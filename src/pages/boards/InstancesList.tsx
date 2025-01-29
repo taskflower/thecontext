@@ -13,12 +13,35 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 import { useKanbanStore } from "@/store/kanbanStore";
 import { useNavigate } from "react-router-dom";
-import { Settings2,   Power } from "lucide-react";
+import { Settings2, Power } from "lucide-react";
 import InstanceActions from "@/components/kaban/instancesList/InstanceActions";
 
 export const InstancesList = () => {
   const { instances, removeInstance } = useKanbanStore();
   const navigate = useNavigate();
+
+  const handleActivateBoard = () => {
+    navigate(`/admin/boards/templates`);
+  };
+
+  if (!instances.length) {
+    return (
+      <div className="max-w-4xl mx-auto min-h-[75vh] flex-1 flex flex-col items-center justify-center p-8 space-y-4">
+        <h2 className="text-2xl font-bold tracking-tight">No Active Boards</h2>
+        <p className="text-muted-foreground text-center">
+          Get started by activating your first kanban board
+        </p>
+        <Button
+          variant="outline"
+          className="gap-2"
+          onClick={handleActivateBoard}
+        >
+          <Power className="h-4 w-4" />
+          Activate new board
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto h-full flex-1 flex-col space-y-8 p-8 md:flex">
@@ -32,7 +55,7 @@ export const InstancesList = () => {
         <div className="flex items-center space-x-2">
           <Button
             className="gap-2"
-            onClick={() => navigate(`/admin/boards/templates`)}
+            onClick={handleActivateBoard}
           >
             <Power className="h-4 w-4" />
             Activate new board
@@ -128,5 +151,3 @@ export const InstancesList = () => {
 };
 
 export default InstancesList;
-
-

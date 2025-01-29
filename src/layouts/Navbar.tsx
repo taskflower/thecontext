@@ -44,7 +44,7 @@ export const Navbar = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem asChild>
-                    <Link to="/admin/dashboard">Dashboard</Link>
+                    <Link to="/admin/boards/instances">Dashboard</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleLogout}>
                     Wyloguj się

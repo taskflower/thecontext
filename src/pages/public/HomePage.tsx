@@ -1,20 +1,27 @@
-// File: src/pages/HomePage.jsx
-
 import { GoalPathwayChart } from "@/components/homepage/GoalPathwayChart";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   FileText,
-  Folder,
-  Target,
-  Shield,
   BarChart2,
   Circle,
   Key,
   Rocket,
   File as FileIcon,
+  Brain,
+  GitBranch,
+  Layout
 } from "lucide-react";
+import { ReactNode } from "react";
 import { Link } from "react-router-dom";
+
+const HighlightedText = ({ children }: { children: ReactNode }) => {
+  return (
+    <span className="bg-gradient-to-r from-primary/5 to-primary/0 px-1 rounded">
+      {children}
+    </span>
+  );
+};
 
 const HomePage = () => {
   const icons = [Circle, FileIcon, Rocket, BarChart2, Key];
@@ -26,28 +33,27 @@ const HomePage = () => {
           THE CONTEXT
         </h1>
         <p className="text-lg text-muted-foreground">
-          Organize your ads documents and dynamically expand context with structured
-          pathways.
+          Build and expand your knowledge context through structured task templates, 
+          interactive Kanban boards, and AI-powered document management.
         </p>
-        {/* /admin/dashboard */}
-        
-        <Button size="lg" className="mt-4" >
-              <Link to="admin/goals">
-              Get Started
-              </Link>
-            </Button>
+        <Button size="lg" className="mt-4">
+          <Link to="admin/boards/instances">
+            Start Building
+          </Link>
+        </Button>
       </header>
 
       <section className="grid gap-8 md:grid-cols-2">
         <Card className="shadow-md hover:shadow-lg transition-shadow">
           <CardHeader>
-            <CardTitle className="text-2xl">What is the CONTEXT System?</CardTitle>
+            <CardTitle className="text-2xl">What is The Context?</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground mb-6 leading-relaxed">
-              This platform enables you to build structured goal pathways that
-              expand categorized document structures, ensuring seamless
-              knowledge progression towards your objectives.
+              Context Builder is an intelligent task management system that combines 
+              customizable templates, Kanban workflows, and AI-powered document context 
+              expansion. It helps you create structured pathways for complex tasks while 
+              automatically building and maintaining relevant knowledge context.
             </p>
             <GoalPathwayChart icons={icons} />
           </CardContent>
@@ -55,43 +61,47 @@ const HomePage = () => {
 
         <Card className="shadow-md hover:shadow-lg transition-shadow">
           <CardHeader>
-            <CardTitle className="text-2xl">Features</CardTitle>
+            <CardTitle className="text-2xl">Core Features</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="space-y-6 text-muted-foreground">
               <li className="flex items-start space-x-3">
-                <FileText className="w-5 h-5 mt-1" />
+                <Layout className="w-8 h-8 mt-1" />
                 <div>
-                  <strong>Document Management</strong>
+                  <strong>Kanban Task Management</strong>
                   <p className="leading-relaxed">
-                    Create, edit, and categorize documents to keep everything at your fingertips.
+                    Create and manage task workflows with customizable templates and 
+                    dependency tracking through an intuitive Kanban board interface.
                   </p>
                 </div>
               </li>
               <li className="flex items-start space-x-3">
-                <Folder className="w-5 h-5 mt-1" />
+                <GitBranch className="w-8 h-8 mt-1" />
                 <div>
-                  <strong>Hierarchical Categorization</strong>
+                  <strong>Process Templates</strong>
                   <p className="leading-relaxed">
-                    Allows logical organization and quick access to files.
+                    Design reusable task templates with step-by-step processes, dependencies, 
+                    and integrated plugins for consistent workflow execution.
                   </p>
                 </div>
               </li>
               <li className="flex items-start space-x-3">
-                <Target className="w-5 h-5 mt-1" />
+                <Brain className="w-8 h-8 mt-1" />
                 <div>
-                  <strong>Dynamic Goal Pathways</strong>
+                  <strong>Context Expansion</strong>
                   <p className="leading-relaxed">
-                    Expand context and support efficient pursuit of objectives.
+                    AI-powered system that automatically expands and maintains document 
+                    context as you work through tasks and templates.
                   </p>
                 </div>
               </li>
               <li className="flex items-start space-x-3">
-                <Shield className="w-5 h-5 mt-1" />
+                <FileText className="w-8 h-8 mt-1" />
                 <div>
-                  <strong>Secure Authentication</strong>
+                  <strong>Smart Document Management</strong>
                   <p className="leading-relaxed">
-                    Ensures protected access to accounts and data.
+                    Intelligent document handling that grows with your tasks, creating 
+                    a dynamic knowledge base tied to your workflows.
                   </p>
                 </div>
               </li>
@@ -101,13 +111,19 @@ const HomePage = () => {
       </section>
 
       <section className="mx-auto max-w-2xl text-center space-y-4">
-        <h2 className="text-3xl font-semibold">Start Your Journey</h2>
+        <h2 className="text-3xl font-semibold">Ready to Expand Your Context?</h2>
         <p className="text-muted-foreground leading-relaxed">
-          Streamline your workflow today. Sign up, organize your documents, and
-          build pathways to success.
+          Start building your <HighlightedText>knowledge base</HighlightedText> today with our{" "}
+          <HighlightedText>intelligent task management</HighlightedText> and{" "}
+          <HighlightedText>context expansion</HighlightedText> system.{" "}
+          <HighlightedText>Create templates</HighlightedText>,{" "}
+          <HighlightedText>manage workflows</HighlightedText>, and watch your document context{" "}
+          <HighlightedText>grow naturally</HighlightedText>.
         </p>
         <Button size="lg" className="mt-4">
-          Sign Up Now
+          <Link to="admin/boards/instances">
+            Create Your First Template
+          </Link>
         </Button>
       </section>
     </div>

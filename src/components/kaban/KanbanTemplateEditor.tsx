@@ -12,7 +12,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus, X } from "lucide-react";
+import { FileSymlink,  Plus, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface KanbanTemplateEditorProps {
   template?: KanbanBoardTemplate;
@@ -39,20 +40,22 @@ export const KanbanTemplateEditor: FC<KanbanTemplateEditorProps> = ({
     const templateData: Omit<KanbanBoardTemplate, "id"> = {
       name: templateDetails.name,
       description: templateDetails.description,
-      tasks: selectedTemplates.map((template): KanbanTaskTemplate => ({
-        id: template.id,
-        name: template.name,
-        description: template.description || "",
-        dependencies: [],
-        templateId: template.id,
-        steps: template.steps.map(step => ({
-          id: step.id,
-          name: step.name,
-          description: step.description || "",
-          pluginId: step.pluginId,
-          data: step.data
-        }))
-      })),
+      tasks: selectedTemplates.map(
+        (template): KanbanTaskTemplate => ({
+          id: template.id,
+          name: template.name,
+          description: template.description || "",
+          dependencies: [],
+          templateId: template.id,
+          steps: template.steps.map((step) => ({
+            id: step.id,
+            name: step.name,
+            description: step.description || "",
+            pluginId: step.pluginId,
+            data: step.data,
+          })),
+        })
+      ),
     };
 
     if (template) {
@@ -117,7 +120,7 @@ export const KanbanTemplateEditor: FC<KanbanTemplateEditorProps> = ({
         <CardHeader className="flex-row justify-between items-center">
           <CardTitle>Task Templates</CardTitle>
           <TemplateSelector
-            templates={templates.filter(t => t.steps && t.steps.length > 0)} // Tylko szablony ze steps
+            templates={templates.filter((t) => t.steps && t.steps.length > 0)} // Tylko szablony ze steps
             selectedTemplates={selectedTemplates}
             onSelect={handleAddTemplate}
           />
@@ -174,18 +177,26 @@ const TemplateSelector: FC<TemplateSelectorProps> = ({
   const availableTemplates = templates.filter(
     (template) => !selectedTemplates.some((st) => st.id === template.id)
   );
-
+  const navigate = useNavigate();
   return (
     <div className="relative">
       <Button onClick={() => setIsOpen(!isOpen)} size="sm">
         <Plus className="h-4 w-4 mr-2" />
-        Add Template
+        Add task template
       </Button>
 
       {isOpen && (
         <div className="absolute right-0 mt-2 w-64 bg-white border rounded-lg shadow-lg z-10">
           {availableTemplates.length === 0 ? (
-            <p className="p-4 text-muted-foreground">No available templates</p>
+            <div className="p-2">
+              <p className="p-4 text-muted-foreground">
+                No available templates
+              </p>
+              <Button variant={"outline"} onClick={() => navigate("/admin/tasks/templates")} size="sm" className="w-full">
+                <FileSymlink className="h-4 w-4" />
+                To tasks templates 
+              </Button>
+            </div>
           ) : (
             <ul className="py-2">
               {availableTemplates.map((template) => (
@@ -197,7 +208,7 @@ const TemplateSelector: FC<TemplateSelectorProps> = ({
                     setIsOpen(false);
                   }}
                 >
-                  {template.name} 
+                  {template.name}
                   <span className="text-xs text-muted-foreground ml-2">
                     ({template.steps.length} steps)
                   </span>
