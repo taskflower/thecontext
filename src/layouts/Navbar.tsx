@@ -1,15 +1,15 @@
 // src/layouts/Navbar.tsx
-import { Link } from 'react-router-dom';
-import { useAuthState } from '@/hooks/useAuthState';
-import { Button } from '@/components/ui/button';
+import { Link } from "react-router-dom";
+import { useAuthState } from "@/hooks/useAuthState";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown } from 'lucide-react';
-import { auth } from '@/firebase/config';
+import { ChevronDown } from "lucide-react";
+import { auth } from "@/firebase/config";
 
 export const Navbar = () => {
   const { user } = useAuthState();
@@ -23,14 +23,23 @@ export const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           <div className="flex space-x-4">
-            <Link to="/" className="text-sm font-medium transition-colors hover:text-primary">
+            <Link
+              to="/"
+              className="text-sm font-medium transition-colors hover:text-primary"
+            >
               Home
             </Link>
-            <Link to="/about" className="text-sm font-medium transition-colors hover:text-primary">
-              About
+            <Link
+              to="/about"
+              className="text-sm font-medium transition-colors hover:text-primary"
+            >
+              Case Studies
             </Link>
-            <Link to="/contact" className="text-sm font-medium transition-colors hover:text-primary">
-              Contact
+            <Link
+              to="/contact"
+              className="text-sm font-medium transition-colors hover:text-primary"
+            >
+              Services
             </Link>
           </div>
           <div>

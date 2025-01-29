@@ -15,7 +15,7 @@ export const Footer = () => {
 
       <footer className="bg-black py-8 text-center text-sm text-white">
         <div className="container mx-auto px-4">
-          <p>&copy; 2024 Your App. All rights reserved.</p>
+          <p>&copy; 2025 THE CONTEXT.it. All rights reserved.</p>
         </div>
       </footer>
     </div>

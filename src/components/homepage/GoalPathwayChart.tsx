@@ -1,13 +1,8 @@
-import { Brain, Database, FileText, GitBranch, Layout, LucideIcon } from 'lucide-react';
+import { Brain, Database, FileText, GitBranch, Layout } from 'lucide-react';
 
-
-interface GoalPathwayChartProps {
-  icons?: LucideIcon[];
-}
-
-export function GoalPathwayChart({ icons: providedIcons }: GoalPathwayChartProps) {
-  // Default icons if none provided
-  const defaultIcons = [
+export function GoalPathwayChart() {
+  // Ikony wpisane na sztywno w kod
+  const icons = [
     Layout,      // Kanban board - starting point
     GitBranch,   // Process templates 
     FileText,    // Document management
@@ -15,15 +10,13 @@ export function GoalPathwayChart({ icons: providedIcons }: GoalPathwayChartProps
     Database     // Knowledge base
   ];
 
-  const icons = providedIcons || defaultIcons;
-
   return (
     <svg
       viewBox="0 4 100 36"
       preserveAspectRatio="xMidYMid meet"
       className="w-full h-auto border"
     >
-      {/* Horizontal baseline */}
+      {/* Pozioma linia bazowa */}
       <line
         x1="0"
         y1="30"
@@ -34,7 +27,7 @@ export function GoalPathwayChart({ icons: providedIcons }: GoalPathwayChartProps
         strokeWidth="0.1"
       />
 
-      {/* Vertical grid lines */}
+      {/* Pionowe linie siatki */}
       {Array.from({ length: 11 }).map((_, i) => (
         <line
           key={i}
@@ -48,7 +41,7 @@ export function GoalPathwayChart({ icons: providedIcons }: GoalPathwayChartProps
         />
       ))}
 
-      {/* Curve with 6 steps */}
+      {/* Krzywa z 6 krokami */}
       <polyline
         fill="none"
         stroke="#3b82f6"
@@ -61,9 +54,11 @@ export function GoalPathwayChart({ icons: providedIcons }: GoalPathwayChartProps
         }).join(" ")}
       />
 
-      {/* Icons (starting from second step) */}
+      {/* Ikony (od drugiego kroku) */}
       {icons.map((Icon, i) => {
+        // Pierwszy indeks (0) to punkt startowy, więc nie rysujemy jego ikony
         if (i === 0) return null;
+
         const t = i / 5;
         const x = (i * 100) / 5;
         const y = 30 - 25 * t ** 3;

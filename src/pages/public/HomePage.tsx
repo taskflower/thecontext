@@ -1,16 +1,13 @@
 import { GoalPathwayChart } from "@/components/homepage/GoalPathwayChart";
+import TheContextCell from "@/components/homepage/TheContextCell";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   FileText,
-  BarChart2,
-  Circle,
-  Key,
-  Rocket,
-  File as FileIcon,
+  
   Brain,
   GitBranch,
-  Layout
+  Layout,
 } from "lucide-react";
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
@@ -24,22 +21,23 @@ const HighlightedText = ({ children }: { children: ReactNode }) => {
 };
 
 const HomePage = () => {
-  const icons = [Circle, FileIcon, Rocket, BarChart2, Key];
 
   return (
     <div className="container mx-auto space-y-16 px-6 py-16">
       <header className="mx-auto max-w-2xl text-center space-y-4">
-        <h1 className="text-5xl font-bold tracking-tight">
-          THE CONTEXT
-        </h1>
+        <div className="flex items-center justify-center gap-1">
+          <TheContextCell className="w-12" />
+
+          <h1 className="text-5xl font-bold tracking-tight">THE CONTEXT</h1>
+        </div>
+
         <p className="text-lg text-muted-foreground">
-          Build and expand your knowledge context through structured task templates, 
-          interactive Kanban boards, and AI-powered document management.
+          Build and expand your knowledge context through structured task
+          templates, interactive Kanban boards, and AI-powered document
+          management.
         </p>
         <Button size="lg" className="mt-4">
-          <Link to="admin/boards/instances">
-            Start Building
-          </Link>
+          <Link to="admin/boards/instances">Start Building</Link>
         </Button>
       </header>
 
@@ -50,12 +48,13 @@ const HomePage = () => {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground mb-6 leading-relaxed">
-              Context Builder is an intelligent task management system that combines 
-              customizable templates, Kanban workflows, and AI-powered document context 
-              expansion. It helps you create structured pathways for complex tasks while 
-              automatically building and maintaining relevant knowledge context.
+              Context Builder is an intelligent task management system that
+              combines customizable templates, Kanban workflows, and AI-powered
+              document context expansion. It helps you create structured
+              pathways for complex tasks while automatically building and
+              maintaining relevant knowledge context.
             </p>
-            <GoalPathwayChart icons={icons} />
+            <GoalPathwayChart />
           </CardContent>
         </Card>
 
@@ -70,8 +69,9 @@ const HomePage = () => {
                 <div>
                   <strong>Kanban Task Management</strong>
                   <p className="leading-relaxed">
-                    Create and manage task workflows with customizable templates and 
-                    dependency tracking through an intuitive Kanban board interface.
+                    Create and manage task workflows with customizable templates
+                    and dependency tracking through an intuitive Kanban board
+                    interface.
                   </p>
                 </div>
               </li>
@@ -80,8 +80,9 @@ const HomePage = () => {
                 <div>
                   <strong>Process Templates</strong>
                   <p className="leading-relaxed">
-                    Design reusable task templates with step-by-step processes, dependencies, 
-                    and integrated plugins for consistent workflow execution.
+                    Design reusable task templates with step-by-step processes,
+                    dependencies, and integrated plugins for consistent workflow
+                    execution.
                   </p>
                 </div>
               </li>
@@ -90,8 +91,8 @@ const HomePage = () => {
                 <div>
                   <strong>Context Expansion</strong>
                   <p className="leading-relaxed">
-                    AI-powered system that automatically expands and maintains document 
-                    context as you work through tasks and templates.
+                    AI-powered system that automatically expands and maintains
+                    document context as you work through tasks and templates.
                   </p>
                 </div>
               </li>
@@ -100,8 +101,8 @@ const HomePage = () => {
                 <div>
                   <strong>Smart Document Management</strong>
                   <p className="leading-relaxed">
-                    Intelligent document handling that grows with your tasks, creating 
-                    a dynamic knowledge base tied to your workflows.
+                    Intelligent document handling that grows with your tasks,
+                    creating a dynamic knowledge base tied to your workflows.
                   </p>
                 </div>
               </li>
@@ -111,19 +112,20 @@ const HomePage = () => {
       </section>
 
       <section className="mx-auto max-w-2xl text-center space-y-4">
-        <h2 className="text-3xl font-semibold">Ready to Expand Your Context?</h2>
+        <h2 className="text-3xl font-semibold">
+          Ready to Expand Your Context?
+        </h2>
         <p className="text-muted-foreground leading-relaxed">
-          Start building your <HighlightedText>knowledge base</HighlightedText> today with our{" "}
+          Start building your <HighlightedText>knowledge base</HighlightedText>{" "}
+          today with our{" "}
           <HighlightedText>intelligent task management</HighlightedText> and{" "}
           <HighlightedText>context expansion</HighlightedText> system.{" "}
           <HighlightedText>Create templates</HighlightedText>,{" "}
-          <HighlightedText>manage workflows</HighlightedText>, and watch your document context{" "}
-          <HighlightedText>grow naturally</HighlightedText>.
+          <HighlightedText>manage workflows</HighlightedText>, and watch your
+          document context <HighlightedText>grow naturally</HighlightedText>.
         </p>
         <Button size="lg" className="mt-4">
-          <Link to="admin/boards/instances">
-            Create Your First Template
-          </Link>
+          <Link to="admin/boards/instances">Create Your First Template</Link>
         </Button>
       </section>
     </div>
