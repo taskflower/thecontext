@@ -1,0 +1,9 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Zezwól na odczyt i zapis dla wszystkich dokumentów
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
