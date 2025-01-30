@@ -1,25 +1,13 @@
 import { FC, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import {
-  ChevronLeft,
-  ChevronRight,
-  CheckCircle,
-  PanelRightOpen,
-  PanelRightClose,
-} from "lucide-react";
+import { PanelRightOpen, PanelRightClose } from "lucide-react";
 import { plugins } from "@/plugins";
 import { Template } from "@/types/template";
-import { PluginRuntimeData } from "@/plugins/base";
+import { LLMMessage, PluginRuntimeData } from "@/plugins/base";
 import StepsPreview from "./preview/StepsPreview";
-import { Separator } from "../ui/separator";
+import { Separator } from "@/components/ui/separator";
 import InvalidTemplate from "./ProcesRunner/InvalidTemplate";
+import StepDisplay from "./preview/StepDisplay1";
 
 interface ProcessRunnerProps {
   template: Template;
@@ -30,6 +18,7 @@ interface ProcessRunnerProps {
 interface StepState {
   data: PluginRuntimeData;
   isValid: boolean;
+  messages?: LLMMessage[];
 }
 
 export const ProcessRunner: FC<ProcessRunnerProps> = ({
@@ -63,12 +52,30 @@ export const ProcessRunner: FC<ProcessRunnerProps> = ({
     });
   });
 
+  if (!template?.steps?.length) {
+    return <InvalidTemplate onBack={onBack} />;
+  }
+
+  const currentStep = template.steps[currentStepIndex];
+  const plugin = plugins[currentStep.pluginId];
+  const currentStepState = stepsState[currentStepIndex] || {
+    data: {
+      answer: "",
+      isConfirmed: false,
+      role: "user",
+    },
+    messages: [],
+    isValid: false,
+  };
+
   const handleDataChange = (newData: PluginRuntimeData) => {
     setStepsState((prev) => {
       const updatedSteps = [...prev];
+      const messages = plugin.generateMessages(currentStep.config, newData);
       updatedSteps[currentStepIndex] = {
         ...updatedSteps[currentStepIndex],
         data: newData,
+        messages,
         isValid: true,
       };
       return updatedSteps;
@@ -86,21 +93,6 @@ export const ProcessRunner: FC<ProcessRunnerProps> = ({
     });
   };
 
-  if (!template?.steps?.length) {
-    return <InvalidTemplate onBack={onBack} />;
-  }
-
-  const currentStep = template.steps[currentStepIndex];
-  const plugin = plugins[currentStep.pluginId];
-  const currentStepState = stepsState[currentStepIndex] || {
-    data: {
-      answer: "",
-      isConfirmed: false,
-      role: "user",
-    },
-    isValid: false,
-  };
-
   const handleNext = () => {
     if (currentStepIndex === template.steps.length - 1) {
       onComplete();
@@ -109,12 +101,20 @@ export const ProcessRunner: FC<ProcessRunnerProps> = ({
     }
   };
 
+  const handleBack = () => {
+    if (currentStepIndex === 0) {
+      onBack();
+    } else {
+      setCurrentStepIndex((prev) => prev - 1);
+    }
+  };
+
   const togglePanel = () => setIsPanelOpen(!isPanelOpen);
 
   return (
     <div className="relative h-full flex">
       <div
-        className={`fixed top-0 left-0 h-full w-96 bg-background border-r transition-transform duration-300 ease-in-out z-50 ${
+        className={`fixed top-0 left-0 h-full w-full max-w-xl bg-background border-r transition-transform duration-300 ease-in-out z-50 ${
           isPanelOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -130,71 +130,37 @@ export const ProcessRunner: FC<ProcessRunnerProps> = ({
       </div>
 
       <div className="flex-1">
-        <div className="max-w-4xl mx-auto flex flex-col space-y-8 p-8">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">{template.name}</h2>
-            <button>Back to....</button>
+        <div className="max-w-4xl mx-auto flex flex-col p-2">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">
+              {template.name}
+            </h2>
+            {/* <p className="text-muted-foreground">
+            Create or modify task template details and steps
+          </p> */}
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                Step {currentStepIndex + 1}: {currentStep.name}
-              </CardTitle>
-              <CardDescription>
-                {currentStep.description || "No description provided"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {plugin?.RuntimeComponent && (
-                <plugin.RuntimeComponent
-                  config={currentStep.config}
-                  data={currentStepState.data}
-                  onDataChange={handleDataChange}
-                  onStatusChange={handleStatusChange}
-                  context={{
-                    currentStep: currentStepIndex + 1,
-                    totalSteps: template.steps.length,
-                    previousSteps: stepsState
-                      .slice(0, currentStepIndex)
-                      .map((s) => s.data),
-                  }}
-                />
-              )}
-
-              <div className="flex justify-between pt-6 border-t mt-6">
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    currentStepIndex === 0
-                      ? onBack()
-                      : setCurrentStepIndex((prev) => prev - 1)
-                  }
-                >
-                  <ChevronLeft className="h-4 w-4 mr-2" /> Previous
-                </Button>
-                <Button
-                  onClick={handleNext}
-                  disabled={!currentStepState.isValid}
-                >
-                  {currentStepIndex === template.steps.length - 1 ? (
-                    <>
-                      <CheckCircle className="h-4 w-4 mr-2" /> Complete
-                    </>
-                  ) : (
-                    <>
-                      Next <ChevronRight className="h-4 w-4 ml-2" />
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-          <Separator />
-          <Button variant="outline" onClick={togglePanel}>
-            {isPanelOpen ? <PanelRightClose /> : <PanelRightOpen />}{" "}
-            {isPanelOpen ? "Hide Preview" : "Show Preview"}
-          </Button>
+          <StepDisplay
+            template={template}
+            currentStep={currentStep}
+            currentStepIndex={currentStepIndex}
+            plugin={plugin}
+            stepState={currentStepState}
+            stepsState={stepsState}
+            onBack={handleBack}
+            onNext={handleNext}
+            onDataChange={handleDataChange}
+            onStatusChange={handleStatusChange}
+          />
+          <div className="fixed bottom-0 right-0 w-full bg-white">
+            <Separator />
+            <div className="p-3 flex justify-end">
+              <Button variant="outline" onClick={togglePanel}>
+                {isPanelOpen ? <PanelRightClose /> : <PanelRightOpen />}
+                {isPanelOpen ? "Hide Preview" : "Show Preview"}
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

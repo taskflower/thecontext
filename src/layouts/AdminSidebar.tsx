@@ -41,9 +41,9 @@ export const AdminSidebar = () => {
   };
 
   return (
-    <div className="h-screen w-64 border-r bg-background sticky top-0">
-      <div className="space-y-4 py-4">
-        <div className="px-3 py-2">
+    <div className="h-screen w-full max-w-lg border-r bg-background sticky top-0">
+      <div className="space-y-4 px-12 w-96 ml-auto ">
+        
           <h2 className="mb-17 px-4 text-lg font-semibold">&nbsp;</h2>
           <div className="space-y-1">
             <SidebarLink
@@ -75,7 +75,7 @@ export const AdminSidebar = () => {
               Settings
             </SidebarLink>
           </div>
-        </div>
+     
       </div>
     </div>
   );

@@ -2,13 +2,7 @@ import { GoalPathwayChart } from "@/components/homepage/GoalPathwayChart";
 import TheContextCell from "@/components/homepage/TheContextCell";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import {
-  FileText,
-  
-  Brain,
-  GitBranch,
-  Layout,
-} from "lucide-react";
+import { FileText, Brain, GitBranch, Layout } from "lucide-react";
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
@@ -21,17 +15,15 @@ const HighlightedText = ({ children }: { children: ReactNode }) => {
 };
 
 const HomePage = () => {
-
   return (
-    <div className="container mx-auto space-y-16 px-6 py-16">
-      <header className="mx-auto max-w-2xl text-center space-y-4">
-        <div className="flex items-center justify-center gap-1">
-          <TheContextCell className="w-12" />
-
-          <h1 className="text-5xl font-bold tracking-tight">THE CONTEXT</h1>
+    <div className="max-w-7xl mx-auto space-y-16 px-6 py-16">
+      <header className="mx-auto max-w-3xl text-center space-y-4">
+        <div className="flex items-end justify-center gap-6">
+          <TheContextCell className="h-20 mb-1" />
+          <h1 className="text-8xl font-bold tracking-tight">THE CONTEXT</h1>
         </div>
 
-        <p className="text-lg text-muted-foreground">
+        <p className="text-lg text-muted-foreground py-2">
           Build and expand your knowledge context through structured task
           templates, interactive Kanban boards, and AI-powered document
           management.
@@ -125,7 +117,7 @@ const HomePage = () => {
           document context <HighlightedText>grow naturally</HighlightedText>.
         </p>
         <Button size="lg" className="mt-4">
-          <Link to="admin/boards/instances">Create Your First Template</Link>
+          <Link to="admin/tasks/templates">Create Your First Template</Link>
         </Button>
       </section>
     </div>

@@ -20,7 +20,7 @@ export const AdminLayout = () => {
       <Navbar /> {/* Dodano Navbar na górze */}
       <div className="flex flex-grow">
         <AdminSidebar />
-        <main className="flex-grow p-8 relative">
+        <main className="flex-grow p-8 relative -ml-32">
           <Outlet />
         </main>
       </div>

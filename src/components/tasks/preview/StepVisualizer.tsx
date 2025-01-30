@@ -1,5 +1,11 @@
-import { Check } from "lucide-react";
+import { Check, MessageCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/services/utils";
+import { useState } from "react";
+
+interface Message {
+  role: string;
+  content: string;
+}
 
 interface StepVisualizerProps {
   step: {
@@ -11,6 +17,7 @@ interface StepVisualizerProps {
   currentStepIndex: number;
   stepsLength: number;
   stepAnswer?: string;
+  messages?: Message[];
 }
 
 const StepVisualizer = ({ 
@@ -18,8 +25,17 @@ const StepVisualizer = ({
   index, 
   currentStepIndex,
   stepsLength,
-  stepAnswer 
+  stepAnswer,
+  messages = []
 }: StepVisualizerProps) => {
+  const [isMessagesOpen, setIsMessagesOpen] = useState(false);
+
+  const toggleMessages = () => setIsMessagesOpen(!isMessagesOpen);
+
+  const truncateMessage = (message: string) => {
+    return message.length > 100 ? `${message.slice(0, 100)}...` : message;
+  };
+
   return (
     <div
       className={cn(
@@ -44,7 +60,7 @@ const StepVisualizer = ({
       {/* Circle indicator */}
       <div
         className={cn(
-          "absolute left-0 w-5 h-5 -ml-2.5 rounded-full border-2 flex items-center justify-center bg-background",
+          "absolute left-0 w-6 h-6 -ml-3 rounded-full border-2 flex items-center justify-center bg-background",
           index < currentStepIndex
             ? "border-primary"
             : index === currentStepIndex
@@ -70,20 +86,50 @@ const StepVisualizer = ({
 
       {/* Content */}
       <div className="space-y-1">
-        <p
-          className={cn(
-            "text-sm font-medium leading-none",
-            index === currentStepIndex ? "text-primary" : "text-foreground"
+        <div className="flex items-center gap-2 justify-between py-1">
+          <p
+            className={cn(
+              "text-sm font-medium leading-none",
+              index === currentStepIndex ? "text-primary" : "text-foreground"
+            )}
+          >
+            {step.name}
+          </p>
+          {messages && messages.length > 0 && (
+            <button 
+              onClick={toggleMessages}
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+            >
+              <MessageCircle className="h-4 w-4" />
+              {isMessagesOpen ? (
+                <ChevronUp className="h-3 w-3" />
+              ) : (
+                <ChevronDown className="h-3 w-3" />
+              )}
+            </button>
           )}
-        >
-          {step.name}
-        </p>
+        </div>
         <p className="text-sm text-muted-foreground">
           {step.description}
         </p>
         {stepAnswer && (
           <div className="mt-2 text-sm bg-muted/50 p-3 rounded-lg border">
             <span className="font-medium">Answer:</span> {stepAnswer}
+          </div>
+        )}
+        {isMessagesOpen && messages && messages.length > 0 && (
+          <div className="mt-2 space-y-2">
+            {messages.map((message, idx) => (
+              <div 
+                key={idx} 
+                className={`${message.role === "user" && "border-green-400" } text-sm p-2 rounded-lg bg-muted/30 border`}
+              >
+                <span className="font-medium capitalize text-xs text-muted-foreground">
+                  {message.role}:
+                </span>
+                <p className="mt-1">{truncateMessage(message.content)}</p>
+              </div>
+            ))}
           </div>
         )}
       </div>
