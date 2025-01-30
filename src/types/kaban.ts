@@ -1,47 +1,33 @@
-// src/types/kaban.ts
-import {Step } from "./template";
+import { BaseEntity } from "./common";
+import { Step } from "./template";
 
+// src/types/kanban.ts
 export type KanbanStatus = 'todo' | 'inProgress' | 'done';
 
 export interface KanbanTaskTemplate {
   id: string;
   name: string;
-  description?: string;
+  description: string;
   dependencies: string[];
   templateId: string;
-  steps: Step[]; // Dodajemy obowiązkowe steps
+  steps: Step[];  // Zachowujemy steps bo są używane w ProcessRunner
 }
 
-export type KanbanBoardTemplate = {
-  id: string;
+export interface KanbanBoard extends BaseEntity {
   name: string;
   description: string;
   tasks: KanbanTaskTemplate[];
-};
+}
 
-export type KanbanInstance = {
-  id: string;
-  templateId: string;
-  name: string;
-  tasks: KanbanInstanceTask[];
-  createdAt: Date;
-};
-
-export type KanbanInstanceTask = {
+export interface KanbanTask {
   id: string;
   templateTaskId: string;
   status: KanbanStatus;
-  completedAt?: Date;
-};
+  completedAt: Date | null;
+}
 
-export interface KanbanStore {
-  boardTemplates: KanbanBoardTemplate[];
-  instances: KanbanInstance[];
-  
-  addBoardTemplate: (template: Omit<KanbanBoardTemplate, 'id'>) => void;
-  updateBoardTemplate: (template: KanbanBoardTemplate) => void;
-  removeBoardTemplate: (id: string) => void;
-  createInstance: (templateId: string, name: string) => void;
-  updateInstanceTaskStatus: (instanceId: string, taskId: string, status: KanbanStatus) => void;
-  removeInstance: (id: string) => void;
+export interface KanbanInstance extends BaseEntity {
+  templateId: string;
+  name: string;
+  tasks: KanbanTask[];
 }

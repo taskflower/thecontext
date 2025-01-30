@@ -1,8 +1,19 @@
-// src/store/kanbanStore.ts
-import { KanbanInstance, KanbanStore } from '@/types/kaban';
+import { KanbanBoard, KanbanInstance, KanbanStatus } from '@/types/kaban';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
+interface KanbanStore {
+  boardTemplates: KanbanBoard[];
+  instances: KanbanInstance[];
+  
+  addBoardTemplate: (template: Omit<KanbanBoard, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateBoardTemplate: (template: KanbanBoard) => void;
+  removeBoardTemplate: (id: string) => void;
+  
+  createInstance: (templateId: string, name: string) => void;
+  updateInstanceTaskStatus: (instanceId: string, taskId: string, status: KanbanStatus) => void;
+  removeInstance: (id: string) => void;
+}
 
 export const useKanbanStore = create<KanbanStore>()(
   persist(
@@ -14,7 +25,9 @@ export const useKanbanStore = create<KanbanStore>()(
         set((state) => ({
           boardTemplates: [...state.boardTemplates, {
             ...template,
-            id: Date.now().toString()
+            id: Date.now().toString(),
+            createdAt: new Date(),
+            updatedAt: new Date()
           }]
         })),
 
@@ -42,9 +55,11 @@ export const useKanbanStore = create<KanbanStore>()(
             tasks: template.tasks.map(task => ({
               id: Date.now().toString() + task.id,
               templateTaskId: task.id,
-              status: 'todo'
+              status: 'todo',
+              completedAt: null
             })),
-            createdAt: new Date()
+            createdAt: new Date(),
+            updatedAt: new Date()
           };
 
           return {
@@ -58,9 +73,10 @@ export const useKanbanStore = create<KanbanStore>()(
             instance.id === instanceId
               ? {
                   ...instance,
+                  updatedAt: new Date(),
                   tasks: instance.tasks.map(task =>
                     task.id === taskId
-                      ? { ...task, status, completedAt: status === 'done' ? new Date() : undefined }
+                      ? { ...task, status, completedAt: status === 'done' ? new Date() : null }
                       : task
                   )
                 }

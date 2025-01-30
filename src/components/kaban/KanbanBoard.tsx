@@ -1,7 +1,7 @@
 // src/components/kanban/Board.tsx
 import { FC, useState } from 'react';
 import { useKanbanStore } from '@/store/kanbanStore';
-import { KanbanInstance} from '@/types/kaban';
+import { KanbanInstance, KanbanTaskTemplate, KanbanStatus } from '@/types/kaban';
 import { Template } from '@/types/template';
 import { KanbanColumn } from './KanbanColumn';
 import { ProcessRunner } from '../tasks/ProcessRunner';
@@ -23,18 +23,20 @@ export const KanbanBoard: FC<{ instance: KanbanInstance }> = ({ instance }) => {
 
   const handleTaskClick = (taskId: string) => {
     setSelectedTaskId(taskId);
-    updateInstanceTaskStatus(instance.id, taskId, 'inProgress');
+    updateInstanceTaskStatus(instance.id, taskId, 'inProgress' as KanbanStatus);
   };
 
   const handleProcessComplete = () => {
     if (selectedTaskId) {
-      updateInstanceTaskStatus(instance.id, selectedTaskId, 'done');
+      updateInstanceTaskStatus(instance.id, selectedTaskId, 'done' as KanbanStatus);
       setSelectedTaskId(null);
     }
   };
 
   const selectedTask = selectedTaskId ? instance.tasks.find(t => t.id === selectedTaskId) : null;
-  const selectedTemplateTask = selectedTask ? template.tasks.find(t => t.id === selectedTask.templateTaskId) : null;
+  const selectedTemplateTask = selectedTask 
+    ? template.tasks.find(t => t.id === selectedTask.templateTaskId) as KanbanTaskTemplate 
+    : null;
 
   // Sprawdzamy czy task ma wymagane pola
   if (selectedTemplateTask && (!selectedTemplateTask.steps || selectedTemplateTask.steps.length === 0)) {
@@ -50,13 +52,16 @@ export const KanbanBoard: FC<{ instance: KanbanInstance }> = ({ instance }) => {
   const processRunnerTemplate: Template | null = selectedTemplateTask ? {
     id: selectedTemplateTask.id,
     name: selectedTemplateTask.name,
-    description: selectedTemplateTask.description || '',
+    description: selectedTemplateTask.description,
+    createdAt: new Date(), // Required by BaseEntity
+    updatedAt: new Date(), // Required by BaseEntity
     steps: selectedTemplateTask.steps.map(step => ({
       id: step.id,
       name: step.name,
-      description: step.description || '',
+      description: step.description,
       pluginId: step.pluginId,
-      data: step.data
+      data: step.data,
+      config: step.config || {} // dodane brakujące pole config z domyślną pustą wartością
     }))
   } : null;
 

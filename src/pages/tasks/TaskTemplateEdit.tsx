@@ -1,6 +1,6 @@
 // src/pages/tasks/TaskTemplateEdit.tsx
 import { useNavigate, useParams } from "react-router-dom";
-import { TemplateEditor } from "@/components/tasks/TemplateEditor";
+import { TemplateEditor } from "@/components/tasks/editor/TemplateEditor";
 import { useTasksStore } from "@/store/tasksStore";
 
 export const TaskTemplateEdit = () => {

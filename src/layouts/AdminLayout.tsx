@@ -16,11 +16,11 @@ export const AdminLayout = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col select-none">
+    <div className="min-h-screen flex flex-col select-none relative">
       <Navbar /> {/* Dodano Navbar na górze */}
       <div className="flex flex-grow">
         <AdminSidebar />
-        <main className="flex-grow p-8">
+        <main className="flex-grow p-8 relative">
           <Outlet />
         </main>
       </div>

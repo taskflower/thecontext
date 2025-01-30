@@ -31,6 +31,7 @@ export interface DocumentContainer {
     contexts: DocumentContainerContext[];
     
     addContainer: (container: Omit<DocumentContainer, 'id' | 'createdAt'>) => void;
+    updateContainer: (id: string, updates: Partial<Omit<DocumentContainer, 'id' | 'createdAt'>>) => void;
     addDocument: (document: Omit<Document, 'id' | 'createdAt' | 'updatedAt'>) => void;
     updateDocument: (id: string, updates: Partial<Document>) => void;
     removeDocument: (id: string) => void;

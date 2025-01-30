@@ -1,6 +1,6 @@
 // src/pages/tasks/TaskTemplateNew.tsx
 import { useNavigate } from "react-router-dom";
-import { TemplateEditor } from "@/components/tasks/TemplateEditor";
+import { TemplateEditor } from "@/components/tasks/editor/TemplateEditor";
 
 export const TaskTemplateNew = () => {
   const navigate = useNavigate();

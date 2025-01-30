@@ -27,7 +27,7 @@ export default function AdminOutletTemplate({
   const navigate = useNavigate();
 
   return (
-    <div className="container mx-auto py-8 space-y-8">
+    <div className="container mx-auto py-8 space-y-8 relative">
       <Breadcrumbs />
 
       <div className="flex justify-between items-center">

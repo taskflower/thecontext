@@ -1,5 +1,4 @@
-// src/store/documentsStore.ts
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DocumentsStore } from '@/types/document';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
@@ -18,6 +17,15 @@ export const useDocumentsStore = create<DocumentsStore>()(
             id: Date.now().toString(),
             createdAt: new Date()
           }]
+        })),
+
+      updateContainer: (id: string, updates: any) =>
+        set((state) => ({
+          containers: state.containers.map(container =>
+            container.id === id
+              ? { ...container, ...updates }
+              : container
+          )
         })),
 
       addDocument: (document) =>

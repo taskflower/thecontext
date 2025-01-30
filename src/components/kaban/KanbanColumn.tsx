@@ -1,7 +1,8 @@
 import {
   KanbanStatus,
   KanbanInstance,
-  KanbanBoardTemplate,
+  KanbanBoard,
+  KanbanTaskTemplate
 } from "@/types/kaban";
 import { FC } from "react";
 import { Card, CardContent } from "../ui/card";
@@ -10,7 +11,7 @@ import StatusIcon from "./StatusIcon";
 export const KanbanColumn: FC<{
   status: KanbanStatus;
   instance: KanbanInstance;
-  template: KanbanBoardTemplate;
+  template: KanbanBoard;
   onTaskClick: (taskId: string) => void;
 }> = ({ status, instance, template, onTaskClick }) => {
   const columnTasks = instance.tasks.filter((task) => task.status === status);
@@ -29,7 +30,8 @@ export const KanbanColumn: FC<{
         {columnTasks.map((task) => {
           const templateTask = template.tasks.find(
             (t) => t.id === task.templateTaskId
-          );
+          ) as KanbanTaskTemplate | undefined;
+          
           const isBlocked = templateTask?.dependencies.some(
             (depId) =>
               !instance.tasks.find(
@@ -46,8 +48,10 @@ export const KanbanColumn: FC<{
               onClick={() => !isBlocked && onTaskClick(task.id)}
             >
               <CardContent className="p-3">
-                <div className="flex items-center gap-2"> <StatusIcon status={task.status} /><div className="font-medium text-sm">{templateTask?.name}</div>
-               </div>
+                <div className="flex items-center gap-2">
+                  <StatusIcon status={task.status} />
+                  <div className="font-medium text-sm">{templateTask?.name}</div>
+                </div>
                 
                 <div className="text-sm text-muted-foreground mt-1">
                   {templateTask?.description}

@@ -37,7 +37,7 @@ const HomePage = () => {
           management.
         </p>
         <Button size="lg" className="mt-4">
-          <Link to="admin/boards/instances">Start Building</Link>
+          <Link to="/admin/tasks/templates">Start Building</Link>
         </Button>
       </header>
 

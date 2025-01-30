@@ -10,9 +10,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Settings2, Plus } from "lucide-react";
+import { Settings2, Plus, Play, Info } from "lucide-react";
 import { useTasksStore } from "@/store/tasksStore";
 import { useNavigate } from "react-router-dom";
+import { TaskTemplateEmptyState } from "@/components/tasks/taskTemplateLstPage/TaskTemplateEmptyState";
+
 
 export const TaskTemplateList = () => {
   const { templates } = useTasksStore();
@@ -22,16 +24,17 @@ export const TaskTemplateList = () => {
     <div className="max-w-4xl mx-auto h-full flex-1 flex-col space-y-8 p-8 md:flex">
       <div className="flex items-center justify-between space-y-2">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Task Templates</h2>
-          <p className="text-muted-foreground">
-            Manage and create your task templates
+          <h2 className="text-2xl font-bold tracking-tight flex">
+            Task Templates
+          </h2>
+          <p className="text-muted-foreground flex items-center gap-1">
+            <Info className="h-5 w-5 stroke-1" /> Manage and create your task
+            templates
           </p>
         </div>
+
         <div className="flex items-center space-x-2">
-          <Button
-            className="gap-2"
-            onClick={() => navigate('new')}
-          >
+          <Button className="gap-2" onClick={() => navigate("new")}>
             <Plus className="h-4 w-4" />
             New Template
           </Button>
@@ -68,42 +71,51 @@ export const TaskTemplateList = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {templates.map((template) => (
-                  <TableRow key={template.id}>
-                    <TableCell className="px-6">
-                      <Checkbox />
-                    </TableCell>
-                    <TableCell className="px-6">
-                      <div className="flex space-x-2">
-                        <span className="max-w-[500px] truncate font-medium">
-                          {template.name}
+                {templates.length === 0 ? (
+                  <TaskTemplateEmptyState onCreateClick={() => navigate("new")} />
+                ) : (
+                  templates.map((template) => (
+                    <TableRow key={template.id}>
+                      <TableCell className="px-6">
+                        <Checkbox />
+                      </TableCell>
+                      <TableCell className="px-6">
+                        <div className="flex space-x-2">
+                          <span className="max-w-[500px] truncate font-medium">
+                            {template.name}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="px-6">
+                        <span className="text-muted-foreground">
+                          {template.description}
                         </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="px-6">
-                      <span className="text-muted-foreground">
-                        {template.description}
-                      </span>
-                    </TableCell>
-                    <TableCell className="px-6">
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => navigate(`/admin/tasks/${template.id}/edit`)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={() => navigate(`/admin/tasks/${template.id}/run`)}
-                        >
-                          Run
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                      <TableCell className="px-6">
+                        <div className="flex space-x-2">
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              navigate(`/admin/tasks/${template.id}/run`)
+                            }
+                          >
+                            <Play className="h-4 w-4" />
+                            Run
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              navigate(`/admin/tasks/${template.id}/edit`)
+                            }
+                          >
+                            Edit
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </CardContent>

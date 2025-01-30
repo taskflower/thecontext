@@ -5,6 +5,7 @@ import { AdminLayout } from "@/layouts/AdminLayout";
 import publicRoutes from "@/pages/public/routes";
 import tasksRoutes from "./pages/tasks/routes";
 import boardsRoutes from "./pages/boards/routes";
+import documentsRoutes from "./pages/documents/routes";
 
 export const routes: RouteObject[] = [
   {
@@ -18,6 +19,6 @@ export const routes: RouteObject[] = [
         <AdminLayout />
       </RequireAuth>
     ),
-    children: [...tasksRoutes, ...boardsRoutes],
+    children: [...tasksRoutes, ...boardsRoutes, ...documentsRoutes],
   },
 ];

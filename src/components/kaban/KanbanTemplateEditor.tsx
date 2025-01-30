@@ -1,7 +1,7 @@
 import { FC, useState } from "react";
 import { useKanbanStore } from "@/store/kanbanStore";
 import { useTasksStore } from "@/store/tasksStore";
-import { KanbanBoardTemplate, KanbanTaskTemplate } from "@/types/kaban";
+import { KanbanBoard, KanbanTaskTemplate } from "@/types/kaban";
 import { Template } from "@/types/template";
 import {
   Card,
@@ -12,11 +12,11 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FileSymlink,  Plus, X } from "lucide-react";
+import { FileSymlink, Plus, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface KanbanTemplateEditorProps {
-  template?: KanbanBoardTemplate;
+  template?: KanbanBoard;
   onClose: () => void;
 }
 
@@ -37,7 +37,7 @@ export const KanbanTemplateEditor: FC<KanbanTemplateEditorProps> = ({
   );
 
   const handleSave = () => {
-    const templateData: Omit<KanbanBoardTemplate, "id"> = {
+    const templateData: Omit<KanbanBoard, 'id' | 'createdAt' | 'updatedAt'> = {
       name: templateDetails.name,
       description: templateDetails.description,
       tasks: selectedTemplates.map(
@@ -53,13 +53,14 @@ export const KanbanTemplateEditor: FC<KanbanTemplateEditorProps> = ({
             description: step.description || "",
             pluginId: step.pluginId,
             data: step.data,
+            config: step.config || {},
           })),
         })
       ),
     };
 
     if (template) {
-      updateBoardTemplate({ ...templateData, id: template.id });
+      updateBoardTemplate({ ...template, ...templateData });
     } else {
       addBoardTemplate(templateData);
     }
@@ -78,7 +79,7 @@ export const KanbanTemplateEditor: FC<KanbanTemplateEditorProps> = ({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold tracking-tight">
-          {template ? "Edit" : "Create"} roadmap template
+          {template ? "Edit" : "Create"} board template
         </h2>
       </div>
 
@@ -120,7 +121,7 @@ export const KanbanTemplateEditor: FC<KanbanTemplateEditorProps> = ({
         <CardHeader className="flex-row justify-between items-center">
           <CardTitle>Task Templates</CardTitle>
           <TemplateSelector
-            templates={templates.filter((t) => t.steps && t.steps.length > 0)} // Tylko szablony ze steps
+            templates={templates.filter((t) => t.steps && t.steps.length > 0)}
             selectedTemplates={selectedTemplates}
             onSelect={handleAddTemplate}
           />
@@ -149,15 +150,16 @@ export const KanbanTemplateEditor: FC<KanbanTemplateEditorProps> = ({
             </Card>
           ))}
         </CardContent>
-        <CardFooter className="flex justify-end space-x-2">
+       
+      </Card>
+      <CardFooter className="flex justify-end space-x-2">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={!templateDetails.name}>
-            Save roadmap template
+            Save board template
           </Button>
         </CardFooter>
-      </Card>
     </div>
   );
 };
@@ -192,7 +194,7 @@ const TemplateSelector: FC<TemplateSelectorProps> = ({
               <p className="p-4 text-muted-foreground">
                 No available templates
               </p>
-              <Button variant={"outline"} onClick={() => navigate("/admin/tasks/templates")} size="sm" className="w-full">
+              <Button variant="outline" onClick={() => navigate("/admin/tasks/templates")} size="sm" className="w-full">
                 <FileSymlink className="h-4 w-4" />
                 To tasks templates 
               </Button>

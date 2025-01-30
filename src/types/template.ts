@@ -1,29 +1,20 @@
 // src/types/template.ts
-export type StepData = {
-    question: string;
-    answer: string;
-    confirmed?: boolean;
-    role?: string;
-  };
-  
-  export type Step = {
-    id: string;
-    name: string;
-    description: string;
-    pluginId: string;
-    data: StepData;
-  };
-  
-  export interface Template {
-    id: string;
-    name: string;
-    description?: string;
-    steps: {
-      id: string;
-      name: string;
-      description?: string;
-      pluginId: string;
-      data: StepData;
-    }[];
-  }
-  
+import { PluginConfig, PluginRuntimeData } from "@/plugins/base";
+
+export interface Step {
+  id: string;
+  name: string;
+  description: string;
+  pluginId: string;
+  data: PluginRuntimeData;
+  config: PluginConfig;
+}
+
+export interface Template {
+  id: string;
+  name: string;
+  description: string;
+  steps: Step[];
+  createdAt: Date;
+  updatedAt: Date;
+}

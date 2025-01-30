@@ -1,5 +1,5 @@
 import { FC, useState } from "react";
-import { Template, Step } from "../../types/template";
+import { Template, Step } from "../../../types/template";
 import { StepEditor } from "./StepEditor";
 import { useTasksStore } from "@/store/tasksStore";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { MessageRole } from "@/types/common";
 
 interface TemplateEditorProps {
   template?: Template;
@@ -37,7 +38,17 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
   const [editingStepId, setEditingStepId] = useState<string | null>(null);
 
   const handleAddStep = (step: Step) => {
-    setSteps((prev) => [...prev, step]);
+    const newStep: Step = {
+      ...step,
+      id: step.id || Date.now().toString(),
+      data: step.data || {
+        question: "",
+        answer: "",
+        isConfirmed: false,
+        role: "user" as MessageRole,
+      },
+    };
+    setSteps((prev) => [...prev, newStep]);
     setIsAddStepOpen(false);
   };
 
@@ -49,8 +60,11 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
   };
 
   const handleSave = () => {
-    const templateData = {
+    const currentDate = new Date();
+    const templateData: Template = {
       id: template?.id || Date.now().toString(),
+      createdAt: template?.createdAt || currentDate,
+      updatedAt: currentDate,
       ...templateDetails,
       steps,
     };
@@ -86,7 +100,7 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
 
       <Card>
         <CardHeader>
-          <CardTitle>Template Details</CardTitle>
+          <CardTitle>Task template details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -136,6 +150,9 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
                   <p className="text-sm text-muted-foreground">
                     {step.description}
                   </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Plugin ID: {step.pluginId}
+                  </p>
                 </div>
                 <div className="flex gap-2">
                   <Button
@@ -160,6 +177,11 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
           ))}
         </CardContent>
       </Card>
+      <div className="flex justify-end">
+        <Button variant={'outline'} onClick={handleSave} disabled={!templateDetails.name}>
+          Save template
+        </Button>
+      </div>
 
       <Dialog open={isAddStepOpen} onOpenChange={setIsAddStepOpen}>
         <DialogContent>
