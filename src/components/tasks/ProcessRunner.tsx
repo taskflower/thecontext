@@ -1,13 +1,15 @@
 import { FC, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { PanelRightOpen, PanelRightClose } from "lucide-react";
+import { PanelRightOpen, PanelRightClose, LayoutGrid, List } from "lucide-react";
 import { plugins } from "@/plugins";
 import { Template } from "@/types/template";
 import { LLMMessage, PluginRuntimeData } from "@/plugins/base";
 import StepsPreview from "./preview/StepsPreview";
 import { Separator } from "@/components/ui/separator";
 import InvalidTemplate from "./ProcesRunner/InvalidTemplate";
-import StepDisplay from "./preview/StepDisplay1";
+import StepDisplayCard from "./preview/StepDisplayCard";
+import StepDisplayMini from "./preview/StepDisplayMini";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface ProcessRunnerProps {
   template: Template;
@@ -21,6 +23,8 @@ interface StepState {
   messages?: LLMMessage[];
 }
 
+type ViewMode = 'card' | 'mini';
+
 export const ProcessRunner: FC<ProcessRunnerProps> = ({
   template,
   onBack,
@@ -28,6 +32,7 @@ export const ProcessRunner: FC<ProcessRunnerProps> = ({
 }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isPanelOpen, setIsPanelOpen] = useState(true);
+  const [viewMode, setViewMode] = useState<ViewMode>('card');
 
   const [stepsState, setStepsState] = useState<StepState[]>(() => {
     if (!template?.steps) return [];
@@ -111,6 +116,8 @@ export const ProcessRunner: FC<ProcessRunnerProps> = ({
 
   const togglePanel = () => setIsPanelOpen(!isPanelOpen);
 
+  const StepDisplayComponent = viewMode === 'card' ? StepDisplayCard : StepDisplayMini;
+
   return (
     <div className="relative h-full flex">
       <div
@@ -135,12 +142,9 @@ export const ProcessRunner: FC<ProcessRunnerProps> = ({
             <h2 className="text-2xl font-bold tracking-tight">
               {template.name}
             </h2>
-            {/* <p className="text-muted-foreground">
-            Create or modify task template details and steps
-          </p> */}
           </div>
 
-          <StepDisplay
+          <StepDisplayComponent
             template={template}
             currentStep={currentStep}
             currentStepIndex={currentStepIndex}
@@ -152,9 +156,26 @@ export const ProcessRunner: FC<ProcessRunnerProps> = ({
             onDataChange={handleDataChange}
             onStatusChange={handleStatusChange}
           />
-          <div className="fixed bottom-0 right-0 w-full bg-white">
+
+          <div className="fixed bottom-0 right-0 w-full bg-zinc-50 z-20">
             <Separator />
-            <div className="p-3 flex justify-end">
+            <div className="p-3 flex justify-end items-center gap-3">
+              <ToggleGroup 
+              variant={"outline"}
+                type="single" 
+                value={viewMode}
+                onValueChange={(value: string) => setViewMode(value as ViewMode)}
+              >
+                <ToggleGroupItem value="card" aria-label="Card View">
+                  <LayoutGrid className="h-4 w-4 mr-2" />
+                  Card View
+                </ToggleGroupItem>
+                <ToggleGroupItem value="mini" aria-label="Mini View">
+                  <List className="h-4 w-4 mr-2" />
+                  Mini View
+                </ToggleGroupItem>
+              </ToggleGroup>
+
               <Button variant="outline" onClick={togglePanel}>
                 {isPanelOpen ? <PanelRightClose /> : <PanelRightOpen />}
                 {isPanelOpen ? "Hide Preview" : "Show Preview"}

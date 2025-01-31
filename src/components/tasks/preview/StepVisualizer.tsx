@@ -20,13 +20,13 @@ interface StepVisualizerProps {
   messages?: Message[];
 }
 
-const StepVisualizer = ({ 
-  step, 
-  index, 
+const StepVisualizer = ({
+  step,
+  index,
   currentStepIndex,
   stepsLength,
   stepAnswer,
-  messages = []
+  messages = [],
 }: StepVisualizerProps) => {
   const [isMessagesOpen, setIsMessagesOpen] = useState(false);
 
@@ -48,7 +48,7 @@ const StepVisualizer = ({
         <div
           className={cn(
             "absolute left-0 top-2 w-px h-full -ml-px",
-            index < currentStepIndex 
+            index < currentStepIndex
               ? "bg-primary"
               : index === currentStepIndex
               ? "bg-gradient-to-b from-primary to-border"
@@ -56,7 +56,7 @@ const StepVisualizer = ({
           )}
         />
       )}
-      
+
       {/* Circle indicator */}
       <div
         className={cn(
@@ -86,19 +86,19 @@ const StepVisualizer = ({
 
       {/* Content */}
       <div className="space-y-1">
-        <div className="flex items-center gap-2 justify-between py-1">
+        <div className="flex items-center gap-2 justify-between">
           <p
             className={cn(
-              "text-sm font-medium leading-none",
+              "text-sm font-medium leading-none p-1",
               index === currentStepIndex ? "text-primary" : "text-foreground"
             )}
           >
             {step.name}
           </p>
           {messages && messages.length > 0 && (
-            <button 
+            <button
               onClick={toggleMessages}
-              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+              className="p-1 rounded inline-flex bg-gray-100 items-center gap-1 text-xs text-gray-900 hover:text-foreground"
             >
               <MessageCircle className="h-4 w-4" />
               {isMessagesOpen ? (
@@ -109,9 +109,7 @@ const StepVisualizer = ({
             </button>
           )}
         </div>
-        <p className="text-sm text-muted-foreground">
-          {step.description}
-        </p>
+        <p className="text-sm text-muted-foreground">{step.description}</p>
         {stepAnswer && (
           <div className="mt-2 text-sm bg-muted/50 p-3 rounded-lg border">
             <span className="font-medium">Answer:</span> {stepAnswer}
@@ -120,9 +118,11 @@ const StepVisualizer = ({
         {isMessagesOpen && messages && messages.length > 0 && (
           <div className="mt-2 space-y-2">
             {messages.map((message, idx) => (
-              <div 
-                key={idx} 
-                className={`${message.role === "user" && "border-green-400" } text-sm p-2 rounded-lg bg-muted/30 border`}
+              <div
+                key={idx}
+                className={`${
+                  message.role === "user" && "border-green-400"
+                } text-sm p-2 rounded-lg bg-muted/30 border`}
               >
                 <span className="font-medium capitalize text-xs text-muted-foreground">
                   {message.role}:

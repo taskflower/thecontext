@@ -5,6 +5,7 @@ import { KanbanBoard } from '@/components/kaban/KanbanBoard';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 export const KanbanViewPage: FC = () => {
   const navigate = useNavigate();
@@ -43,6 +44,7 @@ export const KanbanViewPage: FC = () => {
           Back to active boards
         </Button>
       </div>
+      <Separator/>
 
       <KanbanBoard instance={instance} />
     </div>

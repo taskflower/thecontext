@@ -35,7 +35,7 @@ interface StepDisplayProps {
   onStatusChange: (isValid: boolean) => void;
 }
 
-export const StepDisplay: FC<StepDisplayProps> = ({
+export const StepDisplayCard: FC<StepDisplayProps> = ({
   template,
   currentStep,
   currentStepIndex,
@@ -50,7 +50,7 @@ export const StepDisplay: FC<StepDisplayProps> = ({
   const isLastStep = currentStepIndex === template.steps.length - 1;
 
   return (
-    <Card className="w-full">
+    <Card className="w-full mt-12">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -110,4 +110,4 @@ export const StepDisplay: FC<StepDisplayProps> = ({
   );
 };
 
-export default StepDisplay;
+export default StepDisplayCard;

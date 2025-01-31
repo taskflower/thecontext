@@ -28,7 +28,7 @@ interface StepDisplayProps {
   onStatusChange: (isValid: boolean) => void;
 }
 
-export const StepDisplay: FC<StepDisplayProps> = ({
+export const StepDisplayMini: FC<StepDisplayProps> = ({
   template,
   currentStep,
   currentStepIndex,
@@ -127,4 +127,4 @@ export const StepDisplay: FC<StepDisplayProps> = ({
   );
 };
 
-export default StepDisplay;
+export default StepDisplayMini;
