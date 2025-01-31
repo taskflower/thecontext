@@ -2,7 +2,7 @@
 import { MessageRole } from "@/types/common";
 import {
   PluginDefinition,
-  PluginConfig,
+  // PluginConfig,
   PluginRuntimeData,
   LLMMessage,
 } from "../base";
@@ -19,7 +19,7 @@ export const PickerDocPlugin: PluginDefinition = {
   RuntimeComponent,
 
   validate: async (
-    config: PluginConfig,
+    // config: PluginConfig,
     data?: PluginRuntimeData
   ): Promise<boolean> => {
     const pickerData = data as PickerDocRuntimeData | undefined;
@@ -32,7 +32,7 @@ export const PickerDocPlugin: PluginDefinition = {
   },
 
   generateMessages: (
-    config: PluginConfig,
+    // config: PluginConfig,
     data: PluginRuntimeData
   ): LLMMessage[] => {
     const pickerData = data as PickerDocRuntimeData;
