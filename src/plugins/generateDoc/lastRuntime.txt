@@ -41,41 +41,19 @@ export const RuntimeComponent: React.FC<PluginRuntimeProps> = ({
     onStatusChange(generateDocData?.isGenerated || false);
   }, [generateDocData?.isGenerated, onStatusChange]);
 
+  const generateLoremIpsum = () => {
+    return `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.`;
+  };
+
   const handleGenerateDocument = async () => {
     setIsGenerating(true);
     setShowSuccess(false);
     
     try {
-      // Prepare messages from context
-      const messages = allMessages.map(msg => ({
-        role: msg.role,
-        content: msg.content
-      }));
-
-      const response = await fetch('http://localhost:3000/api/v1/services/chat/completion', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          messages,
-          userId: 'anonymous'
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to generate document');
-      }
-
-      const result = await response.json();
+      // Simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      if (!result.result?.response) {
-        throw new Error('Invalid response format from API');
-      }
-
-      const generatedContent = result.result.response.content;
-      const containerId = result.result.id;
-      
+      const containerId = Date.now().toString();
       if (generateDocConfig.containerName) {
         const newContainer = {
           name: generateDocConfig.containerName,
@@ -83,6 +61,8 @@ export const RuntimeComponent: React.FC<PluginRuntimeProps> = ({
         };
         addContainer(newContainer);
       }
+
+      const generatedContent = generateLoremIpsum();
 
       const newDocument = {
         title: generateDocConfig.documentName,
@@ -98,26 +78,26 @@ export const RuntimeComponent: React.FC<PluginRuntimeProps> = ({
       addDocument(newDocument);
       setShowSuccess(true);
 
-      // Update runtime data
+      // Aktualizacja danych runtime
       const newData: GenerateDocRuntimeData = {
         messages: [
           ...(generateDocData?.messages || []),
-          result.result.response
+          {
+            role: 'assistant',
+            content: generatedContent
+          }
         ],
         isGenerated: true,
         generatedContent
       };
-      
       onDataChange(newData);
-      
-    } catch (error) {
-      console.error('Error generating document:', error);
+
     } finally {
       setIsGenerating(false);
     }
-};
+  };
 
-  return (
+    return (
     <div className="space-y-6">
       {showSuccess && (
         <Alert className="bg-green-50 border-green-200 relative">

@@ -54,7 +54,7 @@ const StepsPreview: React.FC<StepsPreviewProps> = ({
   };
 
   return (
-    <div className="space-y-6 mt-12">
+    <div className="space-y-6 mt-12 ">
       <Button
         variant="ghost"
         size="icon"
@@ -87,7 +87,7 @@ const StepsPreview: React.FC<StepsPreviewProps> = ({
           </TabsList>
 
           <TabsContent value="visual" className="mt-4">
-            <ScrollArea className="h-[calc(100vh-16rem)]">
+            <ScrollArea className="h-[calc(100vh-20rem)]">
               <div className="relative space-y-4 ml-4">
                 {steps.map((step, index) => (
                   <StepVisualizer
@@ -105,7 +105,7 @@ const StepsPreview: React.FC<StepsPreviewProps> = ({
           </TabsContent>
 
           <TabsContent value="data" className="mt-4">
-            <ScrollArea className="h-[calc(100vh-16rem)]">
+            <ScrollArea className="h-[calc(100vh-20rem)]">
               <pre className="p-4 bg-muted rounded-lg text-sm select-text">
                 {JSON.stringify(stepsState, null, 2)}
               </pre>
@@ -113,7 +113,7 @@ const StepsPreview: React.FC<StepsPreviewProps> = ({
           </TabsContent>
 
           <TabsContent value="messages" className="mt-4">
-            <ScrollArea className="h-[calc(100vh-16rem)]">
+            <ScrollArea className="h-[calc(100vh-20rem)]">
               <pre className="p-4 bg-muted rounded-lg text-sm select-text">
                 {JSON.stringify(
                   steps.map((step) => step.config),

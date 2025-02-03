@@ -1,14 +1,9 @@
+// src/components/StepEditor.tsx
 import { FC, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { plugins } from "@/plugins";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { PluginSelector } from "@/components/PluginSelector";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Step } from "@/types/template";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,58 +14,42 @@ interface StepEditorProps {
 }
 
 export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit }) => {
-  const [stepData, setStepData] = useState<Step>(() => ({
+  const [stepData, setStepData] = useState<Step>({
     id: step?.id || Date.now().toString(),
     name: step?.name || "",
     description: step?.description || "",
     pluginId: step?.pluginId || "",
     config: step?.config || {},
-    data: step?.data || {},  // Dodane brakujące pole data
-  }));
-
+    data: step?.data || {},
+  });
   const [isValid, setIsValid] = useState(false);
+  const [showPluginSelector, setShowPluginSelector] = useState(false);
+
   const selectedPlugin = plugins[stepData.pluginId];
+  // Przypisujemy komponent konfiguracji do zmiennej, by uniknąć błędów ESLint
+  const ConfigComponent = selectedPlugin?.ConfigComponent;
 
   useEffect(() => {
-    const initializePlugin = async () => {
-      if (selectedPlugin?.initialize) {
-        try {
-          await selectedPlugin.initialize(stepData.config);
-        } catch (error) {
-          console.error("Plugin initialization error:", error);
-        }
-      }
-    };
-    initializePlugin();
+    if (selectedPlugin?.initialize) {
+      selectedPlugin.initialize(stepData.config).catch((err) =>
+        console.error("Plugin initialization error:", err)
+      );
+    }
   }, [selectedPlugin, stepData.config]);
 
   useEffect(() => {
-    const validateStep = async () => {
-      if (selectedPlugin?.validate) {
-        const isValid = await selectedPlugin.validate(stepData.config);
-        setIsValid(isValid);
-      } else {
-        setIsValid(true);
-      }
-    };
-    validateStep();
+    if (selectedPlugin?.validate) {
+      selectedPlugin.validate(stepData.config).then(setIsValid);
+    } else {
+      setIsValid(true);
+    }
   }, [selectedPlugin, stepData.config]);
 
-  const handlePluginChange = (pluginId: string) => {
-    setStepData((prev) => ({
-      ...prev,
-      pluginId,
-      config: {}, // Reset config when plugin changes
-      data: {},   // Reset data when plugin changes
-    }));
-  };
+  const handlePluginChange = (pluginId: string) =>
+    setStepData((prev) => ({ ...prev, pluginId, config: {}, data: {} }));
 
-  const handleConfigChange = (newConfig: Record<string, unknown>) => {
-    setStepData((prev) => ({
-      ...prev,
-      config: { ...prev.config, ...newConfig },
-    }));
-  };
+  const handleConfigChange = (newConfig: Record<string, unknown>) =>
+    setStepData((prev) => ({ ...prev, config: { ...prev.config, ...newConfig } }));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,6 +60,7 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Name */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Name</label>
         <Input
@@ -93,6 +73,7 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit }) => {
         />
       </div>
 
+      {/* Description */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Description</label>
         <Textarea
@@ -104,30 +85,43 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit }) => {
         />
       </div>
 
+      {/* Plugin Selection */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Plugin</label>
-        <Select value={stepData.pluginId} onValueChange={handlePluginChange}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select plugin" />
-          </SelectTrigger>
-          <SelectContent>
-            {Object.values(plugins).map((plugin) => (
-              <SelectItem key={plugin.id} value={plugin.id}>
-                {plugin.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {stepData.pluginId ? (
+          <div className="flex items-center space-x-2">
+            <span>{plugins[stepData.pluginId].name}</span>
+            <Button variant="outline" onClick={() => setShowPluginSelector(true)}>
+              Zmień Plugin
+            </Button>
+          </div>
+        ) : (
+          <Button type="button" onClick={() => setShowPluginSelector(true)}>
+            Wybierz Plugin
+          </Button>
+        )}
       </div>
 
-      {selectedPlugin?.ConfigComponent && (
+      {/* Wywołanie PluginSelector */}
+      {showPluginSelector && (
+        <div className="mb-4">
+          <PluginSelector
+            onSelect={(pluginId) => {
+              handlePluginChange(pluginId);
+              setShowPluginSelector(false);
+            }}
+          />
+        </div>
+      )}
+
+      {/* Konfiguracja pluginu */}
+      {ConfigComponent && (
         <Card>
           <CardHeader className="border-b p-4">
-            <CardTitle>Plugin Configuration</CardTitle>
+            <CardTitle>Konfiguracja Pluginu</CardTitle>
           </CardHeader>
-          
           <CardContent className="p-4">
-            <selectedPlugin.ConfigComponent
+            <ConfigComponent
               config={stepData.config}
               onConfigChange={handleConfigChange}
               onStatusChange={setIsValid}
@@ -137,7 +131,7 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit }) => {
       )}
 
       <Button type="submit" className="w-full" disabled={!isValid}>
-        {step ? "Save Changes" : "Add Step"}
+        {step ? "Zapisz zmiany" : "Dodaj krok"}
       </Button>
     </form>
   );

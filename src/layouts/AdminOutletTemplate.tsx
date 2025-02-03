@@ -1,50 +1,43 @@
-// src/layouts/AdminTemplate.tsx
-import { LucideIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import MainTitle from "./MainTitle";
+import React, { FC } from "react";
+
+import MainTitleSecondary from "./MainTitleSecondary";
+import IconCom from "@/components/IconComp";
+import { useParams } from "react-router-dom";
 import Breadcrumbs from "@/components/ui/braadcrumbs";
-import { useNavigate } from "react-router-dom";
 
 interface AdminTemplateProps {
   title: string;
   description?: string;
-  icon: LucideIcon;
   children: React.ReactNode;
   backPath?: string;
   actions?: React.ReactNode;
   showBreadcrumbs?: boolean;
 }
 
-export default function AdminOutletTemplate({
+const AdminOutletTemplate: FC<AdminTemplateProps> = ({
   title,
   description,
-  icon,
   children,
-  backPath,
   actions,
-}: AdminTemplateProps) {
-  const navigate = useNavigate();
+}) => {
+  const { module } = useParams<{ module?: string }>();
 
   return (
-    <div className="container mx-auto py-8 space-y-8 relative">
-      <Breadcrumbs />
-
-      <div className="flex justify-between items-center">
-        <MainTitle title={title} icon={icon} description={description} />
-
-        <div className="flex gap-4 items-center">
-         
-          {backPath && (
-            <Button variant="ghost" onClick={() => navigate(backPath)}>
-              <ArrowLeft className="h-4 w-4 mr-2" /> Back
-            </Button>
-          )}
-           {actions}
-        </div>
+    <div className="max-w-4xl mx-auto flex-1 flex-col space-y-8 p-0 md:p-8 md:flex h-full">
+      <div className="p-3 md:p-0">
+        <Breadcrumbs />
       </div>
-
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 p-3 md:p-0">
+        <MainTitleSecondary
+          title={title}
+          icon={<IconCom icon={module ?? "documents"} />}
+          description={description}
+        />
+        <div className="flex gap-4 items-center">{actions ?? null}</div>
+      </div>
       {children}
     </div>
   );
-}
+};
+
+export default AdminOutletTemplate;

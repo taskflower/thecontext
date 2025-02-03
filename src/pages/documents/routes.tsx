@@ -8,12 +8,12 @@ import { DocumentNew } from "./DocumentNew";
 import { DocumentEdit } from "./DocumentEdit";
 
 const documentsRoutes: RouteObject[] = [
-  { path: "documents", element: <DocumentList /> },
-  { path: "documents/new", element: <DocumentContainerNew /> },
-  { path: "documents/:id/edit", element: <DocumentContainerEdit /> },
-  { path: "documents/:containerId", element: <ContainerDocuments /> },
-  { path: "documents/:containerId/document/new", element: <DocumentNew /> },
-  { path: "documents/:containerId/document/:documentId/edit", element: <DocumentEdit /> }
+  { index: true, element: <DocumentList /> },
+  { path: "new", element: <DocumentContainerNew /> },
+  { path: ":id/edit", element: <DocumentContainerEdit /> },
+  { path: ":containerId", element: <ContainerDocuments /> },
+  { path: ":containerId/document/new", element: <DocumentNew /> },
+  { path: ":containerId/document/:documentId/edit", element: <DocumentEdit /> }
 ];
 
 export default documentsRoutes;

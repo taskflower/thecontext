@@ -8,181 +8,238 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Check } from "lucide-react";
+import { Check, Target, Lightbulb, CheckCircle } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-type Step = {
+type ActionStep = {
   id: number;
   title: string;
   completed: boolean;
 };
 
-type MarketingSuggestion = {
-  id: string;
-  name: string;
-  match: number; // w %
-  description: string;
+type WizardStep = {
+  title: string;
+  subtitle: string;
+  icon: React.ReactNode;
 };
 
-export default function MarketingCampaignBuilder() {
+export default function CampaignWizard() {
+  // Stan dla kreatora
+  const [currentStep, setCurrentStep] = useState<number>(0);
   const [campaignGoal, setCampaignGoal] = useState<string>("");
-  const [steps, setSteps] = useState<Step[]>([
-    { id: 1, title: "Zdefiniuj grupę docelową", completed: false },
-    { id: 2, title: "Opracuj strategię treści", completed: false },
-    { id: 3, title: "Uruchom kampanię reklamową", completed: false },
+  const [actionSteps, setActionSteps] = useState<ActionStep[]>([
+    { id: 1, title: "Define Target Audience", completed: false },
+    { id: 2, title: "Develop Content Strategy", completed: false },
+    { id: 3, title: "Launch Advertising Campaign", completed: false },
   ]);
+  const [isDemoRunning, setIsDemoRunning] = useState<boolean>(false);
 
-  const [suggestions] = useState<MarketingSuggestion[]>([
+  const aiSuggestions = [
     {
       id: "1",
-      name: "Kampania na Facebooku",
+      name: "Facebook Campaign",
       match: 90,
-      description: "Dotarcie do szerokiej grupy odbiorców na Facebooku.",
+      description: "Reach a broad audience on Facebook.",
     },
     {
       id: "2",
-      name: "Marketing e-mailowy",
+      name: "Email Marketing",
       match: 75,
-      description: "Personalizowane wiadomości e-mail zwiększające zaangażowanie.",
+      description: "Personalized emails to boost engagement.",
     },
     {
       id: "3",
-      name: "SEO i Content Marketing",
+      name: "SEO & Content Marketing",
       match: 65,
-      description: "Poprawa widoczności w wyszukiwarkach i wartościowe treści.",
+      description: "Improve search engine visibility with valuable content.",
     },
-  ]);
+  ];
 
-  // Obliczamy % postępu kampanii w oparciu o zrobione kroki
-  const completedSteps = steps.filter((step) => step.completed).length;
-  const progress = Math.round((completedSteps / steps.length) * 100);
+  // Definicja kroków – tytuł, podtytuł oraz ikona
+  const wizardSteps: WizardStep[] = [
+    { title: "Campaign Goal", subtitle: "Set your campaign objective", icon: <Target className="h-5 w-5" /> },
+    { title: "AI Suggestions", subtitle: "See tailored recommendations", icon: <Lightbulb className="h-5 w-5" /> },
+    { title: "Action Plan", subtitle: "Plan your campaign steps", icon: <CheckCircle className="h-5 w-5" /> },
+  ];
 
-  const toggleStep = (id: number) => {
-    setSteps((prev) =>
+  const nextStep = () => {
+    if (currentStep < wizardSteps.length - 1) setCurrentStep(currentStep + 1);
+  };
+
+  const prevStep = () => {
+    if (currentStep > 0) setCurrentStep(currentStep - 1);
+  };
+
+  const toggleActionStep = (id: number) => {
+    setActionSteps((prev) =>
       prev.map((step) =>
         step.id === id ? { ...step, completed: !step.completed } : step
       )
     );
   };
 
-  return (
-    <>
-      {/* KARTA: Cel i deklaracja kampanii */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Określ cel kampanii</CardTitle>
-          <CardDescription>
-            Opisz, jaki efekt chcesz osiągnąć dzięki kampanii marketingowej.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Label htmlFor="campaignGoal">Główny cel kampanii</Label>
-          <Textarea
-            id="campaignGoal"
-            placeholder="Np. Zwiększenie świadomości marki o 20% w ciągu 3 miesięcy..."
-            value={campaignGoal}
-            onChange={(e) => setCampaignGoal(e.target.value)}
-          />
-        </CardContent>
-        <CardFooter>
-          <Button onClick={() => alert(`Zapisano cel kampanii: ${campaignGoal}`)}>
-            Zapisz cel
-          </Button>
-        </CardFooter>
-      </Card>
+  // Demo – symulacja przejścia przez kreatora
+  const runDemo = async () => {
+    setIsDemoRunning(true);
+    // Krok 1: Ustawienie celu kampanii
+    setCampaignGoal("Increase brand awareness by 20% in 3 months");
+    await new Promise((res) => setTimeout(res, 1500));
+    setCurrentStep(1);
+    await new Promise((res) => setTimeout(res, 1500));
+    setCurrentStep(2);
+    // Automatyczne oznaczanie kroków w planie działania
+    for (let i = 0; i < actionSteps.length; i++) {
+      await new Promise((res) => setTimeout(res, 1000));
+      setActionSteps((prev) =>
+        prev.map((step) =>
+          step.id === actionSteps[i].id ? { ...step, completed: true } : step
+        )
+      );
+    }
+    await new Promise((res) => setTimeout(res, 1000));
+    setIsDemoRunning(false);
+  };
 
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* KARTA: Rekomendacje AI */}
-        <Card className="flex-1">
-          <CardHeader>
-            <CardTitle>Rekomendacje AI</CardTitle>
-            <CardDescription>
-              Dopasowane do Twojego celu w {campaignGoal ? `„${campaignGoal}”` : "…"}
-            </CardDescription>
-          </CardHeader>
-          <Separator />
-          <CardContent className="p-0">
-            <ScrollArea className="h-64 px-4">
-              {suggestions.map((suggestion) => (
+  // Obliczenie postępu w sekcji "Action Plan"
+  const actionProgress = Math.round(
+    (actionSteps.filter((s) => s.completed).length / actionSteps.length) * 100
+  );
+
+  return (
+    <Card  mobile>
+      <CardHeader className="border-b border-gray-200">
+        <CardTitle className="text-2xl font-bold text-gray-900">
+          Campaign Wizard
+        </CardTitle>
+        <CardDescription className="text-gray-600">
+          Kliknij na kartę, aby przejść do danego etapu.
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="p-6">
+        {/* Nawigacja kroków jako karty */}
+        <div className="flex gap-4 mb-6">
+          {wizardSteps.map((step, index) => (
+            <Card
+              key={index}
+              onClick={() => setCurrentStep(index)}
+              className={`cursor-pointer flex-1 border ${
+                currentStep === index
+                  ? "border-black bg-white"
+                  : "border-gray-200 bg-gray-50"
+              }`}
+            >
+              <CardHeader className="p-4 flex flex-col items-center">
+                <div className="mb-2 text-black">{step.icon}</div>
+                <CardTitle className="text-center text-sm font-medium text-black">
+                  {step.title}
+                </CardTitle>
+                <CardDescription className="text-center text-xs text-gray-600">
+                  {step.subtitle}
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
+        <Separator />
+
+        {/* Treść aktualnego etapu */}
+        {currentStep === 0 && (
+          <div className="mt-6">
+            <Label htmlFor="campaignGoal" className="text-gray-700">
+              Campaign Goal
+            </Label>
+            <Textarea
+              id="campaignGoal"
+              placeholder="Np. Increase brand awareness by 20% in 3 months..."
+              value={campaignGoal}
+              onChange={(e) => setCampaignGoal(e.target.value)}
+              className="mt-2 bg-gray-50 text-gray-900 border border-gray-300"
+            />
+          </div>
+        )}
+
+        {currentStep === 1 && (
+          <div className="mt-6">
+            <p className="mb-2 font-medium text-gray-800">AI Suggestions for:</p>
+            <p className="italic mb-4 text-gray-600">
+              "{campaignGoal || "Your Campaign Goal"}"
+            </p>
+            <ScrollArea className="h-48 border border-gray-200 rounded">
+              {aiSuggestions.map((sugg) => (
                 <div
-                  key={suggestion.id}
-                  className="py-4 border-b last:border-none flex items-start justify-between"
+                  key={sugg.id}
+                  className="p-4 border-b border-gray-200 flex justify-between items-center"
                 >
                   <div>
-                    <p className="font-semibold">{suggestion.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {suggestion.description}
-                    </p>
+                    <p className="font-semibold text-gray-800">{sugg.name}</p>
+                    <p className="text-sm text-gray-600">{sugg.description}</p>
                   </div>
-                  <Badge variant="outline">{suggestion.match}%</Badge>
+                  <Badge variant="outline" className="border-gray-300 text-gray-800">
+                    {sugg.match}%
+                  </Badge>
                 </div>
               ))}
             </ScrollArea>
-          </CardContent>
-          <CardFooter>
-            <Button variant="outline" className="w-full">
-              Zobacz więcej propozycji
-            </Button>
-          </CardFooter>
-        </Card>
+          </div>
+        )}
 
-        {/* KARTA: Plan działania */}
-        <Card className="flex-1">
-          <CardHeader>
-            <CardTitle>Plan działania</CardTitle>
-            <CardDescription>Kroki do realizacji Twojej kampanii marketingowej</CardDescription>
-          </CardHeader>
-          <CardContent>
+        {currentStep === 2 && (
+          <div className="mt-6">
+            <p className="mb-2 font-medium text-gray-800">Action Plan</p>
             <div className="mb-4">
-              <p className="mb-2 text-sm font-medium text-muted-foreground">
-                Postęp: {progress}%
-              </p>
-              <Progress value={progress} className="w-full" />
+              <Progress value={actionProgress} className="w-full" />
             </div>
-            <div className="space-y-3">
-              {steps.map((step) => (
-                <div
-                  key={step.id}
-                  className="p-3 border rounded-md flex items-center justify-between"
+            {actionSteps.map((step) => (
+              <div
+                key={step.id}
+                className="flex items-center justify-between p-3 border border-gray-200 rounded mb-3"
+              >
+                <span className={step.completed ? "line-through text-gray-500" : "text-gray-800"}>
+                  {step.title}
+                </span>
+                <Button
+                  size="sm"
+                  variant={step.completed ? "secondary" : "outline"}
+                  onClick={() => toggleActionStep(step.id)}
+                  disabled={isDemoRunning}
+                  className="border-gray-300 text-gray-800"
                 >
-                  <div
-                    className={`${
-                      step.completed ? "line-through text-muted-foreground" : ""
-                    }`}
-                  >
-                    {step.title}
-                  </div>
-                  <Button
-                    variant={step.completed ? "secondary" : "outline"}
-                    size="sm"
-                    onClick={() => toggleStep(step.id)}
-                  >
-                    {step.completed ? (
-                      <>
-                        <Check className="mr-1 h-4 w-4" />
-                        Zakończono
-                      </>
-                    ) : (
-                      "Oznacz"
-                    )}
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button variant="ghost" onClick={() => alert("Dodaj nowy krok...")}>
-              Dodaj krok
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
-    </>
+                  {step.completed ? (
+                    <>
+                      <Check className="mr-1 h-4 w-4" /> Completed
+                    </>
+                  ) : (
+                    "Mark as Done"
+                  )}
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+
+      <CardFooter className="flex justify-between items-center p-6 border-t border-gray-200">
+        <div className="flex gap-3">
+          <Button onClick={prevStep} disabled={currentStep === 0 || isDemoRunning}>
+            Back
+          </Button>
+          <Button
+            onClick={nextStep}
+            disabled={currentStep === wizardSteps.length - 1 || isDemoRunning}
+          >
+            Next
+          </Button>
+        </div>
+        <Button variant="outline" onClick={runDemo} disabled={isDemoRunning}>
+          {isDemoRunning ? "Running Demo..." : "Run Demo"}
+        </Button>
+      </CardFooter>
+    </Card>
   );
 }

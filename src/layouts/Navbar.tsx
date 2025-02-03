@@ -1,5 +1,5 @@
 // src/layouts/Navbar.tsx
-import { Link } from "react-router-dom";
+import { Link, NavLink, useParams } from "react-router-dom";
 import { useAuthState } from "@/hooks/useAuthState";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,33 +14,37 @@ import { auth } from "@/firebase/config";
 export const Navbar = () => {
   const { user } = useAuthState();
 
+  // Pobieramy parametr 'module' – będzie dostępny przy trasach np. /admin/:module/...
+  const { module } = useParams<{ module?: string }>();
+
   const handleLogout = () => {
     auth.signOut();
   };
+
+  // Funkcja pomocnicza do określania klasy dla aktywnych linków (dla publicznych stron)
+  const getNavLinkClass = ({ isActive }: { isActive: boolean }) =>
+    `text-sm font-medium transition-colors hover:text-primary p-3 rounded ${
+      isActive ? "text-primary bg-muted" : "text-muted-foreground"
+    }`;
+
+  // Przyjmijmy, że w sekcji admin chcemy wyróżnić Dashboard, jeśli module === "boards"
+  const dashboardActiveClass =
+    module === "boards" ? "text-primary bg-muted" : "text-muted-foreground";
 
   return (
     <nav className="border-b">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-          <div className="flex space-x-4">
-            <Link
-              to="/"
-              className="text-sm font-medium transition-colors hover:text-primary"
-            >
+          <div className="flex">
+            <NavLink to="/" end className={getNavLinkClass}>
               Home
-            </Link>
-            <Link
-              to="/about"
-              className="text-sm font-medium transition-colors hover:text-primary"
-            >
+            </NavLink>
+            <NavLink to="/about" end className={getNavLinkClass}>
               Case Studies
-            </Link>
-            <Link
-              to="/contact"
-              className="text-sm font-medium transition-colors hover:text-primary"
-            >
+            </NavLink>
+            <NavLink to="/contact" end className={getNavLinkClass}>
               Services
-            </Link>
+            </NavLink>
           </div>
           <div>
             {user ? (
@@ -52,8 +56,14 @@ export const Navbar = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {/* Przykładowo: Dashboard jest wyróżniany, gdy aktualny moduł to "boards" */}
                   <DropdownMenuItem asChild>
-                    <Link to="/admin/boards/instances">Dashboard</Link>
+                    <Link
+                      to="/admin/boards/instances"
+                      className={dashboardActiveClass}
+                    >
+                      Dashboard
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleLogout}>
                     Wyloguj się

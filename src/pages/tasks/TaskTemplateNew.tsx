@@ -1,15 +1,26 @@
-// src/pages/tasks/TaskTemplateNew.tsx
 import { useNavigate } from "react-router-dom";
 import { TemplateEditor } from "@/components/tasks/editor/TemplateEditor";
+import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 
 export const TaskTemplateNew = () => {
   const navigate = useNavigate();
-  
+
   return (
-    <div className="max-w-4xl mx-auto h-full flex-1 flex-col space-y-8 p-8 md:flex">
-      <TemplateEditor
-        onCancel={() => navigate('/admin/tasks/templates')}
-      />
-    </div>
+    <AdminOutletTemplate
+      title="New Template"
+      description="Create a new task template"
+      actions={
+        <button
+          onClick={() => navigate("/admin/tasks/templates")}
+          className="btn"
+        >
+          Back
+        </button>
+      }
+    >
+      <TemplateEditor onCancel={() => navigate("/admin/tasks/templates")} />
+    </AdminOutletTemplate>
   );
 };
+
+export default TaskTemplateNew;

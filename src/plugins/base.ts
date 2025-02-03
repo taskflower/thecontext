@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/plugins/base.ts
+import React from "react";
 import { MessageRole } from "@/types/common";
 
 export interface LLMMessage {
@@ -43,6 +44,7 @@ export interface PluginDefinition {
   id: string;
   name: string;
   description: string;
+  icon?: React.ReactNode; // nowa właściwość
 
   // UI Components
   ConfigComponent: React.ComponentType<PluginConfigProps>;

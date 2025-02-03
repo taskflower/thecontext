@@ -6,10 +6,10 @@ import { TaskTemplateNew } from "./TaskTemplateNew";
 
 
 const tasksRoutes: RouteObject[] = [
-  { path: "tasks/templates", element: <TaskTemplateList /> },
-  { path: "tasks/templates/new", element: <TaskTemplateNew /> },
-  { path: "tasks/:id/edit", element: <TaskTemplateEdit /> },
-  { path: "tasks/:id/run", element: <TaskRunner /> }
+  { path: "templates", element: <TaskTemplateList /> },
+  { path: "templates/new", element: <TaskTemplateNew /> },
+  { path: ":id/edit", element: <TaskTemplateEdit /> },
+  { path: ":id/run", element: <TaskRunner /> }
 ];
 
 export default tasksRoutes;

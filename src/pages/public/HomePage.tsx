@@ -1,3 +1,4 @@
+// HomePage.tsx
 import { GoalPathwayChart } from "@/components/homepage/GoalPathwayChart";
 import TheContextCell from "@/components/homepage/TheContextCell";
 import { Button } from "@/components/ui/button";
@@ -16,14 +17,16 @@ const HighlightedText = ({ children }: { children: ReactNode }) => {
 
 const HomePage = () => {
   return (
-    <div className="max-w-7xl mx-auto space-y-16 px-6 py-16">
+    <div className="max-w-7xl mx-auto space-y-16 px-0 md:px-6 py-16">
       <header className="mx-auto max-w-3xl text-center space-y-4">
         <div className="flex items-end justify-center gap-6">
           <TheContextCell className="h-20 mb-1" />
-          <h1 className="text-8xl font-bold tracking-tight">THE CONTEXT</h1>
+          <h1 className="font-bold tracking-tight text-4xl sm:text-6xl md:text-8xl">
+            THE CONTEXT
+          </h1>
         </div>
 
-        <p className="text-lg text-muted-foreground py-2">
+        <p className="py-2 text-base sm:text-lg text-muted-foreground">
           Build and expand your knowledge context through structured task
           templates, interactive Kanban boards, and AI-powered document
           management.
@@ -36,10 +39,12 @@ const HomePage = () => {
       <section className="grid gap-8 md:grid-cols-2">
         <Card className="shadow-md hover:shadow-lg transition-shadow">
           <CardHeader>
-            <CardTitle className="text-2xl">What is The Context?</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">
+              What is THE CONTEXT?
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-6 leading-relaxed">
+            <p className="mb-6 leading-relaxed text-muted-foreground">
               Context Builder is an intelligent task management system that
               combines customizable templates, Kanban workflows, and AI-powered
               document context expansion. It helps you create structured
@@ -52,7 +57,7 @@ const HomePage = () => {
 
         <Card className="shadow-md hover:shadow-lg transition-shadow">
           <CardHeader>
-            <CardTitle className="text-2xl">Core Features</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">Core Features</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="space-y-6 text-muted-foreground">
@@ -104,10 +109,10 @@ const HomePage = () => {
       </section>
 
       <section className="mx-auto max-w-2xl text-center space-y-4">
-        <h2 className="text-3xl font-semibold">
+        <h2 className="font-semibold text-2xl sm:text-3xl">
           Ready to Expand Your Context?
         </h2>
-        <p className="text-muted-foreground leading-relaxed">
+        <p className="leading-relaxed text-muted-foreground">
           Start building your <HighlightedText>knowledge base</HighlightedText>{" "}
           today with our{" "}
           <HighlightedText>intelligent task management</HighlightedText> and{" "}

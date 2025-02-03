@@ -1,6 +1,8 @@
+// src/layouts/AdminSidebar.tsx
+import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Settings, FileText, ListTodo, Route } from "lucide-react"; // Import ikon Lucide
+import { Settings, FileText, LayoutGrid, CheckSquare } from "lucide-react";
 
 interface SidebarLinkProps {
   to: string;
@@ -9,8 +11,24 @@ interface SidebarLinkProps {
   isActivePath: boolean;
 }
 
-// Nowy komponent SidebarLink
-const SidebarLink: React.FC<SidebarLinkProps> = ({
+const MobileNavLink: React.FC<SidebarLinkProps> = ({
+  to,
+  icon: Icon,
+  children,
+  isActivePath,
+}) => (
+  <Link
+    to={to}
+    className={`flex flex-col items-center justify-center w-full h-full p-2 ${
+      isActivePath ? "text-black" : "text-gray-500"
+    } active:bg-gray-100`}
+  >
+    <Icon className={`h-6 w-6 ${isActivePath ? "text-black" : "text-gray-500"}`} />
+    <span className="text-xs mt-1">{children}</span>
+  </Link>
+);
+
+const DesktopSidebarLink: React.FC<SidebarLinkProps> = ({
   to,
   icon: Icon,
   children,
@@ -32,51 +50,65 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
   </Button>
 );
 
-export const AdminSidebar = () => {
+export const AdminSidebar: React.FC = () => {
   const location = useLocation();
 
-  // Funkcja pomocnicza do sprawdzania, czy ścieżka jest aktywna
   const isActive = (path: string): boolean => {
     return location.pathname.startsWith(path);
   };
 
-  return (
-    <div className="h-screen w-full max-w-lg border-r bg-background sticky top-0">
-      <div className="space-y-4 px-12 w-96 ml-auto ">
-        
-          <h2 className="mb-17 px-4 text-lg font-semibold">&nbsp;</h2>
-          <div className="space-y-1">
-            <SidebarLink
-              to="/admin/boards/instances"
-              icon={Route}
-              isActivePath={isActive("/admin/boards")}
+  const navigationItems = [
+    { path: "/admin/boards/instances", icon: LayoutGrid, label: "Boards" },
+    { path: "/admin/tasks/templates", icon: CheckSquare, label: "Tasks" },
+    { path: "/admin/documents", icon: FileText, label: "Documents" },
+    { path: "/admin/settings", icon: Settings, label: "Settings" },
+  ];
+
+  // Mobile bottom navigation
+  const mobileNav = (
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t md:hidden z-30">
+      <div className="grid grid-cols-4 h-16">
+        {navigationItems.map((item) => (
+          <MobileNavLink
+            key={item.path}
+            to={item.path}
+            icon={item.icon}
+            isActivePath={isActive(item.path)}
+          >
+            {item.label}
+          </MobileNavLink>
+        ))}
+      </div>
+    </nav>
+  );
+
+  // Desktop sidebar
+  const desktopNav = (
+    <div className="hidden md:block w-full md:h-screen md:max-w-full lg:max-w-lg border-r bg-background md:sticky md:top-0">
+      <div className="space-y-4 p-4 md:px-8 lg:px-12 md:w-72 lg:w-96 md:ml-auto">
+        <h2 className="mb-4 md:mb-12 lg:mb-17 px-4 text-lg font-semibold">
+          &nbsp;
+        </h2>
+        <div className="space-y-1">
+          {navigationItems.map((item) => (
+            <DesktopSidebarLink
+              key={item.path}
+              to={item.path}
+              icon={item.icon}
+              isActivePath={isActive(item.path)}
             >
-              Boards
-            </SidebarLink>
-            <SidebarLink
-              to="/admin/tasks/templates"
-              icon={ListTodo}
-              isActivePath={isActive("/admin/tasks")}
-            >
-              Tasks
-            </SidebarLink>
-            <SidebarLink
-              to="/admin/documents"
-              icon={FileText}
-              isActivePath={isActive("/admin/documents")}
-            >
-              Documents
-            </SidebarLink>
-            <SidebarLink
-              to="/admin/settings"
-              icon={Settings}
-              isActivePath={isActive("/admin/settings")}
-            >
-              Settings
-            </SidebarLink>
-          </div>
-     
+              {item.label}
+            </DesktopSidebarLink>
+          ))}
+        </div>
       </div>
     </div>
+  );
+
+  return (
+    <>
+      {desktopNav}
+      {mobileNav}
+    </>
   );
 };

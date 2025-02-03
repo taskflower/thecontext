@@ -7,11 +7,11 @@ import { InstancesList } from "./InstancesList";
 import { KanbanViewPage } from "./KanbanViewPage";
 
 const boardsRoutes: RouteObject[] = [
-  { path: "boards/instances", element: <InstancesList /> },
-  { path: "boards/templates", element: <KanbanTemplateList /> },
-  { path: "boards/templates/new", element: <KanbanTemplateNew /> },
-  { path: "boards/:id/edit", element: <KanbanTemplateEdit /> },
-  { path: "boards/:id/view", element: <KanbanViewPage /> },
+  { path: "instances", element: <InstancesList /> },
+  { path: "templates", element: <KanbanTemplateList /> },
+  { path: "templates/new", element: <KanbanTemplateNew /> },
+  { path: ":id/edit", element: <KanbanTemplateEdit /> },
+  { path: ":id/view", element: <KanbanViewPage /> },
 ];
 
 export default boardsRoutes;

@@ -14,13 +14,13 @@ export const AdminLayout = () => {
   if (!user) {
     return <Navigate to="/login" replace />;
   }
-
+ 
   return (
     <div className="min-h-screen flex flex-col select-none relative">
-      <Navbar /> {/* Dodano Navbar na górze */}
-      <div className="flex flex-grow">
+      <Navbar />
+      <div className="flex flex-col md:flex-row flex-grow relative">
         <AdminSidebar />
-        <main className="flex-grow p-8 relative -ml-32">
+        <main className="flex-grow p-0 md:p-6 lg:p-8 pb-20 md:pb-6 relative ml-0  2xl:-ml-32">
           <Outlet />
         </main>
       </div>

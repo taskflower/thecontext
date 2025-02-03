@@ -17,7 +17,7 @@ import {
   
   const CaseStudiesPage = () => {
     return (
-      <div className="max-w-7xl mx-auto px-6 py-16">
+      <div className="max-w-7xl mx-auto space-y-16 px-0 md:px-6 py-16">
         <header className="text-center mb-16">
           <TheContextCell className="w-12 mb-6" />
           <h1 className="text-4xl font-bold">THE CONTEXT: Case Studies</h1>
