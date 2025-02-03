@@ -1,3 +1,4 @@
+// src/components/tasks/editor/TemplateEditor.tsx
 import { FC, useState } from "react";
 import { Template, Step } from "../../../types/template";
 import { StepEditor } from "./StepEditor";
@@ -79,30 +80,12 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">
-            {template ? "Edit" : "New"} Task Template
-          </h2>
-          <p className="text-muted-foreground">
-            Create or modify task template details and steps
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} disabled={!templateDetails.name}>
-            Save template
-          </Button>
-        </div>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Task template details</CardTitle>
+      {/* Formularz szczegółów szablonu */}
+      <Card className="border-0 md:border shadow-none md:shadow">
+        <CardHeader className="px-3 md:px-6 border border-dashed border-t-black md:border-0">
+          <CardTitle>Template Details</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="px-3 md:px-6 space-y-3">
           <div className="space-y-2">
             <label className="text-sm font-medium">Name</label>
             <Input
@@ -133,15 +116,16 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+      {/* Lista kroków */}
+      <Card className="border-0 md:border shadow-none md:shadow">
+        <CardHeader className="px-3 md:px-6 space-y-2 *:flex flex-row items-center justify-between border border-dashed border-t-black md:border-0">
           <CardTitle>Steps</CardTitle>
           <Button onClick={() => setIsAddStepOpen(true)} size="sm">
             <Plus className="h-4 w-4 mr-2" />
             Add Step
           </Button>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="px-3 md:px-6 space-y-2">
           {steps.map((step) => (
             <Card key={step.id}>
               <CardContent className="flex items-center justify-between p-4">
@@ -177,12 +161,15 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
           ))}
         </CardContent>
       </Card>
+
+      {/* Przycisk zapisu */}
       <div className="flex justify-end">
-        <Button variant={'outline'} onClick={handleSave} disabled={!templateDetails.name}>
+        <Button onClick={handleSave} disabled={!templateDetails.name}>
           Save template
         </Button>
       </div>
 
+      {/* Dialog dodawania kroku */}
       <Dialog open={isAddStepOpen} onOpenChange={setIsAddStepOpen}>
         <DialogContent>
           <DialogHeader>
@@ -192,6 +179,7 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
         </DialogContent>
       </Dialog>
 
+      {/* Dialog edycji kroku */}
       <Dialog
         open={!!editingStepId}
         onOpenChange={() => setEditingStepId(null)}
@@ -209,3 +197,5 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
     </div>
   );
 };
+
+export default TemplateEditor;

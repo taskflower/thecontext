@@ -1,6 +1,5 @@
-// src/pages/tasks/TaskRunner.tsx
 import { useNavigate, useParams } from "react-router-dom";
-import { ProcessRunner } from "@/components/tasks/ProcessRunner";
+import ProcessRunner from "@/components/tasks/ProcessRunner";
 import { useTasksStore } from "@/store/tasksStore";
 
 export const TaskRunner = () => {
@@ -19,6 +18,7 @@ export const TaskRunner = () => {
       <ProcessRunner
         template={template}
         onBack={() => navigate('/admin/tasks/templates')}
+        onEdit={() => navigate(`/admin/tasks/${template.id}/edit`)}
         onComplete={() => {
           // TODO: Handle task completion
           navigate('/admin/tasks/templates');
@@ -27,3 +27,5 @@ export const TaskRunner = () => {
     </div>
   );
 };
+
+export default TaskRunner;

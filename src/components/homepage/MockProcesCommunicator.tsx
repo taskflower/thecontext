@@ -111,7 +111,7 @@ export default function CampaignWizard() {
   );
 
   return (
-    <Card  mobile>
+    <Card className="border-0 md:border shadow-none md:shadow">
       <CardHeader className="border-b border-gray-200">
         <CardTitle className="text-2xl font-bold text-gray-900">
           Campaign Wizard

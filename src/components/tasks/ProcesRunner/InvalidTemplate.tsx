@@ -1,21 +1,14 @@
 import { FC } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, AlertTriangle } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"; // Ensure the path is correct
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 
 interface InvalidTemplateProps {
   onBack: () => void;
+  onEdit: () => void;
 }
 
-const InvalidTemplate: FC<InvalidTemplateProps> = ({ onBack }) => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-
-  const handleEditClick = () => {
-    navigate(`/admin/tasks/${id}/edit`);
-  };
-
+const InvalidTemplate: FC<InvalidTemplateProps> = ({ onBack, onEdit }) => {
   return (
     <div className="flex justify-center items-center p-4">
       <Card className="w-full max-w-lg">
@@ -26,8 +19,7 @@ const InvalidTemplate: FC<InvalidTemplateProps> = ({ onBack }) => {
             The task you are trying to run does not have defined steps in this template.
           </p>
         </CardHeader>
-        <CardContent className="text-center w-96  m-auto pt-6">
-         
+        <CardContent className="text-center w-96 m-auto pt-6">
           <p className="text-lg">
             Add steps to the template or choose another template.
           </p>
@@ -37,7 +29,7 @@ const InvalidTemplate: FC<InvalidTemplateProps> = ({ onBack }) => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Templates
           </Button>
-          <Button onClick={handleEditClick}>
+          <Button onClick={onEdit}>
             Add Steps to Template
           </Button>
         </CardFooter>

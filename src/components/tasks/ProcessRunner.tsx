@@ -15,6 +15,7 @@ interface ProcessRunnerProps {
   template: Template;
   onBack: () => void;
   onComplete: () => void;
+  onEdit: () => void;
 }
 
 interface StepState {
@@ -29,6 +30,7 @@ export const ProcessRunner: FC<ProcessRunnerProps> = ({
   template,
   onBack,
   onComplete,
+  onEdit,
 }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isPanelOpen, setIsPanelOpen] = useState(true);
@@ -58,7 +60,7 @@ export const ProcessRunner: FC<ProcessRunnerProps> = ({
   });
 
   if (!template?.steps?.length) {
-    return <InvalidTemplate onBack={onBack} />;
+    return <InvalidTemplate onBack={onBack} onEdit={onEdit} />;
   }
 
   const currentStep = template.steps[currentStepIndex];
@@ -161,7 +163,7 @@ export const ProcessRunner: FC<ProcessRunnerProps> = ({
             <Separator />
             <div className="p-3 flex justify-end items-center gap-3">
               <ToggleGroup 
-              variant={"outline"}
+                variant={"outline"}
                 type="single" 
                 value={viewMode}
                 onValueChange={(value: string) => setViewMode(value as ViewMode)}

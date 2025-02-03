@@ -72,6 +72,7 @@ export const KanbanBoard: FC<{ instance: KanbanInstance }> = ({ instance }) => {
           template={processRunnerTemplate}
           onBack={() => setSelectedTaskId(null)}
           onComplete={handleProcessComplete}
+          onEdit={() => {}}
         />
       ) : (
         <Card>
