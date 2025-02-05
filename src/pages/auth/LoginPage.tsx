@@ -1,13 +1,22 @@
-import React from 'react';
+// src/pages/auth/LoginPage.tsx
+import React, { useEffect } from 'react';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '@/firebase/config';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router-dom';
+import { useGoogleDrive } from '@/hooks/useGoogleDrive';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const { driveConnected } = useGoogleDrive();
+
+  useEffect(() => {
+    if (driveConnected) {
+      console.log('Google Drive connection status: Connected!');
+    }
+  }, [driveConnected]);
 
   const handleGoogleLogin = async () => {
     try {
@@ -37,13 +46,11 @@ const LoginPage: React.FC = () => {
               Access your knowledge context
             </p>
           </div>
-
           <div className="flex items-center space-x-2">
             <Separator className="flex-1" />
             <span className="text-xs text-gray-500 px-2">with</span>
             <Separator className="flex-1" />
           </div>
-
           <Button 
             size="lg"
             className="w-full py-4"
@@ -52,7 +59,6 @@ const LoginPage: React.FC = () => {
             Continue with Google
           </Button>
         </CardContent>
-
         <CardFooter className="text-center px-6 pb-6">
           <p className="text-xs text-gray-500">
             By signing in, you agree to our{' '}

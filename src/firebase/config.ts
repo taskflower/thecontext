@@ -1,3 +1,4 @@
+// src/firebase/config.ts
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
@@ -17,6 +18,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
+// Dodajemy scope'y dla Google Drive
+googleProvider.addScope('https://www.googleapis.com/auth/drive.file');
+// Opcjonalne dodatkowe scope'y
+// googleProvider.addScope('https://www.googleapis.com/auth/drive.readonly');
+// googleProvider.addScope('https://www.googleapis.com/auth/drive');
+
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const analytics = getAnalytics(app);
