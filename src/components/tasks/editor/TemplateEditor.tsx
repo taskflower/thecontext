@@ -35,8 +35,14 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
     name: template?.name || "",
     description: template?.description || "",
   });
-  const [isAddStepOpen, setIsAddStepOpen] = useState(false);
-  const [editingStepId, setEditingStepId] = useState<string | null>(null);
+  const [dialogState, setDialogState] = useState<{
+    type: 'add' | 'edit' | null;
+    stepId?: string;
+    isOpen: boolean;
+  }>({
+    type: null,
+    isOpen: false
+  });
 
   const handleAddStep = (step: Step) => {
     const newStep: Step = {
@@ -50,14 +56,22 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
       },
     };
     setSteps((prev) => [...prev, newStep]);
-    setIsAddStepOpen(false);
+    setDialogState({ type: null, isOpen: false });
   };
 
   const handleUpdateStep = (updatedStep: Step) => {
     setSteps((prev) =>
       prev.map((s) => (s.id === updatedStep.id ? updatedStep : s))
     );
-    setEditingStepId(null);
+    setDialogState({ type: null, isOpen: false });
+  };
+
+  const handleOpenDialog = (type: 'add' | 'edit', stepId?: string) => {
+    setDialogState({ type, stepId, isOpen: true });
+  };
+
+  const handleCloseDialog = () => {
+    setDialogState({ type: null, isOpen: false });
   };
 
   const handleSave = () => {
@@ -78,9 +92,31 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
     onCancel();
   };
 
+  const getDialogContent = () => {
+    const step = dialogState.stepId 
+      ? steps.find(s => s.id === dialogState.stepId)
+      : undefined;
+
+    return (
+      <Dialog open={dialogState.isOpen} onOpenChange={handleCloseDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {dialogState.type === 'add' ? 'Add New Step' : 'Edit Step'}
+            </DialogTitle>
+          </DialogHeader>
+          <StepEditor 
+            step={step}
+            onSubmit={dialogState.type === 'add' ? handleAddStep : handleUpdateStep}
+            onCancel={handleCloseDialog}
+          />
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
   return (
     <div className="space-y-8">
-      {/* Formularz szczegółów szablonu */}
       <Card className="border-0 md:border shadow-none md:shadow">
         <CardHeader className="px-3 md:px-6 border border-dashed border-t-black md:border-0">
           <CardTitle>Template Details</CardTitle>
@@ -116,11 +152,10 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
         </CardContent>
       </Card>
 
-      {/* Lista kroków */}
       <Card className="border-0 md:border shadow-none md:shadow">
         <CardHeader className="px-3 md:px-6 space-y-2 *:flex flex-row items-center justify-between border border-dashed border-t-black md:border-0">
           <CardTitle>Steps</CardTitle>
-          <Button onClick={() => setIsAddStepOpen(true)} size="sm">
+          <Button onClick={() => handleOpenDialog('add')} size="sm">
             <Plus className="h-4 w-4 mr-2" />
             Add Step
           </Button>
@@ -142,7 +177,7 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setEditingStepId(step.id)}
+                    onClick={() => handleOpenDialog('edit', step.id)}
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>
@@ -162,40 +197,13 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
         </CardContent>
       </Card>
 
-      {/* Przycisk zapisu */}
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={!templateDetails.name}>
           Save template
         </Button>
       </div>
 
-      {/* Dialog dodawania kroku */}
-      <Dialog open={isAddStepOpen} onOpenChange={setIsAddStepOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add New Step</DialogTitle>
-          </DialogHeader>
-          <StepEditor onSubmit={handleAddStep} />
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog edycji kroku */}
-      <Dialog
-        open={!!editingStepId}
-        onOpenChange={() => setEditingStepId(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Step</DialogTitle>
-          </DialogHeader>
-          <StepEditor
-            step={steps.find((s) => s.id === editingStepId)}
-            onSubmit={handleUpdateStep}
-          />
-        </DialogContent>
-      </Dialog>
+      {getDialogContent()}
     </div>
   );
 };
-
-export default TemplateEditor;

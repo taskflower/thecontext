@@ -1,4 +1,3 @@
-// src/pages/tasks/TaskTemplateList.tsx
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,15 +10,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Settings2, Play, Plus } from "lucide-react";
+import { Settings2, Plus } from "lucide-react";
 import { useTasksStore } from "@/store/tasksStore";
 import { useNavigate } from "react-router-dom";
 import { TaskTemplateEmptyState } from "@/components/tasks/taskTemplateLstPage/TaskTemplateEmptyState";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { truncate } from "@/services/utils";
+import TemplateActions from "@/components/tasks/templatesList/TemplateActions";
+
 
 export const TaskTemplateList = () => {
-  const { templates } = useTasksStore();
+  const { templates, removeTemplate } = useTasksStore();
   const navigate = useNavigate();
 
   return (
@@ -38,7 +39,11 @@ export const TaskTemplateList = () => {
           placeholder="Filter templates..."
           className="h-8 w-[150px] lg:w-[250px]"
         />
-        <Button variant="outline" size="sm" className="ml-auto hidden h-8 lg:flex">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="ml-auto hidden h-8 lg:flex"
+        >
           <Settings2 className="mr-2 h-4 w-4" />
           View
         </Button>
@@ -54,7 +59,7 @@ export const TaskTemplateList = () => {
                 </TableHead>
                 <TableHead className="px-3">Name</TableHead>
                 <TableHead className="hidden md:table-cell px-3">Description</TableHead>
-                <TableHead className="w-[100px] px-3"></TableHead>
+                <TableHead className="w-[150px] px-3"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -79,26 +84,10 @@ export const TaskTemplateList = () => {
                       </span>
                     </TableCell>
                     <TableCell className="px-3">
-                      <div className="flex space-x-2">
-                        <Button
-                          size="sm"
-                          onClick={() =>
-                            navigate(`/admin/tasks/${template.id}/run`)
-                          }
-                        >
-                          <Play className="h-4 w-4" />
-                          Run
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            navigate(`/admin/tasks/${template.id}/edit`)
-                          }
-                        >
-                          Edit
-                        </Button>
-                      </div>
+                      <TemplateActions 
+                        templateId={template.id}
+                        onDelete={removeTemplate}
+                      />
                     </TableCell>
                   </TableRow>
                 ))

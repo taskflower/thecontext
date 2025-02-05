@@ -6,7 +6,7 @@ const TheContextCell = ({ className = '', inverted = true }) => {
     };
   
     return (
-      <div className={`inline-block hidden ${className}`} >
+      <div className={`inline-block ${className}`} >
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
           viewBox="0 0 120 140"

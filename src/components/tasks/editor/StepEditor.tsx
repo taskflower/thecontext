@@ -11,9 +11,10 @@ import { Textarea } from "@/components/ui/textarea";
 interface StepEditorProps {
   step?: Step;
   onSubmit: (step: Step) => void;
+  onCancel: () => void;
 }
 
-export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit }) => {
+export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit, onCancel }) => {
   const [stepData, setStepData] = useState<Step>({
     id: step?.id || Date.now().toString(),
     name: step?.name || "",
@@ -26,7 +27,6 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit }) => {
   const [showPluginSelector, setShowPluginSelector] = useState(false);
 
   const selectedPlugin = plugins[stepData.pluginId];
-  // Przypisujemy komponent konfiguracji do zmiennej, by uniknąć błędów ESLint
   const ConfigComponent = selectedPlugin?.ConfigComponent;
 
   useEffect(() => {
@@ -45,8 +45,10 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit }) => {
     }
   }, [selectedPlugin, stepData.config]);
 
-  const handlePluginChange = (pluginId: string) =>
+  const handlePluginChange = (pluginId: string) => {
     setStepData((prev) => ({ ...prev, pluginId, config: {}, data: {} }));
+    setShowPluginSelector(false);
+  };
 
   const handleConfigChange = (newConfig: Record<string, unknown>) =>
     setStepData((prev) => ({ ...prev, config: { ...prev.config, ...newConfig } }));
@@ -60,7 +62,6 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Name */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Name</label>
         <Input
@@ -73,7 +74,6 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit }) => {
         />
       </div>
 
-      {/* Description */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Description</label>
         <Textarea
@@ -85,40 +85,44 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit }) => {
         />
       </div>
 
-      {/* Plugin Selection */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Plugin</label>
         {stepData.pluginId ? (
           <div className="flex items-center space-x-2">
             <span>{plugins[stepData.pluginId].name}</span>
-            <Button variant="outline" onClick={() => setShowPluginSelector(true)}>
-              Zmień Plugin
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setShowPluginSelector(true)}
+            >
+              Change Plugin
             </Button>
           </div>
         ) : (
-          <Button type="button" onClick={() => setShowPluginSelector(true)}>
-            Wybierz Plugin
+          <Button 
+            type="button" 
+            onClick={() => setShowPluginSelector(true)}
+          >
+            Select Plugin
           </Button>
         )}
       </div>
 
-      {/* Wywołanie PluginSelector */}
       {showPluginSelector && (
-        <div className="mb-4">
-          <PluginSelector
-            onSelect={(pluginId) => {
-              handlePluginChange(pluginId);
-              setShowPluginSelector(false);
-            }}
-          />
-        </div>
+        <Card className="mt-4">
+          <CardHeader>
+            <CardTitle>Select Plugin</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PluginSelector onSelect={handlePluginChange} />
+          </CardContent>
+        </Card>
       )}
 
-      {/* Konfiguracja pluginu */}
       {ConfigComponent && (
         <Card>
           <CardHeader className="border-b p-4">
-            <CardTitle>Konfiguracja Pluginu</CardTitle>
+            <CardTitle>Plugin Configuration</CardTitle>
           </CardHeader>
           <CardContent className="p-4">
             <ConfigComponent
@@ -130,9 +134,14 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit }) => {
         </Card>
       )}
 
-      <Button type="submit" className="w-full" disabled={!isValid}>
-        {step ? "Zapisz zmiany" : "Dodaj krok"}
-      </Button>
+      <div className="flex justify-end space-x-2">
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={!isValid}>
+          {step ? "Save changes" : "Add step"}
+        </Button>
+      </div>
     </form>
   );
 };

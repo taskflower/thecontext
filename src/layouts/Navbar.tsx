@@ -30,7 +30,7 @@ export const Navbar = () => {
               Home
             </NavLink>
             <NavLink to="/about" end className={getNavLinkClass}>
-              Case Studies
+              Cases
             </NavLink>
             <NavLink to="/contact" end className={getNavLinkClass}>
               Services

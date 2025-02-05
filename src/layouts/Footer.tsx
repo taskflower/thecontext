@@ -15,7 +15,7 @@ export const Footer = () => {
 
       <footer className="bg-black py-8 text-center text-sm text-white">
         <div className="container mx-auto px-4">
-          <p>&copy; 2025 wiseapp.onrender.com All rights reserved.</p>
+          <p>&copy; 2025 thecontext.onrender.it | version 0.1.14 | All rights reserved</p>
         </div>
       </footer>
     </div>

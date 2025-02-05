@@ -58,6 +58,12 @@ export const useDocumentsStore = create<DocumentsStore>()(
           .filter(doc => doc.documentContainerId === documentContainerId)
           .sort((a, b) => a.order - b.order);
       },
+      reset: () => 
+        set(() => ({
+          containers: [],
+          documents: [],
+          contexts: []
+        })),
 
       linkContainerToInstance: (documentContainerId, instanceId) =>
         set((state) => {

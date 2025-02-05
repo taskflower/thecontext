@@ -62,9 +62,21 @@ export default function CampaignWizard() {
 
   // Definicja kroków – tytuł, podtytuł oraz ikona
   const wizardSteps: WizardStep[] = [
-    { title: "Campaign Goal", subtitle: "Set your campaign objective", icon: <Target className="h-5 w-5" /> },
-    { title: "AI Suggestions", subtitle: "See tailored recommendations", icon: <Lightbulb className="h-5 w-5" /> },
-    { title: "Action Plan", subtitle: "Plan your campaign steps", icon: <CheckCircle className="h-5 w-5" /> },
+    {
+      title: "Campaign Goal",
+      subtitle: "Set your campaign objective",
+      icon: <Target className="h-5 w-5" />,
+    },
+    {
+      title: "AI Suggestions",
+      subtitle: "See tailored recommendations",
+      icon: <Lightbulb className="h-5 w-5" />,
+    },
+    {
+      title: "Action Plan",
+      subtitle: "Plan your campaign steps",
+      icon: <CheckCircle className="h-5 w-5" />,
+    },
   ];
 
   const nextStep = () => {
@@ -166,7 +178,9 @@ export default function CampaignWizard() {
 
         {currentStep === 1 && (
           <div className="mt-6">
-            <p className="mb-2 font-medium text-gray-800">AI Suggestions for:</p>
+            <p className="mb-2 font-medium text-gray-800">
+              AI Suggestions for:
+            </p>
             <p className="italic mb-4 text-gray-600">
               "{campaignGoal || "Your Campaign Goal"}"
             </p>
@@ -180,7 +194,10 @@ export default function CampaignWizard() {
                     <p className="font-semibold text-gray-800">{sugg.name}</p>
                     <p className="text-sm text-gray-600">{sugg.description}</p>
                   </div>
-                  <Badge variant="outline" className="border-gray-300 text-gray-800">
+                  <Badge
+                    variant="outline"
+                    className="border-gray-300 text-gray-800"
+                  >
                     {sugg.match}%
                   </Badge>
                 </div>
@@ -200,7 +217,13 @@ export default function CampaignWizard() {
                 key={step.id}
                 className="flex items-center justify-between p-3 border border-gray-200 rounded mb-3"
               >
-                <span className={step.completed ? "line-through text-gray-500" : "text-gray-800"}>
+                <span
+                  className={
+                    step.completed
+                      ? "line-through text-gray-500"
+                      : "text-gray-800"
+                  }
+                >
                   {step.title}
                 </span>
                 <Button
@@ -226,7 +249,10 @@ export default function CampaignWizard() {
 
       <CardFooter className="flex justify-between items-center p-6 border-t border-gray-200">
         <div className="flex gap-3">
-          <Button onClick={prevStep} disabled={currentStep === 0 || isDemoRunning}>
+          <Button
+            onClick={prevStep}
+            disabled={currentStep === 0 || isDemoRunning}
+          >
             Back
           </Button>
           <Button

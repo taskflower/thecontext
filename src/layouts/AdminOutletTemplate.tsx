@@ -1,9 +1,9 @@
 import React, { FC } from "react";
-
 import MainTitleSecondary from "./MainTitleSecondary";
 import IconCom from "@/components/IconComp";
-import { useParams } from "react-router-dom";
 import Breadcrumbs from "@/components/ui/braadcrumbs";
+import { useCurrentModule } from "@/services/utils";
+
 
 interface AdminTemplateProps {
   title: string;
@@ -20,7 +20,7 @@ const AdminOutletTemplate: FC<AdminTemplateProps> = ({
   children,
   actions,
 }) => {
-  const { module } = useParams<{ module?: string }>();
+  const module = useCurrentModule();
 
   return (
     <div className="max-w-4xl mx-auto flex-1 flex-col space-y-8 p-0 md:p-8 md:flex h-full">
@@ -30,7 +30,7 @@ const AdminOutletTemplate: FC<AdminTemplateProps> = ({
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 p-3 md:p-0">
         <MainTitleSecondary
           title={title}
-          icon={<IconCom icon={module ?? "documents"} />}
+          icon={<IconCom icon={module} />}
           description={description}
         />
         <div className="flex gap-4 items-center">{actions ?? null}</div>

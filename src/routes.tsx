@@ -6,7 +6,7 @@ import { AdminLayout } from "@/layouts/AdminLayout";
 import publicRoutes from "@/pages/public/routes";
 import documentsRoutes from "@/pages/documents/routes";
 import boardsRoutes from "@/pages/boards/routes";
-import tasksRoutes from "@/pages/tasks/routes"; // jeśli istnieje
+import tasksRoutes from "@/pages/tasks/routes"; 
 import settingsRoutes from "@/pages/settings/routes";
 
 export const routes: RouteObject[] = [

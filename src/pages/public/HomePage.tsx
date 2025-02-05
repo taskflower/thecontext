@@ -19,9 +19,9 @@ const HomePage = () => {
   return (
     <div className="max-w-7xl mx-auto space-y-16 px-0 md:px-6 py-16">
       <header className="mx-auto max-w-3xl text-center space-y-4">
-        <div className="flex items-end justify-center gap-6">
+        <div className="flex md:items-end justify-center gap-6 flex-col md:flex-row">
           <TheContextCell className="h-20 mb-1" />
-          <h1 className="font-bold tracking-tight text-4xl sm:text-6xl md:text-8xl">
+          <h1 className="font-bold tracking-tight text-4xl sm:text-6xl md:text-7xl xl:text-8xl">
             THE CONTEXT
           </h1>
         </div>
@@ -31,9 +31,11 @@ const HomePage = () => {
           templates, interactive Kanban boards, and AI-powered document
           management.
         </p>
+        <Link to="/admin/tasks/templates">
         <Button size="lg" className="mt-4">
-          <Link to="/admin/tasks/templates">Start Building</Link>
+          Start Building
         </Button>
+        </Link>
       </header>
 
       <section className="grid gap-8 md:grid-cols-2">

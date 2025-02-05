@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/types/document.ts
 // nie usuwaj komentarzy
 export interface DocumentContainer {
@@ -26,6 +27,7 @@ export interface DocumentContainer {
   }
   
   export interface DocumentsStore {
+    reset: any;
     containers: DocumentContainer[];
     documents: Document[];
     contexts: DocumentContainerContext[];
