@@ -1,12 +1,20 @@
-// src/components/StepEditor.tsx
 import { FC, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { plugins } from "@/plugins";
-import { PluginSelector } from "@/components/PluginSelector";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Step } from "@/types/template";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Check } from "lucide-react";
 
 interface StepEditorProps {
   step?: Step;
@@ -15,6 +23,7 @@ interface StepEditorProps {
 }
 
 export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit, onCancel }) => {
+  const [isOpen, setIsOpen] = useState(false);
   const [stepData, setStepData] = useState<Step>({
     id: step?.id || Date.now().toString(),
     name: step?.name || "",
@@ -24,7 +33,6 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit, onCancel }) =>
     data: step?.data || {},
   });
   const [isValid, setIsValid] = useState(false);
-  const [showPluginSelector, setShowPluginSelector] = useState(false);
 
   const selectedPlugin = plugins[stepData.pluginId];
   const ConfigComponent = selectedPlugin?.ConfigComponent;
@@ -32,7 +40,7 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit, onCancel }) =>
   useEffect(() => {
     if (selectedPlugin?.initialize) {
       selectedPlugin.initialize(stepData.config).catch((err) =>
-        console.error("Plugin initialization error:", err)
+        console.error("Błąd inicjalizacji pluginu:", err)
       );
     }
   }, [selectedPlugin, stepData.config]);
@@ -47,7 +55,7 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit, onCancel }) =>
 
   const handlePluginChange = (pluginId: string) => {
     setStepData((prev) => ({ ...prev, pluginId, config: {}, data: {} }));
-    setShowPluginSelector(false);
+    setIsOpen(false);
   };
 
   const handleConfigChange = (newConfig: Record<string, unknown>) =>
@@ -60,69 +68,90 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit, onCancel }) =>
     }
   };
 
+  const pluginsList = Object.entries(plugins);
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
-        <label className="text-sm font-medium">Name</label>
+        <label className="text-sm font-medium">Nazwa</label>
         <Input
           value={stepData.name}
           onChange={(e) =>
             setStepData((prev) => ({ ...prev, name: e.target.value }))
           }
-          placeholder="Step name"
+          placeholder="Nazwa kroku"
           required
         />
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Description</label>
+        <label className="text-sm font-medium">Opis</label>
         <Textarea
           value={stepData.description}
           onChange={(e) =>
             setStepData((prev) => ({ ...prev, description: e.target.value }))
           }
-          placeholder="Step description"
+          placeholder="Opis kroku"
         />
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Plugin</label>
-        {stepData.pluginId ? (
-          <div className="flex items-center space-x-2">
-            <span>{plugins[stepData.pluginId].name}</span>
+        <label className="text-sm font-medium">Wtyczka</label>
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          <SheetTrigger asChild>
             <Button 
-              type="button" 
+              type="button"
               variant="outline" 
-              onClick={() => setShowPluginSelector(true)}
+              className="w-full justify-between"
             >
-              Change Plugin
+              <div className="flex items-center gap-2">
+                {stepData.pluginId && plugins[stepData.pluginId].icon}
+                {stepData.pluginId ? plugins[stepData.pluginId].name : "Wybierz wtyczkę"}
+              </div>
+              <span className="ml-2 text-muted-foreground">⌘K</span>
             </Button>
-          </div>
-        ) : (
-          <Button 
-            type="button" 
-            onClick={() => setShowPluginSelector(true)}
-          >
-            Select Plugin
-          </Button>
-        )}
+          </SheetTrigger>
+          <SheetContent side="right" className="w-96">
+            <SheetHeader>
+              <SheetTitle>Wybierz wtyczkę</SheetTitle>
+              <SheetDescription>
+                Wybierz wtyczkę do przetwarzania tego kroku
+              </SheetDescription>
+            </SheetHeader>
+            <ScrollArea className="h-[calc(100vh-8rem)] mt-4 pr-4">
+              <div className="space-y-2">
+                {pluginsList.map(([id, plugin]) => (
+                  <div 
+                    key={id}
+                    className={`cursor-pointer rounded-lg border p-4 hover:bg-accent ${
+                      stepData.pluginId === id ? 'bg-accent' : ''
+                    }`}
+                    onClick={() => handlePluginChange(id)}
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2">
+                        {plugin.icon}
+                        <span className="font-medium">{plugin.name}</span>
+                      </div>
+                      {stepData.pluginId === id && (
+                        <Check className="h-4 w-4 text-primary" />
+                      )}
+                    </div>
+                    {plugin.description && (
+                      <p className="mt-1 text-sm text-muted-foreground">{plugin.description}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </SheetContent>
+        </Sheet>
       </div>
-
-      {showPluginSelector && (
-        <Card className="mt-4">
-          <CardHeader>
-            <CardTitle>Select Plugin</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <PluginSelector onSelect={handlePluginChange} />
-          </CardContent>
-        </Card>
-      )}
 
       {ConfigComponent && (
         <Card>
           <CardHeader className="border-b p-4">
-            <CardTitle>Plugin Configuration</CardTitle>
+            <CardTitle>Konfiguracja wtyczki</CardTitle>
           </CardHeader>
           <CardContent className="p-4">
             <ConfigComponent
@@ -136,12 +165,14 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit, onCancel }) =>
 
       <div className="flex justify-end space-x-2">
         <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
+          Anuluj
         </Button>
         <Button type="submit" disabled={!isValid}>
-          {step ? "Save changes" : "Add step"}
+          {step ? "Zapisz zmiany" : "Dodaj krok"}
         </Button>
       </div>
     </form>
   );
 };
+
+export default StepEditor;

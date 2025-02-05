@@ -9,12 +9,13 @@ import {
 import { ConfigComponent } from "./ConfigComponent";
 import { RuntimeComponent } from "./RuntimeComponent";
 import { PickerDocRuntimeData } from "./types";
+import { FileUp } from "lucide-react";
 
 export const PickerDocPlugin: PluginDefinition = {
   id: "pickerDoc",
   name: "Document Picker",
   description: "Plugin for selecting documents to include in the conversation",
-
+  icon: <FileUp className="h-4 w-4" />,
   ConfigComponent,
   RuntimeComponent,
 

@@ -49,7 +49,7 @@ export const TaskTemplateList = () => {
         </Button>
       </div>
 
-      <Card className="border-0 md:border">
+      <Card className="border-0 md:border shadow-none md:shadow">
         <CardContent className="p-0">
           <Table>
             <TableHeader>

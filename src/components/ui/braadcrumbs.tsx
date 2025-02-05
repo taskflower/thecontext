@@ -38,7 +38,7 @@ export default function Breadcrumbs() {
           ) : (
             <Link 
               to={url}
-              className="hover:text-primary transition-colors"
+              className="hover:text-blue-950 transition-colors text-blue-800"
             >
               {label}
             </Link>

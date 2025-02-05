@@ -10,13 +10,13 @@ import {
 import { ConfigComponent } from "./ConfigComponent";
 import { RuntimeComponent } from "./RuntimeComponent";
 import { FormConfig, FormRuntimeData } from "./types";
-import { File } from "lucide-react"; // Używamy ikony File z lucide-react
+import { TextCursorInput } from "lucide-react"; // Używamy ikony File z lucide-react
 
 export const FormPlugin: PluginDefinition = {
   id: "form",
   name: "Form Input",
   description: "Simple form input plugin",
-  icon: <File className="h-4 w-4" />, // JSX element jako ikona
+  icon: <TextCursorInput className="h-4 w-4" />, // JSX element jako ikona
   ConfigComponent,
   RuntimeComponent,
 

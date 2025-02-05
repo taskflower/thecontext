@@ -4,12 +4,13 @@ import { PluginDefinition, PluginConfig, PluginRuntimeData, LLMMessage } from ".
 import { ConfigComponent } from "./ConfigComponent";
 import { RuntimeComponent } from "./RuntimeComponent";
 import { GenerateDocConfig, GenerateDocRuntimeData } from "./types";
+import { FileCog } from "lucide-react";
 
 export const GenerateDocPlugin: PluginDefinition = {
   id: "generateDoc",
   name: "Document Generator",
   description: "Plugin for document generation with container specification",
-
+  icon: <FileCog className="h-4 w-4" />,
   ConfigComponent,
   RuntimeComponent,
 
