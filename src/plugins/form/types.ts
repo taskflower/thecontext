@@ -4,6 +4,7 @@ export interface FormConfig {
   question: string;
   required?: boolean;
   minLength?: number;
+  systemLLMMessage?: string; // zmieniono z stepDescription
 }
 
 export interface FormRuntimeData {

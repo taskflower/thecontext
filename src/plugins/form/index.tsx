@@ -1,5 +1,3 @@
-// src/plugins/form/index.tsx
-
 import { MessageRole } from "@/types/common";
 import {
   PluginDefinition,
@@ -10,13 +8,13 @@ import {
 import { ConfigComponent } from "./ConfigComponent";
 import { RuntimeComponent } from "./RuntimeComponent";
 import { FormConfig, FormRuntimeData } from "./types";
-import { TextCursorInput } from "lucide-react"; // Używamy ikony File z lucide-react
+import { TextCursorInput } from "lucide-react";
 
 export const FormPlugin: PluginDefinition = {
   id: "form",
   name: "Form Input",
   description: "Simple form input plugin",
-  icon: <TextCursorInput className="h-4 w-4" />, // JSX element jako ikona
+  icon: <TextCursorInput className="h-4 w-4" />,
   ConfigComponent,
   RuntimeComponent,
 
@@ -42,15 +40,29 @@ export const FormPlugin: PluginDefinition = {
   ): LLMMessage[] => {
     const formConfig = config as FormConfig;
     const formData = data as FormRuntimeData;
-    return [
+    
+    const messages: LLMMessage[] = [];
+
+    // Only add system message if it exists
+    if (formConfig.systemLLMMessage) {
+      messages.push({
+        role: "system" as MessageRole,
+        content: formConfig.systemLLMMessage,
+      });
+    }
+
+    // Add question and answer messages
+    messages.push(
       {
-        role: "user" as MessageRole,
+        role: "assistant" as MessageRole,
         content: formConfig.question || "No question provided",
       },
       {
-        role: "assistant" as MessageRole,
+        role: "user" as MessageRole,
         content: formData.answer || "No answer provided",
-      },
-    ];
+      }
+    );
+
+    return messages;
   },
 };

@@ -1,14 +1,14 @@
-// src/plugins/pickerDoc/index.ts
+// src/plugins/pickerDoc/index.tsx
 import { MessageRole } from "@/types/common";
 import {
   PluginDefinition,
-  // PluginConfig,
+  PluginConfig,
   PluginRuntimeData,
   LLMMessage,
 } from "../base";
 import { ConfigComponent } from "./ConfigComponent";
 import { RuntimeComponent } from "./RuntimeComponent";
-import { PickerDocRuntimeData } from "./types";
+import { PickerDocConfig, PickerDocRuntimeData } from "./types";
 import { FileUp } from "lucide-react";
 
 export const PickerDocPlugin: PluginDefinition = {
@@ -29,18 +29,33 @@ export const PickerDocPlugin: PluginDefinition = {
       return (pickerData?.selectedDocuments?.length || 0) > 0;
     }
 
-    return true; // Config is always valid as we don't have any configuration
+    return true; // Config is always valid
   },
 
   generateMessages: (
-    // config: PluginConfig,
+    config: PluginConfig,
     data: PluginRuntimeData
   ): LLMMessage[] => {
+    const pickerConfig = config as PickerDocConfig;
     const pickerData = data as PickerDocRuntimeData;
+    const messages: LLMMessage[] = [];
 
-    return pickerData.selectedDocuments.map((doc) => ({
-      role: "user" as MessageRole,
-      content: doc.content,
-    }));
+    // Add system message if it exists
+    if (pickerConfig.systemLLMMessage) {
+      messages.push({
+        role: "system" as MessageRole,
+        content: pickerConfig.systemLLMMessage,
+      });
+    }
+
+    // Add document content messages
+    messages.push(
+      ...pickerData.selectedDocuments.map((doc) => ({
+        role: "user" as MessageRole,
+        content: doc.content,
+      }))
+    );
+
+    return messages;
   },
 };

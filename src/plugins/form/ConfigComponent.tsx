@@ -2,16 +2,15 @@
 import React from 'react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { FormConfig } from './types';
 import { PluginConfigProps } from '../base';
 
-// Create a type-safe wrapper component
 export const ConfigComponent: React.FC<PluginConfigProps> = ({
   config,
   onConfigChange,
   onStatusChange,
 }) => {
-  // Cast the generic config to your specific type
   const formConfig = config as FormConfig;
   
   const validateConfig = (newConfig: FormConfig) => {
@@ -28,6 +27,15 @@ export const ConfigComponent: React.FC<PluginConfigProps> = ({
     validateConfig(newConfig);
   };
 
+  const handleSystemMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newConfig = {
+      ...formConfig,
+      systemLLMMessage: e.target.value,
+    };
+    onConfigChange(newConfig);
+    validateConfig(newConfig);
+  };
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -36,6 +44,15 @@ export const ConfigComponent: React.FC<PluginConfigProps> = ({
           value={formConfig.question || ""}
           onChange={handleQuestionChange}
           placeholder="Enter the question..."
+        />
+      </div>
+      <div className="space-y-2">
+        <Label>System LLM Message</Label>
+        <Textarea
+          value={formConfig.systemLLMMessage || ""}
+          onChange={handleSystemMessageChange}
+          placeholder="Enter the system message for LLM..."
+          className="min-h-[100px]"
         />
       </div>
       <div className="space-y-2">
