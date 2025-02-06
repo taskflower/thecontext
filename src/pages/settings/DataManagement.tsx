@@ -1,3 +1,4 @@
+// src/components/DataManagement.jsx
 import { useState } from "react";
 import {
   Card,
@@ -50,9 +51,7 @@ export const DataManagement = () => {
             <Database className="h-8 w-8" />
             <div>
               <CardTitle>Data Management</CardTitle>
-              <CardDescription>
-                Manage your local application data
-              </CardDescription>
+              <CardDescription>Manage your local application data</CardDescription>
             </div>
           </div>
         </div>
@@ -72,27 +71,26 @@ export const DataManagement = () => {
           <AlertDialogTrigger asChild>
             <Button variant="destructive" className="gap-2 w-full">
               <Trash2 className="h-4 w-4" />
-              Reset All Data!
+              Reset local data!
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogTitle>Are you sure you want to delete the data?</AlertDialogTitle>
               <AlertDialogDescription>
-                This action will permanently delete all your stored data
-                including:
-                <ul className="list-disc ml-6 mt-2">
+                This action will permanently delete all data stored in your browser (localStorage), including:
+                <ul className="list-disc ml-6 my-2">
                   <li>All documents and containers</li>
                   <li>All Kanban boards and instances</li>
                   <li>All task templates</li>
                 </ul>
-                This action cannot be undone.
+                <span className="text-black">Note: This operation only affects local data and does not impact cloud-stored data.</span>
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={handleDataReset}>
-                Yes, delete everything
+                Yes, delete local data
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -102,8 +100,7 @@ export const DataManagement = () => {
           <Alert variant="default" className="bg-green-50 border-green-200">
             <AlertTitle>Success!</AlertTitle>
             <AlertDescription>
-              All data has been successfully reset. You may need to refresh the
-              page to see all changes.
+              All data has been successfully deleted. You might need to refresh the page to see the changes.
             </AlertDescription>
           </Alert>
         )}

@@ -1,3 +1,4 @@
+// src/pages/documents/ContainerDocuments.tsx
 import { useNavigate, useParams } from "react-router-dom";
 import { useDocumentsStore } from "@/store/documentsStore";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Settings2, 
-  ArrowLeft, 
   Trash2, 
   FilePlus, 
   MoveUp, 
@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import MDEditor from '@uiw/react-md-editor';
 import { useState } from "react";
+import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 
 export const ContainerDocuments = () => {
   const { containerId } = useParams();
@@ -73,35 +74,19 @@ export const ContainerDocuments = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto h-full flex-1 flex-col space-y-8 p-8 md:flex">
-      <div className="flex items-center justify-between space-y-2">
-        <div>
-          <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => navigate('/admin/documents')}
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <h2 className="text-2xl font-bold tracking-tight">
-              {container.name}
-            </h2>
-          </div>
-          <p className="text-muted-foreground">{container.description}</p>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Button 
-            className="gap-2" 
-            onClick={() => navigate(`/admin/documents/${containerId}/document/new`)}
-          >
-            <FilePlus className="h-4 w-4" />
-            New Document
-          </Button>
-        </div>
-      </div>
-
+    <AdminOutletTemplate
+      title={container.name}
+      description={container.description}
+      actions={
+        <Button 
+          className="gap-2" 
+          onClick={() => navigate(`/admin/documents/${containerId}/document/new`)}
+        >
+          <FilePlus className="h-4 w-4" />
+          New Document
+        </Button>
+      }
+    >
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Input
@@ -110,11 +95,7 @@ export const ContainerDocuments = () => {
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
           />
-          <Button
-            variant="outline"
-            size="sm"
-            className="ml-auto hidden h-8 lg:flex"
-          >
+          <Button variant="outline" size="sm" className="ml-auto hidden h-8 lg:flex">
             <Settings2 className="mr-2 h-4 w-4" />
             View
           </Button>
@@ -219,6 +200,8 @@ export const ContainerDocuments = () => {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </AdminOutletTemplate>
   );
 };
+
+export default ContainerDocuments;

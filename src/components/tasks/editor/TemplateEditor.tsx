@@ -1,3 +1,4 @@
+// TemplateEditor.tsx
 import { FC, useState } from "react";
 import { Template, Step } from "../../../types/template";
 import { StepEditor } from "./StepEditor";
@@ -101,7 +102,7 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {dialogState.type === 'add' ? 'Dodaj nowy krok' : 'Edytuj krok'}
+              {dialogState.type === 'add' ? 'Add New Step' : 'Edit Step'}
             </DialogTitle>
           </DialogHeader>
           <StepEditor 
@@ -118,11 +119,11 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
     <div className="space-y-8">
       <Card className="border-0 md:border shadow-none md:shadow">
         <CardHeader className="px-3 md:px-6 border border-dashed border-t-black md:border-0">
-          <CardTitle>Szczegóły szablonu</CardTitle>
+          <CardTitle>Template Details</CardTitle>
         </CardHeader>
         <CardContent className="px-3 md:px-6 space-y-3">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Nazwa</label>
+            <label className="text-sm font-medium">Name</label>
             <Input
               value={templateDetails.name}
               onChange={(e) =>
@@ -131,12 +132,12 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
                   name: e.target.value,
                 }))
               }
-              placeholder="Nazwa szablonu"
+              placeholder="Template name"
               required
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">Opis</label>
+            <label className="text-sm font-medium">Description</label>
             <Input
               value={templateDetails.description}
               onChange={(e) =>
@@ -145,7 +146,7 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
                   description: e.target.value,
                 }))
               }
-              placeholder="Opis szablonu"
+              placeholder="Template description"
             />
           </div>
         </CardContent>
@@ -153,10 +154,10 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
 
       <Card className="border-0 md:border shadow-none md:shadow">
         <CardHeader className="px-3 md:px-6 space-y-2 *:flex flex-row items-center justify-between border border-dashed border-t-black md:border-0">
-          <CardTitle>Kroki</CardTitle>
+          <CardTitle>Steps</CardTitle>
           <Button onClick={() => handleOpenDialog('add')} size="sm">
             <Plus className="h-4 w-4 mr-2" />
-            Dodaj krok
+            Add Step
           </Button>
         </CardHeader>
         <CardContent className="px-3 md:px-6 space-y-2">
@@ -169,7 +170,7 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
                     {step.description}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    ID wtyczki: {step.pluginId}
+                    Plugin ID: {step.pluginId}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -198,7 +199,7 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
 
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={!templateDetails.name}>
-          Zapisz szablon
+          Save Template
         </Button>
       </div>
 

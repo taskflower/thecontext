@@ -1,3 +1,4 @@
+// StepEditor.tsx
 import { FC, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -40,7 +41,7 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit, onCancel }) =>
   useEffect(() => {
     if (selectedPlugin?.initialize) {
       selectedPlugin.initialize(stepData.config).catch((err) =>
-        console.error("Błąd inicjalizacji pluginu:", err)
+        console.error("Plugin initialization error:", err)
       );
     }
   }, [selectedPlugin, stepData.config]);
@@ -73,30 +74,30 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit, onCancel }) =>
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
-        <label className="text-sm font-medium">Nazwa</label>
+        <label className="text-sm font-medium">Name</label>
         <Input
           value={stepData.name}
           onChange={(e) =>
             setStepData((prev) => ({ ...prev, name: e.target.value }))
           }
-          placeholder="Nazwa kroku"
+          placeholder="Step name"
           required
         />
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Opis</label>
+        <label className="text-sm font-medium">Description</label>
         <Textarea
           value={stepData.description}
           onChange={(e) =>
             setStepData((prev) => ({ ...prev, description: e.target.value }))
           }
-          placeholder="Opis kroku"
+          placeholder="Step description"
         />
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Wtyczka</label>
+        <label className="text-sm font-medium">Plugin</label>
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
             <Button 
@@ -106,16 +107,16 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit, onCancel }) =>
             >
               <div className="flex items-center gap-2">
                 {stepData.pluginId && plugins[stepData.pluginId].icon}
-                {stepData.pluginId ? plugins[stepData.pluginId].name : "Wybierz wtyczkę"}
+                {stepData.pluginId ? plugins[stepData.pluginId].name : "Select plugin"}
               </div>
               <span className="ml-2 text-muted-foreground">⌘K</span>
             </Button>
           </SheetTrigger>
           <SheetContent side="right" className="w-96">
             <SheetHeader>
-              <SheetTitle>Wybierz wtyczkę</SheetTitle>
+              <SheetTitle>Select Plugin</SheetTitle>
               <SheetDescription>
-                Wybierz wtyczkę do przetwarzania tego kroku
+                Select a plugin to process this step
               </SheetDescription>
             </SheetHeader>
             <ScrollArea className="h-[calc(100vh-8rem)] mt-4 pr-4">
@@ -151,7 +152,7 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit, onCancel }) =>
       {ConfigComponent && (
         <Card>
           <CardHeader className="border-b p-4">
-            <CardTitle>Konfiguracja wtyczki</CardTitle>
+            <CardTitle>Plugin configuration</CardTitle>
           </CardHeader>
           <CardContent className="p-4">
             <ConfigComponent
@@ -165,10 +166,10 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit, onCancel }) =>
 
       <div className="flex justify-end space-x-2">
         <Button type="button" variant="outline" onClick={onCancel}>
-          Anuluj
+          Cancel
         </Button>
         <Button type="submit" disabled={!isValid}>
-          {step ? "Zapisz zmiany" : "Dodaj krok"}
+          {step ? "Save changes" : "Add step"}
         </Button>
       </div>
     </form>
