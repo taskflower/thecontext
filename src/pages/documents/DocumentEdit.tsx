@@ -1,12 +1,9 @@
-// src/pages/documents/DocumentEdit.tsx
 import { useNavigate, useParams } from "react-router-dom";
 import { useDocumentsStore } from "@/store/documentsStore";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import MDEditor from "@uiw/react-md-editor";
 import { useState, useEffect } from "react";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DocumentForm } from "@/components/documents/DocumentForm";
 
 export const DocumentEdit = () => {
   const { containerId, documentId } = useParams();
@@ -46,36 +43,16 @@ export const DocumentEdit = () => {
         </Button>
       }
     >
-      <Card className="border-0 md:border shadow-none md:shadow">
-        <CardHeader>
-          <CardTitle>Document Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Title</label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} required />
-            </div>
-            <div className="space-y-2" data-color-mode="light">
-              <label className="text-sm font-medium">Content</label>
-              <MDEditor
-                value={content}
-                onChange={(val) => setContent(val || "")}
-                height={400}
-                preview="edit"
-              />
-            </div>
-            <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={() => navigate(-1)}>
-                Cancel
-              </Button>
-              <Button type="submit">Save Changes</Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+      <DocumentForm
+        title={title}
+        content={content}
+        onTitleChange={setTitle}
+        onContentChange={setContent}
+        onSubmit={handleSubmit}
+        onCancel={() => navigate(-1)}
+        submitButtonText="Save Changes"
+        formTitle="Document Details"
+      />
     </AdminOutletTemplate>
   );
 };
-
-export default DocumentEdit;

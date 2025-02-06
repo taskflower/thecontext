@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DocumentsStore } from '@/types/document';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
@@ -10,22 +9,54 @@ export const useDocumentsStore = create<DocumentsStore>()(
       documents: [],
       contexts: [],
 
-      addContainer: (container) =>
+      addContainer: (container) => {
+        const { containers } = get();
+        const isNameTaken = containers.some(
+          existingContainer => existingContainer.name.toLowerCase() === container.name.toLowerCase()
+        );
+
+        if (isNameTaken) {
+          throw new Error(`Container with name "${container.name}" already exists`);
+        }
+
         set((state) => ({
           containers: [...state.containers, {
             ...container,
             id: Date.now().toString(),
             createdAt: new Date()
           }]
-        })),
+        }));
+      },
 
-      updateContainer: (id: string, updates: any) =>
+      updateContainer: (id, updates) => {
+        const { containers } = get();
+        
+        if (updates.name) {
+          const isNameTaken = containers.some(
+            existingContainer => 
+              existingContainer.id !== id && 
+              existingContainer.name.toLowerCase() === updates.name.toLowerCase()
+          );
+
+          if (isNameTaken) {
+            throw new Error(`Container with name "${updates.name}" already exists`);
+          }
+        }
+
         set((state) => ({
           containers: state.containers.map(container =>
             container.id === id
               ? { ...container, ...updates }
               : container
           )
+        }));
+      },
+
+      deleteContainer: (id: string) => 
+        set((state) => ({
+          containers: state.containers.filter(container => container.id !== id),
+          documents: state.documents.filter(doc => doc.documentContainerId !== id),
+          contexts: state.contexts.filter(ctx => ctx.documentContainerId !== id)
         })),
 
       addDocument: (document) =>
@@ -58,6 +89,7 @@ export const useDocumentsStore = create<DocumentsStore>()(
           .filter(doc => doc.documentContainerId === documentContainerId)
           .sort((a, b) => a.order - b.order);
       },
+
       reset: () => 
         set(() => ({
           containers: [],

@@ -1,45 +1,19 @@
-// src/pages/documents/ContainerDocuments.tsx
 import { useNavigate, useParams } from "react-router-dom";
 import { useDocumentsStore } from "@/store/documentsStore";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Settings2, FilePlus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  Settings2, 
-  Trash2, 
-  FilePlus, 
-  MoveUp, 
-  MoveDown,
-  Eye 
-} from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import MDEditor from '@uiw/react-md-editor';
 import { useState } from "react";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
+import { SearchInput } from "@/components/common/SearchInput";
+import { DocumentTable } from "@/components/documents/DocumentTable";
 
 export const ContainerDocuments = () => {
   const { containerId } = useParams();
   const navigate = useNavigate();
-  const { 
-    containers, 
-    removeDocument, 
-    getContainerDocuments,
-    updateDocument 
-  } = useDocumentsStore();
+  const { containers, removeDocument, getContainerDocuments, updateDocument } = useDocumentsStore();
   
   const [filter, setFilter] = useState("");
   const [selectedDocument, setSelectedDocument] = useState<{ title: string; content: string } | null>(null);
@@ -69,10 +43,6 @@ export const ContainerDocuments = () => {
     }
   };
 
-  const handlePreview = (document: { title: string; content: string }) => {
-    setSelectedDocument(document);
-  };
-
   return (
     <AdminOutletTemplate
       title={container.name}
@@ -89,11 +59,11 @@ export const ContainerDocuments = () => {
     >
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <Input
+          <SearchInput
+            value={filter}
+            onChange={setFilter}
             placeholder="Filter documents..."
             className="h-8 w-[150px] lg:w-[250px]"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
           />
           <Button variant="outline" size="sm" className="ml-auto hidden h-8 lg:flex">
             <Settings2 className="mr-2 h-4 w-4" />
@@ -103,86 +73,13 @@ export const ContainerDocuments = () => {
 
         <Card>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[30px] p-6">
-                    <Checkbox />
-                  </TableHead>
-                  <TableHead className="px-6">Title</TableHead>
-                  <TableHead className="px-6">Content Preview</TableHead>
-                  <TableHead className="w-[250px] px-6"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredDocuments.map((document, index) => (
-                  <TableRow key={document.id}>
-                    <TableCell className="px-6">
-                      <Checkbox />
-                    </TableCell>
-                    <TableCell className="px-6">
-                      <div className="flex space-x-2">
-                        <span className="max-w-[500px] truncate font-medium">
-                          {document.title}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="px-6">
-                      <span className="text-muted-foreground line-clamp-1">
-                        {document.content}
-                      </span>
-                    </TableCell>
-                    <TableCell className="px-6">
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handlePreview(document)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            navigate(`/admin/documents/${containerId}/document/${document.id}/edit`)
-                          }
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleMoveDocument(document.id, 'up')}
-                          disabled={index === 0}
-                        >
-                          <MoveUp className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleMoveDocument(document.id, 'down')}
-                          disabled={index === documents.length - 1}
-                        >
-                          <MoveDown className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            if (window.confirm('Are you sure you want to delete this document?')) {
-                              removeDocument(document.id);
-                            }
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <DocumentTable
+              documents={filteredDocuments}
+              onPreview={setSelectedDocument}
+              onEdit={(id) => navigate(`/admin/documents/${containerId}/document/${id}/edit`)}
+              onMove={handleMoveDocument}
+              onDelete={removeDocument}
+            />
           </CardContent>
         </Card>
       </div>
@@ -203,5 +100,3 @@ export const ContainerDocuments = () => {
     </AdminOutletTemplate>
   );
 };
-
-export default ContainerDocuments;
