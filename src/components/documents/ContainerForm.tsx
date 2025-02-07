@@ -50,7 +50,7 @@ export const ContainerForm = ({
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">Target Document Count</label>
+            <label className="text-sm font-medium">Estimated target document count</label>
             <Input
               type="number"
               min="0"

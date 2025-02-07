@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Settings2, Plus } from "lucide-react";
+import { Settings2, Plus, SquareSigma } from "lucide-react";
 import { useDocumentsStore } from "@/store/documentsStore";
 import { useNavigate } from "react-router-dom";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
@@ -33,6 +33,10 @@ export const ContainerList = () => {
           <Button variant="outline" size="sm" className="hidden lg:flex">
             <Settings2 className="mr-2 h-4 w-4" />
             View
+          </Button>
+          <Button variant="outline" size="sm" className="hidden lg:flex" onClick={() => navigate("/admin/documents/all")}>
+            <SquareSigma className="mr-2 h-4 w-4" />
+            All
           </Button>
           <Button className="gap-2" onClick={() => navigate("new")}>
             <Plus className="h-4 w-4" />
