@@ -15,7 +15,7 @@ export const Footer = () => {
 
       <footer className="bg-black py-8 text-center text-sm text-white">
         <div className="container mx-auto px-4">
-          <p>&copy; 2025 thecontext.onrender.com | ver 0.5.5</p>
+          <p>&copy; 2025 thecontext.onrender.com | ver 0.5.6</p>
         </div>
       </footer>
     </div>

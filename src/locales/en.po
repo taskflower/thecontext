@@ -85,6 +85,11 @@ msgstr ""
 msgid "Back to Containers"
 msgstr ""
 
+#: src/pages/tasks/TaskTemplateEdit.tsx:31
+#: src/pages/tasks/TaskTemplateNew.tsx:22
+msgid "Back to list of tasks templates"
+msgstr ""
+
 #: src/pages/public/HomePage.tsx:31
 msgid "Build and expand your knowledge context through structured task templates, interactive Kanban boards, and AI-powered document management."
 msgstr ""
@@ -93,6 +98,14 @@ msgstr ""
 #: src/components/documents/ContainerForm.tsx:74
 #: src/components/documents/DocumentForm.tsx:61
 msgid "Cancel"
+msgstr ""
+
+#: src/components/tasks/ProcessRunner.tsx:174
+msgid "Card View"
+msgstr ""
+
+#: src/components/tasks/TemplateList.tsx:66
+msgid "Close Preview"
 msgstr ""
 
 #: src/components/documents/ContainerCard.tsx:95
@@ -157,6 +170,10 @@ msgstr ""
 msgid "Create a new document container"
 msgstr ""
 
+#: src/pages/tasks/TaskTemplateNew.tsx:14
+msgid "Create a new task template"
+msgstr ""
+
 #: src/pages/public/HomePage.tsx:80
 msgid "Create and manage task workflows with customizable templates and dependency tracking through an intuitive Kanban board interface."
 msgstr ""
@@ -192,6 +209,7 @@ msgid "Delete"
 msgstr ""
 
 #: src/components/documents/ContainerForm.tsx:50
+#: src/pages/tasks/TaskTemplateList.tsx:61
 msgid "Description"
 msgstr ""
 
@@ -218,6 +236,7 @@ msgstr ""
 
 #: src/components/documents/ContainerActions.tsx:55
 #: src/components/documents/DocumentTable.tsx:98
+#: src/components/tasks/TemplateList.tsx:38
 msgid "Edit"
 msgstr ""
 
@@ -226,6 +245,7 @@ msgid "Edit Document"
 msgstr ""
 
 #: src/pages/documents/ContainerEdit.tsx:60
+#: src/pages/tasks/TaskTemplateEdit.tsx:22
 msgid "Editing: {0}"
 msgstr ""
 
@@ -253,8 +273,16 @@ msgstr ""
 msgid "Filter documents..."
 msgstr ""
 
+#: src/pages/tasks/TaskTemplateList.tsx:42
+msgid "Filter templates..."
+msgstr ""
+
 #: src/pages/public/CaseStudiesPage.tsx:178
 msgid "From initial content creation through peer review to final publication, the system manages the entire curriculum development lifecycle with automated version control and quality assurance checks."
+msgstr ""
+
+#: src/components/tasks/ProcessRunner.tsx:185
+msgid "Hide Preview"
 msgstr ""
 
 #: src/pages/public/HomePage.tsx:124
@@ -282,12 +310,20 @@ msgstr ""
 msgid "Maintaining Order in the System"
 msgstr ""
 
+#: src/pages/tasks/TaskTemplateList.tsx:29
+msgid "Manage and create your task templates."
+msgstr ""
+
 #: src/pages/documents/ContainerList.tsx:31
 msgid "Manage your document containers and their contents"
 msgstr ""
 
 #: src/pages/public/CaseStudiesPage.tsx:58
 msgid "Marketing Description Generation"
+msgstr ""
+
+#: src/components/tasks/ProcessRunner.tsx:178
+msgid "Mini View"
 msgstr ""
 
 #: src/pages/documents/ContainerEdit.tsx:61
@@ -298,11 +334,16 @@ msgstr ""
 msgid "Modify document details"
 msgstr ""
 
+#: src/pages/tasks/TaskTemplateEdit.tsx:23
+msgid "Modify the template details and steps below."
+msgstr ""
+
 #: src/pages/public/CaseStudiesPage.tsx:152
 msgid "Multidisciplinary Learning Modules"
 msgstr ""
 
 #: src/components/documents/ContainerForm.tsx:39
+#: src/pages/tasks/TaskTemplateList.tsx:59
 msgid "Name"
 msgstr ""
 
@@ -317,6 +358,14 @@ msgstr ""
 
 #: src/pages/documents/ContainerNew.tsx:40
 msgid "New Document Container"
+msgstr ""
+
+#: src/pages/tasks/TaskTemplateNew.tsx:13
+msgid "New task template"
+msgstr ""
+
+#: src/pages/tasks/TaskTemplateList.tsx:36
+msgid "New Template"
 msgstr ""
 
 #: src/pages/documents/ContainerList.tsx:75
@@ -339,12 +388,20 @@ msgstr ""
 msgid "PL"
 msgstr ""
 
+#: src/components/tasks/TemplateList.tsx:32
+msgid "Preview"
+msgstr ""
+
 #: src/pages/public/HomePage.tsx:92
 msgid "Process Templates"
 msgstr ""
 
 #: src/pages/public/HomePage.tsx:138
 msgid "Ready to Expand Your Context?"
+msgstr ""
+
+#: src/components/tasks/TemplateList.tsx:44
+msgid "Run"
 msgstr ""
 
 #: src/pages/documents/ContainerEdit.tsx:73
@@ -354,6 +411,10 @@ msgstr ""
 
 #: src/pages/documents/AllDocuments.tsx:84
 msgid "Search documents..."
+msgstr ""
+
+#: src/components/tasks/ProcessRunner.tsx:187
+msgid "Show Preview"
 msgstr ""
 
 #: src/pages/public/HomePage.tsx:121
@@ -368,8 +429,25 @@ msgstr ""
 msgid "Start building your <0>knowledge base</0> today with our <1>intelligent task management</1> and <2>context expansion</2> system. <3>Create templates</3>, <4>manage workflows</4>, and watch your document context <5>grow naturally</5>."
 msgstr ""
 
+#: src/components/tasks/TemplateList.tsx:57
+msgid "Step {0}: {1}"
+msgstr ""
+
+#: src/components/tasks/TemplateList.tsx:52
+msgid "Steps:"
+msgstr ""
+
 #: src/pages/public/CaseStudiesPage.tsx:82
 msgid "Subsequent tasks include competitive analysis and developing a marketing strategy based on the prepared documents, ensuring consistency and effectiveness of actions."
+msgstr ""
+
+#: src/pages/tasks/TaskTemplateList.tsx:28
+msgid "Task Templates"
+msgstr ""
+
+#: src/pages/tasks/TaskTemplateEdit.tsx:17
+#: src/pages/tasks/TaskTemplateRunner.tsx:15
+msgid "Template not found"
 msgstr ""
 
 #: src/pages/public/HomePage.tsx:26
@@ -412,6 +490,7 @@ msgstr ""
 #: src/pages/documents/AllDocuments.tsx:74
 #: src/pages/documents/ContainerDocuments.tsx:77
 #: src/pages/documents/ContainerList.tsx:36
+#: src/pages/tasks/TaskTemplateList.tsx:47
 msgid "View"
 msgstr ""
 

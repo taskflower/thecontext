@@ -85,6 +85,11 @@ msgstr "Wstecz"
 msgid "Back to Containers"
 msgstr "Powrót do kontenerów"
 
+#: src/pages/tasks/TaskTemplateEdit.tsx:31
+#: src/pages/tasks/TaskTemplateNew.tsx:22
+msgid "Back to list of tasks templates"
+msgstr "Powrót do listy szablonów zadań"
+
 #: src/pages/public/HomePage.tsx:31
 msgid "Build and expand your knowledge context through structured task templates, interactive Kanban boards, and AI-powered document management."
 msgstr "Buduj i rozwijaj kontekst swojej wiedzy dzięki uporządkowanym szablonom zadań, interaktywnym tablicom Kanban oraz zarządzaniu dokumentami wspieranym przez AI."
@@ -94,6 +99,14 @@ msgstr "Buduj i rozwijaj kontekst swojej wiedzy dzięki uporządkowanym szablono
 #: src/components/documents/DocumentForm.tsx:61
 msgid "Cancel"
 msgstr "Anuluj"
+
+#: src/components/tasks/ProcessRunner.tsx:174
+msgid "Card View"
+msgstr "Widok karty"
+
+#: src/components/tasks/TemplateList.tsx:66
+msgid "Close Preview"
+msgstr "Zamknij podgląd"
 
 #: src/components/documents/ContainerCard.tsx:95
 msgid "Collection status"
@@ -157,6 +170,10 @@ msgstr "Utwórz nowy dokument"
 msgid "Create a new document container"
 msgstr "Utwórz nowy kontener dokumentów"
 
+#: src/pages/tasks/TaskTemplateNew.tsx:14
+msgid "Create a new task template"
+msgstr "Utwórz nowy szablon zadania"
+
 #: src/pages/public/HomePage.tsx:80
 msgid "Create and manage task workflows with customizable templates and dependency tracking through an intuitive Kanban board interface."
 msgstr "Twórz i zarządzaj przepływami zadań, korzystając z konfigurowalnych szablonów oraz śledzenia zależności przez intuicyjny interfejs tablicy Kanban."
@@ -192,6 +209,7 @@ msgid "Delete"
 msgstr "Usuń"
 
 #: src/components/documents/ContainerForm.tsx:50
+#: src/pages/tasks/TaskTemplateList.tsx:61
 msgid "Description"
 msgstr "Opis"
 
@@ -218,6 +236,7 @@ msgstr "Tytuł dokumentu"
 
 #: src/components/documents/ContainerActions.tsx:55
 #: src/components/documents/DocumentTable.tsx:98
+#: src/components/tasks/TemplateList.tsx:38
 msgid "Edit"
 msgstr "Edytuj"
 
@@ -226,6 +245,7 @@ msgid "Edit Document"
 msgstr "Edytuj dokument"
 
 #: src/pages/documents/ContainerEdit.tsx:60
+#: src/pages/tasks/TaskTemplateEdit.tsx:22
 msgid "Editing: {0}"
 msgstr "Edycja: {0}"
 
@@ -253,9 +273,17 @@ msgstr "Filtruj kontenery..."
 msgid "Filter documents..."
 msgstr "Filtruj dokumenty..."
 
+#: src/pages/tasks/TaskTemplateList.tsx:42
+msgid "Filter templates..."
+msgstr "Filtruj szablony..."
+
 #: src/pages/public/CaseStudiesPage.tsx:178
 msgid "From initial content creation through peer review to final publication, the system manages the entire curriculum development lifecycle with automated version control and quality assurance checks."
 msgstr "Od początkowego tworzenia treści, przez recenzje, aż do ostatecznej publikacji, system zarządza całym cyklem rozwoju programu nauczania, oferując automatyczną kontrolę wersji oraz mechanizmy zapewnienia jakości."
+
+#: src/components/tasks/ProcessRunner.tsx:187
+msgid "Hide Preview"
+msgstr "Ukryj podgląd"
 
 #: src/pages/public/HomePage.tsx:124
 msgid "Intelligent document handling that grows with your tasks, creating a dynamic knowledge base tied to your workflows."
@@ -282,6 +310,10 @@ msgstr "Wyloguj się"
 msgid "Maintaining Order in the System"
 msgstr "Utrzymanie porządku w systemie"
 
+#: src/pages/tasks/TaskTemplateList.tsx:29
+msgid "Manage and create your task templates."
+msgstr "Zarządzaj i twórz swoje szablony zadań."
+
 #: src/pages/documents/ContainerList.tsx:31
 msgid "Manage your document containers and their contents"
 msgstr "Zarządzaj swoimi kontenerami dokumentów i ich zawartością"
@@ -289,6 +321,10 @@ msgstr "Zarządzaj swoimi kontenerami dokumentów i ich zawartością"
 #: src/pages/public/CaseStudiesPage.tsx:58
 msgid "Marketing Description Generation"
 msgstr "Generowanie opisu marketingowego"
+
+#: src/components/tasks/ProcessRunner.tsx:178
+msgid "Mini View"
+msgstr "Widok mini"
 
 #: src/pages/documents/ContainerEdit.tsx:61
 msgid "Modify container details"
@@ -298,11 +334,16 @@ msgstr "Modyfikuj szczegóły kontenera"
 msgid "Modify document details"
 msgstr "Modyfikuj szczegóły dokumentu"
 
+#: src/pages/tasks/TaskTemplateEdit.tsx:23
+msgid "Modify the template details and steps below."
+msgstr "Modyfikuj szczegóły szablonu i poniższe kroki."
+
 #: src/pages/public/CaseStudiesPage.tsx:152
 msgid "Multidisciplinary Learning Modules"
 msgstr "Multidyscyplinarne moduły edukacyjne"
 
 #: src/components/documents/ContainerForm.tsx:39
+#: src/pages/tasks/TaskTemplateList.tsx:59
 msgid "Name"
 msgstr "Nazwa"
 
@@ -318,6 +359,14 @@ msgstr "Nowy dokument"
 #: src/pages/documents/ContainerNew.tsx:40
 msgid "New Document Container"
 msgstr "Nowy kontener dokumentów"
+
+#: src/pages/tasks/TaskTemplateNew.tsx:13
+msgid "New task template"
+msgstr "Nowy szablon zadania"
+
+#: src/pages/tasks/TaskTemplateList.tsx:36
+msgid "New Template"
+msgstr "Nowy szablon"
 
 #: src/pages/documents/ContainerList.tsx:75
 msgid "No containers found"
@@ -339,6 +388,10 @@ msgstr "Opcjonalna docelowa liczba dokumentów"
 msgid "PL"
 msgstr "Polski"
 
+#: src/components/tasks/TemplateList.tsx:32
+msgid "Preview"
+msgstr "Podgląd"
+
 #: src/pages/public/HomePage.tsx:92
 msgid "Process Templates"
 msgstr "Szablony procesów"
@@ -346,6 +399,10 @@ msgstr "Szablony procesów"
 #: src/pages/public/HomePage.tsx:138
 msgid "Ready to Expand Your Context?"
 msgstr "Gotowy, aby rozszerzyć swój kontekst?"
+
+#: src/components/tasks/TemplateList.tsx:44
+msgid "Run"
+msgstr "Uruchom"
 
 #: src/pages/documents/ContainerEdit.tsx:73
 #: src/pages/documents/DocumentEdit.tsx:57
@@ -355,6 +412,10 @@ msgstr "Zapisz zmiany"
 #: src/pages/documents/AllDocuments.tsx:84
 msgid "Search documents..."
 msgstr "Wyszukaj dokumenty..."
+
+#: src/components/tasks/ProcessRunner.tsx:187
+msgid "Show Preview"
+msgstr "Pokaż podgląd"
 
 #: src/pages/public/HomePage.tsx:121
 msgid "Smart Document Management"
@@ -368,9 +429,26 @@ msgstr "Zacznij budować"
 msgid "Start building your <0>knowledge base</0> today with our <1>intelligent task management</1> and <2>context expansion</2> system. <3>Create templates</3>, <4>manage workflows</4>, and watch your document context <5>grow naturally</5>."
 msgstr "Rozpocznij budowę swojej <0>bazy wiedzy</0> już dziś, korzystając z naszego systemu <1>inteligentnego zarządzania zadaniami</1> oraz <2>rozszerzania kontekstu</2>. <3>Twórz szablony</3>, <4>zarządzaj przepływami pracy</4> i obserwuj, jak kontekst Twoich dokumentów <5>naturalnie się rozwija</5>."
 
+#: src/components/tasks/TemplateList.tsx:57
+msgid "Step {0}: {1}"
+msgstr "Krok {0}: {1}"
+
+#: src/components/tasks/TemplateList.tsx:52
+msgid "Steps:"
+msgstr "Kroki:"
+
 #: src/pages/public/CaseStudiesPage.tsx:82
 msgid "Subsequent tasks include competitive analysis and developing a marketing strategy based on the prepared documents, ensuring consistency and effectiveness of actions."
 msgstr "Kolejne zadania obejmują analizę konkurencji oraz opracowanie strategii marketingowej na podstawie przygotowanych dokumentów, co zapewnia spójność i skuteczność działań."
+
+#: src/pages/tasks/TaskTemplateList.tsx:28
+msgid "Task Templates"
+msgstr "Szablony zadań"
+
+#: src/pages/tasks/TaskTemplateEdit.tsx:17
+#: src/pages/tasks/TaskTemplateRunner.tsx:15
+msgid "Template not found"
+msgstr "Nie znaleziono szablonu"
 
 #: src/pages/public/HomePage.tsx:26
 msgid "THE CONTEXT"
@@ -412,6 +490,7 @@ msgstr "Wykorzystując krajowy program nauczania jako dane wejściowe, system au
 #: src/pages/documents/AllDocuments.tsx:74
 #: src/pages/documents/ContainerDocuments.tsx:77
 #: src/pages/documents/ContainerList.tsx:36
+#: src/pages/tasks/TaskTemplateList.tsx:47
 msgid "View"
 msgstr "Podgląd"
 
