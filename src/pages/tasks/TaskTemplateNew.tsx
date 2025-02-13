@@ -1,29 +1,29 @@
-// src/pages/tasks/TaskTemplateNew.tsx
-import { useNavigate } from "react-router-dom";
+import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 import { TemplateEditor } from "@/components/tasks/editor/TemplateEditor";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
+import { Trans } from "@lingui/macro";
 
 export const TaskTemplateNew = () => {
-  const navigate = useNavigate();
+  const adminNavigate = useAdminNavigate();
 
   return (
     <AdminOutletTemplate
-      title="New task template"
-      description="Create a new task template"
+      title={<Trans>New task template</Trans>}
+      description={<Trans>Create a new task template</Trans>}
       actions={
         <Button
-          variant={"outline"}
+          variant="outline"
           className="gap-2"
-          onClick={() => navigate("/admin/tasks/templates")}
+          onClick={() => adminNavigate("/tasks/templates")}
         >
           <ChevronLeft className="h-4 w-4" />
-          Back to list of tasks templates
+          <Trans>Back to list of tasks templates</Trans>
         </Button>
       }
     >
-      <TemplateEditor onCancel={() => navigate("/admin/tasks/templates")} />
+      <TemplateEditor onCancel={() => adminNavigate("/tasks/templates")} />
     </AdminOutletTemplate>
   );
 };

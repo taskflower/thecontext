@@ -10,6 +10,7 @@ import InvalidTemplate from "./ProcesRunner/InvalidTemplate";
 import StepDisplayCard from "./preview/StepDisplayCard";
 import StepDisplayMini from "./preview/StepDisplayMini";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Trans } from "@lingui/macro";
 
 interface ProcessRunnerProps {
   template: Template;
@@ -24,7 +25,7 @@ interface StepState {
   messages?: LLMMessage[];
 }
 
-type ViewMode = 'card' | 'mini';
+type ViewMode = "card" | "mini";
 
 export const ProcessRunner: FC<ProcessRunnerProps> = ({
   template,
@@ -34,7 +35,7 @@ export const ProcessRunner: FC<ProcessRunnerProps> = ({
 }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isPanelOpen, setIsPanelOpen] = useState(true);
-  const [viewMode, setViewMode] = useState<ViewMode>('card');
+  const [viewMode, setViewMode] = useState<ViewMode>("card");
 
   const [stepsState, setStepsState] = useState<StepState[]>(() => {
     if (!template?.steps) return [];
@@ -118,7 +119,7 @@ export const ProcessRunner: FC<ProcessRunnerProps> = ({
 
   const togglePanel = () => setIsPanelOpen(!isPanelOpen);
 
-  const StepDisplayComponent = viewMode === 'card' ? StepDisplayCard : StepDisplayMini;
+  const StepDisplayComponent = viewMode === "card" ? StepDisplayCard : StepDisplayMini;
 
   return (
     <div className="relative h-full flex">
@@ -162,25 +163,29 @@ export const ProcessRunner: FC<ProcessRunnerProps> = ({
           <div className="fixed bottom-0 right-0 w-full bg-zinc-50 z-20">
             <Separator />
             <div className="p-3 flex justify-end items-center gap-3">
-              <ToggleGroup 
+              <ToggleGroup
                 variant={"outline"}
-                type="single" 
+                type="single"
                 value={viewMode}
                 onValueChange={(value: string) => setViewMode(value as ViewMode)}
               >
                 <ToggleGroupItem value="card" aria-label="Card View">
                   <LayoutGrid className="h-4 w-4 mr-2" />
-                  Card View
+                  <Trans>Card View</Trans>
                 </ToggleGroupItem>
                 <ToggleGroupItem value="mini" aria-label="Mini View">
                   <List className="h-4 w-4 mr-2" />
-                  Mini View
+                  <Trans>Mini View</Trans>
                 </ToggleGroupItem>
               </ToggleGroup>
 
               <Button variant="outline" onClick={togglePanel}>
                 {isPanelOpen ? <PanelRightClose /> : <PanelRightOpen />}
-                {isPanelOpen ? "Hide Preview" : "Show Preview"}
+                {isPanelOpen ? (
+                  <Trans>Hide Preview</Trans>
+                ) : (
+                  <Trans>Show Preview</Trans>
+                )}
               </Button>
             </div>
           </div>

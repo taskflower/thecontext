@@ -9,8 +9,8 @@ const tasksRoutes: RouteObject[] = [
   { path: "templates", element: <TaskTemplateList /> },
   { path: "templates/list", element: <TaskTemplateList /> },
   { path: "templates/new", element: <TaskTemplateNew /> },
-  { path: ":id/edit", element: <TaskTemplateEdit /> },
-  { path: ":id/run", element: <TaskTemplateRunner /> },
+  { path: "templates/:id/edit", element: <TaskTemplateEdit /> },
+  { path: "templates/:id/run", element: <TaskTemplateRunner /> },
 ];
 
 export default tasksRoutes;

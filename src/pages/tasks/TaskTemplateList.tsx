@@ -5,47 +5,46 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Settings2, Plus } from "lucide-react";
 import { useTasksStore } from "@/store/tasksStore";
-import { useNavigate } from "react-router-dom";
-import { TaskTemplateEmptyState } from "@/components/tasks/taskTemplateLstPage/TaskTemplateEmptyState";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { truncate } from "@/services/utils";
 import TemplateActions from "@/components/tasks/templatesList/TemplateActions";
-
+// Importujemy jako named export – tak jak jest w pliku:
+import { TaskTemplateEmptyState } from "@/components/tasks/taskTemplateLstPage/TaskTemplateEmptyState";
+import { Trans } from "@lingui/macro";
+import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 
 export const TaskTemplateList = () => {
   const { templates, removeTemplate } = useTasksStore();
-  const navigate = useNavigate();
+  const adminNavigate = useAdminNavigate();
 
   return (
     <AdminOutletTemplate
-      title="Task Templates"
-      description="Manage and create your task templates."
+      title={<Trans>Task Templates</Trans>}
+      description={<Trans>Manage and create your task templates.</Trans>}
       actions={
-        <Button className="gap-2" onClick={() => navigate("new")}>
+        <Button
+          className="gap-2"
+          onClick={() => adminNavigate("/tasks/templates/new")}
+        >
           <Plus className="h-4 w-4" />
-          New Template
+          <Trans>New Template</Trans>
         </Button>
       }
     >
       <div className="flex items-center gap-2 p-3 md:p-0">
         <Input
-          placeholder="Filter templates..."
+          placeholder={<Trans>Filter templates...</Trans>}
           className="h-8 w-[150px] lg:w-[250px]"
         />
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="ml-auto hidden h-8 lg:flex"
-        >
+        <Button variant="outline" size="sm" className="ml-auto hidden h-8 lg:flex">
           <Settings2 className="mr-2 h-4 w-4" />
-          View
+          <Trans>View</Trans>
         </Button>
       </div>
 
@@ -54,17 +53,19 @@ export const TaskTemplateList = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[30px] p-3 py-4">
+                <TableCell className="w-[30px] p-3 py-4">
                   <Checkbox />
-                </TableHead>
-                <TableHead className="px-3">Name</TableHead>
-                <TableHead className="hidden md:table-cell px-3">Description</TableHead>
-                <TableHead className="w-[150px] px-3"></TableHead>
+                </TableCell>
+                <TableCell className="px-3"><Trans>Name</Trans></TableCell>
+                <TableCell className="hidden md:table-cell px-3">
+                  <Trans>Description</Trans>
+                </TableCell>
+                <TableCell className="w-[150px] px-3"></TableCell>
               </TableRow>
             </TableHeader>
             <TableBody>
               {templates.length === 0 ? (
-                <TaskTemplateEmptyState onCreateClick={() => navigate("new")} />
+                <TaskTemplateEmptyState onCreateClick={() => adminNavigate("/tasks/templates/new")} />
               ) : (
                 templates.map((template) => (
                   <TableRow key={template.id}>
