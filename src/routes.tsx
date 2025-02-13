@@ -12,6 +12,7 @@ import settingsRoutes from "@/pages/settings/routes";
 import containerRoutes from "./pages/documents/routes";
 import usersRoutes from "@/pages/users/routes"; // Importujemy routingi dla użytkowników
 import { LanguageProvider } from "./context/LanguageContext";
+import ProjectRenderer from "@/components/projects/ProjectRenderer"; // Import nowego komponentu
 
 export const DEFAULT_LANGUAGE = "en";
 
@@ -28,7 +29,10 @@ export const routes: RouteObject[] = [
         <MainLayout />
       </LanguageWrapper>
     ),
-    children: [...publicRoutes],
+    children: [
+      ...publicRoutes,
+      { path: "projects", element: <ProjectRenderer /> } // Trasa dla podglądu projektu poza adminem
+    ],
   },
   {
     // Admin routy opakowane w dodatkowy LanguageProvider oraz LanguageWrapper
@@ -47,7 +51,7 @@ export const routes: RouteObject[] = [
       { path: "boards/*", children: boardsRoutes },
       { path: "tasks/*", children: tasksRoutes },
       { path: "settings/*", children: settingsRoutes },
-      { path: "users/*", children: usersRoutes }, // Dodany routing dla użytkowników
+      { path: "users/*", children: usersRoutes }
     ],
   },
 ];
