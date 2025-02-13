@@ -5,16 +5,17 @@ import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { ContainerForm } from "@/components/documents/ContainerForm";
 import { ErrorDialog } from "@/components/common/ErrorDialog";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
+import { Trans } from "@lingui/macro";
 
 export const ContainerNew = () => {
   const adminNavigate = useAdminNavigate();
   const { addContainer } = useDocumentsStore();
   const [error, setError] = useState<string | null>(null);
-  
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    targetDocumentCount: 0
+    targetDocumentCount: 0,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,20 +31,17 @@ export const ContainerNew = () => {
   };
 
   const handleChange = (field: string, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
     <>
       <AdminOutletTemplate
-        title="New Document Container"
-        description="Create a new document container"
+        title={<Trans>New Document Container</Trans>}
+        description={<Trans>Create a new document container</Trans>}
         actions={
-          <Button 
-            variant="outline" 
-            onClick={() => adminNavigate("/documents")}
-          >
-            Back to Containers
+          <Button variant="outline" onClick={() => adminNavigate("/documents")}>
+            <Trans>Back to Containers</Trans>
           </Button>
         }
       >
@@ -52,15 +50,12 @@ export const ContainerNew = () => {
           onSubmit={handleSubmit}
           onCancel={() => adminNavigate("/documents")}
           onChange={handleChange}
-          submitButtonText="Create Container"
-          formTitle="Container Details"
+          submitButtonText={<Trans>Create Container</Trans>}
+          formTitle={<Trans>Container Details</Trans>}
         />
       </AdminOutletTemplate>
 
-      <ErrorDialog 
-        error={error}
-        onClose={() => setError(null)}
-      />
+      <ErrorDialog error={error} onClose={() => setError(null)} />
     </>
   );
 };

@@ -13,6 +13,19 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: src/pages/documents/ContainerDocuments.tsx:55
+#: src/pages/documents/ContainerDocuments.tsx:56
+msgid "{0}"
+msgstr ""
+
+#: src/components/documents/ContainerCard.tsx:98
+msgid "{documentCount} documents stored"
+msgstr ""
+
+#: src/components/documents/ContainerCard.tsx:86
+msgid "{documentCount} of {0} documents"
+msgstr ""
+
 #: src/pages/public/CaseStudiesPage.tsx:107
 msgid "<0>Data Isolation:</0> Each work cycle generates unique document identifiers."
 msgstr ""
@@ -37,6 +50,23 @@ msgstr ""
 msgid "AI-powered system that automatically expands and maintains document context as you work through tasks and templates."
 msgstr ""
 
+#: src/pages/documents/ContainerList.tsx:45
+msgid "All"
+msgstr ""
+
+#: src/pages/documents/AllDocuments.tsx:60
+#: src/pages/documents/AllDocuments.tsx:70
+msgid "All Documents"
+msgstr ""
+
+#: src/components/documents/DocumentTable.tsx:126
+msgid "Are you sure you want to delete this document?"
+msgstr ""
+
+#: src/components/documents/ContainerActions.tsx:69
+msgid "Are you sure?"
+msgstr ""
+
 #: src/pages/public/CaseStudiesPage.tsx:173
 msgid "Automated Curriculum Development Process"
 msgstr ""
@@ -45,8 +75,28 @@ msgstr ""
 msgid "Automated Document Creation"
 msgstr ""
 
+#: src/pages/documents/DocumentEdit.tsx:46
+#: src/pages/documents/DocumentNew.tsx:44
+msgid "Back"
+msgstr ""
+
+#: src/pages/documents/ContainerEdit.tsx:64
+#: src/pages/documents/ContainerNew.tsx:44
+msgid "Back to Containers"
+msgstr ""
+
 #: src/pages/public/HomePage.tsx:31
 msgid "Build and expand your knowledge context through structured task templates, interactive Kanban boards, and AI-powered document management."
+msgstr ""
+
+#: src/components/documents/ContainerActions.tsx:80
+#: src/components/documents/ContainerForm.tsx:74
+#: src/components/documents/DocumentForm.tsx:61
+msgid "Cancel"
+msgstr ""
+
+#: src/components/documents/ContainerCard.tsx:95
+msgid "Collection status"
 msgstr ""
 
 #: src/pages/public/CaseStudiesPage.tsx:77
@@ -55,6 +105,36 @@ msgstr ""
 
 #: src/pages/public/CaseStudiesPage.tsx:194
 msgid "Contact Us"
+msgstr ""
+
+#: src/components/documents/DocumentTable.tsx:50
+msgid "Container"
+msgstr ""
+
+#: src/components/documents/ContainerForm.tsx:55
+msgid "Container description"
+msgstr ""
+
+#: src/pages/documents/ContainerEdit.tsx:74
+#: src/pages/documents/ContainerNew.tsx:54
+msgid "Container Details"
+msgstr ""
+
+#: src/components/documents/ContainerForm.tsx:44
+msgid "Container name"
+msgstr ""
+
+#: src/pages/documents/ContainerDocuments.tsx:37
+#: src/pages/documents/ContainerEdit.tsx:36
+msgid "Container not found"
+msgstr ""
+
+#: src/components/documents/DocumentForm.tsx:50
+msgid "Content"
+msgstr ""
+
+#: src/components/documents/DocumentTable.tsx:54
+msgid "Content Preview"
 msgstr ""
 
 #: src/pages/public/HomePage.tsx:53
@@ -69,8 +149,29 @@ msgstr ""
 msgid "Core Features"
 msgstr ""
 
+#: src/pages/documents/DocumentNew.tsx:41
+msgid "Create a new document"
+msgstr ""
+
+#: src/pages/documents/ContainerNew.tsx:41
+msgid "Create a new document container"
+msgstr ""
+
 #: src/pages/public/HomePage.tsx:80
 msgid "Create and manage task workflows with customizable templates and dependency tracking through an intuitive Kanban board interface."
+msgstr ""
+
+#: src/pages/documents/ContainerList.tsx:88
+#: src/pages/documents/ContainerNew.tsx:53
+msgid "Create Container"
+msgstr ""
+
+#: src/pages/documents/DocumentNew.tsx:55
+msgid "Create Document"
+msgstr ""
+
+#: src/pages/documents/ContainerList.tsx:80
+msgid "Create your first container to get started."
 msgstr ""
 
 #: src/pages/public/HomePage.tsx:153
@@ -85,16 +186,71 @@ msgstr ""
 msgid "Dashboard"
 msgstr ""
 
+#: src/components/documents/ContainerActions.tsx:63
+#: src/components/documents/ContainerActions.tsx:83
+msgid "Delete"
+msgstr ""
+
+#: src/components/documents/ContainerForm.tsx:50
+msgid "Description"
+msgstr ""
+
 #: src/pages/public/HomePage.tsx:95
 msgid "Design reusable task templates with step-by-step processes, dependencies, and integrated plugins for consistent workflow execution."
+msgstr ""
+
+#: src/pages/documents/ContainerList.tsx:30
+msgid "Document Containers"
+msgstr ""
+
+#: src/pages/documents/DocumentEdit.tsx:58
+#: src/pages/documents/DocumentNew.tsx:56
+msgid "Document Details"
+msgstr ""
+
+#: src/pages/documents/DocumentEdit.tsx:27
+msgid "Document not found"
+msgstr ""
+
+#: src/components/documents/DocumentForm.tsx:44
+msgid "Document title"
+msgstr ""
+
+#: src/components/documents/ContainerActions.tsx:55
+#: src/components/documents/DocumentTable.tsx:98
+msgid "Edit"
+msgstr ""
+
+#: src/pages/documents/DocumentEdit.tsx:42
+msgid "Edit Document"
+msgstr ""
+
+#: src/pages/documents/ContainerEdit.tsx:60
+msgid "Editing: {0}"
 msgstr ""
 
 #: src/layouts/AdminDropdown.tsx:72
 msgid "EN"
 msgstr ""
 
+#: src/components/documents/ContainerCard.tsx:83
+msgid "Estimated progress"
+msgstr ""
+
+#: src/components/documents/ContainerForm.tsx:60
+msgid "Estimated target document count"
+msgstr ""
+
 #: src/pages/public/CaseStudiesPage.tsx:28
 msgid "Example scenarios showcasing the use of our task and document management system."
+msgstr ""
+
+#: src/pages/documents/ContainerList.tsx:58
+msgid "Filter containers..."
+msgstr ""
+
+#: src/pages/documents/ContainerDocuments.tsx:72
+msgid "Filter documents..."
 msgstr ""
 
 #: src/pages/public/CaseStudiesPage.tsx:178
@@ -126,12 +282,57 @@ msgstr ""
 msgid "Maintaining Order in the System"
 msgstr ""
 
+#: src/pages/documents/ContainerList.tsx:31
+msgid "Manage your document containers and their contents"
+msgstr ""
+
 #: src/pages/public/CaseStudiesPage.tsx:58
 msgid "Marketing Description Generation"
 msgstr ""
 
+#: src/pages/documents/ContainerEdit.tsx:61
+msgid "Modify container details"
+msgstr ""
+
+#: src/pages/documents/DocumentEdit.tsx:43
+msgid "Modify document details"
+msgstr ""
+
 #: src/pages/public/CaseStudiesPage.tsx:152
 msgid "Multidisciplinary Learning Modules"
+msgstr ""
+
+#: src/components/documents/ContainerForm.tsx:39
+msgid "Name"
+msgstr ""
+
+#: src/pages/documents/ContainerList.tsx:49
+msgid "New Container"
+msgstr ""
+
+#: src/pages/documents/ContainerDocuments.tsx:63
+#: src/pages/documents/DocumentNew.tsx:40
+msgid "New Document"
+msgstr ""
+
+#: src/pages/documents/ContainerNew.tsx:40
+msgid "New Document Container"
+msgstr ""
+
+#: src/pages/documents/ContainerList.tsx:75
+msgid "No containers found"
+msgstr ""
+
+#: src/components/documents/ContainerCard.tsx:57
+msgid "No description provided"
+msgstr ""
+
+#: src/components/documents/ContainerActions.tsx:47
+msgid "Open menu"
+msgstr ""
+
+#: src/components/documents/ContainerForm.tsx:69
+msgid "Optional target number of documents"
 msgstr ""
 
 #: src/layouts/AdminDropdown.tsx:62
@@ -144,6 +345,15 @@ msgstr ""
 
 #: src/pages/public/HomePage.tsx:138
 msgid "Ready to Expand Your Context?"
+msgstr ""
+
+#: src/pages/documents/ContainerEdit.tsx:73
+#: src/pages/documents/DocumentEdit.tsx:57
+msgid "Save Changes"
+msgstr ""
+
+#: src/pages/documents/AllDocuments.tsx:84
+msgid "Search documents..."
 msgstr ""
 
 #: src/pages/public/HomePage.tsx:121
@@ -182,8 +392,35 @@ msgstr ""
 msgid "The process starts with a task requesting a URL address. Then, via API, the page content is prepared, converted to Markdown, and saved as the first document."
 msgstr ""
 
+#: src/components/documents/ContainerActions.tsx:72
+msgid "This action cannot be undone. This will permanently delete this container and all its documents."
+msgstr ""
+
+#: src/components/documents/DocumentForm.tsx:39
+#: src/components/documents/DocumentTable.tsx:46
+msgid "Title"
+msgstr ""
+
+#: src/pages/documents/ContainerList.tsx:79
+msgid "Try adjusting your search query or clear the filter."
+msgstr ""
+
 #: src/pages/public/CaseStudiesPage.tsx:136
 msgid "Using the national curriculum as input, the system automatically generates lesson plans, worksheets, and educational materials tailored to specific subjects and grade levels, ensuring perfect alignment with educational standards."
+msgstr ""
+
+#: src/pages/documents/AllDocuments.tsx:74
+#: src/pages/documents/ContainerDocuments.tsx:77
+#: src/pages/documents/ContainerList.tsx:36
+msgid "View"
+msgstr ""
+
+#: src/pages/documents/AllDocuments.tsx:61
+msgid "View and manage all documents across containers"
+msgstr ""
+
+#: src/components/documents/ContainerActions.tsx:40
+msgid "View Documents"
 msgstr ""
 
 #: src/pages/public/HomePage.tsx:48

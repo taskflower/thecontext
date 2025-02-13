@@ -13,6 +13,19 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: src/pages/documents/ContainerDocuments.tsx:55
+#: src/pages/documents/ContainerDocuments.tsx:56
+msgid "{0}"
+msgstr "{0}"
+
+#: src/components/documents/ContainerCard.tsx:98
+msgid "{documentCount} documents stored"
+msgstr "Przechowywanych {documentCount} dokumentów"
+
+#: src/components/documents/ContainerCard.tsx:86
+msgid "{documentCount} of {0} documents"
+msgstr "{documentCount} z {0} dokumentów"
+
 #: src/pages/public/CaseStudiesPage.tsx:107
 msgid "<0>Data Isolation:</0> Each work cycle generates unique document identifiers."
 msgstr "<0>Izolacja danych:</0> Każdy cykl pracy generuje unikalne identyfikatory dokumentów."
@@ -37,6 +50,23 @@ msgstr "Panel administracyjny"
 msgid "AI-powered system that automatically expands and maintains document context as you work through tasks and templates."
 msgstr "System wspierany przez AI, który automatycznie rozbudowuje i utrzymuje kontekst dokumentów podczas pracy nad zadaniami i szablonami."
 
+#: src/pages/documents/ContainerList.tsx:45
+msgid "All"
+msgstr "Wszystkie"
+
+#: src/pages/documents/AllDocuments.tsx:60
+#: src/pages/documents/AllDocuments.tsx:70
+msgid "All Documents"
+msgstr "Wszystkie dokumenty"
+
+#: src/components/documents/DocumentTable.tsx:126
+msgid "Are you sure you want to delete this document?"
+msgstr "Czy na pewno chcesz usunąć ten dokument?"
+
+#: src/components/documents/ContainerActions.tsx:69
+msgid "Are you sure?"
+msgstr "Czy na pewno?"
+
 #: src/pages/public/CaseStudiesPage.tsx:173
 msgid "Automated Curriculum Development Process"
 msgstr "Zautomatyzowany proces opracowywania programu nauczania"
@@ -45,9 +75,29 @@ msgstr "Zautomatyzowany proces opracowywania programu nauczania"
 msgid "Automated Document Creation"
 msgstr "Automatyczne tworzenie dokumentów"
 
+#: src/pages/documents/DocumentEdit.tsx:46
+#: src/pages/documents/DocumentNew.tsx:44
+msgid "Back"
+msgstr "Wstecz"
+
+#: src/pages/documents/ContainerEdit.tsx:64
+#: src/pages/documents/ContainerNew.tsx:44
+msgid "Back to Containers"
+msgstr "Powrót do kontenerów"
+
 #: src/pages/public/HomePage.tsx:31
 msgid "Build and expand your knowledge context through structured task templates, interactive Kanban boards, and AI-powered document management."
 msgstr "Buduj i rozwijaj kontekst swojej wiedzy dzięki uporządkowanym szablonom zadań, interaktywnym tablicom Kanban oraz zarządzaniu dokumentami wspieranym przez AI."
+
+#: src/components/documents/ContainerActions.tsx:80
+#: src/components/documents/ContainerForm.tsx:74
+#: src/components/documents/DocumentForm.tsx:61
+msgid "Cancel"
+msgstr "Anuluj"
+
+#: src/components/documents/ContainerCard.tsx:95
+msgid "Collection status"
+msgstr "Status kolekcji"
 
 #: src/pages/public/CaseStudiesPage.tsx:77
 msgid "Competitive Analysis and Marketing Strategy"
@@ -56,6 +106,36 @@ msgstr "Analiza konkurencji i strategia marketingowa"
 #: src/pages/public/CaseStudiesPage.tsx:194
 msgid "Contact Us"
 msgstr "Skontaktuj się z nami"
+
+#: src/components/documents/DocumentTable.tsx:50
+msgid "Container"
+msgstr "Kontener"
+
+#: src/components/documents/ContainerForm.tsx:55
+msgid "Container description"
+msgstr "Opis kontenera"
+
+#: src/pages/documents/ContainerEdit.tsx:74
+#: src/pages/documents/ContainerNew.tsx:54
+msgid "Container Details"
+msgstr "Szczegóły kontenera"
+
+#: src/components/documents/ContainerForm.tsx:44
+msgid "Container name"
+msgstr "Nazwa kontenera"
+
+#: src/pages/documents/ContainerDocuments.tsx:37
+#: src/pages/documents/ContainerEdit.tsx:36
+msgid "Container not found"
+msgstr "Nie znaleziono kontenera"
+
+#: src/components/documents/DocumentForm.tsx:50
+msgid "Content"
+msgstr "Treść"
+
+#: src/components/documents/DocumentTable.tsx:54
+msgid "Content Preview"
+msgstr "Podgląd treści"
 
 #: src/pages/public/HomePage.tsx:53
 msgid "Context Builder is an intelligent task management system that combines customizable templates, Kanban workflows, and AI-powered document context expansion. It helps you create structured pathways for complex tasks while automatically building and maintaining relevant knowledge context."
@@ -69,9 +149,30 @@ msgstr "Rozszerzanie kontekstu"
 msgid "Core Features"
 msgstr "Kluczowe funkcje"
 
+#: src/pages/documents/DocumentNew.tsx:41
+msgid "Create a new document"
+msgstr "Utwórz nowy dokument"
+
+#: src/pages/documents/ContainerNew.tsx:41
+msgid "Create a new document container"
+msgstr "Utwórz nowy kontener dokumentów"
+
 #: src/pages/public/HomePage.tsx:80
 msgid "Create and manage task workflows with customizable templates and dependency tracking through an intuitive Kanban board interface."
 msgstr "Twórz i zarządzaj przepływami zadań, korzystając z konfigurowalnych szablonów oraz śledzenia zależności przez intuicyjny interfejs tablicy Kanban."
+
+#: src/pages/documents/ContainerList.tsx:88
+#: src/pages/documents/ContainerNew.tsx:53
+msgid "Create Container"
+msgstr "Utwórz kontener"
+
+#: src/pages/documents/DocumentNew.tsx:55
+msgid "Create Document"
+msgstr "Utwórz dokument"
+
+#: src/pages/documents/ContainerList.tsx:80
+msgid "Create your first container to get started."
+msgstr "Aby rozpocząć, utwórz swój pierwszy kontener."
 
 #: src/pages/public/HomePage.tsx:153
 msgid "Create Your First Template"
@@ -85,17 +186,72 @@ msgstr "Generowanie treści edukacyjnych opartych na programie nauczania"
 msgid "Dashboard"
 msgstr "Panel główny"
 
+#: src/components/documents/ContainerActions.tsx:63
+#: src/components/documents/ContainerActions.tsx:83
+msgid "Delete"
+msgstr "Usuń"
+
+#: src/components/documents/ContainerForm.tsx:50
+msgid "Description"
+msgstr "Opis"
+
 #: src/pages/public/HomePage.tsx:95
 msgid "Design reusable task templates with step-by-step processes, dependencies, and integrated plugins for consistent workflow execution."
 msgstr "Projektuj wielokrotnego użytku szablony zadań, zawierające procesy krok po kroku, zależności oraz zintegrowane wtyczki, które zapewniają spójną realizację przepływu pracy."
+
+#: src/pages/documents/ContainerList.tsx:30
+msgid "Document Containers"
+msgstr "Kontenery dokumentów"
+
+#: src/pages/documents/DocumentEdit.tsx:58
+#: src/pages/documents/DocumentNew.tsx:56
+msgid "Document Details"
+msgstr "Szczegóły dokumentu"
+
+#: src/pages/documents/DocumentEdit.tsx:27
+msgid "Document not found"
+msgstr "Nie znaleziono dokumentu"
+
+#: src/components/documents/DocumentForm.tsx:44
+msgid "Document title"
+msgstr "Tytuł dokumentu"
+
+#: src/components/documents/ContainerActions.tsx:55
+#: src/components/documents/DocumentTable.tsx:98
+msgid "Edit"
+msgstr "Edytuj"
+
+#: src/pages/documents/DocumentEdit.tsx:42
+msgid "Edit Document"
+msgstr "Edytuj dokument"
+
+#: src/pages/documents/ContainerEdit.tsx:60
+msgid "Editing: {0}"
+msgstr "Edycja: {0}"
 
 #: src/layouts/AdminDropdown.tsx:72
 msgid "EN"
 msgstr "Angielski"
 
+#: src/components/documents/ContainerCard.tsx:83
+msgid "Estimated progress"
+msgstr "Szacowany postęp"
+
+#: src/components/documents/ContainerForm.tsx:60
+msgid "Estimated target document count"
+msgstr "Szacowana docelowa liczba dokumentów"
+
 #: src/pages/public/CaseStudiesPage.tsx:28
 msgid "Example scenarios showcasing the use of our task and document management system."
 msgstr "Przykładowe scenariusze ukazujące zastosowanie naszego systemu zarządzania zadaniami i dokumentami."
+
+#: src/pages/documents/ContainerList.tsx:58
+msgid "Filter containers..."
+msgstr "Filtruj kontenery..."
+
+#: src/pages/documents/ContainerDocuments.tsx:72
+msgid "Filter documents..."
+msgstr "Filtruj dokumenty..."
 
 #: src/pages/public/CaseStudiesPage.tsx:178
 msgid "From initial content creation through peer review to final publication, the system manages the entire curriculum development lifecycle with automated version control and quality assurance checks."
@@ -126,13 +282,58 @@ msgstr "Wyloguj się"
 msgid "Maintaining Order in the System"
 msgstr "Utrzymanie porządku w systemie"
 
+#: src/pages/documents/ContainerList.tsx:31
+msgid "Manage your document containers and their contents"
+msgstr "Zarządzaj swoimi kontenerami dokumentów i ich zawartością"
+
 #: src/pages/public/CaseStudiesPage.tsx:58
 msgid "Marketing Description Generation"
 msgstr "Generowanie opisu marketingowego"
 
+#: src/pages/documents/ContainerEdit.tsx:61
+msgid "Modify container details"
+msgstr "Modyfikuj szczegóły kontenera"
+
+#: src/pages/documents/DocumentEdit.tsx:43
+msgid "Modify document details"
+msgstr "Modyfikuj szczegóły dokumentu"
+
 #: src/pages/public/CaseStudiesPage.tsx:152
 msgid "Multidisciplinary Learning Modules"
 msgstr "Multidyscyplinarne moduły edukacyjne"
+
+#: src/components/documents/ContainerForm.tsx:39
+msgid "Name"
+msgstr "Nazwa"
+
+#: src/pages/documents/ContainerList.tsx:49
+msgid "New Container"
+msgstr "Nowy kontener"
+
+#: src/pages/documents/ContainerDocuments.tsx:63
+#: src/pages/documents/DocumentNew.tsx:40
+msgid "New Document"
+msgstr "Nowy dokument"
+
+#: src/pages/documents/ContainerNew.tsx:40
+msgid "New Document Container"
+msgstr "Nowy kontener dokumentów"
+
+#: src/pages/documents/ContainerList.tsx:75
+msgid "No containers found"
+msgstr "Nie znaleziono kontenerów"
+
+#: src/components/documents/ContainerCard.tsx:57
+msgid "No description provided"
+msgstr "Brak opisu"
+
+#: src/components/documents/ContainerActions.tsx:47
+msgid "Open menu"
+msgstr "Otwórz menu"
+
+#: src/components/documents/ContainerForm.tsx:69
+msgid "Optional target number of documents"
+msgstr "Opcjonalna docelowa liczba dokumentów"
 
 #: src/layouts/AdminDropdown.tsx:62
 msgid "PL"
@@ -145,6 +346,15 @@ msgstr "Szablony procesów"
 #: src/pages/public/HomePage.tsx:138
 msgid "Ready to Expand Your Context?"
 msgstr "Gotowy, aby rozszerzyć swój kontekst?"
+
+#: src/pages/documents/ContainerEdit.tsx:73
+#: src/pages/documents/DocumentEdit.tsx:57
+msgid "Save Changes"
+msgstr "Zapisz zmiany"
+
+#: src/pages/documents/AllDocuments.tsx:84
+msgid "Search documents..."
+msgstr "Wyszukaj dokumenty..."
 
 #: src/pages/public/HomePage.tsx:121
 msgid "Smart Document Management"
@@ -182,9 +392,36 @@ msgstr "Platforma integruje koncepcje z wielu dyscyplin, aby tworzyć kompleksow
 msgid "The process starts with a task requesting a URL address. Then, via API, the page content is prepared, converted to Markdown, and saved as the first document."
 msgstr "Proces rozpoczyna się od zadania, które prosi o adres URL. Następnie, za pośrednictwem API, zawartość strony jest przygotowywana, konwertowana do formatu Markdown i zapisywana jako pierwszy dokument."
 
+#: src/components/documents/ContainerActions.tsx:72
+msgid "This action cannot be undone. This will permanently delete this container and all its documents."
+msgstr "Tej operacji nie można cofnąć. Spowoduje to trwałe usunięcie tego kontenera oraz wszystkich jego dokumentów."
+
+#: src/components/documents/DocumentForm.tsx:39
+#: src/components/documents/DocumentTable.tsx:46
+msgid "Title"
+msgstr "Tytuł"
+
+#: src/pages/documents/ContainerList.tsx:79
+msgid "Try adjusting your search query or clear the filter."
+msgstr "Spróbuj zmienić zapytanie wyszukiwania lub wyczyść filtr."
+
 #: src/pages/public/CaseStudiesPage.tsx:136
 msgid "Using the national curriculum as input, the system automatically generates lesson plans, worksheets, and educational materials tailored to specific subjects and grade levels, ensuring perfect alignment with educational standards."
 msgstr "Wykorzystując krajowy program nauczania jako dane wejściowe, system automatycznie generuje plany lekcji, arkusze pracy oraz materiały edukacyjne dostosowane do konkretnych przedmiotów i poziomów nauczania, zapewniając pełną zgodność ze standardami edukacyjnymi."
+
+#: src/pages/documents/AllDocuments.tsx:74
+#: src/pages/documents/ContainerDocuments.tsx:77
+#: src/pages/documents/ContainerList.tsx:36
+msgid "View"
+msgstr "Podgląd"
+
+#: src/pages/documents/AllDocuments.tsx:61
+msgid "View and manage all documents across containers"
+msgstr "Przeglądaj i zarządzaj wszystkimi dokumentami we wszystkich kontenerach"
+
+#: src/components/documents/ContainerActions.tsx:40
+msgid "View Documents"
+msgstr "Wyświetl dokumenty"
 
 #: src/pages/public/HomePage.tsx:48
 msgid "What is THE CONTEXT?"

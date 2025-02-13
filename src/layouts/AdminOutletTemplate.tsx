@@ -4,10 +4,10 @@ import IconCom from "@/components/IconComp";
 import Breadcrumbs from "@/components/ui/braadcrumbs";
 import { useCurrentModule } from "@/services/utils";
 
-
 interface AdminTemplateProps {
-  title: string;
-  description?: string;
+  // Zmieniamy typ title i description aby mogły przyjmować ReactNode
+  title: React.ReactNode;
+  description?: React.ReactNode;
   children: React.ReactNode;
   backPath?: string;
   actions?: React.ReactNode;

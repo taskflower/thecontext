@@ -1,4 +1,3 @@
-// DocumentNew.tsx
 import { useParams } from "react-router-dom";
 import { useDocumentsStore } from "@/store/documentsStore";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,7 @@ import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { DocumentForm } from "@/components/documents/DocumentForm";
 import { useState } from "react";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
+import { Trans } from "@lingui/macro";
 
 export const DocumentNew = () => {
   const { containerId } = useParams();
@@ -19,9 +19,10 @@ export const DocumentNew = () => {
     e.preventDefault();
     if (containerId) {
       const containerDocs = getContainerDocuments(containerId);
-      const maxOrder = containerDocs.length > 0
-        ? Math.max(...containerDocs.map((d) => d.order))
-        : -1;
+      const maxOrder =
+        containerDocs.length > 0
+          ? Math.max(...containerDocs.map((d) => d.order))
+          : -1;
       addDocument({
         title,
         content,
@@ -36,11 +37,11 @@ export const DocumentNew = () => {
 
   return (
     <AdminOutletTemplate
-      title="New Document"
-      description="Create a new document"
+      title={<Trans>New Document</Trans>}
+      description={<Trans>Create a new document</Trans>}
       actions={
         <Button variant="outline" onClick={handleBack}>
-          Back
+          <Trans>Back</Trans>
         </Button>
       }
     >
@@ -51,8 +52,8 @@ export const DocumentNew = () => {
         onContentChange={setContent}
         onSubmit={handleSubmit}
         onCancel={handleBack}
-        submitButtonText="Create Document"
-        formTitle="Document Details"
+        submitButtonText={<Trans>Create Document</Trans>}
+        formTitle={<Trans>Document Details</Trans>}
       />
     </AdminOutletTemplate>
   );

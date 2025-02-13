@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, MoveUp, MoveDown, Trash2 } from "lucide-react";
+import { Trans, t } from "@lingui/macro";
 
 interface Document {
   id: string;
@@ -21,7 +22,7 @@ interface DocumentTableProps {
   documents: Document[];
   onPreview: (document: Document) => void;
   onEdit: (documentId: string) => void;
-  onMove: (documentId: string, direction: 'up' | 'down') => void;
+  onMove: (documentId: string, direction: "up" | "down") => void;
   onDelete: (documentId: string) => void;
   showContainer?: boolean;
 }
@@ -32,7 +33,7 @@ export const DocumentTable = ({
   onEdit,
   onMove,
   onDelete,
-  showContainer = false
+  showContainer = false,
 }: DocumentTableProps) => {
   return (
     <Table>
@@ -41,11 +42,17 @@ export const DocumentTable = ({
           <TableHead className="w-[30px] p-6">
             <Checkbox />
           </TableHead>
-          <TableHead className="px-6">Title</TableHead>
+          <TableHead className="px-6">
+            <Trans>Title</Trans>
+          </TableHead>
           {showContainer && (
-            <TableHead className="px-6">Container</TableHead>
+            <TableHead className="px-6">
+              <Trans>Container</Trans>
+            </TableHead>
           )}
-          <TableHead className="px-6">Content Preview</TableHead>
+          <TableHead className="px-6">
+            <Trans>Content Preview</Trans>
+          </TableHead>
           <TableHead className="w-[250px] px-6"></TableHead>
         </TableRow>
       </TableHeader>
@@ -88,14 +95,14 @@ export const DocumentTable = ({
                   size="sm"
                   onClick={() => onEdit(document.id)}
                 >
-                  Edit
+                  <Trans>Edit</Trans>
                 </Button>
                 {!showContainer && (
                   <>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onMove(document.id, 'up')}
+                      onClick={() => onMove(document.id, "up")}
                       disabled={index === 0}
                     >
                       <MoveUp className="h-4 w-4" />
@@ -103,7 +110,7 @@ export const DocumentTable = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onMove(document.id, 'down')}
+                      onClick={() => onMove(document.id, "down")}
                       disabled={index === documents.length - 1}
                     >
                       <MoveDown className="h-4 w-4" />
@@ -114,7 +121,11 @@ export const DocumentTable = ({
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    if (window.confirm('Are you sure you want to delete this document?')) {
+                    if (
+                      window.confirm(
+                        t`Are you sure you want to delete this document?`
+                      )
+                    ) {
                       onDelete(document.id);
                     }
                   }}

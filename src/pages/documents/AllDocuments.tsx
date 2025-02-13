@@ -14,6 +14,7 @@ import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { SearchInput } from "@/components/common/SearchInput";
 import { DocumentTable } from "@/components/documents/DocumentTable";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
+import { Trans, t } from "@lingui/macro";
 
 export const AllDocuments = () => {
   const adminNavigate = useAdminNavigate();
@@ -32,7 +33,6 @@ export const AllDocuments = () => {
   );
 
   const handleMoveDocument = (docId: string, direction: "up" | "down") => {
-    // Move functionality not applicable in global view
     console.log(docId, direction);
   };
 
@@ -44,7 +44,9 @@ export const AllDocuments = () => {
   const handleEditDocument = (id: string) => {
     const doc = documents.find((d) => d.id === id);
     if (doc) {
-      adminNavigate(`/documents/${doc.documentContainerId}/document/${id}/edit`);
+      adminNavigate(
+        `/documents/${doc.documentContainerId}/document/${id}/edit`
+      );
     }
   };
 
@@ -55,8 +57,8 @@ export const AllDocuments = () => {
 
   return (
     <AdminOutletTemplate
-      title="All Documents"
-      description="View and manage all documents across containers"
+      title={<Trans>All Documents</Trans>}
+      description={<Trans>View and manage all documents across containers</Trans>}
       actions={
         <div className="flex items-center gap-2">
           <Button
@@ -65,11 +67,11 @@ export const AllDocuments = () => {
             className="hidden lg:flex"
             onClick={() => adminNavigate("/documents/all")}
           >
-            All Documents
+            <Trans>All Documents</Trans>
           </Button>
           <Button variant="outline" size="sm" className="hidden lg:flex">
             <Settings2 className="mr-2 h-4 w-4" />
-            View
+            <Trans>View</Trans>
           </Button>
         </div>
       }
@@ -79,7 +81,7 @@ export const AllDocuments = () => {
           <SearchInput
             value={filter}
             onChange={setFilter}
-            placeholder="Search documents..."
+            placeholder={t`Search documents...`}
             className="h-8 w-[150px] lg:w-[250px]"
           />
         </div>

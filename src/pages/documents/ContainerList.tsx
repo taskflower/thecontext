@@ -1,4 +1,3 @@
-// ContainerList.tsx
 import { Button } from "@/components/ui/button";
 import { Settings2, Plus, SquareSigma } from "lucide-react";
 import { useDocumentsStore } from "@/store/documentsStore";
@@ -7,6 +6,7 @@ import { useState } from "react";
 import { SearchInput } from "@/components/common/SearchInput";
 import ContainerCard from "@/components/documents/ContainerCard";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
+import { Trans, t } from "@lingui/macro";
 
 export const ContainerList = () => {
   const { containers, getContainerDocuments, deleteContainer } = useDocumentsStore();
@@ -27,21 +27,26 @@ export const ContainerList = () => {
 
   return (
     <AdminOutletTemplate
-      title="Document Containers"
-      description="Manage your document containers and their contents"
+      title={<Trans>Document Containers</Trans>}
+      description={<Trans>Manage your document containers and their contents</Trans>}
       actions={
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" className="hidden lg:flex">
             <Settings2 className="mr-2 h-4 w-4" />
-            View
+            <Trans>View</Trans>
           </Button>
-          <Button variant="outline" size="sm" className="hidden lg:flex" onClick={() => adminNavigate("/documents/all")}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="hidden lg:flex"
+            onClick={() => adminNavigate("/documents/all")}
+          >
             <SquareSigma className="mr-2 h-4 w-4" />
-            All
+            <Trans>All</Trans>
           </Button>
           <Button className="gap-2" onClick={() => adminNavigate("/documents/containers/new")}>
             <Plus className="h-4 w-4" />
-            New Container
+            <Trans>New Container</Trans>
           </Button>
         </div>
       }
@@ -50,7 +55,7 @@ export const ContainerList = () => {
         <SearchInput
           value={filterQuery}
           onChange={setFilterQuery}
-          placeholder="Filter containers..."
+          placeholder={t`Filter containers...`}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
@@ -66,16 +71,21 @@ export const ContainerList = () => {
           {filteredContainers.length === 0 && (
             <div className="col-span-full text-center py-12 px-4">
               <div className="max-w-sm mx-auto space-y-3">
-                <p className="text-lg font-medium">No containers found</p>
+                <p className="text-lg font-medium">
+                  <Trans>No containers found</Trans>
+                </p>
                 <p className="text-sm text-muted-foreground">
-                  {filterQuery 
-                    ? "Try adjusting your search query or clear the filter."
-                    : "Create your first container to get started."}
+                  {filterQuery
+                    ? t`Try adjusting your search query or clear the filter.`
+                    : t`Create your first container to get started.`}
                 </p>
                 {!filterQuery && (
-                  <Button onClick={() => adminNavigate("/documents/containers/new")} className="mt-4">
+                  <Button
+                    onClick={() => adminNavigate("/documents/containers/new")}
+                    className="mt-4"
+                  >
                     <Plus className="mr-2 h-4 w-4" />
-                    Create Container
+                    <Trans>Create Container</Trans>
                   </Button>
                 )}
               </div>

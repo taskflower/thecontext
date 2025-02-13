@@ -1,4 +1,4 @@
-// ContainerCard.tsx
+// src/components/documents/ContainerCard.tsx
 import React from "react";
 import {
   Card,
@@ -10,6 +10,7 @@ import {
 import { FileText, Folder, Calendar } from "lucide-react";
 import ContainerActions from "@/components/documents/ContainerActions";
 import { DocumentContainer, Document } from "@/types/document";
+import { Trans } from "@lingui/macro";
 
 interface ContainerCardProps {
   container: DocumentContainer;
@@ -51,9 +52,9 @@ export const ContainerCard: React.FC<ContainerCardProps> = ({
           </div>
         </div>
 
-        <div className="">
+        <div>
           <CardDescription className="text-sm text-muted-foreground leading-relaxed">
-            {container.description || "No description provided"}
+            {container.description || <Trans>No description provided</Trans>}
           </CardDescription>
           <div className="mt-2 flex items-center justify-end gap-2 text-sm text-muted-foreground">
             <Calendar className="h-4 w-4" />
@@ -78,16 +79,24 @@ export const ContainerCard: React.FC<ContainerCardProps> = ({
               />
             </div>
             <div className="flex justify-between items-center text-sm text-muted-foreground">
-              <span>Estimated progress</span>
               <span>
-                {documentCount} of {container.targetDocumentCount} documents
+                <Trans>Estimated progress</Trans>
+              </span>
+              <span>
+                <Trans>
+                  {documentCount} of {container.targetDocumentCount} documents
+                </Trans>
               </span>
             </div>
           </div>
         ) : (
           <div className="py-3 flex items-center justify-between text-sm text-muted-foreground border-y">
-            <span>Collection status</span>
-            <span>{documentCount} documents stored</span>
+            <span>
+              <Trans>Collection status</Trans>
+            </span>
+            <span>
+              <Trans>{documentCount} documents stored</Trans>
+            </span>
           </div>
         )}
 

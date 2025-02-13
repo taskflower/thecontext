@@ -1,4 +1,4 @@
-// ContainerActions.tsx
+// src/components/documents/ContainerActions.tsx
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { MoreHorizontal, FileText } from "lucide-react";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
+import { Trans } from "@lingui/macro";
 
 interface ContainerActionsProps {
   containerId: string;
@@ -36,20 +37,22 @@ const ContainerActions = ({ containerId, onDelete }: ContainerActionsProps) => {
         onClick={() => adminNavigate(`/documents/${containerId}`)}
       >
         <FileText className="h-4 w-4" />
-        View Documents
+        <Trans>View Documents</Trans>
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon">
             <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">
+              <Trans>Open menu</Trans>
+            </span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem
             onClick={() => adminNavigate(`/documents/${containerId}/edit`)}
           >
-            Edit
+            <Trans>Edit</Trans>
           </DropdownMenuItem>
           <AlertDialog>
             <AlertDialogTrigger asChild>
@@ -57,20 +60,27 @@ const ContainerActions = ({ containerId, onDelete }: ContainerActionsProps) => {
                 onSelect={(e) => e.preventDefault()}
                 className="text-destructive"
               >
-                Delete
+                <Trans>Delete</Trans>
               </DropdownMenuItem>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogTitle>
+                  <Trans>Are you sure?</Trans>
+                </AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete this container and all its documents.
+                  <Trans>
+                    This action cannot be undone. This will permanently delete
+                    this container and all its documents.
+                  </Trans>
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel>
+                  <Trans>Cancel</Trans>
+                </AlertDialogCancel>
                 <AlertDialogAction onClick={() => onDelete(containerId)}>
-                  Delete
+                  <Trans>Delete</Trans>
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

@@ -6,17 +6,18 @@ import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { ContainerForm } from "@/components/documents/ContainerForm";
 import { ErrorDialog } from "@/components/common/ErrorDialog";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
+import { Trans } from "@lingui/macro";
 
 export const ContainerEdit = () => {
   const { id } = useParams();
   const adminNavigate = useAdminNavigate();
   const { containers, updateContainer } = useDocumentsStore();
   const [error, setError] = useState<string | null>(null);
-  
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    targetDocumentCount: 0
+    targetDocumentCount: 0,
   });
 
   const container = containers.find((c) => c.id === id);
@@ -26,13 +27,13 @@ export const ContainerEdit = () => {
       setFormData({
         name: container.name,
         description: container.description || "",
-        targetDocumentCount: container.targetDocumentCount || 0
+        targetDocumentCount: container.targetDocumentCount || 0,
       });
     }
   }, [container]);
 
   if (!container) {
-    return <div>Container not found</div>;
+    return <div><Trans>Container not found</Trans></div>;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,7 +49,7 @@ export const ContainerEdit = () => {
   };
 
   const handleChange = (field: string, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleBack = () => adminNavigate("/documents");
@@ -56,11 +57,11 @@ export const ContainerEdit = () => {
   return (
     <>
       <AdminOutletTemplate
-        title={`Editing: ${container.name}`}
-        description="Modify container details"
+        title={<Trans>Editing: {container.name}</Trans>}
+        description={<Trans>Modify container details</Trans>}
         actions={
           <Button variant="outline" onClick={handleBack}>
-            Back to Containers
+            <Trans>Back to Containers</Trans>
           </Button>
         }
       >
@@ -69,15 +70,12 @@ export const ContainerEdit = () => {
           onSubmit={handleSubmit}
           onCancel={handleBack}
           onChange={handleChange}
-          submitButtonText="Save Changes"
-          formTitle="Container Details"
+          submitButtonText={<Trans>Save Changes</Trans>}
+          formTitle={<Trans>Container Details</Trans>}
         />
       </AdminOutletTemplate>
 
-      <ErrorDialog 
-        error={error}
-        onClose={() => setError(null)}
-      />
+      <ErrorDialog error={error} onClose={() => setError(null)} />
     </>
   );
 };
