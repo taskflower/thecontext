@@ -1,3 +1,4 @@
+// src/components/AdminDropdown.tsx
 import { Link, useLocation, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,10 +8,11 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Menu } from "lucide-react";
+import { ChevronDown, Menu, LayoutDashboard, LogOut } from "lucide-react";
 import { auth } from "@/firebase/config";
 import { getPathWithLanguage } from "@/utils/routeHelpers";
 import { Trans } from "@lingui/macro";
+import { useAuthState } from "@/hooks/useAuthState";
 
 interface AdminDropdownProps {
   dashboardActiveClass: string;
@@ -20,6 +22,8 @@ export const AdminDropdown = ({ dashboardActiveClass }: AdminDropdownProps) => {
   const { lang } = useParams<{ lang: string }>();
   const currentLang = lang || "en";
   const location = useLocation();
+
+  const { user } = useAuthState();
 
   const handleLogout = () => {
     auth.signOut();
@@ -39,17 +43,25 @@ export const AdminDropdown = ({ dashboardActiveClass }: AdminDropdownProps) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-36">
+        {user && (
+          <>
+            <DropdownMenuItem disabled>
+              {user.email}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
         <DropdownMenuItem asChild>
           <Link
             to={`/admin/${currentLang}/boards/instances`}
             className={dashboardActiveClass}
           >
+            <LayoutDashboard className="mr-2 h-4 w-4" />
             <Trans>Dashboard</Trans>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        {/* Language selector in shadcn/ui style */}
-        <div className=" py-1.5">
+        <div className="py-1.5">
           <div className="flex items-center justify-center rounded-md bg-muted p-1 w-full gap-1">
             <Link
               to={getPathWithLanguage(location.pathname, currentLang, "pl")}
@@ -75,6 +87,7 @@ export const AdminDropdown = ({ dashboardActiveClass }: AdminDropdownProps) => {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
+          <LogOut className="mr-2 h-4 w-4" />
           <Trans>Log out</Trans>
         </DropdownMenuItem>
       </DropdownMenuContent>

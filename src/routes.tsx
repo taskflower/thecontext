@@ -10,6 +10,7 @@ import boardsRoutes from "@/pages/boards/routes";
 import tasksRoutes from "@/pages/tasks/routes";
 import settingsRoutes from "@/pages/settings/routes";
 import containerRoutes from "./pages/documents/routes";
+import usersRoutes from "@/pages/users/routes"; // Importujemy routingi dla użytkowników
 import { LanguageProvider } from "./context/LanguageContext";
 
 export const DEFAULT_LANGUAGE = "en";
@@ -46,6 +47,7 @@ export const routes: RouteObject[] = [
       { path: "boards/*", children: boardsRoutes },
       { path: "tasks/*", children: tasksRoutes },
       { path: "settings/*", children: settingsRoutes },
+      { path: "users/*", children: usersRoutes }, // Dodany routing dla użytkowników
     ],
   },
 ];

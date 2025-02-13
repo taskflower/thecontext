@@ -1,23 +1,23 @@
 // src/pages/settings/Settings.tsx
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Settings2, Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Settings2 } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
 import { GoogleDriveIntegration } from "./GoogleDriveIntegration";
 import { DataManagement } from "./DataManagement";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 
 export const Settings = () => {
   const navigate = useNavigate();
+  const { lang } = useParams<{ lang: string }>();
 
   return (
     <AdminOutletTemplate
       title="Settings"
       description="Manage your app settings"
       actions={
-        <Button className="gap-2" onClick={() => navigate("new")}>
-          <Plus className="h-4 w-4" />
-          Save settings
+        <Button className="gap-2" onClick={() => navigate(`/admin/${lang}/users`)}>
+          Users
         </Button>
       }
     >
