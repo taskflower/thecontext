@@ -10,13 +10,13 @@ import {
 } from "@/components/ui/dialog";
 import MDEditor from "@uiw/react-md-editor";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { SearchInput } from "@/components/common/SearchInput";
 import { DocumentTable } from "@/components/documents/DocumentTable";
+import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 
 export const AllDocuments = () => {
-  const navigate = useNavigate();
+  const adminNavigate = useAdminNavigate();
   const { documents, containers, removeDocument } = useDocumentsStore();
 
   const [filter, setFilter] = useState("");
@@ -41,6 +41,13 @@ export const AllDocuments = () => {
     return container?.name || "No Container";
   };
 
+  const handleEditDocument = (id: string) => {
+    const doc = documents.find((d) => d.id === id);
+    if (doc) {
+      adminNavigate(`/documents/${doc.documentContainerId}/document/${id}/edit`);
+    }
+  };
+
   const enhancedDocuments = filteredDocuments.map((doc) => ({
     ...doc,
     containerName: getContainerName(doc.documentContainerId),
@@ -56,7 +63,7 @@ export const AllDocuments = () => {
             variant="outline"
             size="sm"
             className="hidden lg:flex"
-            onClick={() => navigate("/admin/documents/all")}
+            onClick={() => adminNavigate("/documents/all")}
           >
             All Documents
           </Button>
@@ -82,14 +89,7 @@ export const AllDocuments = () => {
             <DocumentTable
               documents={enhancedDocuments}
               onPreview={setSelectedDocument}
-              onEdit={(id) => {
-                const doc = documents.find((d) => d.id === id);
-                if (doc) {
-                  navigate(
-                    `/admin/documents/${doc.documentContainerId}/document/${id}/edit`
-                  );
-                }
-              }}
+              onEdit={handleEditDocument}
               onMove={handleMoveDocument}
               onDelete={removeDocument}
               showContainer

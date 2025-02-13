@@ -1,26 +1,37 @@
+// src/components/AppLink.tsx
 import React from "react";
-import { Link, LinkProps } from "react-router-dom";
+import { Link, LinkProps, useLocation } from "react-router-dom";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface AppLinkProps extends LinkProps {
-  /**
-   * Jeśli true – budujemy link do sekcji admin, czyli prefiksujemy ścieżkę jako:
-   * /admin/:lang/...
-   */
   admin?: boolean;
+  forcePublic?: boolean;
 }
 
-export const AppLink: React.FC<AppLinkProps> = ({ admin, to, ...rest }) => {
+export const AppLink: React.FC<AppLinkProps> = ({ 
+  admin, 
+  forcePublic,
+  to, 
+  ...rest 
+}) => {
   const { currentLang } = useLanguage();
+  const location = useLocation();
+  
+  const isInAdminSection = location.pathname.includes('/admin/');
+  const shouldBeAdmin = admin || (isInAdminSection && !forcePublic);
 
   let path = "";
   if (typeof to === "string") {
-    if (admin) {
-      // Dla admina: /admin/:lang/...
-      path = `/admin/${currentLang}${to.startsWith("/") ? to : `/${to}`}`;
+    const cleanPath = to.replace(/^\/?(admin\/)?[a-z]{2}\//, '');
+    
+    if (shouldBeAdmin) {
+      path = `/admin/${currentLang}/${cleanPath}`.replace(/\/+/g, '/');
     } else {
-      // Dla publicznych tras: /:lang/...
-      path = `/${currentLang}${to.startsWith("/") ? to : `/${to}`}`;
+      path = `/${currentLang}/${cleanPath}`.replace(/\/+/g, '/');
+    }
+    
+    if (to === '/') {
+      path = shouldBeAdmin ? `/admin/${currentLang}` : `/${currentLang}`;
     }
   } else {
     console.warn("AppLink nie obsługuje obiektu 'to' – użyj stringa");

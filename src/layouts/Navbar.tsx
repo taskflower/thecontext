@@ -1,13 +1,18 @@
-import { NavLink } from "react-router-dom";
+// src/components/Navbar.tsx
+import { useLocation } from "react-router-dom";
 import { useAuthState } from "@/hooks/useAuthState";
 import { Button } from "@/components/ui/button";
 import { AdminDropdown } from "./AdminDropdown";
 import { AppLink } from "@/components/AppLink";
+import { useLanguage } from "@/context/LanguageContext";
 
 export const Navbar = () => {
   const { user } = useAuthState();
+  const location = useLocation();
+  const { currentLang } = useLanguage();
 
-  // Funkcja pomocnicza do określania klasy dla aktywnych linków (przykład)
+  const isAdminSection = location.pathname.includes("/admin/");
+
   const getNavLinkClass = ({ isActive }: { isActive: boolean }) =>
     `text-sm font-medium transition-colors hover:text-primary p-3 rounded bg-muted md:bg-white ${
       isActive ? "text-primary bg-muted" : "text-muted-foreground"
@@ -18,22 +23,43 @@ export const Navbar = () => {
       <div className="container mx-auto p-3">
         <div className="flex justify-between items-center">
           <div className="flex gap-1">
-            <NavLink to={""} end className={getNavLinkClass}>
+            <AppLink
+              to="/"
+              forcePublic
+              className={getNavLinkClass({
+                isActive: location.pathname === `/${currentLang}`,
+              })}
+            >
               Home
-            </NavLink>
-            <NavLink to={"about"} end className={getNavLinkClass}>
+            </AppLink>
+            <AppLink
+              forcePublic
+              to="/about"
+              className={getNavLinkClass({
+                isActive: location.pathname.includes("/about"),
+              })}
+            >
               Cases
-            </NavLink>
-            <NavLink to={"contact"} end className={getNavLinkClass}>
+            </AppLink>
+            <AppLink
+              forcePublic
+              to="/contact"
+              className={getNavLinkClass({
+                isActive: location.pathname.includes("/contact"),
+              })}
+            >
               Services
-            </NavLink>
+            </AppLink>
           </div>
           <div>
             {user ? (
-              <AdminDropdown dashboardActiveClass={""} /* przekazujemy klasę aktywną w zależności od logiki */ />
+              <AdminDropdown
+                dashboardActiveClass={getNavLinkClass({
+                  isActive: isAdminSection,
+                })}
+              />
             ) : (
               <Button variant="default" asChild>
-                {/* Korzystamy z AppLink, by budować link do logowania z prefiksem języka */}
                 <AppLink to="/login">Login</AppLink>
               </Button>
             )}

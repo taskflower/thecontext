@@ -1,3 +1,4 @@
+// src/paes/public/routes.tsx
 import { lazy } from 'react';
 import { RouteObject } from 'react-router-dom';
 import CaseStudiesPage from './CaseStudiesPage';

@@ -1,13 +1,13 @@
-import { useNavigate } from "react-router-dom";
-import { useDocumentsStore } from "@/store/documentsStore";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useDocumentsStore } from "@/store/documentsStore";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { ContainerForm } from "@/components/documents/ContainerForm";
 import { ErrorDialog } from "@/components/common/ErrorDialog";
+import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 
 export const ContainerNew = () => {
-  const navigate = useNavigate();
+  const adminNavigate = useAdminNavigate();
   const { addContainer } = useDocumentsStore();
   const [error, setError] = useState<string | null>(null);
   
@@ -21,7 +21,7 @@ export const ContainerNew = () => {
     e.preventDefault();
     try {
       addContainer(formData);
-      navigate("/admin/documents");
+      adminNavigate("/documents");
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -39,7 +39,10 @@ export const ContainerNew = () => {
         title="New Document Container"
         description="Create a new document container"
         actions={
-          <Button variant="outline" onClick={() => navigate("/admin/documents")}>
+          <Button 
+            variant="outline" 
+            onClick={() => adminNavigate("/documents")}
+          >
             Back to Containers
           </Button>
         }
@@ -47,7 +50,7 @@ export const ContainerNew = () => {
         <ContainerForm
           formData={formData}
           onSubmit={handleSubmit}
-          onCancel={() => navigate("/admin/documents")}
+          onCancel={() => adminNavigate("/documents")}
           onChange={handleChange}
           submitButtonText="Create Container"
           formTitle="Container Details"

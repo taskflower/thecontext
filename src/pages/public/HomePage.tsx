@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { FileText, Brain, GitBranch, Layout } from "lucide-react";
 import { ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { AppLink } from "@/components/AppLink";
 import { Trans } from "@lingui/macro";
 
 const HighlightedText = ({ children }: { children: ReactNode }) => {
@@ -34,11 +34,11 @@ const HomePage = () => {
             management.
           </Trans>
         </p>
-        <Link to="/admin/tasks/templates">
+        <AppLink to="/tasks/templates" admin>
           <Button size="lg" className="mt-4">
             <Trans>Start Building</Trans>
           </Button>
-        </Link>
+        </AppLink>
       </header>
 
       <section className="grid gap-8 md:grid-cols-2">
@@ -148,11 +148,11 @@ const HomePage = () => {
             document context <HighlightedText>grow naturally</HighlightedText>.
           </Trans>
         </p>
-        <Button size="lg" className="mt-4">
-          <Link to="admin/tasks/templates">
+        <AppLink to="/tasks/templates" admin>
+          <Button size="lg" className="mt-4">
             <Trans>Create Your First Template</Trans>
-          </Link>
-        </Button>
+          </Button>
+        </AppLink>
       </section>
     </div>
   );

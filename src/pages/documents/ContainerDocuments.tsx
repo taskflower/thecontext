@@ -1,4 +1,5 @@
-import { useNavigate, useParams } from "react-router-dom";
+// ContainerDocuments.tsx
+import { useParams } from "react-router-dom";
 import { useDocumentsStore } from "@/store/documentsStore";
 import { Button } from "@/components/ui/button";
 import { Settings2, FilePlus } from "lucide-react";
@@ -9,10 +10,11 @@ import { useState } from "react";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { SearchInput } from "@/components/common/SearchInput";
 import { DocumentTable } from "@/components/documents/DocumentTable";
+import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 
 export const ContainerDocuments = () => {
   const { containerId } = useParams();
-  const navigate = useNavigate();
+  const adminNavigate = useAdminNavigate();
   const { containers, removeDocument, getContainerDocuments, updateDocument } = useDocumentsStore();
   
   const [filter, setFilter] = useState("");
@@ -50,7 +52,7 @@ export const ContainerDocuments = () => {
       actions={
         <Button 
           className="gap-2" 
-          onClick={() => navigate(`/admin/documents/${containerId}/document/new`)}
+          onClick={() => adminNavigate(`/documents/${containerId}/document/new`)}
         >
           <FilePlus className="h-4 w-4" />
           New Document
@@ -76,7 +78,7 @@ export const ContainerDocuments = () => {
             <DocumentTable
               documents={filteredDocuments}
               onPreview={setSelectedDocument}
-              onEdit={(id) => navigate(`/admin/documents/${containerId}/document/${id}/edit`)}
+              onEdit={(id) => adminNavigate(`/documents/${containerId}/document/${id}/edit`)}
               onMove={handleMoveDocument}
               onDelete={removeDocument}
             />

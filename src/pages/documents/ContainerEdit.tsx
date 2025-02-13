@@ -1,14 +1,15 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useDocumentsStore } from "@/store/documentsStore";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { ContainerForm } from "@/components/documents/ContainerForm";
 import { ErrorDialog } from "@/components/common/ErrorDialog";
+import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 
 export const ContainerEdit = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const adminNavigate = useAdminNavigate();
   const { containers, updateContainer } = useDocumentsStore();
   const [error, setError] = useState<string | null>(null);
   
@@ -38,7 +39,7 @@ export const ContainerEdit = () => {
     e.preventDefault();
     try {
       updateContainer(id!, formData);
-      navigate("/admin/documents");
+      adminNavigate("/documents");
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -50,13 +51,15 @@ export const ContainerEdit = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleBack = () => adminNavigate("/documents");
+
   return (
     <>
       <AdminOutletTemplate
         title={`Editing: ${container.name}`}
         description="Modify container details"
         actions={
-          <Button variant="outline" onClick={() => navigate("/admin/documents")}>
+          <Button variant="outline" onClick={handleBack}>
             Back to Containers
           </Button>
         }
@@ -64,7 +67,7 @@ export const ContainerEdit = () => {
         <ContainerForm
           formData={formData}
           onSubmit={handleSubmit}
-          onCancel={() => navigate("/admin/documents")}
+          onCancel={handleBack}
           onChange={handleChange}
           submitButtonText="Save Changes"
           formTitle="Container Details"

@@ -6,6 +6,6 @@ import { i18n } from "@lingui/core"
  * many ways how to load messages — from REST API, from file, from cache, etc.
  */
 export async function loadCatalog(locale: string) {
-  const catalog = await import(`./locales/${locale}.po`)
+  const catalog = await import(`./../locales/${locale}.po`)
   i18n.loadAndActivate({ locale, messages: catalog.messages })
 }

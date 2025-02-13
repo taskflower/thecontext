@@ -1,3 +1,4 @@
+// ContainerActions.tsx
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,7 +18,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { MoreHorizontal, FileText } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 
 interface ContainerActionsProps {
   containerId: string;
@@ -25,14 +26,14 @@ interface ContainerActionsProps {
 }
 
 const ContainerActions = ({ containerId, onDelete }: ContainerActionsProps) => {
-  const navigate = useNavigate();
+  const adminNavigate = useAdminNavigate();
 
   return (
     <div className="flex gap-2 justify-between">
       <Button
         size="sm"
         className="gap-2"
-        onClick={() => navigate(`/admin/documents/${containerId}`)}
+        onClick={() => adminNavigate(`/documents/${containerId}`)}
       >
         <FileText className="h-4 w-4" />
         View Documents
@@ -46,7 +47,7 @@ const ContainerActions = ({ containerId, onDelete }: ContainerActionsProps) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem
-            onClick={() => navigate(`/admin/documents/${containerId}/edit`)}
+            onClick={() => adminNavigate(`/documents/${containerId}/edit`)}
           >
             Edit
           </DropdownMenuItem>

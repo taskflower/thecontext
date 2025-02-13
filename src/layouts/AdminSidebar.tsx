@@ -1,8 +1,9 @@
 // src/layouts/AdminSidebar.tsx
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Settings, FileText, LayoutGrid, CheckSquare } from "lucide-react";
+import { AppLink } from "@/components/AppLink";
 
 interface SidebarLinkProps {
   to: string;
@@ -17,15 +18,16 @@ const MobileNavLink: React.FC<SidebarLinkProps> = ({
   children,
   isActivePath,
 }) => (
-  <Link
+  <AppLink
     to={to}
+    admin
     className={`flex flex-col items-center justify-center w-full h-full p-2 ${
       isActivePath ? "text-black" : "text-gray-500"
     } active:bg-gray-100`}
   >
     <Icon className={`h-6 w-6 ${isActivePath ? "text-black" : "text-gray-500"}`} />
     <span className="text-xs mt-1">{children}</span>
-  </Link>
+  </AppLink>
 );
 
 const DesktopSidebarLink: React.FC<SidebarLinkProps> = ({
@@ -43,10 +45,10 @@ const DesktopSidebarLink: React.FC<SidebarLinkProps> = ({
     }`}
     asChild
   >
-    <Link to={to} className="flex items-center w-full">
+    <AppLink to={to} admin className="flex items-center w-full">
       <Icon className="mr-2 h-5 w-5" />
       {children}
-    </Link>
+    </AppLink>
   </Button>
 );
 
@@ -54,14 +56,15 @@ export const AdminSidebar: React.FC = () => {
   const location = useLocation();
 
   const isActive = (path: string): boolean => {
-    return location.pathname.startsWith(path);
+    const currentPath = location.pathname;
+    return currentPath.includes(path.replace(/^\/admin/, ''));
   };
 
   const navigationItems = [
-    { path: "/admin/boards/instances", icon: LayoutGrid, label: "Boards" },
-    { path: "/admin/tasks/templates", icon: CheckSquare, label: "Tasks" },
-    { path: "/admin/documents", icon: FileText, label: "Documents" },
-    { path: "/admin/settings", icon: Settings, label: "Settings" },
+    { path: "/boards/instances", icon: LayoutGrid, label: "Boards" },
+    { path: "/tasks/templates", icon: CheckSquare, label: "Tasks" },
+    { path: "/documents", icon: FileText, label: "Documents" },
+    { path: "/settings", icon: Settings, label: "Settings" },
   ];
 
   // Mobile bottom navigation

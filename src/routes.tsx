@@ -1,5 +1,5 @@
 // src/routes.tsx
-import LanguageWrapper from "./LanguageWrapper";
+import LanguageWrapper from "./components/LanguageWrapper";
 import { Navigate, RouteObject } from "react-router-dom";
 import { MainLayout } from "@/layouts/MainLayout";
 import { RequireAuth } from "@/layouts/RequireAuth";
