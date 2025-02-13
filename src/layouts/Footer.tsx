@@ -19,7 +19,7 @@ export const Footer = () => {
           <nav className="mb-4">
             {/* Używamy linku względnego – zakładając, że jesteśmy w obrębie ścieżki /:lang */}
             <Link to="projects" className="text-white hover:underline mx-2">
-              Projekty The context
+              MediaStrategist project
             </Link>
           </nav>
           <span>/</span>
