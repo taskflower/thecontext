@@ -17,7 +17,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { MoreHorizontal, Play } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 
 interface TemplateActionsProps {
   templateId: string;
@@ -25,14 +25,14 @@ interface TemplateActionsProps {
 }
 
 const TemplateActions = ({ templateId, onDelete }: TemplateActionsProps) => {
-  const navigate = useNavigate();
+  const adminNavigate = useAdminNavigate();
 
   return (
     <div className="flex gap-2 justify-end">
       <Button
         size="sm"
         className="gap-2"
-        onClick={() => navigate(`/admin/tasks/${templateId}/run`)}
+        onClick={() => adminNavigate(`/tasks/templates/${templateId}/run`)}
       >
         <Play className="h-4 w-4" />
         Run
@@ -46,7 +46,7 @@ const TemplateActions = ({ templateId, onDelete }: TemplateActionsProps) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem
-            onClick={() => navigate(`/admin/tasks/${templateId}/edit`)}
+            onClick={() => adminNavigate(`/tasks/templates/${templateId}/edit`)}
           >
             Edit
           </DropdownMenuItem>
@@ -61,15 +61,15 @@ const TemplateActions = ({ templateId, onDelete }: TemplateActionsProps) => {
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogTitle>Czy na pewno?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete this template.
+                  Ta akcja jest nieodwracalna i usunie szablon na stałe.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel>Anuluj</AlertDialogCancel>
                 <AlertDialogAction onClick={() => onDelete(templateId)}>
-                  Delete
+                  Usuń
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
