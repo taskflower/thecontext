@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { FileText, Brain, GitBranch, Layout } from "lucide-react";
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { Trans } from "@lingui/macro";
 
 const HighlightedText = ({ children }: { children: ReactNode }) => {
   return (
@@ -22,19 +23,21 @@ const HomePage = () => {
         <div className="flex md:items-end justify-center gap-6 flex-col md:flex-row">
           <TheContextCell className="h-20 mb-1" />
           <h1 className="font-bold tracking-tight text-4xl sm:text-6xl md:text-7xl xl:text-8xl">
-            THE CONTEXT
+            <Trans>THE CONTEXT</Trans>
           </h1>
         </div>
 
         <p className="py-2 text-base sm:text-lg text-muted-foreground">
-          Build and expand your knowledge context through structured task
-          templates, interactive Kanban boards, and AI-powered document
-          management.
+          <Trans>
+            Build and expand your knowledge context through structured task
+            templates, interactive Kanban boards, and AI-powered document
+            management.
+          </Trans>
         </p>
         <Link to="/admin/tasks/templates">
-        <Button size="lg" className="mt-4">
-          Start Building
-        </Button>
+          <Button size="lg" className="mt-4">
+            <Trans>Start Building</Trans>
+          </Button>
         </Link>
       </header>
 
@@ -42,16 +45,18 @@ const HomePage = () => {
         <Card className="shadow-md hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="text-xl sm:text-2xl">
-              What is THE CONTEXT?
+              <Trans>What is THE CONTEXT?</Trans>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="mb-6 leading-relaxed text-muted-foreground">
-              Context Builder is an intelligent task management system that
-              combines customizable templates, Kanban workflows, and AI-powered
-              document context expansion. It helps you create structured
-              pathways for complex tasks while automatically building and
-              maintaining relevant knowledge context.
+              <Trans>
+                Context Builder is an intelligent task management system that
+                combines customizable templates, Kanban workflows, and AI-powered
+                document context expansion. It helps you create structured
+                pathways for complex tasks while automatically building and
+                maintaining relevant knowledge context.
+              </Trans>
             </p>
             <GoalPathwayChart />
           </CardContent>
@@ -59,49 +64,67 @@ const HomePage = () => {
 
         <Card className="shadow-md hover:shadow-lg transition-shadow">
           <CardHeader>
-            <CardTitle className="text-xl sm:text-2xl">Core Features</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">
+              <Trans>Core Features</Trans>
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="space-y-6 text-muted-foreground">
               <li className="flex items-start space-x-3">
                 <Layout className="w-8 h-8 mt-1" />
                 <div>
-                  <strong>Kanban Task Management</strong>
+                  <strong>
+                    <Trans>Kanban Task Management</Trans>
+                  </strong>
                   <p className="leading-relaxed">
-                    Create and manage task workflows with customizable templates
-                    and dependency tracking through an intuitive Kanban board
-                    interface.
+                    <Trans>
+                      Create and manage task workflows with customizable templates
+                      and dependency tracking through an intuitive Kanban board
+                      interface.
+                    </Trans>
                   </p>
                 </div>
               </li>
               <li className="flex items-start space-x-3">
                 <GitBranch className="w-8 h-8 mt-1" />
                 <div>
-                  <strong>Process Templates</strong>
+                  <strong>
+                    <Trans>Process Templates</Trans>
+                  </strong>
                   <p className="leading-relaxed">
-                    Design reusable task templates with step-by-step processes,
-                    dependencies, and integrated plugins for consistent workflow
-                    execution.
+                    <Trans>
+                      Design reusable task templates with step-by-step processes,
+                      dependencies, and integrated plugins for consistent workflow
+                      execution.
+                    </Trans>
                   </p>
                 </div>
               </li>
               <li className="flex items-start space-x-3">
                 <Brain className="w-8 h-8 mt-1" />
                 <div>
-                  <strong>Context Expansion</strong>
+                  <strong>
+                    <Trans>Context Expansion</Trans>
+                  </strong>
                   <p className="leading-relaxed">
-                    AI-powered system that automatically expands and maintains
-                    document context as you work through tasks and templates.
+                    <Trans>
+                      AI-powered system that automatically expands and maintains
+                      document context as you work through tasks and templates.
+                    </Trans>
                   </p>
                 </div>
               </li>
               <li className="flex items-start space-x-3">
                 <FileText className="w-8 h-8 mt-1" />
                 <div>
-                  <strong>Smart Document Management</strong>
+                  <strong>
+                    <Trans>Smart Document Management</Trans>
+                  </strong>
                   <p className="leading-relaxed">
-                    Intelligent document handling that grows with your tasks,
-                    creating a dynamic knowledge base tied to your workflows.
+                    <Trans>
+                      Intelligent document handling that grows with your tasks,
+                      creating a dynamic knowledge base tied to your workflows.
+                    </Trans>
                   </p>
                 </div>
               </li>
@@ -112,19 +135,23 @@ const HomePage = () => {
 
       <section className="mx-auto max-w-2xl text-center space-y-4">
         <h2 className="font-semibold text-2xl sm:text-3xl">
-          Ready to Expand Your Context?
+          <Trans>Ready to Expand Your Context?</Trans>
         </h2>
         <p className="leading-relaxed text-muted-foreground">
-          Start building your <HighlightedText>knowledge base</HighlightedText>{" "}
-          today with our{" "}
-          <HighlightedText>intelligent task management</HighlightedText> and{" "}
-          <HighlightedText>context expansion</HighlightedText> system.{" "}
-          <HighlightedText>Create templates</HighlightedText>,{" "}
-          <HighlightedText>manage workflows</HighlightedText>, and watch your
-          document context <HighlightedText>grow naturally</HighlightedText>.
+          <Trans>
+            Start building your <HighlightedText>knowledge base</HighlightedText>{" "}
+            today with our{" "}
+            <HighlightedText>intelligent task management</HighlightedText> and{" "}
+            <HighlightedText>context expansion</HighlightedText> system.{" "}
+            <HighlightedText>Create templates</HighlightedText>,{" "}
+            <HighlightedText>manage workflows</HighlightedText>, and watch your
+            document context <HighlightedText>grow naturally</HighlightedText>.
+          </Trans>
         </p>
         <Button size="lg" className="mt-4">
-          <Link to="admin/tasks/templates">Create Your First Template</Link>
+          <Link to="admin/tasks/templates">
+            <Trans>Create Your First Template</Trans>
+          </Link>
         </Button>
       </section>
     </div>

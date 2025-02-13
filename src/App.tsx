@@ -7,6 +7,7 @@ function AppRoutes() {
 }
 
 export default function App() {
+ 
   return (
     <Router>
       <Suspense fallback={<div>Ładowanie...</div>}>
