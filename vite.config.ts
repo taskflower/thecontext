@@ -57,17 +57,41 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes("node_modules")) {
+             // Radix UI components
+             if (id.includes("@radix-ui")) {
+              return "vendor-radix";
+            }
+            // Markdown editor
+            if (id.includes("@uiw/react-md-editor")) {
+              return "vendor-markdown";
+            }
+            // React core
             if (id.includes("react") || id.includes("react-dom")) {
-              return "vendor-react";
+              return "vendor-react-core";
             }
+            // React Router
             if (id.includes("react-router-dom")) {
-              return "vendor-react-router-dom";
+              return "vendor-router";
             }
-            if (id.includes("reactflow")) {
-              return "vendor-reactflow";
-            }
+            // Firebase
             if (id.includes("firebase")) {
               return "vendor-firebase";
+            }
+            // Utilities (clsx, tailwind-merge, etc)
+            if (id.includes("clsx") || id.includes("tailwind-merge") || id.includes("class-variance-authority")) {
+              return "vendor-utils";
+            }
+            // Lucide icons
+            if (id.includes("lucide-react")) {
+              return "vendor-icons";
+            }
+            // Zustand
+            if (id.includes("zustand")) {
+              return "vendor-state";
+            }
+            // Pozostałe react-related dependencies
+            if (id.includes("react")) {
+              return "vendor-react-misc";
             }
             // Add more conditions as needed
           }

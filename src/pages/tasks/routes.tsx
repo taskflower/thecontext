@@ -1,8 +1,26 @@
 import { RouteObject, Navigate } from "react-router-dom";
-import { TaskTemplateList } from "./TaskTemplateList";
-import { TaskTemplateRunner } from "./TaskTemplateRunner";
-import { TaskTemplateEdit } from "./TaskTemplateEdit";
-import TaskTemplateNew from "./TaskTemplateNew";
+import { lazy } from "react";
+
+// Lazy loaded components
+const TaskTemplateList = lazy(() =>
+  import("./TaskTemplateList").then((module) => ({
+    default: module.TaskTemplateList,
+  }))
+);
+
+const TaskTemplateRunner = lazy(() =>
+  import("./TaskTemplateRunner").then((module) => ({
+    default: module.TaskTemplateRunner,
+  }))
+);
+
+const TaskTemplateEdit = lazy(() =>
+  import("./TaskTemplateEdit").then((module) => ({
+    default: module.TaskTemplateEdit,
+  }))
+);
+
+const TaskTemplateNew = lazy(() => import("./TaskTemplateNew"));
 
 const tasksRoutes: RouteObject[] = [
   { index: true, element: <Navigate to="templates" replace /> },

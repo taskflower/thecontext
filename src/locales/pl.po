@@ -42,13 +42,21 @@ msgstr "<0>Śledzenie zadań:</0> Wszystkie zadania są powiązane z odpowiednim
 msgid "A key aspect of our system is maintaining order and separation of documents across different work cycles. This ensures that even when processes are run multiple times, documents from different cycles do not mix, providing clarity and ease of management."
 msgstr "Kluczowym aspektem naszego systemu jest utrzymanie porządku oraz separacja dokumentów pomiędzy różnymi cyklami pracy. Dzięki temu, nawet gdy procesy są uruchamiane wielokrotnie, dokumenty z różnych cykli nie mieszają się, co zapewnia przejrzystość i łatwość zarządzania."
 
-#: src/layouts/AdminDropdown.tsx:33
+#: src/layouts/AdminDropdown.tsx:46
 msgid "Admin Panel"
 msgstr "Panel administracyjny"
 
+#: src/pages/public/HomePage.tsx:122
+msgid "AI Agents & Learning"
+msgstr "Agenci AI i nauka"
+
+#: src/pages/public/HomePage.tsx:89
+msgid "AI Workflow Management"
+msgstr "Zarządzanie przepływem pracy AI"
+
 #: src/pages/public/HomePage.tsx:110
-msgid "AI-powered system that automatically expands and maintains document context as you work through tasks and templates."
-msgstr "System wspierany przez AI, który automatycznie rozbudowuje i utrzymuje kontekst dokumentów podczas pracy nad zadaniami i szablonami."
+#~ msgid "AI-powered system that automatically expands and maintains document context as you work through tasks and templates."
+#~ msgstr "System wspierany przez AI, który automatycznie rozbudowuje i utrzymuje kontekst dokumentów podczas pracy nad zadaniami i szablonami."
 
 #: src/pages/documents/ContainerList.tsx:45
 msgid "All"
@@ -75,6 +83,14 @@ msgstr "Zautomatyzowany proces opracowywania programu nauczania"
 msgid "Automated Document Creation"
 msgstr "Automatyczne tworzenie dokumentów"
 
+#: src/pages/public/HomePage.tsx:142
+msgid "Automatically analyze and extract insights from your documents - websites, PDFs, and spreadsheets."
+msgstr "Automatycznie analizuj i wyciągaj wnioski z dokumentów – stron internetowych, plików PDF i arkuszy kalkulacyjnych."
+
+#: src/layouts/AdminDropdown.tsx:66
+msgid "Available tokens: {0}"
+msgstr "Dostępne tokeny: {0}"
+
 #: src/pages/documents/DocumentEdit.tsx:46
 #: src/pages/documents/DocumentNew.tsx:44
 msgid "Back"
@@ -91,8 +107,12 @@ msgid "Back to list of tasks templates"
 msgstr "Powrót do listy szablonów zadań"
 
 #: src/pages/public/HomePage.tsx:31
-msgid "Build and expand your knowledge context through structured task templates, interactive Kanban boards, and AI-powered document management."
-msgstr "Buduj i rozwijaj kontekst swojej wiedzy dzięki uporządkowanym szablonom zadań, interaktywnym tablicom Kanban oraz zarządzaniu dokumentami wspieranym przez AI."
+#~ msgid "Build and expand your knowledge context through structured task templates, interactive Kanban boards, and AI-powered document management."
+#~ msgstr "Buduj i rozwijaj kontekst swojej wiedzy dzięki uporządkowanym szablonom zadań, interaktywnym tablicom Kanban oraz zarządzaniu dokumentami wspieranym przez AI."
+
+#: src/pages/public/HomePage.tsx:106
+msgid "Business Case Templates"
+msgstr "Szablony business case’ów"
 
 #: src/components/documents/ContainerActions.tsx:80
 #: src/components/documents/ContainerForm.tsx:74
@@ -101,8 +121,8 @@ msgid "Cancel"
 msgstr "Anuluj"
 
 #: src/components/tasks/ProcessRunner.tsx:174
-msgid "Card View"
-msgstr "Widok karty"
+#~ msgid "Card View"
+#~ msgstr "Widok karty"
 
 #: src/components/tasks/TemplateList.tsx:66
 msgid "Close Preview"
@@ -151,14 +171,18 @@ msgid "Content Preview"
 msgstr "Podgląd treści"
 
 #: src/pages/public/HomePage.tsx:53
-msgid "Context Builder is an intelligent task management system that combines customizable templates, Kanban workflows, and AI-powered document context expansion. It helps you create structured pathways for complex tasks while automatically building and maintaining relevant knowledge context."
-msgstr "Context Builder to inteligentny system zarządzania zadaniami, który łączy możliwość dostosowywania szablonów, przepływy pracy w systemie Kanban oraz automatyczne rozszerzanie kontekstu dokumentów przy użyciu AI. Pomaga tworzyć uporządkowane ścieżki dla złożonych zadań, automatycznie budując i utrzymując odpowiedni kontekst wiedzy."
+#~ msgid "Context Builder is an intelligent task management system that combines customizable templates, Kanban workflows, and AI-powered document context expansion. It helps you create structured pathways for complex tasks while automatically building and maintaining relevant knowledge context."
+#~ msgstr "Context Builder to inteligentny system zarządzania zadaniami, który łączy możliwość dostosowywania szablonów, przepływy pracy w systemie Kanban oraz automatyczne rozszerzanie kontekstu dokumentów przy użyciu AI. Pomaga tworzyć uporządkowane ścieżki dla złożonych zadań, automatycznie budując i utrzymując odpowiedni kontekst wiedzy."
 
 #: src/pages/public/HomePage.tsx:107
-msgid "Context Expansion"
-msgstr "Rozszerzanie kontekstu"
+#~ msgid "Context Expansion"
+#~ msgstr "Rozszerzanie kontekstu"
 
-#: src/pages/public/HomePage.tsx:68
+#: src/pages/public/HomePage.tsx:110
+msgid "Convert any business scenario into an automated workflow with pre-built or custom templates."
+msgstr "Przekształć dowolny scenariusz biznesowy w zautomatyzowany przepływ pracy, korzystając z gotowych lub niestandardowych szablonów."
+
+#: src/pages/public/HomePage.tsx:79
 msgid "Core Features"
 msgstr "Kluczowe funkcje"
 
@@ -175,8 +199,8 @@ msgid "Create a new task template"
 msgstr "Utwórz nowy szablon zadania"
 
 #: src/pages/public/HomePage.tsx:80
-msgid "Create and manage task workflows with customizable templates and dependency tracking through an intuitive Kanban board interface."
-msgstr "Twórz i zarządzaj przepływami zadań, korzystając z konfigurowalnych szablonów oraz śledzenia zależności przez intuicyjny interfejs tablicy Kanban."
+#~ msgid "Create and manage task workflows with customizable templates and dependency tracking through an intuitive Kanban board interface."
+#~ msgstr "Twórz i zarządzaj przepływami zadań, korzystając z konfigurowalnych szablonów oraz śledzenia zależności przez intuicyjny interfejs tablicy Kanban."
 
 #: src/pages/documents/ContainerList.tsx:88
 #: src/pages/documents/ContainerNew.tsx:53
@@ -192,14 +216,18 @@ msgid "Create your first container to get started."
 msgstr "Aby rozpocząć, utwórz swój pierwszy kontener."
 
 #: src/pages/public/HomePage.tsx:153
-msgid "Create Your First Template"
-msgstr "Stwórz swój pierwszy szablon"
+#~ msgid "Create Your First Template"
+#~ msgstr "Stwórz swój pierwszy szablon"
+
+#: src/pages/public/HomePage.tsx:51
+msgid "Create Your Workflow"
+msgstr "Utwórz swój przepływ pracy"
 
 #: src/pages/public/CaseStudiesPage.tsx:131
 msgid "Curriculum-Based Educational Content Generation"
 msgstr "Generowanie treści edukacyjnych opartych na programie nauczania"
 
-#: src/layouts/AdminDropdown.tsx:47
+#: src/layouts/AdminDropdown.tsx:83
 msgid "Dashboard"
 msgstr "Panel główny"
 
@@ -209,13 +237,13 @@ msgid "Delete"
 msgstr "Usuń"
 
 #: src/components/documents/ContainerForm.tsx:50
-#: src/pages/tasks/TaskTemplateList.tsx:61
+#: src/pages/tasks/TaskTemplateList.tsx:60
 msgid "Description"
 msgstr "Opis"
 
 #: src/pages/public/HomePage.tsx:95
-msgid "Design reusable task templates with step-by-step processes, dependencies, and integrated plugins for consistent workflow execution."
-msgstr "Projektuj wielokrotnego użytku szablony zadań, zawierające procesy krok po kroku, zależności oraz zintegrowane wtyczki, które zapewniają spójną realizację przepływu pracy."
+#~ msgid "Design reusable task templates with step-by-step processes, dependencies, and integrated plugins for consistent workflow execution."
+#~ msgstr "Projektuj wielokrotnego użytku szablony zadań, zawierające procesy krok po kroku, zależności oraz zintegrowane wtyczki, które zapewniają spójną realizację przepływu pracy."
 
 #: src/pages/documents/ContainerList.tsx:30
 msgid "Document Containers"
@@ -250,8 +278,8 @@ msgid "Editing: {0}"
 msgstr "Edycja: {0}"
 
 #: src/layouts/AdminDropdown.tsx:72
-msgid "EN"
-msgstr "Angielski"
+#~ msgid "EN"
+#~ msgstr "Angielski"
 
 #: src/components/documents/ContainerCard.tsx:83
 msgid "Estimated progress"
@@ -273,7 +301,7 @@ msgstr "Filtruj kontenery..."
 msgid "Filter documents..."
 msgstr "Filtruj dokumenty..."
 
-#: src/pages/tasks/TaskTemplateList.tsx:42
+#: src/pages/tasks/TaskTemplateList.tsx:41
 msgid "Filter templates..."
 msgstr "Filtruj szablony..."
 
@@ -281,38 +309,13 @@ msgstr "Filtruj szablony..."
 msgid "From initial content creation through peer review to final publication, the system manages the entire curriculum development lifecycle with automated version control and quality assurance checks."
 msgstr "Od początkowego tworzenia treści, przez recenzje, aż do ostatecznej publikacji, system zarządza całym cyklem rozwoju programu nauczania, oferując automatyczną kontrolę wersji oraz mechanizmy zapewnienia jakości."
 
-#: src/components/tasks/ProcessRunner.tsx:187
+#: src/components/tasks/ProcesRunner/BottomToolbar.tsx:57
 msgid "Hide Preview"
 msgstr "Ukryj podgląd"
 
-#: src/pages/public/HomePage.tsx:124
-msgid "Intelligent document handling that grows with your tasks, creating a dynamic knowledge base tied to your workflows."
-msgstr "Inteligentne zarządzanie dokumentami, które rozwija się wraz z Twoimi zadaniami, tworząc dynamiczną bazę wiedzy powiązaną z Twoimi przepływami pracy."
-
-#: src/pages/public/HomePage.tsx:77
-msgid "Kanban Task Management"
-msgstr "Zarządzanie zadaniami metodą Kanban"
-
-#: src/pages/public/CaseStudiesPage.tsx:49
-#: src/pages/public/CaseStudiesPage.tsx:68
-#: src/pages/public/CaseStudiesPage.tsx:87
-#: src/pages/public/CaseStudiesPage.tsx:143
-#: src/pages/public/CaseStudiesPage.tsx:164
-#: src/pages/public/CaseStudiesPage.tsx:185
-msgid "Learn More"
-msgstr "Dowiedz się więcej"
-
-#: src/layouts/AdminDropdown.tsx:78
-msgid "Log out"
-msgstr "Wyloguj się"
-
-#: src/pages/public/CaseStudiesPage.tsx:96
-msgid "Maintaining Order in the System"
-msgstr "Utrzymanie porządku w systemie"
-
-#: src/pages/tasks/TaskTemplateList.tsx:29
-msgid "Manage and create your task templates."
-msgstr "Zarządzaj i twórz swoje szablony zadań."
+#: src/pages/public/HomePage.tsx:93
+msgid "Manage your AI agents like a team using our intuitive Kanban board. Track progress and oversee multiple processes seamlessly."
+msgstr "Zarządzaj swoimi agentami AI jak zespołem, korzystając z intuicyjnej tablicy Kanban. Śledź postępy i nadzoruj wiele procesów bez zakłóceń."
 
 #: src/pages/documents/ContainerList.tsx:31
 msgid "Manage your document containers and their contents"
@@ -323,8 +326,8 @@ msgid "Marketing Description Generation"
 msgstr "Generowanie opisu marketingowego"
 
 #: src/components/tasks/ProcessRunner.tsx:178
-msgid "Mini View"
-msgstr "Widok mini"
+#~ msgid "Mini View"
+#~ msgstr "Widok mini"
 
 #: src/pages/documents/ContainerEdit.tsx:61
 msgid "Modify container details"
@@ -343,7 +346,7 @@ msgid "Multidisciplinary Learning Modules"
 msgstr "Multidyscyplinarne moduły edukacyjne"
 
 #: src/components/documents/ContainerForm.tsx:39
-#: src/pages/tasks/TaskTemplateList.tsx:59
+#: src/pages/tasks/TaskTemplateList.tsx:58
 msgid "Name"
 msgstr "Nazwa"
 
@@ -364,7 +367,7 @@ msgstr "Nowy kontener dokumentów"
 msgid "New task template"
 msgstr "Nowy szablon zadania"
 
-#: src/pages/tasks/TaskTemplateList.tsx:36
+#: src/pages/tasks/TaskTemplateList.tsx:35
 msgid "New Template"
 msgstr "Nowy szablon"
 
@@ -373,6 +376,7 @@ msgid "No containers found"
 msgstr "Nie znaleziono kontenerów"
 
 #: src/components/documents/ContainerCard.tsx:57
+#: src/pages/tasks/TaskTemplateList.tsx:86
 msgid "No description provided"
 msgstr "Brak opisu"
 
@@ -385,20 +389,24 @@ msgid "Optional target number of documents"
 msgstr "Opcjonalna docelowa liczba dokumentów"
 
 #: src/layouts/AdminDropdown.tsx:62
-msgid "PL"
-msgstr "Polski"
+#~ msgid "PL"
+#~ msgstr "Polski"
 
 #: src/components/tasks/TemplateList.tsx:32
 msgid "Preview"
 msgstr "Podgląd"
 
 #: src/pages/public/HomePage.tsx:92
-msgid "Process Templates"
-msgstr "Szablony procesów"
+#~ msgid "Process Templates"
+#~ msgstr "Szablony procesów"
 
-#: src/pages/public/HomePage.tsx:138
-msgid "Ready to Expand Your Context?"
-msgstr "Gotowy, aby rozszerzyć swój kontekst?"
+#: src/pages/public/HomePage.tsx:156
+msgid "Ready to Automate Your Business Processes?"
+msgstr "Gotowy, aby zautomatyzować swoje procesy biznesowe?"
+
+#: src/pages/public/HomePage.tsx:169
+msgid "Start Your First Project"
+msgstr "Rozpocznij swój pierwszy projekt"
 
 #: src/components/tasks/TemplateList.tsx:44
 msgid "Run"
@@ -413,46 +421,62 @@ msgstr "Zapisz zmiany"
 msgid "Search documents..."
 msgstr "Wyszukaj dokumenty..."
 
-#: src/components/tasks/ProcessRunner.tsx:187
+#: src/components/tasks/ProcesRunner/BottomToolbar.tsx:71
 msgid "Show Preview"
 msgstr "Pokaż podgląd"
 
+#: src/pages/public/HomePage.tsx:126
+msgid "Smart AI agents learn from your documents while executing tasks, building specialized knowledge for your business."
+msgstr "Inteligentni agenci AI uczą się z Twoich dokumentów podczas wykonywania zadań, tworząc wyspecjalizowaną bazę wiedzy na potrzeby Twojego biznesu."
+
 #: src/pages/public/HomePage.tsx:121
-msgid "Smart Document Management"
-msgstr "Inteligentne zarządzanie dokumentami"
+#~ msgid "Smart Document Management"
+#~ msgstr "Inteligentne zarządzanie dokumentami"
+
+#: src/pages/public/HomePage.tsx:159
+msgid ""
+"Transform your business cases into <0>automated workflows</0>. Let our <1>AI "
+"agents</1> handle the heavy lifting while building a <2>specialized knowledge "
+"base</2> for your needs. From <3>marketing campaigns</3> to <4>career "
+"development</4>, see how AI can streamline your processes today."
+msgstr ""
+"Przekształć swoje przypadki biznesowe w <0>zautomatyzowane przepływy pracy</0>. "
+"Pozwól naszym <1>agentom AI</1> zająć się ciężką pracą, jednocześnie tworząc "
+"<2>wyspecjalizowaną bazę wiedzy</2> dla Twoich potrzeb. Od <3>kampanii "
+"marketingowych</3> po <4>rozwój kariery</4> – zobacz, jak AI może usprawnić "
+"Twoje procesy już dziś."
+
+#: src/pages/public/HomePage.tsx:138
+#~ msgid "Smart Document Processing"
+#~ msgstr "Inteligentne przetwarzanie dokumentów"
 
 #: src/pages/public/HomePage.tsx:39
-msgid "Start Building"
-msgstr "Zacznij budować"
+#~ msgid "Start Building"
+#~ msgstr "Zacznij budować"
 
 #: src/pages/public/HomePage.tsx:141
-msgid "Start building your <0>knowledge base</0> today with our <1>intelligent task management</1> and <2>context expansion</2> system. <3>Create templates</3>, <4>manage workflows</4>, and watch your document context <5>grow naturally</5>."
-msgstr "Rozpocznij budowę swojej <0>bazy wiedzy</0> już dziś, korzystając z naszego systemu <1>inteligentnego zarządzania zadaniami</1> oraz <2>rozszerzania kontekstu</2>. <3>Twórz szablony</3>, <4>zarządzaj przepływami pracy</4> i obserwuj, jak kontekst Twoich dokumentów <5>naturalnie się rozwija</5>."
+#~ msgid ""
+#~ "Start building your <0>knowledge base</0> today with our <1>intelligent task "
+#~ "management</1> and <2>context expansion</2> system. <3>Create templates</3>, "
+#~ " <4>manage workflows</4>, and watch your document context <5>grow "
+#~ "naturally</5>."
+#~ msgstr ""
+#~ "Rozpocznij budowę swojej <0>bazy wiedzy</0> już dziś, korzystając z naszego "
+#~ "systemu <1>inteligentnego zarządzania zadaniami</1> oraz <2>rozszerzania "
+#~ "kontekstu</2>. <3>Twórz szablony</3>, <4>zarządzaj przepływami pracy</4> i "
+#~ "obserwuj, jak kontekst Twoich dokumentów <5>naturalnie się rozwija</5>."
 
-#: src/components/tasks/TemplateList.tsx:57
-msgid "Step {0}: {1}"
-msgstr "Krok {0}: {1}"
+#: src/pages/public/HomePage.tsx:142
+#~ msgid "Automatically analyze and extract insights from your documents - websites, PDFs, and spreadsheets."
+#~ msgstr "Automatycznie analizuj i wyciągaj wnioski z dokumentów – stron internetowych, plików PDF i arkuszy kalkulacyjnych."
 
-#: src/components/tasks/TemplateList.tsx:52
-msgid "Steps:"
-msgstr "Kroki:"
+#: src/pages/public/HomePage.tsx:38
+#~ msgid "THE CONTEXT"
+#~ msgstr "KONTEKST"
 
-#: src/pages/public/CaseStudiesPage.tsx:82
-msgid "Subsequent tasks include competitive analysis and developing a marketing strategy based on the prepared documents, ensuring consistency and effectiveness of actions."
-msgstr "Kolejne zadania obejmują analizę konkurencji oraz opracowanie strategii marketingowej na podstawie przygotowanych dokumentów, co zapewnia spójność i skuteczność działań."
-
-#: src/pages/tasks/TaskTemplateList.tsx:28
-msgid "Task Templates"
-msgstr "Szablony zadań"
-
-#: src/pages/tasks/TaskTemplateEdit.tsx:17
-#: src/pages/tasks/TaskTemplateRunner.tsx:15
-msgid "Template not found"
-msgstr "Nie znaleziono szablonu"
-
-#: src/pages/public/HomePage.tsx:26
-msgid "THE CONTEXT"
-msgstr "KONTEKST"
+#: src/pages/public/HomePage.tsx:65
+msgid "THE CONTEXT is a platform that automates your business workflows using AI. Upload your content, set your goals, and let our AI analyze and execute tasks automatically. The system learns from your data to deliver increasingly personalized results."
+msgstr "KONTEKST to platforma, która automatyzuje Twoje przepływy pracy w biznesie przy użyciu AI. Prześlij swoją zawartość, określ cele i pozwól, aby nasze AI automatycznie analizowało i realizowało zadania. System uczy się na podstawie Twoich danych, aby dostarczać coraz bardziej spersonalizowane wyniki."
 
 #: src/pages/public/CaseStudiesPage.tsx:25
 msgid "THE CONTEXT: Case Studies"
@@ -479,29 +503,17 @@ msgstr "Tej operacji nie można cofnąć. Spowoduje to trwałe usunięcie tego k
 msgid "Title"
 msgstr "Tytuł"
 
-#: src/pages/documents/ContainerList.tsx:79
-msgid "Try adjusting your search query or clear the filter."
-msgstr "Spróbuj zmienić zapytanie wyszukiwania lub wyczyść filtr."
-
-#: src/pages/public/CaseStudiesPage.tsx:136
-msgid "Using the national curriculum as input, the system automatically generates lesson plans, worksheets, and educational materials tailored to specific subjects and grade levels, ensuring perfect alignment with educational standards."
-msgstr "Wykorzystując krajowy program nauczania jako dane wejściowe, system automatycznie generuje plany lekcji, arkusze pracy oraz materiały edukacyjne dostosowane do konkretnych przedmiotów i poziomów nauczania, zapewniając pełną zgodność ze standardami edukacyjnymi."
-
-#: src/pages/documents/AllDocuments.tsx:74
-#: src/pages/documents/ContainerDocuments.tsx:77
-#: src/pages/documents/ContainerList.tsx:36
-#: src/pages/tasks/TaskTemplateList.tsx:47
-msgid "View"
-msgstr "Podgląd"
-
-#: src/pages/documents/AllDocuments.tsx:61
-msgid "View and manage all documents across containers"
-msgstr "Przeglądaj i zarządzaj wszystkimi dokumentami we wszystkich kontenerach"
-
-#: src/components/documents/ContainerActions.tsx:40
-msgid "View Documents"
-msgstr "Wyświetl dokumenty"
-
-#: src/pages/public/HomePage.tsx:48
+#: src/pages/public/HomePage.tsx:60
 msgid "What is THE CONTEXT?"
 msgstr "Czym jest KONTEKST?"
+
+#: src/pages/public/HomePage.tsx:42
+msgid ""
+"Your <0>AI-powered workflow platform</0> for<1>automating complex business "
+"processes</1>. From marketing campaigns to career planning, turn any business "
+"case into an actionable, AI-guided workflow."
+msgstr ""
+"Twoja <0>platforma do przepływów pracy opartych na AI</0>, służąca do <1>automatyzacji "
+"złożonych procesów biznesowych</1>. Od kampanii marketingowych po planowanie "
+"kariery – przekształć dowolny przypadek biznesowy w wykonalny, wspierany przez "
+"AI przepływ pracy."
