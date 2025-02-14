@@ -1,4 +1,3 @@
-// HomePage.tsx
 import { GoalPathwayChart } from "@/components/homepage/GoalPathwayChart";
 import TheContextCell from "@/components/homepage/TheContextCell";
 import { Button } from "@/components/ui/button";
@@ -8,9 +7,21 @@ import { ReactNode } from "react";
 import { AppLink } from "@/components/AppLink";
 import { Trans } from "@lingui/macro";
 
-const HighlightedText = ({ children }: { children: ReactNode }) => {
+const Hl = ({
+  children,
+  variant = "default",
+}: {
+  children: ReactNode;
+  variant?: "default" | "yellow" | "green";
+}) => {
+  const gradients = {
+    default: "from-primary/5 to-primary/0",
+    yellow: "from-yellow-50/50 to-yellow-50/0",
+    green: "from-green-100/50 to-green-100/0",
+  };
+
   return (
-    <span className="bg-gradient-to-r from-primary/5 to-primary/0 px-1 rounded">
+    <span className={`bg-gradient-to-r ${gradients[variant]} px-1 rounded`}>
       {children}
     </span>
   );
@@ -27,16 +38,17 @@ const HomePage = () => {
           </h1>
         </div>
 
-        <p className="py-2 text-base sm:text-lg text-muted-foreground">
+        <p className="py-2 text-base sm:text-xl text-muted-foreground">
           <Trans>
-            Build and expand your knowledge context through structured task
-            templates, interactive Kanban boards, and AI-powered document
-            management.
+            Your <Hl variant="yellow">AI-powered workflow platform</Hl> for
+            <Hl variant="yellow">automating complex business processes</Hl>.
+            From marketing campaigns to career planning, turn any business case
+            into an actionable, AI-guided workflow.
           </Trans>
         </p>
         <AppLink to="/tasks/templates" admin>
           <Button size="lg" className="mt-4">
-            <Trans>Start Building</Trans>
+            <Trans>Create Your Workflow</Trans>
           </Button>
         </AppLink>
       </header>
@@ -51,11 +63,10 @@ const HomePage = () => {
           <CardContent>
             <p className="mb-6 leading-relaxed text-muted-foreground">
               <Trans>
-                Context Builder is an intelligent task management system that
-                combines customizable templates, Kanban workflows, and AI-powered
-                document context expansion. It helps you create structured
-                pathways for complex tasks while automatically building and
-                maintaining relevant knowledge context.
+                THE CONTEXT is a platform that automates your business workflows
+                using AI. Upload your content, set your goals, and let our AI
+                analyze and execute tasks automatically. The system learns from
+                your data to deliver increasingly personalized results.
               </Trans>
             </p>
             <GoalPathwayChart />
@@ -63,94 +74,99 @@ const HomePage = () => {
         </Card>
 
         <Card className="shadow-md hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle className="text-xl sm:text-2xl">
-              <Trans>Core Features</Trans>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-6 text-muted-foreground">
-              <li className="flex items-start space-x-3">
-                <Layout className="w-8 h-8 mt-1" />
-                <div>
-                  <strong>
-                    <Trans>Kanban Task Management</Trans>
-                  </strong>
-                  <p className="leading-relaxed">
-                    <Trans>
-                      Create and manage task workflows with customizable templates
-                      and dependency tracking through an intuitive Kanban board
-                      interface.
-                    </Trans>
-                  </p>
-                </div>
-              </li>
-              <li className="flex items-start space-x-3">
-                <GitBranch className="w-8 h-8 mt-1" />
-                <div>
-                  <strong>
-                    <Trans>Process Templates</Trans>
-                  </strong>
-                  <p className="leading-relaxed">
-                    <Trans>
-                      Design reusable task templates with step-by-step processes,
-                      dependencies, and integrated plugins for consistent workflow
-                      execution.
-                    </Trans>
-                  </p>
-                </div>
-              </li>
-              <li className="flex items-start space-x-3">
-                <Brain className="w-8 h-8 mt-1" />
-                <div>
-                  <strong>
-                    <Trans>Context Expansion</Trans>
-                  </strong>
-                  <p className="leading-relaxed">
-                    <Trans>
-                      AI-powered system that automatically expands and maintains
-                      document context as you work through tasks and templates.
-                    </Trans>
-                  </p>
-                </div>
-              </li>
-              <li className="flex items-start space-x-3">
-                <FileText className="w-8 h-8 mt-1" />
-                <div>
-                  <strong>
-                    <Trans>Smart Document Management</Trans>
-                  </strong>
-                  <p className="leading-relaxed">
-                    <Trans>
-                      Intelligent document handling that grows with your tasks,
-                      creating a dynamic knowledge base tied to your workflows.
-                    </Trans>
-                  </p>
-                </div>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
+  <CardHeader>
+    <CardTitle className="text-xl sm:text-2xl">
+      <Trans>Core Features</Trans>
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    <ul className="space-y-6 text-muted-foreground">
+      <li className="flex items-start space-x-3">
+        <Layout className="w-8 h-8 mt-1" />
+        <div>
+          <Hl variant="green">
+            <strong className="text-black">
+              <Trans>AI Workflow Management</Trans>
+            </strong>
+          </Hl>
+          <p className="leading-relaxed">
+            <Trans>
+              Manage your AI agents like a team using our intuitive
+              Kanban board. Track progress and oversee multiple
+              processes seamlessly.
+            </Trans>
+          </p>
+        </div>
+      </li>
+      <li className="flex items-start space-x-3">
+        <GitBranch className="w-8 h-8 mt-1" />
+        <div>
+          <Hl variant="green">
+            <strong className="text-black">
+              <Trans>Business Case Templates</Trans>
+            </strong>
+          </Hl>
+          <p className="leading-relaxed">
+            <Trans>
+              Convert any business scenario into an automated workflow
+              with pre-built or custom templates.
+            </Trans>
+          </p>
+        </div>
+      </li>
+      <li className="flex items-start space-x-3">
+        <Brain className="w-8 h-8 mt-1" />
+        <div>
+          <Hl variant="green">
+            <strong className="text-black">
+              <Trans>AI Agents & Learning</Trans>
+            </strong>
+          </Hl>
+          <p className="leading-relaxed">
+            <Trans>
+              Smart AI agents learn from your documents while executing
+              tasks, building specialized knowledge for your business.
+            </Trans>
+          </p>
+        </div>
+      </li>
+      <li className="flex items-start space-x-3">
+        <FileText className="w-8 h-8 mt-1" />
+        <div>
+          <Hl variant="green">
+            <strong className="text-black">
+              <Trans>Smart Document Processing</Trans>
+            </strong>
+          </Hl>
+          <p className="leading-relaxed">
+            <Trans>
+              Automatically analyze and extract insights from your
+              documents - websites, PDFs, and spreadsheets.
+            </Trans>
+          </p>
+        </div>
+      </li>
+    </ul>
+  </CardContent>
+</Card>
       </section>
 
       <section className="mx-auto max-w-2xl text-center space-y-4">
         <h2 className="font-semibold text-2xl sm:text-3xl">
-          <Trans>Ready to Expand Your Context?</Trans>
+          <Trans>Ready to Automate Your Business Processes?</Trans>
         </h2>
         <p className="leading-relaxed text-muted-foreground">
           <Trans>
-            Start building your <HighlightedText>knowledge base</HighlightedText>{" "}
-            today with our{" "}
-            <HighlightedText>intelligent task management</HighlightedText> and{" "}
-            <HighlightedText>context expansion</HighlightedText> system.{" "}
-            <HighlightedText>Create templates</HighlightedText>,{" "}
-            <HighlightedText>manage workflows</HighlightedText>, and watch your
-            document context <HighlightedText>grow naturally</HighlightedText>.
+            Transform your business cases into <Hl>automated workflows</Hl>. Let
+            our <Hl>AI agents</Hl> handle the heavy lifting while building a{" "}
+            <Hl>specialized knowledge base</Hl> for your needs. From{" "}
+            <Hl>marketing campaigns</Hl> to <Hl>career development</Hl>, see how
+            AI can streamline your processes today.
           </Trans>
         </p>
         <AppLink to="/tasks/templates" admin>
           <Button size="lg" className="mt-4">
-            <Trans>Create Your First Template</Trans>
+            <Trans>Start Your First Project</Trans>
           </Button>
         </AppLink>
       </section>

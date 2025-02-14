@@ -1,104 +1,117 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/plugins/webPageAnalyser/RuntimeComponent.tsx
 import React, { useState } from "react";
 import { PluginRuntimeProps } from "../base";
 import { WebPageAnalyserConfig, WebPageAnalyserRuntimeData } from "./types";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useDocumentsStore } from "@/store/documentsStore";
+import { useAuthState } from "@/hooks/useAuthState";
+import { analyserModule } from "./runtimeModules/analyserModule";
+import { documentModule } from "./runtimeModules/documentModule";
+import { truncate } from "@/services/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Loader } from "lucide-react";
+
+interface ApiError {
+  code: string;
+  message: string;
+}
 
 export const RuntimeComponent: React.FC<PluginRuntimeProps> = ({
   config,
-  // data,
   context,
   onDataChange,
   onStatusChange,
 }) => {
   const analyserConfig = config as WebPageAnalyserConfig;
-  // const analyserData = (data as WebPageAnalyserRuntimeData) || {};
-
   const { addDocument, addContainer } = useDocumentsStore();
-  const [selectedDomain, setSelectedDomain] = useState<string>("");
+  const { user, loading } = useAuthState();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string>("");
-  const [error, setError] = useState<string | null>(null);
-
-  // Lista kroków (wcześniejsze wykonane taski) pobieramy z context
-  const previousSteps = context.previousSteps || [];
-
-  const handleSelectDomain = (stepId: string) => {
-    setSelectedDomain(stepId);
-  };
+  const [error, setError] = useState<ApiError | null>(null);
 
   const startAnalysis = async () => {
-    if (!selectedDomain) {
-      setError("Wybierz domenę z listy kroków");
+    if (!analyserConfig.selectedStepId) {
+      setError({
+        code: 'STEP_REQUIRED',
+        message: 'No step selected'
+      });
       return;
     }
+
+    if (!user) {
+      setError({
+        code: 'AUTH_REQUIRED',
+        message: 'You must be logged in to analyze websites'
+      });
+      return;
+    }
+
     setError(null);
     setIsAnalyzing(true);
+
     try {
-      // Znajdź wybrany krok – przyjmujemy, że ma on właściwość id i opcjonalnie data.domain
-      const selectedStep = previousSteps.find(
-        (step: any) => step.id === selectedDomain
+      const selectedStep = context.previousSteps[0];
+      const targetUrl = selectedStep?.data?.answer;
+      
+      if (!targetUrl) {
+        throw {
+          code: 'URL_NOT_FOUND',
+          message: 'URL not found in selected step'
+        };
+      }
+
+      // Using Analyser Module
+      const result = await analyserModule.analyzeWebPage(
+        analyserConfig.analysisType,
+        targetUrl,
+        user
       );
-      const url = selectedStep?.data?.domain || selectedDomain;
 
-      // Endpoint zależny od wybranej opcji
-      const endpoint = `/analyze-website/${analyserConfig.analysisType}?url=${encodeURIComponent(
-        url
-      )}`;
-
-      const response = await fetch(endpoint, { method: "GET" });
-      if (!response.ok) {
-        throw new Error("Błąd analizy strony");
+      if (!result.success || !result.content) {
+        throw {
+          code: 'INVALID_RESPONSE',
+          message: 'Invalid API response format'
+        };
       }
-      const result = await response.json();
-      const content = result.content; // Zakładamy, że API zwraca { content: string }
 
-      setAnalysisResult(content);
+      setAnalysisResult(result.content);
 
-      // Zapis dokumentu – podobnie jak w GenerateDocPlugin
-      const containerId = Date.now().toString();
-      if (analyserConfig.containerName) {
-        addContainer({
-          name: analyserConfig.containerName,
-          description: `Container for ${analyserConfig.documentName}`,
-        });
-      }
-      const newDocument = {
-        title: analyserConfig.documentName,
-        content,
-        documentContainerId: containerId,
-        order: 0,
-        metadata: {
-          generatedFrom: "WebPageAnalyser",
-          timestamp: new Date().toISOString(),
-        },
-      };
-      addDocument(newDocument);
+      // Using Document Module
+      documentModule.saveDocument(
+        { addDocument, addContainer },
+        analyserConfig.documentName,
+        analyserConfig.containerName,
+        result.content
+      );
 
       const newData: WebPageAnalyserRuntimeData = {
-        selectedDomain: url,
-        analysisResult: content,
+        analysisResult: result.content,
         messages: [
           {
             role: "system",
-            content: `Analysis started: ${analyserConfig.analysisType} for ${url}`,
+            content: `Analysis started: ${analyserConfig.analysisType} for ${targetUrl}`,
           },
           {
             role: "assistant",
-            content,
+            content: result.content,
           },
         ],
       };
+      
       onDataChange(newData);
       onStatusChange(true);
-    } catch (err: any) {
-      setError(err.message || "Nie udało się przeprowadzić analizy");
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'code' in error) {
+        const apiError = error as ApiError;
+        setError(apiError);
+      } else {
+        setError({
+          code: 'UNKNOWN_ERROR',
+          message: error instanceof Error ? error.message : 'An unexpected error occurred'
+        });
+      }
+      console.error("Analysis error:", error);
     } finally {
       setIsAnalyzing(false);
     }
@@ -108,44 +121,43 @@ export const RuntimeComponent: React.FC<PluginRuntimeProps> = ({
     <div className="space-y-6">
       {error && (
         <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>
+            <div className="flex flex-col gap-1">
+              <span className="font-semibold">{error.code}</span>
+              <span>{error.message}</span>
+            </div>
+          </AlertDescription>
         </Alert>
       )}
-      <Card>
-        <CardHeader>
-          <CardTitle>Wybierz domenę (krok)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {previousSteps.length === 0 && <p>Brak wcześniejszych kroków</p>}
-            {previousSteps.map((step: any) => (
-              <div key={step.id} className="flex items-center space-x-2">
-                <Checkbox
-                  checked={selectedDomain === step.id}
-                  onCheckedChange={() => handleSelectDomain(step.id)}
-                />
-                <Label>{step.data?.domain || `Krok ${step.id}`}</Label>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-      <div className="flex justify-end">
+
+      <div className="w-full">
         <Button
           onClick={startAnalysis}
-          disabled={isAnalyzing}
-          className="bg-primary text-primary-foreground hover:bg-primary/90"
+          disabled={isAnalyzing || loading || !user || !analyserConfig.selectedStepId}
+          className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
         >
-          {isAnalyzing ? "Analizowanie..." : "Start Analysis"}
+          {isAnalyzing ? (
+            <span className="flex items-center gap-2">
+              <Loader className="h-4 w-4 animate-spin" />
+              Analyzing...
+            </span>
+          ) : (
+            "Start Analysis"
+          )}
         </Button>
       </div>
+
       {analysisResult && (
-        <Card>
+        <Card className="h-96">
           <CardHeader>
-            <CardTitle>Wynik analizy</CardTitle>
+            <CardTitle>Analysis Result</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p>{analysisResult}</p>
+          <CardContent className="p-0">
+            <ScrollArea className="h-72 rounded-md">
+              <div className="p-4">
+                <p>{truncate(analysisResult, 4096)}</p>
+              </div>
+            </ScrollArea>
           </CardContent>
         </Card>
       )}

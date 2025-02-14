@@ -36,12 +36,12 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
     description: template?.description || "",
   });
   const [dialogState, setDialogState] = useState<{
-    type: 'add' | 'edit' | null;
+    type: "add" | "edit" | null;
     stepId?: string;
     isOpen: boolean;
   }>({
     type: null,
-    isOpen: false
+    isOpen: false,
   });
 
   const handleAddStep = (step: Step) => {
@@ -66,7 +66,7 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
     setDialogState({ type: null, isOpen: false });
   };
 
-  const handleOpenDialog = (type: 'add' | 'edit', stepId?: string) => {
+  const handleOpenDialog = (type: "add" | "edit", stepId?: string) => {
     setDialogState({ type, stepId, isOpen: true });
   };
 
@@ -93,25 +93,28 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
   };
 
   const getDialogContent = () => {
-    const step = dialogState.stepId 
-      ? steps.find(s => s.id === dialogState.stepId)
+    const step = dialogState.stepId
+      ? steps.find((s) => s.id === dialogState.stepId)
       : undefined;
 
     return (
       <Dialog open={dialogState.isOpen} onOpenChange={handleCloseDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {dialogState.type === 'add' ? 'Add New Step' : 'Edit Step'}
-            </DialogTitle>
-          </DialogHeader>
-          <StepEditor 
-            step={step}
-            onSubmit={dialogState.type === 'add' ? handleAddStep : handleUpdateStep}
-            onCancel={handleCloseDialog}
-          />
-        </DialogContent>
-      </Dialog>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
+            {dialogState.type === "add" ? "Add New Step" : "Edit Step"}
+          </DialogTitle>
+        </DialogHeader>
+        <StepEditor
+          step={step}
+          allSteps={steps}
+          onSubmit={
+            dialogState.type === "add" ? handleAddStep : handleUpdateStep
+          }
+          onCancel={handleCloseDialog}
+        />
+      </DialogContent>
+    </Dialog>
     );
   };
 
@@ -155,10 +158,6 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
       <Card className="border-0 md:border shadow-none md:shadow">
         <CardHeader className="px-3 md:px-6 space-y-2 *:flex flex-row items-center justify-between border border-dashed border-t-black md:border-0">
           <CardTitle>Steps</CardTitle>
-          <Button onClick={() => handleOpenDialog('add')} size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Step
-          </Button>
         </CardHeader>
         <CardContent className="px-3 md:px-6 space-y-2">
           {steps.map((step) => (
@@ -177,7 +176,7 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleOpenDialog('edit', step.id)}
+                    onClick={() => handleOpenDialog("edit", step.id)}
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>
@@ -195,6 +194,16 @@ export const TemplateEditor: FC<TemplateEditorProps> = ({
             </Card>
           ))}
         </CardContent>
+        <div className="flex justify-end px-3 md:p-6 pt-0 -mt-6">
+          <Button
+            variant={"outline"}
+            onClick={() => handleOpenDialog("add")}
+            size="sm"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Step
+          </Button>
+        </div>
       </Card>
 
       <div className="flex justify-end">

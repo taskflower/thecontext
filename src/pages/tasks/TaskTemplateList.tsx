@@ -14,7 +14,6 @@ import { useTasksStore } from "@/store/tasksStore";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { truncate } from "@/services/utils";
 import TemplateActions from "@/components/tasks/templatesList/TemplateActions";
-// Importujemy jako named export – tak jak jest w pliku:
 import { TaskTemplateEmptyState } from "@/components/tasks/taskTemplateLstPage/TaskTemplateEmptyState";
 import { Trans } from "@lingui/macro";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
@@ -81,7 +80,12 @@ export const TaskTemplateList = () => {
                     </TableCell>
                     <TableCell className="hidden md:table-cell px-3">
                       <span className="text-muted-foreground">
-                        {truncate(template.description, 100)}
+                        {template.description ? 
+                          truncate(template.description, 100) : 
+                          <span className="italic text-muted-foreground">
+                            <Trans>No description provided</Trans>
+                          </span>
+                        }
                       </span>
                     </TableCell>
                     <TableCell className="px-3">

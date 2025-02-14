@@ -1,4 +1,4 @@
-// StepEditor.tsx
+// src/components/tasks/editor/StepEditor.tsx
 import { FC, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { plugins } from "@/plugins";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Step } from "@/types/template";
 import { Textarea } from "@/components/ui/textarea";
+import { PluginStepContext, PluginDefinition } from "@/plugins/base";
 import {
   Sheet,
   SheetContent,
@@ -19,11 +20,17 @@ import { Check } from "lucide-react";
 
 interface StepEditorProps {
   step?: Step;
+  allSteps?: Step[];
   onSubmit: (step: Step) => void;
   onCancel: () => void;
 }
 
-export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit, onCancel }) => {
+export const StepEditor: FC<StepEditorProps> = ({
+  step,
+  allSteps = [],
+  onSubmit,
+  onCancel,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [stepData, setStepData] = useState<Step>({
     id: step?.id || Date.now().toString(),
@@ -35,8 +42,18 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit, onCancel }) =>
   });
   const [isValid, setIsValid] = useState(false);
 
-  const selectedPlugin = plugins[stepData.pluginId];
+  const selectedPlugin = plugins[stepData.pluginId] as PluginDefinition | undefined;
   const ConfigComponent = selectedPlugin?.ConfigComponent;
+
+  const currentStepIndex = step ? allSteps.findIndex(s => s.id === step.id) : allSteps.length;
+  const previousSteps = allSteps.slice(0, currentStepIndex);
+  
+  const stepContext: PluginStepContext = {
+    currentStep: currentStepIndex,
+    totalSteps: allSteps.length,
+    previousSteps: previousSteps.map(s => s.data),
+    availableSteps: previousSteps  // Dodajemy wymagane pole
+  };
 
   useEffect(() => {
     if (selectedPlugin?.initialize) {
@@ -69,7 +86,7 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit, onCancel }) =>
     }
   };
 
-  const pluginsList = Object.entries(plugins);
+  const pluginsList = Object.entries(plugins) as [string, PluginDefinition][];
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -106,8 +123,8 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit, onCancel }) =>
               className="w-full justify-between"
             >
               <div className="flex items-center gap-2">
-                {stepData.pluginId && plugins[stepData.pluginId].icon}
-                {stepData.pluginId ? plugins[stepData.pluginId].name : "Select plugin"}
+                {stepData.pluginId && selectedPlugin?.icon}
+                {stepData.pluginId ? selectedPlugin?.name : "Select plugin"}
               </div>
               <span className="ml-2 text-muted-foreground">⌘K</span>
             </Button>
@@ -139,7 +156,9 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit, onCancel }) =>
                       )}
                     </div>
                     {plugin.description && (
-                      <p className="mt-1 text-sm text-muted-foreground">{plugin.description}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {plugin.description}
+                      </p>
                     )}
                   </div>
                 ))}
@@ -157,6 +176,7 @@ export const StepEditor: FC<StepEditorProps> = ({ step, onSubmit, onCancel }) =>
           <CardContent className="p-4">
             <ConfigComponent
               config={stepData.config}
+              context={stepContext}
               onConfigChange={handleConfigChange}
               onStatusChange={setIsValid}
             />

@@ -8,28 +8,33 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Menu, LayoutDashboard, LogOut, Coins, User } from "lucide-react";
-import { auth } from "@/firebase/config";
+import {
+  ChevronDown,
+  Menu,
+  LayoutDashboard,
+  LogOut,
+  Coins,
+  User,
+} from "lucide-react";
 import { getPathWithLanguage } from "@/utils/routeHelpers";
 import { Trans } from "@lingui/macro";
 import { useAuthState } from "@/hooks/useAuthState";
+import { authService } from "@/services/authService";
+import { AppLink } from "@/components/AppLink";
 
-interface AdminDropdownProps {
-  dashboardActiveClass: string;
-}
-
-export const AdminDropdown = ({ dashboardActiveClass }: AdminDropdownProps) => {
+export const AdminDropdown = () => {
   const { lang } = useParams<{ lang: string }>();
   const currentLang = lang || "en";
   const location = useLocation();
 
   const { user, backendUser } = useAuthState();
+  const isTemplatesPage = location.pathname.includes('/tasks/templates');
 
   const handleLogout = async () => {
     try {
-      await auth.signOut();
+      await authService.signOut();
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     }
   };
 
@@ -58,7 +63,9 @@ export const AdminDropdown = ({ dashboardActiveClass }: AdminDropdownProps) => {
                 {backendUser && (
                   <p className="text-xs text-muted-foreground flex items-center gap-2">
                     <Coins className="h-3 w-3" />
-                    <Trans>Available tokens: {backendUser.availableTokens}</Trans>
+                    <Trans>
+                      Available tokens: {backendUser.availableTokens}
+                    </Trans>
                   </p>
                 )}
               </div>
@@ -67,13 +74,14 @@ export const AdminDropdown = ({ dashboardActiveClass }: AdminDropdownProps) => {
           </>
         )}
         <DropdownMenuItem asChild>
-          <Link
-            to={`/admin/${currentLang}/boards/instances`}
-            className={dashboardActiveClass}
+          <AppLink 
+            className={`w-full ${isTemplatesPage ? 'bg-accent text-accent-foreground' : ''}`}
+            to="/tasks/templates" 
+            admin
           >
             <LayoutDashboard className="mr-2 h-4 w-4" />
             <Trans>Dashboard</Trans>
-          </Link>
+          </AppLink>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <div className="py-1.5">
@@ -86,7 +94,7 @@ export const AdminDropdown = ({ dashboardActiveClass }: AdminDropdownProps) => {
                   : "text-muted-foreground hover:bg-muted-foreground/10"
               }`}
             >
-              <Trans>PL</Trans>
+              PL
             </Link>
             <Link
               to={getPathWithLanguage(location.pathname, currentLang, "en")}
@@ -96,7 +104,7 @@ export const AdminDropdown = ({ dashboardActiveClass }: AdminDropdownProps) => {
                   : "text-muted-foreground hover:bg-muted-foreground/10"
               }`}
             >
-              <Trans>EN</Trans>
+              EN
             </Link>
           </div>
         </div>

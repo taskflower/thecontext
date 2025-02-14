@@ -1,7 +1,6 @@
-// src/pages/settings/Settings.tsx
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Settings2 } from "lucide-react";
+import { Settings2, Users } from "lucide-react"; // Added Users import
 import { useNavigate, useParams } from "react-router-dom";
 import { GoogleDriveIntegration } from "./GoogleDriveIntegration";
 import { DataManagement } from "./DataManagement";
@@ -17,6 +16,7 @@ export const Settings = () => {
       description="Manage your app settings"
       actions={
         <Button className="gap-2" onClick={() => navigate(`/admin/${lang}/users`)}>
+          <Users className="h-4 w-4" /> {/* Added Users icon */}
           Users
         </Button>
       }

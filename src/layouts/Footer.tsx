@@ -14,7 +14,7 @@ export const Footer = () => {
         <polygon fill="currentColor" points="100,0 100,50 0,50" />
       </svg>
 
-      <footer className="bg-black py-8 text-center text-sm text-white">
+      <footer className="bg-black py-8 text-center text-sm text-white  pb-20">
         <div className="container mx-auto px-4 flex justify-end gap-2">
           <nav className="mb-4">
             {/* Używamy linku względnego – zakładając, że jesteśmy w obrębie ścieżki /:lang */}
@@ -25,7 +25,7 @@ export const Footer = () => {
           <span>/</span>
           <p>&copy; 2025 thecontext.onrender.com</p>
           <span>/</span>
-          <p>ver 0.7.13</p>
+          <p>ver 0.8.2</p>
         </div>
       </footer>
     </div>

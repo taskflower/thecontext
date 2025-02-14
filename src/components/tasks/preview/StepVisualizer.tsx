@@ -101,6 +101,7 @@ const StepVisualizer = ({
               className="p-1 rounded inline-flex bg-gray-100 items-center gap-1 text-xs text-gray-900 hover:text-foreground"
             >
               <MessageCircle className="h-4 w-4" />
+              <span>Generated messages</span>
               {isMessagesOpen ? (
                 <ChevronUp className="h-3 w-3" />
               ) : (

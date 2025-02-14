@@ -2,6 +2,7 @@
 // src/plugins/base.ts
 import React from "react";
 import { MessageRole } from "@/types/common";
+import { Step } from "@/types/template";
 
 export interface LLMMessage {
   role: MessageRole;
@@ -9,29 +10,28 @@ export interface LLMMessage {
 }
 
 export interface PluginStepContext {
+  user: any;
   currentStep: number;
   totalSteps: number;
   previousSteps: PluginRuntimeData[];
+  availableSteps: Step[];
 }
 
-// Base interface for plugin configuration
 export interface PluginConfig {
   [key: string]: any;
 }
 
-// Base interface for runtime data
 export interface PluginRuntimeData {
   [key: string]: any;
 }
 
-// Props for configuration component
 export interface PluginConfigProps {
   config: PluginConfig;
+  context?: PluginStepContext;
   onConfigChange: (config: PluginConfig) => void;
   onStatusChange: (isValid: boolean) => void;
 }
 
-// Props for runtime component
 export interface PluginRuntimeProps {
   config: PluginConfig;
   data: PluginRuntimeData;
@@ -44,13 +44,9 @@ export interface PluginDefinition {
   id: string;
   name: string;
   description: string;
-  icon?: React.ReactNode; // nowa właściwość
-
-  // UI Components
+  icon?: React.ReactNode;
   ConfigComponent: React.ComponentType<PluginConfigProps>;
   RuntimeComponent: React.ComponentType<PluginRuntimeProps>;
-
-  // Logic
   initialize?: (config?: PluginConfig) => Promise<void>;
   validate: (
     config: PluginConfig,

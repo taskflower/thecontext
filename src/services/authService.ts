@@ -1,6 +1,7 @@
 // src/services/authService.ts
 import { auth, googleProvider } from '@/firebase/config';
 import { signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth';
+import { tokenService } from './tokenService';
 
 export interface AuthUser {
   uid: string;
@@ -42,7 +43,8 @@ export class AuthService {
   // Wylogowanie
   async signOut(): Promise<void> {
     try {
-      await firebaseSignOut(auth);
+      await firebaseSignOut(auth); // Zostawiamy to - to jest wylogowanie z Firebase
+      tokenService.clearCache(); // Dodajemy czyszczenie tokena
     } catch (error) {
       console.error('Error signing out:', error);
       throw error;
@@ -60,25 +62,19 @@ export class AuthService {
 
   // Sprawdzenie statusu autoryzacji
   async checkAuthStatus(): Promise<AuthUser | null> {
-    const token = await this.getCurrentUserToken();
-    if (!token) return null;
-
-    try {
-      const response = await fetch(`${this.API_URL}/api/v1/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) return null;
-
-      const data = await response.json();
-      return data.user;
-    } catch (error) {
-      console.error('Error checking auth status:', error);
-      return null;
-    }
+    const user = auth.currentUser;
+    if (!user) return null;
+    
+    // Możemy od razu stworzyć obiekt AuthUser z danych z Firebase
+    return {
+      uid: user.uid,
+      email: user.email || '',
+      // Jeśli potrzebujemy dodatkowych danych specyficznych dla aplikacji,
+      // możemy je pobrać z Firestore
+      availableTokens: 0, // domyślna wartość lub z cache
+      createdAt: new Date(user.metadata.creationTime || Date.now()),
+      lastLoginAt: new Date(user.metadata.lastSignInTime || Date.now())
+    };
   }
 }
 

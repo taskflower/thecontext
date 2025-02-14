@@ -1,16 +1,14 @@
 import { FC, useState, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { PanelRightOpen, PanelRightClose, LayoutGrid, List } from "lucide-react";
 import { plugins } from "@/plugins";
 import { Template } from "@/types/template";
 import { LLMMessage, PluginRuntimeData } from "@/plugins/base";
 import StepsPreview from "./preview/StepsPreview";
-import { Separator } from "@/components/ui/separator";
 import InvalidTemplate from "./ProcesRunner/InvalidTemplate";
 import StepDisplayCard from "./preview/StepDisplayCard";
 import StepDisplayMini from "./preview/StepDisplayMini";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Trans } from "@lingui/macro";
+import BottomToolbar from "./ProcesRunner/BottomToolbar";
+
+
 
 interface ProcessRunnerProps {
   template: Template;
@@ -37,33 +35,24 @@ export const ProcessRunner: FC<ProcessRunnerProps> = ({
   const [isPanelOpen, setIsPanelOpen] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("card");
 
-  // Inicjalizacja stanu kroków
-  const initialStepsState: StepState[] = template?.steps?.map((step) => {
-    const plugin = plugins[step.pluginId];
-    if (plugin) {
-      return {
-        data: {
-          answer: "",
-          isConfirmed: false,
-          ...(step.config || {}),
-          role: "user",
-        },
-        isValid: false,
-      };
-    }
-    return {
-      data: {},
-      isValid: false,
-    };
-  }) || [];
+  // Initialize step states
+  const initialStepsState: StepState[] = template?.steps?.map((step) => ({
+    data: {
+      answer: "",
+      isConfirmed: false,
+      ...(step.config || {}),
+      role: "user",
+    },
+    isValid: false,
+  })) || [];
 
   const [stepsState, setStepsState] = useState<StepState[]>(initialStepsState);
 
-  // Wszystkie hooki muszą być zadeklarowane przed jakimkolwiek warunkowym returnem
   const handleDataChange = useCallback((newData: PluginRuntimeData) => {
     setStepsState((prev) => {
       const updatedSteps = [...prev];
-      const messages = plugin.generateMessages(currentStep.config, newData);
+      const plugin = plugins[template.steps[currentStepIndex].pluginId];
+      const messages = plugin.generateMessages(template.steps[currentStepIndex].config, newData);
       updatedSteps[currentStepIndex] = {
         ...updatedSteps[currentStepIndex],
         data: newData,
@@ -72,7 +61,7 @@ export const ProcessRunner: FC<ProcessRunnerProps> = ({
       };
       return updatedSteps;
     });
-  }, [currentStepIndex]);
+  }, [currentStepIndex, template.steps]);
 
   const handleStatusChange = useCallback((isValid: boolean) => {
     setStepsState((prev) => {
@@ -85,12 +74,10 @@ export const ProcessRunner: FC<ProcessRunnerProps> = ({
     });
   }, [currentStepIndex]);
 
-  // Early return musi być po wszystkich hookach
   if (!template?.steps?.length) {
     return <InvalidTemplate onBack={onBack} onEdit={onEdit} />;
   }
 
-  // Od tego momentu wiemy, że template i steps istnieją
   const currentStep = template.steps[currentStepIndex];
   const plugin = plugins[currentStep.pluginId];
   
@@ -161,35 +148,12 @@ export const ProcessRunner: FC<ProcessRunnerProps> = ({
             onStatusChange={handleStatusChange}
           />
 
-          <div className="fixed bottom-0 right-0 w-full bg-zinc-50 z-20">
-            <Separator />
-            <div className="p-3 flex justify-end items-center gap-3">
-              <ToggleGroup
-                variant="outline"
-                type="single"
-                value={viewMode}
-                onValueChange={(value: string) => setViewMode(value as ViewMode)}
-              >
-                <ToggleGroupItem value="card" aria-label="Card View">
-                  <LayoutGrid className="h-4 w-4 mr-2" />
-                  <Trans>Card View</Trans>
-                </ToggleGroupItem>
-                <ToggleGroupItem value="mini" aria-label="Mini View">
-                  <List className="h-4 w-4 mr-2" />
-                  <Trans>Mini View</Trans>
-                </ToggleGroupItem>
-              </ToggleGroup>
-
-              <Button variant="outline" onClick={togglePanel}>
-                {isPanelOpen ? <PanelRightClose /> : <PanelRightOpen />}
-                {isPanelOpen ? (
-                  <Trans>Hide Preview</Trans>
-                ) : (
-                  <Trans>Show Preview</Trans>
-                )}
-              </Button>
-            </div>
-          </div>
+          <BottomToolbar 
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            isPanelOpen={isPanelOpen}
+            togglePanel={togglePanel}
+          />
         </div>
       </div>
     </div>
