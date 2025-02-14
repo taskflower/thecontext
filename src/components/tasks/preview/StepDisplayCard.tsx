@@ -78,6 +78,8 @@ export const StepDisplayCard: FC<StepDisplayProps> = ({
                 currentStep: currentStepIndex + 1,
                 totalSteps: template.steps.length,
                 previousSteps: stepsState.slice(0, currentStepIndex),
+                user: undefined, // or some other value, depending on your requirements
+                availableSteps: [], // or some other value, depending on your requirements
               }}
             />
           )}

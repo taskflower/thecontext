@@ -52,7 +52,9 @@ export const StepEditor: FC<StepEditorProps> = ({
     currentStep: currentStepIndex,
     totalSteps: allSteps.length,
     previousSteps: previousSteps.map(s => s.data),
-    availableSteps: previousSteps  // Dodajemy wymagane pole
+    availableSteps: previousSteps // Dodajemy wymagane pole
+    ,
+    user: undefined
   };
 
   useEffect(() => {

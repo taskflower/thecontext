@@ -11,7 +11,7 @@ export const Navbar = () => {
   const location = useLocation();
   const { currentLang } = useLanguage();
 
-  const isAdminSection = location.pathname.includes("/admin/");
+
 
   const getNavLinkClass = ({ isActive }: { isActive: boolean }) =>
     `text-sm font-medium transition-colors hover:text-primary p-3 rounded bg-muted md:bg-white ${
@@ -54,9 +54,7 @@ export const Navbar = () => {
           <div>
             {user ? (
               <AdminDropdown
-                dashboardActiveClass={getNavLinkClass({
-                  isActive: isAdminSection,
-                })}
+              
               />
             ) : (
               <Button variant="default" asChild>
