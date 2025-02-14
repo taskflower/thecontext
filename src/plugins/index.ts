@@ -3,11 +3,13 @@ import { PluginMap } from "./base";
 import { FormPlugin } from "./form";
 import { GenerateDocPlugin } from "./generateDoc";
 import { PickerDocPlugin } from "./pickerDoc";
+import { WebPageAnalyserPlugin } from "./webPageAnalyser";
 
 export const plugins: PluginMap = {
   form: FormPlugin,
   generateDoc: GenerateDocPlugin,
   pickerDoc: PickerDocPlugin,
+  webPageAnalyser: WebPageAnalyserPlugin,
 };
 
 // Eksportujemy wszystkie potrzebne typy z base
