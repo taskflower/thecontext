@@ -21,19 +21,14 @@ import { Badge } from "@/components/ui/badge";
 import { Users, Pencil, Eye } from "lucide-react";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { FirestoreService } from "@/services/firestoreService";
+import { UserType } from "@/types/user";
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role?: string;
-  lastLogin?: string;
-}
 
-const userService = new FirestoreService<User>("users");
+
+const userService = new FirestoreService<UserType>("users");
 
 export const UserList = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserType[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
   const adminNavigate = useAdminNavigate();
@@ -94,6 +89,7 @@ export const UserList = () => {
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Role</TableHead>
+                  <TableHead>Tokens</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -106,6 +102,11 @@ export const UserList = () => {
                     <TableCell>
                       <Badge variant="secondary">
                         {user.role || "User"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className="font-mono">
+                        {user.availableTokens?.toLocaleString() || '0'}
                       </Badge>
                     </TableCell>
                     <TableCell>

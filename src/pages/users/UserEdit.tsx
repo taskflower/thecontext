@@ -20,12 +20,9 @@ import { ArrowLeft, User } from "lucide-react";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 import { FirestoreService } from "@/services/firestoreService";
+import { UserData } from "@/types/user";
 
-interface UserData {
-  name: string;
-  email: string;
-  role: string;
-}
+
 
 const userService = new FirestoreService<UserData>("users");
 
@@ -35,7 +32,8 @@ export const UserEdit = () => {
   const [formData, setFormData] = useState<UserData>({
     name: "",
     email: "",
-    role: "user"
+    role: "user",
+    availableTokens: 0
   });
   const adminNavigate = useAdminNavigate();
 
@@ -48,7 +46,8 @@ export const UserEdit = () => {
           setFormData({
             name: data.name,
             email: data.email,
-            role: data.role || "user"
+            role: data.role || "user",
+            availableTokens: data.availableTokens || 0
           });
         }
       } catch (error) {
@@ -74,9 +73,13 @@ export const UserEdit = () => {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.name === 'availableTokens' 
+      ? parseInt(e.target.value) || 0
+      : e.target.value;
+
     setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: value
     }));
   };
 
@@ -155,6 +158,19 @@ export const UserEdit = () => {
                   <SelectItem value="moderator">Moderator</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Available Tokens</label>
+              <Input
+                name="availableTokens"
+                type="number"
+                value={formData.availableTokens}
+                onChange={handleChange}
+                placeholder="Enter available tokens"
+                min="0"
+                step="1"
+              />
             </div>
 
             <div className="flex justify-end space-x-2">

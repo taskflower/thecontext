@@ -1,4 +1,3 @@
-// src/components/AdminDropdown.tsx
 import { Link, useLocation, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,8 +6,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Menu, LayoutDashboard, LogOut } from "lucide-react";
+import { ChevronDown, Menu, LayoutDashboard, LogOut, Coins, User } from "lucide-react";
 import { auth } from "@/firebase/config";
 import { getPathWithLanguage } from "@/utils/routeHelpers";
 import { Trans } from "@lingui/macro";
@@ -23,10 +23,14 @@ export const AdminDropdown = ({ dashboardActiveClass }: AdminDropdownProps) => {
   const currentLang = lang || "en";
   const location = useLocation();
 
-  const { user } = useAuthState();
+  const { user, backendUser } = useAuthState();
 
-  const handleLogout = () => {
-    auth.signOut();
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   return (
@@ -42,12 +46,23 @@ export const AdminDropdown = ({ dashboardActiveClass }: AdminDropdownProps) => {
           </span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-36">
+      <DropdownMenuContent align="end" className="min-w-56">
         {user && (
           <>
-            <DropdownMenuItem disabled>
-              {user.email}
-            </DropdownMenuItem>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  {user.email}
+                </p>
+                {backendUser && (
+                  <p className="text-xs text-muted-foreground flex items-center gap-2">
+                    <Coins className="h-3 w-3" />
+                    <Trans>Available tokens: {backendUser.availableTokens}</Trans>
+                  </p>
+                )}
+              </div>
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
           </>
         )}
