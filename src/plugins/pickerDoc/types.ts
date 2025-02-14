@@ -1,7 +1,8 @@
 
-// src/plugins/pickerDoc/types.ts
+
 export interface PickerDocConfig {
   systemLLMMessage?: string;
+  containerId?: string;
 }
 
 export interface PickerDocRuntimeData {

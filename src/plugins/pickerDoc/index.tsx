@@ -1,4 +1,3 @@
-// src/plugins/pickerDoc/index.tsx
 import { MessageRole } from "@/types/common";
 import {
   PluginDefinition,
@@ -19,17 +18,14 @@ export const PickerDocPlugin: PluginDefinition = {
   ConfigComponent,
   RuntimeComponent,
 
+
+  /* TODO - popraw interfejsy aby pozwalały na pusty config i data */
   validate: async (
-    // config: PluginConfig,
-    data?: PluginRuntimeData
+    _config?: PluginConfig,
+    _data?: PluginRuntimeData
   ): Promise<boolean> => {
-    const pickerData = data as PickerDocRuntimeData | undefined;
-
-    if (data) {
-      return (pickerData?.selectedDocuments?.length || 0) > 0;
-    }
-
-    return true; // Config is always valid
+    console.log('Skip valifator',_config,_data);
+    return true;
   },
 
   generateMessages: (
@@ -48,13 +44,15 @@ export const PickerDocPlugin: PluginDefinition = {
       });
     }
 
-    // Add document content messages
-    messages.push(
-      ...pickerData.selectedDocuments.map((doc) => ({
-        role: "user" as MessageRole,
-        content: doc.content,
-      }))
-    );
+    // Add document content messages if they exist
+    if (pickerData?.selectedDocuments?.length) {
+      messages.push(
+        ...pickerData.selectedDocuments.map((doc) => ({
+          role: "user" as MessageRole,
+          content: doc.content,
+        }))
+      );
+    }
 
     return messages;
   },

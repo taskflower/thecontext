@@ -1,79 +1,90 @@
-// src/plugins/pickerDoc/RuntimeComponent.tsx
-import { PluginRuntimeProps } from "../base";
-import { PickerDocRuntimeData } from "./types";
-import { useEffect, useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useDocumentsStore } from "@/store/documentsStore";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useEffect, useState } from 'react';
+import { PluginRuntimeProps } from '../base';
+import { PickerDocConfig, PickerDocRuntimeData } from './types';
+import { Document } from '@/types/document';
+import { useDocumentsStore } from '@/store/documentsStore';
+import { Card } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export const RuntimeComponent: React.FC<PluginRuntimeProps> = ({
+  config,
+  data,
   onDataChange,
   onStatusChange,
 }) => {
+  const pickerConfig = config as PickerDocConfig;
   const { documents } = useDocumentsStore();
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set());
 
+  // Filter documents based on container if specified
+  const filteredDocuments = documents.filter((doc) => 
+    pickerConfig.containerId === 'all' || doc.documentContainerId === pickerConfig.containerId
+  );
+
   useEffect(() => {
-    // Update validity - at least one document must be selected
-    const isValid = selectedDocs.size > 0;
-    onStatusChange(isValid);
+    // Initialize selected documents from data if it exists
+    if (data?.selectedDocuments) {
+      setSelectedDocs(new Set(data.selectedDocuments.map((doc: { id: string; }) => doc.id)));
+    }
+  }, [data?.selectedDocuments]);
+
+  useEffect(() => {
+    // Always valid if at least one document is selected
+    onStatusChange(selectedDocs.size > 0);
+  }, [selectedDocs, onStatusChange]);
+
+  const handleDocumentToggle = (document: Document) => {
+    const newSelectedDocs = new Set(selectedDocs);
+    
+    if (newSelectedDocs.has(document.id)) {
+      newSelectedDocs.delete(document.id);
+    } else {
+      newSelectedDocs.add(document.id);
+    }
+    
+    setSelectedDocs(newSelectedDocs);
 
     // Update runtime data
-    if (isValid) {
-      const selectedDocuments = Array.from(selectedDocs).map((id) => {
-        const doc = documents.find((d) => d.id === id);
-        return {
-          id,
-          content: doc?.content || "",
-        };
-      });
-
-      const newData: PickerDocRuntimeData = {
-        selectedDocuments,
-      };
-      onDataChange(newData);
-    }
-  }, [selectedDocs, documents, onStatusChange, onDataChange]);
-
-  const handleToggleDocument = (docId: string) => {
-    setSelectedDocs((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(docId)) {
-        newSet.delete(docId);
-      } else {
-        newSet.add(docId);
-      }
-      return newSet;
-    });
+    const newData: PickerDocRuntimeData = {
+      selectedDocuments: filteredDocuments
+        .filter(doc => newSelectedDocs.has(doc.id))
+        .map(doc => ({
+          id: doc.id,
+          content: doc.content
+        }))
+    };
+    
+    onDataChange(newData);
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Select Documents</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-[400px] w-full rounded-md border p-4">
-          <div className="space-y-4">
-            {documents.map((doc) => (
-              <div key={doc.id} className="flex items-center space-x-2">
-                <Checkbox
-                  id={doc.id}
-                  checked={selectedDocs.has(doc.id)}
-                  onCheckedChange={() => handleToggleDocument(doc.id)}
-                />
-                <label
-                  htmlFor={doc.id}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  {doc.title}
-                </label>
-              </div>
-            ))}
+    <ScrollArea className="h-[400px] w-full rounded-md border p-4">
+      <div className="space-y-4">
+        {filteredDocuments.map((document) => (
+          <Card key={document.id} className="p-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id={document.id}
+                checked={selectedDocs.has(document.id)}
+                onCheckedChange={() => handleDocumentToggle(document)}
+              />
+              <label
+                htmlFor={document.id}
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {document.title}
+              </label>
+            </div>
+          </Card>
+        ))}
+        {filteredDocuments.length === 0 && (
+          <div className="text-center text-muted-foreground">
+            No documents available in the selected container
           </div>
-        </ScrollArea>
-      </CardContent>
-    </Card>
+        )}
+      </div>
+    </ScrollArea>
   );
 };
