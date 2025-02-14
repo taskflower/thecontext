@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/plugins/generateDoc/RuntimeComponent.tsx
+import React, { useEffect, useState } from "react";
 import { PluginRuntimeProps } from "../base";
 import { GenerateDocConfig, GenerateDocRuntimeData } from "./types";
-import { useEffect, useState } from "react";
 import { useAuthState } from "@/hooks/useAuthState";
-
+import { useDocumentsStore } from "@/store/documentsStore";
+import { llmModule } from "./runtimeModules/llmModule";
+import { documentModule } from "./runtimeModules/documentModule";
 import {
   Card,
   CardContent,
@@ -19,7 +21,6 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, FileText, X } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useDocumentsStore } from "@/store/documentsStore";
 
 interface ApiError {
   code: string;
@@ -58,75 +59,42 @@ export const RuntimeComponent: React.FC<PluginRuntimeProps> = ({
       if (!user) {
         setError({
           code: 'AUTH_REQUIRED',
-          message: 'Musisz być zalogowany aby generować dokumenty'
+          message: 'You must be logged in to generate documents'
         });
         return;
       }
 
-      const idToken = await user.getIdToken();
-      
       const messages = allMessages.map(msg => ({
         role: msg.role,
         content: msg.content
       }));
 
-      const response = await fetch('http://localhost:3000/api/v1/services/chat/completion', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${idToken}`
-        },
-        body: JSON.stringify({ messages })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        if (errorData.error) {
-          setError({
-            code: errorData.error.code,
-            message: errorData.error.message
-          });
-          return;
-        }
-        throw new Error('Nie udało się wygenerować dokumentu');
-      }
-
-      const result = await response.json();
+      // Using LLM Module
+      const result = await llmModule.generateContent(messages, user);
 
       if (!result.success || !result.data || !result.data.message || !result.data.message.content) {
-        throw new Error('Nieprawidłowy format odpowiedzi z API');
+        throw new Error('Invalid API response format');
       }
 
       const generatedContent = result.data.message.content;
-      // Generujemy unikalne ID dla kontenera, bo API go już nie zwraca
-      const containerId = Date.now().toString();
-      
-      if (generateDocConfig.containerName) {
-        const newContainer = {
-          name: generateDocConfig.containerName,
-          description: `Kontener dla ${generateDocConfig.documentName}`,
-        };
-        addContainer(newContainer);
-      }
 
-      const newDocument = {
-        title: generateDocConfig.documentName,
-        content: generatedContent,
-        documentContainerId: containerId,
-        order: 0,
-        metadata: {
-          generatedFrom: 'plugin',
-          timestamp: new Date().toISOString(),
-        }
-      };
+      // Using Document Module
+      documentModule.saveDocument(
+        { addDocument, addContainer },
+        generateDocConfig.documentName,
+        generateDocConfig.containerName,
+        generatedContent
+      );
 
-      addDocument(newDocument);
       setShowSuccess(true);
 
       const newData: GenerateDocRuntimeData = {
         messages: [
           ...(generateDocData?.messages || []),
-          result.data.message
+          {
+            role: result.data.message.role || 'assistant',
+            content: result.data.message.content
+          }
         ],
         isGenerated: true,
         generatedContent
@@ -135,10 +103,10 @@ export const RuntimeComponent: React.FC<PluginRuntimeProps> = ({
       onDataChange(newData);
       
     } catch (error) {
-      console.error('Błąd podczas generowania dokumentu:', error);
+      console.error('Error generating document:', error);
       setError({
         code: 'GENERATION_ERROR',
-        message: error instanceof Error ? error.message : 'Wystąpił nieoczekiwany błąd podczas generowania dokumentu'
+        message: error instanceof Error ? error.message : 'An unexpected error occurred while generating the document'
       });
     } finally {
       setIsGenerating(false);
@@ -150,7 +118,7 @@ export const RuntimeComponent: React.FC<PluginRuntimeProps> = ({
       {showSuccess && (
         <Alert className="bg-green-50 border-green-200 relative">
           <AlertDescription className="text-green-800">
-            Dokument został wygenerowany pomyślnie!
+            Document has been generated successfully!
           </AlertDescription>
           <Button
             variant="ghost"
@@ -185,17 +153,17 @@ export const RuntimeComponent: React.FC<PluginRuntimeProps> = ({
       <div className="flex justify-between items-center">
         <Card className="w-full">
           <CardHeader>
-            <CardTitle>Szczegóły generowania dokumentu</CardTitle>
+            <CardTitle>Document Generation Details</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4">
               <div className="flex flex-col space-y-1.5">
-                <p className="text-sm font-medium text-muted-foreground">Nazwa dokumentu</p>
+                <p className="text-sm font-medium text-muted-foreground">Document Name</p>
                 <p className="text-sm">{generateDocConfig.documentName}</p>
               </div>
               <Separator />
               <div className="flex flex-col space-y-1.5">
-                <p className="text-sm font-medium text-muted-foreground">Nazwa kontenera</p>
+                <p className="text-sm font-medium text-muted-foreground">Container Name</p>
                 <p className="text-sm">{generateDocConfig.containerName}</p>
               </div>
             </div>
@@ -210,14 +178,14 @@ export const RuntimeComponent: React.FC<PluginRuntimeProps> = ({
           disabled={isGenerating || loading || !user}
         >
           <FileText className="mr-2 h-4 w-4" />
-          {isGenerating ? "Generowanie..." : "Generuj dokument"}
+          {isGenerating ? "Generating..." : "Generate document"}
         </Button>
       </div>
 
       <Card className="w-full">
         <CardHeader className="cursor-pointer" onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}>
           <div className="flex justify-between items-center">
-            <CardTitle>Historia konwersacji</CardTitle>
+            <CardTitle>Conversation History</CardTitle>
             <Button variant="ghost" size="sm">
               {isHistoryExpanded ? (
                 <ChevronUp className="h-4 w-4" />
