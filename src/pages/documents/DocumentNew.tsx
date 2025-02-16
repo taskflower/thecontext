@@ -3,9 +3,9 @@ import { useDocumentsStore } from "@/store/documentsStore";
 import { Button } from "@/components/ui/button";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { DocumentForm } from "@/components/documents/DocumentForm";
-import { useState } from "react";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 import { Trans } from "@lingui/macro";
+import { useState } from "react";
 
 export const DocumentNew = () => {
   const { containerId } = useParams();
@@ -58,3 +58,4 @@ export const DocumentNew = () => {
     </AdminOutletTemplate>
   );
 };
+export default DocumentNew;

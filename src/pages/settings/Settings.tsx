@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Settings2, Users } from "lucide-react"; // Added Users import
+import { Settings2, Users, Folder } from "lucide-react"; // Dodano import Folder
 import { useNavigate, useParams } from "react-router-dom";
 import { GoogleDriveIntegration } from "./GoogleDriveIntegration";
 import { DataManagement } from "./DataManagement";
@@ -15,10 +15,22 @@ export const Settings = () => {
       title="Settings"
       description="Manage your app settings"
       actions={
-        <Button className="gap-2" onClick={() => navigate(`/admin/${lang}/users`)}>
-          <Users className="h-4 w-4" /> {/* Added Users icon */}
-          Users
-        </Button>
+        <>
+          <Button
+            className="gap-2"
+            onClick={() => navigate(`/admin/${lang}/users`)}
+          >
+            <Users className="h-4 w-4" />
+            Users
+          </Button>
+          <Button
+            className="gap-2"
+            onClick={() => navigate(`/admin/${lang}/projects`)}
+          >
+            <Folder className="h-4 w-4" /> {/* Użyto ikony Folder */}
+            Projects
+          </Button>
+        </>
       }
     >
       <div className="space-y-4">
@@ -27,7 +39,11 @@ export const Settings = () => {
             placeholder="Filter settings..."
             className="h-8 w-[150px] lg:w-[250px]"
           />
-          <Button variant="outline" size="sm" className="ml-auto hidden h-8 lg:flex">
+          <Button
+            variant="outline"
+            size="sm"
+            className="ml-auto hidden h-8 lg:flex"
+          >
             <Settings2 className="mr-2 h-4 w-4" />
             View
           </Button>

@@ -60,3 +60,4 @@ export const DocumentEdit = () => {
     </AdminOutletTemplate>
   );
 };
+export default DocumentEdit;

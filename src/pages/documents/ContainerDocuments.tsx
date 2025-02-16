@@ -1,3 +1,4 @@
+// src/pages/documents/ContainerDocuments.tsx
 import { useParams } from "react-router-dom";
 import { useDocumentsStore } from "@/store/documentsStore";
 import { Button } from "@/components/ui/button";
@@ -9,41 +10,50 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import MDEditor from "@uiw/react-md-editor";
 import { useState } from "react";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { SearchInput } from "@/components/common/SearchInput";
 import { DocumentTable } from "@/components/documents/DocumentTable";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 import { Trans, t } from "@lingui/macro";
+import { MarkdownPreview } from "@/components/documents/MarkdownComponents";
 
 export const ContainerDocuments = () => {
   const { containerId } = useParams();
   const adminNavigate = useAdminNavigate();
-  const { containers, removeDocument, getContainerDocuments, updateDocument } = useDocumentsStore();
+  const { containers, removeDocument, getContainerDocuments, updateDocument } =
+    useDocumentsStore();
 
   const [filter, setFilter] = useState("");
-  const [selectedDocument, setSelectedDocument] = useState<{ title: string; content: string } | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<{
+    title: string;
+    content: string;
+  } | null>(null);
 
   const container = containers.find((c) => c.id === containerId);
   const documents = getContainerDocuments(containerId || "");
 
-  const filteredDocuments = documents.filter((doc) =>
-    doc.title.toLowerCase().includes(filter.toLowerCase()) ||
-    doc.content.toLowerCase().includes(filter.toLowerCase())
+  const filteredDocuments = documents.filter(
+    (doc) =>
+      doc.title.toLowerCase().includes(filter.toLowerCase()) ||
+      doc.content.toLowerCase().includes(filter.toLowerCase())
   );
 
   if (!container) {
-    return <div><Trans>Container not found</Trans></div>;
+    return (
+      <div>
+        <Trans>Container not found</Trans>
+      </div>
+    );
   }
 
-  const handleMoveDocument = (docId: string, direction: 'up' | 'down') => {
+  const handleMoveDocument = (docId: string, direction: "up" | "down") => {
     const currentIndex = documents.findIndex((d) => d.id === docId);
-    if (direction === 'up' && currentIndex > 0) {
+    if (direction === "up" && currentIndex > 0) {
       const prevDoc = documents[currentIndex - 1];
       updateDocument(docId, { order: prevDoc.order });
       updateDocument(prevDoc.id, { order: documents[currentIndex].order });
-    } else if (direction === 'down' && currentIndex < documents.length - 1) {
+    } else if (direction === "down" && currentIndex < documents.length - 1) {
       const nextDoc = documents[currentIndex + 1];
       updateDocument(docId, { order: nextDoc.order });
       updateDocument(nextDoc.id, { order: documents[currentIndex].order });
@@ -57,7 +67,9 @@ export const ContainerDocuments = () => {
       actions={
         <Button
           className="gap-2"
-          onClick={() => adminNavigate(`/documents/${containerId}/document/new`)}
+          onClick={() =>
+            adminNavigate(`/documents/${containerId}/document/new`)
+          }
         >
           <FilePlus className="h-4 w-4" />
           <Trans>New Document</Trans>
@@ -72,7 +84,11 @@ export const ContainerDocuments = () => {
             placeholder={t`Filter documents...`}
             className="h-8 w-[150px] lg:w-[250px]"
           />
-          <Button variant="outline" size="sm" className="ml-auto hidden h-8 lg:flex">
+          <Button
+            variant="outline"
+            size="sm"
+            className="ml-auto hidden h-8 lg:flex"
+          >
             <Settings2 className="mr-2 h-4 w-4" />
             <Trans>View</Trans>
           </Button>
@@ -83,7 +99,9 @@ export const ContainerDocuments = () => {
             <DocumentTable
               documents={filteredDocuments}
               onPreview={setSelectedDocument}
-              onEdit={(id) => adminNavigate(`/documents/${containerId}/document/${id}/edit`)}
+              onEdit={(id) =>
+                adminNavigate(`/documents/${containerId}/document/${id}/edit`)
+              }
               onMove={handleMoveDocument}
               onDelete={removeDocument}
             />
@@ -91,19 +109,20 @@ export const ContainerDocuments = () => {
         </Card>
       </div>
 
-      <Dialog open={!!selectedDocument} onOpenChange={() => setSelectedDocument(null)}>
+      <Dialog
+        open={!!selectedDocument}
+        onOpenChange={() => setSelectedDocument(null)}
+      >
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{selectedDocument?.title}</DialogTitle>
           </DialogHeader>
-          <div data-color-mode="light">
-            <MDEditor.Markdown
-              source={selectedDocument?.content || ""}
-              className="p-4 border rounded-md"
-            />
-          </div>
+          {selectedDocument && (
+            <MarkdownPreview content={selectedDocument.content} />
+          )}
         </DialogContent>
       </Dialog>
     </AdminOutletTemplate>
   );
 };
+export default ContainerDocuments;

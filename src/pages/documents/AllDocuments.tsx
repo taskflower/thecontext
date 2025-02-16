@@ -1,3 +1,4 @@
+// src/pages/documents/AllDocuments.tsx
 import { useDocumentsStore } from "@/store/documentsStore";
 import { Button } from "@/components/ui/button";
 import { Settings2 } from "lucide-react";
@@ -8,13 +9,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import MDEditor from "@uiw/react-md-editor";
 import { useState } from "react";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { SearchInput } from "@/components/common/SearchInput";
 import { DocumentTable } from "@/components/documents/DocumentTable";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 import { Trans, t } from "@lingui/macro";
+import { MarkdownPreview } from "@/components/documents/MarkdownComponents";
 
 export const AllDocuments = () => {
   const adminNavigate = useAdminNavigate();
@@ -108,14 +109,12 @@ export const AllDocuments = () => {
           <DialogHeader>
             <DialogTitle>{selectedDocument?.title}</DialogTitle>
           </DialogHeader>
-          <div data-color-mode="light">
-            <MDEditor.Markdown
-              source={selectedDocument?.content || ""}
-              className="p-4 border rounded-md"
-            />
-          </div>
+          {selectedDocument && (
+            <MarkdownPreview content={selectedDocument.content} />
+          )}
         </DialogContent>
       </Dialog>
     </AdminOutletTemplate>
   );
 };
+export default AllDocuments;

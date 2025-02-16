@@ -2,9 +2,9 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import MDEditor from "@uiw/react-md-editor";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trans, t } from "@lingui/macro";
+import { MarkdownEditor } from "./MarkdownComponents";
 
 interface DocumentFormProps {
   title: string;
@@ -45,15 +45,13 @@ export const DocumentForm = ({
               required
             />
           </div>
-          <div className="space-y-2" data-color-mode="light">
+          <div className="space-y-2">
             <label className="text-sm font-medium">
               <Trans>Content</Trans>
             </label>
-            <MDEditor
-              value={content}
+            <MarkdownEditor 
+              content={content}
               onChange={(val) => onContentChange(val || "")}
-              height={400}
-              preview="edit"
             />
           </div>
           <div className="flex justify-end space-x-2">

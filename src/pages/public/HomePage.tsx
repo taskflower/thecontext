@@ -38,10 +38,10 @@ const HomePage = () => {
           </h1>
         </div>
 
-        <p className="py-2 text-base sm:text-xl text-muted-foreground">
+        <p className="py-2 text-base sm:text-md text-muted-foreground">
           <Trans>
             Your <Hl variant="yellow">AI-powered workflow platform</Hl> for
-            <Hl variant="yellow">automating complex business processes</Hl>.
+            <Hl variant="yellow">automating complex business processes.</Hl>
             From marketing campaigns to career planning, turn any business case
             into an actionable, AI-guided workflow.
           </Trans>

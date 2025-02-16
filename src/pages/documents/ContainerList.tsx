@@ -2,11 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Settings2, Plus, SquareSigma } from "lucide-react";
 import { useDocumentsStore } from "@/store/documentsStore";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
-import { useState } from "react";
 import { SearchInput } from "@/components/common/SearchInput";
 import ContainerCard from "@/components/documents/ContainerCard";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 import { Trans, t } from "@lingui/macro";
+import { useState } from "react";
 
 export const ContainerList = () => {
   const { containers, getContainerDocuments, deleteContainer } = useDocumentsStore();
@@ -96,3 +96,4 @@ export const ContainerList = () => {
     </AdminOutletTemplate>
   );
 };
+export default ContainerList;
