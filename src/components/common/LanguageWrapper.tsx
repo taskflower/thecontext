@@ -2,7 +2,7 @@
 // src/components/LanguageWrapper.tsx
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { loadCatalog } from "../utils/i18n";
+import { loadCatalog } from "../../utils/i18n";
 import { I18nProvider } from "@lingui/react";
 import { i18n } from "@lingui/core";
 

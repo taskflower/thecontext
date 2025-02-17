@@ -1,11 +1,12 @@
-import { GoalPathwayChart } from "@/components/homepage/GoalPathwayChart";
-import TheContextCell from "@/components/homepage/TheContextCell";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { FileText, Brain, GitBranch, Layout } from "lucide-react";
 import { ReactNode } from "react";
-import { AppLink } from "@/components/AppLink";
+import { AppLink } from "@/components/common/AppLink";
 import { Trans } from "@lingui/macro";
+import { GoalPathwayChart } from "@/components/public/GoalPathwayChart";
+import TheContextCell from "@/components/public/TheContextCell";
 
 const Hl = ({
   children,

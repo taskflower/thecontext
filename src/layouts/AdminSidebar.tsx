@@ -3,7 +3,7 @@ import React from "react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Settings, FileText, LayoutGrid, CheckSquare } from "lucide-react";
-import { AppLink } from "@/components/AppLink";
+import { AppLink } from "@/components/common/AppLink";
 
 interface SidebarLinkProps {
   to: string;

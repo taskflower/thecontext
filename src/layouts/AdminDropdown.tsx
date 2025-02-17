@@ -20,7 +20,7 @@ import { getPathWithLanguage } from "@/utils/routeHelpers";
 import { Trans } from "@lingui/macro";
 import { useAuthState } from "@/hooks/useAuthState";
 import { authService } from "@/services/authService";
-import { AppLink } from "@/components/AppLink";
+import { AppLink } from "@/components/common/AppLink";
 
 export const AdminDropdown = () => {
   const { lang } = useParams<{ lang: string }>();

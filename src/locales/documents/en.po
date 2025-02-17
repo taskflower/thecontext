@@ -1,0 +1,150 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2025-02-17 20:43+0100\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: en\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+#: src/pages/documents/ContainerDocuments.tsx:65
+#: src/pages/documents/ContainerDocuments.tsx:66
+msgid "{0}"
+msgstr ""
+
+#: src/pages/documents/ContainerList.tsx:45
+msgid "All"
+msgstr ""
+
+#: src/pages/documents/AllDocuments.tsx:61
+#: src/pages/documents/AllDocuments.tsx:71
+msgid "All Documents"
+msgstr ""
+
+#: src/pages/documents/DocumentEdit.tsx:46
+#: src/pages/documents/DocumentNew.tsx:44
+msgid "Back"
+msgstr ""
+
+#: src/pages/documents/ContainerEdit.tsx:64
+#: src/pages/documents/ContainerNew.tsx:44
+msgid "Back to Containers"
+msgstr ""
+
+#: src/pages/documents/ContainerEdit.tsx:74
+#: src/pages/documents/ContainerNew.tsx:54
+msgid "Container Details"
+msgstr ""
+
+#: src/pages/documents/ContainerDocuments.tsx:45
+#: src/pages/documents/ContainerEdit.tsx:36
+msgid "Container not found"
+msgstr ""
+
+#: src/pages/documents/DocumentNew.tsx:41
+msgid "Create a new document"
+msgstr ""
+
+#: src/pages/documents/ContainerNew.tsx:41
+msgid "Create a new document container"
+msgstr ""
+
+#: src/pages/documents/ContainerList.tsx:88
+#: src/pages/documents/ContainerNew.tsx:53
+msgid "Create Container"
+msgstr ""
+
+#: src/pages/documents/DocumentNew.tsx:55
+msgid "Create Document"
+msgstr ""
+
+#: src/pages/documents/ContainerList.tsx:80
+msgid "Create your first container to get started."
+msgstr ""
+
+#: src/pages/documents/ContainerList.tsx:30
+msgid "Document Containers"
+msgstr ""
+
+#: src/pages/documents/DocumentEdit.tsx:58
+#: src/pages/documents/DocumentNew.tsx:56
+msgid "Document Details"
+msgstr ""
+
+#: src/pages/documents/DocumentEdit.tsx:27
+msgid "Document not found"
+msgstr ""
+
+#: src/pages/documents/DocumentEdit.tsx:42
+msgid "Edit Document"
+msgstr ""
+
+#: src/pages/documents/ContainerEdit.tsx:60
+msgid "Editing: {0}"
+msgstr ""
+
+#: src/pages/documents/ContainerList.tsx:58
+msgid "Filter containers..."
+msgstr ""
+
+#: src/pages/documents/ContainerDocuments.tsx:84
+msgid "Filter documents..."
+msgstr ""
+
+#: src/pages/documents/ContainerList.tsx:31
+msgid "Manage your document containers and their contents"
+msgstr ""
+
+#: src/pages/documents/ContainerEdit.tsx:61
+msgid "Modify container details"
+msgstr ""
+
+#: src/pages/documents/DocumentEdit.tsx:43
+msgid "Modify document details"
+msgstr ""
+
+#: src/pages/documents/ContainerList.tsx:49
+msgid "New Container"
+msgstr ""
+
+#: src/pages/documents/ContainerDocuments.tsx:75
+#: src/pages/documents/DocumentNew.tsx:40
+msgid "New Document"
+msgstr ""
+
+#: src/pages/documents/ContainerNew.tsx:40
+msgid "New Document Container"
+msgstr ""
+
+#: src/pages/documents/ContainerList.tsx:75
+msgid "No containers found"
+msgstr ""
+
+#: src/pages/documents/ContainerEdit.tsx:73
+#: src/pages/documents/DocumentEdit.tsx:57
+msgid "Save Changes"
+msgstr ""
+
+#: src/pages/documents/AllDocuments.tsx:85
+msgid "Search documents..."
+msgstr ""
+
+#: src/pages/documents/ContainerList.tsx:79
+msgid "Try adjusting your search query or clear the filter."
+msgstr ""
+
+#: src/pages/documents/AllDocuments.tsx:75
+#: src/pages/documents/ContainerDocuments.tsx:93
+#: src/pages/documents/ContainerList.tsx:36
+msgid "View"
+msgstr ""
+
+#: src/pages/documents/AllDocuments.tsx:62
+msgid "View and manage all documents across containers"
+msgstr ""

@@ -1,11 +1,12 @@
 import { FC } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useKanbanStore } from '@/store/kanbanStore';
-import { KanbanBoard } from '@/components/kaban/KanbanBoard';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { KanbanBoard } from '@/components/boards/KanbanBoard';
 
 export const KanbanViewPage: FC = () => {
   const navigate = useNavigate();

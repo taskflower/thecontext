@@ -1,11 +1,25 @@
+// src/utils/i18n.ts
 import { i18n } from "@lingui/core"
 
-/**
- * Load messages for requested locale and activate it.
- * This function isn't part of the LinguiJS library because there are
- * many ways how to load messages — from REST API, from file, from cache, etc.
- */
 export async function loadCatalog(locale: string) {
-  const catalog = await import(`./../locales/${locale}.po`)
-  i18n.loadAndActivate({ locale, messages: catalog.messages })
+  const [boards, documents, tasks, settings, users, projects] = await Promise.all([
+    import(`../locales/boards/${locale}.po`),
+    import(`../locales/documents/${locale}.po`),
+    import(`../locales/tasks/${locale}.po`),
+    import(`../locales/settings/${locale}.po`),
+    import(`../locales/users/${locale}.po`),
+    import(`../locales/projects/${locale}.po`),
+  ]);
+
+  const messages = {
+    ...boards.messages,
+    ...documents.messages,
+    ...tasks.messages,
+    ...settings.messages,
+    ...users.messages,
+    ...projects.messages,
+  };
+
+  await i18n.load(locale, messages);
+  await i18n.activate(locale);
 }

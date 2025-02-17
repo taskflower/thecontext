@@ -1,6 +1,7 @@
 // src/pages/boards/templates/KanbanTemplateNew.tsx
+import { KanbanTemplateEditor } from '@/components/boards/KanbanTemplateEditor';
 import { useNavigate } from 'react-router-dom';
-import { KanbanTemplateEditor } from '@/components/kaban/KanbanTemplateEditor';
+
 
 export const KanbanTemplateNew = () => {
  const navigate = useNavigate();

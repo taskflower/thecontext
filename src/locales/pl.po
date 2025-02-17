@@ -6,6 +6,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: @lingui/cli\n"
 "Language: pl\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
 
 #: src/pages/documents/ContainerDocuments.tsx:65
 #: src/pages/documents/ContainerDocuments.tsx:66
@@ -35,6 +41,10 @@ msgstr "<0>Śledzenie Zadań:</0> Wszystkie zadania są powiązane z odpowiednim
 #: src/pages/public/CaseStudiesPage.tsx:101
 msgid "A key aspect of our system is maintaining order and separation of documents across different work cycles. This ensures that even when processes are run multiple times, documents from different cycles do not mix, providing clarity and ease of management."
 msgstr "Kluczowym aspektem naszego systemu jest utrzymanie porządku i rozdzielenie dokumentów w różnych cyklach pracy. Zapewnia to, że nawet przy wielokrotnym uruchamianiu procesów, dokumenty z różnych cykli nie mieszają się, co zapewnia przejrzystość i ułatwia zarządzanie."
+
+#: src/components/projects/ProjectRenderer.tsx:138
+msgid "Actions"
+msgstr ""
 
 #: src/layouts/AdminDropdown.tsx:46
 msgid "Admin Panel"
@@ -96,6 +106,11 @@ msgstr "Powrót do kontenerów"
 msgid "Back to list of tasks templates"
 msgstr "Powrót do listy szablonów zadań"
 
+#: src/pages/projects/ProjectEdit.tsx:50
+#: src/pages/projects/ProjectNew.tsx:32
+msgid "Back to Projects"
+msgstr ""
+
 #: src/pages/public/HomePage.tsx:106
 msgid "Business Case Templates"
 msgstr "Szablony przypadków biznesowych"
@@ -103,6 +118,7 @@ msgstr "Szablony przypadków biznesowych"
 #: src/components/documents/ContainerActions.tsx:80
 #: src/components/documents/ContainerForm.tsx:74
 #: src/components/documents/DocumentForm.tsx:59
+#: src/pages/projects/ProjectForm.tsx:102
 msgid "Cancel"
 msgstr "Anuluj"
 
@@ -113,6 +129,10 @@ msgstr "Zamknij podgląd"
 #: src/components/documents/ContainerCard.tsx:95
 msgid "Collection status"
 msgstr "Status kolekcji"
+
+#: src/components/projects/ProjectRenderer.tsx:125
+msgid "Columns"
+msgstr ""
 
 #: src/pages/public/CaseStudiesPage.tsx:77
 msgid "Competitive Analysis and Marketing Strategy"
@@ -168,6 +188,10 @@ msgstr "Utwórz nowy dokument"
 msgid "Create a new document container"
 msgstr "Utwórz nowy kontener dokumentów"
 
+#: src/pages/projects/ProjectNew.tsx:29
+msgid "Create a new project"
+msgstr ""
+
 #: src/pages/tasks/TaskTemplateNew.tsx:14
 msgid "Create a new task template"
 msgstr "Utwórz nowy szablon zadania"
@@ -199,10 +223,13 @@ msgstr "Panel główny"
 
 #: src/components/documents/ContainerActions.tsx:63
 #: src/components/documents/ContainerActions.tsx:83
+#: src/pages/projects/ProjectList.tsx:103
 msgid "Delete"
 msgstr "Usuń"
 
 #: src/components/documents/ContainerForm.tsx:50
+#: src/pages/projects/ProjectForm.tsx:71
+#: src/pages/projects/ProjectList.tsx:63
 #: src/pages/tasks/TaskTemplateList.tsx:60
 msgid "Description"
 msgstr "Opis"
@@ -227,12 +254,17 @@ msgstr "Tytuł dokumentu"
 #: src/components/documents/ContainerActions.tsx:55
 #: src/components/documents/DocumentTable.tsx:98
 #: src/components/tasks/TemplateList.tsx:38
+#: src/pages/projects/ProjectList.tsx:96
 msgid "Edit"
 msgstr "Edytuj"
 
 #: src/pages/documents/DocumentEdit.tsx:42
 msgid "Edit Document"
 msgstr "Edytuj dokument"
+
+#: src/pages/projects/ProjectEdit.tsx:46
+msgid "Edit Project"
+msgstr ""
 
 #: src/pages/documents/ContainerEdit.tsx:60
 #: src/pages/tasks/TaskTemplateEdit.tsx:22
@@ -271,6 +303,10 @@ msgstr "Od wstępnego tworzenia treści, poprzez recenzje koleżeńskie, aż po 
 msgid "Hide Preview"
 msgstr "Ukryj podgląd"
 
+#: src/components/projects/ProjectRenderer.tsx:156
+msgid "Kanban Board"
+msgstr ""
+
 #: src/pages/public/CaseStudiesPage.tsx:49
 #: src/pages/public/CaseStudiesPage.tsx:68
 #: src/pages/public/CaseStudiesPage.tsx:87
@@ -279,6 +315,10 @@ msgstr "Ukryj podgląd"
 #: src/pages/public/CaseStudiesPage.tsx:185
 msgid "Learn More"
 msgstr "Dowiedz się więcej"
+
+#: src/components/projects/ProjectRenderer.tsx:95
+msgid "Loading project configuration..."
+msgstr ""
 
 #: src/layouts/AdminDropdown.tsx:114
 msgid "Log out"
@@ -300,6 +340,10 @@ msgstr "Zarządzaj swoimi agentami AI jak zespołem, korzystając z intuicyjnej 
 msgid "Manage your document containers and their contents"
 msgstr "Zarządzaj swoimi kontenerami dokumentów i ich zawartością"
 
+#: src/pages/projects/ProjectList.tsx:28
+msgid "Manage your projects and their settings"
+msgstr ""
+
 #: src/pages/public/CaseStudiesPage.tsx:58
 msgid "Marketing Description Generation"
 msgstr "Generowanie opisu marketingowego"
@@ -311,6 +355,10 @@ msgstr "Modyfikuj szczegóły kontenera"
 #: src/pages/documents/DocumentEdit.tsx:43
 msgid "Modify document details"
 msgstr "Modyfikuj szczegóły dokumentu"
+
+#: src/pages/projects/ProjectEdit.tsx:47
+msgid "Modify project details and settings"
+msgstr ""
 
 #: src/pages/tasks/TaskTemplateEdit.tsx:23
 msgid "Modify the template details and steps below."
@@ -338,6 +386,11 @@ msgstr "Nowy dokument"
 msgid "New Document Container"
 msgstr "Nowy kontener dokumentów"
 
+#: src/pages/projects/ProjectList.tsx:44
+#: src/pages/projects/ProjectNew.tsx:28
+msgid "New Project"
+msgstr ""
+
 #: src/pages/tasks/TaskTemplateNew.tsx:13
 msgid "New task template"
 msgstr "Nowy szablon zadania"
@@ -351,6 +404,8 @@ msgid "No containers found"
 msgstr "Nie znaleziono kontenerów"
 
 #: src/components/documents/ContainerCard.tsx:57
+#: src/components/projects/ProjectRenderer.tsx:111
+#: src/pages/projects/ProjectList.tsx:78
 #: src/pages/tasks/TaskTemplateList.tsx:86
 msgid "No description provided"
 msgstr "Brak opisu"
@@ -367,6 +422,22 @@ msgstr "Opcjonalna docelowa liczba dokumentów"
 msgid "Preview"
 msgstr "Podgląd"
 
+#: src/pages/projects/ProjectForm.tsx:51
+msgid "Project Details"
+msgstr ""
+
+#: src/pages/projects/ProjectEdit.tsx:35
+msgid "Project not found"
+msgstr ""
+
+#: src/components/projects/ProjectRenderer.tsx:79
+msgid "Project Not Found"
+msgstr ""
+
+#: src/pages/projects/ProjectList.tsx:27
+msgid "Projects"
+msgstr ""
+
 #: src/pages/public/HomePage.tsx:156
 msgid "Ready to Automate Your Business Processes?"
 msgstr "Gotowy na automatyzację procesów biznesowych?"
@@ -374,6 +445,10 @@ msgstr "Gotowy na automatyzację procesów biznesowych?"
 #: src/components/tasks/TemplateList.tsx:44
 msgid "Run"
 msgstr "Uruchom"
+
+#: src/pages/projects/ProjectForm.tsx:105
+msgid "Save"
+msgstr ""
 
 #: src/pages/documents/ContainerEdit.tsx:73
 #: src/pages/documents/DocumentEdit.tsx:57
@@ -383,6 +458,14 @@ msgstr "Zapisz zmiany"
 #: src/pages/documents/AllDocuments.tsx:85
 msgid "Search documents..."
 msgstr "Szukaj dokumentów..."
+
+#: src/pages/projects/ProjectList.tsx:53
+msgid "Search projects..."
+msgstr ""
+
+#: src/pages/projects/ProjectForm.tsx:85
+msgid "Settings (JSON)"
+msgstr ""
 
 #: src/components/tasks/ProcesRunner/BottomToolbar.tsx:71
 msgid "Show Preview"
@@ -404,6 +487,10 @@ msgstr "Rozpocznij swój pierwszy projekt"
 msgid "Step {0}: {1}"
 msgstr "Krok {0}: {1}"
 
+#: src/components/projects/ProjectRenderer.tsx:169
+msgid "Steps"
+msgstr ""
+
 #: src/components/tasks/TemplateList.tsx:52
 msgid "Steps:"
 msgstr "Kroki:"
@@ -415,6 +502,10 @@ msgstr "Kolejne zadania obejmują analizę konkurencji oraz opracowanie strategi
 #: src/pages/tasks/TaskTemplateList.tsx:27
 msgid "Task Templates"
 msgstr "Szablony zadań"
+
+#: src/components/projects/ProjectRenderer.tsx:159
+msgid "Template ID:"
+msgstr ""
 
 #: src/pages/tasks/TaskTemplateEdit.tsx:17
 #: src/pages/tasks/TaskTemplateRunner.tsx:15
@@ -445,12 +536,18 @@ msgstr "Platforma łączy zagadnienia z wielu dziedzin, tworząc kompleksowe mod
 msgid "The process starts with a task requesting a URL address. Then, via API, the page content is prepared, converted to Markdown, and saved as the first document."
 msgstr "Proces rozpoczyna się od zadania proszącego o adres URL. Następnie, poprzez API, treść strony jest przygotowywana, konwertowana do formatu Markdown i zapisywana jako pierwszy dokument."
 
+#: src/components/projects/ProjectRenderer.tsx:82
+msgid "The requested project does not exist or you may not have access to it."
+msgstr ""
+
 #: src/components/documents/ContainerActions.tsx:72
 msgid "This action cannot be undone. This will permanently delete this container and all its documents."
 msgstr "Tej operacji nie można cofnąć. Ta akcja trwale usunie ten kontener oraz wszystkie jego dokumenty."
 
 #: src/components/documents/DocumentForm.tsx:39
 #: src/components/documents/DocumentTable.tsx:46
+#: src/pages/projects/ProjectForm.tsx:57
+#: src/pages/projects/ProjectList.tsx:62
 msgid "Title"
 msgstr "Tytuł"
 
@@ -469,6 +566,8 @@ msgstr "Wykorzystując podstawę programową jako dane wejściowe, system automa
 #: src/pages/documents/AllDocuments.tsx:75
 #: src/pages/documents/ContainerDocuments.tsx:93
 #: src/pages/documents/ContainerList.tsx:36
+#: src/pages/projects/ProjectList.tsx:37
+#: src/pages/projects/ProjectList.tsx:89
 #: src/pages/tasks/TaskTemplateList.tsx:46
 msgid "View"
 msgstr "Zobacz"

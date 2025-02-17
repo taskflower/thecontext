@@ -13,8 +13,9 @@ import {
   GitFork,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import TheContextCell from "@/components/homepage/TheContextCell";
+
 import { Trans } from "@lingui/macro";
+import TheContextCell from "@/components/public/TheContextCell";
 
 const CaseStudiesPage = () => {
   return (

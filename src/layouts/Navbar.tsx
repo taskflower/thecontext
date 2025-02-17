@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { useAuthState } from "@/hooks/useAuthState";
 import { Button } from "@/components/ui/button";
 import { AdminDropdown } from "./AdminDropdown";
-import { AppLink } from "@/components/AppLink";
+import { AppLink } from "@/components/common/AppLink";
 import { useLanguage } from "@/context/LanguageContext";
 
 export const Navbar = () => {

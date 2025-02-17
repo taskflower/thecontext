@@ -14,7 +14,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useKanbanStore } from "@/store/kanbanStore";
 import { useNavigate } from "react-router-dom";
 import { Settings2, Power } from "lucide-react";
-import InstanceActions from "@/components/kaban/instancesList/InstanceActions";
+import InstanceActions from "@/components/boards/instancesList/InstanceActions";
+
 
 export const InstancesList = () => {
   const { instances, removeInstance } = useKanbanStore();

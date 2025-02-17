@@ -6,6 +6,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: @lingui/cli\n"
 "Language: en\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
 
 #: src/pages/documents/ContainerDocuments.tsx:65
 #: src/pages/documents/ContainerDocuments.tsx:66
@@ -34,6 +40,10 @@ msgstr ""
 
 #: src/pages/public/CaseStudiesPage.tsx:101
 msgid "A key aspect of our system is maintaining order and separation of documents across different work cycles. This ensures that even when processes are run multiple times, documents from different cycles do not mix, providing clarity and ease of management."
+msgstr ""
+
+#: src/components/projects/ProjectRenderer.tsx:138
+msgid "Actions"
 msgstr ""
 
 #: src/layouts/AdminDropdown.tsx:46
@@ -96,6 +106,11 @@ msgstr ""
 msgid "Back to list of tasks templates"
 msgstr ""
 
+#: src/pages/projects/ProjectEdit.tsx:50
+#: src/pages/projects/ProjectNew.tsx:32
+msgid "Back to Projects"
+msgstr ""
+
 #: src/pages/public/HomePage.tsx:106
 msgid "Business Case Templates"
 msgstr ""
@@ -103,6 +118,7 @@ msgstr ""
 #: src/components/documents/ContainerActions.tsx:80
 #: src/components/documents/ContainerForm.tsx:74
 #: src/components/documents/DocumentForm.tsx:59
+#: src/pages/projects/ProjectForm.tsx:102
 msgid "Cancel"
 msgstr ""
 
@@ -112,6 +128,10 @@ msgstr ""
 
 #: src/components/documents/ContainerCard.tsx:95
 msgid "Collection status"
+msgstr ""
+
+#: src/components/projects/ProjectRenderer.tsx:125
+msgid "Columns"
 msgstr ""
 
 #: src/pages/public/CaseStudiesPage.tsx:77
@@ -168,6 +188,10 @@ msgstr ""
 msgid "Create a new document container"
 msgstr ""
 
+#: src/pages/projects/ProjectNew.tsx:29
+msgid "Create a new project"
+msgstr ""
+
 #: src/pages/tasks/TaskTemplateNew.tsx:14
 msgid "Create a new task template"
 msgstr ""
@@ -199,10 +223,13 @@ msgstr ""
 
 #: src/components/documents/ContainerActions.tsx:63
 #: src/components/documents/ContainerActions.tsx:83
+#: src/pages/projects/ProjectList.tsx:103
 msgid "Delete"
 msgstr ""
 
 #: src/components/documents/ContainerForm.tsx:50
+#: src/pages/projects/ProjectForm.tsx:71
+#: src/pages/projects/ProjectList.tsx:63
 #: src/pages/tasks/TaskTemplateList.tsx:60
 msgid "Description"
 msgstr ""
@@ -227,11 +254,16 @@ msgstr ""
 #: src/components/documents/ContainerActions.tsx:55
 #: src/components/documents/DocumentTable.tsx:98
 #: src/components/tasks/TemplateList.tsx:38
+#: src/pages/projects/ProjectList.tsx:96
 msgid "Edit"
 msgstr ""
 
 #: src/pages/documents/DocumentEdit.tsx:42
 msgid "Edit Document"
+msgstr ""
+
+#: src/pages/projects/ProjectEdit.tsx:46
+msgid "Edit Project"
 msgstr ""
 
 #: src/pages/documents/ContainerEdit.tsx:60
@@ -271,6 +303,10 @@ msgstr ""
 msgid "Hide Preview"
 msgstr ""
 
+#: src/components/projects/ProjectRenderer.tsx:156
+msgid "Kanban Board"
+msgstr ""
+
 #: src/pages/public/CaseStudiesPage.tsx:49
 #: src/pages/public/CaseStudiesPage.tsx:68
 #: src/pages/public/CaseStudiesPage.tsx:87
@@ -278,6 +314,10 @@ msgstr ""
 #: src/pages/public/CaseStudiesPage.tsx:164
 #: src/pages/public/CaseStudiesPage.tsx:185
 msgid "Learn More"
+msgstr ""
+
+#: src/components/projects/ProjectRenderer.tsx:95
+msgid "Loading project configuration..."
 msgstr ""
 
 #: src/layouts/AdminDropdown.tsx:114
@@ -300,6 +340,10 @@ msgstr ""
 msgid "Manage your document containers and their contents"
 msgstr ""
 
+#: src/pages/projects/ProjectList.tsx:28
+msgid "Manage your projects and their settings"
+msgstr ""
+
 #: src/pages/public/CaseStudiesPage.tsx:58
 msgid "Marketing Description Generation"
 msgstr ""
@@ -310,6 +354,10 @@ msgstr ""
 
 #: src/pages/documents/DocumentEdit.tsx:43
 msgid "Modify document details"
+msgstr ""
+
+#: src/pages/projects/ProjectEdit.tsx:47
+msgid "Modify project details and settings"
 msgstr ""
 
 #: src/pages/tasks/TaskTemplateEdit.tsx:23
@@ -338,6 +386,11 @@ msgstr ""
 msgid "New Document Container"
 msgstr ""
 
+#: src/pages/projects/ProjectList.tsx:44
+#: src/pages/projects/ProjectNew.tsx:28
+msgid "New Project"
+msgstr ""
+
 #: src/pages/tasks/TaskTemplateNew.tsx:13
 msgid "New task template"
 msgstr ""
@@ -351,6 +404,8 @@ msgid "No containers found"
 msgstr ""
 
 #: src/components/documents/ContainerCard.tsx:57
+#: src/components/projects/ProjectRenderer.tsx:111
+#: src/pages/projects/ProjectList.tsx:78
 #: src/pages/tasks/TaskTemplateList.tsx:86
 msgid "No description provided"
 msgstr ""
@@ -367,12 +422,32 @@ msgstr ""
 msgid "Preview"
 msgstr ""
 
+#: src/pages/projects/ProjectForm.tsx:51
+msgid "Project Details"
+msgstr ""
+
+#: src/pages/projects/ProjectEdit.tsx:35
+msgid "Project not found"
+msgstr ""
+
+#: src/components/projects/ProjectRenderer.tsx:79
+msgid "Project Not Found"
+msgstr ""
+
+#: src/pages/projects/ProjectList.tsx:27
+msgid "Projects"
+msgstr ""
+
 #: src/pages/public/HomePage.tsx:156
 msgid "Ready to Automate Your Business Processes?"
 msgstr ""
 
 #: src/components/tasks/TemplateList.tsx:44
 msgid "Run"
+msgstr ""
+
+#: src/pages/projects/ProjectForm.tsx:105
+msgid "Save"
 msgstr ""
 
 #: src/pages/documents/ContainerEdit.tsx:73
@@ -382,6 +457,14 @@ msgstr ""
 
 #: src/pages/documents/AllDocuments.tsx:85
 msgid "Search documents..."
+msgstr ""
+
+#: src/pages/projects/ProjectList.tsx:53
+msgid "Search projects..."
+msgstr ""
+
+#: src/pages/projects/ProjectForm.tsx:85
+msgid "Settings (JSON)"
 msgstr ""
 
 #: src/components/tasks/ProcesRunner/BottomToolbar.tsx:71
@@ -404,6 +487,10 @@ msgstr ""
 msgid "Step {0}: {1}"
 msgstr ""
 
+#: src/components/projects/ProjectRenderer.tsx:169
+msgid "Steps"
+msgstr ""
+
 #: src/components/tasks/TemplateList.tsx:52
 msgid "Steps:"
 msgstr ""
@@ -414,6 +501,10 @@ msgstr ""
 
 #: src/pages/tasks/TaskTemplateList.tsx:27
 msgid "Task Templates"
+msgstr ""
+
+#: src/components/projects/ProjectRenderer.tsx:159
+msgid "Template ID:"
 msgstr ""
 
 #: src/pages/tasks/TaskTemplateEdit.tsx:17
@@ -445,12 +536,18 @@ msgstr ""
 msgid "The process starts with a task requesting a URL address. Then, via API, the page content is prepared, converted to Markdown, and saved as the first document."
 msgstr ""
 
+#: src/components/projects/ProjectRenderer.tsx:82
+msgid "The requested project does not exist or you may not have access to it."
+msgstr ""
+
 #: src/components/documents/ContainerActions.tsx:72
 msgid "This action cannot be undone. This will permanently delete this container and all its documents."
 msgstr ""
 
 #: src/components/documents/DocumentForm.tsx:39
 #: src/components/documents/DocumentTable.tsx:46
+#: src/pages/projects/ProjectForm.tsx:57
+#: src/pages/projects/ProjectList.tsx:62
 msgid "Title"
 msgstr ""
 
@@ -469,6 +566,8 @@ msgstr ""
 #: src/pages/documents/AllDocuments.tsx:75
 #: src/pages/documents/ContainerDocuments.tsx:93
 #: src/pages/documents/ContainerList.tsx:36
+#: src/pages/projects/ProjectList.tsx:37
+#: src/pages/projects/ProjectList.tsx:89
 #: src/pages/tasks/TaskTemplateList.tsx:46
 msgid "View"
 msgstr ""

@@ -1,4 +1,4 @@
-import ProcessCommunicator from "@/components/homepage/MockProcesCommunicator";
+import ProcessCommunicator from "@/components/public/MockProcesCommunicator";
 
 // src/pages/ContactPage.tsx
 export default function ContactPage() {

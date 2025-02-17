@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Trans } from "@lingui/macro";
-import { AppLink } from "@/components/AppLink";
+import { AppLink } from "@/components/common/AppLink";
 
 interface BottomToolbarProps {
   viewMode: "card" | "mini";

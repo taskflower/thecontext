@@ -1,6 +1,6 @@
 import React, { FC } from "react";
 import MainTitleSecondary from "./MainTitleSecondary";
-import IconCom from "@/components/IconComp";
+import IconCom from "@/components/common/IconComp";
 import Breadcrumbs from "@/components/ui/braadcrumbs";
 import { useCurrentModule } from "@/services/utils";
 
