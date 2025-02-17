@@ -112,7 +112,7 @@ msgstr "Powrót do listy szablonów zadań"
 
 #: src/pages/public/HomePage.tsx:106
 msgid "Business Case Templates"
-msgstr "Szablony business case’ów"
+msgstr "Szablony business case'ów"
 
 #: src/components/documents/ContainerActions.tsx:80
 #: src/components/documents/ContainerForm.tsx:74
@@ -465,10 +465,6 @@ msgstr ""
 #~ "systemu <1>inteligentnego zarządzania zadaniami</1> oraz <2>rozszerzania "
 #~ "kontekstu</2>. <3>Twórz szablony</3>, <4>zarządzaj przepływami pracy</4> i "
 #~ "obserwuj, jak kontekst Twoich dokumentów <5>naturalnie się rozwija</5>."
-
-#: src/pages/public/HomePage.tsx:142
-#~ msgid "Automatically analyze and extract insights from your documents - websites, PDFs, and spreadsheets."
-#~ msgstr "Automatycznie analizuj i wyciągaj wnioski z dokumentów – stron internetowych, plików PDF i arkuszy kalkulacyjnych."
 
 #: src/pages/public/HomePage.tsx:38
 #~ msgid "THE CONTEXT"

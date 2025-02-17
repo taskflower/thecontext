@@ -57,46 +57,39 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes("node_modules")) {
-             // Radix UI components
-             if (id.includes("@radix-ui")) {
-              return "vendor-radix";
-            }
-            // Markdown editor
             if (id.includes("@uiw/react-md-editor")) {
-              return "vendor-markdown";
+              return "vendor-md-editor";
             }
-            // React core
-            if (id.includes("react") || id.includes("react-dom")) {
+            if (id.includes("@babel/runtime")) {
+              return "vendor-babel-runtime";
+            }
+            if (id.includes("rehype") || id.includes("remark") || id.includes("unified")) {
+              return "vendor-md-processors";
+            }
+            if (id.includes("micromark") || id.includes("mdast") || id.includes("unist")) {
+              return "vendor-md-core";
+            }
+            if (id.includes("react") || id.includes("react-dom") || id.includes("react-router-dom")) {
               return "vendor-react-core";
             }
-            // React Router
-            if (id.includes("react-router-dom")) {
-              return "vendor-router";
+            if (id.includes("@radix-ui")) {
+              return "vendor-radix";
             }
-            // Firebase
             if (id.includes("firebase")) {
               return "vendor-firebase";
             }
-            // Utilities (clsx, tailwind-merge, etc)
             if (id.includes("clsx") || id.includes("tailwind-merge") || id.includes("class-variance-authority")) {
               return "vendor-utils";
             }
-            // Lucide icons
             if (id.includes("lucide-react")) {
               return "vendor-icons";
             }
-            // Zustand
             if (id.includes("zustand")) {
               return "vendor-state";
             }
-            // Pozostałe react-related dependencies
-            if (id.includes("react")) {
-              return "vendor-react-misc";
-            }
-            // Add more conditions as needed
           }
-        },
-      },
-    },
-  },
+        }
+      }
+    }
+  }
 });
