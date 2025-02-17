@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/components/projects/ProjectRenderer.tsx
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useProjectsStore } from '@/store/projectsStore';
 import { PROJECT } from './mockedproject';
+import { Trans } from '@lingui/macro';
 
 interface ColumnConfig {
   name: string;
@@ -53,58 +55,132 @@ interface ProjectConfig {
 }
 
 const ProjectRenderer: React.FC = () => {
+  const { projectSlug } = useParams();
+  const { projects } = useProjectsStore();
   const [config, setConfig] = useState<ProjectConfig | null>(null);
 
-  useEffect(() => {
-    // Zamiast fetch, wykorzystujemy lokalny JSON z pliku mockedproject.ts
-    setConfig(PROJECT as ProjectConfig);
-  }, []);
+  // Find the project by matching the slug with the project title
+  const project = projects.find(
+    (p) => p.title.toLowerCase() === projectSlug?.toLowerCase()
+  );
 
-  if (!config) {
-    return <div>Ładowanie konfiguracji...</div>;
+  useEffect(() => {
+    if (project) {
+      // If project exists, load its configuration
+      setConfig(PROJECT as ProjectConfig);
+    }
+  }, [project]);
+
+  // If project doesn't exist, show error message
+  if (!project) {
+    return (
+      <div className="container mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-4">
+          <Trans>Project Not Found</Trans>
+        </h1>
+        <p className="text-gray-600">
+          <Trans>
+            The requested project does not exist or you may not have access to it.
+          </Trans>
+        </p>
+      </div>
+    );
   }
 
+  // Show loading state while configuration is being loaded
+  if (!config) {
+    return (
+      <div className="container mx-auto p-4">
+        <div className="text-center">
+          <Trans>Loading project configuration...</Trans>
+        </div>
+      </div>
+    );
+  }
+
+  // Render project content
   return (
-    <div>
-      <h1>{config.name}</h1>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-6">{project.title}</h1>
+      
+      {/* Project Description */}
+      <div className="mb-8">
+        <p className="text-gray-600">
+          {project.description || (
+            <span className="italic">
+              <Trans>No description provided</Trans>
+            </span>
+          )}
+        </p>
+      </div>
+
+      {/* Tabs Section */}
       {config.tabs.map((tab, index) => (
-        <div key={index} style={{ border: '1px solid #ccc', marginBottom: '1rem', padding: '1rem' }}>
-          <h2>{tab.title}</h2>
-          <h3>Kolumny:</h3>
-          <ul>
-            {tab.columns.map((col, idx) => (
-              <li key={idx}>
-                {col.name} ({col.key}) - typ: {col.type}
-              </li>
-            ))}
-          </ul>
-          <h3>Akcje:</h3>
-          <ul>
-            {tab.actions.map((action, idx) => (
-              <li key={idx}>
-                {action.label} - typ: {action.actionType} {action.taskId ? `(task: ${action.taskId})` : ''}
-              </li>
-            ))}
-          </ul>
+        <div key={index} className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4">{tab.title}</h2>
+          
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-medium mb-2">
+                <Trans>Columns</Trans>
+              </h3>
+              <ul className="space-y-2">
+                {tab.columns.map((col, idx) => (
+                  <li key={idx} className="text-gray-600">
+                    {col.name} ({col.key}) - {col.type}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-2">
+                <Trans>Actions</Trans>
+              </h3>
+              <ul className="space-y-2">
+                {tab.actions.map((action, idx) => (
+                  <li key={idx} className="text-gray-600">
+                    {action.label} - {action.actionType}
+                    {action.taskId && ` (Task: ${action.taskId})`}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       ))}
-      <div>
-        <h2>Tablica Kanban</h2>
-        <p>Szablon: {config.kanban.boardTemplateId}</p>
-        {config.kanban.tasks.map(task => (
-          <div key={task.id} style={{ border: '1px solid #000', marginBottom: '1rem', padding: '0.5rem' }}>
-            <h3>{task.name}</h3>
-            <p>{task.description}</p>
-            <h4>Kroki:</h4>
-            <ul>
-              {task.steps.map(step => (
-                <li key={step.id}>
-                  <strong>{step.name}</strong>: {step.description} - Plugin: {step.pluginId}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+
+      {/* Kanban Board Section */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h2 className="text-xl font-semibold mb-4">
+          <Trans>Kanban Board</Trans>
+        </h2>
+        <p className="text-gray-600 mb-4">
+          <Trans>Template ID:</Trans> {config.kanban.boardTemplateId}
+        </p>
+        
+        <div className="space-y-4">
+          {config.kanban.tasks.map(task => (
+            <div key={task.id} className="border border-gray-200 rounded-lg p-4">
+              <h3 className="text-lg font-medium mb-2">{task.name}</h3>
+              <p className="text-gray-600 mb-4">{task.description}</p>
+              
+              <h4 className="font-medium mb-2">
+                <Trans>Steps</Trans>
+              </h4>
+              <ul className="space-y-2">
+                {task.steps.map(step => (
+                  <li key={step.id} className="text-gray-600">
+                    <span className="font-medium">{step.name}:</span> {step.description}
+                    <span className="text-gray-500 ml-2">
+                      (Plugin: {step.pluginId})
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

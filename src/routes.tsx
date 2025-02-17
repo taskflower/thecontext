@@ -13,6 +13,7 @@ import containerRoutes from "./pages/documents/routes";
 import usersRoutes from "@/pages/users/routes"; // Importujemy routingi dla użytkowników
 import { LanguageProvider } from "./context/LanguageContext";
 import ProjectRenderer from "@/components/projects/ProjectRenderer"; // Import nowego komponentu
+import projectsRoutes from "./pages/projects/routes";
 
 export const DEFAULT_LANGUAGE = "en";
 
@@ -31,7 +32,8 @@ export const routes: RouteObject[] = [
     ),
     children: [
       ...publicRoutes,
-      { path: "projects", element: <ProjectRenderer /> } // Trasa dla podglądu projektu poza adminem
+      { path: "projects", element: <ProjectRenderer /> }, // Keep existing projects route
+      { path: ":projectSlug", element: <ProjectRenderer /> }, // Add dynamic project route
     ],
   },
   {
@@ -51,7 +53,8 @@ export const routes: RouteObject[] = [
       { path: "boards/*", children: boardsRoutes },
       { path: "tasks/*", children: tasksRoutes },
       { path: "settings/*", children: settingsRoutes },
-      { path: "users/*", children: usersRoutes }
+      { path: "users/*", children: usersRoutes },
+      { path: "projects/*", children: projectsRoutes },
     ],
   },
 ];
