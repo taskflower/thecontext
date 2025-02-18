@@ -13,53 +13,53 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: src/pages/tasks/TaskTemplateEdit.tsx:31
-#: src/pages/tasks/TaskTemplateNew.tsx:22
-msgid "Back to list of tasks templates"
-msgstr ""
-
-#: src/pages/tasks/TaskTemplateNew.tsx:14
-msgid "Create a new task template"
-msgstr ""
-
-#: src/pages/tasks/TaskTemplateList.tsx:60
-msgid "Description"
-msgstr ""
-
-#: src/pages/tasks/TaskTemplateEdit.tsx:22
-msgid "Editing: {0}"
-msgstr ""
-
-#: src/pages/tasks/TaskTemplateList.tsx:41
-msgid "Filter templates..."
-msgstr ""
-
-#: src/pages/tasks/TaskTemplateList.tsx:28
-msgid "Manage and create your task templates."
-msgstr ""
-
 #: src/pages/tasks/TaskTemplateEdit.tsx:23
 msgid "Modify the template details and steps below."
+msgstr ""
+
+#: src/pages/tasks/TaskTemplateList.tsx:27
+msgid "Task Templates"
 msgstr ""
 
 #: src/pages/tasks/TaskTemplateList.tsx:58
 msgid "Name"
 msgstr ""
 
-#: src/pages/tasks/TaskTemplateNew.tsx:13
-msgid "New task template"
+#: src/pages/tasks/TaskTemplateList.tsx:41
+msgid "Filter templates..."
 msgstr ""
 
 #: src/pages/tasks/TaskTemplateList.tsx:35
 msgid "New Template"
 msgstr ""
 
+#: src/pages/tasks/TaskTemplateList.tsx:60
+msgid "Description"
+msgstr ""
+
+#: src/pages/tasks/TaskTemplateList.tsx:28
+msgid "Manage and create your task templates."
+msgstr ""
+
 #: src/pages/tasks/TaskTemplateList.tsx:86
 msgid "No description provided"
 msgstr ""
 
-#: src/pages/tasks/TaskTemplateList.tsx:27
-msgid "Task Templates"
+#: src/pages/tasks/TaskTemplateNew.tsx:14
+msgid "Create a new task template"
+msgstr ""
+
+#: src/pages/tasks/TaskTemplateList.tsx:46
+msgid "View"
+msgstr ""
+
+#: src/pages/tasks/TaskTemplateEdit.tsx:31
+#: src/pages/tasks/TaskTemplateNew.tsx:22
+msgid "Back to list of tasks templates"
+msgstr ""
+
+#: src/pages/tasks/TaskTemplateEdit.tsx:22
+msgid "Editing: {0}"
 msgstr ""
 
 #: src/pages/tasks/TaskTemplateEdit.tsx:17
@@ -67,6 +67,6 @@ msgstr ""
 msgid "Template not found"
 msgstr ""
 
-#: src/pages/tasks/TaskTemplateList.tsx:46
-msgid "View"
+#: src/pages/tasks/TaskTemplateNew.tsx:13
+msgid "New task template"
 msgstr ""

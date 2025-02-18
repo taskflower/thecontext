@@ -61,7 +61,7 @@ export const AdminSidebar: React.FC = () => {
   };
 
   const navigationItems = [
-    { path: "/boards/instances", icon: LayoutGrid, label: "Boards" },
+    { path: "/boards", icon: LayoutGrid, label: "Boards" },
     { path: "/tasks/templates", icon: CheckSquare, label: "Tasks" },
     { path: "/documents", icon: FileText, label: "Documents" },
     { path: "/settings", icon: Settings, label: "Settings" },

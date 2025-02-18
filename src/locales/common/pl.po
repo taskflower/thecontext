@@ -1,0 +1,267 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language: \n"
+"Language-Team: \n"
+"Content-Type: \n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#: src/components/boards/instancesList/InstanceActions.tsx:39
+msgid "Open"
+msgstr "Otwórz"
+
+#: src/components/tasks/TemplateList.tsx:44
+msgid "Run"
+msgstr "Uruchom"
+
+#: src/components/documents/DocumentForm.tsx:50
+msgid "Content"
+msgstr "Zawartość"
+
+#: src/components/boards/KanbanTemplateEditor.tsx:153
+msgid "Task Templates"
+msgstr "Szablony zadań"
+
+#: src/components/documents/ContainerForm.tsx:39
+msgid "Name"
+msgstr "Nazwa"
+
+#: src/components/boards/instancesList/InstanceActions.tsx:68
+#: src/components/documents/ContainerActions.tsx:69
+msgid "Are you sure?"
+msgstr "Czy jesteś pewien?"
+
+#: src/components/projects/ProjectRenderer.tsx:138
+msgid "Actions"
+msgstr "Akcje"
+
+#: src/components/documents/ContainerForm.tsx:55
+msgid "Container description"
+msgstr "Opis kontenera"
+
+#: src/components/boards/instancesList/InstanceActions.tsx:71
+msgid "This action cannot be undone. This will permanently delete your board and remove all tasks."
+msgstr "Tej akcji nie można cofnąć. Spowoduje to trwałe usunięcie twojej tablicy i wszystkich zadań."
+
+#: src/components/boards/KanbanTemplateEditor.tsx:260
+msgid "Create template"
+msgstr "Utwórz szablon"
+
+#: src/components/projects/ProjectRenderer.tsx:169
+msgid "Steps"
+msgstr "Kroki"
+
+#: src/components/documents/ContainerCard.tsx:95
+msgid "Collection status"
+msgstr "Status kolekcji"
+
+#: src/components/boards/KanbanTemplateEditor.tsx:161
+msgid "Add task template"
+msgstr "Dodaj szablon zadania"
+
+#: src/components/boards/KanbanTemplateEditor.tsx:118
+msgid "Template Details"
+msgstr "Szczegóły szablonu"
+
+#: src/components/boards/KanbanTemplateEditor.tsx:229
+msgid "({0} steps)"
+msgstr "({0} kroków)"
+
+#: src/components/boards/instancesList/InstanceActions.tsx:46
+#: src/components/documents/ContainerActions.tsx:47
+msgid "Open menu"
+msgstr "Otwórz menu"
+
+#: src/components/tasks/ProcesRunner/BottomToolbar.tsx:71
+msgid "Show Preview"
+msgstr "Pokaż podgląd"
+
+#: src/components/documents/DocumentTable.tsx:50
+msgid "Container"
+msgstr "Kontener"
+
+#: src/components/documents/DocumentForm.tsx:39
+#: src/components/documents/DocumentTable.tsx:46
+msgid "Title"
+msgstr "Tytuł"
+
+#: src/components/tasks/ProcesRunner/BottomToolbar.tsx:57
+msgid "Hide Preview"
+msgstr "Ukryj podgląd"
+
+#: src/components/boards/KanbanTemplateEditor.tsx:136
+#: src/components/documents/ContainerForm.tsx:50
+msgid "Description"
+msgstr "Opis"
+
+#: src/components/documents/ContainerCard.tsx:83
+msgid "Estimated progress"
+msgstr "Szacowany postęp"
+
+#: src/components/boards/KanbanTemplateEditor.tsx:112
+msgid "Back to Templates"
+msgstr "Powrót do szablonów"
+
+#: src/components/boards/KanbanTemplateEditor.tsx:100
+msgid "Create board template"
+msgstr "Utwórz szablon tablicy"
+
+#: src/components/documents/DocumentForm.tsx:44
+msgid "Document title"
+msgstr "Tytuł dokumentu"
+
+#: src/components/documents/ContainerCard.tsx:98
+msgid "{documentCount} documents stored"
+msgstr "{documentCount} przechowywanych dokumentów"
+
+#: src/components/boards/KanbanTemplateEditor.tsx:167
+msgid "No task templates added yet"
+msgstr "Nie dodano jeszcze szablonów zadań"
+
+#: src/components/documents/ContainerForm.tsx:44
+msgid "Container name"
+msgstr "Nazwa kontenera"
+
+#: src/components/documents/DocumentTable.tsx:126
+msgid "Are you sure you want to delete this document?"
+msgstr "Czy na pewno chcesz usunąć ten dokument?"
+
+#: src/components/boards/KanbanTemplateEditor.tsx:122
+msgid "Template Name"
+msgstr "Nazwa szablonu"
+
+#: src/components/documents/ContainerActions.tsx:40
+msgid "View Documents"
+msgstr "Zobacz dokumenty"
+
+#: src/components/documents/ContainerForm.tsx:69
+msgid "Optional target number of documents"
+msgstr "Opcjonalna docelowa liczba dokumentów"
+
+#: src/components/projects/ProjectRenderer.tsx:156
+msgid "Kanban Board"
+msgstr "Tablica Kanban"
+
+#: src/components/boards/KanbanTemplateEditor.tsx:198
+msgid "Select Task Template"
+msgstr "Wybierz szablon zadania"
+
+#: src/components/documents/ContainerCard.tsx:57
+#: src/components/projects/ProjectRenderer.tsx:111
+msgid "No description provided"
+msgstr "Nie podano opisu"
+
+#: src/components/boards/KanbanTemplateEditor.tsx:100
+msgid "Edit board template"
+msgstr "Edytuj szablon tablicy"
+
+#: src/components/documents/ContainerCard.tsx:86
+msgid "{documentCount} of {0} documents"
+msgstr "{documentCount} z {0} dokumentów"
+
+#: src/components/boards/KanbanTemplateEditor.tsx:131
+msgid "Enter template name"
+msgstr "Wprowadź nazwę szablonu"
+
+#: src/components/boards/instancesList/InstanceActions.tsx:62
+#: src/components/boards/instancesList/InstanceActions.tsx:79
+#: src/components/documents/ContainerActions.tsx:63
+#: src/components/documents/ContainerActions.tsx:83
+msgid "Delete"
+msgstr "Usuń"
+
+#: src/components/boards/KanbanTemplateEditor.tsx:103
+msgid "Create or modify board template details"
+msgstr "Utwórz lub zmodyfikuj szczegóły szablonu tablicy"
+
+#: src/components/projects/ProjectRenderer.tsx:95
+msgid "Loading project configuration..."
+msgstr "Ładowanie konfiguracji projektu..."
+
+#: src/components/boards/instancesList/InstanceActions.tsx:77
+#: src/components/boards/KanbanTemplateEditor.tsx:241
+#: src/components/boards/KanbanTemplateEditor.tsx:254
+#: src/components/documents/ContainerActions.tsx:80
+#: src/components/documents/ContainerForm.tsx:74
+#: src/components/documents/DocumentForm.tsx:59
+msgid "Cancel"
+msgstr "Anuluj"
+
+#: src/components/boards/KanbanTemplateEditor.tsx:214
+msgid "Go to task templates"
+msgstr "Przejdź do szablonów zadań"
+
+#: src/components/documents/ContainerActions.tsx:55
+#: src/components/documents/DocumentTable.tsx:98
+#: src/components/tasks/TemplateList.tsx:38
+msgid "Edit"
+msgstr "Edytuj"
+
+#: src/components/documents/ContainerActions.tsx:72
+msgid "This action cannot be undone. This will permanently delete this container and all its documents."
+msgstr "Tej akcji nie można cofnąć. Spowoduje to trwałe usunięcie tego kontenera i wszystkich jego dokumentów."
+
+#: src/components/boards/instancesList/InstanceActions.tsx:54
+msgid "Templates"
+msgstr "Szablony"
+
+#: src/components/tasks/TemplateList.tsx:57
+msgid "Step {0}: {1}"
+msgstr "Krok {0}: {1}"
+
+#: src/components/projects/ProjectRenderer.tsx:125
+msgid "Columns"
+msgstr "Kolumny"
+
+#: src/components/boards/KanbanTemplateEditor.tsx:179
+msgid "Steps: {0}"
+msgstr "Kroki: {0}"
+
+#: src/components/documents/DocumentTable.tsx:54
+msgid "Content Preview"
+msgstr "Podgląd zawartości"
+
+#: src/components/tasks/TemplateList.tsx:52
+msgid "Steps:"
+msgstr "Kroki:"
+
+#: src/components/boards/KanbanTemplateEditor.tsx:205
+msgid "No available templates"
+msgstr "Brak dostępnych szablonów"
+
+#: src/components/projects/ProjectRenderer.tsx:159
+msgid "Template ID:"
+msgstr "ID szablonu:"
+
+#: src/components/tasks/TemplateList.tsx:66
+msgid "Close Preview"
+msgstr "Zamknij podgląd"
+
+#: src/components/tasks/TemplateList.tsx:32
+msgid "Preview"
+msgstr "Podgląd"
+
+#: src/components/documents/ContainerForm.tsx:60
+msgid "Estimated target document count"
+msgstr "Szacowana docelowa liczba dokumentów"
+
+#: src/components/projects/ProjectRenderer.tsx:79
+msgid "Project Not Found"
+msgstr "Nie znaleziono projektu"
+
+#: src/components/projects/ProjectRenderer.tsx:82
+msgid "The requested project does not exist or you may not have access to it."
+msgstr "Żądany projekt nie istnieje lub nie masz do niego dostępu."
+
+#: src/components/boards/KanbanTemplateEditor.tsx:260
+msgid "Save changes"
+msgstr "Zapisz zmiany"
+
+#: src/components/boards/KanbanTemplateEditor.tsx:145
+msgid "Enter template description"
+msgstr "Wprowadź opis szablonu"

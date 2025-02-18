@@ -1,0 +1,171 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2025-02-18 00:56+0100\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: pl\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+#: src/pages/public/CaseStudiesPage.tsx:174
+msgid "Automated Curriculum Development Process"
+msgstr "Zautomatyzowany proces tworzenia programu nauczania"
+
+#: src/pages/public/HomePage.tsx:157
+msgid "Ready to Automate Your Business Processes?"
+msgstr "Gotowy na automatyzację procesów biznesowych?"
+
+#: src/pages/public/CaseStudiesPage.tsx:179
+msgid "From initial content creation through peer review to final publication, the system manages the entire curriculum development lifecycle with automated version control and quality assurance checks."
+msgstr "Od początkowego tworzenia treści, przez recenzję, aż po ostateczną publikację, system zarządza całym cyklem życia programu nauczania z automatyczną kontrolą wersji i sprawdzaniem jakości."
+
+#: src/pages/public/HomePage.tsx:38
+msgid "THE CONTEXT"
+msgstr "THE CONTEXT"
+
+#: src/pages/public/CaseStudiesPage.tsx:40
+msgid "Automated Document Creation"
+msgstr "Automatyczne tworzenie dokumentów"
+
+#: src/pages/public/CaseStudiesPage.tsx:45
+msgid "The process starts with a task requesting a URL address. Then, via API, the page content is prepared, converted to Markdown, and saved as the first document."
+msgstr "Proces rozpoczyna się od zadania wymagającego adresu URL. Następnie, poprzez API, zawartość strony jest przygotowywana, konwertowana na format Markdown i zapisywana jako pierwszy dokument."
+
+#: src/pages/public/HomePage.tsx:52
+msgid "Create Your Workflow"
+msgstr "Stwórz swój przepływ pracy"
+
+#: src/pages/public/CaseStudiesPage.tsx:29
+msgid "Example scenarios showcasing the use of our task and document management system."
+msgstr "Przykładowe scenariusze pokazujące wykorzystanie naszego systemu zarządzania zadaniami i dokumentami."
+
+#: src/pages/public/CaseStudiesPage.tsx:26
+msgid "THE CONTEXT: Case Studies"
+msgstr "THE CONTEXT: Studia przypadków"
+
+#: src/pages/public/CaseStudiesPage.tsx:108
+msgid "<0>Data Isolation:</0> Each work cycle generates unique document identifiers."
+msgstr "<0>Izolacja danych:</0> Każdy cykl pracy generuje unikalne identyfikatory dokumentów."
+
+#: src/pages/public/HomePage.tsx:80
+msgid "Core Features"
+msgstr "Główne funkcje"
+
+#: src/pages/public/HomePage.tsx:170
+msgid "Start Your First Project"
+msgstr "Rozpocznij swój pierwszy projekt"
+
+#: src/pages/public/CaseStudiesPage.tsx:50
+#: src/pages/public/CaseStudiesPage.tsx:69
+#: src/pages/public/CaseStudiesPage.tsx:88
+#: src/pages/public/CaseStudiesPage.tsx:144
+#: src/pages/public/CaseStudiesPage.tsx:165
+#: src/pages/public/CaseStudiesPage.tsx:186
+msgid "Learn More"
+msgstr "Dowiedz się więcej"
+
+#: src/pages/public/HomePage.tsx:107
+msgid "Business Case Templates"
+msgstr "Szablony przypadków biznesowych"
+
+#: src/pages/public/HomePage.tsx:127
+msgid "Smart AI agents learn from your documents while executing tasks, building specialized knowledge for your business."
+msgstr "Inteligentni agenci AI uczą się z Twoich dokumentów podczas wykonywania zadań, budując specjalistyczną wiedzę dla Twojej firmy."
+
+#: src/pages/public/CaseStudiesPage.tsx:158
+msgid "The platform integrates concepts from multiple disciplines to create comprehensive learning modules that show real-world connections between subjects, fostering holistic understanding and critical thinking."
+msgstr "Platforma integruje koncepcje z wielu dyscyplin, tworząc kompleksowe moduły nauczania, które pokazują rzeczywiste powiązania między przedmiotami, wspierając holistyczne zrozumienie i myślenie krytyczne."
+
+#: src/pages/public/CaseStudiesPage.tsx:153
+msgid "Multidisciplinary Learning Modules"
+msgstr "Multidyscyplinarne moduły nauczania"
+
+#: src/pages/public/CaseStudiesPage.tsx:113
+msgid "<0>Task Tracking:</0> All tasks are linked to their respective documents, enabling easy tracking."
+msgstr "<0>Śledzenie zadań:</0> Wszystkie zadania są powiązane z odpowiednimi dokumentami, umożliwiając łatwe śledzenie."
+
+#: src/pages/public/HomePage.tsx:139
+msgid "Smart Document Processing"
+msgstr "Inteligentne przetwarzanie dokumentów"
+
+#: src/pages/public/CaseStudiesPage.tsx:83
+msgid "Subsequent tasks include competitive analysis and developing a marketing strategy based on the prepared documents, ensuring consistency and effectiveness of actions."
+msgstr "Kolejne zadania obejmują analizę konkurencji i opracowanie strategii marketingowej w oparciu o przygotowane dokumenty, zapewniając spójność i skuteczność działań."
+
+#: src/pages/public/CaseStudiesPage.tsx:59
+msgid "Marketing Description Generation"
+msgstr "Generowanie opisów marketingowych"
+
+#: src/pages/public/CaseStudiesPage.tsx:195
+msgid "Contact Us"
+msgstr "Skontaktuj się z nami"
+
+#: src/pages/public/HomePage.tsx:90
+msgid "AI Workflow Management"
+msgstr "Zarządzanie przepływem pracy AI"
+
+#: src/pages/public/HomePage.tsx:66
+msgid "THE CONTEXT is a platform that automates your business workflows using AI. Upload your content, set your goals, and let our AI analyze and execute tasks automatically. The system learns from your data to deliver increasingly personalized results."
+msgstr "THE CONTEXT to platforma, która automatyzuje procesy biznesowe przy użyciu AI. Wgraj swoje treści, określ cele i pozwól naszej AI automatycznie analizować i wykonywać zadania. System uczy się z Twoich danych, aby dostarczać coraz bardziej spersonalizowane wyniki."
+
+#: src/pages/public/HomePage.tsx:123
+msgid "AI Agents & Learning"
+msgstr "Agenci AI i uczenie się"
+
+#: src/pages/public/CaseStudiesPage.tsx:118
+msgid "<0>Process Automation:</0> Integration with APIs and LLM plugins automates key stages of document creation."
+msgstr "<0>Automatyzacja procesów:</0> Integracja z API i wtyczkami LLM automatyzuje kluczowe etapy tworzenia dokumentów."
+
+#: src/pages/public/CaseStudiesPage.tsx:132
+msgid "Curriculum-Based Educational Content Generation"
+msgstr "Generowanie treści edukacyjnych w oparciu o program nauczania"
+
+#: src/pages/public/HomePage.tsx:43
+msgid "Your <0>AI-powered workflow platform</0> for<1>automating complex business processes.</1>From marketing campaigns to career planning, turn any business case into an actionable, AI-guided workflow."
+msgstr "Twoja <0>platforma przepływu pracy oparta na AI</0> do <1>automatyzacji złożonych procesów biznesowych.</1>Od kampanii marketingowych po planowanie kariery, przekształć każdy przypadek biznesowy w wykonalny przepływ pracy kierowany przez AI."
+
+#: src/pages/public/HomePage.tsx:61
+msgid "What is THE CONTEXT?"
+msgstr "Czym jest THE CONTEXT?"
+
+#: src/pages/public/HomePage.tsx:111
+msgid "Convert any business scenario into an automated workflow with pre-built or custom templates."
+msgstr "Przekształć dowolny scenariusz biznesowy w zautomatyzowany przepływ pracy za pomocą gotowych lub niestandardowych szablonów."
+
+#: src/pages/public/CaseStudiesPage.tsx:137
+msgid "Using the national curriculum as input, the system automatically generates lesson plans, worksheets, and educational materials tailored to specific subjects and grade levels, ensuring perfect alignment with educational standards."
+msgstr "Wykorzystując podstawę programową jako dane wejściowe, system automatycznie generuje plany lekcji, karty pracy i materiały edukacyjne dostosowane do konkretnych przedmiotów i poziomów nauczania, zapewniając pełną zgodność ze standardami edukacyjnymi."
+
+#: src/pages/public/CaseStudiesPage.tsx:78
+msgid "Competitive Analysis and Marketing Strategy"
+msgstr "Analiza konkurencji i strategia marketingowa"
+
+#: src/pages/public/CaseStudiesPage.tsx:64
+msgid "The next task uses the document from the previous step and, with the LLM plugin, generates a marketing description of the website, preparing content for campaigns."
+msgstr "Kolejne zadanie wykorzystuje dokument z poprzedniego kroku i, za pomocą wtyczki LLM, generuje marketingowy opis strony internetowej, przygotowując treści do kampanii."
+
+#: src/pages/public/CaseStudiesPage.tsx:102
+msgid "A key aspect of our system is maintaining order and separation of documents across different work cycles. This ensures that even when processes are run multiple times, documents from different cycles do not mix, providing clarity and ease of management."
+msgstr "Kluczowym aspektem naszego systemu jest utrzymanie porządku i separacji dokumentów w różnych cyklach pracy. Zapewnia to, że nawet gdy procesy są uruchamiane wielokrotnie, dokumenty z różnych cykli nie mieszają się, zapewniając przejrzystość i łatwość zarządzania."
+
+#: src/pages/public/HomePage.tsx:143
+msgid "Automatically analyze and extract insights from your documents - websites, PDFs, and spreadsheets."
+msgstr "Automatycznie analizuj i wydobywaj wnioski z dokumentów - stron internetowych, plików PDF i arkuszy kalkulacyjnych."
+
+#: src/pages/public/CaseStudiesPage.tsx:97
+msgid "Maintaining Order in the System"
+msgstr "Utrzymanie porządku w systemie"
+
+#: src/pages/public/HomePage.tsx:94
+msgid "Manage your AI agents like a team using our intuitive Kanban board. Track progress and oversee multiple processes seamlessly."
+msgstr "Zarządzaj swoimi agentami AI jak zespołem za pomocą intuicyjnej tablicy Kanban. Śledź postępy i nadzoruj wiele procesów bez zakłóceń."
+
+#: src/pages/public/HomePage.tsx:160
+msgid "Transform your business cases into <0>automated workflows</0>. Let our <1>AI agents</1> handle the heavy lifting while building a <2>specialized knowledge base</2> for your needs. From <3>marketing campaigns</3> to <4>career development</4>, see how AI can streamline your processes today."
+msgstr "Przekształć swoje przypadki biznesowe w <0>zautomatyzowane przepływy pracy</0>. Pozwól naszym <1>agentom AI</1> wykonać ciężką pracę, budując jednocześnie <2>specjalistyczną bazę wiedzy</2> dla Twoich potrzeb. Od <3>kampanii marketingowych</3> po <4>rozwój kariery</4>, zobacz jak AI może usprawnić Twoje procesy już dziś."

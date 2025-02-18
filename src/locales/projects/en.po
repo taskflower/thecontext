@@ -13,42 +13,8 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: src/pages/projects/ProjectEdit.tsx:50
-#: src/pages/projects/ProjectNew.tsx:32
-msgid "Back to Projects"
-msgstr ""
-
-#: src/pages/projects/ProjectForm.tsx:102
-msgid "Cancel"
-msgstr ""
-
-#: src/pages/projects/ProjectNew.tsx:29
-msgid "Create a new project"
-msgstr ""
-
-#: src/pages/projects/ProjectList.tsx:103
-msgid "Delete"
-msgstr ""
-
-#: src/pages/projects/ProjectForm.tsx:71
-#: src/pages/projects/ProjectList.tsx:63
-msgid "Description"
-msgstr ""
-
-#: src/pages/projects/ProjectList.tsx:96
-msgid "Edit"
-msgstr ""
-
-#: src/pages/projects/ProjectEdit.tsx:46
-msgid "Edit Project"
-msgstr ""
-
-#: src/pages/projects/ProjectList.tsx:28
-msgid "Manage your projects and their settings"
-msgstr ""
-
-#: src/pages/projects/ProjectEdit.tsx:47
-msgid "Modify project details and settings"
+#: src/pages/projects/ProjectList.tsx:27
+msgid "Projects"
 msgstr ""
 
 #: src/pages/projects/ProjectList.tsx:44
@@ -56,32 +22,25 @@ msgstr ""
 msgid "New Project"
 msgstr ""
 
-#: src/pages/projects/ProjectList.tsx:78
-msgid "No description provided"
+#: src/pages/projects/ProjectEdit.tsx:50
+#: src/pages/projects/ProjectNew.tsx:32
+msgid "Back to Projects"
 msgstr ""
 
 #: src/pages/projects/ProjectForm.tsx:51
 msgid "Project Details"
 msgstr ""
 
-#: src/pages/projects/ProjectEdit.tsx:35
-msgid "Project not found"
+#: src/pages/projects/ProjectEdit.tsx:46
+msgid "Edit Project"
 msgstr ""
 
-#: src/pages/projects/ProjectList.tsx:27
-msgid "Projects"
+#: src/pages/projects/ProjectNew.tsx:29
+msgid "Create a new project"
 msgstr ""
 
-#: src/pages/projects/ProjectForm.tsx:105
-msgid "Save"
-msgstr ""
-
-#: src/pages/projects/ProjectList.tsx:53
-msgid "Search projects..."
-msgstr ""
-
-#: src/pages/projects/ProjectForm.tsx:85
-msgid "Settings (JSON)"
+#: src/pages/projects/ProjectList.tsx:28
+msgid "Manage your projects and their settings"
 msgstr ""
 
 #: src/pages/projects/ProjectForm.tsx:57
@@ -89,7 +48,48 @@ msgstr ""
 msgid "Title"
 msgstr ""
 
+#: src/pages/projects/ProjectForm.tsx:71
+#: src/pages/projects/ProjectList.tsx:63
+msgid "Description"
+msgstr ""
+
+#: src/pages/projects/ProjectEdit.tsx:47
+msgid "Modify project details and settings"
+msgstr ""
+
+#: src/pages/projects/ProjectList.tsx:53
+msgid "Search projects..."
+msgstr ""
+
+#: src/pages/projects/ProjectList.tsx:78
+msgid "No description provided"
+msgstr ""
+
+#: src/pages/projects/ProjectList.tsx:103
+msgid "Delete"
+msgstr ""
+
+#: src/pages/projects/ProjectForm.tsx:102
+msgid "Cancel"
+msgstr ""
+
+#: src/pages/projects/ProjectList.tsx:96
+msgid "Edit"
+msgstr ""
+
 #: src/pages/projects/ProjectList.tsx:37
 #: src/pages/projects/ProjectList.tsx:89
 msgid "View"
+msgstr ""
+
+#: src/pages/projects/ProjectEdit.tsx:35
+msgid "Project not found"
+msgstr ""
+
+#: src/pages/projects/ProjectForm.tsx:85
+msgid "Settings (JSON)"
+msgstr ""
+
+#: src/pages/projects/ProjectForm.tsx:105
+msgid "Save"
 msgstr ""

@@ -1,18 +1,27 @@
-// lingui.config.ts
 import type { LinguiConfig } from "@lingui/conf";
 
 const config: LinguiConfig = {
   locales: ["en", "pl"],
+  sourceLocale: "en",
+  pseudoLocale: "pseudo",
+  fallbackLocales: {
+    default: "en",
+  },
+  format: "po",
+  formatOptions: {
+    origins: true,
+    lineNumbers: true,
+  },
   catalogs: [
     {
       // Tłumaczenia dla "auth"
       path: "<rootDir>/src/locales/auth/{locale}",
-      include: ["src/routes/auth/**/*.{js,jsx,ts,tsx}"],
+      include: ["src/pages/auth/**/*.{js,jsx,ts,tsx}"],
     },
     {
       // Tłumaczenia dla "boards"
       path: "<rootDir>/src/locales/boards/{locale}",
-      include: ["src/routes/boards/**/*.{js,jsx,ts,tsx}"],
+      include: ["src/pages/boards/**/*.{js,jsx,ts,tsx}"],
     },
     {
       // Tłumaczenia dla "documents"
@@ -49,9 +58,31 @@ const config: LinguiConfig = {
       path: "<rootDir>/src/locales/plugins/{locale}",
       include: ["src/plugins/**/*.{js,jsx,ts,tsx}"],
     },
-   
-   
+    {
+      // Tłumaczenia dla wspólnych komponentów
+      path: "<rootDir>/src/locales/common/{locale}",
+      include: ["src/components/**/*.{js,jsx,ts,tsx}"],
+    },
+    {
+      // Tłumaczenia dla layoutów
+      path: "<rootDir>/src/locales/layouts/{locale}",
+      include: ["src/layouts/**/*.{js,jsx,ts,tsx}"],
+    },
+    {
+      // Tłumaczenia dla hooks
+      path: "<rootDir>/src/locales/hooks/{locale}",
+      include: ["src/hooks/**/*.{js,jsx,ts,tsx}"],
+    },
+    {
+      // Tłumaczenia dla wiadomości systemowych i błędów
+      path: "<rootDir>/src/locales/system/{locale}",
+      include: ["src/services/**/*.{js,jsx,ts,tsx}"],
+    }
   ],
+  rootDir: ".",
+  compileNamespace: "cjs",
+  runtimeConfigModule: ["@lingui/core", "i18n"],
+  orderBy: "messageId",
 };
 
 export default config;

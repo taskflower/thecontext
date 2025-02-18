@@ -1,3 +1,4 @@
+// src/components/boards/instancesList/InstanceActions.tsx
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,7 +18,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { MoreHorizontal } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Trans } from "@lingui/macro";
+import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 
 interface InstanceActionsProps {
   instanceId: string;
@@ -25,29 +27,31 @@ interface InstanceActionsProps {
 }
 
 const InstanceActions = ({ instanceId, onDelete }: InstanceActionsProps) => {
-  const navigate = useNavigate();
+  const adminNavigate = useAdminNavigate();
 
   return (
     <div className="flex gap-2 justify-end">
       <Button
         variant="outline"
         size="sm"
-        onClick={() => navigate(`/admin/boards/${instanceId}/view`)}
+        onClick={() => adminNavigate(`/boards/${instanceId}/view`)}
       >
-        Open
+        <Trans>Open</Trans>
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon">
             <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">
+              <Trans>Open menu</Trans>
+            </span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem
-            onClick={() => navigate(`/admin/boards/${instanceId}/template`)}
+            onClick={() => adminNavigate(`/boards/templates`)}
           >
-            Template
+            <Trans>Templates</Trans>
           </DropdownMenuItem>
           <AlertDialog>
             <AlertDialogTrigger asChild>
@@ -55,20 +59,24 @@ const InstanceActions = ({ instanceId, onDelete }: InstanceActionsProps) => {
                 onSelect={(e) => e.preventDefault()}
                 className="text-destructive"
               >
-                Delete
+                <Trans>Delete</Trans>
               </DropdownMenuItem>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogTitle>
+                  <Trans>Are you sure?</Trans>
+                </AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete your board and remove all tasks.
+                  <Trans>
+                    This action cannot be undone. This will permanently delete your board and remove all tasks.
+                  </Trans>
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel><Trans>Cancel</Trans></AlertDialogCancel>
                 <AlertDialogAction onClick={() => onDelete(instanceId)}>
-                  Delete
+                  <Trans>Delete</Trans>
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
