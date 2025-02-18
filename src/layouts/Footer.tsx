@@ -25,7 +25,9 @@ export const Footer = () => {
           <span>/</span>
           <p>&copy; 2025 thecontext.onrender.com</p>
           <span>/</span>
-          <p>ver 0.10.2</p>
+          <span>dadmor@gmail.com</span>
+          <span>/</span>
+          <p>ver 0.10.6</p>
         </div>
       </footer>
     </div>
