@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useParams } from "react-router-dom";
 import { useDocumentsStore } from "@/store/documentsStore";
 import { Button } from "@/components/ui/button";
@@ -6,31 +7,40 @@ import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { DocumentForm } from "@/components/documents/DocumentForm";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 import { Trans } from "@lingui/macro";
+import { Document } from "@/types/document";
 
 export const DocumentEdit = () => {
   const { containerId, documentId } = useParams();
   const adminNavigate = useAdminNavigate();
   const { documents, updateDocument } = useDocumentsStore();
-
-  const document = documents.find((d) => d.id === documentId);
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  
+  const originalDocument = documents.find((d) => d.id === documentId);
+  const [documentState, setDocumentState] = useState<Document | null>(null);
 
   useEffect(() => {
-    if (document) {
-      setTitle(document.title);
-      setContent(document.content);
+    if (originalDocument) {
+      setDocumentState(originalDocument);
     }
-  }, [document]);
+  }, [originalDocument]);
 
-  if (!document) {
+  if (!documentState) {
     return <div><Trans>Document not found</Trans></div>;
   }
 
+  const handleUpdate = (field: string, value: any) => {
+    setDocumentState(prev => ({
+      ...prev!,
+      [field]: value
+    }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (documentId) {
-      updateDocument(documentId, { title, content });
+    if (documentId && documentState) {
+      updateDocument(documentId, {
+        title: documentState.title,
+        content: documentState.content
+      });
       adminNavigate(`/documents/${containerId}`);
     }
   };
@@ -48,10 +58,8 @@ export const DocumentEdit = () => {
       }
     >
       <DocumentForm
-        title={title}
-        content={content}
-        onTitleChange={setTitle}
-        onContentChange={setContent}
+        document={documentState}
+        onUpdate={handleUpdate}
         onSubmit={handleSubmit}
         onCancel={handleBack}
         submitButtonText={<Trans>Save Changes</Trans>}
@@ -60,4 +68,5 @@ export const DocumentEdit = () => {
     </AdminOutletTemplate>
   );
 };
+
 export default DocumentEdit;
