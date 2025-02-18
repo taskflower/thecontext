@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useParams } from "react-router-dom";
 import { useDocumentsStore } from "@/store/documentsStore";
 import { Button } from "@/components/ui/button";
@@ -12,8 +13,17 @@ export const DocumentNew = () => {
   const adminNavigate = useAdminNavigate();
   const { addDocument, getContainerDocuments } = useDocumentsStore();
 
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [documentState, setDocumentState] = useState({
+    title: "",
+    content: ""
+  });
+
+  const handleUpdate = (field: string, value: any) => {
+    setDocumentState(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,8 +34,7 @@ export const DocumentNew = () => {
           ? Math.max(...containerDocs.map((d) => d.order))
           : -1;
       addDocument({
-        title,
-        content,
+        ...documentState,
         documentContainerId: containerId,
         order: maxOrder + 1,
       });
@@ -38,7 +47,7 @@ export const DocumentNew = () => {
   return (
     <AdminOutletTemplate
       title={<Trans>New Document</Trans>}
-      description={<Trans>Create a new document</Trans>}
+      description={<Trans>Create a new document with content</Trans>}
       actions={
         <Button variant="outline" onClick={handleBack}>
           <Trans>Back</Trans>
@@ -46,16 +55,12 @@ export const DocumentNew = () => {
       }
     >
       <DocumentForm
-        title={title}
-        content={content}
-        onTitleChange={setTitle}
-        onContentChange={setContent}
+        document={documentState}
+        onUpdate={handleUpdate}
         onSubmit={handleSubmit}
         onCancel={handleBack}
         submitButtonText={<Trans>Create Document</Trans>}
-        formTitle={<Trans>Document Details</Trans>}
       />
     </AdminOutletTemplate>
   );
 };
-export default DocumentNew;

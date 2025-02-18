@@ -49,8 +49,8 @@ export const DocumentEdit = () => {
 
   return (
     <AdminOutletTemplate
-      title={<Trans>Edit Document</Trans>}
-      description={<Trans>Modify document details</Trans>}
+      title={<Trans>Document Details</Trans>}
+      description={<Trans>Modify document properties and content</Trans>}
       actions={
         <Button variant="outline" onClick={handleBack}>
           <Trans>Back</Trans>
@@ -63,10 +63,7 @@ export const DocumentEdit = () => {
         onSubmit={handleSubmit}
         onCancel={handleBack}
         submitButtonText={<Trans>Save Changes</Trans>}
-        formTitle={<Trans>Document Details</Trans>}
       />
     </AdminOutletTemplate>
   );
 };
-
-export default DocumentEdit;
