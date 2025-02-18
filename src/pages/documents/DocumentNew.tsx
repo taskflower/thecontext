@@ -64,3 +64,4 @@ export const DocumentNew = () => {
     </AdminOutletTemplate>
   );
 };
+export default DocumentNew;
