@@ -1,5 +1,4 @@
-// src/components/AppLink.tsx
-import React from "react";
+import React, { forwardRef } from "react";
 import { Link, LinkProps, useLocation } from "react-router-dom";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -8,12 +7,12 @@ interface AppLinkProps extends LinkProps {
   forcePublic?: boolean;
 }
 
-export const AppLink: React.FC<AppLinkProps> = ({ 
+export const AppLink = forwardRef<HTMLAnchorElement, AppLinkProps>(({ 
   admin, 
   forcePublic,
   to, 
   ...rest 
-}) => {
+}, ref) => {
   const { currentLang } = useLanguage();
   const location = useLocation();
   
@@ -37,5 +36,7 @@ export const AppLink: React.FC<AppLinkProps> = ({
     console.warn("AppLink nie obsługuje obiektu 'to' – użyj stringa");
   }
 
-  return <Link to={path} {...rest} />;
-};
+  return <Link ref={ref} to={path} {...rest} />;
+});
+
+AppLink.displayName = 'AppLink';

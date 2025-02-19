@@ -5,8 +5,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
+  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 import {
   ChevronDown,
@@ -14,7 +13,7 @@ import {
   LayoutDashboard,
   LogOut,
   Coins,
-  User,
+  User
 } from "lucide-react";
 import { getPathWithLanguage } from "@/utils/routeHelpers";
 import { Trans } from "@lingui/macro";
@@ -26,9 +25,8 @@ export const AdminDropdown = () => {
   const { lang } = useParams<{ lang: string }>();
   const currentLang = lang || "en";
   const location = useLocation();
-
   const { user, backendUser } = useAuthState();
-  const isTemplatesPage = location.pathname.includes('/tasks/templates');
+  const isTemplatesPage = location.pathname.includes("/tasks/templates");
 
   const handleLogout = async () => {
     try {
@@ -51,40 +49,52 @@ export const AdminDropdown = () => {
           </span>
         </Button>
       </DropdownMenuTrigger>
+
       <DropdownMenuContent align="end" className="min-w-56">
         {user && (
           <>
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  {user.email}
-                </p>
-                {backendUser && (
-                  <p className="text-xs text-muted-foreground flex items-center gap-2">
-                    <Coins className="h-3 w-3" />
-                    <Trans>
-                      Available tokens: {backendUser.availableTokens}
-                    </Trans>
+            <DropdownMenuItem asChild>
+              <AppLink to="/settings" admin className="w-full select-none">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    <span>{user.email}</span>
                   </p>
-                )}
-              </div>
-            </DropdownMenuLabel>
+                  {backendUser && (
+                    <p className="text-xs text-muted-foreground flex items-center gap-2">
+                      <Coins className="h-4 w-4" />
+                      <span>
+                        <Trans>
+                          Available tokens: {backendUser.availableTokens}
+                        </Trans>
+                      </span>
+                    </p>
+                  )}
+                </div>
+              </AppLink>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
           </>
         )}
+
         <DropdownMenuItem asChild>
-          <AppLink 
-            className={`w-full ${isTemplatesPage ? 'bg-accent text-accent-foreground' : ''}`}
-            to="/tasks/templates" 
+          <AppLink
+            className={`w-full flex items-center ${
+              isTemplatesPage ? "bg-accent text-accent-foreground" : ""
+            }`}
+            to="/tasks/templates"
             admin
           >
-            <LayoutDashboard className="mr-2 h-4 w-4" />
-            <Trans>Dashboard</Trans>
+            <LayoutDashboard className="h-4 w-4" />
+            <span className="ml-2">
+              <Trans>Dashboard</Trans>
+            </span>
           </AppLink>
         </DropdownMenuItem>
+
         <DropdownMenuSeparator />
-        <div className="py-1.5">
+
+        <div className="p-2 select-none">
           <div className="flex items-center justify-center rounded-md bg-muted p-1 w-full gap-1">
             <Link
               to={getPathWithLanguage(location.pathname, currentLang, "pl")}
@@ -108,10 +118,14 @@ export const AdminDropdown = () => {
             </Link>
           </div>
         </div>
+
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>
-          <LogOut className="mr-2 h-4 w-4" />
-          <Trans>Log out</Trans>
+
+        <DropdownMenuItem onClick={handleLogout} className="flex items-center">
+          <LogOut className="h-4 w-4" />
+          <span className="ml-2">
+            <Trans>Log out</Trans>
+          </span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
