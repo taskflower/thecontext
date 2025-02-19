@@ -1,23 +1,10 @@
+import { AddContainerInput, AddDocumentInput } from "@/types/document";
+
 // src/plugins/generateDoc/runtimeModules/documentModule.ts
-interface Container {
-    name: string;
-    description: string;
-  }
-  
-  interface Document {
-    title: string;
-    content: string;
-    documentContainerId: string;
-    order: number;
-    metadata: {
-      generatedFrom: string;
-      timestamp: string;
-    };
-  }
-  
+
   interface DocumentModuleProps {
-    addDocument: (doc: Document) => void;
-    addContainer: (container: Container) => void;
+    addDocument: (doc: AddDocumentInput) => void;
+    addContainer: (container: AddContainerInput) => void;
   }
   
   export const documentModule = {

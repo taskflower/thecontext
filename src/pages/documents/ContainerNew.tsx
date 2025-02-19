@@ -16,7 +16,11 @@ export const ContainerNew = () => {
     name: "",
     description: "",
     targetDocumentCount: 0,
-  });
+    schema: {
+        id: Date.now().toString(),
+        fields: []
+    }
+});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

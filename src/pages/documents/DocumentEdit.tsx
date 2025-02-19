@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// src/pages/documents/DocumentEdit.tsx
 import { useParams } from "react-router-dom";
 import { useDocumentsStore } from "@/store/documentsStore";
 import { Button } from "@/components/ui/button";
@@ -12,8 +13,9 @@ import { Document } from "@/types/document";
 export const DocumentEdit = () => {
   const { containerId, documentId } = useParams();
   const adminNavigate = useAdminNavigate();
-  const { documents, updateDocument } = useDocumentsStore();
+  const { documents, containers, updateDocument } = useDocumentsStore();
   
+  const container = containers.find(c => c.id === containerId);
   const originalDocument = documents.find((d) => d.id === documentId);
   const [documentState, setDocumentState] = useState<Document | null>(null);
 
@@ -23,10 +25,14 @@ export const DocumentEdit = () => {
     }
   }, [originalDocument]);
 
+  if (!container) {
+    return <div><Trans>Container not found</Trans></div>;
+  }
   if (!documentState) {
     return <div><Trans>Document not found</Trans></div>;
   }
 
+  // Uaktualniamy właściwość dokumentu (w tym custom field) bezpośrednio
   const handleUpdate = (field: string, value: any) => {
     setDocumentState(prev => ({
       ...prev!,
@@ -37,10 +43,7 @@ export const DocumentEdit = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (documentId && documentState) {
-      updateDocument(documentId, {
-        title: documentState.title,
-        content: documentState.content
-      });
+      updateDocument(documentId, documentState);
       adminNavigate(`/documents/${containerId}`);
     }
   };
@@ -59,6 +62,7 @@ export const DocumentEdit = () => {
     >
       <DocumentForm
         document={documentState}
+        container={container}
         onUpdate={handleUpdate}
         onSubmit={handleSubmit}
         onCancel={handleBack}
@@ -67,4 +71,5 @@ export const DocumentEdit = () => {
     </AdminOutletTemplate>
   );
 };
+
 export default DocumentEdit;

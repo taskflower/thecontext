@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// src/pages/documents/DocumentNew.tsx
 import { useParams } from "react-router-dom";
 import { useDocumentsStore } from "@/store/documentsStore";
 import { Button } from "@/components/ui/button";
@@ -11,12 +12,15 @@ import { useState } from "react";
 export const DocumentNew = () => {
   const { containerId } = useParams();
   const adminNavigate = useAdminNavigate();
-  const { addDocument, getContainerDocuments } = useDocumentsStore();
-
+  const { addDocument, getContainerDocuments, containers } = useDocumentsStore();
+  
   const [documentState, setDocumentState] = useState({
     title: "",
-    content: ""
+    content: "",
+    customFields: {}
   });
+
+  const container = containers.find(c => c.id === containerId);
 
   const handleUpdate = (field: string, value: any) => {
     setDocumentState(prev => ({
@@ -44,6 +48,24 @@ export const DocumentNew = () => {
 
   const handleBack = () => adminNavigate(`/documents/${containerId}`);
 
+  if (!container) {
+    return (
+      <AdminOutletTemplate
+        title={<Trans>Error</Trans>}
+        description={<Trans>Container not found</Trans>}
+        actions={
+          <Button variant="outline" onClick={handleBack}>
+            <Trans>Back</Trans>
+          </Button>
+        }
+      >
+        <div className="p-4 text-red-500">
+          <Trans>The specified container was not found.</Trans>
+        </div>
+      </AdminOutletTemplate>
+    );
+  }
+
   return (
     <AdminOutletTemplate
       title={<Trans>New Document</Trans>}
@@ -56,6 +78,7 @@ export const DocumentNew = () => {
     >
       <DocumentForm
         document={documentState}
+        container={container}
         onUpdate={handleUpdate}
         onSubmit={handleSubmit}
         onCancel={handleBack}
@@ -64,4 +87,5 @@ export const DocumentNew = () => {
     </AdminOutletTemplate>
   );
 };
+
 export default DocumentNew;

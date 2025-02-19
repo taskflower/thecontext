@@ -7,8 +7,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Trans, t } from "@lingui/macro";
 import { DocumentTabs } from "./editor/DocumentTabs";
 
+import { DocumentContainer } from "@/types/document";
+
 interface DocumentFormProps {
   document: Record<string, any>;
+  container: DocumentContainer;
   onUpdate: (field: string, value: any) => void;
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
@@ -17,11 +20,16 @@ interface DocumentFormProps {
 
 export const DocumentForm = ({
   document,
+  container,
   onUpdate,
   onSubmit,
   onCancel,
   submitButtonText,
 }: DocumentFormProps) => {
+  if (!container) {
+    return <div>Error: Container not found</div>;
+  }
+
   return (
     <Card className="border-0 md:border shadow-none md:shadow">
       <CardContent className="pt-6">
@@ -38,8 +46,9 @@ export const DocumentForm = ({
             />
           </div>
 
-          <DocumentTabs 
+          <DocumentTabs
             document={document}
+            container={container}
             onUpdate={onUpdate}
           />
 
