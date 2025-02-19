@@ -11,6 +11,7 @@ export interface SchemaField {
   name: string;
   type: SchemaFieldType;
   validation?: SchemaFieldValidation;
+  atList?: boolean; // New field
 }
 
 export interface DocumentSchema {

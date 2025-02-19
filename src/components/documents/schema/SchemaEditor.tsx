@@ -16,13 +16,13 @@ interface SchemaEditorProps {
 export const SchemaEditor: React.FC<SchemaEditorProps> = ({ fields, onChange }) => {
   const addField = () => {
     const newField: SchemaField = {
-      // Początkowo klucz pusty; zostanie uzupełniony gdy użytkownik wpisze nazwę
       key: '',
       name: '',
       type: 'text',
       validation: {
         required: false
-      }
+      },
+      atList: false
     };
     onChange([...fields, newField]);
   };
@@ -67,7 +67,6 @@ export const SchemaEditor: React.FC<SchemaEditorProps> = ({ fields, onChange }) 
                     value={field.name}
                     onChange={e => {
                       const newName = e.target.value;
-                      // Ustawiamy klucz jako wpisaną nazwę (trimowana i zamieniona na małe litery)
                       updateField(index, {
                         name: newName,
                         key: newName.trim() ? newName.trim().toLowerCase() : field.key,
@@ -98,16 +97,28 @@ export const SchemaEditor: React.FC<SchemaEditorProps> = ({ fields, onChange }) 
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={field.validation?.required}
-                  onCheckedChange={checked =>
-                    updateField(index, {
-                      validation: { ...field.validation, required: checked },
-                    })
-                  }
-                />
-                <label className="text-sm"><Trans>Required field</Trans></label>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={field.validation?.required}
+                    onCheckedChange={checked =>
+                      updateField(index, {
+                        validation: { ...field.validation, required: checked },
+                      })
+                    }
+                  />
+                  <label className="text-sm"><Trans>Required field</Trans></label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={field.atList}
+                    onCheckedChange={checked =>
+                      updateField(index, { atList: checked })
+                    }
+                  />
+                  <label className="text-sm"><Trans>Show in list</Trans></label>
+                </div>
               </div>
 
               {field.type === 'select' && (
