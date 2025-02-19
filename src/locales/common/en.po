@@ -13,6 +13,10 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: src/components/documents/schema/SchemaEditor.tsx:115
+msgid "Options"
+msgstr "Options"
+
 #: src/components/boards/instancesList/InstanceActions.tsx:39
 msgid "Open"
 msgstr "Open"
@@ -21,7 +25,7 @@ msgstr "Open"
 msgid "Run"
 msgstr "Run"
 
-#: src/components/documents/DocumentForm.tsx:50
+#: src/components/documents/editor/DocumentTabs.tsx:24
 msgid "Content"
 msgstr "Content"
 
@@ -29,7 +33,7 @@ msgstr "Content"
 msgid "Task Templates"
 msgstr "Task Templates"
 
-#: src/components/documents/ContainerForm.tsx:39
+#: src/components/documents/ContainerForm.tsx:74
 msgid "Name"
 msgstr "Name"
 
@@ -42,7 +46,15 @@ msgstr "Are you sure?"
 msgid "Actions"
 msgstr "Actions"
 
-#: src/components/documents/ContainerForm.tsx:55
+#: src/components/documents/preview/DocumentPreview.tsx:46
+msgid "Property"
+msgstr "Property"
+
+#: src/components/documents/schema/SchemaEditor.tsx:110
+msgid "Required field"
+msgstr "Required field"
+
+#: src/components/documents/ContainerForm.tsx:90
 msgid "Container description"
 msgstr "Container description"
 
@@ -66,6 +78,10 @@ msgstr "Collection status"
 msgid "Add task template"
 msgstr "Add task template"
 
+#: src/components/documents/schema/SchemaEditor.tsx:55
+msgid "Add Field"
+msgstr "Add Field"
+
 #: src/components/boards/KanbanTemplateEditor.tsx:118
 msgid "Template Details"
 msgstr "Template Details"
@@ -83,6 +99,10 @@ msgstr "Open menu"
 msgid "Show Preview"
 msgstr "Show Preview"
 
+#: src/components/documents/preview/DocumentPreview.tsx:57
+msgid "{0}"
+msgstr "{0}"
+
 #: src/components/documents/DocumentTable.tsx:50
 msgid "Container"
 msgstr "Container"
@@ -97,7 +117,7 @@ msgid "Hide Preview"
 msgstr "Hide Preview"
 
 #: src/components/boards/KanbanTemplateEditor.tsx:136
-#: src/components/documents/ContainerForm.tsx:50
+#: src/components/documents/ContainerForm.tsx:85
 msgid "Description"
 msgstr "Description"
 
@@ -113,6 +133,15 @@ msgstr "Back to Templates"
 msgid "Create board template"
 msgstr "Create board template"
 
+#: src/components/documents/ContainerForm.tsx:67
+msgid "Schema"
+msgstr "Schema"
+
+#: src/components/documents/schema/CustomFields.tsx:44
+#: src/components/documents/schema/SchemaEditor.tsx:46
+msgid "Custom Fields"
+msgstr "Custom Fields"
+
 #: src/components/documents/DocumentForm.tsx:44
 msgid "Document title"
 msgstr "Document title"
@@ -125,7 +154,7 @@ msgstr "{documentCount} documents stored"
 msgid "No task templates added yet"
 msgstr "No task templates added yet"
 
-#: src/components/documents/ContainerForm.tsx:44
+#: src/components/documents/ContainerForm.tsx:79
 msgid "Container name"
 msgstr "Container name"
 
@@ -137,11 +166,16 @@ msgstr "Are you sure you want to delete this document?"
 msgid "Template Name"
 msgstr "Template Name"
 
+#: src/components/documents/ContainerForm.tsx:63
+#: src/components/documents/editor/DocumentTabs.tsx:28
+msgid "Details"
+msgstr "Details"
+
 #: src/components/documents/ContainerActions.tsx:40
 msgid "View Documents"
 msgstr "View Documents"
 
-#: src/components/documents/ContainerForm.tsx:69
+#: src/components/documents/ContainerForm.tsx:104
 msgid "Optional target number of documents"
 msgstr "Optional target number of documents"
 
@@ -189,8 +223,8 @@ msgstr "Loading project configuration..."
 #: src/components/boards/KanbanTemplateEditor.tsx:241
 #: src/components/boards/KanbanTemplateEditor.tsx:254
 #: src/components/documents/ContainerActions.tsx:80
-#: src/components/documents/ContainerForm.tsx:74
-#: src/components/documents/DocumentForm.tsx:59
+#: src/components/documents/ContainerForm.tsx:119
+#: src/components/documents/DocumentForm.tsx:57
 msgid "Cancel"
 msgstr "Cancel"
 
@@ -207,6 +241,10 @@ msgstr "Edit"
 #: src/components/documents/ContainerActions.tsx:72
 msgid "This action cannot be undone. This will permanently delete this container and all its documents."
 msgstr "This action cannot be undone. This will permanently delete this container and all its documents."
+
+#: src/components/documents/schema/SchemaEditor.tsx:65
+msgid "Field Name"
+msgstr "Field Name"
 
 #: src/components/boards/instancesList/InstanceActions.tsx:54
 msgid "Templates"
@@ -248,7 +286,7 @@ msgstr "Close Preview"
 msgid "Preview"
 msgstr "Preview"
 
-#: src/components/documents/ContainerForm.tsx:60
+#: src/components/documents/ContainerForm.tsx:95
 msgid "Estimated target document count"
 msgstr "Estimated target document count"
 
@@ -256,9 +294,17 @@ msgstr "Estimated target document count"
 msgid "Project Not Found"
 msgstr "Project Not Found"
 
+#: src/components/documents/schema/SchemaEditor.tsx:80
+msgid "Field Type"
+msgstr "Field Type"
+
 #: src/components/projects/ProjectRenderer.tsx:82
 msgid "The requested project does not exist or you may not have access to it."
 msgstr "The requested project does not exist or you may not have access to it."
+
+#: src/components/documents/preview/DocumentPreview.tsx:49
+msgid "Value"
+msgstr "Value"
 
 #: src/components/boards/KanbanTemplateEditor.tsx:260
 msgid "Save changes"

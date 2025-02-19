@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Settings } from "lucide-react";
+import { FileText, Settings, Box } from "lucide-react";
 import { SchemaEditor } from "./schema/SchemaEditor";
 import { DocumentSchema } from "@/types/schema";
 import { Trans, t } from "@lingui/macro";
@@ -52,7 +52,10 @@ export const ContainerForm = ({
   return (
     <Card className="border-0 md:border shadow-none md:shadow">
       <CardHeader>
-        <CardTitle>{formTitle}</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Box className="h-5 w-5" />
+          {formTitle}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">

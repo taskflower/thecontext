@@ -47,6 +47,8 @@ export const ContainerDocuments = () => {
     );
   }
 
+  const handleBack = () => adminNavigate("/documents");
+
   const handleMoveDocument = (docId: string, direction: "up" | "down") => {
     const currentIndex = documents.findIndex((d) => d.id === docId);
     if (direction === "up" && currentIndex > 0) {
@@ -63,9 +65,12 @@ export const ContainerDocuments = () => {
   return (
     <AdminOutletTemplate
       title={<Trans>{container.name}</Trans>}
-      description={<Trans>{container.description}</Trans>}
-      actions={
-        <Button
+      description={container.description ? <Trans>{container.description}</Trans> : <Trans>This container has no description</Trans>}
+      actions={<>
+       <Button variant="outline" onClick={handleBack}>
+           <Trans>Back to Containers</Trans>
+         </Button>
+         <Button
           className="gap-2"
           onClick={() =>
             adminNavigate(`/documents/${containerId}/document/new`)
@@ -74,6 +79,8 @@ export const ContainerDocuments = () => {
           <FilePlus className="h-4 w-4" />
           <Trans>New Document</Trans>
         </Button>
+      </>
+       
       }
     >
       <div className="space-y-4">

@@ -54,17 +54,17 @@ msgstr "Zobacz"
 #: src/pages/tasks/TaskTemplateEdit.tsx:31
 #: src/pages/tasks/TaskTemplateNew.tsx:22
 msgid "Back to list of tasks templates"
-msgstr ""
+msgstr "Powrót do listy szablonów zadań"
 
 #: src/pages/tasks/TaskTemplateEdit.tsx:22
 msgid "Editing: {0}"
-msgstr ""
+msgstr "Edycja: {0}"
 
 #: src/pages/tasks/TaskTemplateEdit.tsx:17
 #: src/pages/tasks/TaskTemplateRunner.tsx:15
 msgid "Template not found"
-msgstr ""
+msgstr "Nie znaleziono szablonu"
 
 #: src/pages/tasks/TaskTemplateNew.tsx:13
 msgid "New task template"
-msgstr ""
+msgstr "Nowy szablon zadania"

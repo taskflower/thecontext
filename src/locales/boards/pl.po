@@ -1,72 +1,88 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2025-02-17 20:43+0100\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"X-Generator: @lingui/cli\n"
-"Language: pl\n"
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
+"Language: \n"
 "Language-Team: \n"
+"Content-Type: \n"
+"Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
+
 #: src/pages/boards/InstancesList.tsx:86
 msgid "Name"
 msgstr "Nazwa"
+
 #: src/pages/boards/InstancesList.tsx:89
 msgid "Progress"
 msgstr "Postęp"
+
 #: src/pages/boards/InstancesList.tsx:88
 msgid "Tasks"
 msgstr "Zadania"
+
 #: src/pages/boards/InstancesList.tsx:122
 msgid "{totalTasks} tasks"
 msgstr "{totalTasks} zadań"
+
 #: src/pages/boards/InstancesList.tsx:27
 #: src/pages/boards/InstancesList.tsx:54
 msgid "Manage and access your kanban boards"
 msgstr "Zarządzaj i korzystaj z tablic kanban"
+
 #: src/pages/boards/KanbanTemplateList.tsx:48
 msgid "Create new template"
 msgstr "Utwórz nowy szablon"
+
 #: src/pages/boards/InstancesList.tsx:40
 msgid "Get started by activating your first kanban board"
 msgstr "Rozpocznij aktywując swoją pierwszą tablicę kanban"
+
 #: src/pages/boards/InstancesList.tsx:31
 #: src/pages/boards/InstancesList.tsx:44
 #: src/pages/boards/InstancesList.tsx:63
 msgid "Activate new board"
 msgstr "Aktywuj nową tablicę"
+
 #: src/pages/boards/InstancesList.tsx:87
 msgid "Created"
 msgstr "Utworzono"
+
 #: src/pages/boards/KanbanTemplateList.tsx:74
 msgid "Edit"
 msgstr "Edytuj"
+
 #: src/pages/boards/InstancesList.tsx:26
 #: src/pages/boards/InstancesList.tsx:53
 msgid "Active Boards"
 msgstr "Aktywne tablice"
+
 #: src/pages/boards/InstancesList.tsx:59
 msgid "View"
 msgstr "Podgląd"
+
 #: src/pages/boards/KanbanTemplateList.tsx:34
 msgid "Create new boards from predefined templates"
 msgstr "Twórz nowe tablice na podstawie predefiniowanych szablonów"
+
 #: src/pages/boards/KanbanTemplateList.tsx:81
 msgid "Activate Board"
 msgstr "Aktywuj tablicę"
+
 #: src/pages/boards/KanbanTemplateList.tsx:31
 msgid "Board Templates"
 msgstr "Szablony tablic"
+
 #: src/pages/boards/InstancesList.tsx:37
 msgid "No Active Boards"
 msgstr "Brak aktywnych tablic"
+
 #: src/pages/boards/KanbanTemplateList.tsx:44
 msgid "Back to boards"
 msgstr "Powrót do tablic"
+
 #: src/pages/boards/InstancesList.tsx:73
 msgid "Filter boards..."
 msgstr "Filtruj tablice..."

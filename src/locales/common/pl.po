@@ -11,6 +11,10 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
 
+#: src/components/documents/schema/SchemaEditor.tsx:115
+msgid "Options"
+msgstr "Opcje"
+
 #: src/components/boards/instancesList/InstanceActions.tsx:39
 msgid "Open"
 msgstr "Otwórz"
@@ -19,7 +23,7 @@ msgstr "Otwórz"
 msgid "Run"
 msgstr "Uruchom"
 
-#: src/components/documents/DocumentForm.tsx:50
+#: src/components/documents/editor/DocumentTabs.tsx:24
 msgid "Content"
 msgstr "Zawartość"
 
@@ -27,7 +31,7 @@ msgstr "Zawartość"
 msgid "Task Templates"
 msgstr "Szablony zadań"
 
-#: src/components/documents/ContainerForm.tsx:39
+#: src/components/documents/ContainerForm.tsx:74
 msgid "Name"
 msgstr "Nazwa"
 
@@ -40,7 +44,15 @@ msgstr "Czy jesteś pewien?"
 msgid "Actions"
 msgstr "Akcje"
 
-#: src/components/documents/ContainerForm.tsx:55
+#: src/components/documents/preview/DocumentPreview.tsx:46
+msgid "Property"
+msgstr "Właściwość"
+
+#: src/components/documents/schema/SchemaEditor.tsx:110
+msgid "Required field"
+msgstr "Pole wymagane"
+
+#: src/components/documents/ContainerForm.tsx:90
 msgid "Container description"
 msgstr "Opis kontenera"
 
@@ -64,6 +76,10 @@ msgstr "Status kolekcji"
 msgid "Add task template"
 msgstr "Dodaj szablon zadania"
 
+#: src/components/documents/schema/SchemaEditor.tsx:55
+msgid "Add Field"
+msgstr "Dodaj pole"
+
 #: src/components/boards/KanbanTemplateEditor.tsx:118
 msgid "Template Details"
 msgstr "Szczegóły szablonu"
@@ -81,6 +97,10 @@ msgstr "Otwórz menu"
 msgid "Show Preview"
 msgstr "Pokaż podgląd"
 
+#: src/components/documents/preview/DocumentPreview.tsx:57
+msgid "{0}"
+msgstr ""
+
 #: src/components/documents/DocumentTable.tsx:50
 msgid "Container"
 msgstr "Kontener"
@@ -95,7 +115,7 @@ msgid "Hide Preview"
 msgstr "Ukryj podgląd"
 
 #: src/components/boards/KanbanTemplateEditor.tsx:136
-#: src/components/documents/ContainerForm.tsx:50
+#: src/components/documents/ContainerForm.tsx:85
 msgid "Description"
 msgstr "Opis"
 
@@ -111,6 +131,15 @@ msgstr "Powrót do szablonów"
 msgid "Create board template"
 msgstr "Utwórz szablon tablicy"
 
+#: src/components/documents/ContainerForm.tsx:67
+msgid "Schema"
+msgstr "Schemat"
+
+#: src/components/documents/schema/CustomFields.tsx:44
+#: src/components/documents/schema/SchemaEditor.tsx:46
+msgid "Custom Fields"
+msgstr "Pola niestandardowe"
+
 #: src/components/documents/DocumentForm.tsx:44
 msgid "Document title"
 msgstr "Tytuł dokumentu"
@@ -123,7 +152,7 @@ msgstr "{documentCount} przechowywanych dokumentów"
 msgid "No task templates added yet"
 msgstr "Nie dodano jeszcze szablonów zadań"
 
-#: src/components/documents/ContainerForm.tsx:44
+#: src/components/documents/ContainerForm.tsx:79
 msgid "Container name"
 msgstr "Nazwa kontenera"
 
@@ -135,11 +164,16 @@ msgstr "Czy na pewno chcesz usunąć ten dokument?"
 msgid "Template Name"
 msgstr "Nazwa szablonu"
 
+#: src/components/documents/ContainerForm.tsx:63
+#: src/components/documents/editor/DocumentTabs.tsx:28
+msgid "Details"
+msgstr "Szczegóły"
+
 #: src/components/documents/ContainerActions.tsx:40
 msgid "View Documents"
 msgstr "Zobacz dokumenty"
 
-#: src/components/documents/ContainerForm.tsx:69
+#: src/components/documents/ContainerForm.tsx:104
 msgid "Optional target number of documents"
 msgstr "Opcjonalna docelowa liczba dokumentów"
 
@@ -187,8 +221,8 @@ msgstr "Ładowanie konfiguracji projektu..."
 #: src/components/boards/KanbanTemplateEditor.tsx:241
 #: src/components/boards/KanbanTemplateEditor.tsx:254
 #: src/components/documents/ContainerActions.tsx:80
-#: src/components/documents/ContainerForm.tsx:74
-#: src/components/documents/DocumentForm.tsx:59
+#: src/components/documents/ContainerForm.tsx:119
+#: src/components/documents/DocumentForm.tsx:57
 msgid "Cancel"
 msgstr "Anuluj"
 
@@ -205,6 +239,10 @@ msgstr "Edytuj"
 #: src/components/documents/ContainerActions.tsx:72
 msgid "This action cannot be undone. This will permanently delete this container and all its documents."
 msgstr "Tej akcji nie można cofnąć. Spowoduje to trwałe usunięcie tego kontenera i wszystkich jego dokumentów."
+
+#: src/components/documents/schema/SchemaEditor.tsx:65
+msgid "Field Name"
+msgstr "Nazwa pola"
 
 #: src/components/boards/instancesList/InstanceActions.tsx:54
 msgid "Templates"
@@ -246,7 +284,7 @@ msgstr "Zamknij podgląd"
 msgid "Preview"
 msgstr "Podgląd"
 
-#: src/components/documents/ContainerForm.tsx:60
+#: src/components/documents/ContainerForm.tsx:95
 msgid "Estimated target document count"
 msgstr "Szacowana docelowa liczba dokumentów"
 
@@ -254,9 +292,17 @@ msgstr "Szacowana docelowa liczba dokumentów"
 msgid "Project Not Found"
 msgstr "Nie znaleziono projektu"
 
+#: src/components/documents/schema/SchemaEditor.tsx:80
+msgid "Field Type"
+msgstr "Typ pola"
+
 #: src/components/projects/ProjectRenderer.tsx:82
 msgid "The requested project does not exist or you may not have access to it."
 msgstr "Żądany projekt nie istnieje lub nie masz do niego dostępu."
+
+#: src/components/documents/preview/DocumentPreview.tsx:49
+msgid "Value"
+msgstr "Wartość"
 
 #: src/components/boards/KanbanTemplateEditor.tsx:260
 msgid "Save changes"
