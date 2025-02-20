@@ -77,6 +77,10 @@ export const ContainerDocuments = () => {
           <Button variant="outline" onClick={handleBack}>
             <Trans>Back to Containers</Trans>
           </Button>
+           {/* Nowy przycisk do edycji kontenera */}
+        <Button variant="outline" onClick={() => adminNavigate(`/documents/${containerId}/edit`)}>
+          <Trans>Edit Container</Trans>
+        </Button>
           <Button
             className="gap-2"
             onClick={() =>
