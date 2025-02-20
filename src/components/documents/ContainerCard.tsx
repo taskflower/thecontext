@@ -1,16 +1,18 @@
 // src/components/documents/ContainerCard.tsx
-import React from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
+import { Link } from "react-router-dom";
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle, 
+  CardDescription 
 } from "@/components/ui/card";
-import { FileText, Folder, Calendar } from "lucide-react";
-import ContainerActions from "@/components/documents/ContainerActions";
+import { FileText, Folder, Calendar, Link2 } from "lucide-react";
+import ContainerActions from "./ContainerActions";
 import { DocumentContainer, Document } from "@/types/document";
 import { Trans } from "@lingui/macro";
+import { useDocumentsStore } from "@/store/documentsStore";
+
 
 interface ContainerCardProps {
   container: DocumentContainer;
@@ -23,7 +25,11 @@ export const ContainerCard: React.FC<ContainerCardProps> = ({
   onDelete,
   getContainerDocuments,
 }) => {
+  const { relationConfigs } = useDocumentsStore();
   const documentCount = getContainerDocuments(container.id).length;
+  const relationsCount = relationConfigs.filter(
+    config => config.sourceContainerId === container.id || config.targetContainerId === container.id
+  ).length;
 
   const formatDate = (date: Date | string) => {
     const dateObject = typeof date === "string" ? new Date(date) : date;
@@ -42,11 +48,21 @@ export const ContainerCard: React.FC<ContainerCardProps> = ({
               <CardTitle className="text-md font-semibold truncate pt-0.5">
                 {container.name}
               </CardTitle>
-              <div className="flex items-center gap-2 bg-primary/10 px-2 py-1 rounded-lg shrink-0">
-                <FileText className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-primary">
-                  {documentCount}
-                </span>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 bg-primary/10 px-2 py-1 rounded-lg">
+                  <FileText className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium text-primary">
+                    {documentCount}
+                  </span>
+                </div>
+                {relationsCount > 0 && (
+                  <div className="flex items-center gap-2 bg-blue-100 px-2 py-1 rounded-lg">
+                    <Link2 className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium text-blue-600">
+                      {relationsCount}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -64,8 +80,7 @@ export const ContainerCard: React.FC<ContainerCardProps> = ({
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {container.targetDocumentCount !== undefined &&
-        container.targetDocumentCount > 0 ? (
+        {container.targetDocumentCount !== undefined && container.targetDocumentCount > 0 ? (
           <div className="space-y-3">
             <div className="h-2.5 bg-secondary rounded-full overflow-hidden">
               <div
@@ -100,12 +115,24 @@ export const ContainerCard: React.FC<ContainerCardProps> = ({
           </div>
         )}
 
-        <div className="w-full">
-          <ContainerActions containerId={container.id} onDelete={onDelete} />
+        <div className="flex flex-col gap-4">
+          {relationsCount > 0 && (
+            <div className="text-sm text-muted-foreground border-y py-3">
+              <Link to={`/admin/documents/${container.id}/relations`} className="hover:text-primary">
+                <div className="flex justify-between items-center">
+                  <span><Trans>Container Relations</Trans></span>
+                  <span>{relationsCount}</span>
+                </div>
+              </Link>
+            </div>
+          )}
+          
+          <div className="w-full">
+            <ContainerActions containerId={container.id} onDelete={onDelete} />
+          </div>
         </div>
       </CardContent>
     </Card>
   );
 };
-
 export default ContainerCard;

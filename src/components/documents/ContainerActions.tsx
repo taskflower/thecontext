@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, FileText } from "lucide-react";
+import { MoreHorizontal, FileText, Link2 } from "lucide-react";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 import { Trans } from "@lingui/macro";
 
@@ -31,14 +31,25 @@ const ContainerActions = ({ containerId, onDelete }: ContainerActionsProps) => {
 
   return (
     <div className="flex gap-2 justify-between">
-      <Button
-        size="sm"
-        className="gap-2"
-        onClick={() => adminNavigate(`/documents/${containerId}`)}
-      >
-        <FileText className="h-4 w-4" />
-        <Trans>View Documents</Trans>
-      </Button>
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          className="gap-2"
+          onClick={() => adminNavigate(`/documents/${containerId}`)}
+        >
+          <FileText className="h-4 w-4" />
+          <Trans>View Documents</Trans>
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          className="gap-2"
+          onClick={() => adminNavigate(`/documents/${containerId}/relations`)}
+        >
+          <Link2 className="h-4 w-4" />
+          <Trans>Relations</Trans>
+        </Button>
+      </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon">

@@ -8,24 +8,32 @@ import { DocumentForm } from "@/components/documents/DocumentForm";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 import { Trans } from "@lingui/macro";
 import { useState } from "react";
+import { Document } from "@/types/document";
 
 export const DocumentNew = () => {
   const { containerId } = useParams();
   const adminNavigate = useAdminNavigate();
   const { addDocument, getContainerDocuments, containers } = useDocumentsStore();
   
-  const [documentState, setDocumentState] = useState({
+  const container = containers.find(c => c.id === containerId);
+  
+  // Create initial document state with all required fields
+  const [documentState, setDocumentState] = useState<Document>({
+    id: `temp-${Date.now()}`, // Temporary ID that will be replaced on save
     title: "",
     content: "",
+    documentContainerId: containerId || "",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    order: 0,
     customFields: {}
   });
-
-  const container = containers.find(c => c.id === containerId);
 
   const handleUpdate = (field: string, value: any) => {
     setDocumentState(prev => ({
       ...prev,
-      [field]: value
+      [field]: value,
+      updatedAt: new Date()
     }));
   };
 
@@ -37,9 +45,24 @@ export const DocumentNew = () => {
         containerDocs.length > 0
           ? Math.max(...containerDocs.map((d) => d.order))
           : -1;
+          
+      // Create new document without the temporary ID
+      const { 
+        title, 
+        content, 
+        documentContainerId, 
+        createdAt, 
+        updatedAt, 
+        customFields 
+      } = documentState;
+      
       addDocument({
-        ...documentState,
-        documentContainerId: containerId,
+        title,
+        content,
+        documentContainerId,
+        createdAt,
+        updatedAt,
+        customFields,
         order: maxOrder + 1,
       });
       adminNavigate(`/documents/${containerId}`);

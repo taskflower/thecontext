@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Settings2, Plus, SquareSigma } from "lucide-react";
+import {  Plus, SquareSigma } from "lucide-react";
 import { useDocumentsStore } from "@/store/documentsStore";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { SearchInput } from "@/components/common/SearchInput";
@@ -31,10 +31,7 @@ export const ContainerList = () => {
       description={<Trans>Manage your document containers and their contents</Trans>}
       actions={
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="hidden lg:flex">
-            <Settings2 className="mr-2 h-4 w-4" />
-            <Trans>View</Trans>
-          </Button>
+          
           <Button
             variant="outline"
             size="sm"
@@ -42,7 +39,7 @@ export const ContainerList = () => {
             onClick={() => adminNavigate("/documents/all")}
           >
             <SquareSigma className="mr-2 h-4 w-4" />
-            <Trans>All</Trans>
+            <Trans>All documents</Trans>
           </Button>
           <Button className="gap-2" onClick={() => adminNavigate("/documents/containers/new")}>
             <Plus className="h-4 w-4" />

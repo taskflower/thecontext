@@ -23,6 +23,7 @@ interface DocumentTableProps {
   onMove: (documentId: string, direction: "up" | "down") => void;
   onDelete: (documentId: string) => void;
   showContainer?: boolean;
+  onPreviewRelated?: (document: Document) => void;
 }
 
 const formatValue = (value: any, field?: SchemaField) => {

@@ -7,6 +7,7 @@ import ContainerList from '@/pages/documents/ContainerList';
 import ContainerNew from '@/pages/documents/ContainerNew';
 import DocumentEdit from '@/pages/documents/DocumentEdit';
 import DocumentNew from '@/pages/documents/DocumentNew';
+import ContainerRelations from './ContainerRelations';
 
 const documentsRoutes: RouteObject[] = [
   { index: true, element: <Navigate to="containers" replace /> },
@@ -15,6 +16,7 @@ const documentsRoutes: RouteObject[] = [
   { path: 'containers/list', element: <ContainerList /> },
   { path: 'containers/new', element: <ContainerNew /> },
   { path: ':id/edit', element: <ContainerEdit /> },
+  { path: ':containerId/relations', element: <ContainerRelations /> },
   { path: ':containerId', element: <ContainerDocuments /> },
   { path: ':containerId/document/new', element: <DocumentNew /> },
   { path: ':containerId/document/:documentId/edit', element: <DocumentEdit /> },
