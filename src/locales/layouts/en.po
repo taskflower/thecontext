@@ -13,18 +13,18 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: src/layouts/AdminDropdown.tsx:66
+#: src/layouts/AdminDropdown.tsx:67
 msgid "Available tokens: {0}"
 msgstr "Available tokens: {0}"
 
-#: src/layouts/AdminDropdown.tsx:83
+#: src/layouts/AdminDropdown.tsx:90
 msgid "Dashboard"
 msgstr "Dashboard"
 
-#: src/layouts/AdminDropdown.tsx:114
+#: src/layouts/AdminDropdown.tsx:127
 msgid "Log out"
 msgstr "Log out"
 
-#: src/layouts/AdminDropdown.tsx:46
+#: src/layouts/AdminDropdown.tsx:44
 msgid "Admin Panel"
 msgstr "Admin Panel"

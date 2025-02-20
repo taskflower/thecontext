@@ -11,18 +11,18 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
 
-#: src/layouts/AdminDropdown.tsx:66
+#: src/layouts/AdminDropdown.tsx:67
 msgid "Available tokens: {0}"
 msgstr "Dostępne tokeny: {0}"
 
-#: src/layouts/AdminDropdown.tsx:83
+#: src/layouts/AdminDropdown.tsx:90
 msgid "Dashboard"
 msgstr "Panel główny"
 
-#: src/layouts/AdminDropdown.tsx:114
+#: src/layouts/AdminDropdown.tsx:127
 msgid "Log out"
 msgstr "Wyloguj się"
 
-#: src/layouts/AdminDropdown.tsx:46
+#: src/layouts/AdminDropdown.tsx:44
 msgid "Admin Panel"
 msgstr "Panel administratora"
