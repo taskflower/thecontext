@@ -8,7 +8,8 @@ import { useState } from "react";
 import { Document } from "@/types/document";
 import { DocumentForm } from "@/components/documents";
 import { Button } from "@/components/ui";
-import { initializeDocumentWithSchema } from "@/utils/documents/documentHelpers";
+// Importujemy nową nazwę funkcji
+import { initializeDocument } from "@/utils/documents/documentUtils";
 
 export const DocumentNew: React.FC = () => {
   const { containerId } = useParams();
@@ -18,7 +19,7 @@ export const DocumentNew: React.FC = () => {
   const container = containers.find(c => c.id === containerId);
   
   const [documentState, setDocumentState] = useState<Document>(() => 
-    initializeDocumentWithSchema({
+    initializeDocument({
       id: `temp-${Date.now()}`,
       title: "",
       content: "",

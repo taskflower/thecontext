@@ -1,3 +1,4 @@
+// src/store/documentsStore.ts
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import {
@@ -9,15 +10,15 @@ import {
 } from "@/types/document";
 import { RelationConfig } from "@/types/relation";
 import {
-  validateContainerName,
-  createNewContainer,
-  validateContainerDeletion,
-  createNewDocument,
-  validateRelation,
-  createNewRelation,
+  isContainerNameUnique,       // wcześniej validateContainerName
+  createContainer,             // wcześniej createNewContainer
+  canDeleteContainer,          // wcześniej validateContainerDeletion
+  createDocument,              // wcześniej createNewDocument
+  isRelationValid,             // wcześniej validateRelation
+  createRelation,              // wcześniej createNewRelation
   filterDocumentsByContainer,
-  getRelatedDocumentsForContainer,
-  getAvailableConfigs
+  getRelatedDocuments,         // wcześniej getRelatedDocumentsForContainer
+  getAvailableRelationConfigs  // wcześniej getAvailableConfigs
 } from "@/utils/documents/documentUtils";
 
 export const useDocumentsStore = create<DocumentsStore>()(
@@ -31,13 +32,13 @@ export const useDocumentsStore = create<DocumentsStore>()(
 
       addContainer: (container: AddContainerInput) => {
         const { containers } = get();
-        
-        if (!validateContainerName(containers, container.name)) {
+
+        if (!isContainerNameUnique(containers, container.name)) {
           throw new Error(`Container with name "${container.name}" already exists`);
         }
 
-        const newContainer = createNewContainer(container);
-        
+        const newContainer = createContainer(container);
+
         set((state) => ({
           ...state,
           containers: [...state.containers, newContainer],
@@ -47,7 +48,7 @@ export const useDocumentsStore = create<DocumentsStore>()(
       updateContainer: (id: string, updates: Partial<DocumentContainer>) => {
         const { containers } = get();
 
-        if (typeof updates.name === "string" && !validateContainerName(containers, updates.name, id)) {
+        if (typeof updates.name === "string" && !isContainerNameUnique(containers, updates.name, id)) {
           throw new Error(`Container with name "${updates.name}" already exists`);
         }
 
@@ -61,8 +62,8 @@ export const useDocumentsStore = create<DocumentsStore>()(
 
       deleteContainer: (id: string) => {
         const { relations } = get();
-        
-        if (!validateContainerDeletion(id, relations)) {
+
+        if (!canDeleteContainer(id, relations)) {
           throw new Error("Cannot delete container with existing relations. Remove relations first.");
         }
 
@@ -75,8 +76,8 @@ export const useDocumentsStore = create<DocumentsStore>()(
       },
 
       addDocument: (document: AddDocumentInput) => {
-        const newDocument = createNewDocument(document);
-        
+        const newDocument = createDocument(document);
+
         set((state) => ({
           ...state,
           documents: [...state.documents, newDocument],
@@ -135,7 +136,7 @@ export const useDocumentsStore = create<DocumentsStore>()(
       addRelation: (sourceDocId: string, targetDocId: string, configId: string) => {
         const { documents, relationConfigs, relations } = get();
 
-        const validationResult = validateRelation(
+        const validationResult = isRelationValid(
           sourceDocId,
           targetDocId,
           configId,
@@ -151,7 +152,7 @@ export const useDocumentsStore = create<DocumentsStore>()(
         const sourceDoc = documents.find((d) => d.id === sourceDocId)!;
         const targetDoc = documents.find((d) => d.id === targetDocId)!;
 
-        const newRelation = createNewRelation(
+        const newRelation = createRelation(
           sourceDocId,
           targetDocId,
           configId,
@@ -186,12 +187,12 @@ export const useDocumentsStore = create<DocumentsStore>()(
 
       getRelatedDocuments: (documentId: string, targetContainerId?: string) => {
         const { documents, relations } = get();
-        return getRelatedDocumentsForContainer(documentId, targetContainerId, documents, relations);
+        return getRelatedDocuments(documentId, targetContainerId, documents, relations);
       },
 
       getAvailableRelationConfigs: (sourceContainerId: string) => {
         const { relationConfigs } = get();
-        return getAvailableConfigs(sourceContainerId, relationConfigs);
+        return getAvailableRelationConfigs(sourceContainerId, relationConfigs);
       },
 
       linkContainerToInstance: (documentContainerId: string, instanceId: string) => {

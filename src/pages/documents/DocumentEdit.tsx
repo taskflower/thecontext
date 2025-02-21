@@ -1,3 +1,4 @@
+// src/pages/documents/DocumentEdit.tsx
 import { useParams } from "react-router-dom";
 import { useDocumentsStore } from "@/store/documentsStore";
 import { useState, useEffect } from "react";
@@ -7,8 +8,8 @@ import { Trans } from "@lingui/macro";
 import { Document } from "@/types/document";
 import { DocumentForm } from "@/components/documents";
 import { Button } from "@/components/ui";
-import { initializeDocumentWithSchema } from "@/utils/documents/documentHelpers";
-
+// Zmieniony import
+import { initializeDocument } from "@/utils/documents/documentUtils";
 
 export const DocumentEdit: React.FC = () => {
   const { containerId, documentId } = useParams();
@@ -21,7 +22,7 @@ export const DocumentEdit: React.FC = () => {
 
   useEffect(() => {
     if (originalDocument && container?.schema) {
-      const initializedDoc = initializeDocumentWithSchema(originalDocument, container.schema);
+      const initializedDoc = initializeDocument(originalDocument, container.schema);
       setDocumentState(initializedDoc);
     } else if (originalDocument) {
       setDocumentState(originalDocument);

@@ -5,7 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Trans, t } from "@lingui/macro";
 import { Document, DocumentContainer, CustomFieldValue } from "@/types/document";
 import DocumentTabs from "./editor/DocumentTabs";
-import { updateDocumentField } from "@/utils/documents/documentHelpers";
+// Zmieniony import
+import { updateDocumentFieldValue } from "@/utils/documents/documentUtils";
 
 interface DocumentFormProps {
   document: Document;
@@ -28,7 +29,7 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
     // Konwertujemy unknown na CustomFieldValue
     const typedValue = value as CustomFieldValue;
     
-    const result = updateDocumentField(document, field, typedValue, container.schema);
+    const result = updateDocumentFieldValue(document, field, typedValue, container.schema);
     
     if (result.isValid) {
       onUpdate(result.document);
