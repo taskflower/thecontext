@@ -12,8 +12,8 @@ import { Trans } from "@lingui/macro";
 import { FilePlus, Settings2 } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-
 import { useDocumentFilter } from "@/utils/documents/hooks";
+import ContainerDropdown from "@/components/documents/container/ContainerDropdown";
 
 export const ContainerDocuments = () => {
   const { containerId } = useParams();
@@ -53,6 +53,12 @@ export const ContainerDocuments = () => {
     }
   };
 
+  // Przykładowa funkcja usuwająca container, którą możesz dostosować do swoich potrzeb
+  const handleDeleteContainer = (id: string) => {
+    // np. wywołanie metody usuwającej container z magazynu
+    console.log("Usuwam container o id:", id);
+  };
+
   return (
     <AdminOutletTemplate
       title={<Trans>{container.name}</Trans>}
@@ -68,13 +74,8 @@ export const ContainerDocuments = () => {
           <Button size="sm" variant="outline" onClick={handleBack}>
             <Trans>Back to Containers</Trans>
           </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => adminNavigate(`/documents/${containerId}/edit`)}
-          >
-            <Trans>Edit Container</Trans>
-          </Button>
+          {/* Zastępujemy przycisk "Edit Container" komponentem ContainerDropdown */}
+          <ContainerDropdown containerId={container.id} onDelete={handleDeleteContainer} />
           <Button
             className="gap-2"
             onClick={() =>
