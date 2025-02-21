@@ -15,7 +15,7 @@ msgstr ""
 msgid "All documents"
 msgstr "Wszystkie dokumenty"
 
-#: src/pages/documents/DocumentEdit.tsx:32
+#: src/pages/documents/DocumentEdit.tsx:54
 msgid "Document not found"
 msgstr "Nie znaleziono dokumentu"
 
@@ -24,10 +24,10 @@ msgid "Document Containers"
 msgstr "Kontenery dokumentów"
 
 #: src/pages/documents/AllDocuments.tsx:122
-msgid "Search documents..."
-msgstr "Szukaj dokumentów..."
+#~ msgid "Search documents..."
+#~ msgstr "Szukaj dokumentów..."
 
-#: src/pages/documents/AllDocuments.tsx:157
+#: src/pages/documents/AllDocuments.tsx:99
 msgid "Related Documents for {0}"
 msgstr "Powiązane dokumenty dla {0}"
 
@@ -35,22 +35,26 @@ msgstr "Powiązane dokumenty dla {0}"
 #~ msgid "Modify document details"
 #~ msgstr "Modyfikuj szczegóły dokumentu"
 
+#: src/pages/documents/DocumentEdit.tsx:62
+msgid "The specified document was not found."
+msgstr ""
+
 #: src/pages/documents/ContainerList.tsx:77
 msgid "Create your first container to get started."
 msgstr "Utwórz swój pierwszy kontener, aby rozpocząć."
 
-#: src/pages/documents/ContainerDocuments.tsx:78
-#: src/pages/documents/ContainerEdit.tsx:76
-#: src/pages/documents/ContainerNew.tsx:48
+#: src/pages/documents/ContainerDocuments.tsx:98
+#: src/pages/documents/ContainerEdit.tsx:78
+#: src/pages/documents/ContainerNew.tsx:49
 msgid "Back to Containers"
 msgstr "Powrót do kontenerów"
 
-#: src/pages/documents/DocumentEdit.tsx:55
+#: src/pages/documents/DocumentEdit.tsx:84
 msgid "Document Details"
 msgstr "Szczegóły dokumentu"
 
-#: src/pages/documents/ContainerDocuments.tsx:87
-#: src/pages/documents/DocumentNew.tsx:94
+#: src/pages/documents/ContainerDocuments.tsx:108
+#: src/pages/documents/DocumentNew.tsx:78
 msgid "New Document"
 msgstr "Nowy dokument"
 
@@ -58,23 +62,23 @@ msgstr "Nowy dokument"
 msgid "Try adjusting your search query or clear the filter."
 msgstr "Spróbuj dostosować zapytanie wyszukiwania lub wyczyść filtr."
 
-#: src/pages/documents/DocumentNew.tsx:95
+#: src/pages/documents/DocumentNew.tsx:79
 msgid "Create a new document with content"
 msgstr "Utwórz nowy dokument z treścią"
 
 #: src/pages/documents/ContainerDocuments.tsx:97
-msgid "Filter documents..."
-msgstr "Filtruj dokumenty..."
+#~ msgid "Filter documents..."
+#~ msgstr "Filtruj dokumenty..."
 
-#: src/pages/documents/ContainerEdit.tsx:73
+#: src/pages/documents/ContainerEdit.tsx:75
 msgid "Modify container details"
 msgstr "Modyfikuj szczegóły kontenera"
 
-#: src/pages/documents/ContainerRelations.tsx:43
+#: src/pages/documents/ContainerRelations.tsx:53
 msgid "Container Relations: {0}"
 msgstr "Relacje kontenera: {0}"
 
-#: src/pages/documents/ContainerNew.tsx:45
+#: src/pages/documents/ContainerNew.tsx:46
 msgid "Create a new document container"
 msgstr "Utwórz nowy kontener dokumentów"
 
@@ -90,76 +94,81 @@ msgstr "Nie znaleziono kontenerów"
 msgid "Filter containers..."
 msgstr "Filtruj kontenery..."
 
-#: src/pages/documents/ContainerEdit.tsx:85
-#: src/pages/documents/DocumentEdit.tsx:69
+#: src/pages/documents/ContainerEdit.tsx:87
+#: src/pages/documents/DocumentEdit.tsx:98
 msgid "Save Changes"
 msgstr "Zapisz zmiany"
 
-#: src/pages/documents/DocumentNew.tsx:108
+#: src/pages/documents/DocumentNew.tsx:92
 msgid "Create Document"
 msgstr "Utwórz dokument"
 
-#: src/pages/documents/ContainerDocuments.tsx:67
-#: src/pages/documents/ContainerDocuments.tsx:70
+#: src/pages/documents/ContainerDocuments.tsx:87
+#: src/pages/documents/ContainerDocuments.tsx:90
 msgid "{0}"
 msgstr "{0}"
 
-#: src/pages/documents/ContainerRelations.tsx:61
+#: src/pages/documents/ContainerRelations.tsx:71
 msgid "New Relation"
 msgstr "Nowa relacja"
 
 #: src/pages/documents/AllDocuments.tsx:95
-msgid "No relation filters"
-msgstr "Brak filtrów relacji"
+#~ msgid "No relation filters"
+#~ msgstr "Brak filtrów relacji"
 
 #: src/pages/documents/ContainerList.tsx:45
 #~ msgid "All"
 #~ msgstr "Wszystkie"
 
-#: src/pages/documents/ContainerDocuments.tsx:72
+#: src/pages/documents/ContainerDocuments.tsx:92
 msgid "This container has no description"
 msgstr "Ten kontener nie ma opisu"
 
-#: src/pages/documents/DocumentNew.tsx:77
+#: src/pages/documents/DocumentEdit.tsx:35
+#: src/pages/documents/DocumentEdit.tsx:53
+#: src/pages/documents/DocumentNew.tsx:61
 msgid "Error"
 msgstr "Błąd"
 
 #: src/pages/documents/AllDocuments.tsx:109
-msgid "Clear Filter"
-msgstr "Wyczyść filtr"
+#~ msgid "Clear Filter"
+#~ msgstr "Wyczyść filtr"
 
 #: src/pages/documents/DocumentNew.tsx:41
 #~ msgid "Create a new document"
 #~ msgstr "Utwórz nowy dokument"
 
-#: src/pages/documents/AllDocuments.tsx:70
+#: src/pages/documents/AllDocuments.tsx:62
 msgid "View and manage all documents across containers"
 msgstr "Przeglądaj i zarządzaj wszystkimi dokumentami we wszystkich kontenerach"
 
-#: src/pages/documents/AllDocuments.tsx:69
+#: src/pages/documents/AllDocuments.tsx:61
 msgid "All Documents"
 msgstr "Wszystkie dokumenty"
 
-#: src/pages/documents/DocumentNew.tsx:86
+#: src/pages/documents/DocumentEdit.tsx:44
+#: src/pages/documents/DocumentNew.tsx:70
 msgid "The specified container was not found."
 msgstr "Określony kontener nie został znaleziony."
 
 #: src/pages/documents/AllDocuments.tsx:89
-msgid "Filters"
-msgstr "Filtry"
+#~ msgid "Filters"
+#~ msgstr "Filtry"
 
 #: src/pages/documents/AllDocuments.tsx:80
-msgid "Back to containers"
-msgstr "Powrót do kontenerów"
+#~ msgid "Back to containers"
+#~ msgstr "Powrót do kontenerów"
 
-#: src/pages/documents/ContainerRelations.tsx:45
+#: src/pages/documents/ContainerRelations.tsx:55
 msgid "Manage document relations for this container. Create and configure relationships between documents in different containers."
 msgstr "Zarządzaj relacjami dokumentów dla tego kontenera. Utwórz i skonfiguruj relacje między dokumentami w różnych kontenerach."
 
-#: src/pages/documents/ContainerRelations.tsx:52
-#: src/pages/documents/DocumentEdit.tsx:59
-#: src/pages/documents/DocumentNew.tsx:81
-#: src/pages/documents/DocumentNew.tsx:98
+#: src/pages/documents/ContainerRelations.tsx:62
+#: src/pages/documents/DocumentEdit.tsx:39
+#: src/pages/documents/DocumentEdit.tsx:57
+#: src/pages/documents/DocumentEdit.tsx:88
+#: src/pages/documents/DocumentNew.tsx:65
+#: src/pages/documents/DocumentNew.tsx:82
 msgid "Back"
 msgstr "Wstecz"
 
@@ -168,23 +177,23 @@ msgstr "Wstecz"
 #~ msgstr "Edytuj dokument"
 
 #: src/pages/documents/ContainerDocuments.tsx:106
-msgid "View"
-msgstr "Widok"
+#~ msgid "View"
+#~ msgstr "Widok"
 
-#: src/pages/documents/ContainerEdit.tsx:86
-#: src/pages/documents/ContainerNew.tsx:58
+#: src/pages/documents/ContainerEdit.tsx:88
+#: src/pages/documents/ContainerNew.tsx:59
 msgid "Container Details"
 msgstr "Szczegóły kontenera"
 
-#: src/pages/documents/ContainerDocuments.tsx:45
-#: src/pages/documents/ContainerEdit.tsx:48
-#: src/pages/documents/ContainerRelations.tsx:26
-#: src/pages/documents/DocumentEdit.tsx:29
-#: src/pages/documents/DocumentNew.tsx:78
+#: src/pages/documents/ContainerDocuments.tsx:60
+#: src/pages/documents/ContainerEdit.tsx:50
+#: src/pages/documents/ContainerRelations.tsx:34
+#: src/pages/documents/DocumentEdit.tsx:36
+#: src/pages/documents/DocumentNew.tsx:62
 msgid "Container not found"
 msgstr "Nie znaleziono kontenera"
 
-#: src/pages/documents/ContainerEdit.tsx:72
+#: src/pages/documents/ContainerEdit.tsx:74
 msgid "Editing: {0}"
 msgstr "Edycja: {0}"
 
@@ -192,15 +201,15 @@ msgstr "Edycja: {0}"
 msgid "New Container"
 msgstr "Nowy kontener"
 
-#: src/pages/documents/ContainerNew.tsx:44
+#: src/pages/documents/ContainerNew.tsx:45
 msgid "New Document Container"
 msgstr "Nowy kontener dokumentów"
 
 #: src/pages/documents/ContainerList.tsx:85
-#: src/pages/documents/ContainerNew.tsx:57
+#: src/pages/documents/ContainerNew.tsx:58
 msgid "Create Container"
 msgstr "Utwórz kontener"
 
-#: src/pages/documents/DocumentEdit.tsx:56
+#: src/pages/documents/DocumentEdit.tsx:85
 msgid "Modify document properties and content"
 msgstr "Modyfikuj właściwości i zawartość dokumentu"
