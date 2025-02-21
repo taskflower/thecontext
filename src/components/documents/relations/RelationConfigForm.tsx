@@ -3,13 +3,8 @@ import React from "react";
 import { DocumentContainer } from "@/types/document";
 import { Trans } from "@lingui/macro";
 import { RelationType } from "@/types/relation";
-import { Card, CardContent, Input, Button, Select } from "@/components/ui";
-import {
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@radix-ui/react-select";
+import { Card, CardContent, Input, Button, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui";
+
 
 type MatchType = "exact" | "contains" | "startsWith" | "endsWith";
 
