@@ -1,51 +1,63 @@
-// src/pages/documents/AllDocuments.tsx
+// AllDocuments.tsx
 
-import { SearchInput } from "@/components/common";
-import { DocumentTable, MarkdownPreview, RelatedDocuments } from "@/components/documents";
-import { Button, Card, CardContent, DialogHeader } from "@/components/ui";
+import {
+  DocumentPreviewDialog,
+  DocumentSearch,
+  DocumentTable,
+  RelatedDocuments,
+} from "@/components/documents";
+import {
+  Button,
+  Card,
+  CardContent,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { useDocumentsStore } from "@/store/documentsStore";
 import { t, Trans } from "@lingui/macro";
-import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@radix-ui/react-dropdown-menu";
 import { Filter } from "lucide-react";
 import { useState } from "react";
 import { Document } from "@/types/document";
+
+import { useDocumentFilter } from "@/utils/documents/hooks";
 
 export const AllDocuments = () => {
   const adminNavigate = useAdminNavigate();
   const { documents, containers, removeDocument, relationConfigs, relations } =
     useDocumentsStore();
 
-  const [filter, setFilter] = useState("");
-  // Zmieniamy typ na Document | null dla spójności
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
-  const [selectedRelatedDocument, setSelectedRelatedDocument] = useState<Document | null>(null);
-  const [selectedRelationFilter, setSelectedRelationFilter] = useState<string | null>(null);
-
-  // Filtrowanie na podstawie wyszukiwania tekstowego
-  let filteredDocuments = documents.filter(
-    (doc) =>
-      doc.title.toLowerCase().includes(filter.toLowerCase()) ||
-      doc.content.toLowerCase().includes(filter.toLowerCase())
+  const {
+    filter,
+    setFilter,
+    filteredDocuments: baseFilteredDocuments,
+  } = useDocumentFilter(documents);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(
+    null
   );
+  const [selectedRelatedDocument, setSelectedRelatedDocument] =
+    useState<Document | null>(null);
+  const [selectedRelationFilter, setSelectedRelationFilter] = useState<
+    string | null
+  >(null);
 
-  // Jeśli wybrano filtr relacji, ograniczamy wyniki do dokumentów biorących udział w relacjach z daną konfiguracją
-  if (selectedRelationFilter) {
-    filteredDocuments = filteredDocuments.filter((doc) =>
-      relations.some(
-        (rel) =>
-          rel.configId === selectedRelationFilter &&
-          (rel.sourceDocumentId === doc.id || rel.targetDocumentId === doc.id)
+  // Dodatkowe filtrowanie wg relacji, jeśli wybrano filtr
+  const filteredDocuments = selectedRelationFilter
+    ? baseFilteredDocuments.filter((doc) =>
+        relations.some(
+          (rel) =>
+            rel.configId === selectedRelationFilter &&
+            (rel.sourceDocumentId === doc.id || rel.targetDocumentId === doc.id)
+        )
       )
-    );
-  }
+    : baseFilteredDocuments;
 
   const getContainerName = (containerId: string) => {
     const container = containers.find((c) => c.id === containerId);
@@ -59,7 +71,9 @@ export const AllDocuments = () => {
   const handleEditDocument = (id: string) => {
     const doc = documents.find((d) => d.id === id);
     if (doc) {
-      adminNavigate(`/documents/${doc.documentContainerId}/document/${id}/edit`);
+      adminNavigate(
+        `/documents/${doc.documentContainerId}/document/${id}/edit`
+      );
     }
   };
 
@@ -71,7 +85,9 @@ export const AllDocuments = () => {
   return (
     <AdminOutletTemplate
       title={<Trans>All Documents</Trans>}
-      description={<Trans>View and manage all documents across containers</Trans>}
+      description={
+        <Trans>View and manage all documents across containers</Trans>
+      }
       actions={
         <div className="flex items-center gap-2">
           <Button
@@ -110,7 +126,9 @@ export const AllDocuments = () => {
                 ))
               )}
               {selectedRelationFilter && (
-                <DropdownMenuItem onClick={() => setSelectedRelationFilter(null)}>
+                <DropdownMenuItem
+                  onClick={() => setSelectedRelationFilter(null)}
+                >
                   <Trans>Clear Filter</Trans>
                 </DropdownMenuItem>
               )}
@@ -121,14 +139,8 @@ export const AllDocuments = () => {
     >
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <SearchInput
-            value={filter}
-            onChange={setFilter}
-            placeholder={t`Search documents...`}
-            className="h-8 w-[150px] lg:w-[250px]"
-          />
+          <DocumentSearch value={filter} onChange={setFilter} />
         </div>
-
         <Card>
           <CardContent className="p-0">
             <DocumentTable
@@ -138,28 +150,14 @@ export const AllDocuments = () => {
               onMove={handleMoveDocument}
               onDelete={removeDocument}
               showContainer
-              // Usunięto nieistniejący props onPreviewRelated
             />
           </CardContent>
         </Card>
       </div>
-
-      {/* Dialog dla podglądu zawartości dokumentu */}
-      <Dialog
-        open={!!selectedDocument}
-        onOpenChange={() => setSelectedDocument(null)}
-      >
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{selectedDocument?.title}</DialogTitle>
-          </DialogHeader>
-          {selectedDocument && (
-            <MarkdownPreview content={selectedDocument.content} />
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog dla podglądu powiązanych dokumentów */}
+      <DocumentPreviewDialog
+        document={selectedDocument}
+        onClose={() => setSelectedDocument(null)}
+      />
       <Dialog
         open={!!selectedRelatedDocument}
         onOpenChange={() => setSelectedRelatedDocument(null)}

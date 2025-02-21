@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/utils/customFields/hooks.ts
-import { useCallback } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import { SchemaField } from "@/types/schema";
-import { validateField } from "./validation";
 import { CustomFieldValue } from '@/types/document';
+import { validateField } from './validation';
 
 export const useCustomFields = (schema: SchemaField[]) => {
   const updateField = useCallback((
@@ -29,3 +29,23 @@ export const useCustomFields = (schema: SchemaField[]) => {
     }
   };
 }
+
+interface FilterableDocument {
+  title: string;
+  content: string;
+  [key: string]: any;
+}
+
+export const useDocumentFilter = <T extends FilterableDocument>(documents: T[]) => {
+  const [filter, setFilter] = useState("");
+  
+  const filteredDocuments = useMemo(() => {
+    return documents.filter(
+      (doc) =>
+        doc.title.toLowerCase().includes(filter.toLowerCase()) ||
+        doc.content.toLowerCase().includes(filter.toLowerCase())
+    );
+  }, [documents, filter]);
+
+  return { filter, setFilter, filteredDocuments };
+};

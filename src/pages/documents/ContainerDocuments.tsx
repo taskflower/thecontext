@@ -1,16 +1,19 @@
-// src/pages/documents/ContainerDocuments.tsx
-
-import { SearchInput } from "@/components/common";
-import { DocumentTable, MarkdownPreview } from "@/components/documents";
-import { Button, Card, CardContent, DialogHeader } from "@/components/ui";
+// ContainerDocuments.tsx
+import {
+  DocumentPreviewDialog,
+  DocumentSearch,
+  DocumentTable,
+} from "@/components/documents";
+import { Button, Card, CardContent } from "@/components/ui";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { useDocumentsStore } from "@/store/documentsStore";
-import { Trans, t } from "@lingui/macro";
-import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
+import { Trans } from "@lingui/macro";
 import { FilePlus, Settings2 } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+
+import { useDocumentFilter } from "@/utils/documents/hooks";
 
 export const ContainerDocuments = () => {
   const { containerId } = useParams();
@@ -18,20 +21,14 @@ export const ContainerDocuments = () => {
   const { containers, removeDocument, getContainerDocuments, updateDocument } =
     useDocumentsStore();
 
-  const [filter, setFilter] = useState("");
+  const container = containers.find((c) => c.id === containerId);
+  const documents = getContainerDocuments(containerId || "");
+
+  const { filter, setFilter, filteredDocuments } = useDocumentFilter(documents);
   const [selectedDocument, setSelectedDocument] = useState<{
     title: string;
     content: string;
   } | null>(null);
-
-  const container = containers.find((c) => c.id === containerId);
-  const documents = getContainerDocuments(containerId || "");
-
-  const filteredDocuments = documents.filter(
-    (doc) =>
-      doc.title.toLowerCase().includes(filter.toLowerCase()) ||
-      doc.content.toLowerCase().includes(filter.toLowerCase())
-  );
 
   if (!container) {
     return (
@@ -71,9 +68,8 @@ export const ContainerDocuments = () => {
           <Button size="sm" variant="outline" onClick={handleBack}>
             <Trans>Back to Containers</Trans>
           </Button>
-          {/* Nowy przycisk do edycji kontenera */}
           <Button
-          size="sm"
+            size="sm"
             variant="outline"
             onClick={() => adminNavigate(`/documents/${containerId}/edit`)}
           >
@@ -93,12 +89,7 @@ export const ContainerDocuments = () => {
     >
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <SearchInput
-            value={filter}
-            onChange={setFilter}
-            placeholder={t`Filter documents...`}
-            className="h-8 w-[150px] lg:w-[250px]"
-          />
+          <DocumentSearch value={filter} onChange={setFilter} />
           <Button
             variant="outline"
             size="sm"
@@ -108,12 +99,11 @@ export const ContainerDocuments = () => {
             <Trans>View</Trans>
           </Button>
         </div>
-
         <Card>
           <CardContent className="p-0">
             <DocumentTable
               documents={filteredDocuments}
-              container={container} // Dodaj tę linię
+              container={container}
               onPreview={setSelectedDocument}
               onEdit={(id) =>
                 adminNavigate(`/documents/${containerId}/document/${id}/edit`)
@@ -124,21 +114,12 @@ export const ContainerDocuments = () => {
           </CardContent>
         </Card>
       </div>
-
-      <Dialog
-        open={!!selectedDocument}
-        onOpenChange={() => setSelectedDocument(null)}
-      >
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{selectedDocument?.title}</DialogTitle>
-          </DialogHeader>
-          {selectedDocument && (
-            <MarkdownPreview content={selectedDocument.content} />
-          )}
-        </DialogContent>
-      </Dialog>
+      <DocumentPreviewDialog
+        document={selectedDocument}
+        onClose={() => setSelectedDocument(null)}
+      />
     </AdminOutletTemplate>
   );
 };
+
 export default ContainerDocuments;

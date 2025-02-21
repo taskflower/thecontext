@@ -66,7 +66,7 @@ export const ContainerForm = ({
               </TabsTrigger>
               <TabsTrigger value="schema" className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
-                <Trans>Schema</Trans>
+                <Trans>Custom fields</Trans>
               </TabsTrigger>
             </TabsList>
 
