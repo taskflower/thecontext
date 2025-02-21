@@ -19,9 +19,9 @@ export const Footer = () => {
           <span>/</span>
           <p>&copy; 2025 thecontext.onrender.com</p>
           <span>/</span>
-          <span>dadmor@gmail.com</span>
-          <span>/</span>
-          <p>ver 0.14.3</p>
+          {/* <span>dadmor@gmail.com</span>
+          <span>/</span> */}
+          <p>ver 0.14.4</p>
         </div>
       </footer>
     </div>
