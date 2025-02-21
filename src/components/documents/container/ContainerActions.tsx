@@ -4,6 +4,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -17,7 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, FileText, Link2 } from "lucide-react";
+import { MoreHorizontal, FileText, Link2, Edit, Trash } from "lucide-react";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 import { Trans } from "@lingui/macro";
 
@@ -40,15 +41,6 @@ const ContainerActions = ({ containerId, onDelete }: ContainerActionsProps) => {
           <FileText className="h-4 w-4" />
           <Trans>View Documents</Trans>
         </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          className="gap-2"
-          onClick={() => adminNavigate(`/documents/${containerId}/relations`)}
-        >
-          <Link2 className="h-4 w-4" />
-          <Trans>Relations</Trans>
-        </Button>
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -60,17 +52,23 @@ const ContainerActions = ({ containerId, onDelete }: ContainerActionsProps) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            onClick={() => adminNavigate(`/documents/${containerId}/edit`)}
-          >
+          <DropdownMenuItem onClick={() => adminNavigate(`/documents/${containerId}`)}>
+            <FileText className="h-4 w-4 mr-2" />
+            <Trans>View Documents</Trans>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => adminNavigate(`/documents/${containerId}/relations`)}>
+            <Link2 className="h-4 w-4 mr-2" />
+            <Trans>Relations</Trans>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => adminNavigate(`/documents/${containerId}/edit`)}>
+            <Edit className="h-4 w-4 mr-2" />
             <Trans>Edit</Trans>
           </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <DropdownMenuItem
-                onSelect={(e) => e.preventDefault()}
-                className="text-destructive"
-              >
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
+                <Trash className="h-4 w-4 mr-2" />
                 <Trans>Delete</Trans>
               </DropdownMenuItem>
             </AlertDialogTrigger>
@@ -81,8 +79,7 @@ const ContainerActions = ({ containerId, onDelete }: ContainerActionsProps) => {
                 </AlertDialogTitle>
                 <AlertDialogDescription>
                   <Trans>
-                    This action cannot be undone. This will permanently delete
-                    this container and all its documents.
+                    This action cannot be undone. This will permanently delete this container and all its documents.
                   </Trans>
                 </AlertDialogDescription>
               </AlertDialogHeader>
