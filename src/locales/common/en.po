@@ -61,8 +61,8 @@ msgid "Are you sure?"
 msgstr "Are you sure?"
 
 #: src/components/projects/ProjectRenderer.tsx:138
-msgid "Actions"
-msgstr "Actions"
+#~ msgid "Actions"
+#~ msgstr "Actions"
 
 #: src/components/documents/document/preview/DocumentPreview.tsx:46
 msgid "Property"
@@ -101,8 +101,8 @@ msgid "Create template"
 msgstr "Create template"
 
 #: src/components/projects/ProjectRenderer.tsx:169
-msgid "Steps"
-msgstr "Steps"
+#~ msgid "Steps"
+#~ msgstr "Steps"
 
 #: src/components/documents/container/ContainerCard.tsx:110
 msgid "Collection status"
@@ -256,8 +256,8 @@ msgid "Optional target number of documents"
 msgstr "Optional target number of documents"
 
 #: src/components/projects/ProjectRenderer.tsx:156
-msgid "Kanban Board"
-msgstr "Kanban Board"
+#~ msgid "Kanban Board"
+#~ msgstr "Kanban Board"
 
 #: src/components/boards/KanbanTemplateEditor.tsx:198
 msgid "Select Task Template"
@@ -272,7 +272,7 @@ msgstr "Brak powiązanych dokumentów."
 #~ msgstr "To:"
 
 #: src/components/documents/container/ContainerCard.tsx:73
-#: src/components/projects/ProjectRenderer.tsx:111
+#: src/components/projects/ProjectRenderer.tsx:162
 msgid "No description provided"
 msgstr "No description provided"
 
@@ -320,7 +320,7 @@ msgstr "Create or modify board template details"
 msgid "Back to containers"
 msgstr "Back to containers"
 
-#: src/components/projects/ProjectRenderer.tsx:95
+#: src/components/projects/ProjectRenderer.tsx:148
 msgid "Loading project configuration..."
 msgstr "Loading project configuration..."
 
@@ -364,8 +364,8 @@ msgid "Step {0}: {1}"
 msgstr "Step {0}: {1}"
 
 #: src/components/projects/ProjectRenderer.tsx:125
-msgid "Columns"
-msgstr "Columns"
+#~ msgid "Columns"
+#~ msgstr "Columns"
 
 #: src/components/boards/KanbanTemplateEditor.tsx:179
 msgid "Steps: {0}"
@@ -396,8 +396,8 @@ msgid "Powiązane dokumenty"
 msgstr "Powiązane dokumenty"
 
 #: src/components/projects/ProjectRenderer.tsx:159
-msgid "Template ID:"
-msgstr "Template ID:"
+#~ msgid "Template ID:"
+#~ msgstr "Template ID:"
 
 #: src/components/documents/DocumentForm.tsx:56
 #~ msgid "Anuluj"
@@ -424,7 +424,7 @@ msgstr "Preview"
 msgid "Estimated target document count"
 msgstr "Estimated target document count"
 
-#: src/components/projects/ProjectRenderer.tsx:79
+#: src/components/projects/ProjectRenderer.tsx:133
 msgid "Project Not Found"
 msgstr "Project Not Found"
 
@@ -432,7 +432,7 @@ msgstr "Project Not Found"
 msgid "Field Type"
 msgstr "Field Type"
 
-#: src/components/projects/ProjectRenderer.tsx:82
+#: src/components/projects/ProjectRenderer.tsx:136
 msgid "The requested project does not exist or you may not have access to it."
 msgstr "The requested project does not exist or you may not have access to it."
 

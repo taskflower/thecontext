@@ -37,7 +37,7 @@ msgstr "Powiązane dokumenty dla {0}"
 
 #: src/pages/documents/DocumentEdit.tsx:62
 msgid "The specified document was not found."
-msgstr ""
+msgstr "Dokument nie został odlaleziony"
 
 #: src/pages/documents/ContainerList.tsx:77
 msgid "Create your first container to get started."

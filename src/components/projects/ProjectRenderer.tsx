@@ -90,7 +90,7 @@ const ProjectRenderer: React.FC = () => {
       setSelectedFlow(action.flowId);
     } else if (action.actionType === 'viewDocument' && action.tag) {
       const documentsWithTag = getContainerDocuments(activeTab).filter(
-        doc => doc.tags?.includes(action.tag)
+        doc => doc.tags?.includes(action.tag ?? '')
       );
       if (documentsWithTag.length > 0) {
         setSelectedDocument(documentsWithTag[0]);

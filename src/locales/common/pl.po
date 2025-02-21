@@ -59,8 +59,8 @@ msgid "Are you sure?"
 msgstr "Czy jesteś pewien?"
 
 #: src/components/projects/ProjectRenderer.tsx:138
-msgid "Actions"
-msgstr "Akcje"
+#~ msgid "Actions"
+#~ msgstr "Akcje"
 
 #: src/components/documents/document/preview/DocumentPreview.tsx:46
 msgid "Property"
@@ -99,8 +99,8 @@ msgid "Create template"
 msgstr "Utwórz szablon"
 
 #: src/components/projects/ProjectRenderer.tsx:169
-msgid "Steps"
-msgstr "Kroki"
+#~ msgid "Steps"
+#~ msgstr "Kroki"
 
 #: src/components/documents/container/ContainerCard.tsx:110
 msgid "Collection status"
@@ -254,8 +254,8 @@ msgid "Optional target number of documents"
 msgstr "Opcjonalna docelowa liczba dokumentów"
 
 #: src/components/projects/ProjectRenderer.tsx:156
-msgid "Kanban Board"
-msgstr "Tablica Kanban"
+#~ msgid "Kanban Board"
+#~ msgstr "Tablica Kanban"
 
 #: src/components/boards/KanbanTemplateEditor.tsx:198
 msgid "Select Task Template"
@@ -270,7 +270,7 @@ msgstr "Brak powiązanych dokumentów."
 #~ msgstr "Do:"
 
 #: src/components/documents/container/ContainerCard.tsx:73
-#: src/components/projects/ProjectRenderer.tsx:111
+#: src/components/projects/ProjectRenderer.tsx:162
 msgid "No description provided"
 msgstr "Nie podano opisu"
 
@@ -318,7 +318,7 @@ msgstr "Utwórz lub zmodyfikuj szczegóły szablonu tablicy"
 msgid "Back to containers"
 msgstr "Powrót do kontenerów"
 
-#: src/components/projects/ProjectRenderer.tsx:95
+#: src/components/projects/ProjectRenderer.tsx:148
 msgid "Loading project configuration..."
 msgstr "Ładowanie konfiguracji projektu..."
 
@@ -362,8 +362,8 @@ msgid "Step {0}: {1}"
 msgstr "Krok {0}: {1}"
 
 #: src/components/projects/ProjectRenderer.tsx:125
-msgid "Columns"
-msgstr "Kolumny"
+#~ msgid "Columns"
+#~ msgstr "Kolumny"
 
 #: src/components/boards/KanbanTemplateEditor.tsx:179
 msgid "Steps: {0}"
@@ -394,8 +394,8 @@ msgid "Powiązane dokumenty"
 msgstr "Powiązane dokumenty"
 
 #: src/components/projects/ProjectRenderer.tsx:159
-msgid "Template ID:"
-msgstr "ID szablonu:"
+#~ msgid "Template ID:"
+#~ msgstr "ID szablonu:"
 
 #: src/components/documents/DocumentForm.tsx:56
 #~ msgid "Anuluj"
@@ -422,7 +422,7 @@ msgstr "Podgląd"
 msgid "Estimated target document count"
 msgstr "Szacowana docelowa liczba dokumentów"
 
-#: src/components/projects/ProjectRenderer.tsx:79
+#: src/components/projects/ProjectRenderer.tsx:133
 msgid "Project Not Found"
 msgstr "Nie znaleziono projektu"
 
@@ -430,7 +430,7 @@ msgstr "Nie znaleziono projektu"
 msgid "Field Type"
 msgstr "Typ pola"
 
-#: src/components/projects/ProjectRenderer.tsx:82
+#: src/components/projects/ProjectRenderer.tsx:136
 msgid "The requested project does not exist or you may not have access to it."
 msgstr "Żądany projekt nie istnieje lub nie masz do niego dostępu."
 

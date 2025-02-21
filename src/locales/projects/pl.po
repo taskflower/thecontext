@@ -11,11 +11,11 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
 
-#: src/pages/projects/ProjectList.tsx:27
+#: src/pages/projects/ProjectList.tsx:35
 msgid "Projects"
 msgstr "Projekty"
 
-#: src/pages/projects/ProjectList.tsx:44
+#: src/pages/projects/ProjectList.tsx:48
 #: src/pages/projects/ProjectNew.tsx:28
 msgid "New Project"
 msgstr "Nowy projekt"
@@ -37,17 +37,17 @@ msgstr "Edytuj projekt"
 msgid "Create a new project"
 msgstr "Utwórz nowy projekt"
 
-#: src/pages/projects/ProjectList.tsx:28
+#: src/pages/projects/ProjectList.tsx:36
 msgid "Manage your projects and their settings"
 msgstr "Zarządzaj swoimi projektami i ich ustawieniami"
 
 #: src/pages/projects/ProjectForm.tsx:57
-#: src/pages/projects/ProjectList.tsx:62
+#: src/pages/projects/ProjectList.tsx:67
 msgid "Title"
 msgstr "Tytuł"
 
 #: src/pages/projects/ProjectForm.tsx:71
-#: src/pages/projects/ProjectList.tsx:63
+#: src/pages/projects/ProjectList.tsx:70
 msgid "Description"
 msgstr "Opis"
 
@@ -55,15 +55,15 @@ msgstr "Opis"
 msgid "Modify project details and settings"
 msgstr "Modyfikuj szczegóły i ustawienia projektu"
 
-#: src/pages/projects/ProjectList.tsx:53
+#: src/pages/projects/ProjectList.tsx:57
 msgid "Search projects..."
 msgstr "Szukaj projektów..."
 
-#: src/pages/projects/ProjectList.tsx:78
+#: src/pages/projects/ProjectList.tsx:86
 msgid "No description provided"
 msgstr "Nie podano opisu"
 
-#: src/pages/projects/ProjectList.tsx:103
+#: src/pages/projects/ProjectList.tsx:113
 msgid "Delete"
 msgstr "Usuń"
 
@@ -71,12 +71,12 @@ msgstr "Usuń"
 msgid "Cancel"
 msgstr "Anuluj"
 
-#: src/pages/projects/ProjectList.tsx:96
+#: src/pages/projects/ProjectList.tsx:106
 msgid "Edit"
 msgstr "Edytuj"
 
-#: src/pages/projects/ProjectList.tsx:37
-#: src/pages/projects/ProjectList.tsx:89
+#: src/pages/projects/ProjectList.tsx:41
+#: src/pages/projects/ProjectList.tsx:97
 msgid "View"
 msgstr "Zobacz"
 
