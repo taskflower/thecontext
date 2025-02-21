@@ -5,15 +5,23 @@ import { Plus, Settings2 } from "lucide-react";
 import { useProjectsStore } from "@/store/projectsStore";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { SearchInput } from "@/components/common/SearchInput";
-import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 import { Trans, t } from "@lingui/macro";
 import { useState } from "react";
 import { truncate } from "@/services/utils";
+import { usePublicNavigate } from "@/hooks/usePublicNavigate";
 
 export const ProjectList = () => {
   const { projects, removeProject } = useProjectsStore();
   const adminNavigate = useAdminNavigate();
+  const publicNavigate = usePublicNavigate();
   const [filter, setFilter] = useState("");
 
   const filteredProjects = projects.filter(
@@ -28,11 +36,7 @@ export const ProjectList = () => {
       description={<Trans>Manage your projects and their settings</Trans>}
       actions={
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="hidden lg:flex"
-          >
+          <Button variant="outline" size="sm" className="hidden lg:flex">
             <Settings2 className="mr-2 h-4 w-4" />
             <Trans>View</Trans>
           </Button>
@@ -59,8 +63,12 @@ export const ProjectList = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableCell className="w-[300px]"><Trans>Title</Trans></TableCell>
-                  <TableCell className="hidden md:table-cell"><Trans>Description</Trans></TableCell>
+                  <TableCell className="w-[300px]">
+                    <Trans>Title</Trans>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    <Trans>Description</Trans>
+                  </TableCell>
                   <TableCell className="w-[100px]"></TableCell>
                 </TableRow>
               </TableHeader>
@@ -84,14 +92,16 @@ export const ProjectList = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => adminNavigate(`/projects/${project.id}`)}
+                          onClick={() => publicNavigate(`/${project.title}`)}
                         >
                           <Trans>View</Trans>
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => adminNavigate(`/projects/${project.id}/edit`)}
+                          onClick={() =>
+                            adminNavigate(`/projects/${project.id}/edit`)
+                          }
                         >
                           <Trans>Edit</Trans>
                         </Button>
@@ -116,4 +126,3 @@ export const ProjectList = () => {
 };
 
 export default ProjectList;
-

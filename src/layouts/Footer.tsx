@@ -16,18 +16,13 @@ export const Footer = () => {
 
       <footer className="bg-black py-8 text-center text-sm text-white  pb-20">
         <div className="container mx-auto px-4 flex justify-end gap-2">
-          <nav className="mb-4">
-            {/* Używamy linku względnego – zakładając, że jesteśmy w obrębie ścieżki /:lang */}
-            <Link to="projects" className="text-white hover:underline mx-2">
-              MediaStrategist project
-            </Link>
-          </nav>
+         
           <span>/</span>
           <p>&copy; 2025 thecontext.onrender.com</p>
           <span>/</span>
           <span>dadmor@gmail.com</span>
           <span>/</span>
-          <p>ver 0.14.0</p>
+          <p>ver 0.14.1</p>
         </div>
       </footer>
     </div>
