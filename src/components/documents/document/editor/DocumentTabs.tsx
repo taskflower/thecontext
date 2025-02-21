@@ -1,19 +1,30 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Info } from "lucide-react";
 import { Trans } from "@lingui/macro";
-import { DocumentPreview } from "../preview/DocumentPreview";
 import { DocumentEditor } from "./DocumentEditor";
-import { DocumentContainer } from "@/types/document";
-import CustomFields from "../schema/CustomFields";
+import { Document, DocumentContainer, CustomFieldValue } from "@/types/document";
+import { CustomFields } from "../../customFields";
+import { DocumentPreview } from "../preview";
 
 interface DocumentTabsProps {
-  document: Record<string, any>;
-  container?: DocumentContainer;
-  onUpdate: (field: string, value: any) => void;
+  document: Document;
+  container: DocumentContainer;
+  onUpdate: (field: string, value: CustomFieldValue) => void;
 }
 
-export const DocumentTabs = ({ document, container, onUpdate }: DocumentTabsProps) => {
+export const DocumentTabs = ({
+  document,
+  container,
+  onUpdate,
+}: DocumentTabsProps) => {
+  const handleContentChange = (content: string | undefined) => {
+    onUpdate("content", content || "");
+  };
+
+  const handleCustomFieldUpdate = (field: string, value: CustomFieldValue) => {
+    onUpdate(field, value);
+  };
+
   return (
     <Tabs defaultValue="editor" className="w-full">
       <div className="flex justify-between items-center mb-4">
@@ -32,28 +43,29 @@ export const DocumentTabs = ({ document, container, onUpdate }: DocumentTabsProp
 
       <TabsContent value="editor" className="mt-4 space-y-6">
         <div>
-          <h3 className="text-sm font-md mb-4">Content Editor</h3>
+          <h3 className="text-sm font-medium mb-4">
+            <Trans>Content Editor</Trans>
+          </h3>
           <DocumentEditor
             content={document.content || ""}
-            onChange={(val: any) => onUpdate("content", val || "")}
+            onChange={handleContentChange}
           />
         </div>
-        
+
         {container?.schema?.fields && container.schema.fields.length > 0 && (
           <CustomFields
             schema={container.schema.fields}
             document={document}
-            onUpdate={onUpdate}
+            onUpdate={handleCustomFieldUpdate}
           />
         )}
       </TabsContent>
 
       <TabsContent value="preview" className="mt-4">
-        <h3 className="text-sm font-medium mb-4">Document Information</h3>
-        <DocumentPreview 
-          document={document} 
-          container={container}
-        />
+        <h3 className="text-sm font-medium mb-4">
+          <Trans>Document Information</Trans>
+        </h3>
+        <DocumentPreview document={document} container={container} />
       </TabsContent>
     </Tabs>
   );

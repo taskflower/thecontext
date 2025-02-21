@@ -1,5 +1,7 @@
-// src/components/documents/editor/DocumentEditor.tsx
-import { MarkdownEditor } from "../MarkdownComponents";
+// src/components/documents/document/editor/DocumentEditor.tsx
+
+import { MarkdownEditor } from "../../MarkdownComponents";
+
 
 interface DocumentEditorProps {
   content: string;

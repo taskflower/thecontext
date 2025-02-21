@@ -7,9 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Settings, Box } from "lucide-react";
-import { SchemaEditor } from "./schema/SchemaEditor";
+
 import { DocumentSchema } from "@/types/schema";
 import { Trans, t } from "@lingui/macro";
+import SchemaEditor from "../customFields/SchemaEditor";
 
 interface ContainerFormData {
   name: string;
@@ -35,12 +36,10 @@ export const ContainerForm = ({
   submitButtonText,
   formTitle,
 }: ContainerFormProps) => {
-
-
   const handleSchemaUpdate = (fields: any) => {
-    onChange("schema", { 
-      id: formData.schema?.id || Date.now().toString(), 
-      fields 
+    onChange("schema", {
+      id: formData.schema?.id || Date.now().toString(),
+      fields,
     });
   };
 
@@ -102,7 +101,10 @@ export const ContainerForm = ({
                   min="0"
                   value={formData.targetDocumentCount}
                   onChange={(e) =>
-                    onChange("targetDocumentCount", parseInt(e.target.value) || 0)
+                    onChange(
+                      "targetDocumentCount",
+                      parseInt(e.target.value) || 0
+                    )
                   }
                   placeholder={t`Optional target number of documents`}
                 />

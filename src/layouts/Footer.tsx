@@ -27,7 +27,7 @@ export const Footer = () => {
           <span>/</span>
           <span>dadmor@gmail.com</span>
           <span>/</span>
-          <p>ver 0.12.2</p>
+          <p>ver 0.13.0</p>
         </div>
       </footer>
     </div>

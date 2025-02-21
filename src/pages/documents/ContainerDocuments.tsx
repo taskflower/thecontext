@@ -1,22 +1,16 @@
 // src/pages/documents/ContainerDocuments.tsx
-import { useParams } from "react-router-dom";
-import { useDocumentsStore } from "@/store/documentsStore";
-import { Button } from "@/components/ui/button";
-import { Settings2, FilePlus } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { useState } from "react";
-import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
-import { SearchInput } from "@/components/common/SearchInput";
-import { DocumentTable } from "@/components/documents/DocumentTable";
+
+import { SearchInput } from "@/components/common";
+import { DocumentTable, MarkdownPreview } from "@/components/documents";
+import { Button, Card, CardContent, DialogHeader } from "@/components/ui";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
+import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
+import { useDocumentsStore } from "@/store/documentsStore";
 import { Trans, t } from "@lingui/macro";
-import { MarkdownPreview } from "@/components/documents/MarkdownComponents";
+import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
+import { FilePlus, Settings2 } from "lucide-react";
+import { useState } from "react";
+import { useParams } from "react-router-dom";
 
 export const ContainerDocuments = () => {
   const { containerId } = useParams();
@@ -74,13 +68,17 @@ export const ContainerDocuments = () => {
       }
       actions={
         <>
-          <Button variant="outline" onClick={handleBack}>
+          <Button size="sm" variant="outline" onClick={handleBack}>
             <Trans>Back to Containers</Trans>
           </Button>
-           {/* Nowy przycisk do edycji kontenera */}
-        <Button variant="outline" onClick={() => adminNavigate(`/documents/${containerId}/edit`)}>
-          <Trans>Edit Container</Trans>
-        </Button>
+          {/* Nowy przycisk do edycji kontenera */}
+          <Button
+          size="sm"
+            variant="outline"
+            onClick={() => adminNavigate(`/documents/${containerId}/edit`)}
+          >
+            <Trans>Edit Container</Trans>
+          </Button>
           <Button
             className="gap-2"
             onClick={() =>

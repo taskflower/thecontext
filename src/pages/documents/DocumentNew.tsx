@@ -1,70 +1,53 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/documents/DocumentNew.tsx
 import { useParams } from "react-router-dom";
 import { useDocumentsStore } from "@/store/documentsStore";
-import { Button } from "@/components/ui/button";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
-import { DocumentForm } from "@/components/documents/DocumentForm";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 import { Trans } from "@lingui/macro";
 import { useState } from "react";
 import { Document } from "@/types/document";
+import { DocumentForm } from "@/components/documents";
+import { Button } from "@/components/ui";
+import { initializeDocumentWithSchema } from "@/utils/documents/documentHelpers";
 
-export const DocumentNew = () => {
+export const DocumentNew: React.FC = () => {
   const { containerId } = useParams();
   const adminNavigate = useAdminNavigate();
   const { addDocument, getContainerDocuments, containers } = useDocumentsStore();
   
   const container = containers.find(c => c.id === containerId);
   
-  // Create initial document state with all required fields
-  const [documentState, setDocumentState] = useState<Document>({
-    id: `temp-${Date.now()}`, // Temporary ID that will be replaced on save
-    title: "",
-    content: "",
-    documentContainerId: containerId || "",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    order: 0,
-    customFields: {}
-  });
+  const [documentState, setDocumentState] = useState<Document>(() => 
+    initializeDocumentWithSchema({
+      id: `temp-${Date.now()}`,
+      title: "",
+      content: "",
+      documentContainerId: containerId || "",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      order: 0,
+      tags: []
+    }, container?.schema)
+  );
 
-  const handleUpdate = (field: string, value: any) => {
-    setDocumentState(prev => ({
-      ...prev,
-      [field]: value,
-      updatedAt: new Date()
-    }));
+  const handleUpdate = (updatedDoc: Document) => {
+    setDocumentState(updatedDoc);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (containerId) {
       const containerDocs = getContainerDocuments(containerId);
-      const maxOrder =
-        containerDocs.length > 0
-          ? Math.max(...containerDocs.map((d) => d.order))
-          : -1;
+      const maxOrder = containerDocs.length > 0
+        ? Math.max(...containerDocs.map((d) => d.order))
+        : -1;
           
-      // Create new document without the temporary ID
-      const { 
-        title, 
-        content, 
-        documentContainerId, 
-        createdAt, 
-        updatedAt, 
-        customFields 
-      } = documentState;
-      
-      addDocument({
-        title,
-        content,
-        documentContainerId,
-        createdAt,
-        updatedAt,
-        customFields,
+      const newDoc = {
+        ...documentState,
         order: maxOrder + 1,
-      });
+      };
+      
+      addDocument(newDoc);
       adminNavigate(`/documents/${containerId}`);
     }
   };

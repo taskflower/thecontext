@@ -1,16 +1,16 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/pages/documents/DocumentEdit.tsx
 import { useParams } from "react-router-dom";
 import { useDocumentsStore } from "@/store/documentsStore";
-import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
-import { DocumentForm } from "@/components/documents/DocumentForm";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 import { Trans } from "@lingui/macro";
 import { Document } from "@/types/document";
+import { DocumentForm } from "@/components/documents";
+import { Button } from "@/components/ui";
+import { initializeDocumentWithSchema } from "@/utils/documents/documentHelpers";
 
-export const DocumentEdit = () => {
+
+export const DocumentEdit: React.FC = () => {
   const { containerId, documentId } = useParams();
   const adminNavigate = useAdminNavigate();
   const { documents, containers, updateDocument } = useDocumentsStore();
@@ -20,24 +20,52 @@ export const DocumentEdit = () => {
   const [documentState, setDocumentState] = useState<Document | null>(null);
 
   useEffect(() => {
-    if (originalDocument) {
+    if (originalDocument && container?.schema) {
+      const initializedDoc = initializeDocumentWithSchema(originalDocument, container.schema);
+      setDocumentState(initializedDoc);
+    } else if (originalDocument) {
       setDocumentState(originalDocument);
     }
-  }, [originalDocument]);
+  }, [originalDocument, container]);
 
   if (!container) {
-    return <div><Trans>Container not found</Trans></div>;
-  }
-  if (!documentState) {
-    return <div><Trans>Document not found</Trans></div>;
+    return (
+      <AdminOutletTemplate
+        title={<Trans>Error</Trans>}
+        description={<Trans>Container not found</Trans>}
+        actions={
+          <Button variant="outline" onClick={() => adminNavigate("/documents")}>
+            <Trans>Back</Trans>
+          </Button>
+        }
+      >
+        <div className="p-4 text-red-500">
+          <Trans>The specified container was not found.</Trans>
+        </div>
+      </AdminOutletTemplate>
+    );
   }
 
-  // Uaktualniamy właściwość dokumentu (w tym custom field) bezpośrednio
-  const handleUpdate = (field: string, value: any) => {
-    setDocumentState(prev => ({
-      ...prev!,
-      [field]: value
-    }));
+  if (!documentState) {
+    return (
+      <AdminOutletTemplate
+        title={<Trans>Error</Trans>}
+        description={<Trans>Document not found</Trans>}
+        actions={
+          <Button variant="outline" onClick={() => adminNavigate(`/documents/${containerId}`)}>
+            <Trans>Back</Trans>
+          </Button>
+        }
+      >
+        <div className="p-4 text-red-500">
+          <Trans>The specified document was not found.</Trans>
+        </div>
+      </AdminOutletTemplate>
+    );
+  }
+
+  const handleUpdate = (updatedDoc: Document) => {
+    setDocumentState(updatedDoc);
   };
 
   const handleSubmit = (e: React.FormEvent) => {

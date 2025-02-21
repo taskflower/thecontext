@@ -1,11 +1,12 @@
-import { Button } from "@/components/ui/button";
+
 import { useState } from "react";
 import { useDocumentsStore } from "@/store/documentsStore";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
-import { ContainerForm } from "@/components/documents/ContainerForm";
 import { ErrorDialog } from "@/components/common/ErrorDialog";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 import { Trans } from "@lingui/macro";
+import { ContainerForm } from "@/components/documents/container";
+import { Button } from "@/components/ui";
 
 export const ContainerNew = () => {
   const adminNavigate = useAdminNavigate();
@@ -44,7 +45,7 @@ export const ContainerNew = () => {
         title={<Trans>New Document Container</Trans>}
         description={<Trans>Create a new document container</Trans>}
         actions={
-          <Button variant="outline" onClick={() => adminNavigate("/documents")}>
+          <Button size="sm" variant="outline" onClick={() => adminNavigate("/documents")}>
             <Trans>Back to Containers</Trans>
           </Button>
         }

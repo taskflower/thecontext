@@ -1,7 +1,7 @@
-// src/types/schema.ts
+// types/schema.ts
 export type SchemaFieldType = 'text' | 'number' | 'date' | 'boolean' | 'select';
 
-export interface SchemaFieldValidation {
+export interface SchemaValidation {
   required?: boolean;
   options?: string[];
 }
@@ -10,8 +10,8 @@ export interface SchemaField {
   key: string;
   name: string;
   type: SchemaFieldType;
-  validation?: SchemaFieldValidation;
-  atList?: boolean; // New field
+  validation?: SchemaValidation;
+  atList?: boolean;
 }
 
 export interface DocumentSchema {

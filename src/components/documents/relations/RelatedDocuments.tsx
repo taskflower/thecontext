@@ -2,14 +2,14 @@
 import React from "react";
 import { useDocumentsStore } from "@/store/documentsStore";
 import { Document } from "@/types/document";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trans } from "@lingui/macro";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui";
 
 interface RelatedDocumentsProps {
   documentId: string;
 }
 
-const RelatedDocuments: React.FC<RelatedDocumentsProps> = ({ documentId }) => {
+export const RelatedDocuments: React.FC<RelatedDocumentsProps> = ({ documentId }) => {
   const { getRelatedDocuments } = useDocumentsStore();
   const relatedDocuments = getRelatedDocuments(documentId);
 

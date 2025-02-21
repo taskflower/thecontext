@@ -1,27 +1,31 @@
 // src/pages/documents/AllDocuments.tsx
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Filter } from "lucide-react";
-import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
-import { SearchInput } from "@/components/common/SearchInput";
-import { DocumentTable } from "@/components/documents/DocumentTable";
-import { useAdminNavigate } from "@/hooks/useAdminNavigate";
-import { Trans, t } from "@lingui/macro";
-import { MarkdownPreview } from "@/components/documents/MarkdownComponents";
 
+import { SearchInput } from "@/components/common";
+import { DocumentTable, MarkdownPreview, RelatedDocuments } from "@/components/documents";
+import { Button, Card, CardContent, DialogHeader } from "@/components/ui";
+import { useAdminNavigate } from "@/hooks/useAdminNavigate";
+import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { useDocumentsStore } from "@/store/documentsStore";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { t, Trans } from "@lingui/macro";
+import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@radix-ui/react-dropdown-menu";
+import { Filter } from "lucide-react";
+import { useState } from "react";
 import { Document } from "@/types/document";
-import RelatedDocuments from "@/components/documents/relations/RelatedDocuments";
-import { Card, CardContent } from "@/components/ui/card";
 
 export const AllDocuments = () => {
   const adminNavigate = useAdminNavigate();
-  const { documents, containers, removeDocument, relationConfigs, relations } = useDocumentsStore();
+  const { documents, containers, removeDocument, relationConfigs, relations } =
+    useDocumentsStore();
 
   const [filter, setFilter] = useState("");
-  const [selectedDocument, setSelectedDocument] = useState<{ title: string; content: string } | null>(null);
+  // Zmieniamy typ na Document | null dla spójności
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [selectedRelatedDocument, setSelectedRelatedDocument] = useState<Document | null>(null);
   const [selectedRelationFilter, setSelectedRelationFilter] = useState<string | null>(null);
 
@@ -76,16 +80,17 @@ export const AllDocuments = () => {
             className="hidden lg:flex"
             onClick={() => adminNavigate("/documents/containers")}
           >
-           
             <Trans>Back to containers</Trans>
           </Button>
-          {/* Zamiast przycisku View dodajemy dropdown Filters */}
+          {/* Dropdown Filters */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="hidden lg:flex">
                 <Filter className="mr-2 h-4 w-4" />
                 {selectedRelationFilter
-                  ? relationConfigs.find((config) => config.id === selectedRelationFilter)?.name
+                  ? relationConfigs.find(
+                      (config) => config.id === selectedRelationFilter
+                    )?.name
                   : t`Filters`}
               </Button>
             </DropdownMenuTrigger>
@@ -133,34 +138,47 @@ export const AllDocuments = () => {
               onMove={handleMoveDocument}
               onDelete={removeDocument}
               showContainer
-              onPreviewRelated={(doc) => setSelectedRelatedDocument(doc)}
+              // Usunięto nieistniejący props onPreviewRelated
             />
           </CardContent>
         </Card>
       </div>
 
       {/* Dialog dla podglądu zawartości dokumentu */}
-      <Dialog open={!!selectedDocument} onOpenChange={() => setSelectedDocument(null)}>
+      <Dialog
+        open={!!selectedDocument}
+        onOpenChange={() => setSelectedDocument(null)}
+      >
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{selectedDocument?.title}</DialogTitle>
           </DialogHeader>
-          {selectedDocument && <MarkdownPreview content={selectedDocument.content} />}
+          {selectedDocument && (
+            <MarkdownPreview content={selectedDocument.content} />
+          )}
         </DialogContent>
       </Dialog>
 
       {/* Dialog dla podglądu powiązanych dokumentów */}
-      <Dialog open={!!selectedRelatedDocument} onOpenChange={() => setSelectedRelatedDocument(null)}>
+      <Dialog
+        open={!!selectedRelatedDocument}
+        onOpenChange={() => setSelectedRelatedDocument(null)}
+      >
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              <Trans>Related Documents for {selectedRelatedDocument?.title}</Trans>
+              <Trans>
+                Related Documents for {selectedRelatedDocument?.title}
+              </Trans>
             </DialogTitle>
           </DialogHeader>
-          {selectedRelatedDocument && <RelatedDocuments documentId={selectedRelatedDocument.id} />}
+          {selectedRelatedDocument && (
+            <RelatedDocuments documentId={selectedRelatedDocument.id} />
+          )}
         </DialogContent>
       </Dialog>
     </AdminOutletTemplate>
   );
 };
+
 export default AllDocuments;

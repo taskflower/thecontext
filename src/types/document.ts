@@ -1,27 +1,7 @@
-// src/types/document.ts
+// types/document.ts
+import { RelationConfig, DocumentRelation } from './relation';
+import { DocumentSchema } from './schema';
 
-import { DocumentSchema } from "./schema";
-
-export type RelationType = 'OneToOne' | 'OneToMany';
-
-export interface RelationConfig {
-  id: string;
-  sourceContainerId: string;
-  targetContainerId: string;
-  type: RelationType;
-  name: string;
-  description?: string;
-}
-
-export interface DocumentRelation {
-  id: string;
-  sourceDocumentId: string;
-  sourceContainerId: string;
-  targetDocumentId: string;
-  targetContainerId: string;
-  configId: string;
-  createdAt: Date;
-}
 
 export interface DocumentContainer {
   id: string;
@@ -32,7 +12,7 @@ export interface DocumentContainer {
   schema?: DocumentSchema;
 }
 
-export interface Document {
+interface BaseDocument {
   id: string;
   title: string;
   content: string;
@@ -42,7 +22,13 @@ export interface Document {
   tags?: string[];
   documentContainerId: string;
   order: number;
-  [key: string]: unknown;
+}
+
+export type CustomFieldValue = string | number | boolean | Date;
+
+// Rozszerzony Document
+export interface Document extends BaseDocument {
+  [key: string]: string | number | boolean | Date | undefined | string[];
 }
 
 export interface DocumentContainerContext {

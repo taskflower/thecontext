@@ -2,15 +2,17 @@
 // src/pages/documents/ContainerEdit.tsx
 import { useParams } from "react-router-dom";
 import { useDocumentsStore } from "@/store/documentsStore";
-import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
-import { ContainerForm } from "@/components/documents/ContainerForm";
-import { ErrorDialog } from "@/components/common/ErrorDialog";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 import { Trans } from "@lingui/macro";
-import { SchemaField } from "@/types/schema";
+import { ErrorDialog } from "@/components/common";
+import { ContainerForm } from "@/components/documents";
+import { Button } from "@/components/ui";
 import { AddContainerInput } from "@/types/document";
+import { SchemaField } from "@/types/schema";
+
+
 
 export const ContainerEdit = () => {
  const { id } = useParams();
@@ -72,7 +74,7 @@ export const ContainerEdit = () => {
        title={<Trans>Editing: {container.name}</Trans>}
        description={<Trans>Modify container details</Trans>}
        actions={
-         <Button variant="outline" onClick={handleBack}>
+         <Button size="sm" variant="outline" onClick={handleBack}>
            <Trans>Back to Containers</Trans>
          </Button>
        }

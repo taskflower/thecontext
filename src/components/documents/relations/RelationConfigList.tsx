@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { RelationType, DocumentContainer } from "@/types/document";
+import { DocumentContainer } from "@/types/document";
 import { ArrowRight, Trash2 } from "lucide-react";
+import { RelationType } from "@/types/relation";
 
 interface Rule {
   sourceField: string;

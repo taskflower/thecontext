@@ -2,34 +2,44 @@
 // src/pages/documents/ContainerRelations.tsx
 import { useParams } from "react-router-dom";
 import { useDocumentsStore } from "@/store/documentsStore";
-import { Button } from "@/components/ui/button";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { Trans } from "@lingui/macro";
 import { useState } from "react";
-import { RelationConfigForm } from "@/components/documents/relations/RelationConfigForm";
-import { RelationConfigList } from "@/components/documents/relations/RelationConfigList";
 import { Plus } from "lucide-react";
+import { RelationConfigForm, RelationConfigList } from "@/components/documents";
+import { Button } from "@/components/ui";
 
 export const ContainerRelations = () => {
   const { containerId } = useParams();
-  const { containers, relationConfigs, addRelationConfig, removeRelationConfig } = useDocumentsStore();
+  const {
+    containers,
+    relationConfigs,
+    addRelationConfig,
+    removeRelationConfig,
+  } = useDocumentsStore();
   const [showForm, setShowForm] = useState(false);
 
-  const container = containers.find(c => c.id === containerId);
-  
+  const container = containers.find((c) => c.id === containerId);
+
   // Get configs where this container is either source or target
   const containerConfigs = relationConfigs.filter(
-    config => config.sourceContainerId === containerId || config.targetContainerId === containerId
+    (config) =>
+      config.sourceContainerId === containerId ||
+      config.targetContainerId === containerId
   );
 
   if (!container) {
-    return <div><Trans>Container not found</Trans></div>;
+    return (
+      <div>
+        <Trans>Container not found</Trans>
+      </div>
+    );
   }
 
   const handleAddConfig = (data: any) => {
     addRelationConfig({
       id: Date.now().toString(),
-      ...data
+      ...data,
     });
     setShowForm(false);
   };
@@ -43,8 +53,8 @@ export const ContainerRelations = () => {
       title={<Trans>Container Relations: {container.name}</Trans>}
       description={
         <Trans>
-          Manage document relations for this container. Create and configure relationships 
-          between documents in different containers.
+          Manage document relations for this container. Create and configure
+          relationships between documents in different containers.
         </Trans>
       }
       actions={

@@ -3,10 +3,10 @@ import {  Plus, SquareSigma } from "lucide-react";
 import { useDocumentsStore } from "@/store/documentsStore";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { SearchInput } from "@/components/common/SearchInput";
-import ContainerCard from "@/components/documents/ContainerCard";
 import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 import { Trans, t } from "@lingui/macro";
 import { useState } from "react";
+import { ContainerCard } from "@/components/documents/container";
 
 export const ContainerList = () => {
   const { containers, getContainerDocuments, deleteContainer } = useDocumentsStore();
