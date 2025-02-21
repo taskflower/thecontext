@@ -18,7 +18,7 @@ export const Settings = () => {
         <>
           <Button
             className="gap-2"
-            onClick={() => navigate(`/admin/${lang}/projects`)}
+            onClick={() => navigate(`/admin/${lang}/users`)}
           >
             <Users className="h-4 w-4" />
             Users

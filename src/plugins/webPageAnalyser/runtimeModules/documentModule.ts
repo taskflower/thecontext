@@ -1,3 +1,4 @@
+// src/plugins/webPageAnalyser/runtimeModules/documentModule.ts
 import { AddContainerInput, AddDocumentInput } from "@/types/document";
 
 interface DocumentModuleProps {
@@ -14,34 +15,40 @@ export const documentModule = {
     containerName: string,
     content: string
   ) => {
-    // Używamy getContainers i getDocuments lub domyślnie pustych tablic
-    const containers = props.getContainers ? props.getContainers() : [];
-    const documents = props.getDocuments ? props.getDocuments() : [];
-
-    // Szukanie istniejącego kontenera
     let containerId: string;
+
+    // Sprawdzamy czy kontener już istnieje
+    const containers = props.getContainers?.() || [];
     const existingContainer = containers.find(
-      (c) => c.name.toLowerCase() === containerName.toLowerCase()
+      c => c.name.toLowerCase() === containerName.toLowerCase()
     );
+
     if (existingContainer) {
+      // Jeśli kontener istnieje, używamy jego ID
       containerId = existingContainer.id;
     } else {
-      const newContainer: AddContainerInput = {
+      // Jeśli nie istnieje, tworzymy nowy
+      props.addContainer({
         name: containerName,
-        description: `Container for ${documentName}`,
-      };
-      props.addContainer(newContainer);
-      // Zakładamy, że nowy kontener otrzyma id wygenerowane przez addContainer
-      containerId = Date.now().toString();
+        description: `Container for ${documentName}`
+      });
+      // Sprawdzamy ponownie listę kontenerów, aby pobrać ID nowo utworzonego
+      const updatedContainers = props.getContainers?.() || [];
+      const newContainer = updatedContainers.find(
+        c => c.name.toLowerCase() === containerName.toLowerCase()
+      );
+      containerId = newContainer?.id || Date.now().toString();
     }
 
-    // Ustalanie unikalnej nazwy dokumentu
+    // Sprawdzamy czy nazwa dokumentu jest unikalna
     let finalDocumentName = documentName;
-    const similarDocs = documents.filter((doc) =>
+    const documents = props.getDocuments?.() || [];
+    const similarDocs = documents.filter(doc => 
       doc.title.startsWith(documentName)
     );
+    
     if (similarDocs.length > 0) {
-      const suffixes = similarDocs.map((doc) => {
+      const suffixes = similarDocs.map(doc => {
         const regex = new RegExp(`^${documentName}(\\s(\\d+))?$`);
         const match = doc.title.match(regex);
         if (match && match[2]) {
@@ -61,10 +68,10 @@ export const documentModule = {
       documentContainerId: containerId,
       order: 0,
       generatedFrom: "plugin",
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     };
 
     props.addDocument(newDocument);
     return newDocument;
-  },
+  }
 };

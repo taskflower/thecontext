@@ -24,7 +24,7 @@ export const RuntimeComponent: React.FC<PluginRuntimeProps> = ({
   onStatusChange,
 }) => {
   const analyserConfig = config as WebPageAnalyserConfig;
-  const { addDocument, addContainer } = useDocumentsStore();
+  const { addDocument, addContainer, containers, documents } = useDocumentsStore();
   const { user, loading } = useAuthState();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string>("");
@@ -61,7 +61,6 @@ export const RuntimeComponent: React.FC<PluginRuntimeProps> = ({
         };
       }
 
-      // Using Analyser Module
       const result = await analyserModule.analyzeWebPage(
         analyserConfig.analysisType,
         targetUrl,
@@ -77,9 +76,13 @@ export const RuntimeComponent: React.FC<PluginRuntimeProps> = ({
 
       setAnalysisResult(result.content);
 
-      // Using Document Module
       documentModule.saveDocument(
-        { addDocument, addContainer },
+        { 
+          addDocument, 
+          addContainer,
+          getContainers: () => containers,
+          getDocuments: () => documents
+        },
         analyserConfig.documentName,
         analyserConfig.containerName,
         result.content

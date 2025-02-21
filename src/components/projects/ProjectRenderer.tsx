@@ -2,18 +2,23 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useProjectsStore } from '@/store/projectsStore';
+import { useDocumentsStore } from '@/store/documentsStore';
+import { useTasksStore } from '@/store/tasksStore';
 import { PROJECT } from './mockedproject';
 import { Trans } from '@lingui/macro';
-
-interface ColumnConfig {
-  name: string;
-  key: string;
-  type: 'text' | 'url' | 'number' | 'date' | 'action';
-}
+import { Card, CardContent } from "@/components/ui";
+import { Button } from "@/components/ui/button";
+import { DocumentTable, DocumentPreviewDialog } from "@/components/documents";
+import { Document } from '@/types/document';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Eye, Play } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import ProcessRunner from '@/components/tasks/ProcessRunner';
 
 interface ActionConfig {
   label: string;
   actionType: string;
+  flowId?: string;
   taskId?: string;
   tag?: string;
 }
@@ -21,7 +26,7 @@ interface ActionConfig {
 interface TabConfig {
   title: string;
   type: string;
-  columns: ColumnConfig[];
+  containerId: string;
   actions: ActionConfig[];
 }
 
@@ -57,7 +62,13 @@ interface ProjectConfig {
 const ProjectRenderer: React.FC = () => {
   const { projectSlug } = useParams();
   const { projects } = useProjectsStore();
+  const { templates } = useTasksStore();
+  const { getContainerDocuments, containers, updateDocument, removeDocument } = useDocumentsStore();
+  
   const [config, setConfig] = useState<ProjectConfig | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("");
+  const [selectedFlow, setSelectedFlow] = useState<string | null>(null);
 
   // Find the project by matching the slug with the project title
   const project = projects.find(
@@ -66,12 +77,55 @@ const ProjectRenderer: React.FC = () => {
 
   useEffect(() => {
     if (project) {
-      // If project exists, load its configuration
       setConfig(PROJECT as ProjectConfig);
+      // Set first tab as active by default
+      if (PROJECT.tabs.length > 0) {
+        setActiveTab(PROJECT.tabs[0].containerId);
+      }
     }
   }, [project]);
 
-  // If project doesn't exist, show error message
+  const handleAction = (action: ActionConfig) => {
+    if (action.actionType === 'runFlow' && action.flowId) {
+      setSelectedFlow(action.flowId);
+    } else if (action.actionType === 'viewDocument' && action.tag) {
+      const documentsWithTag = getContainerDocuments(activeTab).filter(
+        doc => doc.tags?.includes(action.tag)
+      );
+      if (documentsWithTag.length > 0) {
+        setSelectedDocument(documentsWithTag[0]);
+      }
+    }
+  };
+
+  const handleMoveDocument = (docId: string, direction: "up" | "down") => {
+    const documents = selectedDocument?.documentContainerId 
+      ? getContainerDocuments(selectedDocument.documentContainerId)
+      : [];
+    
+    const currentIndex = documents.findIndex((d) => d.id === docId);
+    if (direction === "up" && currentIndex > 0) {
+      const prevDoc = documents[currentIndex - 1];
+      updateDocument(docId, { order: prevDoc.order });
+      updateDocument(prevDoc.id, { order: documents[currentIndex].order });
+    } else if (direction === "down" && currentIndex < documents.length - 1) {
+      const nextDoc = documents[currentIndex + 1];
+      updateDocument(docId, { order: nextDoc.order });
+      updateDocument(nextDoc.id, { order: documents[currentIndex].order });
+    }
+  };
+
+  const getActionIcon = (actionType: string) => {
+    switch (actionType) {
+      case 'viewDocument':
+        return <Eye className="h-4 w-4" />;
+      case 'runFlow':
+        return <Play className="h-4 w-4" />;
+      default:
+        return null;
+    }
+  };
+
   if (!project) {
     return (
       <div className="container mx-auto p-4">
@@ -87,7 +141,6 @@ const ProjectRenderer: React.FC = () => {
     );
   }
 
-  // Show loading state while configuration is being loaded
   if (!config) {
     return (
       <div className="container mx-auto p-4">
@@ -98,12 +151,10 @@ const ProjectRenderer: React.FC = () => {
     );
   }
 
-  // Render project content
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">{project.title}</h1>
       
-      {/* Project Description */}
       <div className="mb-8">
         <p className="text-gray-600">
           {project.description || (
@@ -114,74 +165,74 @@ const ProjectRenderer: React.FC = () => {
         </p>
       </div>
 
-      {/* Tabs Section */}
-      {config.tabs.map((tab, index) => (
-        <div key={index} className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">{tab.title}</h2>
-          
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-lg font-medium mb-2">
-                <Trans>Columns</Trans>
-              </h3>
-              <ul className="space-y-2">
-                {tab.columns.map((col, idx) => (
-                  <li key={idx} className="text-gray-600">
-                    {col.name} ({col.key}) - {col.type}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-medium mb-2">
-                <Trans>Actions</Trans>
-              </h3>
-              <ul className="space-y-2">
-                {tab.actions.map((action, idx) => (
-                  <li key={idx} className="text-gray-600">
-                    {action.label} - {action.actionType}
-                    {action.taskId && ` (Task: ${action.taskId})`}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      ))}
-
-      {/* Kanban Board Section */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h2 className="text-xl font-semibold mb-4">
-          <Trans>Kanban Board</Trans>
-        </h2>
-        <p className="text-gray-600 mb-4">
-          <Trans>Template ID:</Trans> {config.kanban.boardTemplateId}
-        </p>
-        
-        <div className="space-y-4">
-          {config.kanban.tasks.map(task => (
-            <div key={task.id} className="border border-gray-200 rounded-lg p-4">
-              <h3 className="text-lg font-medium mb-2">{task.name}</h3>
-              <p className="text-gray-600 mb-4">{task.description}</p>
-              
-              <h4 className="font-medium mb-2">
-                <Trans>Steps</Trans>
-              </h4>
-              <ul className="space-y-2">
-                {task.steps.map(step => (
-                  <li key={step.id} className="text-gray-600">
-                    <span className="font-medium">{step.name}:</span> {step.description}
-                    <span className="text-gray-500 ml-2">
-                      (Plugin: {step.pluginId})
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList>
+          {config.tabs.map((tab) => (
+            <TabsTrigger key={tab.containerId} value={tab.containerId}>
+              {tab.title}
+            </TabsTrigger>
           ))}
-        </div>
-      </div>
+        </TabsList>
+
+        {config.tabs.map((tab) => {
+          const container = containers.find(c => c.id === tab.containerId);
+          const documents = getContainerDocuments(tab.containerId);
+
+          return (
+            <TabsContent key={tab.containerId} value={tab.containerId}>
+              <div className="flex justify-end items-center mb-4 space-x-2">
+                {tab.actions.map((action, idx) => (
+                  <Button
+                    key={idx}
+                    onClick={() => handleAction(action)}
+                    variant={action.actionType === 'runFlow' ? 'default' : 'secondary'}
+                    size="sm"
+                  >
+                    {getActionIcon(action.actionType)}
+                    <span className="ml-2">{action.label}</span>
+                  </Button>
+                ))}
+              </div>
+
+              <Card>
+                <CardContent className="p-0">
+                  <DocumentTable
+                    documents={documents}
+                    container={container}
+                    onPreview={setSelectedDocument}
+                    onEdit={(id) => console.log('Edit document:', id)}
+                    onMove={handleMoveDocument}
+                    onDelete={removeDocument}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          );
+        })}
+      </Tabs>
+
+      <DocumentPreviewDialog
+        document={selectedDocument}
+        onClose={() => setSelectedDocument(null)}
+      />
+
+      <Dialog open={selectedFlow !== null} onOpenChange={() => setSelectedFlow(null)}>
+        <DialogContent className="max-w-4xl h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>
+              {templates.find(t => t.id === selectedFlow)?.name || 'Uruchom proces'}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedFlow && (
+            <ProcessRunner
+              template={templates.find(t => t.id === selectedFlow)!}
+              onBack={() => setSelectedFlow(null)}
+              onComplete={() => setSelectedFlow(null)}
+              onEdit={() => setSelectedFlow(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
