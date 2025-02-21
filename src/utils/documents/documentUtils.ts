@@ -8,7 +8,7 @@ import {
   AddContainerInput 
 } from "@/types/document";
 import { DocumentSchema, SchemaField } from "@/types/schema";
-import { RelationConfig, DocumentRelation } from "@/types/relation";
+import { DocumentRelation, RelationConfig} from "@/types/relation";
 import { validateField } from "./validation";
 
 /* ================= Dokumenty ================= */
@@ -262,4 +262,111 @@ export const getAvailableRelationConfigs = (
   return relationConfigs.filter(
     config => config.sourceContainerId === sourceContainerId
   );
+};
+
+/**
+ * Porównuje dwie wartości według określonego matchType.
+ */
+const compareValues = (
+  sourceValue: unknown,
+  targetValue: unknown,
+  matchType: "exact" | "contains" | "startsWith" | "endsWith"
+): boolean => {
+  const s = String(sourceValue || "").toLowerCase();
+  const t = String(targetValue || "").toLowerCase();
+  switch (matchType) {
+    case "exact":
+      return s === t;
+    case "contains":
+      return s.includes(t);
+    case "startsWith":
+      return s.startsWith(t);
+    case "endsWith":
+      return s.endsWith(t);
+    default:
+      return false;
+  }
+};
+
+/**
+ * Funkcja automatycznie tworzy relacje dla zaktualizowanego dokumentu.
+ *
+ * @param updatedDocument Dokument, który został utworzony lub zaktualizowany.
+ * @param allDocuments Wszystkie dokumenty w systemie.
+ * @param relationConfigs Konfiguracje relacji.
+ * @param existingRelations Aktualnie zapisane relacje.
+ * @returns Nowo utworzone relacje (jako tablica).
+ */
+export const autoCreateRelations = (
+  updatedDocument: Document,
+  allDocuments: Document[],
+  relationConfigs: RelationConfig[],
+  existingRelations: DocumentRelation[]
+): DocumentRelation[] => {
+  const newRelations: DocumentRelation[] = [];
+
+  relationConfigs.forEach(config => {
+    // Jeśli dokument należy do kontenera źródłowego
+    if (updatedDocument.documentContainerId === config.sourceContainerId) {
+      const targetDocs = allDocuments.filter(
+        doc => doc.documentContainerId === config.targetContainerId
+      );
+      targetDocs.forEach(targetDoc => {
+        // Sprawdzamy wszystkie reguły z konfiguracji
+        const matches = config.rules.every(rule => {
+          const sourceVal = updatedDocument[rule.sourceField];
+          const targetVal = targetDoc[rule.targetField];
+          return compareValues(sourceVal, targetVal, rule.matchType);
+        });
+        // Jeśli warunki spełnione i relacja jeszcze nie istnieje
+        const relationExists = existingRelations.some(
+          rel =>
+            rel.configId === config.id &&
+            rel.sourceDocumentId === updatedDocument.id &&
+            rel.targetDocumentId === targetDoc.id
+        );
+        if (matches && !relationExists) {
+          const rel = createRelation(
+            updatedDocument.id,
+            targetDoc.id,
+            config.id,
+            updatedDocument,
+            targetDoc
+          );
+          newRelations.push(rel);
+        }
+      });
+    }
+    // Jeśli dokument należy do kontenera docelowego
+    if (updatedDocument.documentContainerId === config.targetContainerId) {
+      const sourceDocs = allDocuments.filter(
+        doc => doc.documentContainerId === config.sourceContainerId
+      );
+      sourceDocs.forEach(sourceDoc => {
+        const matches = config.rules.every(rule => {
+          const sourceVal = sourceDoc[rule.sourceField];
+          const targetVal = updatedDocument[rule.targetField];
+          return compareValues(sourceVal, targetVal, rule.matchType);
+        });
+        const relationExists = existingRelations.some(
+          rel =>
+            rel.configId === config.id &&
+            rel.sourceDocumentId === sourceDoc.id &&
+            rel.targetDocumentId === updatedDocument.id
+        );
+        if (matches && !relationExists) {
+          const rel = createRelation(
+            sourceDoc.id,
+            updatedDocument.id,
+            config.id,
+            sourceDoc,
+            updatedDocument
+          );
+          newRelations.push(rel);
+        }
+      });
+    }
+  });
+
+  return newRelations;
 };

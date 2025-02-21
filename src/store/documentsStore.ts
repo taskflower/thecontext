@@ -18,7 +18,8 @@ import {
   createRelation,              // wcześniej createNewRelation
   filterDocumentsByContainer,
   getRelatedDocuments,         // wcześniej getRelatedDocumentsForContainer
-  getAvailableRelationConfigs  // wcześniej getAvailableConfigs
+  getAvailableRelationConfigs, // wcześniej getAvailableConfigs
+  autoCreateRelations          // funkcja do automatycznego tworzenia relacji
 } from "@/utils/documents/documentUtils";
 
 export const useDocumentsStore = create<DocumentsStore>()(
@@ -78,16 +79,25 @@ export const useDocumentsStore = create<DocumentsStore>()(
       addDocument: (document: AddDocumentInput) => {
         const newDocument = createDocument(document);
 
-        set((state) => ({
-          ...state,
-          documents: [...state.documents, newDocument],
-        }));
+        set((state) => {
+          const updatedDocuments = [...state.documents, newDocument];
+          const newRelations = autoCreateRelations(
+            newDocument,
+            updatedDocuments,
+            state.relationConfigs,
+            state.relations
+          );
+          return {
+            ...state,
+            documents: updatedDocuments,
+            relations: [...state.relations, ...newRelations],
+          };
+        });
       },
 
       updateDocument: (id: string, updates: Partial<Document>) => {
-        set((state) => ({
-          ...state,
-          documents: state.documents.map((doc) =>
+        set((state) => {
+          const updatedDocuments = state.documents.map((doc) =>
             doc.id === id
               ? {
                   ...doc,
@@ -95,8 +105,20 @@ export const useDocumentsStore = create<DocumentsStore>()(
                   updatedAt: new Date(),
                 }
               : doc
-          ),
-        }));
+          );
+          const updatedDocument = updatedDocuments.find((doc) => doc.id === id)!;
+          const newRelations = autoCreateRelations(
+            updatedDocument,
+            updatedDocuments,
+            state.relationConfigs,
+            state.relations
+          );
+          return {
+            ...state,
+            documents: updatedDocuments,
+            relations: [...state.relations, ...newRelations],
+          };
+        });
       },
 
       removeDocument: (id: string) => {

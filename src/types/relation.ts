@@ -1,5 +1,14 @@
 // types/relation.ts
+
 export type RelationType = 'OneToOne' | 'OneToMany';
+
+export type MatchType = 'exact' | 'contains' | 'startsWith' | 'endsWith';
+
+export interface RelationRule {
+  sourceField: string;
+  targetField: string;
+  matchType: MatchType;
+}
 
 export interface RelationConfig {
   id: string;
@@ -8,6 +17,7 @@ export interface RelationConfig {
   type: RelationType;
   name: string;
   description?: string;
+  rules: RelationRule[];
 }
 
 export interface DocumentRelation {
