@@ -1,5 +1,4 @@
 // src/layouts/Footer.tsx
-import { Link } from "react-router-dom";
 
 export const Footer = () => {
   return (
@@ -22,7 +21,7 @@ export const Footer = () => {
           <span>/</span>
           <span>dadmor@gmail.com</span>
           <span>/</span>
-          <p>ver 0.14.1</p>
+          <p>ver 0.14.2</p>
         </div>
       </footer>
     </div>
