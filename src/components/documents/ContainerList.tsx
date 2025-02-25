@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { IContainer } from '@/utils/types';
+
 import { PlusCircle, Folder, FolderOpen, MoreHorizontal, Edit, Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,11 +20,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useDocumentStore } from '@/store/documentStore';
+import { useProjectStore } from '@/store/projectStore';
 import { Column } from '../common/ColumnComponent';
+import { IContainer } from '@/utils/documents/documentTypes';
 
 
 export function ContainerList({ onSelectContainer }: { onSelectContainer: (container: IContainer) => void }) {
   const { containers, addContainer, removeContainer, updateContainer } = useDocumentStore();
+  const { currentProject, addExistingContainerToProject } = useProjectStore();
+  
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newContainerName, setNewContainerName] = useState('');
   const [editingContainer, setEditingContainer] = useState<IContainer | null>(null);
@@ -32,7 +36,14 @@ export function ContainerList({ onSelectContainer }: { onSelectContainer: (conta
 
   const handleAddContainer = () => {
     if (newContainerName.trim()) {
-      addContainer(newContainerName);
+      // Dodaj kontener do globalnej listy
+      const containerId = addContainer(newContainerName);
+      
+      // Jeśli istnieje aktywny projekt, przypisz do niego kontener
+      if (currentProject) {
+        addExistingContainerToProject(currentProject.id, containerId);
+      }
+      
       setNewContainerName('');
       setIsDialogOpen(false);
     }
@@ -77,6 +88,11 @@ export function ContainerList({ onSelectContainer }: { onSelectContainer: (conta
             className="w-full"
             autoFocus
           />
+          {currentProject && (
+            <div className="text-sm text-muted-foreground">
+              This container will be automatically added to the current project: {currentProject.name}
+            </div>
+          )}
         </div>
         <DialogFooter>
           <Button 

@@ -10,6 +10,7 @@ export interface StepActions {
   reorderSteps: (taskId: string, stepIds: string[]) => void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const stepActions = (set: SetState, get: GetState): StepActions => ({
   addStep: (taskId: string, stepData) => {
     const stepId = generateId();

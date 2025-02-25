@@ -2,7 +2,7 @@ import { useDocumentStore } from "@/store/documentStore";
 
 import { SetState, GetState } from "./tasksInterfaces";
 import { generateId } from "../utils";
-import { ITaskStep } from "./taskTypes";
+import { ITask, ITaskStep } from "./taskTypes";
 
 export interface TaskAIActions {
   createTaskWithAI: (

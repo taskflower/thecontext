@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-import { IContainer, IContainerDocument } from '@/utils/types';
+
 import { FileText, MoreHorizontal, Edit, Trash, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { useDocumentStore } from '@/store/documentStore';
 import { Column } from '../common/ColumnComponent';
+import { IContainer, IContainerDocument } from '@/utils/documents/documentTypes';
 
 
 interface DocumentListProps {
@@ -37,41 +38,70 @@ interface DocumentListProps {
 }
 
 export function DocumentList({ container, onSelectDocument }: DocumentListProps) {
-  const { addDocument, updateDocument, removeDocument } = useDocumentStore();
+  const { addDocument, updateDocument, removeDocument, containers } = useDocumentStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newDocTitle, setNewDocTitle] = useState('');
   const [newDocContent, setNewDocContent] = useState('');
   const [selectedSchemaId, setSelectedSchemaId] = useState<string>('');
   const [editingDocument, setEditingDocument] = useState<IContainerDocument | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<string | null>(null);
+  const [currentContainer, setCurrentContainer] = useState<IContainer | null>(container);
+
+  // Update currentContainer whenever container or containers state changes
+  useEffect(() => {
+    if (container) {
+      // Find the fresh container data from the store
+      const updatedContainer = containers.find(c => c.id === container.id) || null;
+      setCurrentContainer(updatedContainer);
+    } else {
+      setCurrentContainer(null);
+    }
+  }, [container, containers]);
+
+  // Set initial schema when container changes
+  useEffect(() => {
+    if (currentContainer?.schemas.length > 0 && !selectedSchemaId) {
+      setSelectedSchemaId(currentContainer.schemas[0].id);
+    }
+  }, [currentContainer, selectedSchemaId]);
 
   const resetForm = () => {
     setNewDocTitle('');
     setNewDocContent('');
-    setSelectedSchemaId(container?.schemas[0]?.id || '');
+    setSelectedSchemaId(currentContainer?.schemas[0]?.id || '');
     setEditingDocument(null);
   };
 
   const handleAddDocument = () => {
-    if (!container || !newDocTitle.trim()) return;
+    if (!currentContainer || !newDocTitle.trim()) return;
     
-    const schemaId = selectedSchemaId || container.schemas[0]?.id || 'default';
+    const schemaId = selectedSchemaId || currentContainer.schemas[0]?.id || 'default';
     
-    const docId = addDocument(container.id, {
+    // Add the document to the store
+    const docId = addDocument(currentContainer.id, {
       title: newDocTitle,
       content: newDocContent,
       customFields: {},
       schemaId
     });
     
+    // Force immediate update of the UI by getting the latest data from the store
+    const updatedContainer = useDocumentStore.getState().containers.find(
+      c => c.id === currentContainer.id
+    );
+    
+    if (updatedContainer) {
+      setCurrentContainer(updatedContainer);
+    }
+    
     resetForm();
     setIsDialogOpen(false);
   };
 
   const handleEditDocument = () => {
-    if (!container || !editingDocument || !newDocTitle.trim()) return;
+    if (!currentContainer || !editingDocument || !newDocTitle.trim()) return;
     
-    updateDocument(container.id, editingDocument.id, {
+    updateDocument(currentContainer.id, editingDocument.id, {
       title: newDocTitle,
       content: newDocContent,
       schemaId: selectedSchemaId || editingDocument.schemaId
@@ -94,7 +124,7 @@ export function DocumentList({ container, onSelectDocument }: DocumentListProps)
     setIsDialogOpen(true);
   };
 
-  if (!container) {
+  if (!currentContainer) {
     return (
       <Column 
         title="Documents" 
@@ -155,12 +185,12 @@ export function DocumentList({ container, onSelectDocument }: DocumentListProps)
                   <SelectValue placeholder="Select schema" />
                 </SelectTrigger>
                 <SelectContent>
-                  {container.schemas.map((schema) => (
+                  {currentContainer.schemas.map((schema) => (
                     <SelectItem key={schema.id} value={schema.id}>
                       {schema.name}
                     </SelectItem>
                   ))}
-                  {container.schemas.length === 0 && (
+                  {currentContainer.schemas.length === 0 && (
                     <SelectItem value="default">Default</SelectItem>
                   )}
                 </SelectContent>
@@ -198,7 +228,7 @@ export function DocumentList({ container, onSelectDocument }: DocumentListProps)
     </div>
   );
 
-  const documentItems = container.documents.map((document) => (
+  const documentItems = currentContainer.documents.map((document) => (
     <div
       key={document.id}
       onClick={() => handleSelectDocument(document)}
@@ -231,7 +261,7 @@ export function DocumentList({ container, onSelectDocument }: DocumentListProps)
             className="text-destructive focus:text-destructive"
             onClick={(e) => {
               e.stopPropagation();
-              removeDocument(container.id, document.id);
+              removeDocument(currentContainer.id, document.id);
               if (selectedDocument === document.id) {
                 setSelectedDocument(null);
               }
@@ -247,11 +277,11 @@ export function DocumentList({ container, onSelectDocument }: DocumentListProps)
 
   return (
     <Column 
-      title={`${container.name}`} 
+      title={`${currentContainer.name}`} 
       rightActions={addButton}
-      emptyState={container.documents.length === 0 ? emptyState : undefined}
+      emptyState={currentContainer.documents.length === 0 ? emptyState : undefined}
     >
-      {container.documents.length > 0 && documentItems}
+      {currentContainer.documents.length > 0 && documentItems}
     </Column>
   );
 }

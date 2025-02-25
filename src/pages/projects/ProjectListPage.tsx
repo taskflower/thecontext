@@ -1,23 +1,23 @@
-// src/pages/projects/ProjectListPage.tsx
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useProjectStore } from '@/store/projectStore';
 import { formatDistanceToNow } from 'date-fns';
+import { useAdminNavigate } from '@/hooks/useAdminNavigate';
 
 const ProjectListPage: React.FC = () => {
-  const navigate = useNavigate();
+  const adminNavigate = useAdminNavigate();
   const projects = useProjectStore((state) => state.projects);
+  const currentProject = useProjectStore((state) => state.currentProject);
   const setCurrentProject = useProjectStore((state) => state.setCurrentProject);
   
   const handleCreateNew = () => {
-    navigate('/projects/setup');
+    adminNavigate('/projects/setup');
   };
   
   const handleSelectProject = (projectId: string) => {
     setCurrentProject(projectId);
-    navigate(`/projects/${projectId}`);
+    adminNavigate(`/projects/${projectId}`);
   };
   
   return (
@@ -38,10 +38,23 @@ const ProjectListPage: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
-            <Card key={project.id} className="cursor-pointer hover:border-primary transition-colors"
-                  onClick={() => handleSelectProject(project.id)}>
+            <Card 
+              key={project.id} 
+              className={`cursor-pointer transition-colors
+                ${currentProject?.id === project.id 
+                  ? 'border-primary bg-primary/5' 
+                  : 'hover:border-primary'}`}
+              onClick={() => handleSelectProject(project.id)}
+            >
               <CardHeader>
-                <CardTitle>{project.name}</CardTitle>
+                <div className="flex justify-between items-center">
+                  <CardTitle>{project.name}</CardTitle>
+                  {currentProject?.id === project.id && (
+                    <span className="text-xs font-medium bg-primary text-primary-foreground px-2 py-1 rounded-full">
+                      Active
+                    </span>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground line-clamp-2">{project.description || 'No description'}</p>

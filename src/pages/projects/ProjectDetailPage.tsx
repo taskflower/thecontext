@@ -1,17 +1,16 @@
-// src/pages/projects/ProjectDetailPage.tsx
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useProjectStore } from '@/store/projectStore';
 import { useDocumentStore } from '@/store/documentStore';
 import { useTaskStore } from '@/store/taskStore';
 import { IProjectStats } from '@/utils/projects/projectTypes';
-
+import { useAdminNavigate } from '@/hooks/useAdminNavigate';
 
 const ProjectDetailPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
-  const navigate = useNavigate();
+  const adminNavigate = useAdminNavigate();
   
   const project = useProjectStore((state) => 
     state.projects.find(p => p.id === projectId)
@@ -66,19 +65,19 @@ const ProjectDetailPage: React.FC = () => {
   const handleDeleteProject = () => {
     if (projectId && confirm('Are you sure you want to delete this project?')) {
       removeProject(projectId);
-      navigate('/projects');
+      adminNavigate('/projects');
     }
   };
   
   const handleSetupProject = () => {
-    navigate('/projects/setup');
+    adminNavigate('/projects/setup');
   };
   
   if (!project) {
     return (
       <div className="container mx-auto p-4 text-center">
         <h2 className="text-2xl font-bold mb-4">Project not found</h2>
-        <Button onClick={() => navigate('/projects')}>Return to Projects</Button>
+        <Button onClick={() => adminNavigate('/projects')}>Return to Projects</Button>
       </div>
     );
   }

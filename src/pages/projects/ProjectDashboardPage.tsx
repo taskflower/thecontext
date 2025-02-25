@@ -1,15 +1,14 @@
-// src/pages/projects/ProjectDashboardPage.tsx
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useProjectStore } from '@/store/projectStore';
 import { useTaskStore } from '@/store/taskStore';
 import { suggestNextSteps } from '@/utils/api/projectAI';
-
+import { useAdminNavigate } from '@/hooks/useAdminNavigate';
 
 const ProjectDashboardPage: React.FC = () => {
-  const navigate = useNavigate();
+  const adminNavigate = useAdminNavigate();
   const currentProject = useProjectStore((state) => state.currentProject);
   const projects = useProjectStore((state) => state.projects);
   const tasks = useTaskStore((state) => state.tasks);
@@ -63,7 +62,7 @@ const ProjectDashboardPage: React.FC = () => {
   };
   
   const handleSelectProject = (projectId: string) => {
-    navigate(`/projects/${projectId}`);
+    adminNavigate(`/projects/${projectId}`);
   };
   
   if (!currentProject && projects.length > 0) {
@@ -75,7 +74,7 @@ const ProjectDashboardPage: React.FC = () => {
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Project Dashboard</h1>
-        <Button onClick={() => navigate('/projects/setup')}>New Project</Button>
+        <Button onClick={() => adminNavigate('/projects/setup')}>New Project</Button>
       </div>
       
       {!currentProject ? (
@@ -84,7 +83,7 @@ const ProjectDashboardPage: React.FC = () => {
           <p className="text-muted-foreground mb-6">
             Create a project to get started
           </p>
-          <Button onClick={() => navigate('/projects/setup')}>Create a Project</Button>
+          <Button onClick={() => adminNavigate('/projects/setup')}>Create a Project</Button>
         </div>
       ) : (
         <div className="space-y-6">
@@ -96,10 +95,10 @@ const ProjectDashboardPage: React.FC = () => {
             <CardContent>
               <p>{currentProject.description || 'No description'}</p>
               <div className="flex space-x-2 mt-4">
-                <Button onClick={() => navigate(`/projects/${currentProject.id}`)}>
+                <Button onClick={() => adminNavigate(`/projects/${currentProject.id}`)}>
                   View Details
                 </Button>
-                <Button variant="outline" onClick={() => navigate('/tasks')}>
+                <Button variant="outline" onClick={() => adminNavigate('/tasks')}>
                   View Tasks
                 </Button>
               </div>

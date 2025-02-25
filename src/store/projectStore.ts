@@ -1,12 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/store/projectStore.ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { generateId } from "@/utils/utils";
 import { useDocumentStore } from "./documentStore";
 import { useTaskStore } from "./taskStore";
 import { ITaskTemplate } from "@/utils/tasks/taskTypes";
-
 
 export interface Project {
   id: string;
@@ -44,6 +43,7 @@ interface ProjectState {
   addTemplateToProject: (projectId: string, template: Omit<ITaskTemplate, "id">) => string | null;
   addExistingContainerToProject: (projectId: string, containerId: string) => boolean;
   addExistingTemplateToProject: (projectId: string, templateId: string) => boolean;
+  removeContainerFromProject: (projectId: string, containerId: string) => boolean;
   
   // Query methods
   getProjectById: (id: string) => Project | undefined;
@@ -114,16 +114,7 @@ export const useProjectStore = create<ProjectState>()(
         const project = get().projects.find(p => p.id === id);
         if (!project) return;
         
-        // Optional: Clean up related resources (containers, tasks)
-        // This depends on your application's requirements
-        /* 
-        const { removeContainer } = useDocumentStore.getState();
-        // Remove project containers 
-        project.containers.forEach(containerId => {
-          removeContainer(containerId);
-        });
-        */
-        
+        // Nie usuwamy powiązanych kontenerów, tylko usuwamy projekt
         set((state) => ({
           projects: state.projects.filter((project) => project.id !== id),
           currentProject: state.currentProject?.id === id ? null : state.currentProject
@@ -249,6 +240,20 @@ export const useProjectStore = create<ProjectState>()(
         
         get().updateProject(projectId, {
           containers: [...project.containers, containerId]
+        });
+        
+        return true;
+      },
+      
+      removeContainerFromProject: (projectId, containerId) => {
+        const project = get().projects.find(p => p.id === projectId);
+        if (!project) return false;
+        
+        // Check if container exists in project
+        if (!project.containers.includes(containerId)) return false;
+        
+        get().updateProject(projectId, {
+          containers: project.containers.filter(id => id !== containerId)
         });
         
         return true;

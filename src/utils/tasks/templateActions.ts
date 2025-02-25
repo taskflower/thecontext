@@ -9,6 +9,7 @@ export interface TemplateActions {
   removeTemplate: (templateId: string) => void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const templateActions = (set: SetState, get: GetState): TemplateActions => ({
   addTemplate: (template) => {
     const id = generateId();
