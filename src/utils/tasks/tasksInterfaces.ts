@@ -1,4 +1,5 @@
-import { ITask, ITaskTemplate } from "@/utils/types";
+import { ITask, ITaskTemplate } from "./taskTypes";
+
 
 export interface TaskFormData {
   title: string;

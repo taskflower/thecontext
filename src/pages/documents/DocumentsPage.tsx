@@ -1,9 +1,10 @@
 import { useState } from "react";
 
-import { IContainer, IContainerDocument } from "@/utils/types";
+
 import { ContainerList } from "@/components/documents/ContainerList";
 import { DocumentList } from "@/components/documents/DocumentList";
 import { DocumentDetail } from "@/components/documents/DocumentDetail";
+import { IContainer, IContainerDocument } from "@/utils/documents/documentTypes";
 
 
 

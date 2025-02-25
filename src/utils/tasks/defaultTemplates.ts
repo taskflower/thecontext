@@ -1,6 +1,8 @@
 // src/utils/ragnarok/defaultTemplates.ts
 
-import { ITaskTemplate } from "@/utils/types";
+import { ITaskTemplate } from "./taskTypes";
+
+
 
 
 export const defaultTemplates: ITaskTemplate[] = [

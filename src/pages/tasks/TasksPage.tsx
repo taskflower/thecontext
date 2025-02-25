@@ -1,8 +1,9 @@
 import { useState } from 'react';
 
-import { ITask } from '@/utils/types';
+
 import { TaskList } from '@/components/tasks/TaskList';
 import { TaskDetail } from '@/components/tasks/TaskDetail';
+import { ITask } from '@/utils/tasks/taskTypes';
 
 
 export default function TasksPage() {

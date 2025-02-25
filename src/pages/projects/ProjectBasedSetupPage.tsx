@@ -1,4 +1,4 @@
-// src/pages/ragnarokTasks/ProjectBasedSetupPage.tsx
+// src/pages/projects/ProjectBasedSetupPage.tsx
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -12,15 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+
 import {
   Select,
   SelectTrigger,
@@ -28,17 +20,11 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent
-} from "@/components/ui/tabs";
+
 import { useTaskStore } from "@/store/taskStore";
 import { useDocumentStore } from "@/store/documentStore";
 import { useProjectStore } from "@/store/projectStore";
-import { generateId } from "@/utils/utils";
-import { ITaskTemplate, IContainer, IContainerDocument } from "@/utils/types";
+import { useNavigate } from "react-router-dom";
 
 // Step navigation component
 const StepNavigation: React.FC<{
@@ -55,13 +41,13 @@ const StepNavigation: React.FC<{
         onClick={onBack}
         disabled={currentStep === 0}
       >
-        Wstecz
+        Back
       </Button>
       <div className="text-sm text-muted-foreground">
-        Krok {currentStep + 1} z {totalSteps}
+        Step {currentStep + 1} of {totalSteps}
       </div>
       <Button onClick={onNext} disabled={nextDisabled}>
-        {currentStep === totalSteps - 1 ? "Zakończ" : "Dalej"}
+        {currentStep === totalSteps - 1 ? "Finish" : "Next"}
       </Button>
     </div>
   );
@@ -96,18 +82,26 @@ interface GeneratedSetup {
 }
 
 const ProjectBasedSetupPage: React.FC = () => {
-  // Access stores
+  const navigate = useNavigate();
+  
+  // Access stores with enhanced project functionality
   const addTemplate = useTaskStore((state) => state.addTemplate);
   const addTask = useTaskStore((state) => state.addTask);
   const addContainer = useDocumentStore((state) => state.addContainer);
   const addDocument = useDocumentStore((state) => state.addDocument);
   const containers = useDocumentStore((state) => state.containers);
+  
+  // Access the enhanced project store
   const projects = useProjectStore((state) => state.projects);
   const addProject = useProjectStore((state) => state.addProject);
   const updateProject = useProjectStore((state) => state.updateProject);
   const currentProject = useProjectStore((state) => state.currentProject);
   const setCurrentProject = useProjectStore((state) => state.setCurrentProject);
-
+  const createProjectWithResources = useProjectStore((state) => state.createProjectWithResources);
+  const getProjectContainers = useProjectStore((state) => state.getProjectContainers);
+  const getProjectTemplates = useProjectStore((state) => state.getProjectTemplates);
+  const addContainerToProject = useProjectStore((state) => state.addContainerToProject);
+  
   // State
   const [currentStep, setCurrentStep] = useState(0);
   const [projectName, setProjectName] = useState("");
@@ -147,19 +141,16 @@ const ProjectBasedSetupPage: React.FC = () => {
     }
   };
 
-  // Create project
+  // Create project using the enhanced store
   const createProject = () => {
     if (!projectName.trim()) return null;
     
-    const id = generateId();
-    addProject({
-      id,
-      name: projectName,
-      description: projectDescription,
-      createdAt: new Date(),
-      containers: [],
-      templates: [],
-    });
+    const id = createProjectWithResources(
+      projectName,
+      projectDescription,
+      [], // No initial containers
+      []  // No initial templates
+    );
     
     setCurrentProject(id);
     return id;
@@ -204,8 +195,8 @@ const ProjectBasedSetupPage: React.FC = () => {
   const createMockLLMResponse = (intent: string): GeneratedSetup => {
     // Extract keywords from intent to customize the response
     const containsMarketing = intent.toLowerCase().includes('marketing');
-    const containsResearch = intent.toLowerCase().includes('research') || intent.toLowerCase().includes('badanie');
-    const containsDocuments = intent.toLowerCase().includes('document') || intent.toLowerCase().includes('dokument');
+    const containsResearch = intent.toLowerCase().includes('research');
+    const containsDocuments = intent.toLowerCase().includes('document');
     
     return {
       projectName: projectName,
@@ -254,7 +245,7 @@ const ProjectBasedSetupPage: React.FC = () => {
     };
   };
 
-  // Apply the generated setup
+  // Apply the generated setup using the enhanced project store
   const applyGeneratedSetup = async () => {
     if (!generatedSetup || !projectId) return;
     
@@ -266,30 +257,36 @@ const ProjectBasedSetupPage: React.FC = () => {
       
       for (let i = 0; i < generatedSetup.containers.length; i++) {
         const container = generatedSetup.containers[i];
-        const containerId = addContainer(container.name);
-        containerIds[i] = containerId;
         
-        // Add documents if any
-        if (container.documents) {
-          container.documents.forEach(doc => {
-            addDocument(containerId, {
-              title: doc.title,
-              content: doc.content,
-              customFields: {},
-              schemaId: "default"
+        // Use the enhanced addContainerToProject function
+        const containerId = addContainerToProject(projectId, container.name);
+        if (containerId) {
+          containerIds[i] = containerId;
+          
+          // Add documents if any
+          if (container.documents) {
+            container.documents.forEach(doc => {
+              addDocument(containerId, {
+                title: doc.title,
+                content: doc.content,
+                customFields: {},
+                schemaId: "default"
+              });
             });
-          });
+          }
         }
       }
       
       // Create templates
+      const templateIds: string[] = [];
       generatedSetup.templates.forEach(template => {
-        addTemplate({
+        const templateId = addTemplate({
           name: template.name,
           description: template.description,
           defaultPriority: template.defaultPriority,
           defaultSteps: template.defaultSteps
         });
+        templateIds.push(templateId);
       });
       
       // Create initial task if provided
@@ -309,8 +306,7 @@ const ProjectBasedSetupPage: React.FC = () => {
       
       // Update project with references to created resources
       updateProject(projectId, {
-        containers: Object.values(containerIds),
-        templates: generatedSetup.templates.map(t => t.name),
+        templates: templateIds,
         setupCompleted: true
       });
       
@@ -330,33 +326,38 @@ const ProjectBasedSetupPage: React.FC = () => {
     }
   };
 
+  // Navigate to tasks page
+  const goToTasks = () => {
+    navigate('/tasks');
+  };
+
   // Step 1: Create/Select Project
   const renderProjectStep = () => (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Utwórz nowy projekt</CardTitle>
+            <CardTitle>Create New Project</CardTitle>
             <CardDescription>
-              Zacznij od utworzenia nowego projektu
+              Start by creating a new project
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium">Nazwa projektu</label>
+                <label className="text-sm font-medium">Project Name</label>
                 <Input 
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value)}
-                  placeholder="Nazwa projektu"
+                  placeholder="Project Name"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Opis projektu</label>
+                <label className="text-sm font-medium">Project Description</label>
                 <Textarea
                   value={projectDescription}
                   onChange={(e) => setProjectDescription(e.target.value)}
-                  placeholder="Opis projektu"
+                  placeholder="Project Description"
                 />
               </div>
             </div>
@@ -366,16 +367,16 @@ const ProjectBasedSetupPage: React.FC = () => {
               onClick={createProject}
               disabled={!projectName.trim()}
             >
-              Utwórz projekt
+              Create Project
             </Button>
           </CardFooter>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Wybierz istniejący projekt</CardTitle>
+            <CardTitle>Select Existing Project</CardTitle>
             <CardDescription>
-              Kontynuuj pracę z istniejącym projektem
+              Continue working with an existing project
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -385,7 +386,7 @@ const ProjectBasedSetupPage: React.FC = () => {
                 onValueChange={handleSelectProject}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Wybierz projekt" />
+                  <SelectValue placeholder="Select a project" />
                 </SelectTrigger>
                 <SelectContent>
                   {projects.map((project) => (
@@ -396,7 +397,7 @@ const ProjectBasedSetupPage: React.FC = () => {
                 </SelectContent>
               </Select>
             ) : (
-              <p className="text-muted-foreground">Brak projektów</p>
+              <p className="text-muted-foreground">No projects available</p>
             )}
           </CardContent>
         </Card>
@@ -409,24 +410,24 @@ const ProjectBasedSetupPage: React.FC = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Opisz swój projekt dla modelu AI</CardTitle>
+          <CardTitle>Describe Your Project for AI</CardTitle>
           <CardDescription>
-            Opisz czego potrzebujesz, a model wygeneruje odpowiednią strukturę zadań, szablonów i kontenerów.
+            Describe what you need, and the AI will generate an appropriate structure of tasks, templates, and containers.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Textarea
             value={projectIntent}
             onChange={(e) => setProjectIntent(e.target.value)}
-            placeholder="Np. Chcę stworzyć system zarządzania kampaniami marketingowymi, gdzie będę przechowywać materiały kampanii, planować zadania i analizować wyniki."
+            placeholder="E.g., I want to create a marketing campaign management system where I'll store campaign materials, plan tasks, and analyze results."
             className="min-h-[200px] mb-4"
           />
           <div className="text-sm text-muted-foreground mb-4">
-            <p>Przykłady skutecznych opisów:</p>
+            <p>Examples of effective descriptions:</p>
             <ul className="list-disc pl-5 space-y-1 mt-2">
-              <li>Potrzebuję systemu do zarządzania dokumentami badawczymi i analizy danych</li>
-              <li>Chcę stworzyć system planowania kampanii marketingowych z szablonami zadań</li>
-              <li>Potrzebuję organizować dokumenty klientów i powiązane z nimi zadania projektowe</li>
+              <li>I need a system for managing research documents and data analysis</li>
+              <li>I want to create a marketing campaign planning system with task templates</li>
+              <li>I need to organize client documents and related project tasks</li>
             </ul>
           </div>
         </CardContent>
@@ -435,7 +436,7 @@ const ProjectBasedSetupPage: React.FC = () => {
             onClick={generateSetup}
             disabled={!projectIntent.trim() || isGenerating}
           >
-            {isGenerating ? "Generowanie..." : "Wygeneruj setup"}
+            {isGenerating ? "Generating..." : "Generate Setup"}
           </Button>
         </CardFooter>
       </Card>
@@ -449,15 +450,15 @@ const ProjectBasedSetupPage: React.FC = () => {
         <>
           <Card>
             <CardHeader>
-              <CardTitle>Wygenerowany setup</CardTitle>
+              <CardTitle>Generated Setup</CardTitle>
               <CardDescription>
-                Sprawdź i zatwierdź wygenerowaną strukturę dla twojego projektu
+                Review and approve the generated structure for your project
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
                 <h3 className="text-lg font-medium mb-3">
-                  Kontenery ({generatedSetup.containers.length})
+                  Containers ({generatedSetup.containers.length})
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {generatedSetup.containers.map((container, index) => (
@@ -465,7 +466,7 @@ const ProjectBasedSetupPage: React.FC = () => {
                       <div className="font-medium">{container.name}</div>
                       {container.documents && container.documents.length > 0 && (
                         <div className="text-sm text-muted-foreground mt-2">
-                          <div>Dokumenty:</div>
+                          <div>Documents:</div>
                           <ul className="list-disc pl-5">
                             {container.documents.map((doc, docIndex) => (
                               <li key={docIndex}>{doc.title}</li>
@@ -480,7 +481,7 @@ const ProjectBasedSetupPage: React.FC = () => {
 
               <div>
                 <h3 className="text-lg font-medium mb-3">
-                  Szablony ({generatedSetup.templates.length})
+                  Templates ({generatedSetup.templates.length})
                 </h3>
                 <div className="space-y-3">
                   {generatedSetup.templates.map((template, index) => (
@@ -488,7 +489,7 @@ const ProjectBasedSetupPage: React.FC = () => {
                       <div className="font-medium">{template.name}</div>
                       <div className="text-sm">{template.description}</div>
                       <div className="text-sm text-muted-foreground mt-2">
-                        <div>Kroki:</div>
+                        <div>Steps:</div>
                         <ul className="list-disc pl-5">
                           {template.defaultSteps.map((step, stepIndex) => (
                             <li key={stepIndex}>
@@ -505,13 +506,13 @@ const ProjectBasedSetupPage: React.FC = () => {
               {generatedSetup.initialTask && (
                 <div>
                   <h3 className="text-lg font-medium mb-3">
-                    Początkowe zadanie
+                    Initial Task
                   </h3>
                   <div className="border p-3 rounded-md">
                     <div className="font-medium">{generatedSetup.initialTask.title}</div>
                     <div className="text-sm">{generatedSetup.initialTask.description}</div>
                     <div className="text-sm text-muted-foreground mt-1">
-                      Priorytet: {generatedSetup.initialTask.priority}
+                      Priority: {generatedSetup.initialTask.priority}
                     </div>
                   </div>
                 </div>
@@ -524,14 +525,14 @@ const ProjectBasedSetupPage: React.FC = () => {
                   className="flex-1"
                   onClick={() => setCurrentStep(1)}
                 >
-                  Zmień opis
+                  Change Description
                 </Button>
                 <Button 
                   className="flex-1"
                   onClick={applyGeneratedSetup}
                   disabled={isGenerating || confirmSetup}
                 >
-                  {isGenerating ? "Tworzenie..." : confirmSetup ? "Zatwierdzono" : "Zatwierdź setup"}
+                  {isGenerating ? "Creating..." : confirmSetup ? "Approved" : "Approve Setup"}
                 </Button>
               </div>
             </CardFooter>
@@ -539,20 +540,20 @@ const ProjectBasedSetupPage: React.FC = () => {
           
           {showSuccessMessage && (
             <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-              <strong className="font-bold">Sukces!</strong>
-              <span className="block sm:inline"> Setup projektu został utworzony.</span>
+              <strong className="font-bold">Success!</strong>
+              <span className="block sm:inline"> Project setup has been created.</span>
             </div>
           )}
         </>
       ) : (
         <div className="text-center py-12">
-          <p>Nie wygenerowano jeszcze setupu. Wróć do poprzedniego kroku.</p>
+          <p>No setup has been generated yet. Go back to the previous step.</p>
           <Button 
             variant="outline" 
             onClick={() => setCurrentStep(1)}
             className="mt-4"
           >
-            Wróć do opisu projektu
+            Return to Project Description
           </Button>
         </div>
       )}
@@ -562,16 +563,16 @@ const ProjectBasedSetupPage: React.FC = () => {
   // Step 4: Completion
   const renderCompletionStep = () => (
     <div className="space-y-6 text-center py-12">
-      <h2 className="text-2xl font-bold">Setup projektu ukończony!</h2>
+      <h2 className="text-2xl font-bold">Project Setup Completed!</h2>
       <p className="text-muted-foreground">
-        Twój projekt został pomyślnie skonfigurowany. Możesz teraz przejść do pracy nad zadaniami.
+        Your project has been successfully configured. You can now proceed to work on tasks.
       </p>
       <div className="flex justify-center gap-4 mt-8">
         <Button variant="outline" onClick={() => setCurrentStep(0)}>
-          Konfiguruj nowy projekt
+          Configure New Project
         </Button>
-        <Button>
-          Przejdź do zadań
+        <Button onClick={goToTasks}>
+          Go to Tasks
         </Button>
       </div>
     </div>
@@ -597,16 +598,16 @@ const ProjectBasedSetupPage: React.FC = () => {
   return (
     <div className="container mx-auto p-4 max-w-4xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">Kreator projektu</h1>
+        <h1 className="text-3xl font-bold">Project Creator</h1>
         <p className="text-muted-foreground mt-2">
-          Skonfiguruj nowy projekt przy pomocy sztucznej inteligencji
+          Set up a new project with the help of artificial intelligence
         </p>
       </div>
 
       {/* Stepper */}
       <div className="mb-8">
         <div className="flex justify-between">
-          {["Projekt", "Opis dla AI", "Przegląd setupu", "Zakończenie"].map((step, index) => (
+          {["Project", "AI Description", "Review Setup", "Completion"].map((step, index) => (
             <div 
               key={index}
               className={`flex flex-col items-center ${index <= currentStep ? "text-primary" : "text-muted-foreground"}`}

@@ -21,7 +21,8 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { useTaskStore } from "@/store/taskStore";
-import { ITaskTemplate } from "@/utils/types";
+import { ITaskTemplate } from "@/utils/tasks/taskTypes";
+
 
 type StepType = "retrieval" | "processing" | "generation" | "validation" | "custom";
 

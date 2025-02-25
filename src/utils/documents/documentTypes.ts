@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// src/types/documentTypes.ts
 
-// Document Types
 export type CustomFieldType = 'string' | 'number' | 'boolean' | 'date';
 
 export interface ICustomFieldSchema {
@@ -39,37 +39,4 @@ export interface IContainerRelation {
   sourceField: string;
   targetField: string;
   condition: 'equals' | 'greater' | 'less' | 'contains';
-}
-
-// Task Types
-export interface ITask {
-  id: string;
-  title: string;
-  description: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'failed';
-  priority: 'low' | 'medium' | 'high';
-  createdAt: Date;
-  updatedAt: Date;
-  containerId?: string;
-  relatedDocumentIds: string[];
-  steps: ITaskStep[];
-}
-
-export interface ITaskStep {
-  id: string;
-  taskId: string;
-  order: number;
-  type: 'retrieval' | 'processing' | 'generation' | 'validation' | 'custom';
-  status: 'pending' | 'in_progress' | 'completed' | 'failed';
-  description: string;
-  input?: string;
-  output?: string;
-}
-
-export interface ITaskTemplate {
-  id: string;
-  name: string;
-  description: string;
-  defaultSteps: Omit<ITaskStep, 'id' | 'taskId' | 'status' | 'input' | 'output'>[];
-  defaultPriority: ITask['priority'];
 }

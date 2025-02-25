@@ -2,8 +2,9 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-import { IContainer, IContainerRelation, IContainerDocument, IDocumentSchema } from "@/utils/types";
+
 import { ContainerManager, generateId } from "@/utils/utils";
+import { IContainer, IContainerDocument, IContainerRelation, IDocumentSchema } from "@/utils/documents/documentTypes";
 
 
 interface DocumentState {

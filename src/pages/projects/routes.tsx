@@ -1,13 +1,17 @@
-// src/pages/ragnarokTasks/routes.tsx
+// src/pages/projects/routes.tsx
 import { RouteObject } from 'react-router-dom';
 import ProjectBasedSetupPage from './ProjectBasedSetupPage';
+import ProjectListPage from './ProjectListPage';
+import ProjectDashboardPage from './ProjectDashboardPage';
+import ProjectDetailPage from './ProjectDetailPage';
 
 
 
-
-const taskRoutes: RouteObject[] = [
-  { index: true, element: <ProjectBasedSetupPage /> },
+const projectRoutes: RouteObject[] = [
+  { index: true, element: <ProjectListPage /> },
   { path: 'setup', element: <ProjectBasedSetupPage /> },
+  { path: 'dashboard', element: <ProjectDashboardPage /> },
+  { path: ':projectId', element: <ProjectDetailPage /> },
 ];
 
-export default taskRoutes;
+export default projectRoutes;

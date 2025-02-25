@@ -1,6 +1,7 @@
-import { ITaskStep } from "@/utils/types";
+
 import { SetState, GetState } from "./tasksInterfaces";
 import { generateId } from "../utils";
+import { ITaskStep } from "./taskTypes";
 
 export interface StepActions {
   addStep: (taskId: string, step: Omit<ITaskStep, "id" | "taskId">) => string;
