@@ -5,9 +5,10 @@ import { MainLayout } from "@/layouts/MainLayout";
 import { RequireAuth } from "@/layouts/RequireAuth";
 import { AdminLayout } from "@/layouts/AdminLayout";
 import publicRoutes from "@/pages/public/routes";
-import documentsRoute from "@/pages/ragnarokDocuments/routes"
-import tasksRoute from "@/pages/ragnarokTasks/routes"
+import documentsRoute from "@/pages/documents/routes"
+import tasksRoute from "@/pages/tasks/routes"
 import settingsRoutes from "@/pages/settings/routes";
+import projectsRoutes from "@/pages/projects/routes";
 import usersRoutes from "@/pages/users/routes"; // Importujemy routingi dla użytkowników
 import { LanguageProvider } from "./context/LanguageContext";
 
@@ -51,6 +52,7 @@ export const routes: RouteObject[] = [
       { path: "tasks/*", children: tasksRoute },
       { path: "settings/*", children: settingsRoutes },
       { path: "users/*", children: usersRoutes },
+      { path: "projects/*", children: projectsRoutes },
 
     ],
   },

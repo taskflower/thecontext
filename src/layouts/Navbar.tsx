@@ -43,7 +43,7 @@ export const Navbar = () => {
             </AppLink>
             <AppLink
               forcePublic
-              to="/examples"
+              to="/admin/en/tasks/project-setup"
               className={getNavLinkClass({
                 isActive: location.pathname.includes("/examples"),
               })}
