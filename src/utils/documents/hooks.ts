@@ -1,51 +1,44 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/utils/customFields/hooks.ts
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback } from 'react';
 import { SchemaField } from "@/types/schema";
-import { CustomFieldValue } from '@/types/document';
+import { Document, CustomFieldValue } from '@/types/document';
 import { validateField } from './validation';
+import { Errors } from '../errors';
 
-export const useCustomFields = (schema: SchemaField[]) => {
+interface UseCustomFieldsResult {
+  updateField: (document: Document, key: string, value: CustomFieldValue) => Document | null;
+  validateField: (key: string, value: unknown) => boolean;
+}
+
+export const useCustomFields = (schema: SchemaField[]): UseCustomFieldsResult => {
   const updateField = useCallback((
     document: Document,
     key: string, 
     value: CustomFieldValue
   ): Document | null => {
-
     const field = schema.find(f => f.key === key);
-    if (!field || !validateField(value, field)) return null;
+    if (!field) {
+      throw Errors.INVALID_RELATION(`Field ${key} not found in schema`);
+    }
+
+    if (!validateField(value, field)) {
+      return null;
+    }
     
     return {
       ...document,
-      [key]: value
+      [key]: value,
+      updatedAt: new Date()
     };
+  }, [schema]);
+
+  const fieldValidator = useCallback((key: string, value: unknown): boolean => {
+    const field = schema.find(f => f.key === key);
+    return field ? validateField(value, field) : false;
   }, [schema]);
 
   return {
     updateField,
-    validateField: (key: string, value: unknown) => {
-      const field = schema.find(f => f.key === key);
-      return field ? validateField(value, field) : false;
-    }
+    validateField: fieldValidator
   };
-}
-
-interface FilterableDocument {
-  title: string;
-  content: string;
-  [key: string]: any;
-}
-
-export const useDocumentFilter = <T extends FilterableDocument>(documents: T[]) => {
-  const [filter, setFilter] = useState("");
-  
-  const filteredDocuments = useMemo(() => {
-    return documents.filter(
-      (doc) =>
-        doc.title.toLowerCase().includes(filter.toLowerCase()) ||
-        doc.content.toLowerCase().includes(filter.toLowerCase())
-    );
-  }, [documents, filter]);
-
-  return { filter, setFilter, filteredDocuments };
 };

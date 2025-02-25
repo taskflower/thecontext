@@ -1,12 +1,14 @@
-
 import { useState } from "react";
 import { useDocumentsStore } from "@/store/documentsStore";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
-import { ErrorDialog } from "@/components/common/ErrorDialog";
-import { useAdminNavigate } from "@/hooks/useAdminNavigate";
+
 import { Trans } from "@lingui/macro";
-import { ContainerForm } from "@/components/documents/container";
+
 import { Button } from "@/components/ui";
+import { SchemaField } from "@/types/schema";
+import { useAdminNavigate } from "@/hooks";
+import { ContainerForm } from "@/components/documents";
+import { ErrorDialog } from "@/components/common";
 
 export const ContainerNew = () => {
   const adminNavigate = useAdminNavigate();
@@ -14,14 +16,19 @@ export const ContainerNew = () => {
   const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
+    messagesScope: [],
     name: "",
     description: "",
     targetDocumentCount: 0,
     schema: {
-        id: Date.now().toString(),
-        fields: []
-    }
-});
+      id: Date.now().toString(),
+      name: "Default Schema",
+      description: "",
+      fields: [] as SchemaField[],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +52,11 @@ export const ContainerNew = () => {
         title={<Trans>New Document Container</Trans>}
         description={<Trans>Create a new document container</Trans>}
         actions={
-          <Button size="sm" variant="outline" onClick={() => adminNavigate("/documents")}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => adminNavigate("/documents")}
+          >
             <Trans>Back to Containers</Trans>
           </Button>
         }
@@ -64,4 +75,5 @@ export const ContainerNew = () => {
     </>
   );
 };
+
 export default ContainerNew;

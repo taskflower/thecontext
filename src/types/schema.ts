@@ -1,20 +1,42 @@
-// types/schema.ts
-export type SchemaFieldType = 'text' | 'number' | 'date' | 'boolean' | 'select';
-
-export interface SchemaValidation {
-  required?: boolean;
-  options?: string[];
+// src/types/schema.ts
+export interface DocumentSchema {
+  id: string;
+  name: string;
+  description?: string;
+  fields: SchemaField[];
 }
 
 export interface SchemaField {
   key: string;
   name: string;
-  type: SchemaFieldType;
-  validation?: SchemaValidation;
-  atList?: boolean;
+  type: FieldType;
+  description?: string;
+  validation?: FieldValidation;
+  displayOptions?: {
+    showInList?: boolean;
+    showInDetail?: boolean;
+    order?: number;
+  };
 }
 
-export interface DocumentSchema {
-  id: string;
-  fields: SchemaField[];
+export type FieldType = 'string' | 'number' | 'boolean' | 'date' | 'select';
+
+export interface FieldValidation {
+  required?: boolean;
+  
+  // For string type
+  minLength?: number;
+  maxLength?: number;
+  pattern?: string;
+  
+  // For number type
+  min?: number;
+  max?: number;
+  
+  // For date type
+  minDate?: Date;
+  maxDate?: Date;
+  
+  // For select type
+  options?: string[];
 }

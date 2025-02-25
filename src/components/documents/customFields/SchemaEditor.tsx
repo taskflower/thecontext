@@ -1,12 +1,11 @@
-// src/components/documents/schema/SchemaEditor.tsx
 import React from 'react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
+
 import { Plus, Trash2 } from "lucide-react";
-import { SchemaField, SchemaFieldType } from '@/types/schema';
+import { SchemaField, FieldType } from '@/types/schema';
 import { Trans } from "@lingui/macro";
+import { Button, Input, Switch } from '@/components/ui';
 
 interface SchemaEditorProps {
   fields: SchemaField[];
@@ -18,11 +17,14 @@ export const SchemaEditor: React.FC<SchemaEditorProps> = ({ fields, onChange }) 
     const newField: SchemaField = {
       key: '',
       name: '',
-      type: 'text',
+      type: 'string',
       validation: {
         required: false
       },
-      atList: false
+      displayOptions: {
+        showInList: false,
+        showInDetail: true
+      }
     };
     onChange([...fields, newField]);
   };
@@ -38,7 +40,7 @@ export const SchemaEditor: React.FC<SchemaEditorProps> = ({ fields, onChange }) 
     onChange(fields.filter((_, i) => i !== index));
   };
 
-  const fieldTypes: SchemaFieldType[] = ['text', 'number', 'date', 'boolean', 'select'];
+  const fieldTypes: FieldType[] = ['string', 'number', 'date', 'boolean', 'select'];
 
   return (
     <div className="space-y-4">
@@ -80,7 +82,7 @@ export const SchemaEditor: React.FC<SchemaEditorProps> = ({ fields, onChange }) 
                   <Select
                     value={field.type}
                     onValueChange={value =>
-                      updateField(index, { type: value as SchemaFieldType })
+                      updateField(index, { type: value as FieldType })
                     }
                   >
                     <SelectTrigger>
@@ -112,12 +114,32 @@ export const SchemaEditor: React.FC<SchemaEditorProps> = ({ fields, onChange }) 
 
                 <div className="flex items-center gap-2">
                   <Switch
-                    checked={field.atList}
+                    checked={field.displayOptions?.showInList}
                     onCheckedChange={checked =>
-                      updateField(index, { atList: checked })
+                      updateField(index, {
+                        displayOptions: { 
+                          ...field.displayOptions,
+                          showInList: checked 
+                        }
+                      })
                     }
                   />
                   <label className="text-sm"><Trans>Show in list</Trans></label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={field.displayOptions?.showInDetail}
+                    onCheckedChange={checked =>
+                      updateField(index, {
+                        displayOptions: { 
+                          ...field.displayOptions,
+                          showInDetail: checked 
+                        }
+                      })
+                    }
+                  />
+                  <label className="text-sm"><Trans>Show in detail</Trans></label>
                 </div>
               </div>
 

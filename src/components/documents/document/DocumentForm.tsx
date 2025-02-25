@@ -1,16 +1,20 @@
-// src/components/documents/document/DocumentForm.tsx
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { Trans, t } from "@lingui/macro";
-import { Document, DocumentContainer, CustomFieldValue } from "@/types/document";
-import DocumentTabs from "./editor/DocumentTabs";
-// Zmieniony import
-import { updateDocumentFieldValue } from "@/utils/documents/documentUtils";
+import {
+  Document,
+  DocumentContainer,
+  CustomFieldValue,
+} from "@/types/document";
+import { DocumentSchema } from "@/types/schema";
+import { updateDocumentFieldValue } from "@/utils/documents/fieldUtils";
+import { useState } from "react";
+import { Button, Card, CardContent, Input } from "@/components/ui";
+import { DocumentEditor } from "./editor/DocumentEditor";
+import { CustomFields } from "../customFields";
 
 interface DocumentFormProps {
   document: Document;
   container: DocumentContainer;
+  schema?: DocumentSchema;
   onUpdate: (document: Document) => void;
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
@@ -19,23 +23,34 @@ interface DocumentFormProps {
 
 export const DocumentForm: React.FC<DocumentFormProps> = ({
   document,
-  container,
+  schema,
   onUpdate,
   onSubmit,
   onCancel,
   submitButtonText,
 }) => {
+  const [error, setError] = useState<string | null>(null);
+
   const handleFieldChange = (field: string, value: unknown) => {
-    // Konwertujemy unknown na CustomFieldValue
-    const typedValue = value as CustomFieldValue;
-    
-    const result = updateDocumentFieldValue(document, field, typedValue, container.schema);
-    
-    if (result.isValid) {
-      onUpdate(result.document);
-    } else {
-      // Tutaj możesz dodać obsługę błędów walidacji
-      console.error(result.error);
+    try {
+      const typedValue = value as CustomFieldValue;
+      const result = updateDocumentFieldValue(
+        document,
+        field,
+        typedValue,
+        schema?.fields
+      );
+
+      if (result.isValid) {
+        onUpdate(result.document);
+        setError(null);
+      } else if (result.error) {
+        setError(result.error);
+      }
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : t`An unknown error occurred`
+      );
     }
   };
 
@@ -43,6 +58,12 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
     <Card className="border-0 md:border shadow-none md:shadow">
       <CardContent className="pt-6">
         <form onSubmit={onSubmit} className="space-y-6">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
+              {error}
+            </div>
+          )}
+
           <div className="space-y-2">
             <label className="text-sm font-medium">
               <Trans>Title</Trans>
@@ -55,11 +76,37 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
             />
           </div>
 
-          <DocumentTabs
-            document={document}
-            container={container}
-            onUpdate={handleFieldChange}
-          />
+          {schema?.fields && schema.fields.length > 0 ? (
+            <>
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">
+                  <Trans>Content Editor</Trans>
+                </h3>
+                <DocumentEditor
+                  content={document.content || ""}
+                  onChange={(content) => handleFieldChange("content", content)}
+                />
+              </div>
+
+              <div className="space-y-4">
+                <CustomFields
+                  schema={schema.fields}
+                  document={document}
+                  onUpdate={handleFieldChange}
+                />
+              </div>
+            </>
+          ) : (
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium">
+                <Trans>Content Editor</Trans>
+              </h3>
+              <DocumentEditor
+                content={document.content || ""}
+                onChange={(content) => handleFieldChange("content", content)}
+              />
+            </div>
+          )}
 
           <div className="flex justify-end space-x-2">
             <Button type="button" variant="outline" onClick={onCancel}>
@@ -68,6 +115,8 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
             <Button type="submit">{submitButtonText}</Button>
           </div>
         </form>
+
+        {/* <DocumentPreview document={document} container={container} schema={schema} /> */}
       </CardContent>
     </Card>
   );

@@ -1,9 +1,12 @@
 // src/components/documents/ContainerActions.tsx
-import { Button } from "@/components/ui/button";
+
 import { FileText } from "lucide-react";
-import { useAdminNavigate } from "@/hooks/useAdminNavigate";
+
 import { Trans } from "@lingui/macro";
+import { useAdminNavigate } from "@/hooks";
+import { Button } from "@/components/ui";
 import ContainerDropdown from "./ContainerDropdown";
+
 
 interface ContainerActionsProps {
   containerId: string;
@@ -15,6 +18,8 @@ const ContainerActions = ({ containerId, onDelete }: ContainerActionsProps) => {
 
   return (
     <div className="flex gap-2 justify-between">
+      
+      <ContainerDropdown containerId={containerId} onDelete={onDelete} />
       <div className="flex gap-2">
         <Button
           size="sm"
@@ -25,7 +30,6 @@ const ContainerActions = ({ containerId, onDelete }: ContainerActionsProps) => {
           <Trans>View Documents</Trans>
         </Button>
       </div>
-      <ContainerDropdown containerId={containerId} onDelete={onDelete} />
     </div>
   );
 };

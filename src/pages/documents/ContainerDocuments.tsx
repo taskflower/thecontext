@@ -1,20 +1,20 @@
 // ContainerDocuments.tsx
 import {
+  ContainerDropdown,
+  DocumentFilters,
   DocumentPreviewDialog,
   DocumentTable,
 } from "@/components/documents";
 import { Button, Card, CardContent } from "@/components/ui";
-import { useAdminNavigate } from "@/hooks/useAdminNavigate";
+
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { useDocumentsStore } from "@/store/documentsStore";
 import { Trans } from "@lingui/macro";
-import { FilePlus } from "lucide-react";
+import { FilePlus, Folder } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useDocumentFilter } from "@/utils/documents/hooks";
-import ContainerDropdown from "@/components/documents/container/ContainerDropdown";
-import DocumentFilters from "@/components/documents/relations/DocumentFilters";
 
+import { useAdminNavigate, useDocumentFiltering } from "@/hooks";
 
 export const ContainerDocuments = () => {
   const { containerId } = useParams();
@@ -28,27 +28,15 @@ export const ContainerDocuments = () => {
     relations,
   } = useDocumentsStore();
 
+  // Hook wywoływany zawsze – nawet jeśli containerId nie istnieje, documents będzie pustą tablicą
+  const documents = containerId ? getContainerDocuments(containerId) : [];
+  const { filter, setFilter, filteredDocuments } = useDocumentFiltering({
+    documents,
+    relationFilter: null, // Możesz ustawić filtr relacji, jeśli jest potrzebny
+    relations,
+  });
+
   const container = containers.find((c) => c.id === containerId);
-  const documents = getContainerDocuments(containerId || "");
-
-  const { filter, setFilter, filteredDocuments: baseFilteredDocuments } =
-    useDocumentFilter(documents);
-
-  // Dodajemy stan dla filtra relacji
-  const [selectedRelationFilter, setSelectedRelationFilter] = useState<string | null>(null);
-
-  // Filtrowanie dokumentów wg relacji (jeśli filtr został ustawiony)
-  const filteredDocuments = selectedRelationFilter
-    ? baseFilteredDocuments.filter((doc) => {
-        const matchingRelation = relations.find(
-          (rel) =>
-            rel.configId === selectedRelationFilter &&
-            (rel.sourceDocumentId === doc.id || rel.targetDocumentId === doc.id)
-        );
-        return !!matchingRelation;
-      })
-    : baseFilteredDocuments;
-
   const [selectedDocument, setSelectedDocument] = useState<{
     title: string;
     content: string;
@@ -65,26 +53,26 @@ export const ContainerDocuments = () => {
   const handleBack = () => adminNavigate("/documents");
 
   const handleMoveDocument = (docId: string, direction: "up" | "down") => {
-    const currentIndex = documents.findIndex((d) => d.id === docId);
+    const docs = getContainerDocuments(container.id);
+    const currentIndex = docs.findIndex((d) => d.id === docId);
     if (direction === "up" && currentIndex > 0) {
-      const prevDoc = documents[currentIndex - 1];
+      const prevDoc = docs[currentIndex - 1];
       updateDocument(docId, { order: prevDoc.order });
-      updateDocument(prevDoc.id, { order: documents[currentIndex].order });
-    } else if (direction === "down" && currentIndex < documents.length - 1) {
-      const nextDoc = documents[currentIndex + 1];
+      updateDocument(prevDoc.id, { order: docs[currentIndex].order });
+    } else if (direction === "down" && currentIndex < docs.length - 1) {
+      const nextDoc = docs[currentIndex + 1];
       updateDocument(docId, { order: nextDoc.order });
-      updateDocument(nextDoc.id, { order: documents[currentIndex].order });
+      updateDocument(nextDoc.id, { order: docs[currentIndex].order });
     }
   };
 
-  // Przykładowa funkcja usuwająca container
   const handleDeleteContainer = (id: string) => {
     console.log("Usuwam container o id:", id);
   };
 
   return (
     <AdminOutletTemplate
-      title={<Trans>{container.name}</Trans>}
+    title={<span><Folder className="inline h-5 w-5 mr-2" /> {container.name}</span>}
       description={
         container.description ? (
           <Trans>{container.description}</Trans>
@@ -97,7 +85,7 @@ export const ContainerDocuments = () => {
           <Button size="sm" variant="outline" onClick={handleBack}>
             <Trans>Back to Containers</Trans>
           </Button>
-          <ContainerDropdown containerId={container.id} onDelete={handleDeleteContainer} />
+         
           <Button
             className="gap-2"
             onClick={() =>
@@ -107,17 +95,21 @@ export const ContainerDocuments = () => {
             <FilePlus className="h-4 w-4" />
             <Trans>New Document</Trans>
           </Button>
+        
         </>
       }
     >
+     
       <div className="space-y-4">
+        
         <DocumentFilters
           filter={filter}
           onFilterChange={setFilter}
-          selectedRelationFilter={selectedRelationFilter}
-          setSelectedRelationFilter={setSelectedRelationFilter}
+          selectedRelationFilter={null} // Jeśli potrzebujesz, dodaj logikę dla filtra relacji
+          setSelectedRelationFilter={() => {}}
           relationConfigs={relationConfigs}
         />
+        
         <Card>
           <CardContent className="p-0">
             <DocumentTable
@@ -133,6 +125,13 @@ export const ContainerDocuments = () => {
           </CardContent>
         </Card>
       </div>
+      <div className="flex justify-end">
+      <ContainerDropdown
+            containerId={container.id}
+            onDelete={handleDeleteContainer}
+          />
+      </div>
+      
       <DocumentPreviewDialog
         document={selectedDocument}
         onClose={() => setSelectedDocument(null)}

@@ -1,22 +1,22 @@
-// src/pages/documents/DocumentNew.tsx
 import { useParams } from "react-router-dom";
 import { useDocumentsStore } from "@/store/documentsStore";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
-import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 import { Trans } from "@lingui/macro";
 import { useState } from "react";
 import { Document } from "@/types/document";
 import { DocumentForm } from "@/components/documents";
 import { Button } from "@/components/ui";
-// Importujemy nową nazwę funkcji
-import { initializeDocument } from "@/utils/documents/documentUtils";
+import { initializeDocument } from "@/utils/documents/fieldUtils";
+import { useAdminNavigate } from "@/hooks";
 
 export const DocumentNew: React.FC = () => {
   const { containerId } = useParams();
   const adminNavigate = useAdminNavigate();
-  const { addDocument, getContainerDocuments, containers } = useDocumentsStore();
+  const { addDocument, getContainerDocuments, containers, schemas } = useDocumentsStore();
   
   const container = containers.find(c => c.id === containerId);
+  // Get the schema using container's schemaId
+  const schema = container?.schemaId ? schemas.find(s => s.id === container.schemaId) : undefined;
   
   const [documentState, setDocumentState] = useState<Document>(() => 
     initializeDocument({
@@ -28,7 +28,7 @@ export const DocumentNew: React.FC = () => {
       updatedAt: new Date(),
       order: 0,
       tags: []
-    }, container?.schema)
+    }, schema)
   );
 
   const handleUpdate = (updatedDoc: Document) => {
@@ -86,6 +86,7 @@ export const DocumentNew: React.FC = () => {
       <DocumentForm
         document={documentState}
         container={container}
+        schema={schema}
         onUpdate={handleUpdate}
         onSubmit={handleSubmit}
         onCancel={handleBack}

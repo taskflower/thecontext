@@ -1,15 +1,17 @@
-import { Button } from "@/components/ui/button";
-import {  Plus, SquareSigma } from "lucide-react";
+import { Plus, SquareSigma } from "lucide-react";
 import { useDocumentsStore } from "@/store/documentsStore";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
-import { SearchInput } from "@/components/common/SearchInput";
-import { useAdminNavigate } from "@/hooks/useAdminNavigate";
+
 import { Trans, t } from "@lingui/macro";
 import { useState } from "react";
-import { ContainerCard } from "@/components/documents/container";
+import { useAdminNavigate } from "@/hooks";
+import { Button } from "@/components/ui";
+import { ContainerCard } from "@/components/documents";
+import { SearchInput } from "@/components/common";
 
 export const ContainerList = () => {
-  const { containers, getContainerDocuments, deleteContainer } = useDocumentsStore();
+  const { containers, getContainerDocuments, deleteContainer } =
+    useDocumentsStore();
   const adminNavigate = useAdminNavigate();
   const [filterQuery, setFilterQuery] = useState("");
 
@@ -28,10 +30,11 @@ export const ContainerList = () => {
   return (
     <AdminOutletTemplate
       title={<Trans>Document Containers</Trans>}
-      description={<Trans>Manage your document containers and their contents</Trans>}
+      description={
+        <Trans>Manage your document containers and their contents</Trans>
+      }
       actions={
         <div className="flex items-center gap-2">
-          
           <Button
             variant="outline"
             size="sm"
@@ -41,7 +44,10 @@ export const ContainerList = () => {
             <SquareSigma className="mr-2 h-4 w-4" />
             <Trans>All documents</Trans>
           </Button>
-          <Button className="gap-2" onClick={() => adminNavigate("/documents/containers/new")}>
+          <Button
+            className="gap-2"
+            onClick={() => adminNavigate("/documents/containers/new")}
+          >
             <Plus className="h-4 w-4" />
             <Trans>New Container</Trans>
           </Button>

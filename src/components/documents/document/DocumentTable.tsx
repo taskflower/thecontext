@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Document, DocumentContainer } from "@/types/document";
-import { SchemaField } from "@/types/schema";
+import { SchemaField, DocumentSchema } from "@/types/schema";
 import { Trans } from "@lingui/macro";
-import { Checkbox } from "@radix-ui/react-checkbox";
+
 import { DocumentActions } from "./DocumentActions";
 import {
+  Checkbox,
   Table,
   TableBody,
   TableCell,
@@ -16,6 +17,7 @@ import { truncate } from "@/services/utils";
 interface DocumentTableProps {
   documents: Document[];
   container?: DocumentContainer;
+  schema?: DocumentSchema;
   onPreview: (document: Document) => void;
   onEdit: (documentId: string) => void;
   onMove: (documentId: string, direction: "up" | "down") => void;
@@ -41,19 +43,21 @@ const formatValue = (value: unknown, field?: SchemaField) => {
 export const DocumentTable = ({
   documents,
   container,
+  schema,
   onPreview,
   onEdit,
   onMove,
   onDelete,
   showContainer = false,
 }: DocumentTableProps) => {
-  // Pobieramy wartość pola bezpośrednio z dokumentu
+  // Pobiera wartość bezpośrednio z dokumentu
   const getDocumentValue = (doc: Document, field: SchemaField): unknown => {
     return (doc as any)[field.key];
   };
 
+  // Filtruje kolumny na podstawie displayOptions.showInList
   const customColumns =
-    container?.schema?.fields?.filter((field) => field.atList) || [];
+    schema?.fields?.filter((field) => field.displayOptions?.showInList) || [];
 
   return (
     <Table>

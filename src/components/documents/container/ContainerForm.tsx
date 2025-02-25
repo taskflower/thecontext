@@ -1,16 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/documents/ContainerForm.tsx
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { FileText, Settings, Box } from "lucide-react";
 
 import { DocumentSchema } from "@/types/schema";
 import { Trans, t } from "@lingui/macro";
-import SchemaEditor from "../customFields/SchemaEditor";
+
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  Textarea,
+} from "@/components/ui";
+import { SchemaEditor } from "../customFields";
 
 interface ContainerFormData {
   name: string;
@@ -67,6 +77,10 @@ export const ContainerForm = ({
               <TabsTrigger value="schema" className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
                 <Trans>Custom fields</Trans>
+              </TabsTrigger>
+              <TabsTrigger value="scope" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                <Trans>Messages scope</Trans>
               </TabsTrigger>
             </TabsList>
 
@@ -130,3 +144,4 @@ export const ContainerForm = ({
     </Card>
   );
 };
+export default ContainerForm;

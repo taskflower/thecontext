@@ -34,21 +34,21 @@ export const Navbar = () => {
             </AppLink>
             <AppLink
               forcePublic
-              to="/about"
+              to="/casestudies"
               className={getNavLinkClass({
-                isActive: location.pathname.includes("/about"),
+                isActive: location.pathname.includes("/casestudies"),
               })}
             >
               Cases
             </AppLink>
             <AppLink
               forcePublic
-              to="/contact"
+              to="/examples"
               className={getNavLinkClass({
-                isActive: location.pathname.includes("/contact"),
+                isActive: location.pathname.includes("/examples"),
               })}
             >
-              Services
+              Examples
             </AppLink>
           </div>
           <div>

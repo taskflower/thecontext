@@ -1,15 +1,13 @@
-// src/pages/documents/DocumentEdit.tsx
 import { useParams } from "react-router-dom";
 import { useDocumentsStore } from "@/store/documentsStore";
 import { useState, useEffect } from "react";
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
-import { useAdminNavigate } from "@/hooks/useAdminNavigate";
 import { Trans } from "@lingui/macro";
 import { Document } from "@/types/document";
 import { DocumentForm } from "@/components/documents";
 import { Button } from "@/components/ui";
-// Zmieniony import
-import { initializeDocument } from "@/utils/documents/documentUtils";
+import { initializeDocument } from "@/utils/documents";
+import { useAdminNavigate } from "@/hooks";
 
 export const DocumentEdit: React.FC = () => {
   const { containerId, documentId } = useParams();
@@ -17,17 +15,19 @@ export const DocumentEdit: React.FC = () => {
   const { documents, containers, updateDocument } = useDocumentsStore();
   
   const container = containers.find(c => c.id === containerId);
-  const originalDocument = documents.find((d) => d.id === documentId);
+  // Pobieramy schemat bezpośrednio z kontenera
+  const schema = container?.schema;
+  const originalDocument = documents.find(d => d.id === documentId);
   const [documentState, setDocumentState] = useState<Document | null>(null);
 
   useEffect(() => {
-    if (originalDocument && container?.schema) {
-      const initializedDoc = initializeDocument(originalDocument, container.schema);
+    if (originalDocument && schema) {
+      const initializedDoc = initializeDocument(originalDocument, schema);
       setDocumentState(initializedDoc);
     } else if (originalDocument) {
       setDocumentState(originalDocument);
     }
-  }, [originalDocument, container]);
+  }, [originalDocument, schema]);
 
   if (!container) {
     return (
@@ -92,6 +92,7 @@ export const DocumentEdit: React.FC = () => {
       <DocumentForm
         document={documentState}
         container={container}
+        schema={schema}
         onUpdate={handleUpdate}
         onSubmit={handleSubmit}
         onCancel={handleBack}

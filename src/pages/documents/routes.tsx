@@ -8,10 +8,15 @@ import ContainerNew from '@/pages/documents/ContainerNew';
 import DocumentEdit from '@/pages/documents/DocumentEdit';
 import DocumentNew from '@/pages/documents/DocumentNew';
 import ContainerRelations from './ContainerRelations';
+import ContainersManager from './ContainersManager';
+import { AIRagnarokPage } from './AIRagnarokPage';
+
 
 const documentsRoutes: RouteObject[] = [
   { index: true, element: <Navigate to="containers" replace /> },
   { path: 'all', element: <AllDocuments /> },
+  { path: 'manager', element: <ContainersManager /> },
+  { path: 'ragnarok', element: <AIRagnarokPage /> },
   { path: 'containers', element: <ContainerList /> },
   { path: 'containers/list', element: <ContainerList /> },
   { path: 'containers/new', element: <ContainerNew /> },

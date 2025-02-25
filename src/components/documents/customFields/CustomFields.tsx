@@ -1,11 +1,9 @@
 // src/components/documents/customFields/CustomFields.tsx
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { Trans } from "@lingui/macro";
+
 import { SchemaField } from "@/types/schema";
 import { Document, CustomFieldValue } from "@/types/document";
 import { useCustomFields } from "@/utils/documents/hooks";
-
+import { Input, Switch } from "@/components/ui";
 
 interface CustomFieldsProps {
   schema: SchemaField[];
@@ -29,7 +27,15 @@ export const CustomFields: React.FC<CustomFieldsProps> = ({
     };
 
     switch (field.type) {
-      case "text":
+      case "string":
+        return (
+          <Input
+            value={value?.toString() || ""}
+            onChange={(e) => handleChange(e.target.value)}
+            placeholder={field.name}
+            required={field.validation?.required}
+          />
+        );
       case "select":
         return (
           <Input
@@ -37,6 +43,7 @@ export const CustomFields: React.FC<CustomFieldsProps> = ({
             onChange={(e) => handleChange(e.target.value)}
             placeholder={field.name}
             required={field.validation?.required}
+            list={`${field.key}-options`}
           />
         );
       case "number":
@@ -50,7 +57,6 @@ export const CustomFields: React.FC<CustomFieldsProps> = ({
           />
         );
       case "date": {
-        // Added block scope
         const dateValue =
           value instanceof Date
             ? value.toISOString().split("T")[0]
@@ -77,9 +83,6 @@ export const CustomFields: React.FC<CustomFieldsProps> = ({
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-medium">
-        <Trans>Custom Fields</Trans>
-      </h3>
       <div className="space-y-4">
         {schema.map((field) => (
           <div key={field.key} className="space-y-2">
@@ -90,6 +93,13 @@ export const CustomFields: React.FC<CustomFieldsProps> = ({
               )}
             </label>
             {renderField(field)}
+            {field.type === "select" && field.validation?.options && (
+              <datalist id={`${field.key}-options`}>
+                {field.validation.options.map((option) => (
+                  <option key={option} value={option} />
+                ))}
+              </datalist>
+            )}
           </div>
         ))}
       </div>

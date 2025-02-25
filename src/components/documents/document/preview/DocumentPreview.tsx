@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/components/documents/preview/DocumentPreview.tsx
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Trans } from "@lingui/macro";
 import { DocumentContainer } from "@/types/document";
-import { SchemaField } from "@/types/schema";
+import { DocumentSchema, SchemaField } from "@/types/schema";
 
 interface DocumentPreviewProps {
   document: Record<string, any>;
   container?: DocumentContainer;
+  schema?: DocumentSchema;
 }
 
-export const DocumentPreview = ({ document, container }: DocumentPreviewProps) => {
+export const DocumentPreview = ({ document,schema }: DocumentPreviewProps) => {
   const formatValue = (value: any, field?: SchemaField) => {
     if (value === undefined || value === null || value === "") return "Not set";
     if (field?.type === "date") {
@@ -28,11 +28,10 @@ export const DocumentPreview = ({ document, container }: DocumentPreviewProps) =
     { key: "updatedAt", value: document.updatedAt ? new Date(document.updatedAt).toLocaleString() : "Not set" },
   ];
 
-  if (container?.schema?.fields) {
+  if (schema?.fields) {
     documentMetadata.push(
-      ...container.schema.fields.map((field) => ({
+      ...schema.fields.map((field) => ({
         key: field.name,
-        // Pobieramy wartość bezpośrednio z dokumentu (np. document["color"])
         value: formatValue(document[field.key], field),
       }))
     );

@@ -1,5 +1,11 @@
 // DocumentFilters.tsx
-import { Button, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui";
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui";
 import { DocumentSearch } from "@/components/documents";
 import { Filter } from "lucide-react";
 import { Trans, t } from "@lingui/macro";
@@ -26,7 +32,12 @@ export const DocumentFilters = ({
       <DocumentSearch value={filter} onChange={onFilterChange} />
       <div className="flex items-center gap-2 ml-auto">
         {onBackToContainers && (
-          <Button variant="outline" size="sm" className="hidden lg:flex" onClick={onBackToContainers}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="hidden lg:flex"
+            onClick={onBackToContainers}
+          >
             <Trans>Back to containers</Trans>
           </Button>
         )}
@@ -35,7 +46,9 @@ export const DocumentFilters = ({
             <Button variant="outline" size="sm" className="hidden lg:flex">
               <Filter className="mr-2 h-4 w-4" />
               {selectedRelationFilter
-                ? relationConfigs.find((config) => config.id === selectedRelationFilter)?.name
+                ? relationConfigs.find(
+                    (config) => config.id === selectedRelationFilter
+                  )?.name
                 : t`Filters`}
             </Button>
           </DropdownMenuTrigger>
@@ -46,7 +59,10 @@ export const DocumentFilters = ({
               </DropdownMenuItem>
             ) : (
               relationConfigs.map((config) => (
-                <DropdownMenuItem key={config.id} onClick={() => setSelectedRelationFilter(config.id)}>
+                <DropdownMenuItem
+                  key={config.id}
+                  onClick={() => setSelectedRelationFilter(config.id)}
+                >
                   {config.name}
                 </DropdownMenuItem>
               ))

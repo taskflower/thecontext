@@ -2,3 +2,4 @@
 export * from './RelatedDocuments';
 export * from './RelationConfigForm';
 export * from './RelationConfigList';
+export * from './DocumentFilters';

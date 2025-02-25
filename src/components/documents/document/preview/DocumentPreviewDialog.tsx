@@ -1,5 +1,9 @@
-import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui";
 import { MarkdownPreview } from "../../MarkdownComponents";
 
 interface DocumentPreviewDialogProps {
@@ -7,9 +11,17 @@ interface DocumentPreviewDialogProps {
   onClose: () => void;
 }
 
-export const DocumentPreviewDialog: React.FC<DocumentPreviewDialogProps> = ({ document, onClose }) => {
+export const DocumentPreviewDialog: React.FC<DocumentPreviewDialogProps> = ({
+  document,
+  onClose,
+}) => {
   return (
-    <Dialog open={!!document} onOpenChange={(open) => { if (!open) onClose(); }}>
+    <Dialog
+      open={!!document}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
       <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{document?.title}</DialogTitle>
@@ -19,3 +31,4 @@ export const DocumentPreviewDialog: React.FC<DocumentPreviewDialogProps> = ({ do
     </Dialog>
   );
 };
+export default DocumentPreviewDialog;

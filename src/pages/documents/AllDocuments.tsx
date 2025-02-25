@@ -1,39 +1,41 @@
-// AllDocuments.tsx
 import {
+  DocumentFilters,
   DocumentPreviewDialog,
   DocumentTable,
   RelatedDocuments,
 } from "@/components/documents";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, Card, CardContent } from "@/components/ui";
-import { useAdminNavigate } from "@/hooks/useAdminNavigate";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Card,
+  CardContent,
+} from "@/components/ui";
+
 import AdminOutletTemplate from "@/layouts/AdminOutletTemplate";
 import { useDocumentsStore } from "@/store/documentsStore";
 import { Trans } from "@lingui/macro";
 import { useState } from "react";
 import { Document } from "@/types/document";
-import { useDocumentFilter } from "@/utils/documents/hooks";
-import DocumentFilters from "@/components/documents/relations/DocumentFilters";
-
+import { useAdminNavigate, useDocumentFiltering } from "@/hooks";
 
 export const AllDocuments = () => {
   const adminNavigate = useAdminNavigate();
-  const { documents, containers, removeDocument, relationConfigs, relations } = useDocumentsStore();
+  const { documents, containers, removeDocument, relationConfigs, relations } =
+    useDocumentsStore();
 
-  const { filter, setFilter, filteredDocuments: baseFilteredDocuments } = useDocumentFilter(documents);
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
-  const [selectedRelatedDocument, setSelectedRelatedDocument] = useState<Document | null>(null);
-  const [selectedRelationFilter, setSelectedRelationFilter] = useState<string | null>(null);
+  const { filter, setFilter, filteredDocuments } = useDocumentFiltering({
+    documents,
+    relationFilter: null,
+    relations,
+  });
 
-  // Filtrowanie dokumentów wg relacji
-  const filteredDocuments = selectedRelationFilter
-    ? baseFilteredDocuments.filter((doc) => {
-        const matchingRelation = relations.find((rel) =>
-          rel.configId === selectedRelationFilter &&
-          (rel.sourceDocumentId === doc.id || rel.targetDocumentId === doc.id)
-        );
-        return !!matchingRelation;
-      })
-    : baseFilteredDocuments;
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(
+    null
+  );
+  const [selectedRelatedDocument, setSelectedRelatedDocument] =
+    useState<Document | null>(null);
 
   const getContainerName = (containerId: string) => {
     const container = containers.find((c) => c.id === containerId);
@@ -47,7 +49,9 @@ export const AllDocuments = () => {
   const handleEditDocument = (id: string) => {
     const doc = documents.find((d) => d.id === id);
     if (doc) {
-      adminNavigate(`/documents/${doc.documentContainerId}/document/${id}/edit`);
+      adminNavigate(
+        `/documents/${doc.documentContainerId}/document/${id}/edit`
+      );
     }
   };
 
@@ -59,13 +63,15 @@ export const AllDocuments = () => {
   return (
     <AdminOutletTemplate
       title={<Trans>All Documents</Trans>}
-      description={<Trans>View and manage all documents across containers</Trans>}
+      description={
+        <Trans>View and manage all documents across containers</Trans>
+      }
       actions={
         <DocumentFilters
           filter={filter}
           onFilterChange={setFilter}
-          selectedRelationFilter={selectedRelationFilter}
-          setSelectedRelationFilter={setSelectedRelationFilter}
+          selectedRelationFilter={null}
+          setSelectedRelationFilter={() => {}}
           relationConfigs={relationConfigs}
           onBackToContainers={() => adminNavigate("/documents/containers")}
         />
@@ -96,7 +102,9 @@ export const AllDocuments = () => {
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              <Trans>Related Documents for {selectedRelatedDocument?.title}</Trans>
+              <Trans>
+                Related Documents for {selectedRelatedDocument?.title}
+              </Trans>
             </DialogTitle>
           </DialogHeader>
           {selectedRelatedDocument && (

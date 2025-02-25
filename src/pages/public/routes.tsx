@@ -4,14 +4,16 @@ import { RouteObject } from 'react-router-dom';
 import CaseStudiesPage from './CaseStudiesPage';
 
 const HomePage = lazy(() => import('@/pages/public/HomePage'));
-const ContactPage = lazy(() => import('@/pages/public/ContactPage'));
+const ExamplesPage = lazy(() => import('@/pages/public/ExamplesPage'));
 const NotFoundPage = lazy(() => import('@/pages/public/NotFoundPage'));
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
+const ExamplesPage2 = lazy(() => import('@/pages/public/ExamplesPage2'));
 
 const publicRoutes: RouteObject[] = [
   { index: true, element: <HomePage /> },
-  { path: 'about', element: <CaseStudiesPage /> },
-  { path: 'contact', element: <ContactPage /> },
+  { path: 'casestudies', element: <CaseStudiesPage /> },
+  { path: 'examples', element: <ExamplesPage /> },
+  { path: 'examples2', element: <ExamplesPage2 /> },
   { path: 'login', element: <LoginPage /> },
   { path: '*', element: <NotFoundPage /> },
 ];
