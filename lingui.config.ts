@@ -13,21 +13,17 @@ const config: LinguiConfig = {
     lineNumbers: true,
   },
   catalogs: [
-    {
-      // Tłumaczenia dla "auth"
-      path: "<rootDir>/src/locales/auth/{locale}",
-      include: ["src/pages/auth/**/*.{js,jsx,ts,tsx}"],
-    },
+    // {
+    //   // Tłumaczenia dla "auth"
+    //   path: "<rootDir>/src/locales/auth/{locale}",
+    //   include: ["src/pages/auth/**/*.{js,jsx,ts,tsx}"],
+    // },
     {
       // Tłumaczenia dla "boards"
       path: "<rootDir>/src/locales/boards/{locale}",
       include: ["src/pages/boards/**/*.{js,jsx,ts,tsx}"],
     },
-    {
-      // Tłumaczenia dla "documents"
-      path: "<rootDir>/src/locales/documents/{locale}",
-      include: ["src/pages/documents/**/*.{js,jsx,ts,tsx}"],
-    },
+    
     {
       // Tłumaczenia dla "projects"
       path: "<rootDir>/src/locales/projects/{locale}",

@@ -11,11 +11,11 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
 
-#: src/components/documents/document/DocumentTable.tsx:113
+#: src/components/documents/document/DocumentTable.tsx:117
 msgid "No content provided"
 msgstr "Brak treści"
 
-#: src/components/documents/customFields/SchemaEditor.tsx:126
+#: src/components/documents/customFields/SchemaEditor.tsx:148
 msgid "Options"
 msgstr "Opcje"
 
@@ -31,15 +31,19 @@ msgstr "Otwórz"
 msgid "Run"
 msgstr "Uruchom"
 
+#: src/components/documents/container/ContainerForm.tsx:83
+msgid "Messages scope"
+msgstr ""
+
 #: src/components/documents/document/DocumentSearch.tsx:19
 msgid "Search documents..."
 msgstr "Szukaj dokumentów..."
 
 #: src/components/documents/document/editor/DocumentTabs.tsx:35
-msgid "Content"
-msgstr "Zawartość"
+#~ msgid "Content"
+#~ msgstr "Zawartość"
 
-#: src/components/documents/relations/RelationConfigForm.tsx:164
+#: src/components/documents/relations/RelationConfigForm.tsx:173
 msgid "Target Container"
 msgstr "Docelowy kontener"
 
@@ -47,14 +51,14 @@ msgstr "Docelowy kontener"
 msgid "Task Templates"
 msgstr "Szablony zadań"
 
-#: src/components/documents/container/ContainerForm.tsx:76
-#: src/components/documents/relations/RelationConfigForm.tsx:97
+#: src/components/documents/container/ContainerForm.tsx:90
+#: src/components/documents/relations/RelationConfigForm.tsx:106
 msgid "Name"
 msgstr "Nazwa"
 
 #: src/components/boards/instancesList/InstanceActions.tsx:68
-#: src/components/documents/container/ContainerDropdown.tsx:68
-#: src/components/documents/document/DocumentActions.tsx:96
+#: src/components/documents/container/ContainerDropdown.tsx:81
+#: src/components/documents/document/DocumentActions.tsx:102
 msgid "Are you sure?"
 msgstr "Czy jesteś pewien?"
 
@@ -62,7 +66,7 @@ msgstr "Czy jesteś pewien?"
 #~ msgid "Actions"
 #~ msgstr "Akcje"
 
-#: src/components/documents/document/preview/DocumentPreview.tsx:46
+#: src/components/documents/document/preview/DocumentPreview.tsx:45
 msgid "Property"
 msgstr "Właściwość"
 
@@ -70,7 +74,7 @@ msgstr "Właściwość"
 #~ msgid "Tytuł"
 #~ msgstr "Tytuł"
 
-#: src/components/documents/customFields/SchemaEditor.tsx:110
+#: src/components/documents/customFields/SchemaEditor.tsx:112
 msgid "Required field"
 msgstr "Pole wymagane"
 
@@ -78,15 +82,15 @@ msgstr "Pole wymagane"
 msgid "Container Relations"
 msgstr "Relacje kontenera"
 
-#: src/components/documents/relations/RelationConfigForm.tsx:264
+#: src/components/documents/relations/RelationConfigForm.tsx:273
 msgid "Remove Rule"
 msgstr "Usuń regułę"
 
-#: src/components/documents/container/ContainerForm.tsx:92
+#: src/components/documents/container/ContainerForm.tsx:106
 msgid "Container description"
 msgstr "Opis kontenera"
 
-#: src/components/documents/document/DocumentActions.tsx:99
+#: src/components/documents/document/DocumentActions.tsx:105
 msgid "This action cannot be undone and will permanently delete the document."
 msgstr "Tej akcji nie można cofnąć. Spowoduje to trwałe usunięcie dokumentu."
 
@@ -106,7 +110,7 @@ msgstr "Utwórz szablon"
 msgid "Collection status"
 msgstr "Status kolekcji"
 
-#: src/components/documents/document/DocumentActions.tsx:73
+#: src/components/documents/document/DocumentActions.tsx:77
 msgid "Move Up"
 msgstr "Przenieś w górę"
 
@@ -114,7 +118,7 @@ msgstr "Przenieś w górę"
 msgid "Add task template"
 msgstr "Dodaj szablon zadania"
 
-#: src/components/documents/customFields/SchemaEditor.tsx:55
+#: src/components/documents/customFields/SchemaEditor.tsx:57
 msgid "Add Field"
 msgstr "Dodaj pole"
 
@@ -127,7 +131,7 @@ msgid "({0} steps)"
 msgstr "({0} kroków)"
 
 #: src/components/boards/instancesList/InstanceActions.tsx:46
-#: src/components/documents/container/ContainerDropdown.tsx:39
+#: src/components/documents/container/ContainerDropdown.tsx:43
 msgid "Open menu"
 msgstr "Otwórz menu"
 
@@ -135,29 +139,29 @@ msgstr "Otwórz menu"
 msgid "Show Preview"
 msgstr "Pokaż podgląd"
 
-#: src/components/documents/document/DocumentTable.tsx:75
-#: src/components/documents/document/preview/DocumentPreview.tsx:57
+#: src/components/documents/document/DocumentTable.tsx:79
+#: src/components/documents/document/preview/DocumentPreview.tsx:56
 msgid "{0}"
 msgstr "{0}"
 
-#: src/components/documents/document/DocumentTable.tsx:70
+#: src/components/documents/document/DocumentTable.tsx:74
 msgid "Container"
 msgstr "Kontener"
 
-#: src/components/documents/relations/RelationConfigForm.tsx:273
+#: src/components/documents/relations/RelationConfigForm.tsx:282
 msgid "Create Relation Config"
 msgstr "Utwórz konfigurację relacji"
 
-#: src/components/documents/document/DocumentForm.tsx:48
-#: src/components/documents/document/DocumentTable.tsx:66
+#: src/components/documents/document/DocumentForm.tsx:69
+#: src/components/documents/document/DocumentTable.tsx:70
 msgid "Title"
 msgstr "Tytuł"
 
-#: src/components/documents/relations/DocumentFilters.tsx:45
+#: src/components/documents/relations/DocumentFilters.tsx:58
 msgid "No relation filters"
 msgstr "Nie ma filtrów dla relacji"
 
-#: src/components/documents/relations/RelationConfigForm.tsx:138
+#: src/components/documents/relations/RelationConfigForm.tsx:147
 msgid "Source Container"
 msgstr "Kontener źródłowy"
 
@@ -166,7 +170,7 @@ msgid "Hide Preview"
 msgstr "Ukryj podgląd"
 
 #: src/components/boards/KanbanTemplateEditor.tsx:136
-#: src/components/documents/container/ContainerForm.tsx:87
+#: src/components/documents/container/ContainerForm.tsx:101
 msgid "Description"
 msgstr "Opis"
 
@@ -186,12 +190,11 @@ msgstr "Utwórz szablon tablicy"
 #~ msgid "Schema"
 #~ msgstr "Schemat"
 
-#: src/components/documents/customFields/CustomFields.tsx:81
-#: src/components/documents/customFields/SchemaEditor.tsx:46
+#: src/components/documents/customFields/SchemaEditor.tsx:48
 msgid "Custom Fields"
 msgstr "Pola niestandardowe"
 
-#: src/components/documents/document/DocumentForm.tsx:53
+#: src/components/documents/document/DocumentForm.tsx:74
 msgid "Document title"
 msgstr "Tytuł dokumentu"
 
@@ -199,7 +202,8 @@ msgstr "Tytuł dokumentu"
 msgid "{documentCount} documents stored"
 msgstr "{documentCount} przechowywanych dokumentów"
 
-#: src/components/documents/document/editor/DocumentTabs.tsx:47
+#: src/components/documents/document/DocumentForm.tsx:83
+#: src/components/documents/document/DocumentForm.tsx:102
 msgid "Content Editor"
 msgstr "Edytor treści"
 
@@ -207,7 +211,7 @@ msgstr "Edytor treści"
 msgid "No task templates added yet"
 msgstr "Nie dodano jeszcze szablonów zadań"
 
-#: src/components/documents/container/ContainerForm.tsx:81
+#: src/components/documents/container/ContainerForm.tsx:95
 msgid "Container name"
 msgstr "Nazwa kontenera"
 
@@ -215,7 +219,7 @@ msgstr "Nazwa kontenera"
 #~ msgid "Are you sure you want to delete this document?"
 #~ msgstr "Czy na pewno chcesz usunąć ten dokument?"
 
-#: src/components/documents/relations/RelationConfigForm.tsx:113
+#: src/components/documents/relations/RelationConfigForm.tsx:122
 msgid "Relation Type"
 msgstr "Typ relacji"
 
@@ -223,33 +227,32 @@ msgstr "Typ relacji"
 msgid "Template Name"
 msgstr "Nazwa szablonu"
 
-#: src/components/documents/relations/DocumentFilters.tsx:56
+#: src/components/documents/relations/DocumentFilters.tsx:72
 msgid "Clear Filter"
 msgstr "Wyczyść filtry"
 
-#: src/components/documents/container/ContainerForm.tsx:65
-#: src/components/documents/document/editor/DocumentTabs.tsx:39
+#: src/components/documents/container/ContainerForm.tsx:75
 msgid "Details"
 msgstr "Szczegóły"
 
-#: src/components/documents/relations/RelationConfigForm.tsx:192
+#: src/components/documents/relations/RelationConfigForm.tsx:201
 msgid "Matching Rules"
 msgstr "Reguły dopasowania"
 
-#: src/components/documents/customFields/SchemaEditor.tsx:120
+#: src/components/documents/customFields/SchemaEditor.tsx:127
 msgid "Show in list"
 msgstr "Pokaż na liście"
 
-#: src/components/documents/container/ContainerActions.tsx:25
-#: src/components/documents/container/ContainerDropdown.tsx:46
+#: src/components/documents/container/ContainerActions.tsx:30
+#: src/components/documents/container/ContainerDropdown.tsx:52
 msgid "View Documents"
 msgstr "Zobacz dokumenty"
 
-#: src/components/documents/container/ContainerDropdown.tsx:50
+#: src/components/documents/container/ContainerDropdown.tsx:58
 msgid "Edit conteiner"
 msgstr "Edytuj kontener"
 
-#: src/components/documents/container/ContainerForm.tsx:109
+#: src/components/documents/container/ContainerForm.tsx:123
 msgid "Optional target number of documents"
 msgstr "Opcjonalna docelowa liczba dokumentów"
 
@@ -278,7 +281,7 @@ msgstr "Nie podano opisu"
 msgid "Edit board template"
 msgstr "Edytuj szablon tablicy"
 
-#: src/components/documents/document/DocumentActions.tsx:80
+#: src/components/documents/document/DocumentActions.tsx:84
 msgid "Move Down"
 msgstr "Przenieś w dół"
 
@@ -290,23 +293,23 @@ msgstr "{documentCount} z {0} dokumentów"
 msgid "Enter template name"
 msgstr "Wprowadź nazwę szablonu"
 
-#: src/components/documents/relations/RelationConfigForm.tsx:195
+#: src/components/documents/relations/RelationConfigForm.tsx:204
 msgid "Add Rule"
 msgstr "Dodaj regułę"
 
 #: src/components/documents/document/editor/DocumentTabs.tsx:66
-msgid "Document Information"
-msgstr "Sczegóły dokumentu"
+#~ msgid "Document Information"
+#~ msgstr "Sczegóły dokumentu"
 
-#: src/components/documents/relations/DocumentFilters.tsx:39
+#: src/components/documents/relations/DocumentFilters.tsx:52
 msgid "Filters"
 msgstr "Filtry"
 
 #: src/components/boards/instancesList/InstanceActions.tsx:62
 #: src/components/boards/instancesList/InstanceActions.tsx:79
-#: src/components/documents/container/ContainerDropdown.tsx:81
-#: src/components/documents/document/DocumentActions.tsx:90
-#: src/components/documents/document/DocumentActions.tsx:110
+#: src/components/documents/container/ContainerDropdown.tsx:95
+#: src/components/documents/document/DocumentActions.tsx:96
+#: src/components/documents/document/DocumentActions.tsx:116
 msgid "Delete"
 msgstr "Usuń"
 
@@ -314,7 +317,7 @@ msgstr "Usuń"
 msgid "Create or modify board template details"
 msgstr "Utwórz lub zmodyfikuj szczegóły szablonu tablicy"
 
-#: src/components/documents/relations/DocumentFilters.tsx:30
+#: src/components/documents/relations/DocumentFilters.tsx:41
 msgid "Back to containers"
 msgstr "Powrót do kontenerów"
 
@@ -325,10 +328,10 @@ msgstr "Ładowanie konfiguracji projektu..."
 #: src/components/boards/instancesList/InstanceActions.tsx:77
 #: src/components/boards/KanbanTemplateEditor.tsx:241
 #: src/components/boards/KanbanTemplateEditor.tsx:254
-#: src/components/documents/container/ContainerDropdown.tsx:78
-#: src/components/documents/container/ContainerForm.tsx:124
-#: src/components/documents/document/DocumentActions.tsx:107
-#: src/components/documents/document/DocumentForm.tsx:66
+#: src/components/documents/container/ContainerDropdown.tsx:92
+#: src/components/documents/container/ContainerForm.tsx:138
+#: src/components/documents/document/DocumentActions.tsx:113
+#: src/components/documents/document/DocumentForm.tsx:113
 msgid "Cancel"
 msgstr "Anuluj"
 
@@ -336,22 +339,26 @@ msgstr "Anuluj"
 msgid "Go to task templates"
 msgstr "Przejdź do szablonów zadań"
 
-#: src/components/documents/document/DocumentActions.tsx:64
+#: src/components/documents/document/DocumentActions.tsx:67
 #: src/components/tasks/TemplateList.tsx:38
 msgid "Edit"
 msgstr "Edytuj"
 
-#: src/components/documents/container/ContainerDropdown.tsx:71
+#: src/components/documents/container/ContainerDropdown.tsx:84
 msgid "This action cannot be undone. This will permanently delete this container and all its documents."
 msgstr "Tej akcji nie można cofnąć. Spowoduje to trwałe usunięcie tego kontenera i wszystkich jego dokumentów."
 
-#: src/components/documents/customFields/SchemaEditor.tsx:65
+#: src/components/documents/customFields/SchemaEditor.tsx:67
 msgid "Field Name"
 msgstr "Nazwa pola"
 
-#: src/components/documents/container/ContainerDropdown.tsx:54
+#: src/components/documents/container/ContainerDropdown.tsx:64
 msgid "Relations"
 msgstr "Relacje"
+
+#: src/components/documents/customFields/SchemaEditor.tsx:142
+msgid "Show in detail"
+msgstr ""
 
 #: src/components/boards/instancesList/InstanceActions.tsx:54
 msgid "Templates"
@@ -369,7 +376,7 @@ msgstr "Krok {0}: {1}"
 msgid "Steps: {0}"
 msgstr "Kroki: {0}"
 
-#: src/components/documents/document/DocumentTable.tsx:79
+#: src/components/documents/document/DocumentTable.tsx:83
 msgid "Content Preview"
 msgstr "Podgląd zawartości"
 
@@ -401,7 +408,7 @@ msgstr "Powiązane dokumenty"
 #~ msgid "Anuluj"
 #~ msgstr "Anuluj"
 
-#: src/components/documents/container/ContainerForm.tsx:69
+#: src/components/documents/container/ContainerForm.tsx:79
 msgid "Custom fields"
 msgstr "Własne pola"
 
@@ -409,16 +416,16 @@ msgstr "Własne pola"
 msgid "Close Preview"
 msgstr "Zamknij podgląd"
 
-#: src/components/documents/container/ContainerDropdown.tsx:62
+#: src/components/documents/container/ContainerDropdown.tsx:75
 msgid "Delete container"
 msgstr "Usuń kontener"
 
-#: src/components/documents/document/DocumentActions.tsx:53
+#: src/components/documents/document/DocumentActions.tsx:55
 #: src/components/tasks/TemplateList.tsx:32
 msgid "Preview"
 msgstr "Podgląd"
 
-#: src/components/documents/container/ContainerForm.tsx:97
+#: src/components/documents/container/ContainerForm.tsx:111
 msgid "Estimated target document count"
 msgstr "Szacowana docelowa liczba dokumentów"
 
@@ -426,15 +433,19 @@ msgstr "Szacowana docelowa liczba dokumentów"
 msgid "Project Not Found"
 msgstr "Nie znaleziono projektu"
 
-#: src/components/documents/customFields/SchemaEditor.tsx:79
+#: src/components/documents/customFields/SchemaEditor.tsx:81
 msgid "Field Type"
 msgstr "Typ pola"
+
+#: src/components/documents/document/DocumentForm.tsx:52
+msgid "An unknown error occurred"
+msgstr ""
 
 #: src/components/projects/ProjectRenderer.tsx:136
 msgid "The requested project does not exist or you may not have access to it."
 msgstr "Żądany projekt nie istnieje lub nie masz do niego dostępu."
 
-#: src/components/documents/document/preview/DocumentPreview.tsx:49
+#: src/components/documents/document/preview/DocumentPreview.tsx:48
 msgid "Value"
 msgstr "Wartość"
 

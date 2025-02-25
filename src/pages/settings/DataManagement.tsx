@@ -21,21 +21,21 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useDocumentsStore } from "@/store/documentsStore";
-import { useKanbanStore } from "@/store/kanbanStore";
-import { useTasksStore } from "@/store/tasksStore";
+// import { useDocumentsStore } from "@/store/documentsStore";
+// import { useKanbanStore } from "@/store/kanbanStore";
+// import { useTasksStore } from "@/store/tasksStore";
 
 export const DataManagement = () => {
   const [resetSuccess, setResetSuccess] = useState(false);
 
-  const resetDocuments = useDocumentsStore((state) => state.reset);
-  const resetKanban = useKanbanStore((state) => state.reset);
-  const resetTasks = useTasksStore((state) => state.reset);
+  // const resetDocuments = useDocumentsStore((state) => state.reset);
+  // const resetKanban = useKanbanStore((state) => state.reset);
+  // const resetTasks = useTasksStore((state) => state.reset);
 
   const handleDataReset = () => {
-    resetDocuments();
-    resetKanban();
-    resetTasks();
+    // resetDocuments();
+    // resetKanban();
+    // resetTasks();
     localStorage.removeItem("documents-storage");
     localStorage.removeItem("kanban-storage");
     localStorage.removeItem("templates");
