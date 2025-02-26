@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useProjectStore } from '@/store/projectStore';
 import { formatDistanceToNow } from 'date-fns';
 import { useAdminNavigate } from '@/hooks/useAdminNavigate';
+import AdminOutletTemplate from '@/layouts/AdminOutletTemplate';
 
 const ProjectListPage: React.FC = () => {
   const adminNavigate = useAdminNavigate();
@@ -21,12 +22,15 @@ const ProjectListPage: React.FC = () => {
   };
   
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Projects</h1>
+    <AdminOutletTemplate
+      title="Projects"
+      description=""
+      actions={
         <Button onClick={handleCreateNew}>Create New Project</Button>
-      </div>
-      
+      }
+    >
+    
+    
       {projects.length === 0 ? (
         <div className="text-center py-12 bg-card rounded-lg border">
           <h2 className="text-2xl font-semibold mb-4">No Projects Yet</h2>
@@ -75,7 +79,8 @@ const ProjectListPage: React.FC = () => {
           ))}
         </div>
       )}
-    </div>
+   
+    </AdminOutletTemplate>
   );
 };
 

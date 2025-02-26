@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { ITask, ITaskStep } from '@/utils/types';
 import { Plus, PlayCircle, FileText, Folder } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,8 +22,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ITask, ITaskStep } from '@/utils/tasks/taskTypes';
 
-export function TaskDetail() {
+export function TaskDetailNavigator() {
   // Pobierz wybrane id zadania ze sklepu
   const selectedTaskId = useTaskStore((state) => state.selectedTaskId);
   // Subskrybujemy zadanie na podstawie selectedTaskId
@@ -97,7 +97,7 @@ export function TaskDetail() {
       <div className="px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-semibold">{task.title}</h2>
+            <h2 className="text-xl font-semibold mt-2">{task.title}</h2>
             <div className="flex items-center gap-2 mt-1">
               {getStatusBadge(task.status)}
               {getPriorityBadge(task.priority)}
@@ -114,19 +114,18 @@ export function TaskDetail() {
       </div>
       <div className="px-6">
         <div className="space-y-6">
-          <div>
-            <h3 className="text-sm font-medium mb-2">Description</h3>
-            <p className="text-sm">
+          
+            
+            <p className="text-sm text-muted-foreground">
               {task.description || 'No description provided.'}
             </p>
-          </div>
-
+         
           {container && (
             <div>
-              <h3 className="text-sm font-medium mb-2">Container</h3>
+              
               <div className="flex items-center gap-2 text-sm">
                 <Folder className="h-4 w-4" />
-                {container.name}
+                Inside: {container.name}
               </div>
             </div>
           )}

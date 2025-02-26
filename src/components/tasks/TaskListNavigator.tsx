@@ -1,4 +1,4 @@
-import { ITask } from "@/utils/types";
+
 import { useTaskStore } from "@/store/taskStore";
 import {
   Clock,
@@ -40,12 +40,13 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDocumentStore } from "@/store/documentStore";
 import { Column } from "../common/ColumnComponent";
+import { ITask } from "@/utils/tasks/taskTypes";
 
 interface TaskListProps {
   onSelectTask: (task: ITask) => void;
 }
 
-export function TaskList({ onSelectTask }: TaskListProps) {
+export function TaskListNavigator({ onSelectTask }: TaskListProps) {
   // Data from store
   const {
     tasks,
