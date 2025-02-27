@@ -7,7 +7,8 @@ import { Folder, FileText, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useTaskFlowStore } from "../../store";
+
+import { DocItem } from "../../types";
 
 import DocumentBrowser from "./DocumentBrowser";
 import DocumentViewer from "./DocumentViewer";
@@ -16,14 +17,18 @@ import NewDocumentModal from "./NewDocumentModal";
 const DocumentsView: React.FC = () => {
   const { 
     addFolder, 
+    searchDocItems
+  } = useDataStore();
+  
+  const {
     currentFolder, 
     selectedDocument, 
     toggleNewDocumentModal,
-    searchDocuments
-  } = useTaskFlowStore();
+    selectDocument
+  } = useUIStore();
   
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<DocItem[]>([]);
   
   const handleNewFolder = () => {
     const folderName = prompt("Enter folder name:");
@@ -39,7 +44,7 @@ const DocumentsView: React.FC = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
-      const results = searchDocuments(searchTerm);
+      const results = searchDocItems(searchTerm);
       setSearchResults(results);
     } else {
       setSearchResults([]);
@@ -95,7 +100,7 @@ const DocumentsView: React.FC = () => {
                   metaKeys={doc.metaKeys}
                   updatedAt={doc.updatedAt}
                   onSelect={() => {
-                    useTaskFlowStore.getState().selectDocument(doc.id);
+                    selectDocument(doc.id);
                     setSearchResults([]);
                     setSearchTerm("");
                   }}
@@ -130,5 +135,6 @@ const DocumentsView: React.FC = () => {
 
 // Import DocumentItem here to avoid circular dependency
 import DocumentItem from "./DocumentItem";
+import { useDataStore, useUIStore } from "../../store";
 
 export default DocumentsView;

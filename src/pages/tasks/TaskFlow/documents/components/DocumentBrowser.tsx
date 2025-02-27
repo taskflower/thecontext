@@ -2,22 +2,25 @@
 
 import React from "react";
 import { Folder } from "lucide-react";
-import { useTaskFlowStore } from "../../store";
 import DocumentItem from "./DocumentItem";
 import { Button } from "@/components/ui/button";
+import { useDataStore, useUIStore } from "../../store";
 
 const DocumentBrowser: React.FC = () => {
   const { 
-    currentFolder, 
     getChildFolders, 
-    getDocumentsInFolder, 
-    getFolderPath, 
+    getDocItemsInFolder, 
+    getFolderPath
+  } = useDataStore();
+  
+  const {
+    currentFolder,
     navigateToFolder,
     selectDocument
-  } = useTaskFlowStore();
+  } = useUIStore();
   
   const childFolders = getChildFolders(currentFolder);
-  const documents = getDocumentsInFolder(currentFolder);
+  const docItems = getDocItemsInFolder(currentFolder);
   const folderPath = getFolderPath(currentFolder);
   
   return (
@@ -52,19 +55,19 @@ const DocumentBrowser: React.FC = () => {
           />
         ))}
         
-        {documents.map(document => (
+        {docItems.map(docItem => (
           <DocumentItem 
-            key={document.id} 
+            key={docItem.id} 
             type="document" 
-            id={document.id}
-            name={document.title}
-            metaKeys={document.metaKeys}
-            updatedAt={document.updatedAt}
-            onSelect={() => selectDocument(document.id)}
+            id={docItem.id}
+            name={docItem.title}
+            metaKeys={docItem.metaKeys}
+            updatedAt={docItem.updatedAt}
+            onSelect={() => selectDocument(docItem.id)}
           />
         ))}
         
-        {childFolders.length === 0 && documents.length === 0 && (
+        {childFolders.length === 0 && docItems.length === 0 && (
           <div className="text-center p-6 text-muted-foreground">
             This folder is empty
           </div>

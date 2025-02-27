@@ -1,5 +1,6 @@
-import React from "react";
-import { useTaskFlowStore } from "../../store";
+// src/pages/tasks/TaskFlow/projects/components/NewProjectModal.tsx
+import React, { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,40 +13,60 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useDataStore } from "../../store";
+
 
 interface NewProjectModalProps {
   toggleNewProjectModal: () => void;
 }
 
 const NewProjectModal: React.FC<NewProjectModalProps> = ({ toggleNewProjectModal }) => {
-  const { addProject } = useTaskFlowStore();
-  const [open, setOpen] = React.useState(true);
+  const { addProject, addFolder } = useDataStore();
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [dueDate, setDueDate] = useState(
+    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // Default: 1 week from now
+  );
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const form = e.target as HTMLFormElement;
-    const formData = new FormData(form);
+    if (!title.trim()) return;
 
+    // Create a folder for this project
+    const folderId = `folder-${Date.now()}`;
+    
+    // Add a folder for the project
+    addFolder({
+      id: folderId,
+      name: title,
+      parentId: 'projects' // We assume there's always a "projects" parent folder
+    });
+
+    // Create and add the project
     const newProject = {
       id: `proj-${Date.now()}`,
-      title: formData.get("title") as string,
-      description: formData.get("description") as string,
+      title,
+      description,
       progress: 0,
       tasks: 0,
       completedTasks: 0,
-      dueDate: formData.get("dueDate") as string,
-      folderId: null,
+      dueDate,
+      folderId
     };
 
     addProject(newProject);
-    setOpen(false);
+    
+    // Reset form
+    setTitle("");
+    setDescription("");
+    setDueDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+    
     toggleNewProjectModal();
   };
 
   return (
-    <Dialog open={open} onOpenChange={(open) => {
-      setOpen(open);
+    <Dialog open={true} onOpenChange={(open) => {
       if (!open) toggleNewProjectModal();
     }}>
       <DialogContent>
@@ -60,15 +81,21 @@ const NewProjectModal: React.FC<NewProjectModalProps> = ({ toggleNewProjectModal
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="title">Project Title</Label>
-              <Input id="title" name="title" required />
+              <Input 
+                id="title" 
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required 
+              />
             </div>
             
             <div className="grid gap-2">
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
-                name="description"
                 className="h-24"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
               />
             </div>
             
@@ -76,8 +103,9 @@ const NewProjectModal: React.FC<NewProjectModalProps> = ({ toggleNewProjectModal
               <Label htmlFor="dueDate">Due Date</Label>
               <Input
                 id="dueDate"
-                name="dueDate"
                 type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
                 required
               />
             </div>
@@ -87,7 +115,7 @@ const NewProjectModal: React.FC<NewProjectModalProps> = ({ toggleNewProjectModal
             <Button type="button" variant="outline" onClick={toggleNewProjectModal}>
               Cancel
             </Button>
-            <Button type="submit">
+            <Button type="submit" disabled={!title.trim()}>
               Create Project
             </Button>
           </DialogFooter>

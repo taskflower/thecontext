@@ -2,35 +2,33 @@ import React from "react";
 import { Plus } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
-import { useTaskFlowStore } from "../../store";
+
 import ProjectCard from "./ProjectCard";
 import ProjectListItem from "./ProjectListItem";
+import { useDataStore, useUIStore } from "../../store";
+
 
 const ProjectsView: React.FC = () => {
-  const { 
-    viewMode, 
-    projects, 
-    toggleNewProjectModal, 
-    navigateToFolder, 
-    setActiveTab 
-  } = useTaskFlowStore();
-  
+  const { projects } = useDataStore();
+  const { viewMode, navigateToFolder, setActiveTab, toggleNewProjectModal } =
+    useUIStore();
+
   return (
     <div className="p-6 flex-1 overflow-auto">
       <h3 className="text-lg font-medium mb-4">Your Projects</h3>
-      
+
       {viewMode === "cards" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {projects.map((project) => (
-            <ProjectCard 
-              key={project.id} 
-              project={project} 
+            <ProjectCard
+              key={project.id}
+              project={project}
               navigateToFolder={navigateToFolder}
               setActiveTab={setActiveTab}
             />
           ))}
-          
-          <Card 
+
+          <Card
             className="border border-dashed cursor-pointer hover:bg-secondary/20"
             onClick={toggleNewProjectModal}
           >
@@ -49,11 +47,11 @@ const ProjectsView: React.FC = () => {
             <div className="col-span-2">Due Date</div>
             <div className="col-span-1"></div>
           </div>
-          
+
           {projects.map((project) => (
-            <ProjectListItem 
-              key={project.id} 
-              project={project} 
+            <ProjectListItem
+              key={project.id}
+              project={project}
               navigateToFolder={navigateToFolder}
               setActiveTab={setActiveTab}
             />

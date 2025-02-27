@@ -1,8 +1,10 @@
 import React from "react";
 import { Status } from "../../types";
-import { useTaskFlowStore } from "../../store";
+
 import TaskCard from "./TaskCard";
 import { Badge } from "@/components/ui/badge";
+import { useDataStore } from "../../store";
+
 
 interface TaskColumnProps {
   title: string;
@@ -11,7 +13,7 @@ interface TaskColumnProps {
 }
 
 const TaskColumn: React.FC<TaskColumnProps> = ({ title, status, onTaskClick }) => {
-  const { getTasksByStatus, updateTaskStatus } = useTaskFlowStore();
+  const { getTasksByStatus, updateTaskStatus } = useDataStore();
   const tasks = getTasksByStatus(status);
   const count = tasks.length;
   

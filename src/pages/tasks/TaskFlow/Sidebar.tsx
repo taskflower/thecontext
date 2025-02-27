@@ -4,8 +4,8 @@ import { Home, CheckSquare, FileText, Settings, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { useTaskFlowStore } from "./store";
 import { TabName } from "./types";
+import { useDataStore } from "./store";
 
 
 interface SidebarProps {
@@ -19,7 +19,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   setActiveTab, 
   toggleNewProjectModal 
 }) => {
-  const { getTasksCountByStatus } = useTaskFlowStore();
+  const { getTasksCountByStatus } = useDataStore();
   const pendingTasksCount =
     getTasksCountByStatus("todo") + getTasksCountByStatus("in-progress");
 

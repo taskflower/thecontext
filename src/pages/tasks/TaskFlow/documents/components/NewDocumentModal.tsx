@@ -1,11 +1,6 @@
 // src/pages/tasks/TaskFlow/documents/components/NewDocumentModal.tsx
-
 import React, { useState } from "react";
-import { useTaskFlowStore } from "../../store";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+
 import {
   Dialog,
   DialogContent,
@@ -14,22 +9,27 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { DocItem } from "../../types";
+import { useDataStore, useUIStore } from "../../store";
+import { Button, Input, Label, Textarea } from "@/components/ui";
 
 const NewDocumentModal: React.FC = () => {
-  const { showNewDocumentModal, toggleNewDocumentModal, addDocument, currentFolder } = useTaskFlowStore();
-  const [metaKeys, setMetaKeys] = useState<string>("");
+  const { addDocItem } = useDataStore();
+  const { showNewDocumentModal, toggleNewDocumentModal, currentFolder } = useUIStore();
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [metaKeys, setMetaKeys] = useState("");
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const form = e.target as HTMLFormElement;
-    const formData = new FormData(form);
+    if (!title.trim()) return;
 
     const currentTime = new Date().toISOString();
-    const newDocument = {
+    const newDocItem: DocItem = {
       id: `doc-${Date.now()}`,
-      title: formData.get("title") as string,
-      content: formData.get("content") as string,
+      title,
+      content,
       metaKeys: metaKeys.split(",").map(key => key.trim()).filter(key => key !== ""),
       schema: {},
       folderId: currentFolder,
@@ -37,7 +37,13 @@ const NewDocumentModal: React.FC = () => {
       updatedAt: currentTime
     };
 
-    addDocument(newDocument);
+    addDocItem(newDocItem);
+    
+    // Reset form
+    setTitle("");
+    setContent("");
+    setMetaKeys("");
+    
     toggleNewDocumentModal();
   };
 
@@ -55,15 +61,21 @@ const NewDocumentModal: React.FC = () => {
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="title">Title</Label>
-              <Input id="title" name="title" required />
+              <Input 
+                id="title" 
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required 
+              />
             </div>
             
             <div className="grid gap-2">
               <Label htmlFor="content">Content</Label>
               <Textarea
                 id="content"
-                name="content"
                 className="h-32"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
               />
             </div>
             
@@ -82,7 +94,7 @@ const NewDocumentModal: React.FC = () => {
             <Button type="button" variant="outline" onClick={toggleNewDocumentModal}>
               Cancel
             </Button>
-            <Button type="submit">
+            <Button type="submit" disabled={!title.trim()}>
               Create Document
             </Button>
           </DialogFooter>
