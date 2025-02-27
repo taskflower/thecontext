@@ -1,3 +1,5 @@
+// src/pages/tasks/TaskFlow/documents/components/DocumentBrowser.tsx
+
 import React from "react";
 import { Folder } from "lucide-react";
 import { useTaskFlowStore } from "../../store";
@@ -8,13 +10,14 @@ const DocumentBrowser: React.FC = () => {
   const { 
     currentFolder, 
     getChildFolders, 
-    getFilesInFolder, 
+    getDocumentsInFolder, 
     getFolderPath, 
-    navigateToFolder 
+    navigateToFolder,
+    selectDocument
   } = useTaskFlowStore();
   
   const childFolders = getChildFolders(currentFolder);
-  const files = getFilesInFolder(currentFolder);
+  const documents = getDocumentsInFolder(currentFolder);
   const folderPath = getFolderPath(currentFolder);
   
   return (
@@ -49,14 +52,23 @@ const DocumentBrowser: React.FC = () => {
           />
         ))}
         
-        {files.map(file => (
+        {documents.map(document => (
           <DocumentItem 
-            key={file.id} 
-            type="file" 
-            id={file.id}
-            name={file.name} 
+            key={document.id} 
+            type="document" 
+            id={document.id}
+            name={document.title}
+            metaKeys={document.metaKeys}
+            updatedAt={document.updatedAt}
+            onSelect={() => selectDocument(document.id)}
           />
         ))}
+        
+        {childFolders.length === 0 && documents.length === 0 && (
+          <div className="text-center p-6 text-muted-foreground">
+            This folder is empty
+          </div>
+        )}
       </div>
     </>
   );

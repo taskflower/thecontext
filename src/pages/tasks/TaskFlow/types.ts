@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// src/pages/tasks/TaskFlow/types.ts
+
 export type Priority = 'low' | 'medium' | 'high';
 export type Status = 'todo' | 'in-progress' | 'review' | 'completed';
 export type ViewMode = 'cards' | 'list';
@@ -9,10 +12,16 @@ export interface Folder {
   parentId: string | null;
 }
 
-export interface File {
+// Updated Document interface (replacing File)
+export interface Document {
   id: string;
-  name: string;
+  title: string;
+  content: string;
+  metaKeys: string[];
+  schema: Record<string, any>;
   folderId: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Project {

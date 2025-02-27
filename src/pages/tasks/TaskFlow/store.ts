@@ -1,13 +1,17 @@
+// src/pages/tasks/TaskFlow/store.ts
+
 import { create } from 'zustand';
-import { Project, Task, Folder, File, Status, TabName, ViewMode } from './types';
+import { Project, Task, Folder, Document, Status, TabName, ViewMode } from './types';
 
 interface TaskFlowState {
   activeTab: TabName;
   viewMode: ViewMode;
   showNewProjectModal: boolean;
+  showNewDocumentModal: boolean;
   currentFolder: string;
+  selectedDocument: string | null;
   folders: Folder[];
-  files: File[];
+  documents: Document[];
   projects: Project[];
   tasks: Task[];
 
@@ -15,26 +19,33 @@ interface TaskFlowState {
   setActiveTab: (tab: TabName) => void;
   setViewMode: (mode: ViewMode) => void;
   toggleNewProjectModal: () => void;
+  toggleNewDocumentModal: () => void;
   navigateToFolder: (folderId: string) => void;
+  selectDocument: (documentId: string | null) => void;
   addProject: (project: Project) => void;
   addFolder: (folder: Folder) => void;
-  addFile: (file: File) => void;
+  addDocument: (document: Document) => void;
+  updateDocument: (id: string, updates: Partial<Document>) => void;
   addTask: (task: Task) => void;
   updateTaskStatus: (taskId: string, status: Status) => void;
 
   // Helpers
   getChildFolders: (parentId: string) => Folder[];
-  getFilesInFolder: (folderId: string) => File[];
+  getDocumentsInFolder: (folderId: string) => Document[];
+  getDocument: (documentId: string) => Document | undefined;
   getTasksByStatus: (status: Status) => Task[];
   getTasksCountByStatus: (status: Status) => number;
   getFolderPath: (folderId: string) => Folder[];
+  searchDocuments: (query: string) => Document[];
 }
 
 export const useTaskFlowStore = create<TaskFlowState>((set, get) => ({
   activeTab: 'dashboard',
   viewMode: 'cards',
   showNewProjectModal: false,
+  showNewDocumentModal: false,
   currentFolder: 'root',
+  selectedDocument: null,
   
   folders: [
     { id: 'root', name: 'All Documents', parentId: null },
@@ -43,12 +54,57 @@ export const useTaskFlowStore = create<TaskFlowState>((set, get) => ({
     { id: 'marketing', name: 'Marketing Campaign', parentId: 'projects' },
   ],
   
-  files: [
-    { id: 'file1', name: 'Project Plan Template.docx', folderId: 'projects' },
-    { id: 'file2', name: 'Budget Overview.xlsx', folderId: 'projects' },
-    { id: 'file3', name: 'Team Assignments.pdf', folderId: 'projects' },
-    { id: 'file4', name: 'Logo Designs.png', folderId: 'website' },
-    { id: 'file5', name: 'Content Strategy.docx', folderId: 'marketing' },
+  documents: [
+    { 
+      id: 'doc1', 
+      title: 'Project Plan Template', 
+      content: 'This is a project plan template for our team projects.',
+      metaKeys: ['template', 'project plan', 'management'],
+      schema: {},
+      folderId: 'projects',
+      createdAt: '2025-02-15T10:30:00Z',
+      updatedAt: '2025-02-15T10:30:00Z'
+    },
+    { 
+      id: 'doc2', 
+      title: 'Budget Overview', 
+      content: 'Financial overview for Q1 2025 projects',
+      metaKeys: ['budget', 'finance', 'Q1'],
+      schema: {},
+      folderId: 'projects',
+      createdAt: '2025-02-10T14:45:00Z',
+      updatedAt: '2025-02-20T09:15:00Z'
+    },
+    { 
+      id: 'doc3', 
+      title: 'Team Assignments', 
+      content: 'Assignment details for team members across all current projects',
+      metaKeys: ['team', 'assignments', 'roles'],
+      schema: {},
+      folderId: 'projects',
+      createdAt: '2025-02-05T16:20:00Z',
+      updatedAt: '2025-02-21T11:45:00Z'
+    },
+    { 
+      id: 'doc4', 
+      title: 'Logo Design Specifications', 
+      content: 'Specifications for the new company logo design',
+      metaKeys: ['design', 'logo', 'branding'],
+      schema: {},
+      folderId: 'website',
+      createdAt: '2025-01-28T09:10:00Z',
+      updatedAt: '2025-02-18T15:30:00Z'
+    },
+    { 
+      id: 'doc5', 
+      title: 'Content Strategy', 
+      content: 'Digital marketing content strategy for Q1 2025',
+      metaKeys: ['marketing', 'content', 'strategy'],
+      schema: {},
+      folderId: 'marketing',
+      createdAt: '2025-02-01T13:25:00Z',
+      updatedAt: '2025-02-16T10:20:00Z'
+    },
   ],
   
   projects: [
@@ -96,7 +152,9 @@ export const useTaskFlowStore = create<TaskFlowState>((set, get) => ({
   setActiveTab: (tab) => set(() => ({ activeTab: tab })),
   setViewMode: (mode) => set(() => ({ viewMode: mode })),
   toggleNewProjectModal: () => set((state) => ({ showNewProjectModal: !state.showNewProjectModal })),
+  toggleNewDocumentModal: () => set((state) => ({ showNewDocumentModal: !state.showNewDocumentModal })),
   navigateToFolder: (folderId) => set(() => ({ currentFolder: folderId })),
+  selectDocument: (documentId) => set(() => ({ selectedDocument: documentId })),
   
   addProject: (project) => set((state) => ({ 
     projects: [...state.projects, project] 
@@ -106,8 +164,16 @@ export const useTaskFlowStore = create<TaskFlowState>((set, get) => ({
     folders: [...state.folders, folder] 
   })),
   
-  addFile: (file) => set((state) => ({ 
-    files: [...state.files, file] 
+  addDocument: (document) => set((state) => ({ 
+    documents: [...state.documents, document] 
+  })),
+  
+  updateDocument: (id, updates) => set((state) => ({
+    documents: state.documents.map(document => 
+      document.id === id 
+        ? { ...document, ...updates, updatedAt: new Date().toISOString() } 
+        : document
+    )
   })),
   
   addTask: (task) => set((state) => ({ 
@@ -125,8 +191,12 @@ export const useTaskFlowStore = create<TaskFlowState>((set, get) => ({
     return get().folders.filter(folder => folder.parentId === parentId);
   },
   
-  getFilesInFolder: (folderId) => {
-    return get().files.filter(file => file.folderId === folderId);
+  getDocumentsInFolder: (folderId) => {
+    return get().documents.filter(document => document.folderId === folderId);
+  },
+  
+  getDocument: (documentId) => {
+    return get().documents.find(document => document.id === documentId);
   },
   
   getTasksByStatus: (status) => {
@@ -152,5 +222,14 @@ export const useTaskFlowStore = create<TaskFlowState>((set, get) => ({
     }
     
     return path;
+  },
+
+  searchDocuments: (query) => {
+    const lowerQuery = query.toLowerCase();
+    return get().documents.filter(doc => 
+      doc.title.toLowerCase().includes(lowerQuery) || 
+      doc.content.toLowerCase().includes(lowerQuery) || 
+      doc.metaKeys.some(key => key.toLowerCase().includes(lowerQuery))
+    );
   },
 }));
