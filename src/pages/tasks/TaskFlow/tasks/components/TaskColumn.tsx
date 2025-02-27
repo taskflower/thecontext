@@ -1,18 +1,17 @@
 import React from "react";
-import { Plus } from "lucide-react";
-import { Status, Task } from "../../types";
+import { Status } from "../../types";
 import { useTaskFlowStore } from "../../store";
 import TaskCard from "./TaskCard";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 
 interface TaskColumnProps {
   title: string;
   status: Status;
+  onTaskClick?: (taskId: string) => void;
 }
 
-const TaskColumn: React.FC<TaskColumnProps> = ({ title, status }) => {
-  const { getTasksByStatus, updateTaskStatus, addTask } = useTaskFlowStore();
+const TaskColumn: React.FC<TaskColumnProps> = ({ title, status, onTaskClick }) => {
+  const { getTasksByStatus, updateTaskStatus } = useTaskFlowStore();
   const tasks = getTasksByStatus(status);
   const count = tasks.length;
   
@@ -38,28 +37,10 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ title, status }) => {
       </div>
       <div className="bg-secondary/30 rounded-b-lg border p-2 h-full min-h-64">
         {tasks.map((task) => (
-          <TaskCard key={task.id} task={task} />
+          <div key={task.id} onClick={() => onTaskClick && onTaskClick(task.id)}>
+            <TaskCard task={task} />
+          </div>
         ))}
-        
-        <Button 
-          variant="outline"
-          className="w-full mt-2 border-dashed text-sm border-muted-foreground/50"
-          onClick={() => {
-            // Create a new task with default values
-            const newTask: Task = {
-              id: `task${Date.now()}`,
-              title: "New Task",
-              status,
-              priority: "medium",
-              dueDate: "Mar 20, 2025",
-              projectId: "proj1" // Default project
-            };
-            addTask(newTask);
-          }}
-        >
-          <Plus size={14} className="mr-1" />
-          Add Task
-        </Button>
       </div>
     </div>
   );

@@ -12,7 +12,7 @@ const taskRoutes: RouteObject[] = [
   { index: true, element: <TasksPage /> },
   { path: ':userId/view', element: <TaskVisualizer taskId={''} /> },
   { path: 'flow', element: <TaskFlow/> },
-  { path: 'step', element: < TaskStepView/> },
+  { path: 'step', element: < TaskStepView taskId={''}/> },
  
 
 ];
