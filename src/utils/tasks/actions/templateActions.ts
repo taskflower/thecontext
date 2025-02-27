@@ -1,7 +1,7 @@
 
-import { GetState, SetState } from "./tasksInterfaces";
-import { generateId } from "../utils";
-import { ITaskTemplate } from "./taskTypes";
+import { GetState, SetState } from "../tasksInterfaces";
+import { generateId } from "../../utils";
+import { ITaskTemplate } from "../taskTypes";
 
 export interface TemplateActions {
   addTemplate: (template: Omit<ITaskTemplate, "id">) => string;

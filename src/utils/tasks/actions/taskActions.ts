@@ -1,7 +1,7 @@
 
-import { GetState, SetState } from "./tasksInterfaces";
-import { generateId } from "../utils";
-import { ITask } from "./taskTypes";
+import { GetState, SetState } from "../tasksInterfaces";
+import { generateId } from "../../utils";
+import { ITask } from "../taskTypes";
 
 export interface TaskActions {
   addTask: (task: Omit<ITask, "id" | "createdAt" | "updatedAt">) => string;
