@@ -1,5 +1,6 @@
 # Info prompt
 
+
 ## .
 
 Aplikacja to system zarządzania zadaniami oparty na React z wykorzystaniem tablic Kanban, umożliwiający tworzenie i edytowanie szablonów z zadaniami krokowymi, śledzenie zależności oraz integrację z wtyczkami do automatycznego rozszerzania kontekstu dokumentów.
@@ -19,3 +20,7 @@ hooks/useAItaskForm - to czesc tasks
 
 comonents/containers - UI dla containers - taki multimenager jakby
 components/tasks
+
+#
+
+npx shadcn@latest add toggle-group

@@ -1,9 +1,9 @@
 // src/pages/tasks/TaskFlow/tasks/components/TasksView.tsx
 import React from "react";
 import TaskColumn from "./TaskColumn";
-import NewTaskModal from "./NewTaskModal";
-import StepWizard from "../../steps/components/StepWizard";
-import { useUIStore } from "../../store";
+import NewTaskModal from "../NewTaskModal";
+import StepWizard from "../../../steps/components/StepWizard";
+import { useUIStore } from "../../../store";
 
 
 

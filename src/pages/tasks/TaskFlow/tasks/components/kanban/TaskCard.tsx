@@ -1,11 +1,11 @@
 // src/pages/tasks/TaskFlow/tasks/components/TaskCard.tsx
 import React from "react";
-import { Task } from "../../types";
+import { Task } from "../../../types";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { CheckCircle2, CircleDashed } from "lucide-react";
-import { useDataStore } from "../../store";
+import { useDataStore } from "../../../store";
 
 
 interface TaskCardProps {

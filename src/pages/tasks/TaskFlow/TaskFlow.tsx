@@ -6,8 +6,10 @@ import DocumentsView from "./documents/components/DocumentsView";
 import Header from "./Header";
 import NewProjectModal from "./projects/components/NewProjectModal";
 import ProjectsView from "./projects/components/ProjectsView";
-import TasksView from "./tasks/components/TasksView";
+
 import Sidebar from "./Sidebar";
+import TaskListNavigator from "./tasks/components/navigator/TaskListNavigator";
+import TaskNavigator from "./tasks/components/navigator/TaskNavigator";
 
 export const TaskFlow: React.FC = () => {
   const { folders, addFolder } = useDataStore();
@@ -55,7 +57,7 @@ export const TaskFlow: React.FC = () => {
         />
 
         {activeTab === "dashboard" && <ProjectsView />}
-        {activeTab === "tasks" && <TasksView />}
+        {activeTab === "tasks" && <TaskNavigator />}
         {activeTab === "documents" && <DocumentsView />}
       </div>
 

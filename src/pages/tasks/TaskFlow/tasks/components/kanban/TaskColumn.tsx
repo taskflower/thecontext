@@ -1,9 +1,9 @@
 import React from "react";
-import { Status } from "../../types";
+import { Status } from "../../../types";
 
 import TaskCard from "./TaskCard";
 import { Badge } from "@/components/ui/badge";
-import { useDataStore } from "../../store";
+import { useDataStore } from "../../../store";
 
 
 interface TaskColumnProps {

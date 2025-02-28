@@ -102,18 +102,9 @@ export const useDataStore = create<DataState>((set, get) => ({
     const step = get().steps.find(s => s.id === stepId);
     if (!step) return;
     
-    // Check if this is a partial save
-    const isPartialSave = result._isPartialSave;
-    delete result._isPartialSave;
-    
     set((state) => ({
       steps: state.steps.map(s => 
-        s.id === stepId ? { 
-          ...s, 
-          // Only update status if not a partial save
-          status: isPartialSave ? s.status : 'completed',
-          result 
-        } : s
+        s.id === stepId ? { ...s, status: 'completed' as StepStatus, result } : s
       )
     }));
   },

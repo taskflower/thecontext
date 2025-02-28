@@ -9,11 +9,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useTaskFlowStore } from "../../store";
+
 import { Task } from "../../types";
+import { useDataStore } from "../../store";
 
 const TaskboardPanel: React.FC = () => {
-  const { addTask, projects } = useTaskFlowStore();
+  const { addTask, projects } = useDataStore();
   const [taskTitle, setTaskTitle] = useState("");
   const [projectId, setProjectId] = useState(projects[0]?.id || "");
   const [priority, setPriority] = useState("medium");
@@ -22,12 +23,15 @@ const TaskboardPanel: React.FC = () => {
     if (!taskTitle.trim()) return;
     
     const newTask: Task = {
-      id: `task${Date.now()}`,
+      id: `task-${Date.now()}`,
       title: taskTitle,
+      description: "", // Added empty description
       status: "todo", // Always add to "To Do"
-      priority: priority,
-      dueDate: "Mar 20, 2025", // Default due date
+      priority: priority as "low" | "medium" | "high",
+      dueDate: new Date().toISOString().split("T")[0], // ISO format for date
       projectId: projectId,
+      currentStepId: null,
+      data: {},
     };
     
     addTask(newTask);
@@ -75,7 +79,7 @@ const TaskboardPanel: React.FC = () => {
           </Select>
         </div>
         
-        <Button onClick={handleAddTask}>
+        <Button onClick={handleAddTask} disabled={!taskTitle.trim()}>
           <Plus size={16} className="mr-1" />
           Add Task
         </Button>
