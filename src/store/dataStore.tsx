@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/tasks/TaskFlow/store/dataStore.ts
-import { DocItem, Folder, Project, Status, Step, StepStatus, Task } from '@/types';
+import { DocItem, Folder, Project, Status, Task } from '@/types';
 import { create } from 'zustand';
 
 // Initial folder structure to maintain basic functionality
@@ -14,7 +14,6 @@ interface DataState {
   docItems: DocItem[];
   projects: Project[];
   tasks: Task[];
-  steps: Step[];
   
   // Data actions
   addProject: (project: Project) => void;
@@ -22,13 +21,10 @@ interface DataState {
   addDocItem: (docItem: DocItem) => void;
   updateDocItem: (id: string, updates: Partial<DocItem>) => void;
   addTask: (task: Task) => void;
+  updateTask: (taskId: string, updates: Partial<Task>) => void;
   updateTaskStatus: (taskId: string, status: Status) => void;
   updateTaskData: (taskId: string, data: Record<string, any>) => void;
   deleteTask: (taskId: string) => void;
-  addStep: (step: Step) => void;
-  updateStep: (stepId: string, updates: Partial<Step>) => void;
-  completeStep: (stepId: string, result?: Record<string, any>) => void;
-  skipStep: (stepId: string) => void;
   
   // Helper functions
   getChildFolders: (parentId: string) => Folder[];
@@ -38,8 +34,6 @@ interface DataState {
   getTasksCountByStatus: (status: Status) => number;
   getFolderPath: (folderId: string) => Folder[];
   searchDocItems: (query: string) => DocItem[];
-  getTaskSteps: (taskId: string) => Step[];
-  getCurrentStep: (taskId: string) => Step | undefined;
 }
 
 export const useDataStore = create<DataState>((set, get) => ({
@@ -48,7 +42,6 @@ export const useDataStore = create<DataState>((set, get) => ({
   docItems: [],
   projects: [],
   tasks: [],
-  steps: [],
   
   // Data actions
   addProject: (project) => set((state) => ({ 
@@ -75,6 +68,12 @@ export const useDataStore = create<DataState>((set, get) => ({
     tasks: [...state.tasks, task] 
   })),
   
+  updateTask: (taskId, updates) => set((state) => ({
+    tasks: state.tasks.map(task => 
+      task.id === taskId ? { ...task, ...updates } : task
+    )
+  })),
+  
   updateTaskStatus: (taskId, status) => set((state) => ({
     tasks: state.tasks.map(task => 
       task.id === taskId ? { ...task, status } : task
@@ -90,38 +89,6 @@ export const useDataStore = create<DataState>((set, get) => ({
   deleteTask: (taskId) => set((state) => ({
     tasks: state.tasks.filter(task => task.id !== taskId)
   })),
-  
-  addStep: (step) => set((state) => ({ 
-    steps: [...state.steps, step] 
-  })),
-  
-  updateStep: (stepId, updates) => set((state) => ({
-    steps: state.steps.map(step => 
-      step.id === stepId ? { ...step, ...updates } : step
-    )
-  })),
-  
-  completeStep: (stepId, result = {}) => {
-    const step = get().steps.find(s => s.id === stepId);
-    if (!step) return;
-    
-    set((state) => ({
-      steps: state.steps.map(s => 
-        s.id === stepId ? { ...s, status: 'completed' as StepStatus, result } : s
-      )
-    }));
-  },
-  
-  skipStep: (stepId) => {
-    const step = get().steps.find(s => s.id === stepId);
-    if (!step) return;
-    
-    set((state) => ({
-      steps: state.steps.map(s => 
-        s.id === stepId ? { ...s, status: 'skipped' as StepStatus } : s
-      )
-    }));
-  },
   
   // Helper functions
   getChildFolders: (parentId) => get().folders.filter(folder => folder.parentId === parentId),
@@ -158,25 +125,5 @@ export const useDataStore = create<DataState>((set, get) => ({
       doc.content.toLowerCase().includes(lowerQuery) || 
       doc.metaKeys.some(key => key.toLowerCase().includes(lowerQuery))
     );
-  },
-  
-  getTaskSteps: (taskId) => {
-    return get().steps.filter(step => step.taskId === taskId);
-  },
-  
-  getCurrentStep: (taskId) => {
-    const task = get().tasks.find(t => t.id === taskId);
-    if (!task) return undefined;
-    
-    if (task.currentStepId) {
-      return get().steps.find(step => step.id === task.currentStepId);
-    }
-    
-    // If no current step is set, return the first pending step
-    const pendingSteps = get().steps
-      .filter(step => step.taskId === taskId && step.status === 'pending')
-      .sort((a, b) => a.order - b.order);
-      
-    return pendingSteps[0];
   }
 }));

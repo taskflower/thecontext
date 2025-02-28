@@ -1,12 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/pages/tasks/TaskFlow/tasks/components/navigator/TaskDetailView.tsx
+// src/pages/tasks/components/navigator/TaskDetailView.tsx
 import React from "react";
-import { PlayCircle, Folder, Plus } from "lucide-react";
+import { PlayCircle, Folder, Plus, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
 import {
   Dialog,
   DialogContent,
@@ -22,77 +20,129 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useDataStore, useUIStore } from "@/store";
-
+import { useDataStore } from "@/store/dataStore";
+import { useStepStore } from "@/store/stepStore";
+import { useWizardStore } from "@/store/wizardStore";
+import {
+  StepEditor,
+  getAllPlugins,
+  getDefaultConfig,
+} from "@/pages/stepsPlugins";
+import { StepType } from "@/types";
+import { StepResult } from "@/pages/steps/StepResult";
 
 export function TaskDetailView() {
   const [isAddingStep, setIsAddingStep] = React.useState(false);
-  const [newStepDescription, setNewStepDescription] = React.useState('');
-  const [newStepType, setNewStepType] = React.useState('form');
+  const [isEditingStep, setIsEditingStep] = React.useState(false);
+  const [currentStepIndex, setCurrentStepIndex] = React.useState<number | null>(
+    null
+  );
+  const [newStepType, setNewStepType] = React.useState("");
+  const [newStepTitle, setNewStepTitle] = React.useState("");
 
-  // Get data from store
-  const { tasks, getTaskSteps, addStep, projects } = useDataStore();
-  const { activeTaskId, connectTaskWithSteps } = useUIStore();
+  // Pobierz wszystkie dostępne wtyczki
+  const plugins = getAllPlugins();
+
+  // Ustaw domyślnie pierwszą wtyczkę, jeśli jest dostępna
+  React.useEffect(() => {
+    if (plugins.length > 0 && !newStepType) {
+      setNewStepType(plugins[0].type);
+    }
+  }, [plugins, newStepType]);
+
+  // Pobierz dane ze sklepów
+  const { tasks, projects } = useDataStore();
+  const { getTaskSteps, updateStep, addStep } = useStepStore();
+  const { activeTaskId, openWizard } = useWizardStore();
   
-  // Get the selected task
-  const task = activeTaskId ? tasks.find(t => t.id === activeTaskId) : null;
-  const steps = activeTaskId ? getTaskSteps(activeTaskId) : [];
+  console.log("TaskDetailView - activeTaskId:", activeTaskId); // Log dla debugowania
+
+  // Pobierz wybrane zadanie
+  const task = activeTaskId ? tasks.find((t) => t.id === activeTaskId) : null;
   
-  // Get project name for the task
-  const projectName = task?.projectId ? 
-    projects.find(p => p.id === task.projectId)?.title || task.projectId : 
-    "No project";
+  if (task) {
+    console.log("Znaleziono zadanie:", task.title);
+  } else {
+    console.log("Nie znaleziono zadania dla ID:", activeTaskId);
+  }
+  
+  const steps = activeTaskId ? getTaskSteps(activeTaskId).sort((a, b) => a.order - b.order) : [];
+
+  // Pobierz nazwę projektu dla zadania
+  const projectName = task?.projectId
+    ? projects.find((p) => p.id === task.projectId)?.title || task.projectId
+    : "Brak projektu";
 
   if (!task) {
     return (
       <div className="h-full">
         <div className="px-6 py-4">
-          <h2 className="text-base font-semibold">Task Detail</h2>
+          <h2 className="text-base font-semibold">Szczegóły zadania</h2>
         </div>
         <div className="flex h-[calc(100vh-240px)] items-center justify-center">
-          <p className="text-sm text-muted-foreground">Select a task to view details</p>
+          <p className="text-sm text-muted-foreground">
+            Wybierz zadanie, aby zobaczyć szczegóły
+          </p>
         </div>
       </div>
     );
   }
 
   const handleAddStep = () => {
-    if (!newStepDescription.trim()) return;
-    
-    addStep({
-      id: `step-${task.id}-${steps.length + 1}`,
-      taskId: task.id,
-      title: newStepDescription,
-      description: newStepDescription,
-      type: newStepType as any,
-      status: "pending",
-      order: steps.length + 1,
-      config: {},
+    if (!newStepTitle.trim()) return;
+
+    const defaultConfig = getDefaultConfig(newStepType);
+
+    addStep(task.id, {
+      title: newStepTitle,
+      description: newStepTitle,
+      type: newStepType as StepType,
+      config: defaultConfig,
       options: {},
-      result: null
     });
-    
-    setNewStepDescription('');
+
+    // Resetuj i zamknij dialog
+    setNewStepTitle("");
     setIsAddingStep(false);
   };
-  
+
+  const handleEditStep = (stepIndex: number) => {
+    setCurrentStepIndex(stepIndex);
+    setIsEditingStep(true);
+  };
+
+  const handleUpdateStep = (updates: Partial<any>) => {
+    if (currentStepIndex === null) return;
+
+    const step = steps[currentStepIndex];
+    updateStep(step.id, updates);
+  };
+
+  const handleExecuteStep = (stepId: string) => {
+    if (task) {
+      openWizard(task.id, stepId);
+    }
+  };
+
   const handleExecuteAllSteps = () => {
     if (task) {
-      connectTaskWithSteps(task.id);
+      openWizard(task.id);
     }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'pending':
-        return <Badge variant="outline">Pending</Badge>;
-      case 'in-progress':
-      case 'in_progress':
-        return <Badge variant="secondary">In Progress</Badge>;
-      case 'completed':
-        return <Badge>Completed</Badge>;
-      case 'failed':
-        return <Badge variant="destructive">Failed</Badge>;
+      case "pending":
+        return <Badge variant="outline">Oczekujący</Badge>;
+      case "in-progress":
+      case "in_progress":
+        return <Badge variant="secondary">W trakcie</Badge>;
+      case "completed":
+        return <Badge>Ukończony</Badge>;
+      case "failed":
+        return <Badge variant="destructive">Nieudany</Badge>;
+      case "skipped":
+        return <Badge variant="outline">Pominięty</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -100,12 +150,12 @@ export function TaskDetailView() {
 
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
-      case 'low':
-        return <Badge variant="outline">Low Priority</Badge>;
-      case 'medium':
-        return <Badge variant="secondary">Medium Priority</Badge>;
-      case 'high':
-        return <Badge variant="destructive">High Priority</Badge>;
+      case "low":
+        return <Badge variant="outline">Niski priorytet</Badge>;
+      case "medium":
+        return <Badge variant="secondary">Średni priorytet</Badge>;
+      case "high":
+        return <Badge variant="destructive">Wysoki priorytet</Badge>;
       default:
         return <Badge variant="outline">{priority}</Badge>;
     }
@@ -124,31 +174,35 @@ export function TaskDetailView() {
           </div>
           <Button onClick={handleExecuteAllSteps}>
             <PlayCircle className="mr-2 h-4 w-4" />
-            Execute All Steps
+            Wykonaj wszystkie kroki
           </Button>
         </div>
       </div>
       <div className="px-6 py-4">
         <div className="space-y-6">
           <p className="text-sm text-muted-foreground">
-            {task.description || 'No description provided.'}
+            {task.description || "Brak opisu."}
           </p>
-          
+
           {task.projectId && (
             <div>
               <div className="flex items-center gap-2 text-sm">
                 <Folder className="h-4 w-4" />
-                Project: {projectName}
+                Projekt: {projectName}
               </div>
             </div>
           )}
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium">Steps</h3>
-              <Button variant="outline" size="sm" onClick={() => setIsAddingStep(true)}>
+              <h3 className="text-sm font-medium">Kroki</h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsAddingStep(true)}
+              >
                 <Plus className="h-4 w-4 mr-1" />
-                Add Step
+                Dodaj krok
               </Button>
             </div>
 
@@ -156,11 +210,14 @@ export function TaskDetailView() {
               <div className="space-y-3">
                 {steps.length === 0 ? (
                   <div className="py-4 text-center text-sm text-muted-foreground border rounded-md">
-                    No steps defined. Add steps to execute this task.
+                    Brak zdefiniowanych kroków. Dodaj kroki, aby wykonać to zadanie.
                   </div>
                 ) : (
                   steps.map((step, index) => (
-                    <div key={step.id} className="overflow-hidden border rounded-md">
+                    <div
+                      key={step.id}
+                      className="overflow-hidden border rounded-md"
+                    >
                       <div className="px-4 py-3">
                         <div className="flex items-center justify-between">
                           <h3 className="text-sm font-medium flex items-center gap-2">
@@ -179,12 +236,17 @@ export function TaskDetailView() {
                               variant="outline"
                               size="icon"
                               className="h-7 w-7"
-                              onClick={() => {
-                                // Execute this specific step
-                                if (task) {
-                                  connectTaskWithSteps(task.id);
-                                }
-                              }}
+                              onClick={() => handleEditStep(index)}
+                              title="Edytuj krok"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={() => handleExecuteStep(step.id)}
+                              title="Wykonaj krok"
                             >
                               <PlayCircle className="h-4 w-4" />
                             </Button>
@@ -193,11 +255,7 @@ export function TaskDetailView() {
                       </div>
                       {step.result && (
                         <div className="px-4 py-3 bg-muted/50 border-t">
-                          <div className="text-sm font-mono">
-                            {typeof step.result === 'object' 
-                              ? JSON.stringify(step.result) 
-                              : String(step.result)}
-                          </div>
+                          <StepResult step={step} />
                         </div>
                       )}
                     </div>
@@ -209,49 +267,90 @@ export function TaskDetailView() {
         </div>
       </div>
 
+      {/* Dialog dodawania kroku */}
       <Dialog open={isAddingStep} onOpenChange={setIsAddingStep}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Task Step</DialogTitle>
-            <DialogDescription>Create a new step for this task.</DialogDescription>
+            <DialogTitle>Dodaj krok do zadania</DialogTitle>
+            <DialogDescription>
+              Utwórz nowy krok dla tego zadania.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <label htmlFor="step-type" className="text-sm font-medium mb-1 block">
-                Step Type
+              <label
+                htmlFor="step-type"
+                className="text-sm font-medium mb-1 block"
+              >
+                Typ kroku
               </label>
               <Select
                 value={newStepType}
                 onValueChange={(value) => setNewStepType(value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select step type" />
+                  <SelectValue placeholder="Wybierz typ kroku" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="form">Form</SelectItem>
-                  <SelectItem value="document">Document</SelectItem>
-                  <SelectItem value="data">Data Processing</SelectItem>
-                  <SelectItem value="custom">Custom</SelectItem>
+                  {plugins.map((plugin) => (
+                    <SelectItem key={plugin.type} value={plugin.type}>
+                      {plugin.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <label htmlFor="step-description" className="text-sm font-medium mb-1 block">
-                Description
+              <label
+                htmlFor="step-title"
+                className="text-sm font-medium mb-1 block"
+              >
+                Nazwa kroku
               </label>
               <Input
-                id="step-description"
-                value={newStepDescription}
-                onChange={(e) => setNewStepDescription(e.target.value)}
-                placeholder="Step description"
+                id="step-title"
+                value={newStepTitle}
+                onChange={(e) => setNewStepTitle(e.target.value)}
+                placeholder="Nazwa kroku"
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddingStep(false)}>
-              Cancel
+              Anuluj
             </Button>
-            <Button onClick={handleAddStep}>Add Step</Button>
+            <Button onClick={handleAddStep} disabled={!newStepTitle.trim()}>
+              Dodaj krok
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog edycji kroku */}
+      <Dialog open={isEditingStep} onOpenChange={setIsEditingStep}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Edytuj krok:{" "}
+              {currentStepIndex !== null && steps[currentStepIndex]
+                ? steps[currentStepIndex].title
+                : ""}
+            </DialogTitle>
+          </DialogHeader>
+
+          {currentStepIndex !== null && steps[currentStepIndex] && (
+            <div className="py-4">
+              <StepEditor
+                step={steps[currentStepIndex]}
+                onChange={handleUpdateStep}
+              />
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditingStep(false)}>
+              Zamknij
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

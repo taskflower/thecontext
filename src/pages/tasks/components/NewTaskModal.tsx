@@ -1,6 +1,6 @@
-// src/pages/tasks/TaskFlow/tasks/components/NewTaskModal.tsx
+// src/pages/tasks/components/NewTaskModal.tsx
 import React, { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,17 +21,14 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
-import { useStepsForm } from "../../steps/useStepsForm";
-import StepsList from "../../steps/components/StepsList";
 import { useDataStore } from "@/store";
-import { Task } from "@/types";
+import { Step, StepType, Task } from "@/types";
+import { StepEditor, getAllPlugins, getDefaultConfig } from "@/pages/stepsPlugins";
 
-
-// Import modular components
-
-const NewTaskModal: React.FC = () => {
-  const { addTask, projects } = useDataStore();
+const NewTaskModal = () => {
+  const { addTask, projects, addStep } = useDataStore();
   const [showModal, setShowModal] = useState(false);
   const [taskData, setTaskData] = useState({
     title: "",
@@ -41,16 +38,8 @@ const NewTaskModal: React.FC = () => {
     dueDate: new Date().toISOString().split("T")[0],
   });
 
-  // Use the steps hook
-  const {
-    steps,
-    addStep,
-    handleStepsSubmit,
-    resetSteps,
-    updateStep,
-    removeStep,
-    moveStep,
-  } = useStepsForm();
+  // State for steps
+  const [steps, setSteps] = useState<Step[]>([]);
 
   const handleInputChange = (field: string, value: string) => {
     setTaskData({ ...taskData, [field]: value });
@@ -70,8 +59,47 @@ const NewTaskModal: React.FC = () => {
       });
 
       // Reset steps
-      resetSteps();
+      setSteps([]);
     }
+  };
+
+  // Add a new step
+  const handleAddStep = () => {
+    const plugins = getAllPlugins();
+    const defaultType = plugins.length > 0 ? plugins[0].type : 'form';
+    const defaultConfig = getDefaultConfig(defaultType);
+    
+    const newStep: Step = {
+      id: `temp-${Date.now()}-${steps.length + 1}`,
+      taskId: "temp",
+      title: `Step ${steps.length + 1}`,
+      description: "Step description",
+      type: defaultType as StepType,
+      status: "pending",
+      order: steps.length + 1,
+      config: defaultConfig,
+      options: {},
+      result: null
+    };
+    
+    setSteps([...steps, newStep]);
+  };
+
+  // Update a step
+  const handleUpdateStep = (index: number, updates: Partial<Step>) => {
+    const updatedSteps = [...steps];
+    updatedSteps[index] = { ...updatedSteps[index], ...updates };
+    setSteps(updatedSteps);
+  };
+
+  // Remove a step
+  const handleRemoveStep = (index: number) => {
+    const updatedSteps = steps.filter((_, i) => i !== index);
+    // Update order numbers
+    updatedSteps.forEach((step, i) => {
+      step.order = i + 1;
+    });
+    setSteps(updatedSteps);
   };
 
   const handleSubmit = () => {
@@ -94,8 +122,15 @@ const NewTaskModal: React.FC = () => {
     // Add task to store
     addTask(newTask);
 
-    // Process and add steps for the task
-    handleStepsSubmit(newTaskId);
+    // Add steps for the task
+    steps.forEach(step => {
+      const newStepId = `step-${newTaskId}-${step.order}`;
+      addStep({
+        ...step,
+        id: newStepId,
+        taskId: newTaskId
+      });
+    });
 
     toggleModal();
   };
@@ -200,13 +235,41 @@ const NewTaskModal: React.FC = () => {
             </TabsContent>
 
             <TabsContent value="steps">
-              <StepsList
-                steps={steps}
-                onAddStep={addStep}
-                onUpdateStep={updateStep}
-                onRemoveStep={removeStep}
-                onMoveStep={moveStep}
-              />
+              <div className="mb-4 flex justify-end">
+                <Button onClick={handleAddStep} size="sm" variant="outline">
+                  <Plus size={14} className="mr-1" />
+                  Add Step
+                </Button>
+              </div>
+              
+              {steps.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No steps defined. Click "Add Step" to create a step for this task.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {steps.map((step, index) => (
+                    <Card key={step.id} className="border">
+                      <CardHeader className="py-3 px-4 flex flex-row items-center justify-between space-y-0">
+                        <div className="font-medium">Step {index + 1}: {step.title}</div>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => handleRemoveStep(index)}
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                      </CardHeader>
+                      <CardContent className="px-4 py-3">
+                        <StepEditor 
+                          step={step} 
+                          onChange={(updates) => handleUpdateStep(index, updates)} 
+                        />
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </TabsContent>
           </Tabs>
 
