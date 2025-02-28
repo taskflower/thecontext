@@ -2,7 +2,7 @@ import React, { FC } from "react";
 import MainTitleSecondary from "./MainTitleSecondary";
 import IconCom from "@/components/common/IconComp";
 import Breadcrumbs from "@/components/ui/braadcrumbs";
-import { useCurrentModule } from "@/services/utils";
+import { useCurrentModule } from "@/utils/utils";
 
 interface AdminTemplateProps {
   // Zmieniamy typ title i description aby mogły przyjmować ReactNode

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { cn } from "@/services/utils";
+import { cn } from "@/utils/utils";
 
 interface InputProps
   extends Omit<React.ComponentPropsWithoutRef<"input">, "placeholder"> {
