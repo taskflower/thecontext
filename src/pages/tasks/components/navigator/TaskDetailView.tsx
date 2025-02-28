@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/tasks/components/navigator/TaskDetailView.tsx
 import React from "react";
 import { PlayCircle, Folder, Plus, Edit } from "lucide-react";

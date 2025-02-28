@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/stepsPlugins/StepViewer.tsx
-import React from "react";
 import { Step } from "@/types";
 import { getPlugin } from "./registry";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -13,7 +12,7 @@ interface StepViewerProps {
 
 export function StepViewer({ step, onComplete }: StepViewerProps) {
   const plugin = getPlugin(step.type);
-  
+
   if (!plugin) {
     return (
       <Alert variant="destructive">
@@ -22,6 +21,6 @@ export function StepViewer({ step, onComplete }: StepViewerProps) {
       </Alert>
     );
   }
-  
+
   return <plugin.Viewer step={step} onComplete={onComplete} />;
 }
