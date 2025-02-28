@@ -1,7 +1,7 @@
 // src/pages/tasks/TaskFlow/steps/components/StepHeader.tsx
 import React from "react";
-import { Step } from "../../types";
 import { CheckCircle, Circle, Clock } from "lucide-react";
+import { Step } from "@/types";
 
 interface StepHeaderProps {
   steps: Step[];

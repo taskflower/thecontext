@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/tasks/TaskFlow/stepsPlugins/registry.ts
 
-import { Step, StepType } from "../types";
+
+import { Step, StepType } from "@/types";
 import React from "react";
 
 // Define the common plugin interface

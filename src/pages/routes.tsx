@@ -1,25 +1,25 @@
 // src/routes.tsx
-import LanguageWrapper from "./components/common/LanguageWrapper";
+
 import { Navigate, RouteObject } from "react-router-dom";
 import { MainLayout } from "@/layouts/MainLayout";
 import { RequireAuth } from "@/layouts/RequireAuth";
 import { AdminLayout } from "@/layouts/AdminLayout";
 import publicRoutes from "@/pages/public/routes";
-import tasksRoute from "@/pages/tasks/routes"
+import tasksRoute from "@/pages/tasks/routes";
+import projectsRoute from "@/pages/projects/routes";
+import documentsRoute from "@/pages/documents/routes";
 import settingsRoutes from "@/pages/settings/routes";
-import usersRoutes from "@/pages/users/routes"; // Importujemy routingi dla użytkowników
-import { LanguageProvider } from "./context/LanguageContext";
-
+import usersRoutes from "@/pages/users/routes";
+import LanguageWrapper from "@/components/common/LanguageWrapper";
+import { LanguageProvider } from "@/context/LanguageContext";
 
 export const DEFAULT_LANGUAGE = "en";
-
 export const routes: RouteObject[] = [
   {
     path: "/",
     element: <Navigate to={`/${DEFAULT_LANGUAGE}`} replace />,
   },
   {
-    // Publiczne routy opakowane w LanguageWrapper (zapewnia I18nProvider)
     path: "/:lang",
     element: (
       <LanguageWrapper>
@@ -33,7 +33,6 @@ export const routes: RouteObject[] = [
     ],
   },
   {
-    // Admin routy opakowane w dodatkowy LanguageProvider oraz LanguageWrapper
     path: "/admin/:lang",
     element: (
       <LanguageProvider>
@@ -45,13 +44,11 @@ export const routes: RouteObject[] = [
       </LanguageProvider>
     ),
     children: [
-
-
       { path: "tasks/*", children: tasksRoute },
+      { path: "projects/*", children: projectsRoute },
+      { path: "documents/*", children: documentsRoute },
       { path: "settings/*", children: settingsRoutes },
       { path: "users/*", children: usersRoutes },
-
-
     ],
   },
 ];

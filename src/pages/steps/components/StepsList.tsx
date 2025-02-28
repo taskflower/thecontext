@@ -14,9 +14,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { StepFormData } from "../useStepsForm";
-import { getPluginsList } from "../../stepsPlugins/registry";
-import { StepType } from "../../types";
 import StepConfigPanel from "./StepConfigPanel";
+import { getPluginsList } from "@/pages/stepsPlugins";
+import { StepType } from "@/types";
 
 
 interface StepsListProps {

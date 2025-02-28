@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/tasks/TaskFlow/steps/useStepsForm.ts
+import { useDataStore } from "@/store";
+import { Step, StepType } from "@/types";
 import { useState } from "react";
-import { Step, StepType } from "../types";
+import { getPluginDefaultConfig, getPluginDefaultOptions } from "../stepsPlugins";
 
-import { getPluginDefaultConfig, getPluginDefaultOptions } from "../stepsPlugins/registry";
-import { useDataStore } from "../../../../store";
+
+
 
 // Interface for step form data
 export interface StepFormData {

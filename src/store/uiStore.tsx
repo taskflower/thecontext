@@ -1,7 +1,8 @@
 // src/pages/tasks/TaskFlow/uiStore.tsx
 import { create } from "zustand";
 import { useDataStore } from "./dataStore";
-import { Step, TabName, ViewMode } from "./types";
+import { Step, TabName, ViewMode } from "@/types";
+
 
 interface UIState {
   // UI state

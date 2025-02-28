@@ -1,5 +1,5 @@
-// src/pages/tasks/TaskFlow/tasks/components/navigator/TaskListNavigator.tsx
-import React, { useState} from "react";
+// src/pages/tasks/components/navigator/TaskListNavigator.tsx
+import React, { useState } from "react";
 import {
   Clock,
   AlertCircle,
@@ -10,7 +10,9 @@ import {
   Plus,
   ArrowRight,
   PlayCircle,
+  LayoutGrid,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -23,11 +25,13 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui";
 import { useDataStore, useUIStore } from "@/store";
 import { Status, Task } from "@/types";
+import { useAdminNavigate } from "@/hooks";
 
 export function TaskListNavigator() {
   // Get data and methods from stores
   const { tasks, addTask, projects, deleteTask } = useDataStore();
   const { connectTaskWithSteps, activeTaskId, setActiveTask } = useUIStore();
+  const adminNavigate = useAdminNavigate();
   
   // Local state for selected filter
   const [selectedStatusFilter, setStatusFilter] = useState<Status | 'all'>('all');
@@ -131,15 +135,30 @@ export function TaskListNavigator() {
     <div className="h-full flex flex-col bg-background">
       <div className="px-6 py-4 border-b flex items-center justify-between">
         <h2 className="text-base font-semibold">Tasks</h2>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-7 w-7"
-          onClick={handleQuickAddTask}
-        >
-          <Plus className="h-4 w-4" />
-          <span className="sr-only">Add task</span>
-        </Button>
+        
+        <div className="flex items-center gap-2">
+          {/* Simple board view button */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8"
+            onClick={() => adminNavigate('/tasks/board')}
+            title="Switch to Board View"
+          >
+            <LayoutGrid className="h-4 w-4" />
+          </Button>
+          
+          {/* Quick add task button */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8"
+            onClick={handleQuickAddTask}
+            title="Add New Task"
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       <Tabs

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/tasks/TaskFlow/steps/components/StepConfigPanel.tsx
 
-import { getPlugin } from "../../stepsPlugins/registry";
+import { getPlugin } from "@/pages/stepsPlugins";
 import { StepFormData } from "../useStepsForm";
 import { DynamicForm } from "./DynamicForm";
 

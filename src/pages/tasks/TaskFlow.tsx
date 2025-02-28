@@ -1,28 +1,21 @@
 
-
+/* this file id deprecated */
 
 import { useEffect } from "react";
 
-import Header from "./Header";
-
-import Sidebar from "./Sidebar";
 
 import { initializePlugins } from "../stepsPlugins";
 import { useDataStore, useUIStore } from "@/store";
-import DocumentsView from "../documents/components/DocumentsView";
 import NewProjectModal from "../projects/components/NewProjectModal";
-import ProjectsView from "../projects/components/ProjectsView";
-import TaskNavigator from "./components/navigator/TaskNavigator";
+
 
 export const TaskFlow: React.FC = () => {
   const { folders, addFolder } = useDataStore();
 
   const {
-    activeTab,
-    viewMode,
+  
     showNewProjectModal,
-    setActiveTab,
-    setViewMode,
+   
     toggleNewProjectModal,
   } = useUIStore();
 
@@ -46,7 +39,7 @@ export const TaskFlow: React.FC = () => {
   // Reszta komponentu pozostaje bez zmian
   return (
     <div className="flex h-screen bg-muted/30">
-      <Sidebar
+      {/* <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         toggleNewProjectModal={toggleNewProjectModal}
@@ -62,7 +55,7 @@ export const TaskFlow: React.FC = () => {
         {activeTab === "dashboard" && <ProjectsView />}
         {activeTab === "tasks" && <TaskNavigator />}
         {activeTab === "documents" && <DocumentsView />}
-      </div>
+      </div> */}
 
       {showNewProjectModal && (
         <NewProjectModal toggleNewProjectModal={toggleNewProjectModal} />

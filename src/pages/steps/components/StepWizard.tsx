@@ -11,8 +11,9 @@ import {
 } from "@/components/ui/dialog";
 import StepHeader from "./StepHeader";
 import StepFooter from "./StepFooter";
-import { useDataStore, useUIStore } from "../../../../../store";
-import PluginLoader from "../../stepsPlugins/PluginLoader";
+import { useDataStore, useUIStore } from "@/store";
+import { PluginLoader } from "@/pages/stepsPlugins";
+
 
 
 const StepWizard: React.FC = () => {
