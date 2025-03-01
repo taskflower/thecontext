@@ -1,29 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/services/execution/responseExecutor.ts
-
-import { actionTypeRegistry } from "@/utils/tasks/registry/actionTypeRegistry";
-import { getValueByPath } from "@/utils/tasks/response/parsers";
-import {
-  IResponseAction,
-  IExecutionPlan,
-  ActionType,
-  IEntityMapping,
-} from "@/utils/tasks/response/responseTypes";
+// responseExecutor.ts
+import { IResponseAction, IExecutionPlan, IEntityMapping,  ExecutionContext } from './types';
+import { actionTypeRegistry } from './actionRegistry';
+import { getValueByPath } from './responseParser';
 
 export class ResponseExecutor {
   static async executeResponse(
-    taskId: string,
-    stepId: string,
+    context: ExecutionContext,
     responseData: any,
-    responseAction: IResponseAction,
-    projectId: string
+    responseAction: IResponseAction
   ): Promise<boolean> {
     try {
       // Mapowanie odpowiedzi na plan wykonania
       const executionPlan = this.mapResponseToExecutionPlan(
         responseData,
         responseAction,
-        projectId
+        context.projectId
       );
 
       // Wykonanie planu
@@ -54,7 +46,7 @@ export class ResponseExecutor {
 
         for (const entityData of entities) {
           plan.actions.push({
-            type: `create_${mapping.entityType}` as ActionType,
+            type: `create_${mapping.entityType}` as string,
             data: entityData,
           });
         }
@@ -65,9 +57,9 @@ export class ResponseExecutor {
     ) {
       // Custom handler - przekazujemy do odpowiedniego modułu rozszerzenia
       const customHandler = responseAction.customHandler;
-      if (actionTypeRegistry.hasHandler(customHandler as ActionType)) {
+      if (actionTypeRegistry.hasHandler(customHandler as string)) {
         plan.actions.push({
-          type: customHandler as ActionType,
+          type: customHandler as string,
           data: {
             responseData,
             config: responseAction.customConfig,

@@ -9,4 +9,5 @@ import './form/index';
 import './document/index';
 import './checklist/index';
 import './decision/index';
+import './aiContent/index';
 // Import other plugins here when you create them

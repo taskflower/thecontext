@@ -1,14 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/services/llm/promptBuilder.ts
-
-import { IPromptConfig } from "@/utils/tasks/taskTypes";
+// promptBuilder.ts
+import { IPromptConfig } from './types';
 
 export function preparePrompt(
   config: IPromptConfig,
   variables: Record<string, any>
 ): string {
   let prompt = config.userPromptTemplate;
-
+  
   // Zastępowanie zmiennych w formacie {{zmienna}}
   if (variables) {
     for (const [key, value] of Object.entries(variables)) {
@@ -19,11 +18,9 @@ export function preparePrompt(
           : typeof value === "object"
           ? JSON.stringify(value, null, 2)
           : String(value);
-
       prompt = prompt.replace(new RegExp(`{{${key}}}`, "g"), replacementValue);
     }
   }
-
   return prompt;
 }
 
