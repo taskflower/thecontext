@@ -2,13 +2,14 @@
 import { register } from '../registry';
 import DocumentEditor from './DocumentEditor';
 import DocumentViewer from './DocumentViewer';
-
+import DocumentResult from './DocumentResult';
 
 register({
   type: 'document',
   name: 'Document Editor',
   Viewer: DocumentViewer,
   Editor: DocumentEditor,
+  ResultRenderer: DocumentResult,
   defaultConfig: {
     title: 'Document Editor',
     description: 'Create or edit a document',

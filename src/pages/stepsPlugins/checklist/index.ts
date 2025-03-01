@@ -2,13 +2,14 @@
 import { register } from '../registry';
 import ChecklistEditor from './ChecklistEditor';
 import ChecklistViewer from './ChecklistViewer';
-
+import ChecklistResult from './ChecklistResult';
 
 register({
   type: 'checklist',
   name: 'Checklist',
   Viewer: ChecklistViewer,
   Editor: ChecklistEditor,
+  ResultRenderer: ChecklistResult,
   defaultConfig: {
     title: 'Verification Checklist',
     description: 'Complete all items in this checklist',

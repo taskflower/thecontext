@@ -12,10 +12,15 @@ export interface EditorProps {
   onChange: (updates: Partial<Step>) => void;
 }
 
+export interface ResultRendererProps {
+  step: Step;
+}
+
 export interface StepPlugin {
   type: string;
   name: string;
   Viewer: React.ComponentType<ViewerProps>;
   Editor: React.ComponentType<EditorProps>;
+  ResultRenderer: React.ComponentType<ResultRendererProps>;
   defaultConfig: Record<string, any>;
 }
