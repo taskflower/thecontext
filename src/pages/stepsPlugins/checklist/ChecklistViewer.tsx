@@ -13,13 +13,18 @@ interface ChecklistItem {
   required: boolean;
 }
 
+interface ConversationItem {
+  role: "assistant" | "user";
+  content: string;
+}
+
 export default function ChecklistViewer({ step, onComplete }: ViewerProps) {
   const items = step.config?.items || [];
   const requireAllItems = step.config?.requireAllItems ?? true;
   
   // Initialize checked state from previous result or empty
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>(
-    step.result?.checkedItems || {}
+    step.result?.rawCheckedItems || step.result?.checkedItems || {}
   );
   
   const [isValid, setIsValid] = useState(false);
@@ -52,9 +57,22 @@ export default function ChecklistViewer({ step, onComplete }: ViewerProps) {
       .filter((item: ChecklistItem) => checkedItems[item.id])
       .map((item: ChecklistItem) => item.id);
     
+    // Create conversation format
+    const conversationData: ConversationItem[] = [];
+    
+    // Add each checked item as a pair of assistant-user messages
+    items.forEach((item: ChecklistItem) => {
+      conversationData.push(
+        { role: "assistant", content: item.id },
+        { role: "user", content: String(checkedItems[item.id] || false) }
+      );
+    });
+    
+    // Include both formats for backward compatibility
     onComplete({
-      checkedItems,
-      completedItems,
+      rawCheckedItems: checkedItems,
+      rawCompletedItems: completedItems,
+      conversationData: conversationData,
       completedAt: new Date().toISOString()
     });
   };

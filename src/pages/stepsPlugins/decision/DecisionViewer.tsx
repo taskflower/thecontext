@@ -12,6 +12,11 @@ interface DecisionOption {
   color: string;
 }
 
+interface ConversationItem {
+  role: "assistant" | "user";
+  content: string;
+}
+
 export default function DecisionViewer({ step, onComplete }: ViewerProps) {
   const options = step.config?.options || [
     { id: 'approve', label: 'Approve', color: 'green' },
@@ -73,10 +78,24 @@ export default function DecisionViewer({ step, onComplete }: ViewerProps) {
     
     const selectedOptionObj = options.find((o: DecisionOption) => o.id === selectedOption);
     
+    // Create conversation format data
+    const conversationData: ConversationItem[] = [
+      { role: "assistant", content: "decision" },
+      { role: "user", content: selectedOption },
+      { role: "assistant", content: "decisionLabel" },
+      { role: "user", content: selectedOptionObj?.label || "" },
+      { role: "assistant", content: "comment" },
+      { role: "user", content: comment }
+    ];
+    
+    // Include both formats for backward compatibility
     onComplete({
-      decision: selectedOption,
-      decisionLabel: selectedOptionObj?.label,
-      comment,
+      rawDecision: {
+        decision: selectedOption,
+        decisionLabel: selectedOptionObj?.label,
+        comment
+      },
+      conversationData: conversationData,
       decidedAt: new Date().toISOString()
     });
   };

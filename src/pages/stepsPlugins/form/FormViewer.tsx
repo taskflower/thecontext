@@ -13,12 +13,34 @@ interface FormField {
   required: boolean;
 }
 
+interface ConversationItem {
+  role: "assistant" | "user";
+  content: string;
+}
+
 export default function FormViewer({ step, onComplete }: ViewerProps) {
-  const [values, setValues] = useState<Record<string, any>>(step.result || {});
+  const [values, setValues] = useState<Record<string, any>>(step.result?.rawValues || {});
   
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    onComplete(values);
+    
+    // Transform the values object into the conversation array format
+    const conversationData: ConversationItem[] = [];
+    
+    // Convert the form values to the conversation format
+    Object.entries(values).forEach(([key, value]) => {
+      conversationData.push(
+        { role: "assistant", content: key },
+        { role: "user", content: String(value) }
+      );
+    });
+    
+    // Send both the raw values (for backward compatibility) and the conversation format
+    onComplete({
+      rawValues: values,
+      conversationData: conversationData,
+      completedAt: new Date().toISOString()
+    });
   }
   
   const fields = step.config?.fields || [];
