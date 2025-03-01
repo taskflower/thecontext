@@ -153,7 +153,7 @@ function getStatusBadge(status: string) {
     case "in_progress":
       return <Badge variant="secondary">In Progress</Badge>;
     case "completed":
-      return <Badge>Completed</Badge>;
+      return <Badge className="bg-green-50 border-green-200" variant={"secondary"}>Completed</Badge>;
     case "failed":
       return <Badge variant="destructive">Failed</Badge>;
     case "skipped":

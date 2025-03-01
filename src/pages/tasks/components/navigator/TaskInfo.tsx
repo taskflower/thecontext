@@ -14,10 +14,8 @@ export function TaskInfo({
   projectName,
 }: TaskInfoProps) {
   return (
-    <>
-      <p className="text-sm text-muted-foreground">
-        {description || "Brak opisu."}
-      </p>
+    <div>
+     
 
       {projectId && (
         <div>
@@ -27,7 +25,10 @@ export function TaskInfo({
           </div>
         </div>
       )}
-    </>
+       <p className="text-sm text-muted-foreground italic">
+        {description || "Brak opisu."}
+      </p>
+    </div>
   );
 }
 
