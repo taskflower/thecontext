@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, CheckCircle, Info, Copy, RefreshCw } from "lucide-react";
 import { ViewerProps } from "../types";
 import { useDataStore } from "@/store";
+import { ConversationItem } from "@/types";
 
 export default function DocumentViewer({ step, onComplete }: ViewerProps) {
   const { addDocItem } = useDataStore();
@@ -36,12 +37,23 @@ export default function DocumentViewer({ step, onComplete }: ViewerProps) {
   const handleSubmit = () => {
     if (!isValid) return;
     
+    // Create conversation format data
+    const conversationData: ConversationItem[] = [
+      { role: "assistant", content: "documentContent" },
+      { role: "user", content: content },
+      { role: "assistant", content: "format" },
+      { role: "user", content: format },
+      { role: "assistant", content: "charCount" },
+      { role: "user", content: charCount.toString() }
+    ];
+    
     // Create document result for the step
     const result = { 
       content, 
       format, 
       charCount,
-      completedAt: new Date().toISOString()
+      completedAt: new Date().toISOString(),
+      conversationData
     };
     
     // Also create a document in the document store
@@ -52,15 +64,15 @@ export default function DocumentViewer({ step, onComplete }: ViewerProps) {
       content,
       metaKeys: ["auto-generated", step.taskId, format],
       schema: {},
-      folderId: "root", // Domyślnie do głównego folderu
+      folderId: "root", // Default to main folder
       createdAt: currentTime,
       updatedAt: currentTime
     };
     
-    // Dodaj dokument do store'a
+    // Add document to store
     addDocItem(docItem);
     
-    // Zakończ krok
+    // Complete step
     onComplete(result);
   };
 

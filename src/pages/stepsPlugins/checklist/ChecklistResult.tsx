@@ -2,11 +2,7 @@
 import { List } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ResultRendererProps } from "../types";
-
-interface ConversationItem {
-  role: "assistant" | "user";
-  content: string;
-}
+import { ConversationItem } from "@/types";
 
 export default function ChecklistResult({ step }: ResultRendererProps) {
   const result = step.result;
@@ -15,8 +11,24 @@ export default function ChecklistResult({ step }: ResultRendererProps) {
   let completedItems: string[] = [];
   const totalItems = (step.config?.items || []).length;
 
-  // Handle both new conversation format and legacy format
-  if (result.conversationData) {
+  // Priority 1: Use step's conversationData if available
+  if (step.conversationData && step.conversationData.length > 0) {
+    const checkedMap: Record<string, boolean> = {};
+    
+    // Process pairs (assistant key, user value)
+    for (let i = 0; i < step.conversationData.length; i += 2) {
+      if (i + 1 < step.conversationData.length) {
+        const itemId = step.conversationData[i].content;
+        const isChecked = step.conversationData[i + 1].content === "true";
+        checkedMap[itemId] = isChecked;
+      }
+    }
+    
+    // Get IDs of checked items
+    completedItems = Object.keys(checkedMap).filter(id => checkedMap[id]);
+  }
+  // Priority 2: Use result.conversationData if available
+  else if (result.conversationData) {
     // Extract completed items from conversation data
     const conversationData = result.conversationData as ConversationItem[];
     const checkedMap: Record<string, boolean> = {};
@@ -32,11 +44,13 @@ export default function ChecklistResult({ step }: ResultRendererProps) {
     
     // Get IDs of checked items
     completedItems = Object.keys(checkedMap).filter(id => checkedMap[id]);
-  } else if (result.rawCompletedItems) {
-    // Direct access if available
+  } 
+  // Direct access if available (fallback 1)
+  else if (result.rawCompletedItems) {
     completedItems = result.rawCompletedItems;
-  } else {
-    // Legacy format
+  } 
+  // Legacy format (fallback 2)
+  else {
     completedItems = result.completedItems || [];
   }
   
@@ -57,16 +71,6 @@ export default function ChecklistResult({ step }: ResultRendererProps) {
           Completed at: {new Date(result.completedAt).toLocaleString()}
         </span>
       </div>
-      
-      {/* Optional debug view for new conversation format */}
-      {result.conversationData && (
-        <div className="mt-2 pt-2 border-t">
-          <div className="text-xs text-muted-foreground">Conversation Format:</div>
-          <div className="text-xs font-mono bg-muted p-2 rounded max-h-32 overflow-auto">
-            {JSON.stringify(result.conversationData)}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

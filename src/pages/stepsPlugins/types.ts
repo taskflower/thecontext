@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/stepsPlugins/types.ts
-import { Step } from "@/types";
+import { Step, ConversationItem } from "@/types";
 
 export interface ViewerProps {
   step: Step;
-  onComplete: (result?: Record<string, any>) => void;
+  onComplete: (result?: Record<string, any>, conversationData?: ConversationItem[]) => void;
 }
 
 export interface EditorProps {

@@ -2,21 +2,32 @@
 // src/pages/stepsPlugins/form/FormResult.tsx
 import { FormInput } from "lucide-react";
 import { ResultRendererProps } from "../types";
-
-interface ConversationItem {
-  role: "assistant" | "user";
-  content: string;
-}
+import { ConversationItem } from "@/types";
 
 export default function FormResult({ step }: ResultRendererProps) {
   const result = step.result;
   if (!result) return null;
   
-  // Support both new conversation format and legacy format for backward compatibility
+  // Support both direct conversationData and legacy format
   let displayData: Record<string, any> = {};
   
-  if (result.conversationData) {
-    // New format - extract from conversation pairs
+  // Primary source: check if conversationData exists in the step
+  if (step.conversationData && step.conversationData.length > 0) {
+    // Extract data from conversation pairs in the step
+    const conversationData = step.conversationData;
+    
+    // Process pairs of items (assistant asks, user answers)
+    for (let i = 0; i < conversationData.length; i += 2) {
+      if (i + 1 < conversationData.length) {
+        const field = conversationData[i].content;
+        const value = conversationData[i + 1].content;
+        displayData[field] = value;
+      }
+    }
+  }
+  // Secondary source: check if conversationData exists in the result
+  else if (result.conversationData) {
+    // Extract from conversation pairs in result
     const conversationData = result.conversationData as ConversationItem[];
     
     // Process pairs of items (assistant asks, user answers)
@@ -27,11 +38,13 @@ export default function FormResult({ step }: ResultRendererProps) {
         displayData[field] = value;
       }
     }
-  } else if (result.rawValues) {
-    // Direct access to raw values if available
+  } 
+  // Fallback: use raw values if available
+  else if (result.rawValues) {
     displayData = result.rawValues;
-  } else {
-    // Legacy format - use result directly
+  } 
+  // Last resort: use result directly (legacy format)
+  else {
     displayData = result;
   }
   
@@ -52,16 +65,6 @@ export default function FormResult({ step }: ResultRendererProps) {
           </div>
         ))}
       </div>
-      
-      {/* Optional debug view for new conversation format */}
-      {result.conversationData && (
-        <div className="mt-2 pt-2 border-t">
-          <div className="text-xs text-muted-foreground">Conversation Format:</div>
-          <div className="text-xs font-mono bg-muted p-2 rounded max-h-32 overflow-auto">
-            {JSON.stringify(result.conversationData)}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

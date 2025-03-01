@@ -5,17 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ViewerProps } from "../types";
+import { ConversationItem } from "@/types";
 
 interface FormField {
   name: string;
   label: string;
   type: string;
   required: boolean;
-}
-
-interface ConversationItem {
-  role: "assistant" | "user";
-  content: string;
 }
 
 export default function FormViewer({ step, onComplete }: ViewerProps) {

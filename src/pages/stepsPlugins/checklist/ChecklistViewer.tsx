@@ -6,16 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, CheckCircle } from "lucide-react";
 import { ViewerProps } from "../types";
+import { ConversationItem } from "@/types";
 
 interface ChecklistItem {
   id: string;
   text: string;
   required: boolean;
-}
-
-interface ConversationItem {
-  role: "assistant" | "user";
-  content: string;
 }
 
 export default function ChecklistViewer({ step, onComplete }: ViewerProps) {
@@ -68,12 +64,12 @@ export default function ChecklistViewer({ step, onComplete }: ViewerProps) {
       );
     });
     
-    // Include both formats for backward compatibility
+    // Include both formats for compatibility
     onComplete({
       rawCheckedItems: checkedItems,
       rawCompletedItems: completedItems,
-      conversationData: conversationData,
-      completedAt: new Date().toISOString()
+      completedAt: new Date().toISOString(),
+      conversationData: conversationData
     });
   };
   

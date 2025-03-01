@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/stepsPlugins/StepViewer.tsx
-import { Step } from "@/types";
+import { Step, ConversationItem } from "@/types";
 import { getPlugin } from "./registry";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
@@ -22,5 +22,18 @@ export function StepViewer({ step, onComplete }: StepViewerProps) {
     );
   }
 
-  return <plugin.Viewer step={step} onComplete={onComplete} />;
+  // Wrapper for onComplete that handles conversationData
+  const handleComplete = (result?: Record<string, any>, conversationData?: ConversationItem[]) => {
+    // If conversationData is provided, update the step with it
+    if (conversationData && conversationData.length > 0) {
+      onComplete({
+        ...result,
+        conversationData
+      });
+    } else {
+      onComplete(result);
+    }
+  };
+
+  return <plugin.Viewer step={step} onComplete={handleComplete} />;
 }

@@ -1,9 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/pages/tasks/TaskFlow/types.ts
-// Add these new types for steps implementation
+// src/types/types.ts
+// Update the Step interface with conversationData field
+export type StepType = 'form' | 'document' | 'data' | 'custom' | 'ai-content' | 'checklist' | 'decision';
+export type StepStatus = 'pending' | 'in-progress' | 'completed' | 'skipped' | 'failed';
 
-export type StepType = 'form' | 'document' | 'data' | 'custom';
-export type StepStatus = 'pending' | 'in-progress' | 'completed' | 'skipped';
+// Define the conversation item type
+export interface ConversationItem {
+  role: "assistant" | "user";
+  content: string;
+}
 
 export interface Step {
   id: string;
@@ -14,11 +19,12 @@ export interface Step {
   status: StepStatus;
   order: number;
   config: Record<string, any>;
-  options: Record<string, any>; // Added options property
+  options: Record<string, any>;
   result: Record<string, any> | null;
+  conversationData?: ConversationItem[]; // Add conversationData field
 }
 
-// Extend existing types.ts file
+// Remaining type definitions
 export type Priority = 'low' | 'medium' | 'high';
 export type Status = 'todo' | 'in-progress' | 'review' | 'completed';
 export type ViewMode = 'cards' | 'list';
@@ -55,7 +61,7 @@ export interface Project {
 export interface Task {
   id: string;
   title: string;
-  description: string; // Added description property
+  description: string;
   status: Status;
   priority: Priority;
   dueDate: string;

@@ -7,6 +7,7 @@ import { ActionButtons } from "./ActionButtons";
 import { ContentDisplay } from "./ContentDisplay";
 import { SubmitButton } from "./SubmitButton";
 import { useDataStore } from "@/store";
+import { ConversationItem } from "@/types";
 import llmService from "@/services/promptFactory/llmService";
 import { buildPromptMessages } from "@/services/promptFactory/promptBuilder";
 import { ResponseExecutor } from "@/services/promptFactory/responseExecutor";
@@ -36,7 +37,7 @@ export function ContentGenerator({ step, onComplete }: ViewerProps) {
       date: now.toISOString().split("T")[0],
       time: now.toLocaleTimeString(),
       topic: config.topic || "AI and automation",
-      // Dodaj tu inne zmienne kontekstowe
+      // Add other context variables here
     };
   };
 
@@ -79,9 +80,9 @@ export function ContentGenerator({ step, onComplete }: ViewerProps) {
       // Send request to LLM service
       const apiResponse = await llmService.sendRequest(messages);
 
-      // Obsługa odpowiedzi w zależności od skonfigurowanej akcji
+      // Handle response based on configured action
       if (responseAction.type === "direct") {
-        // Standardowa obsługa - wyciągnięcie treści z odpowiedzi
+        // Standard handling - extract content from response
         let responseContent: string;
 
         if (typeof apiResponse === "object") {
@@ -92,13 +93,13 @@ export function ContentGenerator({ step, onComplete }: ViewerProps) {
           } else if ((apiResponse as any).message?.content) {
             responseContent = (apiResponse as any).message.content;
           } else {
-            console.error("Nieobsługiwany format odpowiedzi:", apiResponse);
-            throw new Error("Otrzymano nieobsługiwany format odpowiedzi z API");
+            console.error("Unsupported response format:", apiResponse);
+            throw new Error("Received unsupported response format from API");
           }
         } else if (typeof apiResponse === "string") {
           responseContent = apiResponse;
         } else {
-          throw new Error("Nieoczekiwany format odpowiedzi z API");
+          throw new Error("Unexpected response format from API");
         }
 
         // Update content
@@ -107,7 +108,7 @@ export function ContentGenerator({ step, onComplete }: ViewerProps) {
         responseAction.type === "create_entities" ||
         responseAction.type === "custom"
       ) {
-        // Użyj ResponseExecutor do przetworzenia odpowiedzi
+        // Use ResponseExecutor to process the response
         const executionContext = {
           taskId: step.taskId || "",
           stepId: step.id || "",
@@ -185,11 +186,22 @@ export function ContentGenerator({ step, onComplete }: ViewerProps) {
       saveAsDocument();
     }
 
+    // Create conversation data format
+    const conversationData: ConversationItem[] = [
+      { role: "assistant", content: "aiGeneratedContent" },
+      { role: "user", content: content },
+      { role: "assistant", content: "format" },
+      { role: "user", content: outputFormat },
+      { role: "assistant", content: "timestamp" },
+      { role: "user", content: new Date().toISOString() }
+    ];
+
     onComplete({
       content,
       format: outputFormat,
       generatedAt: new Date().toISOString(),
       charCount: content.length,
+      conversationData
     });
   };
 

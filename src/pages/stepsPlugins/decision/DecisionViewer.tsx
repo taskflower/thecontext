@@ -5,16 +5,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ViewerProps } from "../types";
+import { ConversationItem } from "@/types";
 
 interface DecisionOption {
   id: string;
   label: string;
   color: string;
-}
-
-interface ConversationItem {
-  role: "assistant" | "user";
-  content: string;
 }
 
 export default function DecisionViewer({ step, onComplete }: ViewerProps) {

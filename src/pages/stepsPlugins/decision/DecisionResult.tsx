@@ -2,11 +2,7 @@
 import { Check, X, CheckCircle, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ResultRendererProps } from "../types";
-
-interface ConversationItem {
-  role: "assistant" | "user";
-  content: string;
-}
+import { ConversationItem } from "@/types";
 
 export default function DecisionResult({ step }: ResultRendererProps) {
   const result = step.result;
@@ -16,8 +12,25 @@ export default function DecisionResult({ step }: ResultRendererProps) {
   let decisionLabel: string;
   let comment: string;
   
-  // Handle both new conversation format and legacy format
-  if (result.conversationData) {
+  // Priority 1: Use step's conversationData if available
+  if (step.conversationData && step.conversationData.length >= 6) {
+    const valueMap: Record<string, string> = {};
+    
+    // Process pairs (assistant key, user value)
+    for (let i = 0; i < step.conversationData.length; i += 2) {
+      if (i + 1 < step.conversationData.length) {
+        const key = step.conversationData[i].content;
+        const value = step.conversationData[i + 1].content;
+        valueMap[key] = value;
+      }
+    }
+    
+    decision = valueMap.decision || '';
+    decisionLabel = valueMap.decisionLabel || '';
+    comment = valueMap.comment || '';
+  }
+  // Priority 2: Use result.conversationData if available
+  else if (result.conversationData) {
     // Extract data from conversation format
     const conversationData = result.conversationData as ConversationItem[];
     const valueMap: Record<string, string> = {};
@@ -34,13 +47,15 @@ export default function DecisionResult({ step }: ResultRendererProps) {
     decision = valueMap.decision || '';
     decisionLabel = valueMap.decisionLabel || '';
     comment = valueMap.comment || '';
-  } else if (result.rawDecision) {
-    // Direct access if available
+  } 
+  // Priority 3: Direct access to rawDecision if available
+  else if (result.rawDecision) {
     decision = result.rawDecision.decision;
     decisionLabel = result.rawDecision.decisionLabel;
     comment = result.rawDecision.comment;
-  } else {
-    // Legacy format
+  } 
+  // Legacy format (fallback)
+  else {
     decision = result.decision;
     decisionLabel = result.decisionLabel;
     comment = result.comment;
@@ -68,16 +83,6 @@ export default function DecisionResult({ step }: ResultRendererProps) {
         <div className="text-sm bg-muted/50 p-2 rounded-md">
           <div className="italic text-muted-foreground">Comment:</div>
           <div>{comment}</div>
-        </div>
-      )}
-      
-      {/* Optional debug view for new conversation format */}
-      {result.conversationData && (
-        <div className="mt-2 pt-2 border-t">
-          <div className="text-xs text-muted-foreground">Conversation Format:</div>
-          <div className="text-xs font-mono bg-muted p-2 rounded max-h-32 overflow-auto">
-            {JSON.stringify(result.conversationData)}
-          </div>
         </div>
       )}
     </div>
