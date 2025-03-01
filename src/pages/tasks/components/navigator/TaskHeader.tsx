@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Task } from "@/types";
 import { useWizardStore } from "@/store/wizardStore";
+import { useStepStore } from "@/store/stepStore";
+import { TaskResultJsonViewer } from "@/pages/steps/TaskResultJsonViewer";
 
 interface TaskHeaderProps {
   task: Task;
@@ -11,10 +13,14 @@ interface TaskHeaderProps {
 
 export function TaskHeader({ task }: TaskHeaderProps) {
   const { openWizard } = useWizardStore();
+  const { getTaskSteps } = useStepStore();
 
   const handleExecuteAllSteps = () => {
     openWizard(task.id);
   };
+
+  // Pobierz kroki dla tego zadania
+  const steps = getTaskSteps(task.id).sort((a, b) => a.order - b.order);
 
   return (
     <div className="px-6 py-4 border-b">
@@ -26,10 +32,15 @@ export function TaskHeader({ task }: TaskHeaderProps) {
             {getPriorityBadge(task.priority)}
           </div>
         </div>
-        <Button onClick={handleExecuteAllSteps}>
-          <PlayCircle className="mr-2 h-4 w-4" />
-          Wykonaj wszystkie kroki
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* Dodajemy naszą dyskretną ikonkę tutaj */}
+          <TaskResultJsonViewer steps={steps} />
+          
+          <Button onClick={handleExecuteAllSteps}>
+            <PlayCircle className="mr-2 h-4 w-4" />
+            Wykonaj wszystkie kroki
+          </Button>
+        </div>
       </div>
     </div>
   );
