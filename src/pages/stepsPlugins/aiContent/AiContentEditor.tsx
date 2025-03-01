@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/pages/stepsPlugins/aiContent/AiContentEditor.tsx
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -38,7 +36,7 @@ export default function AiContentEditor({ step, onChange }: EditorProps) {
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="promptTemplate">Prompt Template</Label>
+        <Label htmlFor="promptTemplate">User Prompt Template</Label>
         <Textarea
           id="promptTemplate"
           className="min-h-32 font-mono text-sm"
@@ -47,7 +45,7 @@ export default function AiContentEditor({ step, onChange }: EditorProps) {
           placeholder="Enter your prompt template..."
         />
         <p className="text-xs text-muted-foreground">
-          Use double curly braces for variables (example: taskId, stepId, projectId)
+          Use double curly braces for variables (example: "topic", "date")
         </p>
       </div>
       
@@ -60,6 +58,45 @@ export default function AiContentEditor({ step, onChange }: EditorProps) {
           onChange={(e) => updateConfig({ systemPrompt: e.target.value })}
         />
       </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="responseAction">Response Action Type</Label>
+        <Select
+          value={config.responseAction?.type || 'direct'}
+          onValueChange={(value) => updateConfig({ 
+            responseAction: { 
+              ...config.responseAction, 
+              type: value 
+            } 
+          })}
+        >
+          <SelectTrigger id="responseAction">
+            <SelectValue placeholder="Select action type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="direct">Direct Content</SelectItem>
+            <SelectItem value="create_entities">Create Entities</SelectItem>
+            <SelectItem value="custom">Custom Handler</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      
+      {config.responseAction?.type === 'custom' && (
+        <div className="space-y-2">
+          <Label htmlFor="customHandler">Custom Handler</Label>
+          <Input
+            id="customHandler"
+            value={config.responseAction?.customHandler || ''}
+            onChange={(e) => updateConfig({ 
+              responseAction: { 
+                ...config.responseAction, 
+                customHandler: e.target.value 
+              } 
+            })}
+            placeholder="Enter custom handler name"
+          />
+        </div>
+      )}
       
       <div className="space-y-2">
         <Label htmlFor="outputFormat">Output Format</Label>

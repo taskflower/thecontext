@@ -18,6 +18,9 @@ register({
     outputFormat: 'markdown',
     maxTokens: 1000,
     storeAsDocument: true,
-    allowRetry: true
+    allowRetry: true,
+    responseAction: {
+      type: 'direct'
+    }
   }
 });
