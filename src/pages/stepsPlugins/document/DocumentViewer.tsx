@@ -1,14 +1,14 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/stepsPlugins/document/DocumentViewer.tsx
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, CheckCircle, Info, Copy, RefreshCw } from "lucide-react";
 import { ViewerProps } from "../types";
+import { useDataStore } from "@/store";
 
 export default function DocumentViewer({ step, onComplete }: ViewerProps) {
+  const { addDocItem } = useDataStore();
   const [content, setContent] = useState(step.result?.content || step.config?.template || '');
   const [error, setError] = useState<string | null>(null);
   const [isValid, setIsValid] = useState(true);
@@ -19,6 +19,7 @@ export default function DocumentViewer({ step, onComplete }: ViewerProps) {
   const maxLength = step.config?.maxLength || 10000;
   const suggestions = step.config?.suggestions || [];
   const format = step.config?.format || 'markdown';
+  const title = step.config?.title || step.title || 'Document';
 
   useEffect(() => {
     setCharCount(content.length);
@@ -34,7 +35,33 @@ export default function DocumentViewer({ step, onComplete }: ViewerProps) {
 
   const handleSubmit = () => {
     if (!isValid) return;
-    onComplete({ content, format, charCount });
+    
+    // Create document result for the step
+    const result = { 
+      content, 
+      format, 
+      charCount,
+      completedAt: new Date().toISOString()
+    };
+    
+    // Also create a document in the document store
+    const currentTime = new Date().toISOString();
+    const docItem = {
+      id: `doc-${Date.now()}`,
+      title: `${title} - ${new Date().toLocaleDateString()}`,
+      content,
+      metaKeys: ["auto-generated", step.taskId, format],
+      schema: {},
+      folderId: "root", // Domyślnie do głównego folderu
+      createdAt: currentTime,
+      updatedAt: currentTime
+    };
+    
+    // Dodaj dokument do store'a
+    addDocItem(docItem);
+    
+    // Zakończ krok
+    onComplete(result);
   };
 
   const handleUseSuggestion = (suggestion: string) => {
@@ -82,7 +109,7 @@ export default function DocumentViewer({ step, onComplete }: ViewerProps) {
           
           {showHints && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
-              {suggestions.map((suggestion, idx) => (
+              {suggestions.map((suggestion: string, idx: number) => (
                 <Button 
                   key={idx}
                   variant="outline" 
