@@ -1,12 +1,21 @@
 // src/pages/steps/StepsList.tsx
-
-import { Plus, Edit, PlayCircle } from "lucide-react";
+import { 
+  Plus, 
+  Edit, 
+  PlayCircle, 
+  FileText, 
+  CheckSquare, 
+  ClipboardCheck, 
+  FormInput, 
+  MessageSquare 
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Step } from "@/types";
 import { useWizardStore } from "@/store/wizardStore";
 import { StepResult } from "@/pages/steps/StepResult";
+import { getPlugin } from "@/pages/stepsPlugins/registry";
 
 interface StepsListProps {
   steps: Step[];
@@ -25,14 +34,14 @@ export function StepsList({ steps, taskId, onAddStep, onEditStep }: StepsListPro
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-medium">Kroki</h3>
+        <h3 className="text-sm font-medium">Workflow Steps</h3>
         <Button
           variant="outline"
           size="sm"
           onClick={onAddStep}
         >
           <Plus className="h-4 w-4 mr-1" />
-          Dodaj krok
+          Add Step
         </Button>
       </div>
 
@@ -40,7 +49,7 @@ export function StepsList({ steps, taskId, onAddStep, onEditStep }: StepsListPro
         <div className="space-y-3">
           {steps.length === 0 ? (
             <div className="py-4 text-center text-sm text-muted-foreground border rounded-md">
-              Brak zdefiniowanych kroków. Dodaj kroki, aby wykonać to zadanie.
+              No steps defined yet. Add steps to complete this task.
             </div>
           ) : (
             steps.map((step, index) => (
@@ -67,28 +76,34 @@ interface StepItemProps {
 }
 
 function StepItem({ step, index, onEdit, onExecute }: StepItemProps) {
+  const plugin = getPlugin(step.type);
+  const stepName = plugin?.name || 'Unknown Step';
+  
   return (
     <div className="overflow-hidden border rounded-md">
       <div className="px-4 py-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <Badge
               variant="outline"
               className="h-6 w-6 p-0 flex items-center justify-center rounded-full"
             >
               {index + 1}
             </Badge>
-            {step.title}
-          </h3>
+            <h3 className="text-sm font-medium">{step.title}</h3>
+          </div>
           <div className="flex items-center gap-2">
             {getStatusBadge(step.status)}
-            <Badge variant="outline">{step.type}</Badge>
+            <Badge variant="outline" className="flex items-center gap-1">
+              {getStepIcon(step.type)}
+              {stepName}
+            </Badge>
             <Button
               variant="outline"
               size="icon"
               className="h-7 w-7"
               onClick={onEdit}
-              title="Edytuj krok"
+              title="Edit step"
             >
               <Edit className="h-4 w-4" />
             </Button>
@@ -97,7 +112,7 @@ function StepItem({ step, index, onEdit, onExecute }: StepItemProps) {
               size="icon"
               className="h-7 w-7"
               onClick={onExecute}
-              title="Wykonaj krok"
+              title="Execute step"
             >
               <PlayCircle className="h-4 w-4" />
             </Button>
@@ -113,19 +128,36 @@ function StepItem({ step, index, onEdit, onExecute }: StepItemProps) {
   );
 }
 
+function getStepIcon(type: string) {
+  switch (type) {
+    case 'form':
+      return <FormInput size={14} className="text-purple-500" />;
+    case 'document':
+      return <FileText size={14} className="text-blue-500" />;
+    case 'checklist':
+      return <ClipboardCheck size={14} className="text-amber-500" />;
+    case 'decision':
+      return <CheckSquare size={14} className="text-green-500" />;
+    case 'ai-content':
+      return <MessageSquare size={14} className="text-indigo-500" />;
+    default:
+      return null;
+  }
+}
+
 function getStatusBadge(status: string) {
   switch (status) {
     case "pending":
-      return <Badge variant="outline">Oczekujący</Badge>;
+      return <Badge variant="outline">Pending</Badge>;
     case "in-progress":
     case "in_progress":
-      return <Badge variant="secondary">W trakcie</Badge>;
+      return <Badge variant="secondary">In Progress</Badge>;
     case "completed":
-      return <Badge>Ukończony</Badge>;
+      return <Badge>Completed</Badge>;
     case "failed":
-      return <Badge variant="destructive">Nieudany</Badge>;
+      return <Badge variant="destructive">Failed</Badge>;
     case "skipped":
-      return <Badge variant="outline">Pominięty</Badge>;
+      return <Badge variant="outline">Skipped</Badge>;
     default:
       return <Badge variant="outline">{status}</Badge>;
   }

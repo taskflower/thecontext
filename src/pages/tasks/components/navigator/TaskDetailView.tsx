@@ -1,20 +1,23 @@
 // src/pages/tasks/components/navigator/TaskDetailView.tsx
-import React from "react";
+import React, { useState } from "react";
 import { useDataStore } from "@/store/dataStore";
 import { useStepStore } from "@/store/stepStore";
 import { useWizardStore } from "@/store/wizardStore";
+import { HelpCircle } from "lucide-react";
 
 import TaskHeader from "./TaskHeader";
 import TaskInfo from "./TaskInfo";
 import StepsList from "@/pages/steps/StepsList";
 import StepAddDialog from "@/pages/steps/StepAddDialog";
 import StepEditDialog from "@/pages/steps/StepEditDialog";
-
+import StepHelpComponent from "@/pages/steps/StepHelpComponent";
+import { Button } from "@/components/ui/button";
 
 export function TaskDetailView() {
   const [isAddingStep, setIsAddingStep] = React.useState(false);
   const [isEditingStep, setIsEditingStep] = React.useState(false);
   const [currentStepIndex, setCurrentStepIndex] = React.useState<number | null>(null);
+  const [showHelp, setShowHelp] = useState(false);
 
   // Fetch data from stores
   const { tasks, projects } = useDataStore();
@@ -28,18 +31,18 @@ export function TaskDetailView() {
   // Get project name for the task
   const projectName = task?.projectId
     ? projects.find((p) => p.id === task.projectId)?.title || task.projectId
-    : "Brak projektu";
+    : "No project";
 
   // If no task is selected, show placeholder
   if (!task) {
     return (
       <div className="h-full">
         <div className="px-6 py-4">
-          <h2 className="text-base font-semibold">Szczegóły zadania</h2>
+          <h2 className="text-base font-semibold">Task Details</h2>
         </div>
         <div className="flex h-[calc(100vh-240px)] items-center justify-center">
           <p className="text-sm text-muted-foreground">
-            Wybierz zadanie, aby zobaczyć szczegóły
+            Select a task to view details
           </p>
         </div>
       </div>
@@ -61,12 +64,29 @@ export function TaskDetailView() {
       <div className="px-6 py-4">
         <div className="space-y-6">
           {/* Task Info Section */}
-          <TaskInfo 
-            description={task.description} 
-            projectId={task.projectId}
-            projectName={projectName} 
-          />
-
+          <div className="flex justify-between items-start">
+            <TaskInfo 
+              description={task.description} 
+              projectId={task.projectId}
+              projectName={projectName} 
+            />
+            
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1"
+              onClick={() => setShowHelp(!showHelp)}
+            >
+              <HelpCircle size={16} />
+              {showHelp ? "Hide Guide" : "Workflow Guide"}
+            </Button>
+          </div>
+          
+          {/* Help section */}
+          {showHelp && (
+            <StepHelpComponent />
+          )}
+          
           {/* Steps List Section */}
           <StepsList 
             steps={steps}

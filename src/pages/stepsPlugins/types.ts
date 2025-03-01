@@ -23,4 +23,6 @@ export interface StepPlugin {
   Editor: React.ComponentType<EditorProps>;
   ResultRenderer: React.ComponentType<ResultRendererProps>;
   defaultConfig: Record<string, any>;
+  category: string;
+  description: string;
 }

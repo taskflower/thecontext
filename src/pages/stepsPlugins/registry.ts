@@ -2,6 +2,13 @@
 // src/pages/stepsPlugins/registry.ts
 import { StepPlugin } from './types';
 
+// Add plugin categories
+export const PLUGIN_CATEGORIES = {
+  CONTENT: "Content Creation",
+  APPROVAL: "Approval & Review",
+  DATA: "Data Collection"
+};
+
 // Simple plugin registry
 const plugins = new Map<string, StepPlugin>();
 
