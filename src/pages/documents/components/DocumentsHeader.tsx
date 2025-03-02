@@ -1,23 +1,30 @@
 import React, { useState } from "react";
 import { Search, Folder, FileText } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useDataStore, useUIStore } from "@/store";
 
 const DocumentsHeader: React.FC = () => {
   const { addFolder } = useDataStore();
-  const { currentFolder, toggleNewDocumentModal } = useUIStore();
+  const { toggleNewDocumentModal } = useUIStore();
+  const { lang, folderId = "root" } = useParams();
+  const navigate = useNavigate();
   
   const [searchTerm, setSearchTerm] = useState("");
   
   const handleNewFolder = () => {
     const folderName = prompt("Enter folder name:");
     if (folderName) {
+      const newFolderId = `folder-${Date.now()}`;
       addFolder({
-        id: `folder-${Date.now()}`,
+        id: newFolderId,
         name: folderName,
-        parentId: currentFolder
+        parentId: folderId
       });
+      
+      // Navigate to the new folder
+      navigate(`/admin/${lang}/documents/${newFolderId}`);
     }
   };
   
@@ -26,7 +33,6 @@ const DocumentsHeader: React.FC = () => {
     // We'll keep the search functionality in the header component
     if (searchTerm.trim()) {
       // Trigger search in the store or pass to parent via context
-      // This will depend on how you want to structure your application
       const searchEvent = new CustomEvent('documentSearch', { 
         detail: { searchTerm } 
       });

@@ -1,5 +1,6 @@
-// src/pages/tasks/TaskFlow/documents/components/NewDocumentModal.tsx
+// src/pages/documents/components/NewDocumentModal.tsx
 import React, { useState } from "react";
+import { useParams } from "react-router-dom";
 
 import {
   Dialog,
@@ -10,14 +11,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-
 import { Button, Input, Label, Textarea } from "@/components/ui";
 import { useDataStore, useUIStore } from "@/store";
 import { DocItem } from "@/types";
 
 const NewDocumentModal: React.FC = () => {
   const { addDocItem } = useDataStore();
-  const { showNewDocumentModal, toggleNewDocumentModal, currentFolder } = useUIStore();
+  const { showNewDocumentModal, toggleNewDocumentModal } = useUIStore();
+  
+  // Get the current folder ID from URL params
+  const { folderId = "root" } = useParams();
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [metaKeys, setMetaKeys] = useState("");
@@ -34,7 +38,7 @@ const NewDocumentModal: React.FC = () => {
       content,
       metaKeys: metaKeys.split(",").map(key => key.trim()).filter(key => key !== ""),
       schema: {},
-      folderId: currentFolder,
+      folderId, // Use the folder ID from URL params
       createdAt: currentTime,
       updatedAt: currentTime
     };

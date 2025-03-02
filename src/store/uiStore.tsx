@@ -1,32 +1,30 @@
-// src/store/uiStore.tsx - poprawiona wersja
+// src/store/uiStore.tsx - updated for router compatibility
 import { create } from "zustand";
 import { TabName, ViewMode } from "@/types";
 
 interface UIState {
-  // Stan UI
+  // UI State
   activeTab: TabName;
   viewMode: ViewMode;
   showNewProjectModal: boolean;
   showNewDocumentModal: boolean;
-  currentFolder: string;
+  currentFolder: string; // Still needed for NewDocumentModal
   selectedDocument: string | null;
-  // Usuwamy activeTaskId stąd, bo jest już w wizardStore
 
-  // Akcje UI
+  // UI Actions
   setActiveTab: (tab: TabName) => void;
   setViewMode: (mode: ViewMode) => void;
   toggleNewProjectModal: () => void;
   toggleNewDocumentModal: () => void;
-  navigateToFolder: (folderId: string) => void;
+  navigateToFolder: (folderId: string) => void; // Kept for backward compatibility
   selectDocument: (documentId: string | null) => void;
-  // Usuwamy setActiveTask stąd, bo jest już w wizardStore
   
-  // Nowa metoda do obsługi kroków
+  // Task handling
   connectTaskWithSteps: (taskId: string) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
-  // Początkowy stan UI
+  // Initial UI state
   activeTab: "dashboard",
   viewMode: "cards",
   showNewProjectModal: false,
@@ -34,22 +32,30 @@ export const useUIStore = create<UIState>((set) => ({
   currentFolder: "root",
   selectedDocument: null,
 
-  // Akcje UI
+  // UI Actions
   setActiveTab: (tab) => set({ activeTab: tab }),
+  
   setViewMode: (mode) => set({ viewMode: mode }),
+  
   toggleNewProjectModal: () =>
     set((state) => ({ showNewProjectModal: !state.showNewProjectModal })),
+    
   toggleNewDocumentModal: () =>
     set((state) => ({ showNewDocumentModal: !state.showNewDocumentModal })),
-  navigateToFolder: (folderId) => set({ currentFolder: folderId }),
+    
+  // Keep this for backward compatibility
+  // Note: This method is now deprecated. Use react-router navigation instead.
+  navigateToFolder: (folderId) => {
+    console.log(`[DEPRECATED] navigateToFolder called with: ${folderId}`);
+    console.log('Please use react-router navigation instead');
+    set({ currentFolder: folderId });
+  },
+  
   selectDocument: (documentId) => set({ selectedDocument: documentId }),
   
-  // Implementacja connectTaskWithSteps, która będzie używać wizardStore
+  // Task handling - placeholder implementation
   connectTaskWithSteps: (taskId) => {
-    // To jest tylko placeholder - faktyczna implementacja 
-    // powinna używać funkcji openWizard z wizardStore
     console.log("connectTaskWithSteps:", taskId);
-    // Tutaj powinno być coś w stylu: wizardStore.openWizard(taskId);
-    // Ale to zaimplementujemy w TaskListNavigator.tsx
+    // Actual implementation would use wizardStore.openWizard(taskId)
   }
 }));

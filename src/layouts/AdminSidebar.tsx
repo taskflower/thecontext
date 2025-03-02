@@ -56,8 +56,12 @@ export const AdminSidebar: React.FC = () => {
   const location = useLocation();
 
   const isActive = (path: string): boolean => {
-    const currentPath = location.pathname;
-    return currentPath.includes(path.replace(/^\/admin/, ''));
+    // Przykładowo: /admin/en/documents/projects -> ['', 'admin', 'en', 'documents', 'projects']
+    const pathSegments = location.pathname.split('/');
+    // Zakładamy, że segment odpowiedzialny za stronę znajduje się na pozycji 3
+    const activeSection = pathSegments[3]; 
+    // Porównujemy z nazwą sekcji (usuwamy początkowy "/")
+    return activeSection === path.replace('/', '');
   };
 
   const navigationItems = [

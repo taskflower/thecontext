@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/pages/tasks/TaskFlow/store/dataStore.ts
+// src/store/dataStore.ts
 import { DocItem, Folder, Project, Status, Task } from '@/types';
 import { create } from 'zustand';
 
-// Initial folder structure to maintain basic functionality
+// Initial folder structure with special Projects root folder
 const initialFolders: Folder[] = [
-  { id: 'root', name: 'All Documents', parentId: null }
+  { id: 'root', name: 'All Documents', parentId: null },
+  { id: 'projects', name: 'Projects', parentId: 'root', isProjectRoot: true }
 ];
 
 interface DataState {
@@ -15,9 +16,14 @@ interface DataState {
   projects: Project[];
   tasks: Task[];
   
-  // Data actions
+  // Project actions
   addProject: (project: Project) => void;
+  updateProject: (id: string, updates: Partial<Project>) => void;
+  deleteProject: (id: string) => void;
+  
+  // Other data actions
   addFolder: (folder: Folder) => void;
+  deleteFolder: (id: string) => void;
   addDocItem: (docItem: DocItem) => void;
   updateDocItem: (id: string, updates: Partial<DocItem>) => void;
   addTask: (task: Task) => void;
@@ -43,14 +49,88 @@ export const useDataStore = create<DataState>((set, get) => ({
   projects: [],
   tasks: [],
   
-  // Data actions
+  // Project actions
   addProject: (project) => set((state) => ({ 
     projects: [...state.projects, project] 
   })),
   
+  updateProject: (id, updates) => set((state) => ({
+    projects: state.projects.map(project => 
+      project.id === id 
+        ? { ...project, ...updates } 
+        : project
+    )
+  })),
+  
+  deleteProject: (id) => set((state) => {
+    // Find the project to get its folder ID
+    const project = state.projects.find(p => p.id === id);
+    
+    if (!project) return state;
+    
+    // Create a function to recursively collect folder IDs to delete
+    const getAllChildFolderIds = (folderId: string): string[] => {
+      const children = state.folders.filter(f => f.parentId === folderId);
+      if (children.length === 0) return [folderId];
+      
+      return [
+        folderId,
+        ...children.flatMap(child => getAllChildFolderIds(child.id))
+      ];
+    };
+    
+    // Get all folder IDs to delete if project has a folder
+    const folderIdsToDelete = project.folderId 
+      ? getAllChildFolderIds(project.folderId) 
+      : [];
+    
+    // Get all tasks related to this project
+    // todo:'tasksToDelete' is assigned a value but never used.
+    // const tasksToDelete = state.tasks.filter(t => t.projectId === id);
+    
+    return {  
+      // Remove the project
+      projects: state.projects.filter(p => p.id !== id),
+      
+      // Remove the project's folder and all its subfolders
+      folders: state.folders.filter(f => !folderIdsToDelete.includes(f.id)),
+      
+      // Remove any documents in those folders
+      docItems: state.docItems.filter(d => 
+        !d.folderId || !folderIdsToDelete.includes(d.folderId)
+      ),
+      
+      // Remove associated tasks
+      tasks: state.tasks.filter(t => t.projectId !== id)
+    };
+  }),
+  
+  // Other actions
   addFolder: (folder) => set((state) => ({ 
     folders: [...state.folders, folder] 
   })),
+  
+  deleteFolder: (id) => set((state) => {
+    // Function to get all nested folder IDs
+    const getAllChildFolderIds = (folderId: string): string[] => {
+      const children = state.folders.filter(f => f.parentId === folderId);
+      if (children.length === 0) return [folderId];
+      
+      return [
+        folderId,
+        ...children.flatMap(child => getAllChildFolderIds(child.id))
+      ];
+    };
+    
+    const folderIdsToDelete = getAllChildFolderIds(id);
+    
+    return {
+      folders: state.folders.filter(f => !folderIdsToDelete.includes(f.id)),
+      docItems: state.docItems.filter(d => 
+        !d.folderId || !folderIdsToDelete.includes(d.folderId)
+      )
+    };
+  }),
   
   addDocItem: (docItem) => set((state) => ({ 
     docItems: [...state.docItems, docItem] 

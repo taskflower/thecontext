@@ -3,13 +3,11 @@
 // Update the Step interface with conversationData field
 export type StepType = 'form' | 'document' | 'data' | 'custom' | 'ai-content' | 'checklist' | 'decision';
 export type StepStatus = 'pending' | 'in-progress' | 'completed' | 'skipped' | 'failed';
-
 // Define the conversation item type
 export interface ConversationItem {
   role: "assistant" | "user";
   content: string;
 }
-
 export interface Step {
   id: string;
   taskId: string;
@@ -23,19 +21,18 @@ export interface Step {
   result: Record<string, any> | null;
   conversationData?: ConversationItem[]; // Add conversationData field
 }
-
 // Remaining type definitions
 export type Priority = 'low' | 'medium' | 'high';
 export type Status = 'todo' | 'in-progress' | 'review' | 'completed';
 export type ViewMode = 'cards' | 'list';
 export type TabName = 'dashboard' | 'tasks' | 'documents';
-
 export interface Folder {
   id: string;
   name: string;
   parentId: string | null;
+  isProjectRoot?: boolean;    // Flag for the root folder that contains all project folders
+  isProjectFolder?: boolean;  // Flag for folders that represent individual projects
 }
-
 export interface DocItem {
   id: string;
   title: string;
@@ -46,7 +43,6 @@ export interface DocItem {
   createdAt: string;
   updatedAt: string;
 }
-
 export interface Project {
   id: string;
   title: string;
@@ -57,7 +53,6 @@ export interface Project {
   dueDate: string;
   folderId: string | null;
 }
-
 export interface Task {
   id: string;
   title: string;

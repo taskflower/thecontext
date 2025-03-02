@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/pages/tasks/TaskFlow/documents/components/DocumentsView.tsx
+// src/pages/documents/components/DocumentsView.tsx
 
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useParams } from "react-router-dom";
 
 import DocumentBrowser from "./DocumentBrowser";
 import DocumentViewer from "./DocumentViewer";
@@ -16,8 +17,18 @@ import { DocItem } from "@/types";
 const DocumentsView: React.FC = () => {
   const { searchDocItems } = useDataStore();
   const { selectedDocument, selectDocument } = useUIStore();
-  
   const [searchResults, setSearchResults] = useState<DocItem[]>([]);
+  
+  // Get the current folder ID from URL params
+  const { folderId = "root" } = useParams();
+
+  // Update UI store's currentFolder when URL parameter changes
+  useEffect(() => {
+    // We're intentionally not calling navigateToFolder here
+    // as we're decoupling the URL from the internal state
+    // Only needed for NewDocumentModal to work properly
+    useUIStore.setState({ currentFolder: folderId });
+  }, [folderId]);
   
   // Set up event listener for search events from the header
   useEffect(() => {
@@ -40,7 +51,6 @@ const DocumentsView: React.FC = () => {
   
   return (
     <div className="flex-1 flex flex-col">
-      {/* Header component now directly uses the store */}
       <DocumentsHeader />
       
       {/* Main content */}

@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import { Pencil, Trash2, FolderOpen } from "lucide-react";
 
 import { 
   Card, 
@@ -10,31 +11,85 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Project } from "@/types";
+import { useDataStore } from "@/store";
 
 interface ProjectCardProps {
   project: Project;
   navigateToFolder: (folderId: string) => void;
   setActiveTab: (tab: "dashboard" | "tasks" | "documents") => void;
+  toggleEditProjectModal: (project: Project) => void;
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ 
   project, 
   navigateToFolder, 
-  setActiveTab 
+  toggleEditProjectModal
 }) => {
-  const handleClick = () => {
+  const { folders, deleteProject } = useDataStore();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const handleViewFolder = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (project.folderId) {
       navigateToFolder(project.folderId);
-      setActiveTab("documents");
     }
   };
 
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleEditProjectModal(project);
+    setIsMenuOpen(false);
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm(`Are you sure you want to delete "${project.title}"?`)) {
+      deleteProject(project.id);
+    }
+    setIsMenuOpen(false);
+  };
+
+  // Check if folder exists - if not, display an error state
+  const folderExists = folders.some(f => f.id === project.folderId);
+
   return (
-    <Card className="hover:shadow-md">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base">{project.title}</CardTitle>
-        <CardDescription>{project.description}</CardDescription>
+    <Card className="hover:shadow-md transition-shadow">
+      <CardHeader className="pb-2 flex flex-row justify-between items-start">
+        <div>
+          <CardTitle className="text-base">{project.title}</CardTitle>
+          <CardDescription>{project.description}</CardDescription>
+        </div>
+        <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <span className="sr-only">Open menu</span>
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3.625 7.5C3.625 8.12132 3.12132 8.625 2.5 8.625C1.87868 8.625 1.375 8.12132 1.375 7.5C1.375 6.87868 1.87868 6.375 2.5 6.375C3.12132 6.375 3.625 6.87868 3.625 7.5ZM8.625 7.5C8.625 8.12132 8.12132 8.625 7.5 8.625C6.87868 8.625 6.375 8.12132 6.375 7.5C6.375 6.87868 6.87868 6.375 7.5 6.375C8.12132 6.375 8.625 6.87868 8.625 7.5ZM13.625 7.5C13.625 8.12132 13.1213 8.625 12.5 8.625C11.8787 8.625 11.375 8.12132 11.375 7.5C11.375 6.87868 11.8787 6.375 12.5 6.375C13.1213 6.375 13.625 6.87868 13.625 7.5Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path>
+              </svg>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleEdit}>
+              <Pencil size={16} className="mr-2" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={handleDelete}
+              className="text-destructive focus:text-destructive"
+            >
+              <Trash2 size={16} className="mr-2" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </CardHeader>
 
       <CardContent className="pb-2">
@@ -49,8 +104,16 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         <div className="text-sm text-muted-foreground">
           Tasks: {project.completedTasks}/{project.tasks}
         </div>
-        <Button variant="ghost" size="sm" className="text-primary" onClick={handleClick}>
-          View
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="text-primary flex items-center"
+          onClick={handleViewFolder}
+          disabled={!folderExists}
+          type="button"
+        >
+          <FolderOpen size={16} className="mr-2" />
+          Folder View
         </Button>
       </CardFooter>
     </Card>

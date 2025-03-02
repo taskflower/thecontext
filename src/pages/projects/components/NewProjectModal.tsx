@@ -1,4 +1,4 @@
-// src/pages/tasks/TaskFlow/projects/components/NewProjectModal.tsx
+// src/pages/projects/components/NewProjectModal.tsx
 import React, { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useDataStore } from "@/store";
-
-
 
 interface NewProjectModalProps {
   toggleNewProjectModal: () => void;
@@ -41,7 +39,8 @@ const NewProjectModal: React.FC<NewProjectModalProps> = ({ toggleNewProjectModal
     addFolder({
       id: folderId,
       name: title,
-      parentId: 'projects' // We assume there's always a "projects" parent folder
+      parentId: 'projects', // Root folder for projects
+      isProjectFolder: true  // Mark as a project folder
     });
 
     // Create and add the project

@@ -1,22 +1,43 @@
-import React from "react";
+import React, { useState } from "react";
 import { Plus } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+
 import ProjectsHeader from "./ProjectsHeader";
 import { Card } from "@/components/ui/card";
 import ProjectCard from "./ProjectCard";
 import ProjectListItem from "./ProjectListItem";
 import { useDataStore, useUIStore } from "@/store";
-import NewProjectModal from "./NewProjectModal"; // Import the modal component
+import NewProjectModal from "./NewProjectModal";
+import EditProjectModal from "./EditProjectModal";
+import { Project } from "@/types";
 
 const ProjectsView: React.FC = () => {
   const { projects } = useDataStore();
   const { 
     viewMode, 
-    navigateToFolder, 
     setActiveTab, 
     toggleNewProjectModal,
     setViewMode,
-    showNewProjectModal // Get the showNewProjectModal state
+    showNewProjectModal
   } = useUIStore();
+
+  const navigate = useNavigate();
+  const { lang } = useParams();
+
+  // State for edit project modal
+  const [editProject, setEditProject] = useState<Project | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  const toggleEditProjectModal = (project: Project | null) => {
+    setEditProject(project);
+    setShowEditModal(!!project);
+  };
+
+  // Router-based navigation to folder
+  const navigateToFolder = (folderId: string) => {
+    navigate(`/admin/${lang}/documents/${folderId}`);
+    setActiveTab("documents");
+  };
 
   return (
     <div className="flex-1 flex flex-col">
@@ -37,11 +58,12 @@ const ProjectsView: React.FC = () => {
                 project={project}
                 navigateToFolder={navigateToFolder}
                 setActiveTab={setActiveTab}
+                toggleEditProjectModal={toggleEditProjectModal}
               />
             ))}
 
             <Card
-              className="border border-dashed cursor-pointer hover:bg-secondary/20"
+              className="border border-dashed cursor-pointer hover:bg-secondary/20 transition-colors"
               onClick={toggleNewProjectModal}
             >
               <div className="p-6 flex flex-col items-center justify-center text-muted-foreground">
@@ -66,16 +88,23 @@ const ProjectsView: React.FC = () => {
                 project={project}
                 navigateToFolder={navigateToFolder}
                 setActiveTab={setActiveTab}
+                toggleEditProjectModal={toggleEditProjectModal}
               />
             ))}
           </Card>
         )}
       </div>
 
-      {/* Render the modal component conditionally based on showNewProjectModal */}
+      {/* Render the modals conditionally */}
       {showNewProjectModal && (
         <NewProjectModal toggleNewProjectModal={toggleNewProjectModal} />
       )}
+      
+      <EditProjectModal 
+        project={editProject}
+        isOpen={showEditModal}
+        onClose={() => toggleEditProjectModal(null)}
+      />
     </div>
   );
 };

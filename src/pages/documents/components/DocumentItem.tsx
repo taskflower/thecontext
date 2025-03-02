@@ -1,8 +1,9 @@
-// src/pages/tasks/TaskFlow/documents/components/DocumentItem.tsx
+// src/pages/documents/components/DocumentItem.tsx
 
 import React from "react";
 import { Folder, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useDataStore } from "@/store";
 
 interface DocumentItemProps {
   type: 'document' | 'folder';
@@ -10,8 +11,8 @@ interface DocumentItemProps {
   name: string;
   metaKeys?: string[];
   updatedAt?: string;
-  onNavigate?: () => void;
-  onSelect?: () => void;
+  onNavigate?: (e: React.MouseEvent) => void;
+  onSelect?: (e: React.MouseEvent) => void;
 }
 
 const DocumentItem: React.FC<DocumentItemProps> = ({ 
@@ -23,32 +24,48 @@ const DocumentItem: React.FC<DocumentItemProps> = ({
   onNavigate, 
   onSelect 
 }) => {
+  const { folders } = useDataStore();
   const Icon = type === "folder" ? Folder : FileText;
+  
+  // Find the folder to check if it's a project folder
+  const folder = type === "folder" ? folders.find(f => f.id === id) : null;
+  const isProjectFolder = folder?.isProjectFolder;
+  const isProjectRoot = folder?.isProjectRoot;
+  
+  // Get the appropriate color based on folder type
+  const getFolderColor = () => {
+    if (isProjectRoot) return "text-purple-500";
+    if (isProjectFolder) return "text-green-500";
+    return "text-primary";
+  };
   
   // Format date if available
   const formattedDate = updatedAt ? new Date(updatedAt).toLocaleDateString() : '';
   
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (type === "folder" && onNavigate) {
-      onNavigate();
+      onNavigate(e);
     } else if (type === "document" && onSelect) {
-      onSelect();
+      onSelect(e);
     }
   };
   
   return (
     <div
-      className={`flex items-center p-3 rounded-md hover:bg-secondary cursor-pointer`}
+      className="flex items-center p-3 rounded-md hover:bg-secondary cursor-pointer"
       onClick={handleClick}
     >
       <Icon
         size={16}
         className={`mr-2 ${
-          type === "folder" ? "text-primary" : "text-muted-foreground"
+          type === "folder" ? getFolderColor() : "text-muted-foreground"
         }`}
       />
       <div className="flex-1">
-        <div className={type === "folder" ? "font-medium" : ""}>{name}:{id}</div>
+        <div className={type === "folder" ? "font-medium" : ""}>{name}</div>
         {type === "document" && metaKeys.length > 0 && (
           <div className="flex gap-1 mt-1">
             {metaKeys.slice(0, 3).map((key, index) => (
