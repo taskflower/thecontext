@@ -6,7 +6,7 @@ interface UIState {
   // UI State
   activeTab: TabName;
   viewMode: ViewMode;
-  showNewProjectModal: boolean;
+  showNewScenarioModal: boolean;
   showNewDocumentModal: boolean;
   currentFolder: string; // Still needed for NewDocumentModal
   selectedDocument: string | null;
@@ -14,7 +14,7 @@ interface UIState {
   // UI Actions
   setActiveTab: (tab: TabName) => void;
   setViewMode: (mode: ViewMode) => void;
-  toggleNewProjectModal: () => void;
+  toggleNewScenarioModal: () => void;
   toggleNewDocumentModal: () => void;
   navigateToFolder: (folderId: string) => void; // Kept for backward compatibility
   selectDocument: (documentId: string | null) => void;
@@ -27,7 +27,7 @@ export const useUIStore = create<UIState>((set) => ({
   // Initial UI state
   activeTab: "dashboard",
   viewMode: "cards",
-  showNewProjectModal: false,
+  showNewScenarioModal: false,
   showNewDocumentModal: false,
   currentFolder: "root",
   selectedDocument: null,
@@ -37,8 +37,8 @@ export const useUIStore = create<UIState>((set) => ({
   
   setViewMode: (mode) => set({ viewMode: mode }),
   
-  toggleNewProjectModal: () =>
-    set((state) => ({ showNewProjectModal: !state.showNewProjectModal })),
+  toggleNewScenarioModal: () =>
+    set((state) => ({ showNewScenarioModal: !state.showNewScenarioModal })),
     
   toggleNewDocumentModal: () =>
     set((state) => ({ showNewDocumentModal: !state.showNewDocumentModal })),

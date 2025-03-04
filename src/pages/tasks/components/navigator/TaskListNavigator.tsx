@@ -19,7 +19,7 @@ import { TaskEditModal } from "./TaskEditModal";
 
 export function TaskListNavigator() {
   // Store data and methods
-  const { tasks, addTask, projects, deleteTask } = useDataStore();
+  const { tasks, addTask, scenarios, deleteTask } = useDataStore();
   const { activeTaskId, setActiveTask, openWizard } = useWizardStore();
   const adminNavigate = useAdminNavigate();
 
@@ -59,10 +59,10 @@ export function TaskListNavigator() {
     openWizard(taskId);
   };
 
-  // Quick add task with project validation
+  // Quick add task with scenario validation
   const handleQuickAddTask = () => {
-    // Check if there are any projects available
-    if (projects.length === 0) {
+    // Check if there are any scenarios available
+    if (scenarios.length === 0) {
       // Show dialog instead of alert
       setShowNoProjectDialog(true);
       return;
@@ -75,7 +75,7 @@ export function TaskListNavigator() {
       status: "todo",
       priority: "medium",
       dueDate: new Date().toISOString().split("T")[0],
-      projectId: projects[0]?.id || "", // Default to first project
+      scenarioId: scenarios[0]?.id || "", // Default to first scenario
       currentStepId: null,
       data: {},
     };
@@ -84,10 +84,10 @@ export function TaskListNavigator() {
     setActiveTask(newTask.id);
   };
 
-  // Handler to navigate to projects from dialog
+  // Handler to navigate to scenarios from dialog
   const handleGoToProjects = () => {
     setShowNoProjectDialog(false);
-    adminNavigate("/projects");
+    adminNavigate("/scenarios");
   };
 
   // Empty state
@@ -120,7 +120,7 @@ export function TaskListNavigator() {
             size="icon"
             className="h-8 w-8"
             onClick={handleQuickAddTask}
-            title={projects.length > 0 ? "Dodaj nowe zadanie" : "Najpierw utwórz projekt"}
+            title={scenarios.length > 0 ? "Dodaj nowe zadanie" : "Najpierw utwórz projekt"}
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -151,7 +151,7 @@ export function TaskListNavigator() {
         </TabsList>
 
         <div className="space-y-1 overflow-auto h-[calc(100vh-220px)]">
-          {projects.length === 0 ? (
+          {scenarios.length === 0 ? (
             <div className="py-8 text-center">
               <p className="text-sm text-muted-foreground mb-2">
                 Nie możesz utworzyć zadania bez projektu.
@@ -159,7 +159,7 @@ export function TaskListNavigator() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => adminNavigate("/projects")}
+                onClick={() => adminNavigate("/scenarios")}
               >
                 Przejdź do projektów
               </Button>

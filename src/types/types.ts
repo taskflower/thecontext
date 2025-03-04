@@ -30,8 +30,8 @@ export interface Folder {
   id: string;
   name: string;
   parentId: string | null;
-  isProjectRoot?: boolean;    // Flag for the root folder that contains all project folders
-  isProjectFolder?: boolean;  // Flag for folders that represent individual projects
+  isScenarioRoot?: boolean;    // Flag for the root folder that contains all project folders
+  isScenarioFolder?: boolean;  // Flag for folders that represent individual projects
 }
 export interface DocItem {
   id: string;
@@ -43,7 +43,7 @@ export interface DocItem {
   createdAt: string;
   updatedAt: string;
 }
-export interface Project {
+export interface Scenario {
   id: string;
   title: string;
   description: string;
@@ -60,7 +60,7 @@ export interface Task {
   status: Status;
   priority: Priority;
   dueDate: string;
-  projectId: string;
+  scenarioId: string;
   currentStepId?: string | null;
   data?: Record<string, any>;
 }

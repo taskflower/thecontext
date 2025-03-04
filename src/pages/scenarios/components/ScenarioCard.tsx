@@ -17,55 +17,55 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Project } from "@/types";
+import { Scenario } from "@/types";
 import { useDataStore } from "@/store";
 
-interface ProjectCardProps {
-  project: Project;
+interface ScenarioCardProps {
+  scenario: Scenario;
   navigateToFolder: (folderId: string) => void;
   setActiveTab: (tab: "dashboard" | "tasks" | "documents") => void;
-  toggleEditProjectModal: (project: Project) => void;
+  toggleEditScenarioModal: (scenario: Scenario) => void;
 }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ 
-  project, 
+const ScenarioCard: React.FC<ScenarioCardProps> = ({ 
+  scenario, 
   navigateToFolder, 
-  toggleEditProjectModal
+  toggleEditScenarioModal
 }) => {
-  const { folders, deleteProject } = useDataStore();
+  const { folders, deleteScenario } = useDataStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleViewFolder = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (project.folderId) {
-      navigateToFolder(project.folderId);
+    if (scenario.folderId) {
+      navigateToFolder(scenario.folderId);
     }
   };
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
-    toggleEditProjectModal(project);
+    toggleEditScenarioModal(scenario);
     setIsMenuOpen(false);
   };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm(`Are you sure you want to delete "${project.title}"?`)) {
-      deleteProject(project.id);
+    if (confirm(`Are you sure you want to delete "${scenario.title}"?`)) {
+      deleteScenario(scenario.id);
     }
     setIsMenuOpen(false);
   };
 
   // Check if folder exists - if not, display an error state
-  const folderExists = folders.some(f => f.id === project.folderId);
+  const folderExists = folders.some(f => f.id === scenario.folderId);
 
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-2 flex flex-row justify-between items-start">
         <div>
-          <CardTitle className="text-base">{project.title}</CardTitle>
-          <CardDescription>{project.description}</CardDescription>
+          <CardTitle className="text-base">{scenario.title}</CardTitle>
+          <CardDescription>{scenario.description}</CardDescription>
         </div>
         <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
           <DropdownMenuTrigger asChild>
@@ -95,14 +95,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
       <CardContent className="pb-2">
         <div className="flex justify-between text-sm text-muted-foreground mb-2">
           <span>Progress</span>
-          <span>{project.progress}%</span>
+          <span>{scenario.progress}%</span>
         </div>
-        <Progress value={project.progress} className="h-2 mb-4" />
+        <Progress value={scenario.progress} className="h-2 mb-4" />
       </CardContent>
 
       <CardFooter className="flex justify-between pt-2 border-t">
         <div className="text-sm text-muted-foreground">
-          Tasks: {project.completedTasks}/{project.tasks}
+          Tasks: {scenario.completedTasks}/{scenario.tasks}
         </div>
         <Button 
           variant="ghost" 
@@ -120,4 +120,4 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   );
 };
 
-export default ProjectCard;
+export default ScenarioCard;

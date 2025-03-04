@@ -28,7 +28,7 @@ interface TaskEditModalProps {
 }
 
 export function TaskEditModal({ taskId, onClose }: TaskEditModalProps) {
-  const { tasks, addTask, deleteTask, projects } = useDataStore();
+  const { tasks, addTask, deleteTask, scenarios } = useDataStore();
   const adminNavigate = useAdminNavigate();
   const task = tasks.find(t => t.id === taskId);
   
@@ -37,7 +37,7 @@ export function TaskEditModal({ taskId, onClose }: TaskEditModalProps) {
     description: "",
     priority: "medium" as Priority,
     dueDate: "",
-    projectId: "",
+    scenarioId: "",
   });
   
   // Initialize form data when task changes
@@ -48,14 +48,14 @@ export function TaskEditModal({ taskId, onClose }: TaskEditModalProps) {
         description: task.description || "",
         priority: task.priority || "medium" as Priority,
         dueDate: task.dueDate || new Date().toISOString().split("T")[0],
-        projectId: task.projectId || "",
+        scenarioId: task.scenarioId || "",
       });
     }
-  }, [task, projects]);
+  }, [task, scenarios]);
   
   // Handle form submission
   const handleUpdate = () => {
-    if (!editData.projectId) {
+    if (!editData.scenarioId) {
       alert("Wybierz projekt dla tego zadania.");
       return;
     }
@@ -71,8 +71,8 @@ export function TaskEditModal({ taskId, onClose }: TaskEditModalProps) {
     }
   };
   
-  // If no projects exist, direct user to create a project first
-  if (projects.length === 0) {
+  // If no scenarios exist, direct user to create a scenario first
+  if (scenarios.length === 0) {
     return (
       <Dialog open={true} onOpenChange={onClose}>
         <DialogContent className="max-w-lg">
@@ -85,7 +85,7 @@ export function TaskEditModal({ taskId, onClose }: TaskEditModalProps) {
             <Button 
               onClick={() => {
                 onClose();
-                adminNavigate("/projects");
+                adminNavigate("/scenarios");
               }}
             >
               Przejdź do projektów
@@ -158,24 +158,24 @@ export function TaskEditModal({ taskId, onClose }: TaskEditModalProps) {
           </div>
           
           <div className="grid gap-2">
-            <Label htmlFor="edit-project">Projekt <span className="text-destructive">*</span></Label>
+            <Label htmlFor="edit-scenario">Projekt <span className="text-destructive">*</span></Label>
             <Select 
-              value={editData.projectId} 
-              onValueChange={(value) => setEditData({...editData, projectId: value})}
+              value={editData.scenarioId} 
+              onValueChange={(value) => setEditData({...editData, scenarioId: value})}
               required
             >
-              <SelectTrigger id="edit-project">
+              <SelectTrigger id="edit-scenario">
                 <SelectValue placeholder="Wybierz projekt" />
               </SelectTrigger>
               <SelectContent>
-                {projects.map(project => (
-                  <SelectItem key={project.id} value={project.id}>
-                    {project.title}
+                {scenarios.map(scenario => (
+                  <SelectItem key={scenario.id} value={scenario.id}>
+                    {scenario.title}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {!editData.projectId && (
+            {!editData.scenarioId && (
               <p className="text-xs text-destructive mt-1">Projekt jest wymagany</p>
             )}
           </div>
@@ -187,7 +187,7 @@ export function TaskEditModal({ taskId, onClose }: TaskEditModalProps) {
           </Button>
           <Button 
             onClick={handleUpdate}
-            disabled={!editData.title.trim() || !editData.projectId}
+            disabled={!editData.title.trim() || !editData.scenarioId}
           >
             Zapisz zmiany
           </Button>

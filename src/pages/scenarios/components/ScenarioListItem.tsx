@@ -8,54 +8,54 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Project } from "@/types";
+import { Scenario } from "@/types";
 import { useDataStore } from "@/store";
 
-interface ProjectListItemProps {
-  project: Project;
+interface ScenarioListItemProps {
+  scenario: Scenario;
   navigateToFolder: (folderId: string) => void;
   setActiveTab: (tab: "dashboard" | "tasks" | "documents") => void;
-  toggleEditProjectModal: (project: Project) => void;
+  toggleEditScenarioModal: (scenario: Scenario) => void;
 }
 
-const ProjectListItem: React.FC<ProjectListItemProps> = ({ 
-  project, 
+const ScenarioListItem: React.FC<ScenarioListItemProps> = ({ 
+  scenario, 
   navigateToFolder, 
-  toggleEditProjectModal
+  toggleEditScenarioModal
 }) => {
-  const { deleteProject, folders } = useDataStore();
+  const { deleteScenario, folders } = useDataStore();
 
   const handleViewFolder = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (project.folderId) {
-      navigateToFolder(project.folderId);
+    if (scenario.folderId) {
+      navigateToFolder(scenario.folderId);
     }
   };
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
-    toggleEditProjectModal(project);
+    toggleEditScenarioModal(scenario);
   };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm(`Are you sure you want to delete "${project.title}"?`)) {
-      deleteProject(project.id);
+    if (confirm(`Are you sure you want to delete "${scenario.title}"?`)) {
+      deleteScenario(scenario.id);
     }
   };
 
   // Check if folder exists
-  const folderExists = folders.some(f => f.id === project.folderId);
+  const folderExists = folders.some(f => f.id === scenario.folderId);
   
   return (
     <div className="grid grid-cols-12 p-3 border-b hover:bg-secondary/20 cursor-pointer">
-      <div className="col-span-4 font-medium">{project.title}</div>
+      <div className="col-span-4 font-medium">{scenario.title}</div>
       <div className="col-span-3">
-        <Progress value={project.progress} className="h-2" />
-        <div className="text-xs text-muted-foreground mt-1">{project.progress}%</div>
+        <Progress value={scenario.progress} className="h-2" />
+        <div className="text-xs text-muted-foreground mt-1">{scenario.progress}%</div>
       </div>
-      <div className="col-span-2 text-muted-foreground">{project.completedTasks}/{project.tasks}</div>
-      <div className="col-span-2 text-muted-foreground">{project.dueDate}</div>
+      <div className="col-span-2 text-muted-foreground">{scenario.completedTasks}/{scenario.tasks}</div>
+      <div className="col-span-2 text-muted-foreground">{scenario.dueDate}</div>
       <div className="col-span-1 flex items-center justify-end">
         <Button
           variant="ghost"
@@ -63,7 +63,7 @@ const ProjectListItem: React.FC<ProjectListItemProps> = ({
           className="h-8 w-8 text-primary"
           onClick={handleViewFolder}
           disabled={!folderExists}
-          title="View project folder"
+          title="View scenario folder"
           type="button"
         >
           <FolderOpen size={16} />
@@ -95,4 +95,4 @@ const ProjectListItem: React.FC<ProjectListItemProps> = ({
   );
 };
 
-export default ProjectListItem;
+export default ScenarioListItem;

@@ -1,4 +1,4 @@
-// src/pages/projects/components/NewProjectModal.tsx
+// src/pages/scenarios/components/NewScenarioModal.tsx
 import React, { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -15,12 +15,12 @@ import {
 } from "@/components/ui/dialog";
 import { useDataStore } from "@/store";
 
-interface NewProjectModalProps {
-  toggleNewProjectModal: () => void;
+interface NewScenarioModalProps {
+  toggleNewScenarioModal: () => void;
 }
 
-const NewProjectModal: React.FC<NewProjectModalProps> = ({ toggleNewProjectModal }) => {
-  const { addProject, addFolder } = useDataStore();
+const NewScenarioModal: React.FC<NewScenarioModalProps> = ({ toggleNewScenarioModal }) => {
+  const { addScenario, addFolder } = useDataStore();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState(
@@ -32,19 +32,19 @@ const NewProjectModal: React.FC<NewProjectModalProps> = ({ toggleNewProjectModal
 
     if (!title.trim()) return;
 
-    // Create a folder for this project
+    // Create a folder for this scenario
     const folderId = `folder-${Date.now()}`;
     
-    // Add a folder for the project
+    // Add a folder for the scenario
     addFolder({
       id: folderId,
       name: title,
-      parentId: 'projects', // Root folder for projects
-      isProjectFolder: true  // Mark as a project folder
+      parentId: 'scenarios', // Root folder for scenarios
+      isScenarioFolder: true  // Mark as a scenario folder
     });
 
-    // Create and add the project
-    const newProject = {
+    // Create and add the scenario
+    const newScenario = {
       id: `proj-${Date.now()}`,
       title,
       description,
@@ -55,32 +55,32 @@ const NewProjectModal: React.FC<NewProjectModalProps> = ({ toggleNewProjectModal
       folderId
     };
 
-    addProject(newProject);
+    addScenario(newScenario);
     
     // Reset form
     setTitle("");
     setDescription("");
     setDueDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
     
-    toggleNewProjectModal();
+    toggleNewScenarioModal();
   };
 
   return (
     <Dialog open={true} onOpenChange={(open) => {
-      if (!open) toggleNewProjectModal();
+      if (!open) toggleNewScenarioModal();
     }}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create New Project</DialogTitle>
+          <DialogTitle>Create New Scenario</DialogTitle>
           <DialogDescription>
-            Add a new project to your dashboard.
+            Add a new scenario to your dashboard.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="title">Project Title</Label>
+              <Label htmlFor="title">Scenario Title</Label>
               <Input 
                 id="title" 
                 value={title}
@@ -112,11 +112,11 @@ const NewProjectModal: React.FC<NewProjectModalProps> = ({ toggleNewProjectModal
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={toggleNewProjectModal}>
+            <Button type="button" variant="outline" onClick={toggleNewScenarioModal}>
               Cancel
             </Button>
             <Button type="submit" disabled={!title.trim()}>
-              Create Project
+              Create Scenario
             </Button>
           </DialogFooter>
         </form>
@@ -125,4 +125,4 @@ const NewProjectModal: React.FC<NewProjectModalProps> = ({ toggleNewProjectModal
   );
 };
 
-export default NewProjectModal;
+export default NewScenarioModal;

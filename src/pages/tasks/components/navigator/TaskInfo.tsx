@@ -4,24 +4,24 @@ import { Folder } from "lucide-react";
 
 interface TaskInfoProps {
   description: string;
-  projectId?: string;
-  projectName: string;
+  scenarioId?: string;
+  scenarioName: string;
 }
 
 export function TaskInfo({
   description,
-  projectId,
-  projectName,
+  scenarioId,
+  scenarioName,
 }: TaskInfoProps) {
   return (
     <div>
      
 
-      {projectId && (
+      {scenarioId && (
         <div>
           <div className="flex items-center gap-2 text-sm">
             <Folder className="h-4 w-4" />
-            Projekt: {projectName}
+            Projekt: {scenarioName}
           </div>
         </div>
       )}

@@ -20,7 +20,7 @@ export function TaskDetailView() {
   const [showHelp, setShowHelp] = useState(false);
 
   // Fetch data from stores
-  const { tasks, projects } = useDataStore();
+  const { tasks, scenarios } = useDataStore();
   const { getTaskSteps } = useStepStore();
   const { activeTaskId } = useWizardStore();
   
@@ -28,10 +28,10 @@ export function TaskDetailView() {
   const task = activeTaskId ? tasks.find((t) => t.id === activeTaskId) : null;
   const steps = activeTaskId ? getTaskSteps(activeTaskId).sort((a, b) => a.order - b.order) : [];
 
-  // Get project name for the task
-  const projectName = task?.projectId
-    ? projects.find((p) => p.id === task.projectId)?.title || task.projectId
-    : "No project";
+  // Get scenario name for the task
+  const scenarioName = task?.scenarioId
+    ? scenarios.find((p) => p.id === task.scenarioId)?.title || task.scenarioId
+    : "No scenario";
 
   // If no task is selected, show placeholder
   if (!task) {
@@ -67,8 +67,8 @@ export function TaskDetailView() {
           <div className="flex justify-between items-start">
             <TaskInfo 
               description={task.description} 
-              projectId={task.projectId}
-              projectName={projectName} 
+              scenarioId={task.scenarioId}
+              scenarioName={scenarioName} 
             />
             
             <Button

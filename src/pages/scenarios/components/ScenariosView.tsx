@@ -2,35 +2,35 @@ import React, { useState } from "react";
 import { Plus } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import ProjectsHeader from "./ProjectsHeader";
+import ScenariosHeader from "./ScenariosHeader";
 import { Card } from "@/components/ui/card";
-import ProjectCard from "./ProjectCard";
-import ProjectListItem from "./ProjectListItem";
+import ScenarioCard from "./ScenarioCard";
+import ScenarioListItem from "./ScenarioListItem";
 import { useDataStore, useUIStore } from "@/store";
-import NewProjectModal from "./NewProjectModal";
-import EditProjectModal from "./EditProjectModal";
-import { Project } from "@/types";
+import NewScenarioModal from "./NewScenarioModal";
+import EditScenarioModal from "./EditScenarioModal";
+import { Scenario } from "@/types";
 
-const ProjectsView: React.FC = () => {
-  const { projects } = useDataStore();
+const ScenariosView: React.FC = () => {
+  const { scenarios } = useDataStore();
   const { 
     viewMode, 
     setActiveTab, 
-    toggleNewProjectModal,
+    toggleNewScenarioModal,
     setViewMode,
-    showNewProjectModal
+    showNewScenarioModal
   } = useUIStore();
 
   const navigate = useNavigate();
   const { lang } = useParams();
 
-  // State for edit project modal
-  const [editProject, setEditProject] = useState<Project | null>(null);
+  // State for edit scenario modal
+  const [editScenario, setEditScenario] = useState<Scenario | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
 
-  const toggleEditProjectModal = (project: Project | null) => {
-    setEditProject(project);
-    setShowEditModal(!!project);
+  const toggleEditScenarioModal = (scenario: Scenario | null) => {
+    setEditScenario(scenario);
+    setShowEditModal(!!scenario);
   };
 
   // Router-based navigation to folder
@@ -41,34 +41,34 @@ const ProjectsView: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col">
-      <ProjectsHeader 
+      <ScenariosHeader 
         viewMode={viewMode} 
         setViewMode={setViewMode}
-        toggleNewProjectModal={toggleNewProjectModal}
+        toggleNewScenarioModal={toggleNewScenarioModal}
       />
       
       <div className="p-6 flex-1 overflow-auto">
-        <h3 className="text-lg font-medium mb-4">Your Projects</h3>
+        <h3 className="text-lg font-medium mb-4">Your Scenarios</h3>
 
         {viewMode === "cards" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {projects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
+            {scenarios.map((scenario) => (
+              <ScenarioCard
+                key={scenario.id}
+                scenario={scenario}
                 navigateToFolder={navigateToFolder}
                 setActiveTab={setActiveTab}
-                toggleEditProjectModal={toggleEditProjectModal}
+                toggleEditScenarioModal={toggleEditScenarioModal}
               />
             ))}
 
             <Card
               className="border border-dashed cursor-pointer hover:bg-secondary/20 transition-colors"
-              onClick={toggleNewProjectModal}
+              onClick={toggleNewScenarioModal}
             >
               <div className="p-6 flex flex-col items-center justify-center text-muted-foreground">
                 <Plus size={24} />
-                <span className="mt-2">Add New Project</span>
+                <span className="mt-2">Add New Scenario</span>
               </div>
             </Card>
           </div>
@@ -82,13 +82,13 @@ const ProjectsView: React.FC = () => {
               <div className="col-span-1"></div>
             </div>
 
-            {projects.map((project) => (
-              <ProjectListItem
-                key={project.id}
-                project={project}
+            {scenarios.map((scenario) => (
+              <ScenarioListItem
+                key={scenario.id}
+                scenario={scenario}
                 navigateToFolder={navigateToFolder}
                 setActiveTab={setActiveTab}
-                toggleEditProjectModal={toggleEditProjectModal}
+                toggleEditScenarioModal={toggleEditScenarioModal}
               />
             ))}
           </Card>
@@ -96,17 +96,17 @@ const ProjectsView: React.FC = () => {
       </div>
 
       {/* Render the modals conditionally */}
-      {showNewProjectModal && (
-        <NewProjectModal toggleNewProjectModal={toggleNewProjectModal} />
+      {showNewScenarioModal && (
+        <NewScenarioModal toggleNewScenarioModal={toggleNewScenarioModal} />
       )}
       
-      <EditProjectModal 
-        project={editProject}
+      <EditScenarioModal 
+        scenario={editScenario}
         isOpen={showEditModal}
-        onClose={() => toggleEditProjectModal(null)}
+        onClose={() => toggleEditScenarioModal(null)}
       />
     </div>
   );
 };
 
-export default ProjectsView;
+export default ScenariosView;

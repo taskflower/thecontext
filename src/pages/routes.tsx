@@ -6,7 +6,7 @@ import { RequireAuth } from "@/layouts/RequireAuth";
 import { AdminLayout } from "@/layouts/AdminLayout";
 import publicRoutes from "@/pages/public/routes";
 import tasksRoute from "@/pages/tasks/routes";
-import projectsRoute from "@/pages/projects/routes";
+import scenariosRoute from "@/pages/scenarios/routes";
 import documentsRoute from "@/pages/documents/routes";
 import settingsRoutes from "@/pages/settings/routes";
 import usersRoutes from "@/pages/users/routes";
@@ -45,7 +45,7 @@ export const routes: RouteObject[] = [
     ),
     children: [
       { path: "tasks/*", children: tasksRoute },
-      { path: "projects/*", children: projectsRoute },
+      { path: "scenarios/*", children: scenariosRoute },
       { path: "documents/*", children: documentsRoute },
       { path: "settings/*", children: settingsRoutes },
       { path: "users/*", children: usersRoutes },

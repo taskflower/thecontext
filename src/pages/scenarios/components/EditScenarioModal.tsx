@@ -1,4 +1,4 @@
-// src/pages/projects/components/EditProjectModal.tsx
+// src/pages/scenarios/components/EditScenarioModal.tsx
 import React, { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -14,35 +14,35 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useDataStore } from "@/store";
-import { Project } from "@/types";
+import { Scenario } from "@/types";
 
-interface EditProjectModalProps {
-  project: Project | null;
+interface EditScenarioModalProps {
+  scenario: Scenario | null;
   isOpen: boolean;
   onClose: () => void;
 }
 
-const EditProjectModal: React.FC<EditProjectModalProps> = ({ project, isOpen, onClose }) => {
-  const { updateProject } = useDataStore();
+const EditScenarioModal: React.FC<EditScenarioModalProps> = ({ scenario, isOpen, onClose }) => {
+  const { updateScenario } = useDataStore();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
 
-  // Set initial form values when project changes
+  // Set initial form values when scenario changes
   useEffect(() => {
-    if (project) {
-      setTitle(project.title);
-      setDescription(project.description || "");
-      setDueDate(project.dueDate);
+    if (scenario) {
+      setTitle(scenario.title);
+      setDescription(scenario.description || "");
+      setDueDate(scenario.dueDate);
     }
-  }, [project]);
+  }, [scenario]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!project || !title.trim()) return;
+    if (!scenario || !title.trim()) return;
 
-    updateProject(project.id, {
+    updateScenario(scenario.id, {
       title,
       description,
       dueDate
@@ -52,7 +52,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ project, isOpen, on
     onClose();
   };
 
-  if (!project) return null;
+  if (!scenario) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {
@@ -60,16 +60,16 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ project, isOpen, on
     }}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit Project</DialogTitle>
+          <DialogTitle>Edit Scenario</DialogTitle>
           <DialogDescription>
-            Update project details.
+            Update scenario details.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="title">Project Title</Label>
+              <Label htmlFor="title">Scenario Title</Label>
               <Input 
                 id="title" 
                 value={title}
@@ -114,4 +114,4 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ project, isOpen, on
   );
 };
 
-export default EditProjectModal;
+export default EditScenarioModal;

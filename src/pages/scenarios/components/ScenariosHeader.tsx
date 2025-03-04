@@ -3,28 +3,28 @@ import { Search, LayoutGrid, List as ListIcon, Filter, Plus } from "lucide-react
 import { ViewMode } from "@/types";
 import { Button, Input } from "@/components/ui";
 
-interface ProjectsHeaderProps {
+interface ScenariosHeaderProps {
   viewMode: ViewMode;
   setViewMode: (mode: ViewMode) => void;
-  toggleNewProjectModal: () => void;
+  toggleNewScenarioModal: () => void;
 }
 
-export const ProjectsHeader: React.FC<ProjectsHeaderProps> = ({ 
+export const ScenariosHeader: React.FC<ScenariosHeaderProps> = ({ 
   viewMode, 
   setViewMode,
-  toggleNewProjectModal
+  toggleNewScenarioModal
 }) => {
   return (
     <div className="h-16 bg-background border-b px-6 flex justify-between items-center">
       <div className="text-xl font-medium">
-        Projects
+        Scenarios
       </div>
 
       <div className="flex items-center">
         <div className="relative mr-4">
           <Input
             type="text"
-            placeholder="Search projects..."
+            placeholder="Search scenarios..."
             className="w-64 pl-9"
           />
           <Search size={16} className="absolute left-3 top-2.5 text-muted-foreground" />
@@ -34,17 +34,17 @@ export const ProjectsHeader: React.FC<ProjectsHeaderProps> = ({
           variant="outline" 
           size="sm" 
           className="mr-3"
-          onClick={toggleNewProjectModal}
+          onClick={toggleNewScenarioModal}
         >
           <Plus size={16} className="mr-2" />
-          New Project
+          New Scenario
         </Button>
 
         <Button
           variant="ghost"
           size="icon"
           className="mr-3"
-          title="Filter projects"
+          title="Filter scenarios"
         >
           <Filter size={16} />
         </Button>
@@ -74,4 +74,4 @@ export const ProjectsHeader: React.FC<ProjectsHeaderProps> = ({
   );
 };
 
-export default ProjectsHeader;
+export default ScenariosHeader;
