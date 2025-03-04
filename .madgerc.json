@@ -1,6 +1,0 @@
-{
-    "aliases": {
-      "@/*": "./src/*"
-    },
-    "extensions": ["ts", "tsx"]
-  }

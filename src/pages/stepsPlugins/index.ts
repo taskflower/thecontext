@@ -5,9 +5,9 @@ export { register, getPlugin, getAllPlugins, getDefaultConfig } from './registry
 export type { StepPlugin, ViewerProps, EditorProps } from './types';
 
 // Import plugins manually to ensure they register
-import './form/index';
-import './document/index';
-import './checklist/index';
-import './decision/index';
-import './aiContent/index';
-// Import other plugins here when you create them
+import './llmGenerator/index';
+import './appBuilder/index';
+import './dataCollector/index';
+import './workflowBuilder/index';
+import './documentEditor/index';
+import './boilerplate/index';
