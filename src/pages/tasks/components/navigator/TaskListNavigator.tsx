@@ -1,7 +1,14 @@
 // src/pages/tasks/components/navigator/TaskListNavigator.tsx
-import  { useState } from "react";
-
+import { useState } from "react";
 import { Button, Tabs, TabsList, TabsTrigger } from "@/components/ui";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from "@/components/ui/dialog";
 import { useDataStore } from "@/store/dataStore";
 import { useWizardStore } from "@/store/wizardStore";
 import { Status, Task } from "@/types";
@@ -17,10 +24,9 @@ export function TaskListNavigator() {
   const adminNavigate = useAdminNavigate();
 
   // Local state
-  const [selectedStatusFilter, setStatusFilter] = useState<Status | "all">(
-    "all"
-  );
+  const [selectedStatusFilter, setStatusFilter] = useState<Status | "all">("all");
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [showNoProjectDialog, setShowNoProjectDialog] = useState(false);
 
   // Filter tasks based on selected status
   const filteredTasks = tasks.filter((task) => {
@@ -53,8 +59,15 @@ export function TaskListNavigator() {
     openWizard(taskId);
   };
 
-  // Quick add task
+  // Quick add task with project validation
   const handleQuickAddTask = () => {
+    // Check if there are any projects available
+    if (projects.length === 0) {
+      // Show dialog instead of alert
+      setShowNoProjectDialog(true);
+      return;
+    }
+
     const newTask: Task = {
       id: `task-${Date.now()}`,
       title: "Nowe zadanie",
@@ -62,13 +75,19 @@ export function TaskListNavigator() {
       status: "todo",
       priority: "medium",
       dueDate: new Date().toISOString().split("T")[0],
-      projectId: projects[0]?.id || "",
+      projectId: projects[0]?.id || "", // Default to first project
       currentStepId: null,
       data: {},
     };
 
     addTask(newTask);
     setActiveTask(newTask.id);
+  };
+
+  // Handler to navigate to projects from dialog
+  const handleGoToProjects = () => {
+    setShowNoProjectDialog(false);
+    adminNavigate("/projects");
   };
 
   // Empty state
@@ -101,7 +120,7 @@ export function TaskListNavigator() {
             size="icon"
             className="h-8 w-8"
             onClick={handleQuickAddTask}
-            title="Dodaj nowe zadanie"
+            title={projects.length > 0 ? "Dodaj nowe zadanie" : "Najpierw utwórz projekt"}
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -132,21 +151,56 @@ export function TaskListNavigator() {
         </TabsList>
 
         <div className="space-y-1 overflow-auto h-[calc(100vh-220px)]">
-          {filteredTasks.length > 0
-            ? filteredTasks.map((task) => (
-                <TaskItem
-                  key={task.id}
-                  task={task}
-                  isActive={activeTaskId === task.id}
-                  onSelect={handleSelectTask}
-                  onEdit={handleEditTask}
-                  onDelete={handleDeleteTask}
-                  onExecute={handleExecuteTask}
-                />
-              ))
-            : emptyState}
+          {projects.length === 0 ? (
+            <div className="py-8 text-center">
+              <p className="text-sm text-muted-foreground mb-2">
+                Nie możesz utworzyć zadania bez projektu.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => adminNavigate("/projects")}
+              >
+                Przejdź do projektów
+              </Button>
+            </div>
+          ) : filteredTasks.length > 0 ? (
+            filteredTasks.map((task) => (
+              <TaskItem
+                key={task.id}
+                task={task}
+                isActive={activeTaskId === task.id}
+                onSelect={handleSelectTask}
+                onEdit={handleEditTask}
+                onDelete={handleDeleteTask}
+                onExecute={handleExecuteTask}
+              />
+            ))
+          ) : (
+            emptyState
+          )}
         </div>
       </Tabs>
+
+      {/* Dialog for "No Project" warning */}
+      <Dialog open={showNoProjectDialog} onOpenChange={setShowNoProjectDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nie można utworzyć zadania</DialogTitle>
+            <DialogDescription>
+              Musisz najpierw utworzyć projekt, zanim będziesz mógł dodać zadania.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setShowNoProjectDialog(false)}>
+              Anuluj
+            </Button>
+            <Button onClick={handleGoToProjects}>
+              Przejdź do projektów
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Task edit modal */}
       {editingTaskId && (

@@ -19,7 +19,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useDataStore } from "@/store/dataStore";
-import { Priority } from "@/types"; // Importuj typ Priority
+import { Priority } from "@/types"; // Import Priority type
+import { useAdminNavigate } from "@/hooks";
 
 interface TaskEditModalProps {
   taskId: string;
@@ -28,6 +29,7 @@ interface TaskEditModalProps {
 
 export function TaskEditModal({ taskId, onClose }: TaskEditModalProps) {
   const { tasks, addTask, deleteTask, projects } = useDataStore();
+  const adminNavigate = useAdminNavigate();
   const task = tasks.find(t => t.id === taskId);
   
   const [editData, setEditData] = useState({
@@ -46,13 +48,18 @@ export function TaskEditModal({ taskId, onClose }: TaskEditModalProps) {
         description: task.description || "",
         priority: task.priority || "medium" as Priority,
         dueDate: task.dueDate || new Date().toISOString().split("T")[0],
-        projectId: task.projectId || projects[0]?.id || "",
+        projectId: task.projectId || "",
       });
     }
   }, [task, projects]);
   
   // Handle form submission
   const handleUpdate = () => {
+    if (!editData.projectId) {
+      alert("Wybierz projekt dla tego zadania.");
+      return;
+    }
+    
     if (task) {
       // Update the task by deleting and re-adding
       deleteTask(task.id);
@@ -63,6 +70,31 @@ export function TaskEditModal({ taskId, onClose }: TaskEditModalProps) {
       onClose();
     }
   };
+  
+  // If no projects exist, direct user to create a project first
+  if (projects.length === 0) {
+    return (
+      <Dialog open={true} onOpenChange={onClose}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Nie można utworzyć zadania</DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-6 text-center">
+            <p className="mb-4">Musisz najpierw utworzyć projekt, zanim będziesz mógł dodać zadania.</p>
+            <Button 
+              onClick={() => {
+                onClose();
+                adminNavigate("/projects");
+              }}
+            >
+              Przejdź do projektów
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
   
   // If task not found, close the modal
   if (!task) {
@@ -126,10 +158,11 @@ export function TaskEditModal({ taskId, onClose }: TaskEditModalProps) {
           </div>
           
           <div className="grid gap-2">
-            <Label htmlFor="edit-project">Projekt</Label>
+            <Label htmlFor="edit-project">Projekt <span className="text-destructive">*</span></Label>
             <Select 
               value={editData.projectId} 
               onValueChange={(value) => setEditData({...editData, projectId: value})}
+              required
             >
               <SelectTrigger id="edit-project">
                 <SelectValue placeholder="Wybierz projekt" />
@@ -142,6 +175,9 @@ export function TaskEditModal({ taskId, onClose }: TaskEditModalProps) {
                 ))}
               </SelectContent>
             </Select>
+            {!editData.projectId && (
+              <p className="text-xs text-destructive mt-1">Projekt jest wymagany</p>
+            )}
           </div>
         </div>
         
@@ -149,7 +185,10 @@ export function TaskEditModal({ taskId, onClose }: TaskEditModalProps) {
           <Button variant="outline" onClick={onClose}>
             Anuluj
           </Button>
-          <Button onClick={handleUpdate}>
+          <Button 
+            onClick={handleUpdate}
+            disabled={!editData.title.trim() || !editData.projectId}
+          >
             Zapisz zmiany
           </Button>
         </DialogFooter>
