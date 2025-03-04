@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Task } from "@/types";
 import { useWizardStore } from "@/store/wizardStore";
 import { useStepStore } from "@/store/stepStore";
-import { TaskResultJsonViewer } from "@/pages/steps/TaskResultJsonViewer";
+import { TaskResultJsonViewer } from "@/pages/steps/details/TaskResultJsonViewer";
 
 interface TaskHeaderProps {
   task: Task;
@@ -35,7 +35,7 @@ export function TaskHeader({ task }: TaskHeaderProps) {
         <div className="flex items-center gap-2">
           {/* Dodajemy naszą dyskretną ikonkę tutaj */}
           <TaskResultJsonViewer steps={steps} />
-          
+
           <Button onClick={handleExecuteAllSteps}>
             <PlayCircle className="mr-2 h-4 w-4" />
             Wykonaj wszystkie kroki

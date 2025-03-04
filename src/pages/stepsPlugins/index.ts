@@ -6,3 +6,6 @@ export type { StepPlugin, ViewerProps, EditorProps } from './types';
 
 // Import plugins manually to ensure they registerS
 import './boilerplate/index';
+import './textInput/index';
+import './llmResponse/index';
+import './storeInjector/index';

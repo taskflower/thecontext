@@ -10,8 +10,8 @@ import TaskInfo from "./TaskInfo";
 import StepsList from "@/pages/steps/StepsList";
 import StepAddDialog from "@/pages/steps/StepAddDialog";
 import StepEditDialog from "@/pages/steps/StepEditDialog";
-import StepHelpComponent from "@/pages/steps/StepHelpComponent";
 import { Button } from "@/components/ui/button";
+import StepHelpComponent from "@/pages/steps/details/StepHelpComponent";
 
 export function TaskDetailView() {
   const [isAddingStep, setIsAddingStep] = React.useState(false);

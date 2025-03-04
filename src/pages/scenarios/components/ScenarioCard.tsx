@@ -1,5 +1,7 @@
+// Updated ScenarioCard.tsx with Details option in dropdown and clickable title
 import React, { useState } from "react";
-import { Pencil, Trash2, FolderOpen } from "lucide-react";
+import { Pencil, Trash2, FolderOpen, Link2, ExternalLink } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { 
   Card, 
@@ -34,6 +36,15 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
 }) => {
   const { folders, deleteScenario } = useDataStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const { lang } = useParams();
+
+  // Function to navigate to scenario detail
+  const handleNavigateToDetail = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/admin/${lang}/scenarios/${scenario.id}`);
+    setIsMenuOpen(false);
+  };
 
   const handleViewFolder = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -59,11 +70,17 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
 
   // Check if folder exists - if not, display an error state
   const folderExists = folders.some(f => f.id === scenario.folderId);
+  
+  // Check if scenario has connections
+  const hasConnections = scenario.connections && scenario.connections.length > 0;
 
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-2 flex flex-row justify-between items-start">
-        <div>
+        <div 
+          onClick={handleNavigateToDetail} 
+          className="cursor-pointer hover:text-primary transition-colors"
+        >
           <CardTitle className="text-base">{scenario.title}</CardTitle>
           <CardDescription>{scenario.description}</CardDescription>
         </div>
@@ -77,6 +94,10 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleNavigateToDetail}>
+              <ExternalLink size={16} className="mr-2" />
+              Details
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleEdit}>
               <Pencil size={16} className="mr-2" />
               Edit
@@ -98,6 +119,14 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
           <span>{scenario.progress}%</span>
         </div>
         <Progress value={scenario.progress} className="h-2 mb-4" />
+
+        {/* Add connections indicator if present */}
+        {hasConnections && (
+          <div className="flex items-center space-x-1 mb-2 text-xs text-muted-foreground">
+            <Link2 size={14} />
+            <span>Connected with {scenario.connections?.length} {scenario.connections?.length === 1 ? 'scenario' : 'scenarios'}</span>
+          </div>
+        )}
       </CardContent>
 
       <CardFooter className="flex justify-between pt-2 border-t">

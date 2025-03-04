@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/store/dataStore.ts
-import { DocItem, Folder, Scenario, Status, Task } from '@/types';
+import { DocItem, Folder, Scenario, Status, Task, ConnectionType } from '@/types';
 import { create } from 'zustand';
 
 // Initial folder structure with special Scenarios root folder
@@ -20,6 +20,9 @@ interface DataState {
   addScenario: (scenario: Scenario) => void;
   updateScenario: (id: string, updates: Partial<Scenario>) => void;
   deleteScenario: (id: string) => void;
+  addScenarioConnection: (scenarioId: string, connectedId: string, connectionType?: ConnectionType) => void;
+  removeScenarioConnection: (scenarioId: string, connectedId: string) => void;
+  getConnectedScenarios: (scenarioId: string) => Scenario[];
   
   // Other data actions
   addFolder: (folder: Folder) => void;
@@ -104,6 +107,46 @@ export const useDataStore = create<DataState>((set, get) => ({
       tasks: state.tasks.filter(t => t.scenarioId !== id)
     };
   }),
+
+  // Scenario connection actions
+  addScenarioConnection: (scenarioId, connectedId, connectionType = 'related') => set((state) => {
+    const updatedScenarios = state.scenarios.map(scenario => {
+      if (scenario.id === scenarioId) {
+        const connections = scenario.connections || [];
+        if (!connections.includes(connectedId)) {
+          return { 
+            ...scenario, 
+            connections: [...connections, connectedId],
+            connectionType
+          };
+        }
+      }
+      return scenario;
+    });
+    
+    return { scenarios: updatedScenarios };
+  }),
+  
+  removeScenarioConnection: (scenarioId, connectedId) => set((state) => {
+    const updatedScenarios = state.scenarios.map(scenario => {
+      if (scenario.id === scenarioId && scenario.connections) {
+        return {
+          ...scenario,
+          connections: scenario.connections.filter(id => id !== connectedId)
+        };
+      }
+      return scenario;
+    });
+    
+    return { scenarios: updatedScenarios };
+  }),
+  
+  getConnectedScenarios: (scenarioId) => {
+    const scenario = get().scenarios.find(s => s.id === scenarioId);
+    if (!scenario || !scenario.connections) return [];
+    
+    return get().scenarios.filter(s => scenario.connections?.includes(s.id));
+  },
   
   // Other actions
   addFolder: (folder) => set((state) => ({ 

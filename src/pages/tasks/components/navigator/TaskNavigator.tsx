@@ -1,7 +1,7 @@
 // src/pages/tasks/TaskFlow/tasks/components/TaskNavigator.tsx
 import React from "react";
 import TaskListNavigator from "./TaskListNavigator";
-import TaskDetailView from "./TaskDetailView";
+import TaskDetailView from "./details/TaskDetailView";
 
 
 const TaskNavigator: React.FC = () => {

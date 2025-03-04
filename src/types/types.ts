@@ -8,6 +8,7 @@ export interface ConversationItem {
   role: "assistant" | "user";
   content: string;
 }
+export type ConnectionType = 'dependency' | 'related' | 'parent' | 'child';
 export interface Step {
   id: string;
   taskId: string;
@@ -52,6 +53,19 @@ export interface Scenario {
   completedTasks: number;
   dueDate: string;
   folderId: string | null;
+  connections?: string[]; // IDs of connected scenarios
+  connectionType?: ConnectionType; // Type of connection
+  // Optional marketing-specific fields
+  channels?: string[];
+  target?: {
+    audience?: string;
+    locations?: string;
+    interests?: string;
+  };
+  budget?: number;
+  startDate?: string;
+  endDate?: string;
+  objective?: string;
 }
 export interface Task {
   id: string;
