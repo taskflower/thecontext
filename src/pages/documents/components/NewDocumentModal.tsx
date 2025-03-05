@@ -2,13 +2,14 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { useDataStore, useUIStore } from "@/store";
-import { DocItem } from "@/types";
+import { useUIStore } from "@/store";
 import { FormModal, Input, Label, Textarea } from "@/components/ui";
+import { documentService } from "../services";
+import { useToast } from "@/hooks/useToast";
 
 const NewDocumentModal: React.FC = () => {
-  const { addDocItem } = useDataStore();
   const { showNewDocumentModal, toggleNewDocumentModal } = useUIStore();
+  const { toast } = useToast();
 
   // Get the current folder ID from URL params
   const { folderId = "root" } = useParams();
@@ -17,38 +18,49 @@ const NewDocumentModal: React.FC = () => {
   const [content, setContent] = useState("");
   const [metaKeys, setMetaKeys] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!title.trim()) return;
+    
+    setIsSubmitting(true);
+    setError(null);
 
-    const currentTime = new Date().toISOString();
-    const newDocItem: DocItem = {
-      id: `doc-${Date.now()}`,
+    // Convert comma-separated metadata to array
+    const metaKeyArray = metaKeys
+      .split(",")
+      .map((key) => key.trim())
+      .filter((key) => key !== "");
+
+    // Use the service to create the document
+    const result = documentService.createDocument(
       title,
       content,
-      metaKeys: metaKeys
-        .split(",")
-        .map((key) => key.trim())
-        .filter((key) => key !== ""),
-      schema: {},
-      folderId, // Use the folder ID from URL params
-      createdAt: currentTime,
-      updatedAt: currentTime,
-    };
-
-    const result = addDocItem(newDocItem);
+      metaKeyArray,
+      folderId
+    );
 
     if (!result.success) {
       setError(result.error || "Failed to create document.");
+      setIsSubmitting(false);
       return;
     }
+
+    // Show success toast
+    toast({
+      title: "Success",
+      description: "Document created successfully",
+      variant: "default"
+    });
 
     // Reset form
     setTitle("");
     setContent("");
     setMetaKeys("");
+    setError(null);
+    setIsSubmitting(false);
 
     toggleNewDocumentModal();
   };
@@ -60,16 +72,19 @@ const NewDocumentModal: React.FC = () => {
       isOpen={showNewDocumentModal}
       onClose={toggleNewDocumentModal}
       onSubmit={handleSubmit}
-      isSubmitDisabled={!title.trim()}
+      isSubmitDisabled={!title.trim() || isSubmitting}
       error={error}
-      submitLabel="Create Document"
+      submitLabel={isSubmitting ? "Creating..." : "Create Document"}
     >
       <div className="grid gap-2">
         <Label htmlFor="title">Title</Label>
         <Input
           id="title"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            setError(null); // Clear error when input changes
+          }}
           required
         />
       </div>

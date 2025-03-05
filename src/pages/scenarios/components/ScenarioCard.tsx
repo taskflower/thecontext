@@ -2,26 +2,12 @@
 import { useState } from "react";
 import { Pencil, Trash2, FolderOpen, Link2, ExternalLink } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Scenario } from "@/types";
-import { useDataStore, useScenarioStore } from "@/store";
-import {
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-  Progress,
-} from "@/components/ui";
-
+import { useDataStore } from "@/store";
+import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Progress } from "@/components/ui";
+import scenarioService from "../services/ScenarioService";
+import { useToast } from "@/hooks/useToast";
 
 interface ScenarioCardProps {
   scenario: Scenario;
@@ -36,12 +22,13 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
   toggleEditScenarioModal,
 }) => {
   const { folders } = useDataStore();
-  const { deleteScenario } = useScenarioStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { lang } = useParams();
 
-  // Function to navigate to scenario detail
+  const { toast } = useToast();
+  
+  // Funkcje obsługujące akcje
   const handleNavigateToDetail = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigate(`/admin/${lang}/scenarios/${scenario.id}`);
@@ -65,17 +52,28 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm(`Are you sure you want to delete "${scenario.title}"?`)) {
-      deleteScenario(scenario.id);
+      const result = scenarioService.deleteScenario(scenario.id);
+      
+      if (!result.success) {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to delete scenario",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Success", 
+          description: "Scenario deleted successfully",
+          variant: "default"
+        });
+      }
     }
     setIsMenuOpen(false);
   };
 
-  // Check if folder exists - if not, display an error state
+  // Sprawdzanie warunków
   const folderExists = folders.some((f) => f.id === scenario.folderId);
-
-  // Check if scenario has connections
-  const hasConnections =
-    scenario.connections && scenario.connections.length > 0;
+  const hasConnections = scenario.connections && scenario.connections.length > 0;
 
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -134,7 +132,6 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
         </div>
         <Progress value={scenario.progress} className="h-2 mb-4" />
 
-        {/* Add connections indicator if present */}
         {hasConnections && (
           <div className="flex items-center space-x-1 mb-2 text-xs text-muted-foreground">
             <Link2 size={14} />

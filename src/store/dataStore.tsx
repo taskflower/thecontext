@@ -28,13 +28,20 @@ export const useDataStore = create<DataState>()(
         );
       },
       
-      // Folder actions
+      // Folder actions - Focused only on state updates
       addFolder: (folder) => {
-        // Validate folder name is unique at the same level
+        // Basic validation
+        if (!folder.name.trim()) {
+          return {
+            success: false,
+            error: "Folder name is required."
+          };
+        }
+        
         if (!get().isFolderNameUnique(folder.name, folder.parentId)) {
           return {
             success: false,
-            error: `Nie można utworzyć folderu: Folder o nazwie "${folder.name}" już istnieje na tym samym poziomie.`
+            error: `A folder with the name "${folder.name}" already exists in this location.`
           };
         }
         
@@ -54,7 +61,7 @@ export const useDataStore = create<DataState>()(
         if (!folder) {
           return {
             success: false,
-            error: "Nie można zaktualizować folderu: Folder nie został znaleziony."
+            error: "Folder not found."
           };
         }
         
@@ -63,7 +70,7 @@ export const useDataStore = create<DataState>()(
           if (!get().isFolderNameUnique(updates.name, folder.parentId, folder.id)) {
             return {
               success: false,
-              error: `Nie można zaktualizować folderu: Folder o nazwie "${updates.name}" już istnieje na tym samym poziomie.`
+              error: `A folder with the name "${updates.name}" already exists in this location.`
             };
           }
         }
@@ -83,7 +90,7 @@ export const useDataStore = create<DataState>()(
         if (!folder) {
           return {
             success: false,
-            error: "Nie można usunąć folderu: Folder nie został znaleziony."
+            error: "Folder not found."
           };
         }
         
@@ -112,6 +119,13 @@ export const useDataStore = create<DataState>()(
       
       // Document actions
       addDocItem: (docItem) => {
+        if (!docItem.title.trim()) {
+          return {
+            success: false,
+            error: "Document title is required."
+          };
+        }
+        
         set((state) => ({ 
           docItems: [...state.docItems, docItem] 
         }));
@@ -128,7 +142,7 @@ export const useDataStore = create<DataState>()(
         if (!docItem) {
           return {
             success: false,
-            error: "Nie można zaktualizować dokumentu: Dokument nie został znaleziony."
+            error: "Document not found."
           };
         }
         
@@ -149,7 +163,7 @@ export const useDataStore = create<DataState>()(
         if (!docItem) {
           return {
             success: false,
-            error: "Nie można usunąć dokumentu: Dokument nie został znaleziony."
+            error: "Document not found."
           };
         }
         

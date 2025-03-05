@@ -1,22 +1,18 @@
-// src/store/scenarioStore.types.ts
-import { Scenario, ConnectionType } from '@/types';
-import { OperationResult } from './dataStore.types';
+import { Scenario } from "@/types";
 
+// src/store/scenarioStore.types.ts
 export interface ScenarioState {
-  // Data collection
+  // Dane
   scenarios: Scenario[];
   
-  // Validation helpers
-  isScenarioNameUnique: (name: string, excludeScenarioId?: string) => boolean;
-  
-  // Scenario actions
+  // Proste akcje CRUD - atomowe operacje na stanie
   getScenarioById: (scenarioId: string) => Scenario | undefined;
-  addScenario: (scenario: Scenario) => OperationResult<string>;
-  updateScenario: (id: string, updates: Partial<Scenario>) => OperationResult;
-  deleteScenario: (id: string) => OperationResult;
+  addScenario: (scenario: Scenario) => void;
+  updateScenario: (id: string, updates: Partial<Scenario>) => boolean;
+  deleteScenario: (id: string) => boolean;
   
-  // Connection management
-  addScenarioConnection: (scenarioId: string, connectedId: string, connectionType?: ConnectionType) => OperationResult;
-  removeScenarioConnection: (scenarioId: string, connectedId: string) => OperationResult;
-  getConnectedScenarios: (scenarioId: string) => Scenario[];
+  // Dodatkowe proste operacje na powiązaniach - bez logiki biznesowej
+  addConnection: (scenarioId: string, connectedId: string) => boolean;
+  removeConnection: (scenarioId: string, connectedId: string) => boolean;
+  updateConnectionType: (scenarioId: string, connectionType: string) => boolean;
 }

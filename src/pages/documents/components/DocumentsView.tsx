@@ -2,7 +2,6 @@
 // src/pages/documents/components/DocumentsView.tsx
 
 import { useState, useEffect } from "react";
-
 import { useParams } from "react-router-dom";
 
 import DocumentBrowser from "./DocumentBrowser";
@@ -10,12 +9,12 @@ import DocumentViewer from "./DocumentViewer";
 import NewDocumentModal from "./NewDocumentModal";
 import DocumentsHeader from "./DocumentsHeader";
 import DocumentItem from "./DocumentItem";
-import { useDataStore, useUIStore } from "@/store";
+import { useUIStore } from "@/store";
 import { DocItem } from "@/types";
 import { Button, Card } from "@/components/ui";
+import { documentService } from "../services";
 
 const DocumentsView: React.FC = () => {
-  const { searchDocItems } = useDataStore();
   const { selectedDocument, selectDocument } = useUIStore();
   const [searchResults, setSearchResults] = useState<DocItem[]>([]);
   
@@ -35,7 +34,7 @@ const DocumentsView: React.FC = () => {
     const handleDocumentSearch = (event: CustomEvent) => {
       const { searchTerm } = event.detail;
       if (searchTerm.trim()) {
-        const results = searchDocItems(searchTerm);
+        const results = documentService.searchDocuments(searchTerm);
         setSearchResults(results);
       } else {
         setSearchResults([]);
@@ -47,7 +46,7 @@ const DocumentsView: React.FC = () => {
     return () => {
       window.removeEventListener('documentSearch', handleDocumentSearch as EventListener);
     };
-  }, [searchDocItems]);
+  }, []);
   
   return (
     <div className="flex-1 flex flex-col">
@@ -55,8 +54,6 @@ const DocumentsView: React.FC = () => {
       
       {/* Main content */}
       <div className="p-4 flex-1 overflow-hidden flex flex-col bg-gray-50">
-       
-        
         <div className="flex gap-6 flex-1 overflow-hidden">
           <Card className="p-4 flex-1 overflow-auto">
             {searchResults.length > 0 ? (

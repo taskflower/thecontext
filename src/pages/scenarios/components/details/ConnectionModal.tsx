@@ -1,98 +1,141 @@
-// src/pages/documents/components/NewDocumentModal.tsx
+// src/pages/scenarios/components/details/ConnectionModal.tsx
 import { useState } from "react";
-import { useParams } from "react-router-dom";
-
 import { FormModal } from "@/components/ui/form-modal";
-import { useDataStore, useUIStore } from "@/store";
-import { DocItem } from "@/types";
-import { Input, Label, Textarea } from "@/components/ui";
+import { useScenarioStore } from "@/store";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui";
 
-const NewDocumentModal: React.FC = () => {
-  const { addDocItem } = useDataStore();
-  const { showNewDocumentModal, toggleNewDocumentModal } = useUIStore();
-  
-  // Get the current folder ID from URL params
-  const { folderId = "root" } = useParams();
+import scenarioService from "../../services/ScenarioService";
+import { useToast } from "@/hooks/useToast";
 
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [metaKeys, setMetaKeys] = useState("");
+interface ConnectionModalProps {
+  scenarioId: string;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const ConnectionModal: React.FC<ConnectionModalProps> = ({
+  scenarioId,
+  isOpen,
+  onClose,
+}) => {
+  const { scenarios } = useScenarioStore();
+  const { toast } = useToast();
+  const [targetScenarioId, setTargetScenarioId] = useState("");
+  const [connectionType, setConnectionType] = useState("related");
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Pobieranie scenariusza i dostępnych połączeń przez serwis
+  // Używanie serwisu zamiast bezpośredniego dostępu do store
+  const currentScenario = scenarioService.getScenarioById(scenarioId);
+  const connectedIds = currentScenario?.connections || [];
+  const availableScenarios = scenarios.filter(
+    (s) => s.id !== scenarioId && !connectedIds.includes(s.id)
+  );
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!title.trim()) return;
-
-    const currentTime = new Date().toISOString();
-    const newDocItem: DocItem = {
-      id: `doc-${Date.now()}`,
-      title,
-      content,
-      metaKeys: metaKeys.split(",").map(key => key.trim()).filter(key => key !== ""),
-      schema: {},
-      folderId, // Use the folder ID from URL params
-      createdAt: currentTime,
-      updatedAt: currentTime
-    };
-
-    const result = addDocItem(newDocItem);
+    if (!targetScenarioId) {
+      setError("Please select a scenario to connect with.");
+      return;
+    }
     
+    setIsSubmitting(true);
+    setError(null);
+
+    const result = scenarioService.connectScenarios(
+      scenarioId,
+      targetScenarioId,
+      connectionType
+    );
+
     if (!result.success) {
-      setError(result.error || "Failed to create document.");
+      setError(result.error || "Failed to create connection");
+      setIsSubmitting(false);
       return;
     }
 
-    // Reset form
-    setTitle("");
-    setContent("");
-    setMetaKeys("");
-    
-    toggleNewDocumentModal();
+    // Powiadomienie o sukcesie
+    toast({
+      title: "Success",
+      description: "Scenarios connected successfully",
+      variant: "default"
+    });
+
+    setTargetScenarioId("");
+    setConnectionType("related");
+    setError(null);
+    setIsSubmitting(false);
+    onClose();
   };
 
   return (
     <FormModal
-      title="Create New Document"
-      description="Add a new document to the current folder."
-      isOpen={showNewDocumentModal}
-      onClose={toggleNewDocumentModal}
+      title="Connect Scenarios"
+      description="Create connections between this scenario and others."
+      isOpen={isOpen}
+      onClose={onClose}
       onSubmit={handleSubmit}
-      isSubmitDisabled={!title.trim()}
+      isSubmitDisabled={!targetScenarioId || isSubmitting}
       error={error}
-      submitLabel="Create Document"
+      submitLabel={isSubmitting ? "Connecting..." : "Create Connection"}
     >
-      <div className="grid gap-2">
-        <Label htmlFor="title">Title</Label>
-        <Input 
-          id="title" 
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required 
-        />
-      </div>
-      
-      <div className="grid gap-2">
-        <Label htmlFor="content">Content</Label>
-        <Textarea
-          id="content"
-          className="h-32"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
-      </div>
-      
-      <div className="grid gap-2">
-        <Label htmlFor="metaKeys">Tags (comma-separated)</Label>
-        <Input
-          id="metaKeys"
-          value={metaKeys}
-          onChange={(e) => setMetaKeys(e.target.value)}
-          placeholder="project, notes, important"
-        />
-      </div>
+      {availableScenarios.length === 0 ? (
+        <div className="py-4 text-center">
+          <p className="text-sm text-muted-foreground">
+            No available scenarios to connect. All scenarios are already connected
+            or there are no other scenarios.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="grid gap-2">
+            <Label htmlFor="targetScenario">Select Scenario</Label>
+            <Select
+              value={targetScenarioId}
+              onValueChange={(value) => {
+                setTargetScenarioId(value);
+                setError(null);
+              }}
+            >
+              <SelectTrigger id="targetScenario">
+                <SelectValue placeholder="Select a scenario to connect" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableScenarios.map((scenario) => (
+                  <SelectItem key={scenario.id} value={scenario.id}>
+                    {scenario.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid gap-2 mt-4">
+            <Label htmlFor="connectionType">Connection Type</Label>
+            <Select
+              value={connectionType}
+              onValueChange={(value) => setConnectionType(value)}
+            >
+              <SelectTrigger id="connectionType">
+                <SelectValue placeholder="Select connection type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="related">Related</SelectItem>
+                <SelectItem value="dependency">Dependency</SelectItem>
+                <SelectItem value="parent">Parent</SelectItem>
+                <SelectItem value="child">Child</SelectItem>
+                <SelectItem value="follows">Follows</SelectItem>
+                <SelectItem value="precedes">Precedes</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </>
+      )}
     </FormModal>
   );
 };
 
-export default NewDocumentModal;
+export default ConnectionModal;

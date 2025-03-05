@@ -1,14 +1,11 @@
+// src/pages/scenarios/components/ScenarioListItem.tsx
 import { FolderOpen, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Scenario } from "@/types";
-import { useDataStore, useScenarioStore } from "@/store";
+import { useDataStore } from "@/store";
 import { Button, Progress } from "@/components/ui";
+import scenarioService from "../services/ScenarioService";
+import { useToast } from "@/hooks/useToast";
 
 interface ScenarioListItemProps {
   scenario: Scenario;
@@ -23,7 +20,7 @@ const ScenarioListItem: React.FC<ScenarioListItemProps> = ({
   toggleEditScenarioModal,
 }) => {
   const { folders } = useDataStore();
-  const { deleteScenario } = useScenarioStore();
+  const { toast } = useToast();
 
   const handleViewFolder = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -40,11 +37,25 @@ const ScenarioListItem: React.FC<ScenarioListItemProps> = ({
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm(`Are you sure you want to delete "${scenario.title}"?`)) {
-      deleteScenario(scenario.id);
+      const result = scenarioService.deleteScenario(scenario.id);
+      
+      if (!result.success) {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to delete scenario",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Success", 
+          description: "Scenario deleted successfully",
+          variant: "default"
+        });
+      }
     }
   };
 
-  // Check if folder exists
+  // Sprawdzanie warunków
   const folderExists = folders.some((f) => f.id === scenario.folderId);
 
   return (

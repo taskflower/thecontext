@@ -1,24 +1,23 @@
 // src/pages/documents/components/DocumentBrowser.tsx
-
 import React from "react";
 import { Folder } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useDataStore, useUIStore } from "@/store";
+import { useUIStore } from "@/store";
 import { Button } from "@/components/ui";
 import DocumentItem from "./DocumentItem";
+import { documentService } from "../services";
 
 const DocumentBrowser: React.FC = () => {
-  const { getChildFolders, getDocItemsInFolder, getFolderPath } =
-    useDataStore();
   const { selectDocument } = useUIStore();
 
   // Use router params instead of internal state
   const { lang, folderId = "root" } = useParams();
   const navigate = useNavigate();
 
-  const childFolders = getChildFolders(folderId);
-  const docItems = getDocItemsInFolder(folderId);
-  const folderPath = getFolderPath(folderId);
+  // Use documentService instead of direct store access
+  const childFolders = documentService.getChildFolders(folderId);
+  const docItems = documentService.getDocumentsInFolder(folderId);
+  const folderPath = documentService.getFolderPath(folderId);
 
   // Handle folder navigation with router
   const handleFolderNavigation =

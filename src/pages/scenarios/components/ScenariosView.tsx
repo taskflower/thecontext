@@ -1,31 +1,22 @@
-import { useState } from "react";
+// src/pages/scenarios/components/ScenariosView.tsx
+import { useState} from "react";
 import { Plus } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useScenarioStore, useUIStore } from "@/store";
 import { Scenario } from "@/types";
 import { Card } from "@/components/ui";
-import {
-  EditScenarioModal,
-  NewScenarioModal,
-  ScenarioCard,
-  ScenarioListItem,
-  ScenariosHeader,
-} from ".";
+import { EditScenarioModal, NewScenarioModal, ScenarioCard, ScenarioListItem, ScenariosHeader } from ".";
+
 
 const ScenariosView: React.FC = () => {
+  // Pobieranie stanu tylko do odczytu
   const { scenarios } = useScenarioStore();
-  const {
-    viewMode,
-    setActiveTab,
-    toggleNewScenarioModal,
-    setViewMode,
-    showNewScenarioModal,
-  } = useUIStore();
+  const { viewMode, setActiveTab, toggleNewScenarioModal, setViewMode, showNewScenarioModal } = useUIStore();
 
   const navigate = useNavigate();
   const { lang } = useParams();
 
-  // State for edit scenario modal
+  // Stan dla edycji scenariusza
   const [editScenario, setEditScenario] = useState<Scenario | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
 
@@ -34,7 +25,7 @@ const ScenariosView: React.FC = () => {
     setShowEditModal(!!scenario);
   };
 
-  // Router-based navigation to folder
+  // Nawigacja do folderu
   const navigateToFolder = (folderId: string) => {
     navigate(`/admin/${lang}/documents/${folderId}`);
     setActiveTab("documents");
@@ -94,7 +85,7 @@ const ScenariosView: React.FC = () => {
         )}
       </div>
 
-      {/* Render the modals conditionally */}
+      {/* Renderowanie modali */}
       {showNewScenarioModal && (
         <NewScenarioModal toggleNewScenarioModal={toggleNewScenarioModal} />
       )}

@@ -1,12 +1,15 @@
+// src/pages/documents/components/DocumentsHeader.tsx
 import { useState } from "react";
 import { Search, Folder, FileText } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useDataStore, useUIStore } from "@/store";
+import { useUIStore } from "@/store";
 import { Button, Input } from "@/components/ui";
+import { documentService } from "../services";
+import { useToast } from "@/hooks/useToast";
 
 const DocumentsHeader: React.FC = () => {
-  const { addFolder } = useDataStore();
   const { toggleNewDocumentModal } = useUIStore();
+  const { toast } = useToast();
   const { lang, folderId = "root" } = useParams();
   const navigate = useNavigate();
 
@@ -14,16 +17,28 @@ const DocumentsHeader: React.FC = () => {
 
   const handleNewFolder = () => {
     const folderName = prompt("Enter folder name:");
-    if (folderName) {
-      const newFolderId = `folder-${Date.now()}`;
-      addFolder({
-        id: newFolderId,
-        name: folderName,
-        parentId: folderId,
+    if (folderName?.trim()) {
+      const result = documentService.createFolder(folderName, folderId);
+      
+      if (!result.success) {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to create folder",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      toast({
+        title: "Success",
+        description: "Folder created successfully",
+        variant: "default"
       });
-
+      
       // Navigate to the new folder
-      navigate(`/admin/${lang}/documents/${newFolderId}`);
+      if (result.data) {
+        navigate(`/admin/${lang}/documents/${result.data.id}`);
+      }
     }
   };
 
@@ -41,7 +56,7 @@ const DocumentsHeader: React.FC = () => {
 
   return (
     <div className="h-16 bg-background border-b px-6 flex justify-between items-center">
-      <h2 className="text-base font-semibold"> Documents</h2>
+      <h2 className="text-base font-semibold">Documents</h2>
 
       <div className="flex items-center">
         <form onSubmit={handleSearch} className="relative mr-4">

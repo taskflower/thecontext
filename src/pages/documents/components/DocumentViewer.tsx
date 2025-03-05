@@ -1,8 +1,5 @@
-// src/pages/tasks/TaskFlow/documents/components/DocumentViewer.tsx
-
-
+// src/pages/documents/components/DocumentViewer.tsx
 import { X, Tag, Clock } from "lucide-react";
-
 import {
   Badge,
   Button,
@@ -11,16 +8,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui";
-import { useDataStore, useUIStore } from "@/store";
+import { useUIStore } from "@/store";
+import { documentService } from "../services";
 
 const DocumentViewer: React.FC = () => {
-  const { getDocItem } = useDataStore();
   const { selectedDocument, selectDocument } = useUIStore();
 
   // If no document is selected, return null
   if (!selectedDocument) return null;
 
-  const docItem = getDocItem(selectedDocument);
+  // Use documentService instead of direct store access
+  const docItem = documentService.getDocumentById(selectedDocument);
 
   // If docItem not found, return null
   if (!docItem) return null;

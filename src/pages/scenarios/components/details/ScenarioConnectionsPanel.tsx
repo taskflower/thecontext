@@ -4,33 +4,27 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Link2, Unlink, ExternalLink } from "lucide-react";
 import { useScenarioStore } from "@/store";
 import { ConnectionModal } from "..";
-import { 
-  Button, 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle, 
-  Progress 
-} from "@/components/ui";
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Progress } from "@/components/ui";
 import { ConnectionTypeBadge } from "@/components/status";
-
+import scenarioService from "../../services/ScenarioService";
+import { useToast } from "@/hooks/useToast";
 
 interface ScenarioConnectionsPanelProps {
   scenarioId: string;
 }
 
-export const ScenarioConnectionsPanel: React.FC<
-  ScenarioConnectionsPanelProps
-> = ({ scenarioId }) => {
+export const ScenarioConnectionsPanel: React.FC<ScenarioConnectionsPanelProps> = ({ 
+  scenarioId 
+}) => {
   const { lang } = useParams();
   const navigate = useNavigate();
-  const { scenarios, getConnectedScenarios, removeScenarioConnection } =
-    useScenarioStore();
+  const { scenarios } = useScenarioStore();
+  const { toast } = useToast();
   const [showConnectionModal, setShowConnectionModal] = useState(false);
 
-  const currentScenario = scenarios.find((s) => s.id === scenarioId);
-  const connectedScenarios = getConnectedScenarios(scenarioId);
+  // Używanie serwisu do pobierania danych
+  const currentScenario = scenarioService.getScenarioById(scenarioId);
+  const connectedScenarios = scenarioService.getConnectedScenarios(scenarioId);
 
   if (!currentScenario) {
     return null;
@@ -38,7 +32,21 @@ export const ScenarioConnectionsPanel: React.FC<
 
   const handleDisconnect = (connectedId: string) => {
     if (confirm("Are you sure you want to remove this connection?")) {
-      removeScenarioConnection(scenarioId, connectedId);
+      const result = scenarioService.removeScenarioConnection(scenarioId, connectedId);
+      
+      if (!result.success) {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to remove connection",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Connection removed successfully",
+          variant: "default"
+        });
+      }
     }
   };
 
@@ -93,9 +101,11 @@ export const ScenarioConnectionsPanel: React.FC<
                         <h4 className="font-medium">{scenario.title}</h4>
                         <div className="ml-2">
                           <ConnectionTypeBadge
-                            type={scenario.connections?.includes(scenarioId)
-                              ? scenario.connectionType
-                              : currentScenario.connectionType}
+                            type={
+                              scenario.connections?.includes(scenarioId)
+                                ? scenario.connectionType || "related"
+                                : currentScenario.connectionType || "related"
+                            }
                           />
                         </div>
                       </div>

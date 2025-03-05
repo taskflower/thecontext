@@ -1,9 +1,9 @@
 // src/pages/scenarios/components/EditScenarioModal.tsx
 import { useState, useEffect } from "react";
-
-import { useScenarioStore } from "@/store";
 import { Scenario } from "@/types";
 import { FormModal, Input, Label, Textarea } from "@/components/ui";
+import scenarioService from "../services/ScenarioService";
+import { useToast } from "@/hooks/useToast";
 
 interface EditScenarioModalProps {
   scenario: Scenario | null;
@@ -16,13 +16,14 @@ const EditScenarioModal: React.FC<EditScenarioModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { updateScenario } = useScenarioStore();
+  const { toast } = useToast();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Set initial form values when scenario changes
+  // Ustawienie początkowych wartości formularza
   useEffect(() => {
     if (scenario) {
       setTitle(scenario.title);
@@ -36,8 +37,11 @@ const EditScenarioModal: React.FC<EditScenarioModalProps> = ({
     e.preventDefault();
 
     if (!scenario || !title.trim()) return;
+    
+    setIsSubmitting(true);
+    setError(null);
 
-    const result = updateScenario(scenario.id, {
+    const result = scenarioService.updateScenario(scenario.id, {
       title,
       description,
       dueDate,
@@ -45,10 +49,18 @@ const EditScenarioModal: React.FC<EditScenarioModalProps> = ({
 
     if (!result.success) {
       setError(result.error || "Failed to update the scenario.");
+      setIsSubmitting(false);
       return;
     }
 
-    // Reset and close
+    // Powiadomienie o sukcesie
+    toast({
+      title: "Success",
+      description: "Scenario updated successfully",
+      variant: "default"
+    });
+
+    setIsSubmitting(false);
     setError(null);
     onClose();
   };
@@ -62,9 +74,9 @@ const EditScenarioModal: React.FC<EditScenarioModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       onSubmit={handleSubmit}
-      isSubmitDisabled={!title.trim()}
+      isSubmitDisabled={!title.trim() || isSubmitting}
       error={error}
-      submitLabel="Save Changes"
+      submitLabel={isSubmitting ? "Saving..." : "Save Changes"}
     >
       <div className="grid gap-2">
         <Label htmlFor="title">Scenario Title</Label>

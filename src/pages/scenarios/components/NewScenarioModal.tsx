@@ -1,9 +1,9 @@
 // src/pages/scenarios/components/NewScenarioModal.tsx
 import { useState } from "react";
-
 import { FormModal } from "@/components/ui/form-modal";
-import { useDataStore, useScenarioStore } from "@/store";
 import { Input, Label, Textarea } from "@/components/ui";
+import scenarioService from "../services/ScenarioService";
+import { useToast } from "@/hooks/useToast";
 
 interface NewScenarioModalProps {
   toggleNewScenarioModal: () => void;
@@ -12,65 +12,37 @@ interface NewScenarioModalProps {
 const NewScenarioModal: React.FC<NewScenarioModalProps> = ({
   toggleNewScenarioModal,
 }) => {
-  const { addFolder } = useDataStore();
-  const { addScenario } = useScenarioStore();
+  const { toast } = useToast();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState(
     new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0] // Default: 1 week from now
   );
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!title.trim()) return;
+    
+    setIsSubmitting(true);
+    setError(null);
 
-    // Create a folder for this scenario
-    const folderId = `folder-${Date.now()}`;
+    const result = scenarioService.createScenario(title, description, dueDate);
 
-    // Add a folder for the scenario
-    const folderResult = addFolder({
-      id: folderId,
-      name: title,
-      parentId: "scenarios", // Root folder for scenarios
-      isScenarioFolder: true, // Mark as a scenario folder
+    if (!result.success) {
+      setError(result.error || "Failed to create scenario");
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Powiadomienie o sukcesie
+    toast({
+      title: "Success",
+      description: "Scenario created successfully",
+      variant: "default"
     });
-
-    // Check if folder creation was successful
-    if (!folderResult.success) {
-      setError(folderResult.error || "Failed to create scenario folder.");
-      return;
-    }
-
-    // Create and add the scenario
-    const newScenario = {
-      id: `proj-${Date.now()}`,
-      title,
-      description,
-      progress: 0,
-      tasks: 0,
-      completedTasks: 0,
-      dueDate,
-      folderId,
-    };
-
-    const scenarioResult = addScenario(newScenario);
-
-    // Check if scenario creation was successful
-    if (!scenarioResult.success) {
-      // If scenario creation failed, try to clean up the folder we just created
-      // This is a best-effort cleanup
-      addFolder({
-        id: folderId,
-        name: title,
-        parentId: "scenarios",
-        isScenarioFolder: true,
-      });
-
-      setError(scenarioResult.error || "Failed to create scenario.");
-      return;
-    }
 
     // Reset form
     setTitle("");
@@ -79,6 +51,7 @@ const NewScenarioModal: React.FC<NewScenarioModalProps> = ({
       new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]
     );
     setError(null);
+    setIsSubmitting(false);
 
     toggleNewScenarioModal();
   };
@@ -90,9 +63,9 @@ const NewScenarioModal: React.FC<NewScenarioModalProps> = ({
       isOpen={true}
       onClose={toggleNewScenarioModal}
       onSubmit={handleSubmit}
-      isSubmitDisabled={!title.trim()}
+      isSubmitDisabled={!title.trim() || isSubmitting}
       error={error}
-      submitLabel="Create Scenario"
+      submitLabel={isSubmitting ? "Creating..." : "Create Scenario"}
     >
       <div className="grid gap-2">
         <Label htmlFor="title">Scenario Title</Label>
