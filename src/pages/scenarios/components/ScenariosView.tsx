@@ -6,19 +6,19 @@ import ScenariosHeader from "./ScenariosHeader";
 import { Card } from "@/components/ui/card";
 import ScenarioCard from "./ScenarioCard";
 import ScenarioListItem from "./ScenarioListItem";
-import { useDataStore, useUIStore } from "@/store";
+import { useScenarioStore, useUIStore } from "@/store";
 import NewScenarioModal from "./NewScenarioModal";
 import EditScenarioModal from "./EditScenarioModal";
 import { Scenario } from "@/types";
 
 const ScenariosView: React.FC = () => {
-  const { scenarios } = useDataStore();
-  const { 
-    viewMode, 
-    setActiveTab, 
+  const { scenarios } = useScenarioStore();
+  const {
+    viewMode,
+    setActiveTab,
     toggleNewScenarioModal,
     setViewMode,
-    showNewScenarioModal
+    showNewScenarioModal,
   } = useUIStore();
 
   const navigate = useNavigate();
@@ -41,12 +41,12 @@ const ScenariosView: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col">
-      <ScenariosHeader 
-        viewMode={viewMode} 
+      <ScenariosHeader
+        viewMode={viewMode}
         setViewMode={setViewMode}
         toggleNewScenarioModal={toggleNewScenarioModal}
       />
-      
+
       <div className="p-6 flex-1 overflow-auto">
         <h3 className="text-lg font-medium mb-4">Your Scenarios</h3>
 
@@ -99,8 +99,8 @@ const ScenariosView: React.FC = () => {
       {showNewScenarioModal && (
         <NewScenarioModal toggleNewScenarioModal={toggleNewScenarioModal} />
       )}
-      
-      <EditScenarioModal 
+
+      <EditScenarioModal
         scenario={editScenario}
         isOpen={showEditModal}
         onClose={() => toggleEditScenarioModal(null)}

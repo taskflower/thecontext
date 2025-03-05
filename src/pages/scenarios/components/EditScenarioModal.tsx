@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { FormModal } from "@/components/ui/form-modal";
-import { useDataStore } from "@/store";
+import { useScenarioStore } from "@/store";
 import { Scenario } from "@/types";
 
 interface EditScenarioModalProps {
@@ -13,8 +13,12 @@ interface EditScenarioModalProps {
   onClose: () => void;
 }
 
-const EditScenarioModal: React.FC<EditScenarioModalProps> = ({ scenario, isOpen, onClose }) => {
-  const { updateScenario } = useDataStore();
+const EditScenarioModal: React.FC<EditScenarioModalProps> = ({
+  scenario,
+  isOpen,
+  onClose,
+}) => {
+  const { updateScenario } = useScenarioStore();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
@@ -38,14 +42,14 @@ const EditScenarioModal: React.FC<EditScenarioModalProps> = ({ scenario, isOpen,
     const result = updateScenario(scenario.id, {
       title,
       description,
-      dueDate
+      dueDate,
     });
-    
+
     if (!result.success) {
       setError(result.error || "Failed to update the scenario.");
       return;
     }
-    
+
     // Reset and close
     setError(null);
     onClose();
@@ -66,17 +70,17 @@ const EditScenarioModal: React.FC<EditScenarioModalProps> = ({ scenario, isOpen,
     >
       <div className="grid gap-2">
         <Label htmlFor="title">Scenario Title</Label>
-        <Input 
-          id="title" 
+        <Input
+          id="title"
           value={title}
           onChange={(e) => {
             setTitle(e.target.value);
             setError(null); // Clear error when input changes
           }}
-          required 
+          required
         />
       </div>
-      
+
       <div className="grid gap-2">
         <Label htmlFor="description">Description</Label>
         <Textarea
@@ -86,7 +90,7 @@ const EditScenarioModal: React.FC<EditScenarioModalProps> = ({ scenario, isOpen,
           onChange={(e) => setDescription(e.target.value)}
         />
       </div>
-      
+
       <div className="grid gap-2">
         <Label htmlFor="dueDate">Due Date</Label>
         <Input

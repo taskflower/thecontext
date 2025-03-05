@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Scenario } from "@/types";
-import { useDataStore } from "@/store";
+import { useDataStore, useScenarioStore } from "@/store";
 
 interface ScenarioListItemProps {
   scenario: Scenario;
@@ -18,12 +18,13 @@ interface ScenarioListItemProps {
   toggleEditScenarioModal: (scenario: Scenario) => void;
 }
 
-const ScenarioListItem: React.FC<ScenarioListItemProps> = ({ 
-  scenario, 
-  navigateToFolder, 
-  toggleEditScenarioModal
+const ScenarioListItem: React.FC<ScenarioListItemProps> = ({
+  scenario,
+  navigateToFolder,
+  toggleEditScenarioModal,
 }) => {
-  const { deleteScenario, folders } = useDataStore();
+  const { folders } = useDataStore();
+  const { deleteScenario } = useScenarioStore();
 
   const handleViewFolder = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -45,16 +46,20 @@ const ScenarioListItem: React.FC<ScenarioListItemProps> = ({
   };
 
   // Check if folder exists
-  const folderExists = folders.some(f => f.id === scenario.folderId);
-  
+  const folderExists = folders.some((f) => f.id === scenario.folderId);
+
   return (
     <div className="grid grid-cols-12 p-3 border-b hover:bg-secondary/20 cursor-pointer">
       <div className="col-span-4 font-medium">{scenario.title}</div>
       <div className="col-span-3">
         <Progress value={scenario.progress} className="h-2" />
-        <div className="text-xs text-muted-foreground mt-1">{scenario.progress}%</div>
+        <div className="text-xs text-muted-foreground mt-1">
+          {scenario.progress}%
+        </div>
       </div>
-      <div className="col-span-2 text-muted-foreground">{scenario.completedTasks}/{scenario.tasks}</div>
+      <div className="col-span-2 text-muted-foreground">
+        {scenario.completedTasks}/{scenario.tasks}
+      </div>
       <div className="col-span-2 text-muted-foreground">{scenario.dueDate}</div>
       <div className="col-span-1 flex items-center justify-end">
         <Button
@@ -68,7 +73,7 @@ const ScenarioListItem: React.FC<ScenarioListItemProps> = ({
         >
           <FolderOpen size={16} />
         </Button>
-        
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -81,7 +86,7 @@ const ScenarioListItem: React.FC<ScenarioListItemProps> = ({
               <Pencil size={16} className="mr-2" />
               Edit
             </DropdownMenuItem>
-            <DropdownMenuItem 
+            <DropdownMenuItem
               onClick={handleDelete}
               className="text-destructive focus:text-destructive"
             >

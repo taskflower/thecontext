@@ -1,9 +1,9 @@
-// src/pages/tasks/components/navigator/TaskDetailView.tsx
+// src/pages/tasks/components/navigator/details/TaskDetailView.tsx
 import { useState } from "react";
 import { HelpCircle } from "lucide-react";
 
 import {
-  useDataStore,
+  useScenarioStore,
   useStepStore,
   useTaskStore,
   useWizardStore,
@@ -23,11 +23,12 @@ export function TaskDetailView() {
   const [currentStepIndex, setCurrentStepIndex] = useState<number | null>(null);
   const [showHelp, setShowHelp] = useState(false);
 
-  // Fetch data from stores
-  const { scenarios } = useDataStore();
-  const { tasks } = useTaskStore();
-  const { getTaskSteps } = useStepStore();
-  const { activeTaskId } = useWizardStore();
+  // Fixed: dataStore doesn't have scenarios directly
+  const { scenarios = [] } = useScenarioStore() || { scenarios: [] };
+  
+  const { tasks = [] } = useTaskStore() || { tasks: [] };
+  const { getTaskSteps = () => [] } = useStepStore() || { getTaskSteps: () => [] };
+  const { activeTaskId } = useWizardStore() || { activeTaskId: null };
 
   // Get selected task
   const task = activeTaskId ? tasks.find((t) => t.id === activeTaskId) : null;
@@ -36,7 +37,7 @@ export function TaskDetailView() {
     : [];
 
   // Get scenario name for the task
-  const scenarioName = task?.scenarioId
+  const scenarioName = task?.scenarioId && scenarios.length
     ? scenarios.find((p) => p.id === task.scenarioId)?.title || task.scenarioId
     : "No scenario";
 

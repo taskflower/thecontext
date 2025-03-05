@@ -13,7 +13,7 @@ import {
 import { FormModal } from "@/components/ui/form-modal";
 import { Priority } from "@/types";
 import { useAdminNavigate } from "@/hooks";
-import { useDataStore, useTaskStore } from "@/store";
+import {  useScenarioStore, useTaskStore } from "@/store";
 
 interface TaskEditModalProps {
   taskId: string;
@@ -21,7 +21,7 @@ interface TaskEditModalProps {
 }
 
 export function TaskEditModal({ taskId, onClose }: TaskEditModalProps) {
-  const { scenarios } = useDataStore();
+  const { scenarios } = useScenarioStore();
   const { tasks, addTask, deleteTask } = useTaskStore();
   const adminNavigate = useAdminNavigate();
   const task = tasks.find((t) => t.id === taskId);

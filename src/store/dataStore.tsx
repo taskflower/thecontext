@@ -17,7 +17,6 @@ export const useDataStore = create<DataState>()(
       // Initial data collections
       folders: initialFolders,
       docItems: [],
-      scenarios: [],
       
       // Validation helper functions
       isFolderNameUnique: (name, parentId, excludeFolderId) => {
@@ -29,227 +28,7 @@ export const useDataStore = create<DataState>()(
         );
       },
       
-      isScenarioNameUnique: (name, excludeScenarioId) => {
-        return !get().scenarios.some(
-          scenario => 
-            scenario.id !== excludeScenarioId && 
-            scenario.title.toLowerCase() === name.toLowerCase()
-        );
-      },
-      
-      // Scenario finder function
-      getScenarioById: (scenarioId) => {
-        return get().scenarios.find(scenario => scenario.id === scenarioId);
-      },
-      
-      // Scenario actions
-      addScenario: (scenario) => {
-        // Validate scenario name is unique
-        if (!get().isScenarioNameUnique(scenario.title)) {
-          return {
-            success: false,
-            error: `Nie można utworzyć scenariusza: Scenariusz o nazwie "${scenario.title}" już istnieje.`
-          };
-        }
-        
-        // Add scenario if validation passes
-        set((state) => ({ 
-          scenarios: [...state.scenarios, scenario] 
-        }));
-        
-        return {
-          success: true,
-          data: scenario.id
-        };
-      },
-      
-      updateScenario: (id, updates) => {
-        const currentScenario = get().scenarios.find(s => s.id === id);
-        
-        if (!currentScenario) {
-          return {
-            success: false,
-            error: "Nie można zaktualizować scenariusza: Scenariusz nie został znaleziony."
-          };
-        }
-        
-        // If title is being updated, check for uniqueness
-        if (updates.title && updates.title !== currentScenario.title) {
-          if (!get().isScenarioNameUnique(updates.title, id)) {
-            return {
-              success: false,
-              error: `Nie można zaktualizować scenariusza: Scenariusz o nazwie "${updates.title}" już istnieje.`
-            };
-          }
-          
-          // If the scenario has a folder, update the folder name too
-          if (currentScenario.folderId) {
-            const folder = get().folders.find(f => f.id === currentScenario.folderId);
-            
-            if (folder) {
-              // Check if the new folder name would be unique
-              if (!get().isFolderNameUnique(updates.title, folder.parentId, folder.id)) {
-                return {
-                  success: false,
-                  error: `Nie można zaktualizować folderu scenariusza: Folder o nazwie "${updates.title}" już istnieje na tym samym poziomie.`
-                };
-              }
-              
-              // Update folder name to match new scenario title
-              set((state) => ({
-                folders: state.folders.map(f => 
-                  f.id === currentScenario.folderId 
-                    ? { ...f, name: updates.title! } 
-                    : f
-                )
-              }));
-            }
-          }
-        }
-        
-        // Update the scenario
-        set((state) => ({
-          scenarios: state.scenarios.map(scenario => 
-            scenario.id === id 
-              ? { ...scenario, ...updates } 
-              : scenario
-          )
-        }));
-        
-        return { success: true };
-      },
-      
-      deleteScenario: (id) => {
-        // Find the scenario to get its folder ID
-        const scenario = get().scenarios.find(p => p.id === id);
-        
-        if (!scenario) {
-          return {
-            success: false,
-            error: "Nie można usunąć scenariusza: Scenariusz nie został znaleziony."
-          };
-        }
-        
-        // Create a function to recursively collect folder IDs to delete
-        const getAllChildFolderIds = (folderId: string): string[] => {
-          const children = get().folders.filter(f => f.parentId === folderId);
-          if (children.length === 0) return [folderId];
-          
-          return [
-            folderId,
-            ...children.flatMap(child => getAllChildFolderIds(child.id))
-          ];
-        };
-        
-        // Get all folder IDs to delete if scenario has a folder
-        const folderIdsToDelete = scenario.folderId 
-          ? getAllChildFolderIds(scenario.folderId) 
-          : [];
-        
-        set((state) => ({
-          // Remove the scenario
-          scenarios: state.scenarios.filter(p => p.id !== id),
-          
-          // Remove the scenario's folder and all its subfolders
-          folders: state.folders.filter(f => !folderIdsToDelete.includes(f.id)),
-          
-          // Remove any documents in those folders
-          docItems: state.docItems.filter(d => 
-            !d.folderId || !folderIdsToDelete.includes(d.folderId)
-          )
-        }));
-        
-        return { success: true };
-      },
-
-      // Scenario connection actions
-      addScenarioConnection: (scenarioId, connectedId, connectionType = 'related') => {
-        const scenario = get().scenarios.find(s => s.id === scenarioId);
-        const connectedScenario = get().scenarios.find(s => s.id === connectedId);
-        
-        if (!scenario) {
-          return {
-            success: false,
-            error: "Nie można utworzyć połączenia: Scenariusz źródłowy nie został znaleziony."
-          };
-        }
-        
-        if (!connectedScenario) {
-          return {
-            success: false,
-            error: "Nie można utworzyć połączenia: Scenariusz docelowy nie został znaleziony."
-          };
-        }
-        
-        // Check if connection already exists
-        if (scenario.connections?.includes(connectedId)) {
-          return {
-            success: false,
-            error: "Nie można utworzyć połączenia: Połączenie już istnieje."
-          };
-        }
-        
-        set((state) => {
-          const updatedScenarios = state.scenarios.map(s => {
-            if (s.id === scenarioId) {
-              const connections = s.connections || [];
-              return { 
-                ...s, 
-                connections: [...connections, connectedId],
-                connectionType
-              };
-            }
-            return s;
-          });
-          
-          return { scenarios: updatedScenarios };
-        });
-        
-        return { success: true };
-      },
-      
-      removeScenarioConnection: (scenarioId, connectedId) => {
-        const scenario = get().scenarios.find(s => s.id === scenarioId);
-        
-        if (!scenario) {
-          return {
-            success: false,
-            error: "Nie można usunąć połączenia: Scenariusz nie został znaleziony."
-          };
-        }
-        
-        if (!scenario.connections?.includes(connectedId)) {
-          return {
-            success: false,
-            error: "Nie można usunąć połączenia: Połączenie nie istnieje."
-          };
-        }
-        
-        set((state) => {
-          const updatedScenarios = state.scenarios.map(s => {
-            if (s.id === scenarioId && s.connections) {
-              return {
-                ...s,
-                connections: s.connections.filter(id => id !== connectedId)
-              };
-            }
-            return s;
-          });
-          
-          return { scenarios: updatedScenarios };
-        });
-        
-        return { success: true };
-      },
-      
-      getConnectedScenarios: (scenarioId) => {
-        const scenario = get().scenarios.find(s => s.id === scenarioId);
-        if (!scenario || !scenario.connections) return [];
-        
-        return get().scenarios.filter(s => scenario.connections?.includes(s.id));
-      },
-      
-      // Other actions
+      // Folder actions
       addFolder: (folder) => {
         // Validate folder name is unique at the same level
         if (!get().isFolderNameUnique(folder.name, folder.parentId)) {
@@ -267,6 +46,35 @@ export const useDataStore = create<DataState>()(
           success: true,
           data: folder.id
         };
+      },
+      
+      updateFolder: (id, updates) => {
+        const folder = get().folders.find(f => f.id === id);
+        
+        if (!folder) {
+          return {
+            success: false,
+            error: "Nie można zaktualizować folderu: Folder nie został znaleziony."
+          };
+        }
+        
+        // Check name uniqueness if name is being updated
+        if (updates.name && updates.name !== folder.name) {
+          if (!get().isFolderNameUnique(updates.name, folder.parentId, folder.id)) {
+            return {
+              success: false,
+              error: `Nie można zaktualizować folderu: Folder o nazwie "${updates.name}" już istnieje na tym samym poziomie.`
+            };
+          }
+        }
+        
+        set((state) => ({
+          folders: state.folders.map(f => 
+            f.id === id ? { ...f, ...updates } : f
+          )
+        }));
+        
+        return { success: true };
       },
       
       deleteFolder: (id) => {
@@ -302,6 +110,7 @@ export const useDataStore = create<DataState>()(
         return { success: true };
       },
       
+      // Document actions
       addDocItem: (docItem) => {
         set((state) => ({ 
           docItems: [...state.docItems, docItem] 
@@ -329,6 +138,23 @@ export const useDataStore = create<DataState>()(
               ? { ...d, ...updates, updatedAt: new Date().toISOString() } 
               : d
           )
+        }));
+        
+        return { success: true };
+      },
+      
+      deleteDocItem: (id) => {
+        const docItem = get().docItems.find(d => d.id === id);
+        
+        if (!docItem) {
+          return {
+            success: false,
+            error: "Nie można usunąć dokumentu: Dokument nie został znaleziony."
+          };
+        }
+        
+        set((state) => ({
+          docItems: state.docItems.filter(d => d.id !== id)
         }));
         
         return { success: true };
@@ -374,7 +200,6 @@ export const useDataStore = create<DataState>()(
         // Only persist these keys
         folders: state.folders,
         docItems: state.docItems,
-        scenarios: state.scenarios,
       }),
     }
   )

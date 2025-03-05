@@ -1,7 +1,7 @@
 // src/store/dataStore.types.ts
-import { DocItem, Folder, Scenario, ConnectionType } from '@/types';
+import { DocItem, Folder } from '@/types';
 
-// Typ dla rezultatu operacji
+// Operation result type
 export type OperationResult<T = void> = {
   success: boolean;
   data?: T;
@@ -9,29 +9,22 @@ export type OperationResult<T = void> = {
 }
 
 export interface DataState {
-  getScenarioById(scenarioId: string): Scenario | undefined;
   // Data collections
   folders: Folder[];
   docItems: DocItem[];
-  scenarios: Scenario[];
   
   // Validation helpers
   isFolderNameUnique: (name: string, parentId: string | null, excludeFolderId?: string) => boolean;
-  isScenarioNameUnique: (name: string, excludeScenarioId?: string) => boolean;
   
-  // Scenario actions
-  addScenario: (scenario: Scenario) => OperationResult<string>;
-  updateScenario: (id: string, updates: Partial<Scenario>) => OperationResult;
-  deleteScenario: (id: string) => OperationResult;
-  addScenarioConnection: (scenarioId: string, connectedId: string, connectionType?: ConnectionType) => OperationResult;
-  removeScenarioConnection: (scenarioId: string, connectedId: string) => OperationResult;
-  getConnectedScenarios: (scenarioId: string) => Scenario[];
-  
-  // Other data actions
+  // Folder actions
   addFolder: (folder: Folder) => OperationResult<string>;
+  updateFolder: (id: string, updates: Partial<Folder>) => OperationResult;
   deleteFolder: (id: string) => OperationResult;
+  
+  // Document actions
   addDocItem: (docItem: DocItem) => OperationResult<string>;
   updateDocItem: (id: string, updates: Partial<DocItem>) => OperationResult;
+  deleteDocItem: (id: string) => OperationResult;
   
   // Helper functions
   getChildFolders: (parentId: string) => Folder[];

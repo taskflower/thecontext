@@ -12,12 +12,12 @@ import {
 import { Status, Task } from "@/types";
 import { useAdminNavigate } from "@/hooks";
 import { LayoutGrid, Plus } from "lucide-react";
-import { useDataStore, useTaskStore, useWizardStore } from "@/store";
+import { useScenarioStore, useTaskStore, useWizardStore } from "@/store";
 import { TaskEditModal, TaskItem } from "..";
 
 export function TaskListNavigator() {
   // Store data and methods
-  const { scenarios } = useDataStore();
+  const { scenarios = [] } = useScenarioStore() || { scenarios: [] }; // Add default empty array
   const { tasks, addTask, deleteTask } = useTaskStore();
   const { activeTaskId, setActiveTask, openWizard } = useWizardStore();
   const adminNavigate = useAdminNavigate();
@@ -63,7 +63,7 @@ export function TaskListNavigator() {
   // Quick add task with scenario validation
   const handleQuickAddTask = () => {
     // Check if there are any scenarios available
-    if (scenarios.length === 0) {
+    if (!scenarios || scenarios.length === 0) {
       // Show dialog instead of alert
       setShowNoProjectDialog(true);
       return;
@@ -122,7 +122,7 @@ export function TaskListNavigator() {
             className="h-8 w-8"
             onClick={handleQuickAddTask}
             title={
-              scenarios.length > 0
+              scenarios && scenarios.length > 0
                 ? "Dodaj nowe zadanie"
                 : "Najpierw utwórz projekt"
             }
@@ -156,7 +156,7 @@ export function TaskListNavigator() {
         </TabsList>
 
         <div className="space-y-1 overflow-auto h-[calc(100vh-220px)]">
-          {scenarios.length === 0 ? (
+          {(!scenarios || scenarios.length === 0) ? (
             <div className="py-8 text-center">
               <p className="text-sm text-muted-foreground mb-2">
                 Nie możesz utworzyć zadania bez projektu.

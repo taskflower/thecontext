@@ -25,14 +25,15 @@ import {
 
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useDataStore } from '@/store';
+import { useScenarioStore, useTaskStore } from '@/store';
 import EditScenarioModal from '../EditScenarioModal';
 import ScenarioConnectionsPanel from './ScenarioConnectionsPanel';
 
 const ScenarioDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { scenarios, tasks } = useDataStore();
+  const { tasks } = useTaskStore();
+  const { scenarios } = useScenarioStore();
   
   // Edit modal state
   const [showEditModal, setShowEditModal] = useState(false);
