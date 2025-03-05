@@ -1,14 +1,19 @@
-// src/pages/scenarios/components/ScenarioConnectionsPanel.tsx
-import React, { useState } from "react";
+// src/pages/scenarios/components/details/ScenarioConnectionsPanel.tsx
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Link2, Unlink, ExternalLink } from "lucide-react";
-
-
-
 import { useScenarioStore } from "@/store";
-import { ConnectionType } from "@/types";
 import { ConnectionModal } from "..";
-import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Progress } from "@/components/ui";
+import { 
+  Button, 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardHeader, 
+  CardTitle, 
+  Progress 
+} from "@/components/ui";
+import { ConnectionTypeBadge } from "@/components/status";
 
 
 interface ScenarioConnectionsPanelProps {
@@ -39,36 +44,6 @@ export const ScenarioConnectionsPanel: React.FC<
 
   const handleNavigateToScenario = (id: string) => {
     navigate(`/admin/${lang}/scenarios/${id}`);
-  };
-
-  const getConnectionTypeBadge = (type?: ConnectionType) => {
-    switch (type) {
-      case "dependency":
-        return (
-          <Badge className="bg-amber-100 text-amber-800 border-amber-300">
-            Depends On
-          </Badge>
-        );
-      case "parent":
-        return (
-          <Badge className="bg-blue-100 text-blue-800 border-blue-300">
-            Parent
-          </Badge>
-        );
-      case "child":
-        return (
-          <Badge className="bg-green-100 text-green-800 border-green-300">
-            Child
-          </Badge>
-        );
-      case "related":
-      default:
-        return (
-          <Badge className="bg-indigo-100 text-indigo-800 border-indigo-300">
-            Related
-          </Badge>
-        );
-    }
   };
 
   const toggleConnectionModal = () => {
@@ -117,11 +92,11 @@ export const ScenarioConnectionsPanel: React.FC<
                       <div className="flex items-center mb-2">
                         <h4 className="font-medium">{scenario.title}</h4>
                         <div className="ml-2">
-                          {getConnectionTypeBadge(
-                            scenario.connections?.includes(scenarioId)
+                          <ConnectionTypeBadge
+                            type={scenario.connections?.includes(scenarioId)
                               ? scenario.connectionType
-                              : currentScenario.connectionType
-                          )}
+                              : currentScenario.connectionType}
+                          />
                         </div>
                       </div>
                       <p className="text-sm text-gray-600 line-clamp-2">

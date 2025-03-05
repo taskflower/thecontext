@@ -1,14 +1,5 @@
 // src/pages/steps/StepsList.tsx
-import {
-  Plus,
-  Edit,
-  PlayCircle,
-  FileText,
-  CheckSquare,
-  ClipboardCheck,
-  FormInput,
-  MessageSquare,
-} from "lucide-react";
+import { Plus, Edit, PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -16,6 +7,9 @@ import { Step } from "@/types";
 import { useWizardStore } from "@/store/wizardStore";
 import { StepResult } from "@/pages/steps/StepResult";
 import { getPlugin } from "@/pages/stepsPlugins/registry";
+import { StatusBadge } from "@/components/status";
+import { StepTypeIcon } from "@/components/status/StepTypeIcon";
+
 
 interface StepsListProps {
   steps: Step[];
@@ -94,9 +88,9 @@ function StepItem({ step, index, onEdit, onExecute }: StepItemProps) {
             <h3 className="text-sm font-medium">{step.title}</h3>
           </div>
           <div className="flex items-center gap-2">
-            {getStatusBadge(step.status)}
+            <StatusBadge status={step.status} />
             <Badge variant="outline" className="flex items-center gap-1">
-              {getStepIcon(step.type)}
+              <StepTypeIcon type={step.type} size={14} />
               {stepName}
             </Badge>
             <Button
@@ -127,45 +121,6 @@ function StepItem({ step, index, onEdit, onExecute }: StepItemProps) {
       )}
     </div>
   );
-}
-
-function getStepIcon(type: string) {
-  switch (type) {
-    case "form":
-      return <FormInput size={14} className="text-purple-500" />;
-    case "document":
-      return <FileText size={14} className="text-blue-500" />;
-    case "checklist":
-      return <ClipboardCheck size={14} className="text-amber-500" />;
-    case "decision":
-      return <CheckSquare size={14} className="text-green-500" />;
-    case "ai-content":
-      return <MessageSquare size={14} className="text-indigo-500" />;
-    default:
-      return null;
-  }
-}
-
-function getStatusBadge(status: string) {
-  switch (status) {
-    case "pending":
-      return <Badge variant="outline">Pending</Badge>;
-    case "in-progress":
-    case "in_progress":
-      return <Badge variant="secondary">In Progress</Badge>;
-    case "completed":
-      return (
-        <Badge className="bg-green-50 border-green-200" variant={"secondary"}>
-          Completed
-        </Badge>
-      );
-    case "failed":
-      return <Badge variant="destructive">Failed</Badge>;
-    case "skipped":
-      return <Badge variant="outline">Skipped</Badge>;
-    default:
-      return <Badge variant="outline">{status}</Badge>;
-  }
 }
 
 export default StepsList;

@@ -1,4 +1,4 @@
-// Updated ScenarioCard.tsx with Details option in dropdown and clickable title
+// src/pages/scenarios/components/ScenarioCard.tsx
 import { useState } from "react";
 import { Pencil, Trash2, FolderOpen, Link2, ExternalLink } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -21,6 +21,7 @@ import {
   CardTitle,
   Progress,
 } from "@/components/ui";
+
 
 interface ScenarioCardProps {
   scenario: Scenario;
