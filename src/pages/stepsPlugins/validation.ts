@@ -1,43 +1,44 @@
 // src/pages/stepsPlugins/validation.ts
 import { Step } from "@/types";
+import { validateStepReference } from '@/components/plugins/PreviousStepsSelect';
 
-// Prosty interfejs wyniku walidacji
+// Simple interface for validation result
 export interface ValidationResult {
   isValid: boolean;
   errorMessage?: string;
 }
 
-// Definicja typu funkcji walidującej
+// Definition of validator function type
 export type StepValidator = (step: Step) => ValidationResult;
 
-// Mapa przechowująca walidatory wg typu pluginu
+// Map storing validators by plugin type
 const pluginValidators = new Map<string, StepValidator>();
 
 /**
- * Rejestruje walidator dla konkretnego typu pluginu
+ * Register a validator for a specific plugin type
  */
 export function registerValidator(pluginType: string, validator: StepValidator): void {
   pluginValidators.set(pluginType, validator);
 }
 
 /**
- * Waliduje krok na podstawie jego typu
+ * Validate a step based on its type
  */
 export function validateStep(step: Step): ValidationResult {
-  // Znajdź walidator dla danego typu kroku
+  // Find validator for this step type
   const validator = pluginValidators.get(step.type);
   
-  // Jeśli nie ma walidatora, uznaj krok za prawidłowy
+  // If no validator exists, consider the step valid
   if (!validator) {
     return { isValid: true };
   }
   
-  // Uruchom walidator
+  // Run the validator
   return validator(step);
 }
 
 /**
- * Pomocnicza funkcja do walidacji wymaganych pól w konfiguracji
+ * Helper function to validate required fields in configuration
  */
 export function validateRequiredFields(
   step: Step, 
@@ -51,7 +52,7 @@ export function validateRequiredFields(
     if (value === undefined || value === null || value === '') {
       return {
         isValid: false,
-        errorMessage: `Pole "${field}" jest wymagane`
+        errorMessage: `Field "${field}" is required`
       };
     }
   }
@@ -60,66 +61,60 @@ export function validateRequiredFields(
 }
 
 /**
- * Proste walidatory dla typowych przypadków
+ * Simple validators for common cases
  */
 
-// Walidator dla pól tekstowych
+// Text input validator
 export function textInputValidator(step: Step): ValidationResult {
   const { result, config = {} } = step;
   const { required = true, minLength = 0 } = config;
   
-  // Jeśli krok ma wynik, sprawdź czy spełnia wymagania
+  // If step has a result, check if it meets requirements
   if (result?.value) {
     const value = result.value;
     
     if (required && !value.trim()) {
       return {
         isValid: false,
-        errorMessage: "To pole jest wymagane"
+        errorMessage: "This field is required"
       };
     }
     
     if (minLength > 0 && value.length < minLength) {
       return {
         isValid: false,
-        errorMessage: `Tekst musi mieć co najmniej ${minLength} znaków`
+        errorMessage: `Text must be at least ${minLength} characters`
       };
     }
     
     return { isValid: true };
   }
   
-  // Jeśli krok nie ma wyniku i jest wymagany, uznaj za nieprawidłowy
+  // If step has no result and is required, consider it invalid
   if (required) {
     return {
       isValid: false,
-      errorMessage: "Uzupełnij to pole przed kontynuacją"
+      errorMessage: "Fill in this field before continuing"
     };
   }
   
   return { isValid: true };
 }
 
-// Walidator sprawdzający czy krok odniesienia ma zdefiniowany cel
+// Step reference validator - using our encapsulated validator
 export function referenceValidator(step: Step): ValidationResult {
   const { config = {} } = step;
   
-  if (!config.referenceStepId) {
-    return {
-      isValid: false,
-      errorMessage: "Wybierz krok, do którego chcesz się odnieść"
-    };
-  }
-  
-  return { isValid: true };
+  // Use the encapsulated validation function
+  return validateStepReference(config.referenceStepId || '', true);
 }
 
-// Walidator dla prostych pluginów (zawsze zwraca success)
+// Simple plugin validator (always returns success)
 export function simpleValidator(): ValidationResult {
   return { isValid: true };
 }
 
-// Rejestruj podstawowe walidatory
+// Register default validators
 export function registerDefaultValidators() {
   registerValidator('text-input', textInputValidator);
   registerValidator('step-reference', referenceValidator);

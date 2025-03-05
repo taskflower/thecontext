@@ -61,10 +61,10 @@ export function TaskDetailView() {
         task={task} 
       />
 
-      <div className="px-6 py-4">
-        <div className="space-y-6">
+      <div className="px-6 py-4 h-full ">
+        <div className="space-y-6 ">
           {/* Task Info Section */}
-          <div className="flex justify-between items-start">
+          <div className="flex justify-between items-start ">
             <TaskInfo 
               description={task.description} 
               scenarioId={task.scenarioId}

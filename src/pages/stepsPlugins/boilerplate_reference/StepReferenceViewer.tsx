@@ -12,9 +12,9 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, RefreshCw, Loader2 } from "lucide-react";
 import { ViewerProps } from "../types";
-import { useStepStore } from "@/store/stepStore";
 import { ConversationItem } from "@/types";
 import { registerPluginHandler, unregisterPluginHandler } from "../pluginHandlers";
+import { getStepData } from "@/components/plugins/PreviousStepsSelect";
 
 export function StepReferenceViewer({ step, onComplete }: ViewerProps) {
   const [referencedData, setReferencedData] = useState<any>(null);
@@ -26,9 +26,10 @@ export function StepReferenceViewer({ step, onComplete }: ViewerProps) {
   const { referenceStepId = "" } = step.config || {};
 
   // Fetch data from the referenced step
-  useEffect(() => {
+  const fetchReferencedData = () => {
     if (!referenceStepId) {
       setError("No reference step selected");
+      setLoading(false);
       return;
     }
 
@@ -36,25 +37,26 @@ export function StepReferenceViewer({ step, onComplete }: ViewerProps) {
     setError(null);
 
     try {
-      const stepStore = useStepStore.getState();
-      const referencedStep = stepStore.getStepById(referenceStepId);
+      // Use the encapsulated helper function to get step data
+      const stepDataResult = getStepData(referenceStepId);
       
-      if (!referencedStep) {
-        throw new Error("Referenced step not found");
+      if (stepDataResult.error) {
+        throw new Error(stepDataResult.error);
       }
       
-      if (!referencedStep.result) {
-        throw new Error("Referenced step has no result data");
-      }
-      
-      setReferencedData(referencedStep.result);
-      setReferencedStepTitle(referencedStep.title || `Step ${referencedStep.order}`);
+      setReferencedData(stepDataResult.data);
+      setReferencedStepTitle(stepDataResult.title);
     } catch (err) {
       setError(`Error: ${(err as Error).message}`);
     } finally {
       setLoading(false);
     }
-  }, [referenceStepId, step.taskId]);
+  };
+
+  // Load the data when the component mounts or the step reference changes
+  useEffect(() => {
+    fetchReferencedData();
+  }, [referenceStepId]);
 
   // Format the data for display
   const formatData = (data: any): React.ReactNode => {
@@ -76,7 +78,7 @@ export function StepReferenceViewer({ step, onComplete }: ViewerProps) {
         <div className="space-y-2">
           {Object.entries(data).map(([key, value]) => (
             <div key={key} className="border-b pb-2">
-              <div className="font-medium text-sm">{key}</div>
+              <div className="font-bold text-sm">{key}</div>
               <div className="text-sm">
                 {typeof value === 'object' ? (
                   <pre className="text-xs mt-1 whitespace-pre-wrap">
@@ -130,11 +132,11 @@ export function StepReferenceViewer({ step, onComplete }: ViewerProps) {
     }, 500);
   };
 
-  // Rejestracja handlera dla systemu handlerów
+  // Register handler for the plugin handler system
   useEffect(() => {
     registerPluginHandler(step.id, handleComplete);
     
-    // Usunięcie handlera przy odmontowaniu komponentu
+    // Clean up handler when component unmounts
     return () => {
       unregisterPluginHandler(step.id);
     };
@@ -161,11 +163,14 @@ export function StepReferenceViewer({ step, onComplete }: ViewerProps) {
             <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         ) : referencedData ? (
-          <div className="border rounded-md p-4 bg-muted/50">
-            <div className="text-sm font-medium mb-2">
+          <div className="border rounded-md bg-muted/50">
+            <div className=" font-medium  text-lg p-4 border-b">
               Data from: {referencedStepTitle}
             </div>
+            <div className="p-4 ">
             {formatData(referencedData)}
+            </div>
+           
           </div>
         ) : (
           <div className="text-center p-8 text-muted-foreground">
@@ -177,14 +182,7 @@ export function StepReferenceViewer({ step, onComplete }: ViewerProps) {
       <CardFooter className="flex justify-between">
         <Button 
           variant="outline" 
-          onClick={() => {
-            // Re-fetch data by forcing a re-render
-            setLoading(true);
-            setTimeout(() => {
-              // This will trigger the useEffect
-              setLoading(false);
-            }, 100);
-          }}
+          onClick={fetchReferencedData}
           disabled={isCompleting}
         >
           <RefreshCw className="mr-2 h-4 w-4" />
@@ -198,10 +196,10 @@ export function StepReferenceViewer({ step, onComplete }: ViewerProps) {
           {isCompleting ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              Przetwarzanie...
+              Processing...
             </>
           ) : (
-            "Zakończ"
+            "Complete"
           )}
         </Button>
       </CardFooter>

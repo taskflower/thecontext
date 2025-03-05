@@ -45,6 +45,7 @@ export function StepReferenceEditor({ step, onChange }: EditorProps) {
         onChange={(value) => updateConfig('referenceStepId', value)}
         label="Referenced Step"
         placeholder="Select a step"
+        required={true}
       />
     </div>
   );

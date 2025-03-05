@@ -33,7 +33,7 @@ export function StepsList({ steps, taskId, onAddStep, onEditStep }: StepsListPro
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-2 ">
         <h3 className="text-sm font-medium">Workflow Steps</h3>
         <Button
           variant="outline"
@@ -45,7 +45,7 @@ export function StepsList({ steps, taskId, onAddStep, onEditStep }: StepsListPro
         </Button>
       </div>
 
-      <ScrollArea className="h-[calc(100vh-350px)]">
+      <ScrollArea className="h-full">
         <div className="space-y-3">
           {steps.length === 0 ? (
             <div className="py-4 text-center text-sm text-muted-foreground border rounded-md">
