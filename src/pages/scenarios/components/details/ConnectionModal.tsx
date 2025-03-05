@@ -1,12 +1,11 @@
 // src/pages/documents/components/NewDocumentModal.tsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+
 import { FormModal } from "@/components/ui/form-modal";
 import { useDataStore, useUIStore } from "@/store";
 import { DocItem } from "@/types";
+import { Input, Label, Textarea } from "@/components/ui";
 
 const NewDocumentModal: React.FC = () => {
   const { addDocItem } = useDataStore();

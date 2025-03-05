@@ -30,7 +30,6 @@ Centralizacja wspólnych wzorców, takich jak nagłówki szczegółów i nawigac
 
 
 
-Wzorzec modalny ma najwięcej bezpośrednich duplikatów - stworzenie konfigurowalnego komponentu FormModal mogłoby wyeliminować ~30% nadmiarowości przy minimalnym wysiłku.
 
 Przetłumaczono z DeepL.com (wersja darmowa)
 

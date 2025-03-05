@@ -1,10 +1,9 @@
 // src/pages/scenarios/components/NewScenarioModal.tsx
-import React, { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { useState } from "react";
+
 import { FormModal } from "@/components/ui/form-modal";
 import { useDataStore, useScenarioStore } from "@/store";
+import { Input, Label, Textarea } from "@/components/ui";
 
 interface NewScenarioModalProps {
   toggleNewScenarioModal: () => void;

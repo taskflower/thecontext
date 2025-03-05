@@ -23,9 +23,9 @@ export function TaskInfo({
     <div className="space-y-3 w-full">
       {/* Project (Scenario) */}
       {scenarioId && (
-        <div className="flex items-center gap-2 text-sm font-medium">
-          <Folder className="h-4 w-4 text-blue-500" />
-          <span>Project:</span> 
+        <div className="flex items-center gap-1.5 text-sm font-medium">
+          <Folder className="h-4 w-4" />
+          <span>Scenario:</span> 
           <span className="text-muted-foreground">{scenarioName}</span>
         </div>
       )}

@@ -14,7 +14,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+
 import { 
   Card, 
   CardContent, 
@@ -23,11 +23,12 @@ import {
   
 } from '@/components/ui/card';
 
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import { useScenarioStore, useTaskStore } from '@/store';
-import EditScenarioModal from '../EditScenarioModal';
+import { Badge, Button, Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui';
 import ScenarioConnectionsPanel from './ScenarioConnectionsPanel';
+import EditScenarioModal from '../EditScenarioModal';
+
 
 const ScenarioDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();

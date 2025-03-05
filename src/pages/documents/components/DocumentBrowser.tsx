@@ -3,9 +3,9 @@
 import React from "react";
 import { Folder } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
-import DocumentItem from "./DocumentItem";
-import { Button } from "@/components/ui/button";
 import { useDataStore, useUIStore } from "@/store";
+import { Button } from "@/components/ui";
+import DocumentItem from "./DocumentItem";
 
 const DocumentBrowser: React.FC = () => {
   const { getChildFolders, getDocItemsInFolder, getFolderPath } =

@@ -1,11 +1,9 @@
 // src/pages/scenarios/components/EditScenarioModal.tsx
-import React, { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { FormModal } from "@/components/ui/form-modal";
+import { useState, useEffect } from "react";
+
 import { useScenarioStore } from "@/store";
 import { Scenario } from "@/types";
+import { FormModal, Input, Label, Textarea } from "@/components/ui";
 
 interface EditScenarioModalProps {
   scenario: Scenario | null;

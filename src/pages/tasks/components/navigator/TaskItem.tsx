@@ -11,8 +11,15 @@ import {
   PlayCircle,
 } from "lucide-react";
 import { Task } from "@/types";
-import { Badge, Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui";
-
+import {
+  Badge,
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui";
+import taskService from "../../services/TaskService";
 
 interface TaskItemProps {
   task: Task;
@@ -23,13 +30,12 @@ interface TaskItemProps {
   onExecute: (taskId: string, e: React.MouseEvent) => void;
 }
 
-export function TaskItem({ 
-  task, 
-  isActive, 
-  onSelect, 
-  onEdit, 
-  onDelete, 
-  onExecute 
+export function TaskItem({
+  task,
+  isActive,
+  onSelect,
+  onEdit,
+  onDelete,
 }: TaskItemProps) {
   // Helper functions
   const getStatusIcon = (status: string) => {
@@ -63,6 +69,12 @@ export function TaskItem({
     }
   };
 
+  // Handler for execute task action in dropdown
+  const handleExecuteTask = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    taskService.executeTask(task.id);
+  };
+
   return (
     <div
       onClick={() => onSelect(task.id)}
@@ -82,25 +94,18 @@ export function TaskItem({
       <div className="flex items-center gap-2">
         {getPriorityBadge(task.priority)}
         <DropdownMenu>
-          <DropdownMenuTrigger
-            asChild
-            onClick={(e) => e.stopPropagation()}
-          >
+          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
             <Button variant="ghost" size="icon" className="h-7 w-7">
               <MoreHorizontal className="h-4 w-4" />
               <span className="sr-only">Więcej opcji</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={(e) => onExecute(task.id, e)}
-            >
+            <DropdownMenuItem onClick={handleExecuteTask}>
               <PlayCircle className="mr-2 h-4 w-4" />
               Wykonaj zadanie
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={(e) => onEdit(task.id, e)}
-            >
+            <DropdownMenuItem onClick={(e) => onEdit(task.id, e)}>
               <Edit className="mr-2 h-4 w-4" />
               Edytuj
             </DropdownMenuItem>

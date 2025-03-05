@@ -7,119 +7,128 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Check, Forward, AlertCircle } from "lucide-react";
+
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Forward,
+  AlertCircle,
+} from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useWizardStore } from "@/store/wizardStore";
-import { useStepStore } from "@/store/stepStore";
-import { useTaskStore } from "@/store/taskStore";
 import { StepViewer } from "@/pages/stepsPlugins";
 import { validateStep } from "@/pages/stepsPlugins/validation";
 import { triggerPluginAction } from "@/pages/stepsPlugins/pluginHandlers";
+import { useStepStore, useTaskStore, useWizardStore } from "@/store";
+import { Button } from "@/components/ui";
+import taskService from "../tasks/services/TaskService";
 
 const StepWizard = () => {
   // Store hooks
-  const { 
-    showWizard, 
-    activeTaskId, 
-    activeStepId, 
-    closeWizard, 
-    moveToNextStep, 
-    moveToPreviousStep, 
-    completeCurrentStep, 
-    skipCurrentStep 
+  const {
+    showWizard,
+    activeTaskId,
+    activeStepId,
+    closeWizard,
+    moveToNextStep,
+    moveToPreviousStep,
+    completeCurrentStep,
+    skipCurrentStep,
   } = useWizardStore();
-  
+
   const { getTaskSteps } = useStepStore();
   const { tasks } = useTaskStore();
-  
+
   // UI state
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  
+
   // References
   const stepContentRef = useRef<HTMLDivElement>(null);
-  
+
   // Data variables
-  const task = activeTaskId ? tasks.find(t => t.id === activeTaskId) : null;
-  const steps = activeTaskId ? getTaskSteps(activeTaskId).sort((a, b) => a.order - b.order) : [];
-  const currentStep = activeStepId ? steps.find(s => s.id === activeStepId) : null;
-  const currentStepIndex = currentStep ? steps.findIndex(s => s.id === activeStepId) : -1;
+  const task = activeTaskId ? tasks.find((t) => t.id === activeTaskId) : null;
+  const steps = activeTaskId
+    ? getTaskSteps(activeTaskId).sort((a, b) => a.order - b.order)
+    : [];
+  const currentStep = activeStepId
+    ? steps.find((s) => s.id === activeStepId)
+    : null;
+  const currentStepIndex = currentStep
+    ? steps.findIndex((s) => s.id === activeStepId)
+    : -1;
   const isFirstStep = currentStepIndex === 0;
   const isLastStep = currentStepIndex === steps.length - 1;
 
-  // Debug effect to log when wizard is shown
+  // Check task executability on mount
   useEffect(() => {
-    if (showWizard) {
-      console.log("StepWizard: Wizard is now visible");
-      console.log("  activeTaskId:", activeTaskId);
-      console.log("  activeStepId:", activeStepId);
-      console.log("  currentStep:", currentStep?.title);
-      console.log("  steps:", steps.length);
+    if (showWizard && task) {
+      const { isExecutable, errorMessage } = taskService.canExecuteTask(
+        task,
+        steps
+      );
+
+      if (!isExecutable) {
+        alert(errorMessage);
+        closeWizard();
+      }
     }
-  }, [showWizard, activeTaskId, activeStepId, currentStep, steps]);
+  }, [showWizard, task, steps, closeWizard]);
 
   // Handle step completion from plugin
   const handleStepComplete = (result?: Record<string, any>) => {
-    console.log("StepWizard: Step completed with result", result);
     setIsProcessing(false);
     completeCurrentStep(result);
   };
-  
+
   // Handle "Next" button - triggers plugin action
   const handleNext = () => {
     if (!currentStep) {
-      console.error("StepWizard: No current step to handle");
       return;
     }
-    
-    console.log(`StepWizard: Next button clicked for step ${currentStep.id}`);
-    
+
     // If step is already completed, just move to the next one
-    if (currentStep.status === 'completed') {
-      console.log("StepWizard: Step already completed, moving to next");
+    if (currentStep.status === "completed") {
       moveToNextStep();
       return;
     }
-    
+
     // Validate step
     const validationResult = validateStep(currentStep);
     if (!validationResult.isValid) {
-      const errorMsg = validationResult.errorMessage || 
-        "Please complete all required fields";
-      console.log("StepWizard: Validation failed:", errorMsg);
+      const errorMsg =
+        validationResult.errorMessage || "Please complete all required fields";
       setValidationError(errorMsg);
       return;
     }
-    
+
     setValidationError(null);
     setIsProcessing(true);
-    
-    console.log(`StepWizard: Triggering plugin action for step ${currentStep.id}`);
-    
+
+    console.log(
+      `StepWizard: Triggering plugin action for step ${currentStep.id}`
+    );
+
     // Trigger plugin action through handler system
     const success = triggerPluginAction(currentStep.id);
-    
+
     if (!success) {
       // If no handler was found, show message
-      console.log("StepWizard: No plugin handler found");
-      setValidationError("Cannot complete this step automatically. Use the button in the plugin.");
+      setValidationError(
+        "Cannot complete this step automatically. Use the button in the plugin."
+      );
       setIsProcessing(false);
     }
   };
 
   // Early return if we don't have the necessary data
   if (!showWizard || !task || !currentStep) {
-    console.log("StepWizard: Missing required data, not rendering");
-    console.log("  showWizard:", showWizard);
-    console.log("  task:", !!task);
-    console.log("  currentStep:", !!currentStep);
     return null;
   }
 
   return (
-    <Dialog 
-      open={showWizard} 
+    <Dialog
+      open={showWizard}
       onOpenChange={(open) => {
         if (!open) closeWizard();
       }}
@@ -136,29 +145,38 @@ const StepWizard = () => {
           {steps.map((step, index) => (
             <React.Fragment key={step.id}>
               <div className="flex flex-col items-center flex-shrink-0">
-                <div 
+                <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center
-                    ${step.status === 'completed' ? 'bg-primary/20 text-primary' : 
-                      index === currentStepIndex ? 'bg-primary text-white' : 
-                      'bg-muted text-muted-foreground'}`
-                  }
+                    ${
+                      step.status === "completed"
+                        ? "bg-primary/20 text-primary"
+                        : index === currentStepIndex
+                        ? "bg-primary text-white"
+                        : "bg-muted text-muted-foreground"
+                    }`}
                 >
-                  {step.status === 'completed' ? <Check size={16} /> : index + 1}
+                  {step.status === "completed" ? (
+                    <Check size={16} />
+                  ) : (
+                    index + 1
+                  )}
                 </div>
-                <span 
+                <span
                   className={`text-xs mt-1 text-center w-16 truncate
-                    ${index === currentStepIndex ? 'text-primary font-medium' : 'text-muted-foreground'}`
-                  }
+                    ${
+                      index === currentStepIndex
+                        ? "text-primary font-medium"
+                        : "text-muted-foreground"
+                    }`}
                 >
                   {step.title}
                 </span>
               </div>
-              
+
               {index < steps.length - 1 && (
-                <div 
+                <div
                   className={`h-px w-16 mx-1 flex-shrink-0
-                    ${index < currentStepIndex ? 'bg-primary' : 'bg-muted'}`
-                  } 
+                    ${index < currentStepIndex ? "bg-primary" : "bg-muted"}`}
                 />
               )}
             </React.Fragment>
@@ -182,8 +200,8 @@ const StepWizard = () => {
         <div className="flex justify-between pt-4 border-t mt-2">
           <div>
             {!isFirstStep && (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={moveToPreviousStep}
                 className="flex items-center"
                 disabled={isProcessing}
@@ -193,11 +211,11 @@ const StepWizard = () => {
               </Button>
             )}
           </div>
-          
+
           <div className="flex gap-2">
             {currentStep.status !== "completed" && (
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 onClick={skipCurrentStep}
                 className="flex items-center"
                 disabled={isProcessing}
@@ -206,8 +224,8 @@ const StepWizard = () => {
                 Pomiń
               </Button>
             )}
-            
-            <Button 
+
+            <Button
               onClick={handleNext}
               className="flex items-center"
               disabled={isProcessing}

@@ -14,12 +14,14 @@ import { useAdminNavigate } from "@/hooks";
 import { LayoutGrid, Plus } from "lucide-react";
 import { useScenarioStore, useTaskStore, useWizardStore } from "@/store";
 import { TaskEditModal, TaskItem } from "..";
+import taskService from "../../services/TaskService";
+
 
 export function TaskListNavigator() {
   // Store data and methods
-  const { scenarios = [] } = useScenarioStore() || { scenarios: [] }; // Add default empty array
+  const { scenarios = [] } = useScenarioStore() || { scenarios: [] };
   const { tasks, addTask, deleteTask } = useTaskStore();
-  const { activeTaskId, setActiveTask, openWizard } = useWizardStore();
+  const { activeTaskId, setActiveTask } = useWizardStore();
   const adminNavigate = useAdminNavigate();
 
   // Local state
@@ -57,7 +59,7 @@ export function TaskListNavigator() {
 
   const handleExecuteTask = (taskId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    openWizard(taskId);
+    taskService.executeTask(taskId);
   };
 
   // Quick add task with scenario validation

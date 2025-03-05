@@ -1,15 +1,16 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Plus } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-
-import ScenariosHeader from "./ScenariosHeader";
-import { Card } from "@/components/ui/card";
-import ScenarioCard from "./ScenarioCard";
-import ScenarioListItem from "./ScenarioListItem";
 import { useScenarioStore, useUIStore } from "@/store";
-import NewScenarioModal from "./NewScenarioModal";
-import EditScenarioModal from "./EditScenarioModal";
 import { Scenario } from "@/types";
+import { Card } from "@/components/ui";
+import {
+  EditScenarioModal,
+  NewScenarioModal,
+  ScenarioCard,
+  ScenarioListItem,
+  ScenariosHeader,
+} from ".";
 
 const ScenariosView: React.FC = () => {
   const { scenarios } = useScenarioStore();

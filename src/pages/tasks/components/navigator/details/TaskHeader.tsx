@@ -1,52 +1,22 @@
 // src/pages/tasks/components/navigator/details/TaskHeader.tsx
 import { PlayCircle, Calendar } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
 import { Task } from "@/types";
-import { useWizardStore } from "@/store/wizardStore";
-import { useStepStore } from "@/store/stepStore";
-import { useTaskStore } from "@/store/taskStore";
-import { TaskResultJsonViewer } from "@/pages/steps/details/TaskResultJsonViewer";
+
+import taskService from "@/pages/tasks/services/TaskService";
+import { useStepStore } from "@/store";
+import { TaskResultJsonViewer } from "@/pages/steps";
+import { Badge, Button } from "@/components/ui";
 
 interface TaskHeaderProps {
   task: Task;
 }
 
 export function TaskHeader({ task }: TaskHeaderProps) {
-  const { openWizard } = useWizardStore();
-  const { getTaskSteps, updateStep } = useStepStore();
-  const { updateTask } = useTaskStore();
+  const { getTaskSteps } = useStepStore();
 
   const handleExecuteAllSteps = () => {
-    // Get all steps for this task
-    const steps = getTaskSteps(task.id).sort((a, b) => a.order - b.order);
-
-    // Make sure we have at least one step
-    if (steps.length === 0) {
-      alert(
-        "No steps defined for this task. Please add at least one step first."
-      );
-      return;
-    }
-
-    // Reset all steps to pending
-    steps.forEach((step) => {
-      updateStep(step.id, {
-        status: "pending",
-        result: null,
-      });
-    });
-
-    // Set task's currentStepId to the first step if there is one
-    updateTask(task.id, {
-      currentStepId: steps[0].id,
-      status: "in-progress",
-    });
-
-    // Adding small delay to ensure state updates are processed
-    setTimeout(() => {
-      openWizard(task.id);
-    }, 100);
+    taskService.executeTask(task.id);
   };
 
   // Get steps for this task

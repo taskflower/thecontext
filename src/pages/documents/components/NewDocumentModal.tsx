@@ -1,17 +1,15 @@
 // src/pages/documents/components/NewDocumentModal.tsx
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { FormModal } from "@/components/ui/form-modal";
+
 import { useDataStore, useUIStore } from "@/store";
 import { DocItem } from "@/types";
+import { FormModal, Input, Label, Textarea } from "@/components/ui";
 
 const NewDocumentModal: React.FC = () => {
   const { addDocItem } = useDataStore();
   const { showNewDocumentModal, toggleNewDocumentModal } = useUIStore();
-  
+
   // Get the current folder ID from URL params
   const { folderId = "root" } = useParams();
 
@@ -30,15 +28,18 @@ const NewDocumentModal: React.FC = () => {
       id: `doc-${Date.now()}`,
       title,
       content,
-      metaKeys: metaKeys.split(",").map(key => key.trim()).filter(key => key !== ""),
+      metaKeys: metaKeys
+        .split(",")
+        .map((key) => key.trim())
+        .filter((key) => key !== ""),
       schema: {},
       folderId, // Use the folder ID from URL params
       createdAt: currentTime,
-      updatedAt: currentTime
+      updatedAt: currentTime,
     };
 
     const result = addDocItem(newDocItem);
-    
+
     if (!result.success) {
       setError(result.error || "Failed to create document.");
       return;
@@ -48,7 +49,7 @@ const NewDocumentModal: React.FC = () => {
     setTitle("");
     setContent("");
     setMetaKeys("");
-    
+
     toggleNewDocumentModal();
   };
 
@@ -65,14 +66,14 @@ const NewDocumentModal: React.FC = () => {
     >
       <div className="grid gap-2">
         <Label htmlFor="title">Title</Label>
-        <Input 
-          id="title" 
+        <Input
+          id="title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          required 
+          required
         />
       </div>
-      
+
       <div className="grid gap-2">
         <Label htmlFor="content">Content</Label>
         <Textarea
@@ -82,7 +83,7 @@ const NewDocumentModal: React.FC = () => {
           onChange={(e) => setContent(e.target.value)}
         />
       </div>
-      
+
       <div className="grid gap-2">
         <Label htmlFor="metaKeys">Tags (comma-separated)</Label>
         <Input

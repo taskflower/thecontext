@@ -3,20 +3,13 @@ import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Link2, Unlink, ExternalLink } from "lucide-react";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { useScenarioStore } from "@/store";
 
+
+import { useScenarioStore } from "@/store";
 import { ConnectionType } from "@/types";
-import ConnectionModal from "./ConnectionModal";
+import { ConnectionModal } from "..";
+import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Progress } from "@/components/ui";
+
 
 interface ScenarioConnectionsPanelProps {
   scenarioId: string;

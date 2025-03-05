@@ -1,7 +1,5 @@
-import React from "react";
 import { FolderOpen, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,6 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Scenario } from "@/types";
 import { useDataStore, useScenarioStore } from "@/store";
+import { Button, Progress } from "@/components/ui";
 
 interface ScenarioListItemProps {
   scenario: Scenario;

@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/documents/components/DocumentsView.tsx
 
-import React, { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+
 import { useParams } from "react-router-dom";
 
 import DocumentBrowser from "./DocumentBrowser";
@@ -13,6 +12,7 @@ import DocumentsHeader from "./DocumentsHeader";
 import DocumentItem from "./DocumentItem";
 import { useDataStore, useUIStore } from "@/store";
 import { DocItem } from "@/types";
+import { Button, Card } from "@/components/ui";
 
 const DocumentsView: React.FC = () => {
   const { searchDocItems } = useDataStore();

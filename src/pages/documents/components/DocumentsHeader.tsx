@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Search, Folder, FileText } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useDataStore, useUIStore } from "@/store";
+import { Button, Input } from "@/components/ui";
 
 const DocumentsHeader: React.FC = () => {
   const { addFolder } = useDataStore();
