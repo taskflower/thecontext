@@ -1,14 +1,16 @@
-// SimplePluginViewer.tsx
-import { useState } from 'react';
+// src/pages/stepsPlugins/boilerplate_action/SimplePluginViewer.tsx
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { ViewerProps } from '../types';
 import { ConversationItem } from '@/types';
+import { registerPluginHandler, unregisterPluginHandler } from '../pluginHandlers';
 
 export function SimplePluginViewer({ step, onComplete }: ViewerProps) {
   const [loading, setLoading] = useState(false);
   
+  // Funkcja obsługująca zakończenie kroku
   const handleComplete = () => {
     setLoading(true);
     
@@ -31,6 +33,16 @@ export function SimplePluginViewer({ step, onComplete }: ViewerProps) {
     }, 1000);
   };
   
+  // Rejestracja handlera dla systemu handlerów
+  useEffect(() => {
+    registerPluginHandler(step.id, handleComplete);
+    
+    // Usunięcie handlera przy odmontowaniu komponentu
+    return () => {
+      unregisterPluginHandler(step.id);
+    };
+  }, [step.id]);
+  
   return (
     <Card className="mb-4">
       <CardHeader>
@@ -42,7 +54,7 @@ export function SimplePluginViewer({ step, onComplete }: ViewerProps) {
       <CardFooter>
         <Button onClick={handleComplete} disabled={loading}>
           {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-          {loading ? 'Processing...' : 'Complete Step'}
+          {loading ? 'Przetwarzanie...' : 'Zakończ krok'}
         </Button>
       </CardFooter>
     </Card>

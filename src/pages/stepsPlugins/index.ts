@@ -5,7 +5,7 @@ export { register, getPlugin, getAllPlugins, getDefaultConfig } from './registry
 export type { StepPlugin, ViewerProps, EditorProps } from './types';
 
 // Import plugins manually to ensure they registerS
-import './boilerplate/index';
+import './boilerplate_action/index';
+import './boilerplate_reference/index';
 import './textInput/index';
-import './llmResponse/index';
-import './storeInjector/index';
+
