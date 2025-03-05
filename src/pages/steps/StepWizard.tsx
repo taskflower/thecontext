@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/steps/StepWizard.tsx
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import { ArrowLeft, ArrowRight, Check, Forward, AlertCircle } from "lucide-react
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useWizardStore } from "@/store/wizardStore";
 import { useStepStore } from "@/store/stepStore";
-import { useDataStore } from "@/store/dataStore";
+import { useTaskStore } from "@/store/taskStore";
 import { StepViewer } from "@/pages/stepsPlugins";
 import { validateStep } from "@/pages/stepsPlugins/validation";
 import { triggerPluginAction } from "@/pages/stepsPlugins/pluginHandlers";
@@ -31,7 +31,7 @@ const StepWizard = () => {
   } = useWizardStore();
   
   const { getTaskSteps } = useStepStore();
-  const { tasks } = useDataStore();
+  const { tasks } = useTaskStore();
   
   // UI state
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -48,48 +48,82 @@ const StepWizard = () => {
   const isFirstStep = currentStepIndex === 0;
   const isLastStep = currentStepIndex === steps.length - 1;
 
-  // Obsługa zakończenia kroku z pluginu
+  // Debug effect to log when wizard is shown
+  useEffect(() => {
+    if (showWizard) {
+      console.log("StepWizard: Wizard is now visible");
+      console.log("  activeTaskId:", activeTaskId);
+      console.log("  activeStepId:", activeStepId);
+      console.log("  currentStep:", currentStep?.title);
+      console.log("  steps:", steps.length);
+    }
+  }, [showWizard, activeTaskId, activeStepId, currentStep, steps]);
+
+  // Handle step completion from plugin
   const handleStepComplete = (result?: Record<string, any>) => {
+    console.log("StepWizard: Step completed with result", result);
     setIsProcessing(false);
     completeCurrentStep(result);
   };
   
-  // Obsługa przycisku "Next" - wywołuje akcję pluginu
+  // Handle "Next" button - triggers plugin action
   const handleNext = () => {
-    if (!currentStep) return;
+    if (!currentStep) {
+      console.error("StepWizard: No current step to handle");
+      return;
+    }
     
-    // Jeśli krok jest już ukończony, po prostu przejdź do następnego
+    console.log(`StepWizard: Next button clicked for step ${currentStep.id}`);
+    
+    // If step is already completed, just move to the next one
     if (currentStep.status === 'completed') {
+      console.log("StepWizard: Step already completed, moving to next");
       moveToNextStep();
       return;
     }
     
-    // Walidacja kroku
+    // Validate step
     const validationResult = validateStep(currentStep);
     if (!validationResult.isValid) {
-      setValidationError(validationResult.errorMessage || 
-        "Uzupełnij poprawnie wszystkie wymagane pola");
+      const errorMsg = validationResult.errorMessage || 
+        "Please complete all required fields";
+      console.log("StepWizard: Validation failed:", errorMsg);
+      setValidationError(errorMsg);
       return;
     }
     
     setValidationError(null);
     setIsProcessing(true);
     
-    // Wywołaj akcję pluginu przez system handlerów
+    console.log(`StepWizard: Triggering plugin action for step ${currentStep.id}`);
+    
+    // Trigger plugin action through handler system
     const success = triggerPluginAction(currentStep.id);
     
     if (!success) {
-      // Jeśli nie znaleziono handlera, pokaż komunikat
-      setValidationError("Nie można zakończyć tego kroku automatycznie. Użyj przycisku w pluginie.");
+      // If no handler was found, show message
+      console.log("StepWizard: No plugin handler found");
+      setValidationError("Cannot complete this step automatically. Use the button in the plugin.");
       setIsProcessing(false);
     }
   };
 
   // Early return if we don't have the necessary data
-  if (!showWizard || !task || !currentStep) return null;
+  if (!showWizard || !task || !currentStep) {
+    console.log("StepWizard: Missing required data, not rendering");
+    console.log("  showWizard:", showWizard);
+    console.log("  task:", !!task);
+    console.log("  currentStep:", !!currentStep);
+    return null;
+  }
 
   return (
-    <Dialog open={showWizard} onOpenChange={closeWizard}>
+    <Dialog 
+      open={showWizard} 
+      onOpenChange={(open) => {
+        if (!open) closeWizard();
+      }}
+    >
       <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>
@@ -177,6 +211,7 @@ const StepWizard = () => {
               onClick={handleNext}
               className="flex items-center"
               disabled={isProcessing}
+              data-testid="next-step-button"
             >
               {isProcessing ? (
                 "Przetwarzanie..."

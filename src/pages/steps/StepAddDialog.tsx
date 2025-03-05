@@ -86,7 +86,7 @@ export function StepAddDialog({ taskId, open, onClose }: StepAddDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Add step to task</DialogTitle>
           <DialogDescription>

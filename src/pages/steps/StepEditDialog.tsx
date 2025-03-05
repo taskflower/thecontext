@@ -1,15 +1,8 @@
 // src/pages/steps/StepEditDialog.tsx
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Step } from "@/types";
 import { useStepStore } from "@/store/stepStore";
 import { StepEditor } from "@/pages/stepsPlugins";
+import { FormModal } from "@/components/ui/form-modal";
 
 interface StepEditDialogProps {
   step: Step;
@@ -24,24 +17,25 @@ export function StepEditDialog({ step, open, onClose }: StepEditDialogProps) {
     updateStep(step.id, updates);
   };
 
+  // Empty submit handler since the StepEditor handles its own state changes
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    onClose();
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-auto">
-        <DialogHeader>
-          <DialogTitle>Edytuj krok: {step.title}</DialogTitle>
-        </DialogHeader>
-
-        <div className="py-4">
-          <StepEditor step={step} onChange={handleUpdateStep} />
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Zamknij
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <FormModal
+      title={`Edit step: ${step.title}`}
+      isOpen={open}
+      onClose={onClose}
+      onSubmit={handleSubmit}
+      submitLabel="Close"
+      size="xl"
+    >
+      <div className="py-2">
+        <StepEditor step={step} onChange={handleUpdateStep} />
+      </div>
+    </FormModal>
   );
 }
 

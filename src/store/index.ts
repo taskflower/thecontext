@@ -1,3 +1,6 @@
-// src/pages/tasks/TaskFlow/store/index.ts
+// src/store/index.ts
 export * from './dataStore';
 export * from './uiStore';
+export * from './stepStore';
+export * from './taskStore';
+export * from './wizardStore';

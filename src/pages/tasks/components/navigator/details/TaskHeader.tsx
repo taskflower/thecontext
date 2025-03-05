@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Task } from "@/types";
 import { useWizardStore } from "@/store/wizardStore";
 import { useStepStore } from "@/store/stepStore";
-import { useDataStore } from "@/store/dataStore";
+import { useTaskStore } from "@/store/taskStore";
 import { TaskResultJsonViewer } from "@/pages/steps/details/TaskResultJsonViewer";
 
 interface TaskHeaderProps {
@@ -15,14 +15,23 @@ interface TaskHeaderProps {
 export function TaskHeader({ task }: TaskHeaderProps) {
   const { openWizard } = useWizardStore();
   const { getTaskSteps, updateStep } = useStepStore();
-  const { updateTask } = useDataStore();
+  const { updateTask } = useTaskStore();
 
   const handleExecuteAllSteps = () => {
     // Get all steps for this task
     const steps = getTaskSteps(task.id).sort((a, b) => a.order - b.order);
     
+    // Make sure we have at least one step
+    if (steps.length === 0) {
+      alert("No steps defined for this task. Please add at least one step first.");
+      return;
+    }
+    
+    console.log(`Executing all steps for task ${task.id}. Found ${steps.length} steps.`);
+    
     // Reset all steps to pending
     steps.forEach(step => {
+      console.log(`Resetting step ${step.id} to pending status`);
       updateStep(step.id, { 
         status: 'pending',
         result: null
@@ -30,15 +39,17 @@ export function TaskHeader({ task }: TaskHeaderProps) {
     });
     
     // Set task's currentStepId to the first step if there is one
-    if (steps.length > 0) {
-      updateTask(task.id, { 
-        currentStepId: steps[0].id,
-        status: 'in-progress' 
-      });
-    }
+    console.log(`Setting task's currentStepId to first step: ${steps[0].id}`);
+    updateTask(task.id, { 
+      currentStepId: steps[0].id,
+      status: 'in-progress' 
+    });
     
-    // Open the wizard starting from the first step
-    openWizard(task.id);
+    // Adding small delay to ensure state updates are processed
+    setTimeout(() => {
+      console.log(`Opening wizard for task ${task.id}`);
+      openWizard(task.id);
+    }, 100);
   };
 
   // Get steps for this task
@@ -55,10 +66,10 @@ export function TaskHeader({ task }: TaskHeaderProps) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {/* Dodajemy naszą dyskretną ikonkę tutaj */}
+          {/* Task result JSON viewer */}
           <TaskResultJsonViewer steps={steps} />
 
-          <Button onClick={handleExecuteAllSteps}>
+          <Button onClick={handleExecuteAllSteps} data-testid="execute-all-steps">
             <PlayCircle className="mr-2 h-4 w-4" />
             Wykonaj wszystkie kroki
           </Button>

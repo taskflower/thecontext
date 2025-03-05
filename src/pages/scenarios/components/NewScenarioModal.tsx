@@ -1,18 +1,9 @@
 // src/pages/scenarios/components/NewScenarioModal.tsx
 import React, { useState } from "react";
-
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { FormModal } from "@/components/ui/form-modal";
 import { useDataStore } from "@/store";
 
 interface NewScenarioModalProps {
@@ -26,6 +17,7 @@ const NewScenarioModal: React.FC<NewScenarioModalProps> = ({ toggleNewScenarioMo
   const [dueDate, setDueDate] = useState(
     new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // Default: 1 week from now
   );
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -36,12 +28,18 @@ const NewScenarioModal: React.FC<NewScenarioModalProps> = ({ toggleNewScenarioMo
     const folderId = `folder-${Date.now()}`;
     
     // Add a folder for the scenario
-    addFolder({
+    const folderResult = addFolder({
       id: folderId,
       name: title,
       parentId: 'scenarios', // Root folder for scenarios
       isScenarioFolder: true  // Mark as a scenario folder
     });
+
+    // Check if folder creation was successful
+    if (!folderResult.success) {
+      setError(folderResult.error || "Failed to create scenario folder.");
+      return;
+    }
 
     // Create and add the scenario
     const newScenario = {
@@ -55,73 +53,77 @@ const NewScenarioModal: React.FC<NewScenarioModalProps> = ({ toggleNewScenarioMo
       folderId
     };
 
-    addScenario(newScenario);
+    const scenarioResult = addScenario(newScenario);
+    
+    // Check if scenario creation was successful
+    if (!scenarioResult.success) {
+      // If scenario creation failed, try to clean up the folder we just created
+      // This is a best-effort cleanup
+      addFolder({
+        id: folderId,
+        name: title,
+        parentId: 'scenarios',
+        isScenarioFolder: true
+      });
+      
+      setError(scenarioResult.error || "Failed to create scenario.");
+      return;
+    }
     
     // Reset form
     setTitle("");
     setDescription("");
     setDueDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+    setError(null);
     
     toggleNewScenarioModal();
   };
 
   return (
-    <Dialog open={true} onOpenChange={(open) => {
-      if (!open) toggleNewScenarioModal();
-    }}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Create New Scenario</DialogTitle>
-          <DialogDescription>
-            Add a new scenario to your dashboard.
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="title">Scenario Title</Label>
-              <Input 
-                id="title" 
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required 
-              />
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                className="h-24"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="dueDate">Due Date</Label>
-              <Input
-                id="dueDate"
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={toggleNewScenarioModal}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={!title.trim()}>
-              Create Scenario
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <FormModal
+      title="Create New Scenario"
+      description="Add a new scenario to your dashboard."
+      isOpen={true}
+      onClose={toggleNewScenarioModal}
+      onSubmit={handleSubmit}
+      isSubmitDisabled={!title.trim()}
+      error={error}
+      submitLabel="Create Scenario"
+    >
+      <div className="grid gap-2">
+        <Label htmlFor="title">Scenario Title</Label>
+        <Input 
+          id="title" 
+          value={title}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            setError(null); // Clear error when input changes
+          }}
+          required 
+        />
+      </div>
+      
+      <div className="grid gap-2">
+        <Label htmlFor="description">Description</Label>
+        <Textarea
+          id="description"
+          className="h-24"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+      </div>
+      
+      <div className="grid gap-2">
+        <Label htmlFor="dueDate">Due Date</Label>
+        <Input
+          id="dueDate"
+          type="date"
+          value={dueDate}
+          onChange={(e) => setDueDate(e.target.value)}
+          required
+        />
+      </div>
+    </FormModal>
   );
 };
 

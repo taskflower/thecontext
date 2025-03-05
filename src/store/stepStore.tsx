@@ -2,24 +2,8 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { Step } from "@/types";
-import { useDataStore } from "./dataStore";
-
-interface StepState {
-  // State
-  steps: Record<string, Step[]>;
-  
-  // Actions
-  addStep: (taskId: string, step: Omit<Step, "id" | "taskId" | "order">) => string;
-  updateStep: (stepId: string, updates: Partial<Step>) => void;
-  completeStep: (stepId: string, result?: Record<string, any>) => void;
-  skipStep: (stepId: string) => void;
-  
-  // Helpers
-  getTaskSteps: (taskId: string) => Step[];
-  getStepById: (stepId: string) => Step | undefined;
-  getNextStep: (taskId: string, currentStepId: string) => Step | undefined;
-  getPreviousStep: (taskId: string, currentStepId: string) => Step | undefined;
-}
+import { useTaskStore } from "./taskStore";
+import { StepState } from "./stepStore.types";
 
 export const useStepStore = create<StepState>()(
   persist(
@@ -70,19 +54,19 @@ export const useStepStore = create<StepState>()(
           result: { ...step.result, ...result } 
         });
         
-        // Auto-advance to next step in data store if needed
-        const dataStore = useDataStore.getState();
-        const task = dataStore.tasks.find(t => t.id === step.taskId);
+        // Auto-advance to next step in task store if needed
+        const taskStore = useTaskStore.getState();
+        const task = taskStore.getTaskById(step.taskId);
         
         if (task && task.currentStepId === stepId) {
           const nextStep = get().getNextStep(step.taskId, stepId);
           if (nextStep) {
-            dataStore.updateTask(step.taskId, { currentStepId: nextStep.id });
+            taskStore.updateTask(step.taskId, { currentStepId: nextStep.id });
             // Set next step to in-progress
             get().updateStep(nextStep.id, { status: 'in-progress' });
           } else {
             // No more steps, mark task as completed
-            dataStore.updateTaskStatus(step.taskId, 'completed');
+            taskStore.updateTaskStatus(step.taskId, 'completed');
           }
         }
       },
@@ -94,13 +78,13 @@ export const useStepStore = create<StepState>()(
         if (!step) return;
         
         // Auto-advance to next step if needed
-        const dataStore = useDataStore.getState();
-        const task = dataStore.tasks.find(t => t.id === step.taskId);
+        const taskStore = useTaskStore.getState();
+        const task = taskStore.getTaskById(step.taskId);
         
         if (task && task.currentStepId === stepId) {
           const nextStep = get().getNextStep(step.taskId, stepId);
           if (nextStep) {
-            dataStore.updateTask(step.taskId, { currentStepId: nextStep.id });
+            taskStore.updateTask(step.taskId, { currentStepId: nextStep.id });
           }
         }
       },

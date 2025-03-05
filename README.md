@@ -3,23 +3,36 @@
 
 ## .
 
-Aplikacja to system zarządzania zadaniami oparty na React z wykorzystaniem tablic Kanban, umożliwiający tworzenie i edytowanie szablonów z zadaniami krokowymi, śledzenie zależności oraz integrację z wtyczkami do automatycznego rozszerzania kontekstu dokumentów.
+Aby szybko wyeliminować najbardziej zbędny kod:
 
-## .
+Utwórz komponent Modal wielokrotnego użytku
 
-Aplikacja to system zarządzania zadaniami z możliwością tworzenia szablonów tablic Kanban, śledzenia postępów poprzez statusy (todo, inProgress, done) oraz wykonywania zadań krok-po-kroku z integracją wtyczek, przeznaczony do budowy strukturyzowanych ścieżek wiedzy i zarządzania kontekstem dokumentów.  
-
-# Nowy decoDupiarz
-
-utils/containers = model dokumentów, konteneróœ i relacji - w nim cos na wzor pluginów
-utils/tasks = moduł nakładany na containers - ma w sobie taskowatosc
-
-hooks/useDocumentForm - to część continaers
-hooks/useAItaskForm - to czesc tasks
+Zastąpienie EditScenarioModal, TaskEditModal, NewDocumentModal jednym konfigurowalnym komponentem.
+Wyodrębnienie wspólnej struktury okna dialogowego, walidacji i wzorców przesyłania formularzy
 
 
-comonents/containers - UI dla containers - taki multimenager jakby
-components/tasks
+Ogólne komponenty elementów
+
+Stworzenie ujednoliconego komponentu ListItem, który zastąpi DocumentItem, ScenarioItem i TaskItem.
+Współdzielenie struktury kart, ale umożliwienie dostosowywania zawartości za pomocą rekwizytów renderowania
+
+
+Konsolidacja operacji CRUD store
+
+Utwórz funkcję fabryczną dla typowych operacji dodawania/aktualizowania/usuwania
+Przykład: createCrudOperations<T>(entityName, storage, validators)
+
+
+Współdzielone komponenty narzędziowe interfejsu użytkownika
+
+Wyodrębnienie komponentów StatusBadge, PriorityBadge, EmptyState z powtarzających się wzorców UI
+Centralizacja wspólnych wzorców, takich jak nagłówki szczegółów i nawigacja po liście
+
+
+
+Wzorzec modalny ma najwięcej bezpośrednich duplikatów - stworzenie konfigurowalnego komponentu FormModal mogłoby wyeliminować ~30% nadmiarowości przy minimalnym wysiłku.
+
+Przetłumaczono z DeepL.com (wersja darmowa)
 
 #
 

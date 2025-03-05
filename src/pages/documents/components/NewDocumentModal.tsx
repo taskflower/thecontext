@@ -1,17 +1,10 @@
 // src/pages/documents/components/NewDocumentModal.tsx
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
-
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-
-import { Button, Input, Label, Textarea } from "@/components/ui";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { FormModal } from "@/components/ui/form-modal";
 import { useDataStore, useUIStore } from "@/store";
 import { DocItem } from "@/types";
 
@@ -25,6 +18,7 @@ const NewDocumentModal: React.FC = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [metaKeys, setMetaKeys] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -43,8 +37,13 @@ const NewDocumentModal: React.FC = () => {
       updatedAt: currentTime
     };
 
-    addDocItem(newDocItem);
+    const result = addDocItem(newDocItem);
     
+    if (!result.success) {
+      setError(result.error || "Failed to create document.");
+      return;
+    }
+
     // Reset form
     setTitle("");
     setContent("");
@@ -54,59 +53,46 @@ const NewDocumentModal: React.FC = () => {
   };
 
   return (
-    <Dialog open={showNewDocumentModal} onOpenChange={toggleNewDocumentModal}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Create New Document</DialogTitle>
-          <DialogDescription>
-            Add a new document to the current folder.
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="title">Title</Label>
-              <Input 
-                id="title" 
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required 
-              />
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="content">Content</Label>
-              <Textarea
-                id="content"
-                className="h-32"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-              />
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="metaKeys">Tags (comma-separated)</Label>
-              <Input
-                id="metaKeys"
-                value={metaKeys}
-                onChange={(e) => setMetaKeys(e.target.value)}
-                placeholder="project, notes, important"
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={toggleNewDocumentModal}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={!title.trim()}>
-              Create Document
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <FormModal
+      title="Create New Document"
+      description="Add a new document to the current folder."
+      isOpen={showNewDocumentModal}
+      onClose={toggleNewDocumentModal}
+      onSubmit={handleSubmit}
+      isSubmitDisabled={!title.trim()}
+      error={error}
+      submitLabel="Create Document"
+    >
+      <div className="grid gap-2">
+        <Label htmlFor="title">Title</Label>
+        <Input 
+          id="title" 
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required 
+        />
+      </div>
+      
+      <div className="grid gap-2">
+        <Label htmlFor="content">Content</Label>
+        <Textarea
+          id="content"
+          className="h-32"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
+      </div>
+      
+      <div className="grid gap-2">
+        <Label htmlFor="metaKeys">Tags (comma-separated)</Label>
+        <Input
+          id="metaKeys"
+          value={metaKeys}
+          onChange={(e) => setMetaKeys(e.target.value)}
+          placeholder="project, notes, important"
+        />
+      </div>
+    </FormModal>
   );
 };
 

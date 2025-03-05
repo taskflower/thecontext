@@ -7,24 +7,25 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter
+  DialogFooter,
 } from "@/components/ui/dialog";
-import { useDataStore } from "@/store/dataStore";
-import { useWizardStore } from "@/store/wizardStore";
 import { Status, Task } from "@/types";
 import { useAdminNavigate } from "@/hooks";
 import { LayoutGrid, Plus } from "lucide-react";
-import { TaskItem } from "./TaskItem";
-import { TaskEditModal } from "./TaskEditModal";
+import { useDataStore, useTaskStore, useWizardStore } from "@/store";
+import { TaskEditModal, TaskItem } from "..";
 
 export function TaskListNavigator() {
   // Store data and methods
-  const { tasks, addTask, scenarios, deleteTask } = useDataStore();
+  const { scenarios } = useDataStore();
+  const { tasks, addTask, deleteTask } = useTaskStore();
   const { activeTaskId, setActiveTask, openWizard } = useWizardStore();
   const adminNavigate = useAdminNavigate();
 
   // Local state
-  const [selectedStatusFilter, setStatusFilter] = useState<Status | "all">("all");
+  const [selectedStatusFilter, setStatusFilter] = useState<Status | "all">(
+    "all"
+  );
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [showNoProjectDialog, setShowNoProjectDialog] = useState(false);
 
@@ -120,7 +121,11 @@ export function TaskListNavigator() {
             size="icon"
             className="h-8 w-8"
             onClick={handleQuickAddTask}
-            title={scenarios.length > 0 ? "Dodaj nowe zadanie" : "Najpierw utwórz projekt"}
+            title={
+              scenarios.length > 0
+                ? "Dodaj nowe zadanie"
+                : "Najpierw utwórz projekt"
+            }
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -188,16 +193,18 @@ export function TaskListNavigator() {
           <DialogHeader>
             <DialogTitle>Nie można utworzyć zadania</DialogTitle>
             <DialogDescription>
-              Musisz najpierw utworzyć projekt, zanim będziesz mógł dodać zadania.
+              Musisz najpierw utworzyć projekt, zanim będziesz mógł dodać
+              zadania.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="secondary" onClick={() => setShowNoProjectDialog(false)}>
+            <Button
+              variant="secondary"
+              onClick={() => setShowNoProjectDialog(false)}
+            >
               Anuluj
             </Button>
-            <Button onClick={handleGoToProjects}>
-              Przejdź do projektów
-            </Button>
+            <Button onClick={handleGoToProjects}>Przejdź do projektów</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -1,187 +1,186 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/store/wizardStore.tsx - zmodyfikowana wersja
-
-import { create } from "zustand";
-import { useStepStore } from "./stepStore";
-import { useDataStore } from "./dataStore";
-import { Step } from "@/types";
+// src/store/wizardStore.ts
+import { create } from 'zustand';
+import { useTaskStore } from '@/store/taskStore';
+import { useStepStore } from '@/store/stepStore';
 
 interface WizardState {
-  // Stan
+  showWizard: boolean;
   activeTaskId: string | null;
   activeStepId: string | null;
-  showWizard: boolean;
   
-  // Akcje
-  openWizard: (taskId: string, stepId?: string) => void;
+  // Actions
+  openWizard: (taskId: string, stepId?: string | null) => void;
   closeWizard: () => void;
+  setActiveTask: (taskId: string | null) => void;
+  setActiveStep: (stepId: string | null) => void;
   moveToNextStep: () => void;
   moveToPreviousStep: () => void;
   completeCurrentStep: (result?: Record<string, any>) => void;
   skipCurrentStep: () => void;
-  setActiveTask: (taskId: string | null) => void;
-  
-  // Pomocnicy
-  getCurrentStep: () => Step | null;
 }
 
-// Uaktualniona wersja useWizardStore
 export const useWizardStore = create<WizardState>((set, get) => ({
+  showWizard: false,
   activeTaskId: null,
   activeStepId: null,
-  showWizard: false,
   
-  // Ta funkcja powinna być używana przez wszystkie komponenty
-  setActiveTask: (taskId) => {
-    console.log("wizardStore.setActiveTask:", taskId);
+  openWizard: (taskId, stepId = null) => {
+    console.log(`WizardStore: Opening wizard for task ${taskId}, step ${stepId || 'auto'}`);
     
-    if (!taskId) {
-      set({
-        activeTaskId: null,
-        activeStepId: null
-      });
-      return;
-    }
-    
+    const taskStore = useTaskStore.getState();
     const stepStore = useStepStore.getState();
-    const dataStore = useDataStore.getState();
     
-    const task = dataStore.tasks.find(t => t.id === taskId);
+    // Get task and determine which step to start with
+    const task = taskStore.tasks.find(t => t.id === taskId);
+    
     if (!task) {
-      console.error("Nie znaleziono zadania:", taskId);
+      console.error(`WizardStore: Task ${taskId} not found`);
       return;
     }
     
-    let stepId = task.currentStepId;
+    // Get all steps for this task
+    const steps = stepStore.getTaskSteps(taskId).sort((a, b) => a.order - b.order);
     
-    if (!stepId) {
-      const steps = stepStore.getTaskSteps(taskId).sort((a, b) => a.order - b.order);
-      stepId = steps[0]?.id || null;
+    if (steps.length === 0) {
+      console.error(`WizardStore: No steps found for task ${taskId}`);
+      return;
     }
     
-    console.log("Ustawiam activeTaskId:", taskId, "activeStepId:", stepId);
-    set({
-      activeTaskId: taskId,
-      activeStepId: stepId
-    });
-  },
-  
-  // Pozostałe funkcje pozostają bez zmian...
-  openWizard: (taskId, stepId) => {
-    const stepStore = useStepStore.getState();
-    const dataStore = useDataStore.getState();
+    // Determine which step to show
+    let startStepId: string | null = null;
     
-    const task = dataStore.tasks.find(t => t.id === taskId);
-    if (!task) return;
-    
-    let targetStepId = stepId;
-    
-    if (!targetStepId) {
-      if (task.currentStepId) {
-        targetStepId = task.currentStepId;
-      } else {
-        const taskSteps = stepStore.getTaskSteps(taskId).sort((a, b) => a.order - b.order);
-        targetStepId = taskSteps[0]?.id;
-      }
-    }
-    
-    if (task.currentStepId !== targetStepId && targetStepId) {
-      dataStore.updateTask(taskId, { currentStepId: targetStepId });
+    if (stepId) {
+      // Use provided stepId
+      startStepId = stepId;
+    } else if (task.currentStepId) {
+      // Use task's currentStepId
+      startStepId = task.currentStepId;
+    } else {
+      // Start with the first step
+      startStepId = steps[0].id;
       
-      const step = stepStore.getStepById(targetStepId);
-      if (step && step.status === 'pending') {
-        stepStore.updateStep(targetStepId, { status: 'in-progress' });
-      }
+      // Update task with the current step ID
+      taskStore.updateTask(taskId, {
+        currentStepId: startStepId,
+        status: 'in-progress'
+      });
     }
     
+    // Set initial state
     set({
+      showWizard: true,
       activeTaskId: taskId,
-      activeStepId: targetStepId || null,
-      showWizard: true
+      activeStepId: startStepId
     });
+    
+    console.log(`WizardStore: Wizard opened with task ${taskId}, step ${startStepId}`);
   },
   
   closeWizard: () => {
+    console.log('WizardStore: Closing wizard');
     set({
       showWizard: false
     });
   },
   
+  setActiveTask: (taskId) => {
+    set({ activeTaskId: taskId });
+  },
+  
+  setActiveStep: (stepId) => {
+    set({ activeStepId: stepId });
+  },
+  
   moveToNextStep: () => {
     const { activeTaskId, activeStepId } = get();
+    
     if (!activeTaskId || !activeStepId) return;
     
     const stepStore = useStepStore.getState();
-    const nextStep = stepStore.getNextStep(activeTaskId, activeStepId);
+    const taskStore = useTaskStore.getState();
+    const steps = stepStore.getTaskSteps(activeTaskId).sort((a, b) => a.order - b.order);
     
-    if (nextStep) {
-      const dataStore = useDataStore.getState();
-      dataStore.updateTask(activeTaskId, { currentStepId: nextStep.id });
-      
-      if (nextStep.status === 'pending') {
-        stepStore.updateStep(nextStep.id, { status: 'in-progress' });
+    // Find current step index
+    const currentIndex = steps.findIndex(s => s.id === activeStepId);
+    
+    if (currentIndex < 0 || currentIndex >= steps.length - 1) {
+      // If we're at the last step, close the wizard and mark the task as completed
+      if (currentIndex === steps.length - 1) {
+        taskStore.updateTask(activeTaskId, {
+          status: 'completed'
+        });
+        get().closeWizard();
       }
-      
-      set({ activeStepId: nextStep.id });
+      return;
     }
+    
+    // Move to the next step
+    const nextStep = steps[currentIndex + 1];
+    
+    // Update task's currentStepId
+    taskStore.updateTask(activeTaskId, {
+      currentStepId: nextStep.id
+    });
+    
+    set({ activeStepId: nextStep.id });
   },
   
   moveToPreviousStep: () => {
     const { activeTaskId, activeStepId } = get();
+    
     if (!activeTaskId || !activeStepId) return;
     
     const stepStore = useStepStore.getState();
-    const prevStep = stepStore.getPreviousStep(activeTaskId, activeStepId);
+    const taskStore = useTaskStore.getState();
+    const steps = stepStore.getTaskSteps(activeTaskId).sort((a, b) => a.order - b.order);
     
-    if (prevStep) {
-      const dataStore = useDataStore.getState();
-      dataStore.updateTask(activeTaskId, { currentStepId: prevStep.id });
-      set({ activeStepId: prevStep.id });
-    }
+    // Find current step index
+    const currentIndex = steps.findIndex(s => s.id === activeStepId);
+    
+    if (currentIndex <= 0) return;
+    
+    // Move to the previous step
+    const prevStep = steps[currentIndex - 1];
+    
+    // Update task's currentStepId
+    taskStore.updateTask(activeTaskId, {
+      currentStepId: prevStep.id
+    });
+    
+    set({ activeStepId: prevStep.id });
   },
   
   completeCurrentStep: (result) => {
-    const { activeStepId } = get();
-    if (!activeStepId) return;
+    const { activeTaskId, activeStepId } = get();
+    
+    if (!activeTaskId || !activeStepId) return;
     
     const stepStore = useStepStore.getState();
-    stepStore.completeStep(activeStepId, result);
     
-    const step = stepStore.getStepById(activeStepId);
-    if (step) {
-      const nextStep = stepStore.getNextStep(step.taskId, activeStepId);
-      if (nextStep) {
-        set({ activeStepId: nextStep.id });
-      } else {
-        get().closeWizard();
-      }
-    }
+    // Update step status and result
+    stepStore.updateStep(activeStepId, {
+      status: 'completed',
+      result: result || {}
+    });
+    
+    // Move to the next step
+    get().moveToNextStep();
   },
   
   skipCurrentStep: () => {
-    const { activeStepId } = get();
-    if (!activeStepId) return;
+    const { activeTaskId, activeStepId } = get();
+    
+    if (!activeTaskId || !activeStepId) return;
     
     const stepStore = useStepStore.getState();
-    stepStore.skipStep(activeStepId);
     
-    const step = stepStore.getStepById(activeStepId);
-    if (step) {
-      const nextStep = stepStore.getNextStep(step.taskId, activeStepId);
-      if (nextStep) {
-        set({ activeStepId: nextStep.id });
-      } else {
-        get().closeWizard();
-      }
-    }
-  },
-  
-  getCurrentStep: () => {
-    const { activeStepId } = get();
-    if (!activeStepId) return null;
+    // Mark step as skipped
+    stepStore.updateStep(activeStepId, {
+      status: 'skipped'
+    });
     
-    const stepStore = useStepStore.getState();
-    const step = stepStore.getStepById(activeStepId);
-    return step || null;
+    // Move to the next step
+    get().moveToNextStep();
   }
 }));

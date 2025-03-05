@@ -14,12 +14,12 @@ export class ScenarioService {
    * 
    * @param scenarioData dane scenariusza
    * @param folderName opcjonalna nazwa folderu, domyślnie używa tytułu scenariusza
-   * @returns obiekt zawierający ID utworzonego scenariusza i ID utworzonego folderu
+   * @returns obiekt zawierający ID utworzonego scenariusza i ID utworzonego folderu, lub null jeśli operacja nie powiodła się
    */
   public static createScenarioWithFolder(
     scenarioData: Partial<Scenario>, 
     folderName?: string
-  ): { scenarioId: string, folderId: string } {
+  ): { scenarioId: string, folderId: string } | null {
     const store = useDataStore.getState();
     
     // 1. Wygeneruj unikalne identyfikatory
@@ -34,10 +34,14 @@ export class ScenarioService {
       isScenarioFolder: true  // Oznacz jako folder scenariusza
     };
     
-    store.addFolder(folderToCreate);
+    const folderResult = store.addFolder(folderToCreate);
+    
+    if (!folderResult.success) {
+      console.error(`Failed to create folder: ${folderResult.error}`);
+      return null;
+    }
     
     // 3. Utwórz scenariusz z danymi domyślnymi
-    // const now = new Date().toISOString();
     const defaultDueDate = this.generateDueDate();
     
     const scenarioToCreate: Scenario = {
@@ -56,7 +60,14 @@ export class ScenarioService {
       ...scenarioData, // Pozostałe pola z przekazanych danych
     };
     
-    store.addScenario(scenarioToCreate);
+    const scenarioResult = store.addScenario(scenarioToCreate);
+    
+    if (!scenarioResult.success) {
+      // Jeśli nie udało się utworzyć scenariusza, usuń utworzony folder
+      store.deleteFolder(folderId);
+      console.error(`Failed to create scenario: ${scenarioResult.error}`);
+      return null;
+    }
     
     console.log(`Created scenario "${scenarioToCreate.title}" with folder "${folderToCreate.name}"`);
     
@@ -69,15 +80,23 @@ export class ScenarioService {
    * @param sourceId ID scenariusza źródłowego
    * @param targetId ID scenariusza docelowego
    * @param type typ połączenia
+   * @returns true jeśli operacja powiodła się, false w przeciwnym razie
    */
   public static createConnection(
     sourceId: string, 
     targetId: string, 
     type: ConnectionType = 'related'
-  ): void {
+  ): boolean {
     const store = useDataStore.getState();
-    store.addScenarioConnection(sourceId, targetId, type);
+    const result = store.addScenarioConnection(sourceId, targetId, type);
+    
+    if (!result.success) {
+      console.error(`Failed to create connection: ${result.error}`);
+      return false;
+    }
+    
     console.log(`Created connection from "${sourceId}" to "${targetId}" of type "${type}"`);
+    return true;
   }
   
   /**
@@ -105,7 +124,7 @@ export class ScenarioService {
         
         // Utwórz scenariusz z folderem
         const folderName = `${projectPrefix}: ${template.title}`;
-        const { scenarioId } = this.createScenarioWithFolder(
+        const result = this.createScenarioWithFolder(
           {
             title: template.title,
             description: template.description,
@@ -113,6 +132,15 @@ export class ScenarioService {
           },
           folderName
         );
+        
+        if (!result) {
+          if (statusCallback) {
+            statusCallback(template.id, 'error');
+          }
+          continue;
+        }
+        
+        const { scenarioId } = result;
         
         // Zapisz mapowanie ID szablonu do rzeczywistego ID
         idMapping[template.id] = scenarioId;
@@ -163,19 +191,18 @@ export class ScenarioService {
    * Usuwa scenariusz wraz z jego folderem
    * 
    * @param scenarioId ID scenariusza do usunięcia
+   * @returns true jeśli operacja powiodła się, false w przeciwnym razie
    */
-  public static deleteScenario(scenarioId: string): void {
+  public static deleteScenario(scenarioId: string): boolean {
     const store = useDataStore.getState();
-    const scenario = store.getScenarioById(scenarioId);
+    const result = store.deleteScenario(scenarioId);
     
-    if (!scenario) {
-      console.warn(`Cannot delete scenario: Scenario with ID ${scenarioId} not found`);
-      return;
+    if (!result.success) {
+      console.error(`Failed to delete scenario: ${result.error}`);
+      return false;
     }
     
-    // Usuń scenariusz (spowoduje również usunięcie folderu)
-    store.deleteScenario(scenarioId);
-    console.log(`Deleted scenario "${scenario.title}" with ID ${scenarioId}`);
+    return true;
   }
   
   /**
