@@ -10,9 +10,9 @@ const DocumentsHeader: React.FC = () => {
   const { toggleNewDocumentModal } = useUIStore();
   const { lang, folderId = "root" } = useParams();
   const navigate = useNavigate();
-  
+
   const [searchTerm, setSearchTerm] = useState("");
-  
+
   const handleNewFolder = () => {
     const folderName = prompt("Enter folder name:");
     if (folderName) {
@@ -20,21 +20,21 @@ const DocumentsHeader: React.FC = () => {
       addFolder({
         id: newFolderId,
         name: folderName,
-        parentId: folderId
+        parentId: folderId,
       });
-      
+
       // Navigate to the new folder
       navigate(`/admin/${lang}/documents/${newFolderId}`);
     }
   };
-  
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     // We'll keep the search functionality in the header component
     if (searchTerm.trim()) {
       // Trigger search in the store or pass to parent via context
-      const searchEvent = new CustomEvent('documentSearch', { 
-        detail: { searchTerm } 
+      const searchEvent = new CustomEvent("documentSearch", {
+        detail: { searchTerm },
       });
       window.dispatchEvent(searchEvent);
     }
@@ -42,10 +42,8 @@ const DocumentsHeader: React.FC = () => {
 
   return (
     <div className="h-16 bg-background border-b px-6 flex justify-between items-center">
-      <div className="text-xl font-medium">
-        Documents
-      </div>
-      
+      <h2 className="text-base font-semibold"> Documents</h2>
+
       <div className="flex items-center">
         <form onSubmit={handleSearch} className="relative mr-4">
           <Input
@@ -55,24 +53,23 @@ const DocumentsHeader: React.FC = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <Search size={16} className="absolute left-3 top-2.5 text-muted-foreground" />
+          <Search
+            size={16}
+            className="absolute left-3 top-2.5 text-muted-foreground"
+          />
         </form>
-        
-        <Button 
-          variant="outline" 
-          size="sm" 
+
+        <Button
+          variant="outline"
+          size="sm"
           className="mr-3"
           onClick={handleNewFolder}
         >
           <Folder size={16} className="mr-2" />
           New Folder
         </Button>
-        
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={toggleNewDocumentModal}
-        >
+
+        <Button variant="outline" size="sm" onClick={toggleNewDocumentModal}>
           <FileText size={16} className="mr-2" />
           New Document
         </Button>

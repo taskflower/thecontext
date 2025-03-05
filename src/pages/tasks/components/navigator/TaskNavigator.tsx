@@ -6,7 +6,7 @@ import TaskDetailView from "./details/TaskDetailView";
 
 const TaskNavigator: React.FC = () => {
   return (
-    <div className="h-full flex">
+    <div className="h-full flex bg-gray-50">
       <div className="w-1/3 h-full border-r">
         <TaskListNavigator />
       </div>

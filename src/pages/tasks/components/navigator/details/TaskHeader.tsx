@@ -1,5 +1,5 @@
 // src/pages/tasks/components/navigator/details/TaskHeader.tsx
-import { PlayCircle } from "lucide-react";
+import { PlayCircle, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Task } from "@/types";
@@ -20,34 +20,31 @@ export function TaskHeader({ task }: TaskHeaderProps) {
   const handleExecuteAllSteps = () => {
     // Get all steps for this task
     const steps = getTaskSteps(task.id).sort((a, b) => a.order - b.order);
-    
+
     // Make sure we have at least one step
     if (steps.length === 0) {
-      alert("No steps defined for this task. Please add at least one step first.");
+      alert(
+        "No steps defined for this task. Please add at least one step first."
+      );
       return;
     }
-    
-    console.log(`Executing all steps for task ${task.id}. Found ${steps.length} steps.`);
-    
+
     // Reset all steps to pending
-    steps.forEach(step => {
-      console.log(`Resetting step ${step.id} to pending status`);
-      updateStep(step.id, { 
-        status: 'pending',
-        result: null
+    steps.forEach((step) => {
+      updateStep(step.id, {
+        status: "pending",
+        result: null,
       });
     });
-    
+
     // Set task's currentStepId to the first step if there is one
-    console.log(`Setting task's currentStepId to first step: ${steps[0].id}`);
-    updateTask(task.id, { 
+    updateTask(task.id, {
       currentStepId: steps[0].id,
-      status: 'in-progress' 
+      status: "in-progress",
     });
-    
+
     // Adding small delay to ensure state updates are processed
     setTimeout(() => {
-      console.log(`Opening wizard for task ${task.id}`);
       openWizard(task.id);
     }, 100);
   };
@@ -55,23 +52,39 @@ export function TaskHeader({ task }: TaskHeaderProps) {
   // Get steps for this task
   const steps = getTaskSteps(task.id).sort((a, b) => a.order - b.order);
 
+  // Format date for display
+  const formattedDueDate = task.dueDate
+    ? new Date(task.dueDate).toLocaleDateString()
+    : null;
+
   return (
-    <div className="px-6 py-4 border-b">
+    <div className="px-6 py-4 border-b bg-background shadow-sm">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-semibold mt-2">{task.title}</h2>
-          <div className="flex items-center gap-2 mt-1">
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold">{task.title}</h2>
+          <div className="flex items-center gap-2">
             {getStatusBadge(task.status)}
             {getPriorityBadge(task.priority)}
+
+            {formattedDueDate && (
+              <div className="flex items-center gap-1 text-xs text-muted-foreground ml-2">
+                <Calendar className="h-3.5 w-3.5" />
+                {formattedDueDate}
+              </div>
+            )}
           </div>
         </div>
+
         <div className="flex items-center gap-2">
           {/* Task result JSON viewer */}
           <TaskResultJsonViewer steps={steps} />
 
-          <Button onClick={handleExecuteAllSteps} data-testid="execute-all-steps">
+          <Button
+            onClick={handleExecuteAllSteps}
+            data-testid="execute-all-steps"
+          >
             <PlayCircle className="mr-2 h-4 w-4" />
-            Wykonaj wszystkie kroki
+            Execute All Steps
           </Button>
         </div>
       </div>
@@ -82,17 +95,38 @@ export function TaskHeader({ task }: TaskHeaderProps) {
 // Helper functions
 function getStatusBadge(status: string) {
   switch (status) {
+    case "todo":
     case "pending":
-      return <Badge variant="outline">Oczekujący</Badge>;
+      return (
+        <Badge variant="outline" className="bg-gray-100">
+          Pending
+        </Badge>
+      );
     case "in-progress":
     case "in_progress":
-      return <Badge variant="secondary">W trakcie</Badge>;
+      return (
+        <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+          In Progress
+        </Badge>
+      );
     case "completed":
-      return <Badge>Ukończony</Badge>;
+      return (
+        <Badge className="bg-green-100 text-green-800 border-green-200">
+          Completed
+        </Badge>
+      );
     case "failed":
-      return <Badge variant="destructive">Nieudany</Badge>;
+      return (
+        <Badge variant="destructive" className="bg-red-100 text-red-800">
+          Failed
+        </Badge>
+      );
     case "skipped":
-      return <Badge variant="outline">Pominięty</Badge>;
+      return (
+        <Badge variant="outline" className="bg-amber-50 text-amber-800">
+          Skipped
+        </Badge>
+      );
     default:
       return <Badge variant="outline">{status}</Badge>;
   }
@@ -101,11 +135,29 @@ function getStatusBadge(status: string) {
 function getPriorityBadge(priority: string) {
   switch (priority) {
     case "low":
-      return <Badge variant="outline">Niski priorytet</Badge>;
+      return (
+        <Badge
+          variant="outline"
+          className="bg-blue-50 text-blue-700 border-blue-200"
+        >
+          Low Priority
+        </Badge>
+      );
     case "medium":
-      return <Badge variant="secondary">Średni priorytet</Badge>;
+      return (
+        <Badge
+          variant="secondary"
+          className="bg-purple-50 text-purple-700 border-purple-200"
+        >
+          Medium Priority
+        </Badge>
+      );
     case "high":
-      return <Badge variant="destructive">Wysoki priorytet</Badge>;
+      return (
+        <Badge className="bg-red-50 text-red-700 border-red-200">
+          High Priority
+        </Badge>
+      );
     default:
       return <Badge variant="outline">{priority}</Badge>;
   }

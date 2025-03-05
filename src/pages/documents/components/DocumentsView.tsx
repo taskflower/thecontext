@@ -54,8 +54,8 @@ const DocumentsView: React.FC = () => {
       <DocumentsHeader />
       
       {/* Main content */}
-      <div className="p-6 flex-1 overflow-hidden flex flex-col">
-        <div className="flex mb-4 gap-2"></div>
+      <div className="p-4 flex-1 overflow-hidden flex flex-col bg-gray-50">
+       
         
         <div className="flex gap-6 flex-1 overflow-hidden">
           <Card className="p-4 flex-1 overflow-auto">

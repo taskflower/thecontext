@@ -1,13 +1,13 @@
 // src/pages/steps/StepsList.tsx
-import { 
-  Plus, 
-  Edit, 
-  PlayCircle, 
-  FileText, 
-  CheckSquare, 
-  ClipboardCheck, 
-  FormInput, 
-  MessageSquare 
+import {
+  Plus,
+  Edit,
+  PlayCircle,
+  FileText,
+  CheckSquare,
+  ClipboardCheck,
+  FormInput,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +24,12 @@ interface StepsListProps {
   onEditStep: (stepIndex: number) => void;
 }
 
-export function StepsList({ steps, taskId, onAddStep, onEditStep }: StepsListProps) {
+export function StepsList({
+  steps,
+  taskId,
+  onAddStep,
+  onEditStep,
+}: StepsListProps) {
   const { openWizard } = useWizardStore();
 
   const handleExecuteStep = (stepId: string) => {
@@ -33,27 +38,23 @@ export function StepsList({ steps, taskId, onAddStep, onEditStep }: StepsListPro
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-2 ">
-        <h3 className="text-sm font-medium">Workflow Steps</h3>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onAddStep}
-        >
+      <div className="flex items-center justify-between mb-2 px-4 py-3 border-b">
+        <h3 className="text-sm font-bold">Workflow Steps</h3>
+        <Button variant="outline" size="sm" onClick={onAddStep}>
           <Plus className="h-4 w-4 mr-1" />
           Add Step
         </Button>
       </div>
 
       <ScrollArea className="h-full">
-        <div className="space-y-3">
+        <div className="space-y-3 bg-background">
           {steps.length === 0 ? (
             <div className="py-4 text-center text-sm text-muted-foreground border rounded-md">
               No steps defined yet. Add steps to complete this task.
             </div>
           ) : (
             steps.map((step, index) => (
-              <StepItem 
+              <StepItem
                 key={step.id}
                 step={step}
                 index={index}
@@ -77,10 +78,10 @@ interface StepItemProps {
 
 function StepItem({ step, index, onEdit, onExecute }: StepItemProps) {
   const plugin = getPlugin(step.type);
-  const stepName = plugin?.name || 'Unknown Step';
-  
+  const stepName = plugin?.name || "Unknown Step";
+
   return (
-    <div className="overflow-hidden border rounded-md">
+    <div className="overflow-hidden border-b rounded-md">
       <div className="px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -130,15 +131,15 @@ function StepItem({ step, index, onEdit, onExecute }: StepItemProps) {
 
 function getStepIcon(type: string) {
   switch (type) {
-    case 'form':
+    case "form":
       return <FormInput size={14} className="text-purple-500" />;
-    case 'document':
+    case "document":
       return <FileText size={14} className="text-blue-500" />;
-    case 'checklist':
+    case "checklist":
       return <ClipboardCheck size={14} className="text-amber-500" />;
-    case 'decision':
+    case "decision":
       return <CheckSquare size={14} className="text-green-500" />;
-    case 'ai-content':
+    case "ai-content":
       return <MessageSquare size={14} className="text-indigo-500" />;
     default:
       return null;
@@ -153,7 +154,11 @@ function getStatusBadge(status: string) {
     case "in_progress":
       return <Badge variant="secondary">In Progress</Badge>;
     case "completed":
-      return <Badge className="bg-green-50 border-green-200" variant={"secondary"}>Completed</Badge>;
+      return (
+        <Badge className="bg-green-50 border-green-200" variant={"secondary"}>
+          Completed
+        </Badge>
+      );
     case "failed":
       return <Badge variant="destructive">Failed</Badge>;
     case "skipped":

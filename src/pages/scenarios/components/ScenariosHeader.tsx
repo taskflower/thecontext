@@ -1,5 +1,11 @@
 import React from "react";
-import { Search, LayoutGrid, List as ListIcon, Filter, Plus } from "lucide-react";
+import {
+  Search,
+  LayoutGrid,
+  List as ListIcon,
+  Filter,
+  Plus,
+} from "lucide-react";
 import { ViewMode } from "@/types";
 import { Button, Input } from "@/components/ui";
 
@@ -9,16 +15,14 @@ interface ScenariosHeaderProps {
   toggleNewScenarioModal: () => void;
 }
 
-export const ScenariosHeader: React.FC<ScenariosHeaderProps> = ({ 
-  viewMode, 
+export const ScenariosHeader: React.FC<ScenariosHeaderProps> = ({
+  viewMode,
   setViewMode,
-  toggleNewScenarioModal
+  toggleNewScenarioModal,
 }) => {
   return (
     <div className="h-16 bg-background border-b px-6 flex justify-between items-center">
-      <div className="text-xl font-medium">
-        Scenarios
-      </div>
+      <h2 className="text-base font-semibold">Scenarios</h2>
 
       <div className="flex items-center">
         <div className="relative mr-4">
@@ -27,12 +31,15 @@ export const ScenariosHeader: React.FC<ScenariosHeaderProps> = ({
             placeholder="Search scenarios..."
             className="w-64 pl-9"
           />
-          <Search size={16} className="absolute left-3 top-2.5 text-muted-foreground" />
+          <Search
+            size={16}
+            className="absolute left-3 top-2.5 text-muted-foreground"
+          />
         </div>
-        
-        <Button 
-          variant="outline" 
-          size="sm" 
+
+        <Button
+          variant="outline"
+          size="sm"
           className="mr-3"
           onClick={toggleNewScenarioModal}
         >

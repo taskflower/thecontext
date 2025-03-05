@@ -14,7 +14,7 @@ import {
   StepHelpComponent,
   StepsList,
 } from "@/pages/steps";
-import { Button } from "@/components/ui";
+import { Button, Card, CardContent } from "@/components/ui";
 import { TaskHeader, TaskInfo } from "../..";
 
 export function TaskDetailView() {
@@ -38,17 +38,17 @@ export function TaskDetailView() {
 
   // Get scenario name for the task
   const scenarioName = task?.scenarioId && scenarios.length
-    ? scenarios.find((p) => p.id === task.scenarioId)?.title || task.scenarioId
-    : "No scenario";
+    ? scenarios.find((p) => p.id === task.scenarioId)?.title || "Unknown Project"
+    : "No project";
 
   // If no task is selected, show placeholder
   if (!task) {
     return (
-      <div className="h-full">
-        <div className="px-6 py-4">
+      <div className="h-full flex flex-col">
+        <div className="px-6 py-4 border-b">
           <h2 className="text-base font-semibold">Task Details</h2>
         </div>
-        <div className="flex h-[calc(100vh-240px)] items-center justify-center">
+        <div className="flex-1 flex items-center justify-center">
           <p className="text-sm text-muted-foreground">
             Select a task to view details
           </p>
@@ -63,24 +63,25 @@ export function TaskDetailView() {
   };
 
   return (
-    <div className="h-full bg-background">
+    <div className="h-full flex flex-col bg-background">
       {/* Task Header */}
       <TaskHeader task={task} />
 
-      <div className="px-6 py-4 h-full ">
-        <div className="space-y-6 ">
+      <div className="flex-1 p-6 overflow-auto">
+        <div className="space-y-6">
           {/* Task Info Section */}
-          <div className="flex justify-between items-start ">
-            <TaskInfo
-              description={task.description}
-              scenarioId={task.scenarioId}
-              scenarioName={scenarioName}
-            />
-
+          <div className="flex items-start justify-between">
+            <div className="space-y-2 flex-1">
+              <TaskInfo
+                description={task.description}
+                scenarioId={task.scenarioId}
+                scenarioName={scenarioName}
+              />
+            </div>
             <Button
               variant="outline"
               size="sm"
-              className="flex items-center gap-1"
+              className="flex items-center gap-1 whitespace-nowrap ml-4"
               onClick={() => setShowHelp(!showHelp)}
             >
               <HelpCircle size={16} />
@@ -89,15 +90,23 @@ export function TaskDetailView() {
           </div>
 
           {/* Help section */}
-          {showHelp && <StepHelpComponent />}
+          {showHelp && (
+            <Card>
+              <CardContent className="pt-6">
+                <StepHelpComponent />
+              </CardContent>
+            </Card>
+          )}
 
           {/* Steps List Section */}
-          <StepsList
-            steps={steps}
-            onAddStep={() => setIsAddingStep(true)}
-            onEditStep={handleEditStep}
-            taskId={task.id}
-          />
+          <div className="bg-white rounded-md shadow-sm border">
+            <StepsList
+              steps={steps}
+              onAddStep={() => setIsAddingStep(true)}
+              onEditStep={handleEditStep}
+              taskId={task.id}
+            />
+          </div>
         </div>
       </div>
 

@@ -20,7 +20,7 @@ export const Navbar = () => {
 
   return (
     <nav className="border-b">
-      <div className="container mx-auto p-3">
+      <div className="p-3 px-6">
         <div className="flex justify-between items-center">
           <div className="flex gap-1">
             <AppLink

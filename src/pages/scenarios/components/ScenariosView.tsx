@@ -40,16 +40,14 @@ const ScenariosView: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-colp bg-gray-50 flex-col">
       <ScenariosHeader
         viewMode={viewMode}
         setViewMode={setViewMode}
         toggleNewScenarioModal={toggleNewScenarioModal}
       />
 
-      <div className="p-6 flex-1 overflow-auto">
-        <h3 className="text-lg font-medium mb-4">Your Scenarios</h3>
-
+      <div className="p-4 flex-1 overflow-auto">
         {viewMode === "cards" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {scenarios.map((scenario) => (
