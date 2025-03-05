@@ -12,3 +12,6 @@ export { GenericStepResult } from './GenericStepResult';
 // Detail components
 export { default as StepHelpComponent } from './details/StepHelpComponent';
 export { default as TaskResultJsonViewer } from './details/TaskResultJsonViewer';
+
+// Services
+export { default as stepService } from './services/StepService';

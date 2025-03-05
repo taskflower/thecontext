@@ -5,9 +5,7 @@
 
 Aby szybko wyeliminować najbardziej zbędny kod:
 
-Utwórz komponent Modal wielokrotnego użytku
 
-Zastąpienie EditScenarioModal, TaskEditModal, NewDocumentModal jednym konfigurowalnym komponentem.
 Wyodrębnienie wspólnej struktury okna dialogowego, walidacji i wzorców przesyłania formularzy
 
 
@@ -25,7 +23,7 @@ Przykład: createCrudOperations<T>(entityName, storage, validators)
 
 Współdzielone komponenty narzędziowe interfejsu użytkownika
 
-Wyodrębnienie komponentów StatusBadge, PriorityBadge, EmptyState z powtarzających się wzorców UI
+Wyodrębnienie komponentów  EmptyState z powtarzających się wzorców UI
 Centralizacja wspólnych wzorców, takich jak nagłówki szczegółów i nawigacja po liście
 
 

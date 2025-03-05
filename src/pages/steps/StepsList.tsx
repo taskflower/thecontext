@@ -9,7 +9,7 @@ import { StepResult } from "@/pages/steps/StepResult";
 import { getPlugin } from "@/pages/stepsPlugins/registry";
 import { StatusBadge } from "@/components/status";
 import { StepTypeIcon } from "@/components/status/StepTypeIcon";
-
+import stepService from "./services/StepService";
 
 interface StepsListProps {
   steps: Step[];
@@ -27,8 +27,20 @@ export function StepsList({
   const { openWizard } = useWizardStore();
 
   const handleExecuteStep = (stepId: string) => {
-    openWizard(taskId, stepId);
+    // Wykorzystanie StepService zamiast bezpośredniego otwierania wizarda
+    const success = stepService.executeStep(stepId);
+    
+    // Jeśli StepService nie może automatycznie wykonać kroku,
+    // otwieramy wizard ręcznie
+    if (!success) {
+      openWizard(taskId, stepId);
+    }
   };
+
+  // Funkcja do zmiany kolejności kroków - zakomentowana do przyszłej implementacji drag&drop
+  // const handleReorderSteps = (stepIds: string[]) => {
+  //   stepService.reorderSteps(taskId, stepIds);
+  // };
 
   return (
     <div>
@@ -108,6 +120,7 @@ function StepItem({ step, index, onEdit, onExecute }: StepItemProps) {
               className="h-7 w-7"
               onClick={onExecute}
               title="Execute step"
+              disabled={step.status === "completed"}
             >
               <PlayCircle className="h-4 w-4" />
             </Button>

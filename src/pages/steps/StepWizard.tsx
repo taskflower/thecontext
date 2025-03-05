@@ -17,11 +17,10 @@ import {
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { StepViewer } from "@/pages/stepsPlugins";
-import { validateStep } from "@/pages/stepsPlugins/validation";
-import { triggerPluginAction } from "@/pages/stepsPlugins/pluginHandlers";
 import { useStepStore, useTaskStore, useWizardStore } from "@/store";
 import { Button } from "@/components/ui";
 import taskService from "../tasks/services/TaskService";
+import stepService from "./services/StepService";
 
 const StepWizard = () => {
   // Store hooks
@@ -78,7 +77,12 @@ const StepWizard = () => {
   // Handle step completion from plugin
   const handleStepComplete = (result?: Record<string, any>) => {
     setIsProcessing(false);
-    completeCurrentStep(result);
+
+    // Use stepService instead of directly calling completeCurrentStep
+    if (currentStep) {
+      stepService.completeStep(currentStep.id, result);
+      completeCurrentStep(result);
+    }
   };
 
   // Handle "Next" button - triggers plugin action
@@ -93,12 +97,10 @@ const StepWizard = () => {
       return;
     }
 
-    // Validate step
-    const validationResult = validateStep(currentStep);
-    if (!validationResult.isValid) {
-      const errorMsg =
-        validationResult.errorMessage || "Please complete all required fields";
-      setValidationError(errorMsg);
+    // Use stepService to validate the step
+    const { isExecutable, errorMessage } = stepService.canExecuteStep(currentStep);
+    if (!isExecutable) {
+      setValidationError(errorMessage || "Cannot execute step.");
       return;
     }
 
@@ -106,18 +108,25 @@ const StepWizard = () => {
     setIsProcessing(true);
 
     console.log(
-      `StepWizard: Triggering plugin action for step ${currentStep.id}`
+      `StepWizard: Executing step ${currentStep.id}`
     );
 
-    // Trigger plugin action through handler system
-    const success = triggerPluginAction(currentStep.id);
-
+    // Use stepService to execute the step
+    const success = stepService.executeStep(currentStep.id);
+    
     if (!success) {
-      // If no handler was found, show message
       setValidationError(
         "Cannot complete this step automatically. Use the button in the plugin."
       );
       setIsProcessing(false);
+    }
+  };
+
+  // Handle skip button - use stepService
+  const handleSkipStep = () => {
+    if (currentStep) {
+      stepService.skipStep(currentStep.id);
+      skipCurrentStep();
     }
   };
 
@@ -216,7 +225,7 @@ const StepWizard = () => {
             {currentStep.status !== "completed" && (
               <Button
                 variant="ghost"
-                onClick={skipCurrentStep}
+                onClick={handleSkipStep}
                 className="flex items-center"
                 disabled={isProcessing}
               >
