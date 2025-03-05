@@ -86,3 +86,7 @@ items => items.map(item => ({
 ```
 
 I chuj. To wszystko.
+
+
+
+https://claude.ai/share/2cf5d6f2-6e79-4059-b216-e2e1056b0e13
