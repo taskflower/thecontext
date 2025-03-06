@@ -1,34 +1,33 @@
-// src/pages/scenarios/components/ScenarioDetailPage.tsx
+// src/pages/scenarios/components/details/ScenarioDetailPage.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Calendar, 
   ChevronLeft, 
   Edit3, 
-  BarChart3,
-  Target,
-  Users,
-  AlertTriangle,
-  Clock,
-  CheckSquare,
-  CheckCircle
+  AlertTriangle
 } from 'lucide-react';
 
-
 import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle,
-  
-} from '@/components/ui/card';
-
+  Badge, 
+  Button, 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
+} from '@/components/ui';
 
 import { useScenarioStore, useTaskStore } from '@/store';
-import { Badge, Button, Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui';
-import ScenarioConnectionsPanel from './ScenarioConnectionsPanel';
-import EditScenarioModal from '../EditScenarioModal';
 
+import { EditScenarioModal, ScenarioConnectionsPanel } from '..';
+import { ScenarioAudienceWidget } from '../widgets/ScenarioAudienceWidget';
+import { ScenarioChannelsWidget } from '../widgets/ScenarioChannelsWidget';
+import { ScenarioDescriptionWidget } from '../widgets/ScenarioDescriptionWidget';
+import { ScenarioMilestonesWidget } from '../widgets/ScenarioMilestonesWidget';
+import { ScenarioProgressWidget } from '../widgets/ScenarioProgressWidget';
+import { ScenarioStatusWidget } from '../widgets/ScenarioStatusWidget';
+
+// Import widgets
 
 const ScenarioDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -64,15 +63,6 @@ const ScenarioDetailPage: React.FC = () => {
       </div>
     );
   }
-  
-  // Generate milestone data based on tasks (if any)
-  const milestones = scenarioTasks.length > 0 
-    ? [
-        { id: 1, title: 'Project Setup', date: scenario.startDate || scenario.dueDate, status: 'completed' },
-        { id: 2, title: 'Halfway Point', date: scenario.dueDate, status: scenarioTasks.filter(t => t.status === 'completed').length >= scenarioTasks.length / 2 ? 'completed' : 'upcoming' },
-        { id: 3, title: 'Project Completion', date: scenario.dueDate, status: scenario.progress === 100 ? 'completed' : 'upcoming' }
-      ]
-    : [];
   
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -127,183 +117,38 @@ const ScenarioDetailPage: React.FC = () => {
           </TabsList>
           
           <TabsContent value="overview" className="mt-6 space-y-6">
-            {/* Progress Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Scenario Progress</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center text-sm mb-2">
-                  <span className="font-medium">Overall Completion:</span>
-                  <span className="ml-2">{scenario.progress}%</span>
-                </div>
-                <div className="w-full bg-gray-200 h-2 rounded-full mb-4">
-                  <div 
-                    className={`h-2 rounded-full ${
-                      scenario.progress === 100
-                        ? "bg-green-500"
-                        : scenario.progress > 60
-                        ? "bg-indigo-600"
-                        : scenario.progress > 30
-                        ? "bg-blue-500"
-                        : "bg-amber-500"
-                    }`}
-                    style={{ width: `${scenario.progress}%` }}
-                  ></div>
-                </div>
-                
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <p className="text-xs text-muted-foreground">Tasks</p>
-                    <p className="font-bold">{scenario.completedTasks}/{scenario.tasks}</p>
-                  </div>
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <p className="text-xs text-muted-foreground">Connected Scenarios</p>
-                    <p className="font-bold">{scenario.connections?.length || 0}</p>
-                  </div>
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <p className="text-xs text-muted-foreground">Days Remaining</p>
-                    <p className="font-bold">
-                      {scenario.dueDate
-                        ? Math.max(0, Math.floor((new Date(scenario.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
-                        : "N/A"}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Progress Card Widget */}
+            <ScenarioProgressWidget scenario={scenario} />
             
-            {/* Description */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Description</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {scenario.description 
-                  ? <p>{scenario.description}</p>
-                  : <p className="text-muted-foreground">No description provided</p>
-                }
-                
-                {scenario.objective && (
-                  <div className="mt-4">
-                    <h4 className="font-medium text-gray-700">Objective</h4>
-                    <p className="text-gray-600">{scenario.objective}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            {/* Description Widget */}
+            <ScenarioDescriptionWidget scenario={scenario} />
             
-            {/* Milestone timeline */}
-            {milestones.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Milestones</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {milestones.map((milestone, index) => (
-                      <div key={milestone.id} className="flex items-start">
-                        <div className="flex flex-col items-center mr-4">
-                          <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                            milestone.status === 'completed' ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600'
-                          }`}>
-                            {milestone.status === 'completed' ? (
-                              <CheckSquare size={14} />
-                            ) : (
-                              <Clock size={14} />
-                            )}
-                          </div>
-                          {index < milestones.length - 1 && (
-                            <div className="w-0.5 h-10 bg-gray-200"></div>
-                          )}
-                        </div>
-                        <div className="pt-1">
-                          <p className="font-medium">{milestone.title}</p>
-                          <p className="text-sm text-muted-foreground">{milestone.date}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            {/* Milestone Widget */}
+            <ScenarioMilestonesWidget 
+              scenario={scenario} 
+              tasks={scenarioTasks}
+            />
             
-            {/* Quick Stats Cards */}
+            {/* Quick Stats Widgets */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">Tasks Status</CardTitle>
-                  <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{scenario.completedTasks}/{scenario.tasks}</div>
-                  <p className="text-xs text-muted-foreground">Tasks completed</p>
-                  {scenarioTasks.length > 0 && (
-                    <div className="mt-2 flex items-center space-x-2">
-                      <CheckCircle size={14} className="text-green-500" />
-                      <span className="text-xs">
-                        {Math.round((scenario.completedTasks / scenario.tasks) * 100)}% completion rate
-                      </span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">Target Audience</CardTitle>
-                  <Target className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  {scenario.target?.audience ? (
-                    <>
-                      <div className="text-sm line-clamp-2">{scenario.target.audience}</div>
-                      <p className="text-xs text-muted-foreground mt-1">Primary audience</p>
-                    </>
-                  ) : (
-                    <>
-                      <div className="text-sm font-medium">Not Specified</div>
-                      <p className="text-xs text-muted-foreground">Add target audience in settings</p>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">Channels</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  {scenario.channels && scenario.channels.length > 0 ? (
-                    <>
-                      <div className="flex flex-wrap gap-1">
-                        {scenario.channels.map(channel => (
-                          <Badge key={channel} variant="outline" className="capitalize">
-                            {channel}
-                          </Badge>
-                        ))}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">Marketing channels</p>
-                    </>
-                  ) : (
-                    <>
-                      <div className="text-sm font-medium">None</div>
-                      <p className="text-xs text-muted-foreground">No channels defined</p>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
+              <ScenarioStatusWidget 
+                scenario={scenario} 
+                tasksCount={scenarioTasks.length} 
+              />
+              <ScenarioAudienceWidget scenario={scenario} />
+              <ScenarioChannelsWidget scenario={scenario} />
             </div>
           </TabsContent>
           
           <TabsContent value="tasks" className="mt-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Tasks</CardTitle>
+            {/* Tasks content remains the same */}
+            {/* This could also be extracted into a separate widget component */}
+            <div className="card">
+              <div className="card-header flex flex-row items-center justify-between">
+                <h3 className="text-lg font-semibold">Tasks</h3>
                 <Button>Create New Task</Button>
-              </CardHeader>
-              <CardContent>
+              </div>
+              <div className="card-content">
                 {scenarioTasks.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <p>No tasks created yet</p>
@@ -342,8 +187,8 @@ const ScenarioDetailPage: React.FC = () => {
                     ))}
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </TabsContent>
           
           <TabsContent value="connections" className="mt-6">
