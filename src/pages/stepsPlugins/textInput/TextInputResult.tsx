@@ -1,5 +1,4 @@
 // src/pages/stepsPlugins/textInput/TextInputResult.tsx
-import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ResultRendererProps } from '../types';
 

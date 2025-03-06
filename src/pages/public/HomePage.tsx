@@ -47,7 +47,7 @@ const HomePage = () => {
             into an actionable, AI-guided workflow.
           </Trans>
         </p>
-        <AppLink to="/tasks/templates" admin>
+        <AppLink to="/tasks" admin>
           <Button size="lg" className="mt-4">
             <Trans>Create Your Workflow</Trans>
           </Button>
@@ -165,7 +165,7 @@ const HomePage = () => {
             AI can streamline your processes today.
           </Trans>
         </p>
-        <AppLink to="/tasks/templates" admin>
+        <AppLink to="/scenarios" admin>
           <Button size="lg" className="mt-4">
             <Trans>Start Your First Project</Trans>
           </Button>

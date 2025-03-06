@@ -45,7 +45,7 @@ export function TaskDetailView() {
   if (!task) {
     return (
       <div className="h-full flex flex-col">
-        <div className="px-6 py-4 border-b">
+        <div className="px-6 py-5 border-b">
           <h2 className="text-base font-semibold">Task Details</h2>
         </div>
         <div className="flex-1 flex items-center justify-center">
