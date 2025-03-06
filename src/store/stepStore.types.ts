@@ -9,12 +9,14 @@ export interface StepState {
   // Actions
   addStep: (taskId: string, step: Omit<Step, "id" | "taskId" | "order">) => string;
   updateStep: (stepId: string, updates: Partial<Step>) => void;
-  completeStep: (stepId: string, result?: Record<string, any>) => void;
-  skipStep: (stepId: string) => void;
+  deleteStep: (stepId: string) => boolean;
+  reorderSteps: (taskId: string, newOrder: string[]) => boolean;
   
   // Helpers
   getTaskSteps: (taskId: string) => Step[];
   getStepById: (stepId: string) => Step | undefined;
   getNextStep: (taskId: string, currentStepId: string) => Step | undefined;
   getPreviousStep: (taskId: string, currentStepId: string) => Step | undefined;
+  getTaskIdForStep: (stepId: string) => string | undefined;
+  areAllStepsCompleted: (taskId: string) => boolean;
 }

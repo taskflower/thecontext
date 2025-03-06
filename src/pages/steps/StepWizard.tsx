@@ -31,8 +31,6 @@ const StepWizard = () => {
     closeWizard,
     moveToNextStep,
     moveToPreviousStep,
-    completeCurrentStep,
-    skipCurrentStep,
   } = useWizardStore();
 
   const { getTaskSteps } = useStepStore();
@@ -61,27 +59,23 @@ const StepWizard = () => {
 
   // Check task executability on mount
   useEffect(() => {
-    if (showWizard && task) {
-      const { isExecutable, errorMessage } = taskService.canExecuteTask(
-        task,
-        steps
-      );
+    if (showWizard && activeTaskId) {
+      const { isExecutable, errorMessage } = taskService.canExecuteTask(activeTaskId);
 
       if (!isExecutable) {
         alert(errorMessage);
         closeWizard();
       }
     }
-  }, [showWizard, task, steps, closeWizard]);
+  }, [showWizard, activeTaskId, closeWizard]);
 
   // Handle step completion from plugin
   const handleStepComplete = (result?: Record<string, any>) => {
     setIsProcessing(false);
 
-    // Use stepService instead of directly calling completeCurrentStep
     if (currentStep) {
+      // Używamy tylko stepService do obsługi krokowania
       stepService.completeStep(currentStep.id, result);
-      completeCurrentStep(result);
     }
   };
 
@@ -126,7 +120,6 @@ const StepWizard = () => {
   const handleSkipStep = () => {
     if (currentStep) {
       stepService.skipStep(currentStep.id);
-      skipCurrentStep();
     }
   };
 
@@ -145,7 +138,7 @@ const StepWizard = () => {
       <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>
-            {task.title} - Krok {currentStepIndex + 1} z {steps.length}
+            {task.title} - Step {currentStepIndex + 1} of {steps.length}
           </DialogTitle>
         </DialogHeader>
 
@@ -216,7 +209,7 @@ const StepWizard = () => {
                 disabled={isProcessing}
               >
                 <ArrowLeft size={16} className="mr-2" />
-                Poprzedni
+                Previous
               </Button>
             )}
           </div>
@@ -230,7 +223,7 @@ const StepWizard = () => {
                 disabled={isProcessing}
               >
                 <Forward size={16} className="mr-2" />
-                Pomiń
+                Skip
               </Button>
             )}
 
@@ -241,15 +234,15 @@ const StepWizard = () => {
               data-testid="next-step-button"
             >
               {isProcessing ? (
-                "Przetwarzanie..."
+                "Processing..."
               ) : isLastStep ? (
                 <>
-                  Zakończ
+                  Finish
                   <Check size={16} className="ml-2" />
                 </>
               ) : (
                 <>
-                  Następny
+                  Next
                   <ArrowRight size={16} className="ml-2" />
                 </>
               )}

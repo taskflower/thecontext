@@ -1,6 +1,7 @@
 // src/services/TaskService.ts
-import { Step, Task } from "@/types";
-import { useTaskStore, useStepStore, useWizardStore } from "@/store";
+import { Task } from "@/types";
+import { useTaskStore, useStepStore, useWizardStore, useScenarioStore } from "@/store";
+
 
 /**
  * TaskService provides centralized business logic for task-related operations
@@ -9,15 +10,22 @@ import { useTaskStore, useStepStore, useWizardStore } from "@/store";
 class TaskService {
   /**
    * Checks if a task can be executed
-   * @param task The task to check
-   * @param steps The steps associated with the task
+   * @param taskId ID of the task to check
    * @returns An object with isExecutable flag and optionally an error message
    */
-  canExecuteTask(task: Task, steps: Step[]): { isExecutable: boolean; errorMessage?: string } {
+  canExecuteTask(taskId: string): { isExecutable: boolean; errorMessage?: string } {
+    const { getTaskById } = useTaskStore.getState();
+    const { getTaskSteps } = useStepStore.getState();
+    
+    const task = getTaskById(taskId);
+    
     // Check if task exists
     if (!task) {
       return { isExecutable: false, errorMessage: "Task not found." };
     }
+    
+    // Get steps for this task
+    const steps = getTaskSteps(taskId);
     
     // Check if task has steps
     if (!steps || steps.length === 0) {
@@ -32,33 +40,38 @@ class TaskService {
 
   /**
    * Prepares a task for execution by resetting step statuses
-   * @param task The task to prepare
-   * @param steps The steps associated with the task
-   * @returns Object with updates for task and steps
+   * @param taskId The ID of the task to prepare
+   * @returns Success indicator
    */
-  prepareTaskExecution(task: Task, steps: Step[]): { 
-    taskUpdates: Partial<Task>; 
-    stepUpdates: Array<{ stepId: string; updates: Partial<Step> }> 
-  } {
+  prepareTaskExecution(taskId: string): boolean {
+    const { getTaskById, updateTask } = useTaskStore.getState();
+    const { getTaskSteps, updateStep } = useStepStore.getState();
+    
+    const task = getTaskById(taskId);
+    if (!task) return false;
+    
+    // Get steps for this task
+    const steps = getTaskSteps(taskId);
+    if (!steps || steps.length === 0) return false;
+    
     // Sort steps by order
     const sortedSteps = [...steps].sort((a, b) => a.order - b.order);
     
     // Reset all steps to pending
-    const stepUpdates = sortedSteps.map(step => ({
-      stepId: step.id,
-      updates: {
-        status: "pending" as const,
+    sortedSteps.forEach(step => {
+      updateStep(step.id, {
+        status: "pending",
         result: null
-      }
-    }));
+      });
+    });
     
-    // Set task's currentStepId to the first step if there is one
-    const taskUpdates: Partial<Task> = {
-      currentStepId: sortedSteps.length > 0 ? sortedSteps[0].id : null,
-      status: "in-progress" as const
-    };
+    // Set task's currentStepId to the first step and status to in-progress
+    updateTask(taskId, {
+      currentStepId: sortedSteps[0].id,
+      status: "in-progress"
+    });
     
-    return { taskUpdates, stepUpdates };
+    return true;
   }
 
   /**
@@ -67,39 +80,85 @@ class TaskService {
    * @returns A boolean indicating whether execution started successfully
    */
   executeTask(taskId: string): boolean {
-    // Get dependencies from stores
-    const taskStore = useTaskStore.getState();
-    const stepStore = useStepStore.getState();
-    const wizardStore = useWizardStore.getState();
-    
-    // Get task and steps
-    const task = taskStore.getTaskById(taskId);
-    const steps = stepStore.getTaskSteps(taskId).sort((a, b) => a.order - b.order);
-    
     // Validate
-    const { isExecutable, errorMessage } = this.canExecuteTask(task!, steps);
+    const { isExecutable, errorMessage } = this.canExecuteTask(taskId);
     if (!isExecutable) {
       alert(errorMessage);
       return false;
     }
     
     // Prepare
-    const { taskUpdates, stepUpdates } = this.prepareTaskExecution(task!, steps);
+    const prepared = this.prepareTaskExecution(taskId);
+    if (!prepared) {
+      alert("Error preparing task for execution");
+      return false;
+    }
     
-    // Apply updates to steps
-    stepUpdates.forEach(({ stepId, updates }) => {
-      stepStore.updateStep(stepId, updates);
-    });
-    
-    // Apply updates to task
-    taskStore.updateTask(taskId, taskUpdates);
-    
-    // Adding small delay to ensure state updates are processed
-    setTimeout(() => {
-      wizardStore.openWizard(taskId);
-    }, 100);
+    // Open wizard
+    const { openWizard } = useWizardStore.getState();
+    openWizard(taskId);
     
     return true;
+  }
+  
+  /**
+   * Creates a new task with default values
+   * @returns The newly created task ID or error object
+   */
+  createTask(): { success: boolean; data?: string; errorMessage?: string } {
+    const { scenarios } = useScenarioStore.getState();
+    
+    if (!scenarios || scenarios.length === 0) {
+      return {
+        success: false,
+        errorMessage: "You must create a project before you can add tasks."
+      };
+    }
+
+    const { addTask } = useTaskStore.getState();
+    const { setActiveTask } = useWizardStore.getState();
+    
+    const newTask: Task = {
+      id: `task-${Date.now()}`,
+      title: "New task",
+      description: "",
+      status: "todo",
+      priority: "medium",
+      dueDate: new Date().toISOString().split("T")[0],
+      scenarioId: scenarios[0]?.id || "",
+      currentStepId: null,
+      data: {},
+    };
+    
+    const result = addTask(newTask);
+    
+    if (result.success) {
+      setActiveTask(newTask.id);
+    }
+    
+    return result;
+  }
+  
+  /**
+   * Deletes a task after confirmation
+   * @param taskId The ID of the task to delete
+   * @returns Success indicator
+   */
+  deleteTask(taskId: string): boolean {
+    if (!confirm("Are you sure you want to delete this task?")) {
+      return false;
+    }
+    
+    const { deleteTask } = useTaskStore.getState();
+    const { setActiveTask, activeTaskId } = useWizardStore.getState();
+    
+    const result = deleteTask(taskId);
+    
+    if (result.success && activeTaskId === taskId) {
+      setActiveTask(null);
+    }
+    
+    return result.success;
   }
 }
 

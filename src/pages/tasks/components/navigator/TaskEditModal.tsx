@@ -13,7 +13,7 @@ import {
 import { FormModal } from "@/components/ui/form-modal";
 import { Priority } from "@/types";
 import { useAdminNavigate } from "@/hooks";
-import {  useScenarioStore, useTaskStore } from "@/store";
+import { useScenarioStore, useTaskStore } from "@/store";
 
 interface TaskEditModalProps {
   taskId: string;
@@ -22,7 +22,7 @@ interface TaskEditModalProps {
 
 export function TaskEditModal({ taskId, onClose }: TaskEditModalProps) {
   const { scenarios } = useScenarioStore();
-  const { tasks, addTask, deleteTask } = useTaskStore();
+  const { tasks, updateTask } = useTaskStore();
   const adminNavigate = useAdminNavigate();
   const task = tasks.find((t) => t.id === taskId);
 
@@ -58,21 +58,24 @@ export function TaskEditModal({ taskId, onClose }: TaskEditModalProps) {
     }
 
     if (task) {
-      // Update the task by deleting and re-adding
-      deleteTask(task.id);
-      addTask({
-        ...task,
-        ...editData,
+      // Use updateTask instead of delete and add
+      const success = updateTask(task.id, {
+        ...editData
       });
-      onClose();
+      
+      if (success.success) {
+        onClose();
+      } else {
+        setError(success.error || "Error updating task");
+      }
     }
   };
 
   // If no scenarios exist, direct user to create a scenario first
-  if (scenarios.length === 0) {
+  if (!scenarios || scenarios.length === 0) {
     return (
       <FormModal
-        title="Cannot Create Task"
+        title="Cannot Edit Task"
         isOpen={true}
         onClose={onClose}
         onSubmit={(e) => {
@@ -83,7 +86,7 @@ export function TaskEditModal({ taskId, onClose }: TaskEditModalProps) {
         submitLabel="Go to Projects"
       >
         <div className="py-2 text-center">
-          <p>You must create a project before you can add tasks.</p>
+          <p>You need a project to associate with this task.</p>
         </div>
       </FormModal>
     );

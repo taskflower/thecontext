@@ -17,14 +17,11 @@ import {
 import taskService from "../../services/TaskService";
 import { PriorityBadge, StatusIcon } from "@/components/status";
 
-
 interface TaskItemProps {
   task: Task;
   isActive: boolean;
   onSelect: (taskId: string) => void;
   onEdit: (taskId: string, e: React.MouseEvent) => void;
-  onDelete: (taskId: string, e: React.MouseEvent) => void;
-  onExecute: (taskId: string, e: React.MouseEvent) => void;
 }
 
 export function TaskItem({
@@ -32,12 +29,17 @@ export function TaskItem({
   isActive,
   onSelect,
   onEdit,
-  onDelete,
 }: TaskItemProps) {
-  // Handler for execute task action in dropdown
+  // Handler dla akcji wykonania zadania
   const handleExecuteTask = (e: React.MouseEvent) => {
     e.stopPropagation();
     taskService.executeTask(task.id);
+  };
+
+  // Handler dla usuwania zadania
+  const handleDeleteTask = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    taskService.deleteTask(task.id);
   };
 
   return (
@@ -76,7 +78,7 @@ export function TaskItem({
             </DropdownMenuItem>
             <DropdownMenuItem
               className="text-destructive focus:text-destructive"
-              onClick={(e) => onDelete(task.id, e)}
+              onClick={handleDeleteTask}
             >
               <Trash className="mr-2 h-4 w-4" />
               Delete

@@ -34,6 +34,22 @@ class StepService {
   }
 
   /**
+   * Get the task that a step belongs to
+   * @param stepId ID of the step
+   * @returns The task object or undefined
+   */
+  private getTaskForStep(stepId: string) {
+    const stepStore = useStepStore.getState();
+    const taskStore = useTaskStore.getState();
+    
+    const step = stepStore.getStepById(stepId);
+    if (!step) return undefined;
+    
+    const taskId = step.taskId;
+    return taskStore.getTaskById(taskId);
+  }
+
+  /**
    * Execute a specific step
    * @param stepId The ID of the step to execute
    * @returns A boolean indicating whether execution started successfully
@@ -41,21 +57,16 @@ class StepService {
   executeStep(stepId: string): boolean {
     // Get dependencies from stores
     const stepStore = useStepStore.getState();
-    const taskStore = useTaskStore.getState();
     
-    // Get step and its task
+    // Get step and validate
     const step = stepStore.getStepById(stepId);
     if (!step) {
       console.error(`Step with ID ${stepId} not found.`);
       return false;
     }
     
-    // Find the task this step belongs to
-    const task = taskStore.tasks.find(t => {
-      const taskSteps = stepStore.getTaskSteps(t.id);
-      return taskSteps.some(s => s.id === stepId);
-    });
-    
+    // Get associated task
+    const task = this.getTaskForStep(stepId);
     if (!task) {
       console.error(`Could not find task for step ${stepId}`);
       return false;
@@ -74,7 +85,8 @@ class StepService {
       result: null
     });
     
-    // Update task status to in-progress if it's not already
+    // Update task status if needed
+    const taskStore = useTaskStore.getState();
     if (task.status !== "in-progress") {
       taskStore.updateTask(task.id, {
         status: "in-progress",
@@ -96,7 +108,7 @@ class StepService {
   }
 
   /**
-   * Complete a step with the given result
+   * Complete a step with the given result and handle progression
    * @param stepId The ID of the step to complete
    * @param result The result data to store with the step
    * @returns A boolean indicating success
@@ -118,26 +130,39 @@ class StepService {
       result
     });
     
-    // Find the task this step belongs to
-    const task = taskStore.tasks.find(t => {
-      const taskSteps = stepStore.getTaskSteps(t.id);
-      return taskSteps.some(s => s.id === stepId);
-    });
+    // Get task
+    const taskId = step.taskId;
+    const task = taskStore.getTaskById(taskId);
     
     if (!task) {
       console.error(`Could not find task for step ${stepId}`);
       return false;
     }
     
-    // Check if all steps are completed
-    const allTaskSteps = stepStore.getTaskSteps(task.id);
-    const allCompleted = allTaskSteps.every(s => s.status === "completed");
-    
-    // If all steps are completed, mark task as completed
-    if (allCompleted) {
-      taskStore.updateTask(task.id, {
-        status: "completed"
-      });
+    // Check if this was the current step
+    if (task.currentStepId === stepId) {
+      // Find the next step
+      const nextStep = stepStore.getNextStep(taskId, stepId);
+      
+      if (nextStep) {
+        // Move to next step
+        taskStore.updateTask(taskId, { 
+          currentStepId: nextStep.id 
+        });
+        
+        // Set next step to in-progress
+        stepStore.updateStep(nextStep.id, { 
+          status: 'in-progress' 
+        });
+      } else {
+        // No more steps, check if all steps are complete
+        const allCompleted = stepStore.areAllStepsCompleted(taskId);
+        
+        if (allCompleted) {
+          // Mark task as completed
+          taskStore.updateTaskStatus(taskId, 'completed');
+        }
+      }
     }
     
     return true;
@@ -150,6 +175,7 @@ class StepService {
    */
   skipStep(stepId: string): boolean {
     const stepStore = useStepStore.getState();
+    const taskStore = useTaskStore.getState();
     
     // Get step
     const step = stepStore.getStepById(stepId);
@@ -163,6 +189,35 @@ class StepService {
       status: "skipped"
     });
     
+    // Get task
+    const taskId = step.taskId;
+    const task = taskStore.getTaskById(taskId);
+    
+    if (!task) {
+      console.error(`Could not find task for step ${stepId}`);
+      return false;
+    }
+    
+    // If this was the current step, move to next
+    if (task.currentStepId === stepId) {
+      const nextStep = stepStore.getNextStep(taskId, stepId);
+      
+      if (nextStep) {
+        // Move to next step
+        taskStore.updateTask(taskId, { 
+          currentStepId: nextStep.id 
+        });
+      } else {
+        // No more steps, check if all steps are complete or skipped
+        const allCompleted = stepStore.areAllStepsCompleted(taskId);
+        
+        if (allCompleted) {
+          // Mark task as completed
+          taskStore.updateTaskStatus(taskId, 'completed');
+        }
+      }
+    }
+    
     return true;
   }
 
@@ -174,25 +229,7 @@ class StepService {
    */
   reorderSteps(taskId: string, stepIds: string[]): boolean {
     const stepStore = useStepStore.getState();
-    
-    // Get all steps for the task
-    const steps = stepStore.getTaskSteps(taskId);
-    
-    // Validate that all provided step IDs actually belong to this task
-    const taskStepIds = steps.map(s => s.id);
-    const allStepsPresent = stepIds.every(id => taskStepIds.includes(id));
-    
-    if (!allStepsPresent || stepIds.length !== steps.length) {
-      console.error(`Invalid step IDs provided for reordering`);
-      return false;
-    }
-    
-    // Update order for each step
-    stepIds.forEach((stepId, index) => {
-      stepStore.updateStep(stepId, { order: index });
-    });
-    
-    return true;
+    return stepStore.reorderSteps(taskId, stepIds);
   }
 
   /**

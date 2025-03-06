@@ -2,14 +2,18 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { Step } from "@/types";
-import { useTaskStore } from "./taskStore";
 import { StepState } from "./stepStore.types";
 
+/**
+ * Step Store - odpowiada za zarządzanie stanem kroków zadań
+ * Zawiera tylko podstawowe operacje na danych, bez logiki biznesowej
+ */
 export const useStepStore = create<StepState>()(
   persist(
     (set, get) => ({
       steps: {},
       
+      // Dodanie nowego kroku do zadania
       addStep: (taskId, stepData) => {
         const taskSteps = get().steps[taskId] || [];
         const newStep: Step = {
@@ -31,6 +35,7 @@ export const useStepStore = create<StepState>()(
         return newStep.id;
       },
       
+      // Aktualizacja kroku
       updateStep: (stepId, updates) => {
         set((state) => {
           const newSteps = { ...state.steps };
@@ -45,54 +50,12 @@ export const useStepStore = create<StepState>()(
         });
       },
       
-      completeStep: (stepId, result = {}) => {
-        const step = get().getStepById(stepId);
-        if (!step) return;
-        
-        get().updateStep(stepId, { 
-          status: 'completed', 
-          result: { ...step.result, ...result } 
-        });
-        
-        // Auto-advance to next step in task store if needed
-        const taskStore = useTaskStore.getState();
-        const task = taskStore.getTaskById(step.taskId);
-        
-        if (task && task.currentStepId === stepId) {
-          const nextStep = get().getNextStep(step.taskId, stepId);
-          if (nextStep) {
-            taskStore.updateTask(step.taskId, { currentStepId: nextStep.id });
-            // Set next step to in-progress
-            get().updateStep(nextStep.id, { status: 'in-progress' });
-          } else {
-            // No more steps, mark task as completed
-            taskStore.updateTaskStatus(step.taskId, 'completed');
-          }
-        }
-      },
-      
-      skipStep: (stepId) => {
-        get().updateStep(stepId, { status: 'skipped' });
-        
-        const step = get().getStepById(stepId);
-        if (!step) return;
-        
-        // Auto-advance to next step if needed
-        const taskStore = useTaskStore.getState();
-        const task = taskStore.getTaskById(step.taskId);
-        
-        if (task && task.currentStepId === stepId) {
-          const nextStep = get().getNextStep(step.taskId, stepId);
-          if (nextStep) {
-            taskStore.updateTask(step.taskId, { currentStepId: nextStep.id });
-          }
-        }
-      },
-      
+      // Pobieranie kroków dla zadania
       getTaskSteps: (taskId) => {
         return get().steps[taskId] || [];
       },
       
+      // Pobieranie kroku po ID
       getStepById: (stepId) => {
         let foundStep: Step | undefined;
         
@@ -104,6 +67,7 @@ export const useStepStore = create<StepState>()(
         return foundStep;
       },
       
+      // Pobieranie następnego kroku
       getNextStep: (taskId, currentStepId) => {
         const taskSteps = get().getTaskSteps(taskId).sort((a, b) => a.order - b.order);
         const currentIndex = taskSteps.findIndex(step => step.id === currentStepId);
@@ -112,12 +76,80 @@ export const useStepStore = create<StepState>()(
         return taskSteps[currentIndex + 1];
       },
       
+      // Pobieranie poprzedniego kroku
       getPreviousStep: (taskId, currentStepId) => {
         const taskSteps = get().getTaskSteps(taskId).sort((a, b) => a.order - b.order);
         const currentIndex = taskSteps.findIndex(step => step.id === currentStepId);
         
         if (currentIndex <= 0) return undefined;
         return taskSteps[currentIndex - 1];
+      },
+      
+      // Zwracanie informacji o zadaniu powiązanym z danym krokiem
+      getTaskIdForStep: (stepId) => {
+        const step = get().getStepById(stepId);
+        return step?.taskId;
+      },
+      
+      // Sprawdzanie czy wszystkie kroki zadania są ukończone
+      areAllStepsCompleted: (taskId) => {
+        const steps = get().getTaskSteps(taskId);
+        return steps.length > 0 && steps.every(step => 
+          step.status === 'completed' || step.status === 'skipped'
+        );
+      },
+      
+      // Usuwanie kroku
+      deleteStep: (stepId) => {
+        const step = get().getStepById(stepId);
+        if (!step) return false;
+        
+        set((state) => {
+          const taskId = step.taskId;
+          const taskSteps = state.steps[taskId] || [];
+          
+          // Usuń krok
+          const updatedSteps = taskSteps.filter(s => s.id !== stepId);
+          
+          // Zaktualizuj kolejność
+          const reorderedSteps = updatedSteps
+            .sort((a, b) => a.order - b.order)
+            .map((step, index) => ({ ...step, order: index + 1 }));
+          
+          return {
+            steps: {
+              ...state.steps,
+              [taskId]: reorderedSteps
+            }
+          };
+        });
+        
+        return true;
+      },
+      
+      // Zmiana kolejności kroków
+      reorderSteps: (taskId, newOrder) => {
+        const taskSteps = get().getTaskSteps(taskId);
+        if (!taskSteps.length) return false;
+        
+        set((state) => {
+          const reorderedSteps = newOrder.map((stepId, index) => {
+            const step = taskSteps.find(s => s.id === stepId);
+            if (!step) return null;
+            return { ...step, order: index + 1 };
+          }).filter(Boolean) as Step[];
+          
+          if (reorderedSteps.length !== taskSteps.length) return state;
+          
+          return {
+            steps: {
+              ...state.steps,
+              [taskId]: reorderedSteps
+            }
+          };
+        });
+        
+        return true;
       }
     }),
     {

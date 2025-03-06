@@ -15,3 +15,4 @@ export { default as TaskResultJsonViewer } from './details/TaskResultJsonViewer'
 
 // Services
 export { default as stepService } from './services/StepService';
+export { default as wizardService } from './services/WizardService';

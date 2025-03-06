@@ -34,3 +34,8 @@ Przetłumaczono z DeepL.com (wersja darmowa)
 #
 
 npx shadcn@latest add toggle-group
+
+
+
+
+zmiana nazwy scenariusza nie zmienia folderu

@@ -9,25 +9,22 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Status, Task } from "@/types";
+import { Status } from "@/types";
 import { useAdminNavigate } from "@/hooks";
 import { LayoutGrid, Plus } from "lucide-react";
 import { useScenarioStore, useTaskStore, useWizardStore } from "@/store";
 import { TaskEditModal, TaskItem } from "..";
 import taskService from "../../services/TaskService";
 
-
 export function TaskListNavigator() {
   // Store data and methods
-  const { scenarios = [] } = useScenarioStore() || { scenarios: [] };
-  const { tasks, addTask, deleteTask } = useTaskStore();
+  const { scenarios } = useScenarioStore();
+  const { tasks } = useTaskStore();
   const { activeTaskId, setActiveTask } = useWizardStore();
   const adminNavigate = useAdminNavigate();
 
   // Local state
-  const [selectedStatusFilter, setStatusFilter] = useState<Status | "all">(
-    "all"
-  );
+  const [selectedStatusFilter, setStatusFilter] = useState<Status | "all">("all");
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [showNoProjectDialog, setShowNoProjectDialog] = useState(false);
 
@@ -42,49 +39,18 @@ export function TaskListNavigator() {
     setActiveTask(taskId);
   };
 
-  const handleDeleteTask = (taskId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (deleteTask) {
-      deleteTask(taskId);
-      if (activeTaskId === taskId) {
-        setActiveTask(null);
-      }
-    }
-  };
-
   const handleEditTask = (taskId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setEditingTaskId(taskId);
   };
 
-  const handleExecuteTask = (taskId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    taskService.executeTask(taskId);
-  };
-
-  // Quick add task with scenario validation
+  // Quick add task with service
   const handleQuickAddTask = () => {
-    // Check if there are any scenarios available
-    if (!scenarios || scenarios.length === 0) {
-      // Show dialog instead of alert
+    const result = taskService.createTask();
+    
+    if (!result.success && result.errorMessage?.includes("project")) {
       setShowNoProjectDialog(true);
-      return;
     }
-
-    const newTask: Task = {
-      id: `task-${Date.now()}`,
-      title: "Nowe zadanie",
-      description: "",
-      status: "todo",
-      priority: "medium",
-      dueDate: new Date().toISOString().split("T")[0],
-      scenarioId: scenarios[0]?.id || "", // Default to first scenario
-      currentStepId: null,
-      data: {},
-    };
-
-    addTask(newTask);
-    setActiveTask(newTask.id);
   };
 
   // Handler to navigate to scenarios from dialog
@@ -96,14 +62,14 @@ export function TaskListNavigator() {
   // Empty state
   const emptyState = (
     <div className="py-8 text-center text-sm text-muted-foreground">
-      Nie znaleziono zadań. Utwórz nowe, aby rozpocząć.
+      No tasks found. Create a new one to get started.
     </div>
   );
 
   return (
     <div className="h-full flex flex-col bg-background">
       <div className="px-6 py-4 border-b flex items-center justify-between">
-        <h2 className="text-base font-semibold">Zadania</h2>
+        <h2 className="text-base font-semibold">Tasks</h2>
 
         <div className="flex items-center gap-2">
           {/* Board view button */}
@@ -112,7 +78,7 @@ export function TaskListNavigator() {
             size="icon"
             className="h-8 w-8"
             onClick={() => adminNavigate("/tasks/board")}
-            title="Przełącz na widok tablicy"
+            title="Switch to board view"
           >
             <LayoutGrid className="h-4 w-4" />
           </Button>
@@ -125,8 +91,8 @@ export function TaskListNavigator() {
             onClick={handleQuickAddTask}
             title={
               scenarios && scenarios.length > 0
-                ? "Dodaj nowe zadanie"
-                : "Najpierw utwórz projekt"
+                ? "Add new task"
+                : "Create a project first"
             }
           >
             <Plus className="h-4 w-4" />
@@ -144,16 +110,16 @@ export function TaskListNavigator() {
       >
         <TabsList className="w-full mb-4">
           <TabsTrigger value="all" className="flex-1">
-            Wszystkie
+            All
           </TabsTrigger>
           <TabsTrigger value="todo" className="flex-1">
-            Do zrobienia
+            To do
           </TabsTrigger>
           <TabsTrigger value="in-progress" className="flex-1">
-            W trakcie
+            In progress
           </TabsTrigger>
           <TabsTrigger value="completed" className="flex-1">
-            Ukończone
+            Completed
           </TabsTrigger>
         </TabsList>
 
@@ -161,14 +127,14 @@ export function TaskListNavigator() {
           {(!scenarios || scenarios.length === 0) ? (
             <div className="py-8 text-center">
               <p className="text-sm text-muted-foreground mb-2">
-                Nie możesz utworzyć zadania bez projektu.
+                You cannot create a task without a project.
               </p>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => adminNavigate("/scenarios")}
               >
-                Przejdź do projektów
+                Go to projects
               </Button>
             </div>
           ) : filteredTasks.length > 0 ? (
@@ -179,8 +145,6 @@ export function TaskListNavigator() {
                 isActive={activeTaskId === task.id}
                 onSelect={handleSelectTask}
                 onEdit={handleEditTask}
-                onDelete={handleDeleteTask}
-                onExecute={handleExecuteTask}
               />
             ))
           ) : (
@@ -193,10 +157,9 @@ export function TaskListNavigator() {
       <Dialog open={showNoProjectDialog} onOpenChange={setShowNoProjectDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nie można utworzyć zadania</DialogTitle>
+            <DialogTitle>Cannot create task</DialogTitle>
             <DialogDescription>
-              Musisz najpierw utworzyć projekt, zanim będziesz mógł dodać
-              zadania.
+              You need to create a project first before you can add tasks.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -204,9 +167,9 @@ export function TaskListNavigator() {
               variant="secondary"
               onClick={() => setShowNoProjectDialog(false)}
             >
-              Anuluj
+              Cancel
             </Button>
-            <Button onClick={handleGoToProjects}>Przejdź do projektów</Button>
+            <Button onClick={handleGoToProjects}>Go to projects</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
