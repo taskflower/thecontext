@@ -2,7 +2,7 @@
 import { FolderOpen, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Scenario } from "@/types";
-import { useDataStore, useTaskStore } from "@/store";
+import { useDataStore } from "@/store";
 import { Button, Progress } from "@/components/ui";
 import scenarioService from "../services/ScenarioService";
 import { useToast } from "@/hooks/useToast";
@@ -20,14 +20,10 @@ const ScenarioListItem: React.FC<ScenarioListItemProps> = ({
   toggleEditScenarioModal,
 }) => {
   const { folders } = useDataStore();
-  const { tasks } = useTaskStore();
   const { toast } = useToast();
 
-  // Dynamicznie obliczamy statystyki zadań
-  const scenarioTasks = tasks.filter(task => task.scenarioId === scenario.id);
-  const completedTasks = scenarioTasks.filter(task => task.status === 'completed').length;
-  const totalTasks = scenarioTasks.length;
-  const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  // Get statistics from the service
+  const { completedTasks, totalTasks, progress } = scenarioService.getScenarioStats(scenario.id);
 
   const handleViewFolder = (e: React.MouseEvent) => {
     e.stopPropagation();

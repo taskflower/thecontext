@@ -4,7 +4,7 @@ import { Pencil, Trash2, FolderOpen, Link2, ExternalLink } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Scenario } from "@/types";
-import { useDataStore, useTaskStore } from "@/store";
+import { useDataStore } from "@/store";
 import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Progress } from "@/components/ui";
 import scenarioService from "../services/ScenarioService";
 import { useToast } from "@/hooks/useToast";
@@ -22,18 +22,14 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
   toggleEditScenarioModal,
 }) => {
   const { folders } = useDataStore();
-  const { tasks } = useTaskStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { lang } = useParams();
 
   const { toast } = useToast();
   
-  // Dynamicznie obliczamy statystyki zadań
-  const scenarioTasks = tasks.filter(task => task.scenarioId === scenario.id);
-  const completedTasks = scenarioTasks.filter(task => task.status === 'completed').length;
-  const totalTasks = scenarioTasks.length;
-  const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  // Get statistics from the service
+  const { completedTasks, totalTasks, progress } = scenarioService.getScenarioStats(scenario.id);
   
   // Funkcje obsługujące akcje
   const handleNavigateToDetail = (e: React.MouseEvent) => {

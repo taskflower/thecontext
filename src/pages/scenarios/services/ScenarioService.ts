@@ -1,5 +1,5 @@
 // src/pages/scenarios/services/ScenarioService.ts
-import { useScenarioStore, useDataStore } from "@/store";
+import { useScenarioStore, useDataStore, useTaskStore } from "@/store";
 import { Scenario } from "@/types";
 
 // Type for service results
@@ -9,15 +9,63 @@ type ServiceResult<T = void> = {
   error?: string;
 };
 
+// Type for scenario statistics
+export type ScenarioStats = {
+  totalTasks: number;
+  completedTasks: number;
+  progress: number;
+};
+
 class ScenarioService {
+  // Get scenario statistics
+  getScenarioStats(scenarioId: string): ScenarioStats {
+    const { tasks } = useTaskStore.getState();
+    
+    // Filter tasks for this scenario
+    const scenarioTasks = tasks.filter(task => task.scenarioId === scenarioId);
+    const completedTasks = scenarioTasks.filter(task => task.status === 'completed').length;
+    const totalTasks = scenarioTasks.length;
+    const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    
+    return {
+      totalTasks,
+      completedTasks,
+      progress
+    };
+  }
+
   // Get scenario by ID
   getScenarioById(id: string): Scenario | undefined {
     const { scenarios } = useScenarioStore.getState();
     return scenarios.find(scenario => scenario.id === id);
   }
 
-  // Get connected scenarios
-  getConnectedScenarios(scenarioId: string): Scenario[] {
+  // Get scenario with calculated statistics
+  getScenarioWithStats(id: string): (Scenario & ScenarioStats) | undefined {
+    const scenario = this.getScenarioById(id);
+    if (!scenario) return undefined;
+    
+    const stats = this.getScenarioStats(id);
+    return {
+      ...scenario,
+      ...stats
+    };
+  }
+
+  // Get all scenarios with calculated statistics
+  getAllScenariosWithStats(): (Scenario & ScenarioStats)[] {
+    const { scenarios } = useScenarioStore.getState();
+    return scenarios.map(scenario => {
+      const stats = this.getScenarioStats(scenario.id);
+      return {
+        ...scenario,
+        ...stats
+      };
+    });
+  }
+
+  // Get connected scenarios with stats
+  getConnectedScenarios(scenarioId: string): (Scenario & ScenarioStats)[] {
     const { scenarios } = useScenarioStore.getState();
     const scenario = this.getScenarioById(scenarioId);
     
@@ -25,7 +73,15 @@ class ScenarioService {
       return [];
     }
     
-    return scenarios.filter(s => scenario.connections?.includes(s.id) || false);
+    return scenarios
+      .filter(s => scenario.connections?.includes(s.id) || false)
+      .map(s => {
+        const stats = this.getScenarioStats(s.id);
+        return {
+          ...s,
+          ...stats
+        };
+      });
   }
 
   // Create new scenario

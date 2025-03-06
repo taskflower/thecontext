@@ -3,7 +3,7 @@ import React from 'react';
 import { BarChart3, CheckCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Scenario } from '@/types';
-import { useTaskStore } from '@/store';
+import scenarioService from '../../services/ScenarioService';
 
 interface ScenarioStatusWidgetProps {
   scenario: Scenario;
@@ -12,13 +12,8 @@ interface ScenarioStatusWidgetProps {
 export const ScenarioStatusWidget: React.FC<ScenarioStatusWidgetProps> = ({
   scenario
 }) => {
-  const { tasks } = useTaskStore();
-  
-  // Dynamicznie obliczamy statystyki zadań
-  const scenarioTasks = tasks.filter(task => task.scenarioId === scenario.id);
-  const completedTasks = scenarioTasks.filter(task => task.status === 'completed').length;
-  const totalTasks = scenarioTasks.length;
-  const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  // Get statistics from the service
+  const { completedTasks, totalTasks, progress } = scenarioService.getScenarioStats(scenario.id);
 
   return (
     <Card>

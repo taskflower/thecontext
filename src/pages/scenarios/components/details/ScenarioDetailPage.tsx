@@ -1,6 +1,6 @@
 // src/pages/scenarios/components/details/ScenarioDetailPage.tsx
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { 
   Calendar, 
   ChevronLeft, 
@@ -26,12 +26,13 @@ import { ScenarioDescriptionWidget } from '../widgets/ScenarioDescriptionWidget'
 import { ScenarioMilestonesWidget } from '../widgets/ScenarioMilestonesWidget';
 import { ScenarioProgressWidget } from '../widgets/ScenarioProgressWidget';
 import { ScenarioStatusWidget } from '../widgets/ScenarioStatusWidget';
+import { useAdminNavigate } from '@/hooks';
 
 // Import widgets
 
 const ScenarioDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const navigate = useAdminNavigate();
   const { tasks } = useTaskStore();
   const { scenarios } = useScenarioStore();
   
@@ -131,10 +132,7 @@ const ScenarioDetailPage: React.FC = () => {
             
             {/* Quick Stats Widgets */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <ScenarioStatusWidget 
-                scenario={scenario} 
-                tasksCount={scenarioTasks.length} 
-              />
+              <ScenarioStatusWidget scenario={scenario} />
               <ScenarioAudienceWidget scenario={scenario} />
               <ScenarioChannelsWidget scenario={scenario} />
             </div>
