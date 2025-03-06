@@ -71,7 +71,7 @@ const MarketingBackoffice = () => {
   ];
 
   // Helper function to get channel icon
-  const getChannelIcon = (channel) => {
+  const getChannelIcon = (channel: string) => {
     switch (channel) {
       case "facebook":
         return <Facebook size={16} className="text-blue-600" />;
@@ -294,9 +294,7 @@ const MarketingBackoffice = () => {
                                   className="text-xs px-2 py-1 bg-indigo-50 text-indigo-700 rounded"
                                 >
                                   {connectedScenario?.title.substring(0, 15)}
-                                  {connectedScenario?.title.length > 15
-                                    ? "..."
-                                    : ""}
+                                 
                                 </div>
                               );
                             })}

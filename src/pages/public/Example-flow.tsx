@@ -1,7 +1,8 @@
 /* eslint-disable */
 /* tslint-ignore */
 /* @ts-nocheck */
-import { useState, useEffect, useCallback } from 'react';
+import {  useEffect, useCallback } from 'react';
+import { Position } from 'reactflow';
 import { 
   ReactFlow, 
   Background, 
@@ -26,7 +27,7 @@ import {
 } from 'lucide-react';
 
 // Channel Icon Component
-const ChannelIcon = ({ channel }) => {
+const ChannelIcon = ({ channel }:any) => {
   switch(channel) {
     case 'facebook': return <Facebook size={16} className="text-blue-600" />;
     case 'instagram': return <Instagram size={16} className="text-pink-600" />;
@@ -38,7 +39,7 @@ const ChannelIcon = ({ channel }) => {
 };
 
 // Custom Node Component for React Flow
-const ScenarioNode = ({ data }) => {
+const ScenarioNode = ({ data }:any) => {
   return (
     <div className={`p-3 rounded-lg shadow-lg bg-white border-2 w-64 ${
       data.isActive ? 'border-indigo-500' : 
@@ -46,8 +47,9 @@ const ScenarioNode = ({ data }) => {
       data.progress > 60 ? 'border-indigo-500' : 
       data.progress > 30 ? 'border-blue-500' : 'border-amber-500'
     }`}>
-      <Handle type="source" position="right" style={{ background: '#4f46e5' }} />
-      <Handle type="target" position="left" style={{ background: '#4f46e5' }} />
+
+      <Handle type="source" position={Position.Right} style={{ background: '#4f46e5' }} />
+      <Handle type="target" position={Position.Left}  style={{ background: '#4f46e5' }} />
       
       <div className="text-sm font-bold mb-2">{data.label}</div>
       <div className="w-full bg-gray-200 h-1.5 rounded-full mb-2">
@@ -62,7 +64,7 @@ const ScenarioNode = ({ data }) => {
       </div>
       <div className="flex justify-between items-center">
         <div className="flex space-x-1">
-          {data.channels.map((channel, idx) => (
+          {data.channels.map((channel:any, idx:any) => (
             <div key={idx} className="p-1">
               <ChannelIcon channel={channel} />
             </div>
@@ -86,7 +88,7 @@ const MarketingFlowGraph = () => {
   const { fitView } = useReactFlow();
   
   // Predefined node positions
-  const nodePositions = {
+  const nodePositions:any = {
     '1': { x: 50, y: 100 },
     '2': { x: 350, y: 100 },
     '3': { x: 650, y: 100 },
@@ -167,7 +169,7 @@ const MarketingFlowGraph = () => {
     }));
     
     // Generate edges
-    const edges = [];
+    const edges:any = [];
     scenarios.forEach(scenario => {
       scenario.connections.forEach(connId => {
         edges.push({
@@ -188,8 +190,8 @@ const MarketingFlowGraph = () => {
   
   const { nodes: initialNodes, edges: initialEdges } = generateNodesAndEdges();
   
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes,, onNodesChange] = useNodesState(initialNodes);
+  const [edges,, onEdgesChange] = useEdgesState(initialEdges);
   
   // Center the view on initial render
   useEffect(() => {
@@ -245,7 +247,7 @@ const MarketingFlowGraph = () => {
               </div>
             </div>
           </Panel>
-          <Background color="#f1f5f9" variant="dots" />
+          <Background color="#f1f5f9" gap={16} />
           <Controls />
           <MiniMap 
             nodeColor={(n) => {

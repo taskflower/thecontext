@@ -12,181 +12,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import ScenarioBuilderService from './service/ScenarioBuilderService';
+import LLMService from './service/LLMService';
 
-// Mock LLM response with rich task and step data
-const MOCK_LLM_RESPONSE = {
-  scenarios: [
-    {
-      id: "scenario-1",
-      title: "Content Strategy Development",
-      description: "Create a comprehensive content plan targeting key audience segments.",
-      objective: "Increase organic traffic by 30% in 3 months",
-      connections: ["scenario-2", "scenario-3"]
-    },
-    {
-      id: "scenario-2",
-      title: "Social Media Campaign",
-      description: "Launch coordinated campaigns across Instagram, Twitter, and LinkedIn.",
-      objective: "Achieve 15% engagement rate and 5000 new followers",
-      connections: ["scenario-1"]
-    },
-    {
-      id: "scenario-3",
-      title: "Analytics Implementation",
-      description: "Set up tracking and reporting for all marketing initiatives.",
-      objective: "Create real-time KPI dashboard for executive team",
-      connections: ["scenario-1", "scenario-2"]
-    }
-  ],
-  tasks: [
-    {
-      scenarioRef: "scenario-1",
-      title: "Audience Research",
-      description: "Conduct comprehensive research on target audience segments",
-      priority: "high"
-    },
-    {
-      scenarioRef: "scenario-1",
-      title: "Content Calendar",
-      description: "Develop monthly content calendar with themes and topics",
-      priority: "medium"
-    },
-    {
-      scenarioRef: "scenario-1",
-      title: "Editorial Guidelines",
-      description: "Create brand voice and style guidelines for content creation",
-      priority: "medium"
-    },
-    {
-      scenarioRef: "scenario-2",
-      title: "Platform Audit",
-      description: "Audit current social media presence and performance",
-      priority: "medium"
-    },
-    {
-      scenarioRef: "scenario-2",
-      title: "Campaign Creative",
-      description: "Design visual assets and copy for social media posts",
-      priority: "high"
-    },
-    {
-      scenarioRef: "scenario-2",
-      title: "Engagement Strategy",
-      description: "Develop plan for community management and engagement",
-      priority: "low"
-    },
-    {
-      scenarioRef: "scenario-3",
-      title: "Analytics Setup",
-      description: "Configure Google Analytics and social tracking pixels",
-      priority: "high"
-    },
-    {
-      scenarioRef: "scenario-3",
-      title: "Dashboard Creation",
-      description: "Build executive dashboard with key performance metrics",
-      priority: "medium"
-    }
-  ],
-  steps: [
-    {
-      taskRef: "Audience Research",
-      title: "Demographic Analysis",
-      description: "Analyze demographic data of current customers",
-      type: "text-input"
-    },
-    {
-      taskRef: "Audience Research",
-      title: "Competitor Analysis",
-      description: "Research competitors' audience targeting strategies",
-      type: "text-input"
-    },
-    {
-      taskRef: "Audience Research",
-      title: "Persona Development",
-      description: "Create detailed buyer personas based on research",
-      type: "step-reference"
-    },
-    {
-      taskRef: "Content Calendar",
-      title: "Theme Development",
-      description: "Brainstorm monthly content themes aligned with business goals",
-      type: "text-input"
-    },
-    {
-      taskRef: "Content Calendar",
-      title: "Content Types Definition",
-      description: "Define mix of content types (blog, video, social, etc.)",
-      type: "simple-plugin"
-    },
-    {
-      taskRef: "Editorial Guidelines",
-      title: "Tone & Voice Document",
-      description: "Document brand voice characteristics and examples",
-      type: "text-input"
-    },
-    {
-      taskRef: "Editorial Guidelines",
-      title: "Style Guide Creation",
-      description: "Compile comprehensive style guide for all content creators",
-      type: "text-input"
-    },
-    {
-      taskRef: "Platform Audit",
-      title: "Performance Review",
-      description: "Document current engagement metrics across all platforms",
-      type: "text-input"
-    },
-    {
-      taskRef: "Platform Audit",
-      title: "Competitive Analysis",
-      description: "Analyze competitor social media strategies and performance",
-      type: "text-input"
-    },
-    {
-      taskRef: "Campaign Creative",
-      title: "Visual Style Guide",
-      description: "Create guidelines for campaign visual identity",
-      type: "simple-plugin"
-    },
-    {
-      taskRef: "Campaign Creative",
-      title: "Copy Development",
-      description: "Write copy templates for different post types",
-      type: "text-input"
-    },
-    {
-      taskRef: "Engagement Strategy",
-      title: "Response Guidelines",
-      description: "Create community management response guidelines",
-      type: "text-input"
-    },
-    {
-      taskRef: "Analytics Setup",
-      title: "Conversion Tracking",
-      description: "Set up conversion tracking for key business objectives",
-      type: "text-input"
-    },
-    {
-      taskRef: "Analytics Setup",
-      title: "Custom Events",
-      description: "Configure custom event tracking for user interactions",
-      type: "simple-plugin"
-    },
-    {
-      taskRef: "Dashboard Creation",
-      title: "Metrics Definition",
-      description: "Define KPIs and metrics to include in dashboard",
-      type: "text-input"
-    },
-    {
-      taskRef: "Dashboard Creation",
-      title: "Dashboard Building",
-      description: "Construct interactive dashboard with data visualizations",
-      type: "step-reference"
-    }
-  ]
-};
 
 export function ScenarioCreatorLLMViewer({ step, onComplete }: ViewerProps) {
   const [llmResponse, setLlmResponse] = useState<any>(null);
@@ -200,7 +27,11 @@ export function ScenarioCreatorLLMViewer({ step, onComplete }: ViewerProps) {
     steps: any[] 
   }>({ scenarios: [], tasks: [], steps: [] });
 
-  const { projectPrefix = 'LLM Campaign', inputPrompt = '', mockResponse = true } = step.config || {};
+  // Get configuration with defaults
+  const config = step.config || {};
+  const projectPrefix = config.projectPrefix || 'LLM Campaign';
+  const inputPrompt = config.inputPrompt || '';
+  const mockResponse = config.mockResponse !== undefined ? config.mockResponse : true;
 
   // Initialize the prompt from config
   useEffect(() => {
@@ -209,23 +40,24 @@ export function ScenarioCreatorLLMViewer({ step, onComplete }: ViewerProps) {
     }
   }, [inputPrompt]);
 
-  // Simulate LLM call
+  // Call the LLM Service to get response
   const fetchFromLLM = async () => {
     setLoading(true);
     setError(null);
     
+    console.log("[DEBUG] Fetching from LLM, mockResponse:", mockResponse);
+    
     try {
-      // In a real implementation, this would be an API call to the LLM
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
+      // Use the LLM service instead of direct API call
+      const response = await LLMService.generateContent({
+        prompt,
+        useMock: mockResponse,
+        userId: "user123"
+      });
       
-      if (mockResponse) {
-        setLlmResponse(MOCK_LLM_RESPONSE);
-      } else {
-        // Here you would make a real API call to an LLM service
-        // For now, we'll just use the mock data
-        setLlmResponse(MOCK_LLM_RESPONSE);
-      }
+      setLlmResponse(response);
     } catch (err) {
+      console.error("[DEBUG] Error in fetchFromLLM:", err);
       setError(`Error fetching from LLM: ${(err as Error).message}`);
     } finally {
       setLoading(false);
@@ -327,6 +159,14 @@ export function ScenarioCreatorLLMViewer({ step, onComplete }: ViewerProps) {
           </p>
         </div>
         
+        {/* Display current mode */}
+        <Alert  className="bg-blue-50">
+          <div className="text-sm">
+            <span className="font-medium">Current mode: </span>
+            {mockResponse ? "Using mock data" : "Using LLM API"}
+          </div>
+        </Alert>
+        
         {llmResponse && (
           <div className="border rounded-md p-4 bg-muted/20">
             <h3 className="text-sm font-medium mb-2">LLM Generated Content Preview</h3>
@@ -335,10 +175,10 @@ export function ScenarioCreatorLLMViewer({ step, onComplete }: ViewerProps) {
                 <span className="font-medium">Scenarios:</span> {llmResponse.scenarios.length}
               </div>
               <div>
-                <span className="font-medium">Tasks:</span> {llmResponse.tasks.length}
+                <span className="font-medium">Tasks:</span> {(llmResponse.tasks || []).length}
               </div>
               <div>
-                <span className="font-medium">Steps:</span> {llmResponse.steps.length}
+                <span className="font-medium">Steps:</span> {(llmResponse.steps || []).length}
               </div>
             </div>
           </div>

@@ -2,15 +2,22 @@
 import { lazy } from 'react';
 import { RouteObject } from 'react-router-dom';
 import CaseStudiesPage from './CaseStudiesPage';
-import MarketingBackoffice from './Example-dashboard';
-import SummerCampaignFlow from './Example-campagin';
-import MarketingBackofficeFlow from './Example-flow';
-import SmartHomeScenario from './Example-launch';
-import EmailAutomationWorkflow from './Example-email';
-import CateringMarketingDashboard from './Example-cattering';
-import MarketingScenarioApp from './Example-mix';
+
+
+
+
+
+
 
 const HomePage = lazy(() => import('@/pages/public/HomePage'));
+const MarketingScenarioApp = lazy(() => import('@/pages/public/Example-mix'));
+const CateringMarketingDashboard = lazy(() => import('@/pages/public/Example-cattering'));
+const EmailAutomationWorkflow = lazy(() => import('@/pages/public/Example-email'));
+const SmartHomeScenario = lazy(() => import('@/pages/public/Example-launch'));
+const MarketingBackofficeFlow = lazy(() => import('@/pages/public/Example-flow'));
+const SummerCampaignFlow = lazy(() => import('@/pages/public/Example-campagin'));
+const MarketingBackoffice = lazy(() => import('@/pages/public/Example-dashboard'));
+
 const NotFoundPage = lazy(() => import('@/pages/public/NotFoundPage'));
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
 

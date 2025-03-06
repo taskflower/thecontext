@@ -66,17 +66,21 @@ export function ScenarioCreatorLLMEditor({ step, onChange }: EditorProps) {
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="mockResponse">Use Mock Response</Label>
-        <div className="flex items-center space-x-2">
+        <Label htmlFor="mockResponse" className="flex items-center justify-between">
+          Use Mock Response
           <Switch
             id="mockResponse"
             checked={config.mockResponse !== false}
-            onCheckedChange={(checked) => updateConfig("mockResponse", checked)}
+            onCheckedChange={(checked) => {
+              console.log("Setting mockResponse to:", checked);
+              updateConfig("mockResponse", checked);
+            }}
           />
-          <span className="text-sm text-muted-foreground">
-            Use pre-defined sample response instead of calling LLM
-          </span>
-        </div>
+        </Label>
+        <p className="text-xs text-muted-foreground">
+          When turned on: Uses pre-defined sample response instead of calling LLM API.
+          When turned off: Makes a real API call to the LLM service.
+        </p>
       </div>
     </div>
   );

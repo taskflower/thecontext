@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { 
   CalendarDays, 
   School, 
@@ -128,7 +128,7 @@ const CateringMarketingDashboard = () => {
   ];
   
   // Helper function to get channel icon
-  const getChannelIcon = (channel) => {
+  const getChannelIcon = (channel: string) => {
     switch(channel) {
       case 'facebook': return <Facebook size={16} className="text-blue-600" />;
       case 'instagram': return <Instagram size={16} className="text-pink-600" />;
@@ -138,7 +138,7 @@ const CateringMarketingDashboard = () => {
   };
   
   // Dynamiczne kolory dla statusu kampanii
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     switch(status) {
       case 'zakończone': return 'bg-green-100 text-green-800';
       case 'w trakcie': return 'bg-blue-100 text-blue-800';

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useState } from 'react';
 import { 
   Calendar,
   ChevronLeft,
@@ -17,7 +18,7 @@ import {
 } from 'lucide-react';
 
 // Channel Icon Component
-const ChannelIcon = ({ channel }) => {
+const ChannelIcon = ({ channel }:any) => {
   switch(channel) {
     case 'facebook': return <Facebook size={16} className="text-blue-600" />;
     case 'instagram': return <Instagram size={16} className="text-pink-600" />;
@@ -27,7 +28,7 @@ const ChannelIcon = ({ channel }) => {
 };
 
 // Status Badge Component
-const StatusBadge = ({ status }) => {
+const StatusBadge = ({ status }:any) => {
   const getStatusStyles = () => {
     switch(status) {
       case 'completed': return 'bg-green-100 text-green-800';
@@ -46,7 +47,7 @@ const StatusBadge = ({ status }) => {
 };
 
 // Task Item Component
-const TaskItem = ({ task, onToggleComplete }) => (
+const TaskItem = ({ task, onToggleComplete }:any) => (
   <div className="flex items-center p-3 border-b last:border-0 hover:bg-gray-50">
     <button 
       onClick={() => onToggleComplete(task.id)}
@@ -77,7 +78,7 @@ const TaskItem = ({ task, onToggleComplete }) => (
 );
 
 // Timeline Item Component
-const TimelineItem = ({ item }) => (
+const TimelineItem = ({ item }:any) => (
   <div className="relative pl-6 pb-6">
     <div className="absolute left-0 top-0 h-full w-px bg-gray-200"></div>
     <div className={`absolute left-0 top-0 w-5 h-5 rounded-full -ml-2.5 ${
@@ -108,8 +109,8 @@ const TimelineItem = ({ item }) => (
 );
 
 // Content Card Component
-const ContentCard = ({ content, isSelected, onClick }) => {
-  const getIconByType = (type) => {
+const ContentCard = ({ content, isSelected, onClick }:any) => {
+  const getIconByType = (type: any) => {
     switch(type) {
       case 'image': return <Image size={18} className="text-indigo-600" />;
       case 'video': return <PlayCircle size={18} className="text-indigo-600" />;
@@ -154,10 +155,10 @@ const ContentCard = ({ content, isSelected, onClick }) => {
 };
 
 // Content Preview Panel
-const ContentPreviewPanel = ({ content }) => {
+const ContentPreviewPanel = ({ content }:any) => {
   if (!content) return null;
   
-  const getIconByType = (type) => {
+  const getIconByType = (type: any) => {
     switch(type) {
       case 'image': return <Image size={20} className="text-indigo-600" />;
       case 'video': return <PlayCircle size={20} className="text-indigo-600" />;
@@ -223,7 +224,7 @@ const ContentPreviewPanel = ({ content }) => {
           </p>
           {content.hashtags && (
             <div className="flex flex-wrap gap-1 mt-2">
-              {content.hashtags.map((tag, idx) => (
+              {content.hashtags.map((tag: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined, idx: Key | null | undefined) => (
                 <span key={idx} className="text-xs text-blue-600">#{tag}</span>
               ))}
             </div>
@@ -312,7 +313,7 @@ const SummerCampaignFlow = () => {
   };
 
   // Toggle task completion
-  const toggleTaskComplete = (taskId) => {
+  const toggleTaskComplete = (taskId: any) => {
     // This would update the task completion status in a real app
     console.log(`Toggling task ${taskId} completion status`);
   };

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { 
   MessageSquare, 
   Clock, 
   Users, 
   BarChart, 
-  Check, 
+
   ArrowLeft, 
   ExternalLink,
   Plus,

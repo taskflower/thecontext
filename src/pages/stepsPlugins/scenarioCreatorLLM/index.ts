@@ -23,6 +23,6 @@ register({
     useMockData: true,
     projectPrefix: 'LLM Campaign',
     inputPrompt: 'Generate 3 marketing scenarios for a new product launch',
-    mockResponse: true
+    mockResponse: false  // Changed to false to use the real API by default
   }
 });

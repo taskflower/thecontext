@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { 
-  Network, 
+
   BrainCircuit, 
   Facebook, 
   Instagram, 
@@ -77,7 +77,7 @@ const SmartHomeScenario = () => {
   ];
   
   // Helper function to get channel icon
-  const getChannelIcon = (channel) => {
+  const getChannelIcon = (channel: string) => {
     switch(channel) {
       case 'facebook': return <Facebook size={16} className="text-blue-600" />;
       case 'instagram': return <Instagram size={16} className="text-pink-600" />;

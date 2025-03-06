@@ -36,7 +36,7 @@ class ScenarioService {
 
     try {
       const { addScenario } = useScenarioStore.getState();
-      const { folders, addFolder } = useDataStore.getState();
+      const { addFolder } = useDataStore.getState();
       
       // Create unique ID for scenario
       const id = crypto.randomUUID();
