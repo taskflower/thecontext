@@ -10,3 +10,4 @@ export { default as EditScenarioModal } from './EditScenarioModal';
 export { default as ScenarioDetailPage } from './details/ScenarioDetailPage';
 export { default as ScenarioConnectionsPanel } from './details/ScenarioConnectionsPanel';
 export { default as ConnectionModal } from './details/ConnectionModal';
+export { default as ScenarioHeader } from './details/ScenarioHeader';
