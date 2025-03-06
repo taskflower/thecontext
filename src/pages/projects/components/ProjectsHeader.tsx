@@ -1,3 +1,4 @@
+// src/pages/projects/components/ProjectsHeader.tsx
 import React from "react";
 import {
   Search,
@@ -5,50 +6,30 @@ import {
   List as ListIcon,
   Filter,
   Plus,
-  Globe,
 } from "lucide-react";
 import { ViewMode } from "@/types";
 import { Button, Input } from "@/components/ui";
-import { useNavigate, useParams } from "react-router-dom";
 
-interface ScenariosHeaderProps {
+interface ProjectsHeaderProps {
   viewMode: ViewMode;
   setViewMode: (mode: ViewMode) => void;
-  toggleNewScenarioModal: () => void;
+  toggleNewProjectModal: () => void;
 }
 
-export const ScenariosHeader: React.FC<ScenariosHeaderProps> = ({
+export const ProjectsHeader: React.FC<ProjectsHeaderProps> = ({
   viewMode,
   setViewMode,
-  toggleNewScenarioModal,
+  toggleNewProjectModal,
 }) => {
-  const navigate = useNavigate();
-  const { lang } = useParams();
-
-  const navigateToProjects = () => {
-    navigate(`/admin/${lang}/projects`);
-  };
-
   return (
     <div className="h-16 bg-background border-b px-6 flex justify-between items-center">
-      <div className="flex items-center">
-        <h2 className="text-base font-semibold">Scenarios</h2>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={navigateToProjects}
-          className="ml-2"
-          title="Go to Projects"
-        >
-          <Globe size={16} />
-        </Button>
-      </div>
+      <h2 className="text-base font-semibold">Projects (public scenarios set)</h2>
 
       <div className="flex items-center">
         <div className="relative mr-4">
           <Input
             type="text"
-            placeholder="Search scenarios..."
+            placeholder="Search projects..."
             className="w-64 pl-9"
           />
           <Search
@@ -61,17 +42,17 @@ export const ScenariosHeader: React.FC<ScenariosHeaderProps> = ({
           variant="outline"
           size="sm"
           className="mr-3"
-          onClick={toggleNewScenarioModal}
+          onClick={toggleNewProjectModal}
         >
           <Plus size={16} className="mr-2" />
-          New Scenario
+          New Project
         </Button>
 
         <Button
           variant="ghost"
           size="icon"
           className="mr-3"
-          title="Filter scenarios"
+          title="Filter projects"
         >
           <Filter size={16} />
         </Button>
@@ -101,4 +82,4 @@ export const ScenariosHeader: React.FC<ScenariosHeaderProps> = ({
   );
 };
 
-export default ScenariosHeader;
+export default ProjectsHeader;

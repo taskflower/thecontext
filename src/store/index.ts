@@ -5,3 +5,4 @@ export * from './stepStore';
 export * from './taskStore';
 export * from './wizardStore';
 export * from './scenarioStore';
+export * from './projectStore';

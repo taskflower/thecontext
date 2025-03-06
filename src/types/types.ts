@@ -78,3 +78,13 @@ export interface Task {
   currentStepId?: string | null;
   data?: Record<string, any>;
 }
+
+export interface Project {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  scenarios: string[]; // IDs of associated scenarios
+  createdAt: string;
+  updatedAt: string;
+}

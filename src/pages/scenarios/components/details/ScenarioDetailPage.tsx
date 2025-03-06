@@ -1,7 +1,6 @@
-// src/pages/scenarios/components/details/ScenarioDetailPage.tsx
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { AlertTriangle, Calendar } from "lucide-react";
+import { AlertTriangle, Calendar, ChevronLeft } from "lucide-react";
 import {
   Badge,
   Button,
@@ -9,6 +8,9 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
+  Card,
+  CardHeader,
+  CardContent
 } from "@/components/ui";
 import { useScenarioStore, useTaskStore } from "@/store";
 import {
@@ -47,17 +49,23 @@ const ScenarioDetailPage: React.FC = () => {
 
   if (!scenario) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold mb-2">Scenario Not Found</h2>
-          <p className="text-muted-foreground mb-4">
-            The scenario you are looking for does not exist or has been deleted.
-          </p>
-          <Button onClick={() => navigate("/scenarios")}>
-            Return to Scenarios
-          </Button>
-        </div>
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <Card className="w-full max-w-md shadow-lg">
+          <CardContent className="pt-6 px-6 pb-8 text-center">
+            <AlertTriangle className="h-16 w-16 text-amber-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold mb-3">Scenario Not Found</h2>
+            <p className="text-muted-foreground mb-6">
+              The scenario you are looking for does not exist or has been deleted.
+            </p>
+            <Button 
+              onClick={() => navigate("/scenarios")} 
+              className="w-full flex items-center justify-center"
+            >
+              <ChevronLeft className="mr-2 h-4 w-4" />
+              Return to Scenarios
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -71,73 +79,86 @@ const ScenarioDetailPage: React.FC = () => {
       />
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto p-6">
-        <Tabs defaultValue="overview">
-          <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="tasks">
-              Tasks ({scenarioTasks.length})
-            </TabsTrigger>
-            <TabsTrigger value="connections">Connections</TabsTrigger>
-          </TabsList>
+      <main className="flex-1 overflow-auto p-4 md:p-6 max-w-7xl mx-auto w-full">
+        <Tabs defaultValue="overview" className="w-full">
+          <div className="bg-white rounded-lg shadow-sm mb-6">
+            <TabsList className="w-full justify-start border-b p-1">
+              <TabsTrigger value="overview" className="flex-1 max-w-[180px]">Overview</TabsTrigger>
+              <TabsTrigger value="tasks" className="flex-1 max-w-[180px]">
+                Tasks <span className="ml-2 inline-flex items-center justify-center rounded-full bg-gray-100 px-2 py-1 text-xs">{scenarioTasks.length}</span>
+              </TabsTrigger>
+              <TabsTrigger value="connections" className="flex-1 max-w-[180px]">Connections</TabsTrigger>
+            </TabsList>
+          </div>
 
-          <TabsContent value="overview" className="mt-6 space-y-6">
+          <TabsContent value="overview" className="mt-4 space-y-6">
             <ScenarioProgressWidget scenario={scenario} />
-            <ScenarioDescriptionWidget scenario={scenario} />
-            <ScenarioMilestonesWidget
-              scenario={scenario}
-              tasks={scenarioTasks}
-            />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <ScenarioStatusWidget scenario={scenario} />
-              <ScenarioAudienceWidget scenario={scenario} />
-              <ScenarioChannelsWidget scenario={scenario} />
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-6">
+                <ScenarioDescriptionWidget scenario={scenario} />
+                <ScenarioMilestonesWidget
+                  scenario={scenario}
+                  tasks={scenarioTasks}
+                />
+              </div>
+              
+              <div className="space-y-6">
+                <ScenarioStatusWidget scenario={scenario} />
+                <ScenarioAudienceWidget scenario={scenario} />
+                <ScenarioChannelsWidget scenario={scenario} />
+              </div>
             </div>
           </TabsContent>
 
-          <TabsContent value="tasks" className="mt-6">
-            <div className="card">
-              <div className="card-header flex flex-row items-center justify-between">
+          <TabsContent value="tasks" className="mt-4">
+            <Card className="shadow-sm">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <h3 className="text-lg font-semibold">Tasks</h3>
-                <Button>Create New Task</Button>
-              </div>
-              <div className="card-content">
+                <Button className="bg-primary hover:bg-primary/90">
+                  Create New Task
+                </Button>
+              </CardHeader>
+              <CardContent>
                 {scenarioTasks.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>No tasks created yet</p>
-                    <p className="text-sm">
+                  <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
+                    <AlertTriangle className="h-10 w-10 text-muted-foreground mx-auto mb-3 opacity-50" />
+                    <p className="font-medium text-lg">No tasks created yet</p>
+                    <p className="text-sm text-muted-foreground mt-1">
                       Create tasks to track work for this scenario
                     </p>
+                    <Button className="mt-4" variant="outline">Create Your First Task</Button>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="divide-y">
                     {scenarioTasks.map((task) => (
                       <div
                         key={task.id}
-                        className="border rounded-md p-4 flex items-center justify-between hover:bg-gray-50 cursor-pointer"
+                        className="py-4 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer rounded-md -mx-1 px-1"
                       >
-                        <div>
+                        <div className="space-y-1">
                           <h4 className="font-medium">{task.title}</h4>
                           <p className="text-sm text-muted-foreground line-clamp-1">
-                            {task.description || "No description"}
+                            {task.description || "No description provided"}
                           </p>
                         </div>
-                        <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-6">
                           {task.dueDate && (
-                            <div className="text-sm text-muted-foreground">
-                              <Calendar size={14} className="inline mr-1" />
+                            <div className="text-sm text-muted-foreground flex items-center">
+                              <Calendar size={14} className="mr-1" />
                               {task.dueDate}
                             </div>
                           )}
                           <Badge
+                            variant="outline"
                             className={
                               task.status === "completed"
-                                ? "bg-green-100 text-green-800"
+                                ? "bg-green-50 text-green-700 border-green-200"
                                 : task.status === "in-progress"
-                                ? "bg-amber-100 text-amber-800"
+                                ? "bg-amber-50 text-amber-700 border-amber-200"
                                 : task.status === "review"
-                                ? "bg-purple-100 text-purple-800"
-                                : "bg-gray-100 text-gray-800"
+                                ? "bg-purple-50 text-purple-700 border-purple-200"
+                                : "bg-gray-50 text-gray-700 border-gray-200"
                             }
                           >
                             {task.status}
@@ -147,12 +168,16 @@ const ScenarioDetailPage: React.FC = () => {
                     ))}
                   </div>
                 )}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
-          <TabsContent value="connections" className="mt-6">
-            <ScenarioConnectionsPanel scenarioId={id!} />
+          <TabsContent value="connections" className="mt-4">
+            <Card className="shadow-sm">
+              <CardContent className="pt-6">
+                <ScenarioConnectionsPanel scenarioId={id!} />
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </main>

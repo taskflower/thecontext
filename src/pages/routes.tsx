@@ -9,6 +9,8 @@ import tasksRoute from "@/pages/tasks/routes";
 import scenariosRoute from "@/pages/scenarios/routes";
 import documentsRoute from "@/pages/documents/routes";
 import settingsRoutes from "@/pages/settings/routes";
+import projectsRoutes from "@/pages/projects/routes";
+
 import usersRoutes from "@/pages/users/routes";
 import LanguageWrapper from "@/components/common/LanguageWrapper";
 import { LanguageProvider } from "@/context/LanguageContext";
@@ -49,6 +51,7 @@ export const routes: RouteObject[] = [
       { path: "documents/*", children: documentsRoute },
       { path: "settings/*", children: settingsRoutes },
       { path: "users/*", children: usersRoutes },
+      { path: "projects/*", children: projectsRoutes},  // Add this line
     ],
   },
 ];

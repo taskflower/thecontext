@@ -1,8 +1,7 @@
-// src/layouts/AdminSidebar.tsx
 import React from "react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Settings, FileText,  CheckSquare } from "lucide-react";
+import { Settings, FileText, CheckSquare, Layers } from "lucide-react";
 import { AppLink } from "@/components/common/AppLink";
 
 interface SidebarLinkProps {
@@ -65,7 +64,7 @@ export const AdminSidebar: React.FC = () => {
   };
 
   const navigationItems = [
-    { path: "/scenarios", icon: CheckSquare, label: "Scenarios" },
+    { path: "/scenarios", icon: Layers, label: "Scenarios" },
     { path: "/tasks", icon: CheckSquare, label: "Tasks" },
     { path: "/documents", icon: FileText, label: "Documents" },
     { path: "/settings", icon: Settings, label: "Settings" },
