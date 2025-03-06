@@ -1,7 +1,7 @@
 // src/pages/projects/routes.tsx
 import { RouteObject } from "react-router-dom";
 import ProjectDetailPage from "./components/details/ProjectDetailPage";
-import { ProjectsViewContainer } from "./components/ProjectsViewContainer";
+import { ProjectsViewContainer } from "./ProjectsViewContainer";
 
 
 const projectRoutes: RouteObject[] = [

@@ -14,6 +14,7 @@ import projectsRoutes from "@/pages/projects/routes";
 import usersRoutes from "@/pages/users/routes";
 import LanguageWrapper from "@/components/common/LanguageWrapper";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { ProjectRenderer } from "./projects/ProjectRenderer";
 
 export const DEFAULT_LANGUAGE = "en";
 export const routes: RouteObject[] = [
@@ -30,8 +31,8 @@ export const routes: RouteObject[] = [
     ),
     children: [
       ...publicRoutes,
-      // { path: "projects", element: <ProjectRenderer /> }, // Keep existing projects route
-      // { path: ":projectSlug", element: <ProjectRenderer /> }, // Add dynamic project route
+      { path: "projects", element: <ProjectRenderer /> }, // Keep existing projects route
+      { path: ":projectSlug", element: <ProjectRenderer /> }, // Add dynamic project route
     ],
   },
   {
