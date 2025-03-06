@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/steps/services/WizardService.ts
 import { useStepStore, useTaskStore, useWizardStore } from "@/store";
 import stepService from "./StepService";
@@ -175,5 +174,6 @@ class WizardService {
   }
 }
 
-export const wizardService = new WizardService();
+// Create and export an instance as default
+const wizardService = new WizardService();
 export default wizardService;

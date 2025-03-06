@@ -15,4 +15,5 @@ export { default as TaskResultJsonViewer } from './details/TaskResultJsonViewer'
 
 // Services
 export { default as stepService } from './services/StepService';
+// Fix import for wizardService - import the default export
 export { default as wizardService } from './services/WizardService';

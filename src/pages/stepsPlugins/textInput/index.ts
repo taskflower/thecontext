@@ -1,3 +1,5 @@
+
+
 // src/pages/stepsPlugins/textInput/index.ts
 import { register } from '../registry';
 import { PLUGIN_CATEGORIES } from '../registry';
@@ -5,7 +7,10 @@ import { TextInputEditor } from './TextInputEditor';
 import { TextInputResult } from './TextInputResult';
 import { TextInputViewer } from './TextInputViewer';
 
+// Import validation to ensure it's registered
+import './validation';
 
+// Register the plugin
 register({
   type: 'text-input',
   name: 'Text Input',

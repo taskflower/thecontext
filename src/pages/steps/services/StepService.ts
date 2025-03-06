@@ -3,7 +3,7 @@
 import { Step } from "@/types";
 import { useStepStore, useTaskStore, useWizardStore } from "@/store";
 import { triggerPluginAction } from "@/pages/stepsPlugins/pluginHandlers";
-import { validateStep } from "@/pages/stepsPlugins/validation";
+import { validateStep } from "@/services/validation";
 
 /**
  * StepService provides centralized business logic for step-related operations
@@ -11,28 +11,27 @@ import { validateStep } from "@/pages/stepsPlugins/validation";
  */
 class StepService {
   /**
-   * Checks if a step can be executed
-   * @param step The step to check
-   * @returns An object with isExecutable flag and optionally an error message
-   */
-  canExecuteStep(step: Step): { isExecutable: boolean; errorMessage?: string } {
-    // Check if step exists
-    if (!step) {
-      return { isExecutable: false, errorMessage: "Step not found." };
-    }
-    
-    // Validate step configuration
-    const validationResult = validateStep(step);
-    if (!validationResult.isValid) {
-      return { 
-        isExecutable: false, 
-        errorMessage: validationResult.errorMessage || "Step configuration is invalid." 
-      };
-    }
-    
-    return { isExecutable: true };
+ * Checks if a step can be executed
+ * @param step The step to check
+ * @returns An object with isExecutable flag and optionally an error message
+ */
+canExecuteStep(step: Step): { isExecutable: boolean; errorMessage?: string } {
+  // Check if step exists
+  if (!step) {
+    return { isExecutable: false, errorMessage: "Step not found." };
   }
-
+  
+  // Validate the step
+  const validationResult = validateStep(step);
+  if (!validationResult.isValid) {
+    return { 
+      isExecutable: false, 
+      errorMessage: validationResult.errorMessage || "Step validation failed." 
+    };
+  }
+  
+  return { isExecutable: true };
+}
   /**
    * Get the task that a step belongs to
    * @param stepId ID of the step
@@ -95,7 +94,7 @@ class StepService {
       });
     }
     
-    // KLUCZOWA ZMIANA: Sprawdź, czy krok jest aktualnie wyświetlany w wizardzie
+    // Check if step is currently displayed in wizard
     const { activeStepId } = wizardStore;
     const isStepActive = activeStepId === stepId;
     
@@ -103,9 +102,9 @@ class StepService {
     const success = triggerPluginAction(stepId);
     
     if (!success) {
-      // Jeśli nie można wykonać automatycznie kroku, otwórz wizard
+      // If step can't be executed automatically, open wizard
       if (!isStepActive) {
-        // Tylko jeśli krok nie jest już aktywny w wizardzie
+        // Only if step is not already active in wizard
         wizardStore.openWizard(task.id, stepId);
       }
     }
@@ -131,6 +130,20 @@ class StepService {
       return false;
     }
     
+    // Create updated step for validation
+    const updatedStep = {
+      ...step,
+      status: 'completed' as const,
+      result
+    };
+    
+    // Validate the step before completing it
+    const validationResult = validateStep(updatedStep);
+    if (!validationResult.isValid) {
+      console.error(`Cannot complete step: ${validationResult.errorMessage}`);
+      return false;
+    }
+    
     // Update step status
     stepStore.updateStep(stepId, {
       status: "completed",
@@ -146,19 +159,16 @@ class StepService {
       return false;
     }
     
-    // KLUCZOWA ZMIANA: sprawdzamy czy step jest aktualnie w wizardzie
+    // Check if step is currently in wizard
     const { activeStepId, activeTaskId } = wizardStore;
     const isStepInWizard = activeStepId === stepId && activeTaskId === taskId;
     
-    // Jeśli krok jest aktualnie aktywny w wizardzie, użyj WizardStore.completeCurrentStep
+    // If step is currently active in wizard, let wizard handle it
     if (isStepInWizard) {
-      // Uwaga: tutaj nie wywołujemy wizardStore.completeCurrentStep(result) 
-      // bo to przeniosłoby nas automatycznie do następnego kroku,
-      // a ta funkcja już zostanie wywołana z komponentu
       return true;
     }
     
-    // Jeśli krok nie jest aktywny w wizardzie, wykonaj standardową logikę
+    // If step is not in wizard, execute standard logic
     
     // Check if this was the current step
     if (task.currentStepId === stepId) {
@@ -206,17 +216,16 @@ class StepService {
       return false;
     }
     
-    // KLUCZOWA ZMIANA: sprawdzamy czy step jest aktualnie w wizardzie
+    // Check if step is currently in wizard
     const { activeStepId, activeTaskId } = wizardStore;
     const isStepInWizard = activeStepId === stepId && activeTaskId === step.taskId;
     
-    // Jeśli krok jest aktualnie aktywny w wizardzie, użyj WizardStore.skipCurrentStep
+    // If step is currently active in wizard, let wizard handle it
     if (isStepInWizard) {
-      // Nie wywołujemy tutaj skipCurrentStep - będzie wywołana z komponentu
       return true;
     }
     
-    // Jeśli krok nie jest aktywny w wizardzie, wykonaj standardową logikę
+    // If step is not in wizard, execute standard logic
     
     // Update step status
     stepStore.updateStep(stepId, {

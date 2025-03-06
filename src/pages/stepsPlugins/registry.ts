@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/stepsPlugins/registry.ts
 import { StepPlugin } from './types';
-import { registerDefaultValidators } from './validation';
+// Import from new validation system
+import { validateStep } from '@/services/validation';
 
-// Kategorie pluginów
+// Plugin categories
 export const PLUGIN_CATEGORIES = {
   CONTENT: "Tworzenie Treści",
   APPROVAL: "Zatwierdzanie i Recenzje",
@@ -11,14 +11,11 @@ export const PLUGIN_CATEGORIES = {
   INTEGRATION: "Integracje"
 };
 
-// Rejestr pluginów - przechowuje wszystkie dostępne pluginy
+// Plugin registry
 const plugins = new Map<string, StepPlugin>();
 
-// Inicjalizuj walidatory podczas pierwszego importu
-registerDefaultValidators();
-
 /**
- * Rejestruje plugin w systemie
+ * Registers a plugin in the system
  */
 export function register(plugin: StepPlugin): void {
   plugins.set(plugin.type, plugin);
@@ -26,35 +23,35 @@ export function register(plugin: StepPlugin): void {
 }
 
 /**
- * Pobiera plugin na podstawie jego typu
+ * Gets a plugin by its type
  */
 export function getPlugin(type: string): StepPlugin | undefined {
   return plugins.get(type);
 }
 
 /**
- * Pobiera listę wszystkich zarejestrowanych pluginów
+ * Gets all registered plugins
  */
 export function getAllPlugins(): StepPlugin[] {
   return Array.from(plugins.values());
 }
 
 /**
- * Pobiera pluginy z określonej kategorii
+ * Gets plugins by category
  */
 export function getPluginsByCategory(category: string): StepPlugin[] {
   return getAllPlugins().filter(plugin => plugin.category === category);
 }
 
 /**
- * Pobiera domyślną konfigurację dla pluginu
+ * Gets default configuration for a plugin
  */
 export function getDefaultConfig(type: string): Record<string, any> {
   return plugins.get(type)?.defaultConfig || {};
 }
 
 /**
- * Tworzy nowy krok określonego typu z domyślnymi wartościami
+ * Creates a new step of the specified type with default values
  */
 export function createDefaultStep(type: string, taskId: string, order: number): Partial<any> {
   const plugin = getPlugin(type);
@@ -73,5 +70,5 @@ export function createDefaultStep(type: string, taskId: string, order: number): 
   };
 }
 
-// Eksportuj funkcje walidacji
-export { validateStep } from './validation';
+// Export validation function from new system
+export { validateStep };

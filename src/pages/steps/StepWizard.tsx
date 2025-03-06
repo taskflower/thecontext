@@ -22,6 +22,7 @@ import { Button } from "@/components/ui";
 import taskService from "../tasks/services/TaskService";
 import stepService from "./services/StepService";
 import { triggerPluginAction } from "@/pages/stepsPlugins/pluginHandlers";
+import { validateStep } from "@/services/validation";
 
 const StepWizard = () => {
   // Store hooks
@@ -32,7 +33,7 @@ const StepWizard = () => {
     closeWizard,
     moveToNextStep,
     moveToPreviousStep,
-    completeCurrentStep, // Używamy metody z WizardStore
+    completeCurrentStep, 
   } = useWizardStore();
 
   const { getTaskSteps } = useStepStore();
@@ -64,13 +65,8 @@ const StepWizard = () => {
 
   // Reset validation error and force StepViewer re-mounting on step change
   useEffect(() => {
-    // Resetujemy błąd walidacji przy każdej zmianie kroku
     setValidationError(null);
-    
-    // Resetujemy stan przetwarzania
     setIsProcessing(false);
-    
-    // Zwiększamy klucz, aby wymusić całkowite odmontowanie i ponowne zamontowanie komponentu
     setViewerKey(prevKey => prevKey + 1);
   }, [activeStepId]);
 
@@ -88,18 +84,10 @@ const StepWizard = () => {
 
   // Handle step completion from plugin
   const handleStepComplete = (result?: Record<string, any>) => {
-    // Najpierw resetujemy błędy walidacji
     setValidationError(null);
-    
-    // Resetujemy stan przetwarzania
     setIsProcessing(false);
 
     if (currentStep) {
-      // Używamy completeCurrentStep z WizardStore
-      // Ta metoda: 
-      // 1. Aktualizuje status kroku na 'completed'
-      // 2. Zapisuje result w kroku
-      // 3. Przechodzi do następnego kroku
       completeCurrentStep(result);
     }
   };
@@ -116,26 +104,24 @@ const StepWizard = () => {
       return;
     }
 
-    // Use stepService to validate the step
-    const { isExecutable, errorMessage } = stepService.canExecuteStep(currentStep);
-    if (!isExecutable) {
-      setValidationError(errorMessage || "Cannot execute step.");
+    // Validate the step
+    const validationResult = validateStep(currentStep);
+    
+    if (!validationResult.isValid) {
+      setValidationError(validationResult.errorMessage || "Step validation failed.");
       return;
     }
-
-    // Resetujemy poprzedni błąd walidacji
+    
     setValidationError(null);
     setIsProcessing(true);
-
-    console.log(
-      `StepWizard: Executing step ${currentStep.id}`
-    );
-
-    // Próbujemy wywołać bezpośrednio akcję pluginu
+    
+    console.log(`StepWizard: Executing step ${currentStep.id}`);
+    
+    // Try to trigger plugin action directly
     const handlerSuccess = triggerPluginAction(currentStep.id);
     
     if (!handlerSuccess) {
-      // Jeśli nie zadziałało bezpośrednie wywołanie, próbujemy przez service
+      // If direct plugin trigger fails, try through service
       const serviceSuccess = stepService.executeStep(currentStep.id);
       
       if (!serviceSuccess) {
@@ -147,13 +133,10 @@ const StepWizard = () => {
     }
   };
 
-  // Handle skip button - używamy skipCurrentStep z WizardStore
+  // Handle skip button
   const handleSkipStep = () => {
     if (currentStep) {
-      // Resetujemy błędy walidacji przed pominięciem
       setValidationError(null);
-      
-      // Używamy metody ze store zamiast service
       useWizardStore.getState().skipCurrentStep();
     }
   };
@@ -228,7 +211,7 @@ const StepWizard = () => {
           </Alert>
         )}
 
-        {/* Step content - używamy key, aby wymusić re-rendering */}
+        {/* Step content - use key to force re-rendering */}
         <div className="flex-1 overflow-auto py-4" ref={stepContentRef}>
           <StepViewer 
             key={`step-viewer-${viewerKey}-${currentStep.id}`}
@@ -293,4 +276,5 @@ const StepWizard = () => {
   );
 };
 
+// Make sure to export as default
 export default StepWizard;
