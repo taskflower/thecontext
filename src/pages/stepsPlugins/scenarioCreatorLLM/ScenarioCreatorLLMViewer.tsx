@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/stepsPlugins/scenarioCreatorLLM/ScenarioCreatorLLMViewer.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, RefreshCw, Play, CheckCircle2 } from 'lucide-react';
+import { Loader2, RefreshCw, Play, CheckCircle2, User } from 'lucide-react';
 import { ViewerProps } from '../types';
 import { ConversationItem } from '@/types';
 import { registerPluginHandler, unregisterPluginHandler } from '../pluginHandlers';
@@ -13,6 +13,8 @@ import { AlertCircle } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import ScenarioBuilderService from './service/ScenarioBuilderService';
 import LLMService from './service/LLMService';
+import { useAuthState } from '@/hooks/useAuthState';
+import { Badge } from '@/components/ui/badge';
 
 
 export function ScenarioCreatorLLMViewer({ step, onComplete }: ViewerProps) {
@@ -26,6 +28,9 @@ export function ScenarioCreatorLLMViewer({ step, onComplete }: ViewerProps) {
     tasks: any[], 
     steps: any[] 
   }>({ scenarios: [], tasks: [], steps: [] });
+  
+  // Get authenticated user information
+  const { user, loading: authLoading } = useAuthState();
 
   // Get configuration with defaults
   const config = step.config || {};
@@ -40,6 +45,17 @@ export function ScenarioCreatorLLMViewer({ step, onComplete }: ViewerProps) {
     }
   }, [inputPrompt]);
 
+  // Get authentication token
+  const getAuthToken = useCallback(async () => {
+    try {
+      if (!user) return null;
+      return await user.getIdToken();
+    } catch (err) {
+      console.error("Error getting auth token:", err);
+      return null;
+    }
+  }, [user]);
+
   // Call the LLM Service to get response
   const fetchFromLLM = async () => {
     setLoading(true);
@@ -48,11 +64,15 @@ export function ScenarioCreatorLLMViewer({ step, onComplete }: ViewerProps) {
     console.log("[DEBUG] Fetching from LLM, mockResponse:", mockResponse);
     
     try {
-      // Use the LLM service instead of direct API call
+      // Get auth token
+      const token = await getAuthToken();
+      
+      // Use the LLM service with auth token
       const response = await LLMService.generateContent({
         prompt,
         useMock: mockResponse,
-        userId: "user123"
+        userId: user?.uid || "anonymous",
+        authToken: token
       });
       
       setLlmResponse(response);
@@ -135,6 +155,21 @@ export function ScenarioCreatorLLMViewer({ step, onComplete }: ViewerProps) {
         <CardDescription>
           {step.description || 'Generate scenarios, tasks, and steps using LLM'}
         </CardDescription>
+        
+        {/* Display current user information */}
+        {!authLoading && (
+          <div className="flex items-center mt-2 text-sm">
+            <User size={16} className="mr-1" />
+            <span className="font-medium mr-2">Current user:</span>
+            {user ? (
+              <Badge variant="outline" className="ml-1">
+                {user.email} (ID: {user.uid})
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="bg-yellow-50">Not authenticated</Badge>
+            )}
+          </div>
+        )}
       </CardHeader>
       
       <CardContent className="space-y-4">
@@ -160,7 +195,7 @@ export function ScenarioCreatorLLMViewer({ step, onComplete }: ViewerProps) {
         </div>
         
         {/* Display current mode */}
-        <Alert  className="bg-blue-50">
+        <Alert className="bg-blue-50">
           <div className="text-sm">
             <span className="font-medium">Current mode: </span>
             {mockResponse ? "Using mock data" : "Using LLM API"}

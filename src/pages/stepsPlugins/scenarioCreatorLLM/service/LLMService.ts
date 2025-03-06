@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/services/LLMService.ts
-import { MOCK_LLM_RESPONSE } from '../mockData';
+import { MOCK_LLM_RESPONSE } from "../mockData";
 
 // Interfaces
 export interface LLMRequest {
@@ -8,6 +8,7 @@ export interface LLMRequest {
   systemMessage?: string;
   userId?: string;
   useMock?: boolean;
+  authToken?: string | null;
 }
 
 export interface LLMResponse {
@@ -22,24 +23,30 @@ export interface LLMResponse {
 class LLMService {
   /**
    * Generate content using the LLM
-   * 
+   *
    * @param options Request options
    * @returns LLM response data
    */
-  public static async generateContent(options: LLMRequest): Promise<LLMResponse> {
-    const { prompt, systemMessage, userId = 'user123', useMock = false } = options;
-    
+  public static async generateContent(
+    options: LLMRequest
+  ): Promise<LLMResponse> {
+    const {
+      prompt,
+      systemMessage,
+      userId = "user123",
+      useMock = false,
+      authToken = null,
+    } = options;
+
     console.log("[LLMService] Generating content, useMock:", useMock);
-    
+
     try {
       if (useMock) {
         console.log("[LLMService] Using mock data response");
         // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise((resolve) => setTimeout(resolve, 1500));
         return MOCK_LLM_RESPONSE;
       } else {
-        console.log("[LLMService] Making real API call");
-        
         // Prepare the system message to instruct the LLM
         const defaultSystemMessage = `You are an AI assistant specialized in creating detailed marketing scenarios, tasks, and steps. 
         Format your response as a JSON object with these keys:
@@ -52,64 +59,78 @@ class LLMService {
         // Prepare the prompt
         const enhancedPrompt = `Create a detailed marketing campaign structure for: ${prompt}`;
 
+        // Prepare headers with auth token if available
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+        };
+
+        if (authToken) {
+          headers["Authorization"] = `Bearer ${authToken}`;
+        }
+
         // Call the API
-        const response = await fetch('http://localhost:3000/api/v1/services/chat/completion', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            messages: [
-              { role: "system", content: systemMessage || defaultSystemMessage },
-              { role: "user", content: enhancedPrompt }
-            ],
-            userId
-          }),
-        });
-        
-        console.log("[LLMService] API response status:", response.status);
-        
+        const response = await fetch(
+          "http://localhost:3000/api/v1/services/chat/completion",
+          {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+              messages: [
+                {
+                  role: "system",
+                  content: systemMessage || defaultSystemMessage,
+                },
+                { role: "user", content: enhancedPrompt },
+              ],
+              userId,
+            }),
+          }
+        );
+
         if (!response.ok) {
           throw new Error(`API error: ${response.status}`);
         }
 
         const data = await response.json();
-        console.log("[LLMService] API response data:", data);
-        
+
         // Extract and parse the LLM response
         try {
-          const content = data.choices[0]?.message?.content;
-          
+          // Extract content from the server's response format
+          const content = data.data?.message?.content;
+
           if (!content) {
             throw new Error("Empty response from LLM");
           }
-          
+
           console.log("[LLMService] LLM response content:", content);
-          
+
           // Try to find and parse JSON in the response
-          const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/) || 
-                           content.match(/{[\s\S]*}/);
-                           
+          const jsonMatch =
+            content.match(/```json\n([\s\S]*?)\n```/) ||
+            content.match(/{[\s\S]*}/);
+
           let parsedData;
-          
+
           if (jsonMatch) {
             parsedData = JSON.parse(jsonMatch[1] || jsonMatch[0]);
           } else {
             // If no JSON block is found, try to parse the entire content
             parsedData = JSON.parse(content);
           }
-          
+
           console.log("[LLMService] Parsed LLM data:", parsedData);
-          
+
           // Validate the structure
           if (!parsedData.scenarios || !Array.isArray(parsedData.scenarios)) {
             throw new Error("Invalid response format: missing scenarios array");
           }
-          
+
           return parsedData;
         } catch (parseError) {
           console.error("[LLMService] Error parsing LLM response:", parseError);
-          throw new Error(`Failed to parse LLM response: ${(parseError as Error).message}`);
+          throw new Error(
+            `Failed to parse LLM response: ${(parseError as Error).message}`
+          );
         }
       }
     } catch (err) {
