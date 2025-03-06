@@ -79,7 +79,7 @@ const ScenarioDetailPage: React.FC = () => {
       />
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto p-4 md:p-6 max-w-7xl mx-auto w-full">
+      <main className="flex-1 overflow-auto p-4  mx-auto w-full">
         <Tabs defaultValue="overview" className="w-full">
           <div className="bg-white rounded-lg shadow-sm mb-6">
             <TabsList className="w-full justify-start border-b p-1">

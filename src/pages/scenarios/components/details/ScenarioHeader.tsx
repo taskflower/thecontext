@@ -31,23 +31,24 @@ const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
 
   return (
     <header className="bg-white border-b px-6 py-3">
-      <div className="flex items-center">
+      <div className="flex items-center gap-3">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => navigate("/scenarios")}
-          className="mr-4"
+          className=""
         >
           <ChevronLeft size={20} />
         </Button>
-        <h1 className="text-xl font-bold">{scenario.title}</h1>
-        <div className="ml-3">
+        
+        <h2 className="text-base font-semibold">{scenario.title}</h2>
+        
           {getStatusBadge(
             scenario.progress === 100 ? "completed" : "in-progress"
           )}
-        </div>
+        
         {scenario.dueDate && (
-          <div className="flex items-center text-sm text-muted-foreground ml-4">
+          <div className="flex items-center text-sm text-muted-foreground ">
             <Calendar size={14} className="mr-1" />
             <span>Due: {scenario.dueDate}</span>
           </div>
