@@ -21,6 +21,7 @@ import { useStepStore, useTaskStore, useWizardStore } from "@/store";
 import { Button } from "@/components/ui";
 import taskService from "../tasks/services/TaskService";
 import stepService from "./services/StepService";
+import { triggerPluginAction } from "@/pages/stepsPlugins/pluginHandlers";
 
 const StepWizard = () => {
   // Store hooks
@@ -31,6 +32,7 @@ const StepWizard = () => {
     closeWizard,
     moveToNextStep,
     moveToPreviousStep,
+    completeCurrentStep, // Używamy metody z WizardStore
   } = useWizardStore();
 
   const { getTaskSteps } = useStepStore();
@@ -39,6 +41,9 @@ const StepWizard = () => {
   // UI state
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Unique key to force re-render StepViewer when step changes
+  const [viewerKey, setViewerKey] = useState<number>(0);
 
   // References
   const stepContentRef = useRef<HTMLDivElement>(null);
@@ -57,6 +62,18 @@ const StepWizard = () => {
   const isFirstStep = currentStepIndex === 0;
   const isLastStep = currentStepIndex === steps.length - 1;
 
+  // Reset validation error and force StepViewer re-mounting on step change
+  useEffect(() => {
+    // Resetujemy błąd walidacji przy każdej zmianie kroku
+    setValidationError(null);
+    
+    // Resetujemy stan przetwarzania
+    setIsProcessing(false);
+    
+    // Zwiększamy klucz, aby wymusić całkowite odmontowanie i ponowne zamontowanie komponentu
+    setViewerKey(prevKey => prevKey + 1);
+  }, [activeStepId]);
+
   // Check task executability on mount
   useEffect(() => {
     if (showWizard && activeTaskId) {
@@ -71,11 +88,19 @@ const StepWizard = () => {
 
   // Handle step completion from plugin
   const handleStepComplete = (result?: Record<string, any>) => {
+    // Najpierw resetujemy błędy walidacji
+    setValidationError(null);
+    
+    // Resetujemy stan przetwarzania
     setIsProcessing(false);
 
     if (currentStep) {
-      // Używamy tylko stepService do obsługi krokowania
-      stepService.completeStep(currentStep.id, result);
+      // Używamy completeCurrentStep z WizardStore
+      // Ta metoda: 
+      // 1. Aktualizuje status kroku na 'completed'
+      // 2. Zapisuje result w kroku
+      // 3. Przechodzi do następnego kroku
+      completeCurrentStep(result);
     }
   };
 
@@ -98,6 +123,7 @@ const StepWizard = () => {
       return;
     }
 
+    // Resetujemy poprzedni błąd walidacji
     setValidationError(null);
     setIsProcessing(true);
 
@@ -105,21 +131,30 @@ const StepWizard = () => {
       `StepWizard: Executing step ${currentStep.id}`
     );
 
-    // Use stepService to execute the step
-    const success = stepService.executeStep(currentStep.id);
+    // Próbujemy wywołać bezpośrednio akcję pluginu
+    const handlerSuccess = triggerPluginAction(currentStep.id);
     
-    if (!success) {
-      setValidationError(
-        "Cannot complete this step automatically. Use the button in the plugin."
-      );
-      setIsProcessing(false);
+    if (!handlerSuccess) {
+      // Jeśli nie zadziałało bezpośrednie wywołanie, próbujemy przez service
+      const serviceSuccess = stepService.executeStep(currentStep.id);
+      
+      if (!serviceSuccess) {
+        setValidationError(
+          "Cannot complete this step automatically. Use the button in the plugin."
+        );
+        setIsProcessing(false);
+      }
     }
   };
 
-  // Handle skip button - use stepService
+  // Handle skip button - używamy skipCurrentStep z WizardStore
   const handleSkipStep = () => {
     if (currentStep) {
-      stepService.skipStep(currentStep.id);
+      // Resetujemy błędy walidacji przed pominięciem
+      setValidationError(null);
+      
+      // Używamy metody ze store zamiast service
+      useWizardStore.getState().skipCurrentStep();
     }
   };
 
@@ -193,9 +228,13 @@ const StepWizard = () => {
           </Alert>
         )}
 
-        {/* Step content */}
+        {/* Step content - używamy key, aby wymusić re-rendering */}
         <div className="flex-1 overflow-auto py-4" ref={stepContentRef}>
-          <StepViewer step={currentStep} onComplete={handleStepComplete} />
+          <StepViewer 
+            key={`step-viewer-${viewerKey}-${currentStep.id}`}
+            step={currentStep} 
+            onComplete={handleStepComplete} 
+          />
         </div>
 
         {/* Navigation buttons */}

@@ -57,6 +57,7 @@ class StepService {
   executeStep(stepId: string): boolean {
     // Get dependencies from stores
     const stepStore = useStepStore.getState();
+    const wizardStore = useWizardStore.getState();
     
     // Get step and validate
     const step = stepStore.getStepById(stepId);
@@ -94,14 +95,19 @@ class StepService {
       });
     }
     
+    // KLUCZOWA ZMIANA: Sprawdź, czy krok jest aktualnie wyświetlany w wizardzie
+    const { activeStepId } = wizardStore;
+    const isStepActive = activeStepId === stepId;
+    
     // Try to trigger plugin action
     const success = triggerPluginAction(stepId);
     
     if (!success) {
-      // If no handler was found or automatic execution is not possible,
-      // open the wizard to allow manual interaction
-      const wizardStore = useWizardStore.getState();
-      wizardStore.openWizard(task.id, stepId);
+      // Jeśli nie można wykonać automatycznie kroku, otwórz wizard
+      if (!isStepActive) {
+        // Tylko jeśli krok nie jest już aktywny w wizardzie
+        wizardStore.openWizard(task.id, stepId);
+      }
     }
     
     return true;
@@ -116,6 +122,7 @@ class StepService {
   completeStep(stepId: string, result: any = {}): boolean {
     const stepStore = useStepStore.getState();
     const taskStore = useTaskStore.getState();
+    const wizardStore = useWizardStore.getState();
     
     // Get step
     const step = stepStore.getStepById(stepId);
@@ -138,6 +145,20 @@ class StepService {
       console.error(`Could not find task for step ${stepId}`);
       return false;
     }
+    
+    // KLUCZOWA ZMIANA: sprawdzamy czy step jest aktualnie w wizardzie
+    const { activeStepId, activeTaskId } = wizardStore;
+    const isStepInWizard = activeStepId === stepId && activeTaskId === taskId;
+    
+    // Jeśli krok jest aktualnie aktywny w wizardzie, użyj WizardStore.completeCurrentStep
+    if (isStepInWizard) {
+      // Uwaga: tutaj nie wywołujemy wizardStore.completeCurrentStep(result) 
+      // bo to przeniosłoby nas automatycznie do następnego kroku,
+      // a ta funkcja już zostanie wywołana z komponentu
+      return true;
+    }
+    
+    // Jeśli krok nie jest aktywny w wizardzie, wykonaj standardową logikę
     
     // Check if this was the current step
     if (task.currentStepId === stepId) {
@@ -176,6 +197,7 @@ class StepService {
   skipStep(stepId: string): boolean {
     const stepStore = useStepStore.getState();
     const taskStore = useTaskStore.getState();
+    const wizardStore = useWizardStore.getState();
     
     // Get step
     const step = stepStore.getStepById(stepId);
@@ -183,6 +205,18 @@ class StepService {
       console.error(`Step with ID ${stepId} not found.`);
       return false;
     }
+    
+    // KLUCZOWA ZMIANA: sprawdzamy czy step jest aktualnie w wizardzie
+    const { activeStepId, activeTaskId } = wizardStore;
+    const isStepInWizard = activeStepId === stepId && activeTaskId === step.taskId;
+    
+    // Jeśli krok jest aktualnie aktywny w wizardzie, użyj WizardStore.skipCurrentStep
+    if (isStepInWizard) {
+      // Nie wywołujemy tutaj skipCurrentStep - będzie wywołana z komponentu
+      return true;
+    }
+    
+    // Jeśli krok nie jest aktywny w wizardzie, wykonaj standardową logikę
     
     // Update step status
     stepStore.updateStep(stepId, {

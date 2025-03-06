@@ -1,5 +1,5 @@
 // src/pages/stepsPlugins/textInput/TextInputViewer.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,6 +11,10 @@ import { ConversationItem } from '@/types';
 import { registerPluginHandler, unregisterPluginHandler } from '../pluginHandlers';
 
 export function TextInputViewer({ step, onComplete }: ViewerProps) {
+  // Używamy useRef do śledzenia montowania/odmontowywania komponentu
+  const isMounted = useRef(true);
+  
+  // Stany komponentu
   const [value, setValue] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -25,34 +29,66 @@ export function TextInputViewer({ step, onComplete }: ViewerProps) {
     rows = 6
   } = step.config || {};
   
-  // Initialize from existing result if available
+  // Resetowanie stanu przy każdym remount komponentu
   useEffect(() => {
+    // Oznaczamy komponent jako zamontowany
+    isMounted.current = true;
+    
+    // Inicjalizacja z istniejącym wynikiem jeśli dostępny
     if (step.result?.value) {
       setValue(step.result.value);
+    } else {
+      setValue('');
     }
-  }, [step.result]);
+    
+    // Resetujemy błąd przy każdym montowaniu komponentu
+    setError(null);
+    setLoading(false);
+    
+    // Cleanup funkcja
+    return () => {
+      // Oznaczamy komponent jako odmontowany
+      isMounted.current = false;
+    };
+  }, [step.id, step.result?.value]);
   
   // Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setValue(e.target.value);
+    // Czyścimy błąd przy każdej zmianie wartości pola
     setError(null);
   };
   
-  // Handle submission
-  const handleSubmit = () => {
+  // Funkcja walidacji wejścia
+  const validateInput = (): boolean => {
     // Basic validation
     if (required && !value.trim()) {
       setError('To pole jest wymagane');
-      return;
+      return false;
     }
     
     if (minLength > 0 && value.length < minLength) {
       setError(`Tekst musi mieć co najmniej ${minLength} znaków`);
-      return;
+      return false;
     }
     
     if (maxLength > 0 && value.length > maxLength) {
       setError(`Tekst nie może przekraczać ${maxLength} znaków`);
+      return false;
+    }
+    
+    // Wyczyść błąd jeśli wszystko jest poprawne
+    setError(null);
+    return true;
+  };
+  
+  // Handle submission - całkowicie przebudowany
+  const handleSubmit = () => {
+    // Najpierw czyścimy poprzednie błędy
+    setError(null);
+    
+    // Validate input first
+    if (!validateInput()) {
       return;
     }
     
@@ -65,48 +101,50 @@ export function TextInputViewer({ step, onComplete }: ViewerProps) {
       { role: "assistant", content: "Otrzymano tekst wejściowy" }
     ];
     
-    // Complete after short delay to show loading state
-    setTimeout(() => {
-      onComplete({
-        value,
-        timestamp: new Date().toISOString()
-      }, conversationData);
-      
-      setLoading(false);
-    }, 300);
+    // Wywołanie onComplete bez opóźnień
+    onComplete({
+      value,
+      timestamp: new Date().toISOString()
+    }, conversationData);
   };
   
   // Rejestracja handlera dla systemu handlerów
   useEffect(() => {
-    // Funkcja do wywołania przez przycisk "Next", która wykona walidację
+    // Tworzymy funkcję, która będzie się odnosić do bieżącego stanu wartości
     const validationHandler = () => {
-      // Sprawdź czy dane są poprawne przed wywołaniem handleComplete
-      if (required && !value.trim()) {
-        setError('To pole jest wymagane');
-        return;
+      // Tylko jeśli komponent jest nadal zamontowany
+      if (isMounted.current) {
+        // Wyczyść błąd przed próbą walidacji
+        setError(null);
+        
+        // Wywołaj walidację i jeśli OK - wykonaj submit
+        if (validateInput()) {
+          // Pokaż stan ładowania
+          setLoading(true);
+          
+          // Create conversation data
+          const conversationData: ConversationItem[] = [
+            { role: "user", content: value },
+            { role: "assistant", content: "Otrzymano tekst wejściowy" }
+          ];
+          
+          // Wywołaj onComplete bezpośrednio
+          onComplete({
+            value,
+            timestamp: new Date().toISOString()
+          }, conversationData);
+        }
       }
-      
-      if (minLength > 0 && value.length < minLength) {
-        setError(`Tekst musi mieć co najmniej ${minLength} znaków`);
-        return;
-      }
-      
-      if (maxLength > 0 && value.length > maxLength) {
-        setError(`Tekst nie może przekraczać ${maxLength} znaków`);
-        return;
-      }
-      
-      // Jeśli walidacja OK, wykonaj normalny handler
-      handleSubmit();
     };
     
+    // Rejestruj handler
     registerPluginHandler(step.id, validationHandler);
     
     // Usunięcie handlera przy odmontowaniu komponentu
     return () => {
       unregisterPluginHandler(step.id);
     };
-  }, [step.id, value, required, minLength, maxLength]);
+  }, [step.id, value, required, minLength, maxLength, onComplete]);
   
   // Character count indicator
   const renderCharCount = () => {
