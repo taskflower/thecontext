@@ -8,5 +8,5 @@ export type { StepPlugin, ViewerProps, EditorProps } from './types';
 import './boilerplate_action/index';
 import './boilerplate_reference/index';
 import './textInput/index';
-import './scenarioCreator/index'
+import './scenarioCreatorLLM/index'
 
