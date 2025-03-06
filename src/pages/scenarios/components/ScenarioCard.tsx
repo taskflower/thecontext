@@ -4,7 +4,7 @@ import { Pencil, Trash2, FolderOpen, Link2, ExternalLink } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Scenario } from "@/types";
-import { useDataStore } from "@/store";
+import { useDataStore, useTaskStore } from "@/store";
 import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Progress } from "@/components/ui";
 import scenarioService from "../services/ScenarioService";
 import { useToast } from "@/hooks/useToast";
@@ -22,11 +22,18 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
   toggleEditScenarioModal,
 }) => {
   const { folders } = useDataStore();
+  const { tasks } = useTaskStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { lang } = useParams();
 
   const { toast } = useToast();
+  
+  // Dynamicznie obliczamy statystyki zadań
+  const scenarioTasks = tasks.filter(task => task.scenarioId === scenario.id);
+  const completedTasks = scenarioTasks.filter(task => task.status === 'completed').length;
+  const totalTasks = scenarioTasks.length;
+  const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
   
   // Funkcje obsługujące akcje
   const handleNavigateToDetail = (e: React.MouseEvent) => {
@@ -128,9 +135,9 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
       <CardContent className="pb-2">
         <div className="flex justify-between text-sm text-muted-foreground mb-2">
           <span>Progress</span>
-          <span>{scenario.progress}%</span>
+          <span>{progress}%</span>
         </div>
-        <Progress value={scenario.progress} className="h-2 mb-4" />
+        <Progress value={progress} className="h-2 mb-4" />
 
         {hasConnections && (
           <div className="flex items-center space-x-1 mb-2 text-xs text-muted-foreground">
@@ -145,7 +152,7 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
 
       <CardFooter className="flex justify-between pt-2 border-t">
         <div className="text-sm text-muted-foreground">
-          Tasks: {scenario.completedTasks}/{scenario.tasks}
+          Tasks: {completedTasks}/{totalTasks}
         </div>
         <Button
           variant="ghost"

@@ -2,7 +2,7 @@
 import { FolderOpen, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Scenario } from "@/types";
-import { useDataStore } from "@/store";
+import { useDataStore, useTaskStore } from "@/store";
 import { Button, Progress } from "@/components/ui";
 import scenarioService from "../services/ScenarioService";
 import { useToast } from "@/hooks/useToast";
@@ -20,7 +20,14 @@ const ScenarioListItem: React.FC<ScenarioListItemProps> = ({
   toggleEditScenarioModal,
 }) => {
   const { folders } = useDataStore();
+  const { tasks } = useTaskStore();
   const { toast } = useToast();
+
+  // Dynamicznie obliczamy statystyki zadań
+  const scenarioTasks = tasks.filter(task => task.scenarioId === scenario.id);
+  const completedTasks = scenarioTasks.filter(task => task.status === 'completed').length;
+  const totalTasks = scenarioTasks.length;
+  const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   const handleViewFolder = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -62,13 +69,13 @@ const ScenarioListItem: React.FC<ScenarioListItemProps> = ({
     <div className="grid grid-cols-12 p-3 border-b hover:bg-secondary/20 cursor-pointer">
       <div className="col-span-4 font-medium">{scenario.title}</div>
       <div className="col-span-3">
-        <Progress value={scenario.progress} className="h-2" />
+        <Progress value={progress} className="h-2" />
         <div className="text-xs text-muted-foreground mt-1">
-          {scenario.progress}%
+          {progress}%
         </div>
       </div>
       <div className="col-span-2 text-muted-foreground">
-        {scenario.completedTasks}/{scenario.tasks}
+        {completedTasks}/{totalTasks}
       </div>
       <div className="col-span-2 text-muted-foreground">{scenario.dueDate}</div>
       <div className="col-span-1 flex items-center justify-end">
