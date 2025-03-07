@@ -1,4 +1,3 @@
-// src/pages/scenarios/components/details/ScenarioHeader.tsx
 import React from "react";
 import { Calendar, ChevronLeft, Edit3, PlayCircle } from "lucide-react";
 import { Badge, Button } from "@/components/ui";
@@ -21,9 +20,7 @@ const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
       case "completed":
         return <Badge className="bg-green-100 text-green-800">Completed</Badge>;
       case "in-progress":
-        return (
-          <Badge className="bg-amber-100 text-amber-800">In Progress</Badge>
-        );
+        return <Badge className="bg-amber-100 text-amber-800">In Progress</Badge>;
       default:
         return <Badge className="bg-gray-100 text-gray-800">To Do</Badge>;
     }
@@ -43,9 +40,9 @@ const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
         
         <h2 className="text-base font-semibold">{scenario.title}</h2>
         
-          {getStatusBadge(
-            scenario.progress === 100 ? "completed" : "in-progress"
-          )}
+        {getStatusBadge(
+          scenario.progress === 100 ? "completed" : "in-progress"
+        )}
         
         {scenario.dueDate && (
           <div className="flex items-center text-sm text-muted-foreground ">

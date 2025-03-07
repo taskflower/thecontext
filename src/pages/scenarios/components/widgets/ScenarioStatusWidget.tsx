@@ -1,9 +1,8 @@
 // src/pages/scenarios/components/widgets/ScenarioStatusWidget.tsx
-import React from 'react';
 import { BarChart3, CheckCircle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Scenario } from '@/types';
 import scenarioService from '../../services/ScenarioService';
+import { Scenario } from '@/types';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 
 interface ScenarioStatusWidgetProps {
   scenario: Scenario;
@@ -12,7 +11,7 @@ interface ScenarioStatusWidgetProps {
 export const ScenarioStatusWidget: React.FC<ScenarioStatusWidgetProps> = ({
   scenario
 }) => {
-  // Get statistics from the service
+  // Pobieranie statystyk przez serwis
   const { completedTasks, totalTasks, progress } = scenarioService.getScenarioStats(scenario.id);
 
   return (

@@ -1,4 +1,3 @@
-// src/pages/scenarios/components/widgets/ScenarioProgressWidget.tsx
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Scenario } from '@/types';
@@ -11,7 +10,7 @@ interface ScenarioProgressWidgetProps {
 export const ScenarioProgressWidget: React.FC<ScenarioProgressWidgetProps> = ({ 
   scenario 
 }) => {
-  // Get statistics from the service
+  // Pobieranie statystyk przez serwis
   const { completedTasks, totalTasks, progress } = scenarioService.getScenarioStats(scenario.id);
 
   return (

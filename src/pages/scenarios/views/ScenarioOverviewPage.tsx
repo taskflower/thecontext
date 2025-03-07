@@ -1,24 +1,18 @@
-// src/pages/scenarios/components/details/ScenarioOverviewPage.tsx
 import React from 'react';
 import { useParams, useOutletContext } from 'react-router-dom';
 import { Scenario } from "@/types";
-import { useTaskStore } from "@/store";
-import { ScenarioProgressWidget } from "./components/widgets/ScenarioProgressWidget";
-import { ScenarioDescriptionWidget } from "./components/widgets/ScenarioDescriptionWidget";
-import { ScenarioMilestonesWidget } from "./components/widgets/ScenarioMilestonesWidget";
-import { ScenarioStatusWidget } from "./components/widgets/ScenarioStatusWidget";
-import { ScenarioAudienceWidget } from "./components/widgets/ScenarioAudienceWidget";
-import { ScenarioChannelsWidget } from "./components/widgets/ScenarioChannelsWidget";
+import scenarioService from "../services/ScenarioService";
+import { ScenarioAudienceWidget, ScenarioChannelsWidget, ScenarioDescriptionWidget, ScenarioMilestonesWidget, ScenarioProgressWidget, ScenarioStatusWidget } from '../components';
+
 
 type ContextType = { scenario: Scenario };
 
 const ScenarioOverviewPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { scenario } = useOutletContext<ContextType>();
-  const { tasks } = useTaskStore();
   
-  // Filter related data
-  const scenarioTasks = tasks.filter((t) => t.scenarioId === id);
+  // Pobieranie zadań przez serwis
+  const scenarioTasks = id ? scenarioService.getScenarioTasks(id) : [];
 
   return (
     <div className="space-y-6">

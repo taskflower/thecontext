@@ -1,4 +1,4 @@
-// src/pages/scenarios/components/details/widgets/ScenarioDescriptionWidget.tsx
+// src/pages/scenarios/components/widgets/ScenarioDescriptionWidget.tsx
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Scenario } from '@/types';

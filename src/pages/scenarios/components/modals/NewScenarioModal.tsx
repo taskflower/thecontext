@@ -1,8 +1,7 @@
-// src/pages/scenarios/components/NewScenarioModal.tsx
 import { useState } from "react";
 import { FormModal } from "@/components/ui/form-modal";
 import { Input, Label, Textarea } from "@/components/ui";
-import scenarioService from "../services/ScenarioService";
+import scenarioService from "../../services/ScenarioService";
 import { useToast } from "@/hooks/useToast";
 
 interface NewScenarioModalProps {
@@ -16,7 +15,7 @@ const NewScenarioModal: React.FC<NewScenarioModalProps> = ({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState(
-    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0] // Default: 1 week from now
+    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0] // Domyślnie: 1 tydzień od teraz
   );
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,7 +43,7 @@ const NewScenarioModal: React.FC<NewScenarioModalProps> = ({
       variant: "default"
     });
 
-    // Reset form
+    // Reset formularza
     setTitle("");
     setDescription("");
     setDueDate(
@@ -74,7 +73,7 @@ const NewScenarioModal: React.FC<NewScenarioModalProps> = ({
           value={title}
           onChange={(e) => {
             setTitle(e.target.value);
-            setError(null); // Clear error when input changes
+            setError(null); // Czyszczenie błędu przy zmianie
           }}
           required
         />

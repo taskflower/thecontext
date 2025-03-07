@@ -1,11 +1,8 @@
-// src/pages/scenarios/routes.tsx
 import { RouteObject } from "react-router-dom";
-import ScenariosView from "./components/ScenariosView";
-import ScenarioLayout from "./components/details/ScenarioLayout";
-import ScenarioOverviewPage from "./ScenarioOverviewPage";
-import ScenarioTasksPage from "./ScenarioTasksPage";
-import ScenarioConnectionsPage from "./ScenarioConnectionsPage";
-
+import { ScenarioLayout, ScenariosView } from "./components";
+import ScenarioOverviewPage from "./views/ScenarioOverviewPage";
+import ScenarioConnectionsPage from "./views/ScenarioConnectionsPage";
+import ScenarioTasksPage from "./views/ScenarioTasksPage";
 
 
 const scenarioRoutes: RouteObject[] = [

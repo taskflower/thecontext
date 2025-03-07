@@ -1,4 +1,3 @@
-// src/pages/scenarios/components/details/widgets/ScenarioMilestonesWidget.tsx
 import React from 'react';
 import { Clock, CheckSquare } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,7 +13,7 @@ export const ScenarioMilestonesWidget: React.FC<ScenarioMilestonesWidgetProps> =
   scenario,
   tasks
 }) => {
-  // Generate milestone data based on tasks
+  // Generowanie danych kamieni milowych na podstawie zadań
   const milestones = tasks.length > 0 
     ? [
         { id: 1, title: 'Project Setup', date: scenario.startDate || scenario.dueDate, status: 'completed' },

@@ -2,23 +2,28 @@
 import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useScenarioStore, useUIStore } from "@/store";
+import { useUIStore, useScenarioStore } from "@/store"; // Import useScenarioStore
 import { Scenario } from "@/types";
 import { Card } from "@/components/ui";
-import { EditScenarioModal, NewScenarioModal, ScenarioCard, ScenarioListItem, ScenariosHeader } from ".";
+
+import EditScenarioModal from "./modals/EditScenarioModal";
 import scenarioService, { ScenarioStats } from "../services/ScenarioService";
+import { NewScenarioModal, ScenarioCard, ScenarioListItem, ScenariosHeader } from ".";
 
 const ScenariosView: React.FC = () => {
-  // State for scenarios with statistics
+  // Stan dla scenariuszy ze statystykami
   const [scenariosWithStats, setScenariosWithStats] = useState<(Scenario & ScenarioStats)[]>([]);
   
-  // Getting UI state
+  // Pobieranie stanu UI
   const { viewMode, setActiveTab, toggleNewScenarioModal, setViewMode, showNewScenarioModal } = useUIStore();
+  
+  // Get the scenarios from the store directly
+  const { scenarios } = useScenarioStore();
 
   const navigate = useNavigate();
   const { lang } = useParams();
 
-  // Fetch scenarios with stats
+  // Pobieranie scenariuszy ze statystykami
   useEffect(() => {
     const fetchScenarios = () => {
       const scenarios = scenarioService.getAllScenariosWithStats();
@@ -26,14 +31,7 @@ const ScenariosView: React.FC = () => {
     };
     
     fetchScenarios();
-    
-    // We need to listen to scenario store changes
-    const unsubscribe = useScenarioStore.subscribe(fetchScenarios);
-    
-    return () => {
-      unsubscribe();
-    };
-  }, []);
+  }, [scenarios]); // Add scenarios as a dependency to re-run when it changes
 
   // Stan dla edycji scenariusza
   const [editScenario, setEditScenario] = useState<Scenario | null>(null);
@@ -51,7 +49,7 @@ const ScenariosView: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-colp bg-gray-50 flex-col">
+    <div className="flex-1 flex flex-col bg-gray-50">
       <ScenariosHeader
         viewMode={viewMode}
         setViewMode={setViewMode}

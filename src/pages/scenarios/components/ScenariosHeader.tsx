@@ -17,7 +17,7 @@ interface ScenariosHeaderProps {
   toggleNewScenarioModal: () => void;
 }
 
-export const ScenariosHeader: React.FC<ScenariosHeaderProps> = ({
+const ScenariosHeader: React.FC<ScenariosHeaderProps> = ({
   viewMode,
   setViewMode,
   toggleNewScenarioModal,

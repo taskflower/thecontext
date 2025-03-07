@@ -1,15 +1,14 @@
-// src/pages/scenarios/services/ScenarioService.ts
 import { useScenarioStore, useDataStore, useTaskStore } from "@/store";
 import { Scenario } from "@/types";
 
-// Type for service results
+// Type dla wyników serwisu
 type ServiceResult<T = void> = {
   success: boolean;
   data?: T;
   error?: string;
 };
 
-// Type for scenario statistics
+// Type dla statystyk scenariusza
 export type ScenarioStats = {
   totalTasks: number;
   completedTasks: number;
@@ -17,11 +16,11 @@ export type ScenarioStats = {
 };
 
 class ScenarioService {
-  // Get scenario statistics
+  // Pobieranie statystyk scenariusza
   getScenarioStats(scenarioId: string): ScenarioStats {
     const { tasks } = useTaskStore.getState();
     
-    // Filter tasks for this scenario
+    // Filtrowanie zadań dla tego scenariusza
     const scenarioTasks = tasks.filter(task => task.scenarioId === scenarioId);
     const completedTasks = scenarioTasks.filter(task => task.status === 'completed').length;
     const totalTasks = scenarioTasks.length;
@@ -34,13 +33,19 @@ class ScenarioService {
     };
   }
 
-  // Get scenario by ID
+  // Pobieranie scenariusza po ID
   getScenarioById(id: string): Scenario | undefined {
     const { scenarios } = useScenarioStore.getState();
     return scenarios.find(scenario => scenario.id === id);
   }
 
-  // Get scenario with calculated statistics
+  // Pobieranie zadań dla danego scenariusza
+  getScenarioTasks(scenarioId: string) {
+    const { tasks } = useTaskStore.getState();
+    return tasks.filter(t => t.scenarioId === scenarioId);
+  }
+
+  // Pobieranie scenariusza z obliczonymi statystykami
   getScenarioWithStats(id: string): (Scenario & ScenarioStats) | undefined {
     const scenario = this.getScenarioById(id);
     if (!scenario) return undefined;
@@ -52,7 +57,7 @@ class ScenarioService {
     };
   }
 
-  // Get all scenarios with calculated statistics
+  // Pobieranie wszystkich scenariuszy z obliczonymi statystykami
   getAllScenariosWithStats(): (Scenario & ScenarioStats)[] {
     const { scenarios } = useScenarioStore.getState();
     return scenarios.map(scenario => {
@@ -64,7 +69,7 @@ class ScenarioService {
     });
   }
 
-  // Get connected scenarios with stats
+  // Pobieranie połączonych scenariuszy z statystykami
   getConnectedScenarios(scenarioId: string): (Scenario & ScenarioStats)[] {
     const { scenarios } = useScenarioStore.getState();
     const scenario = this.getScenarioById(scenarioId);
@@ -84,7 +89,7 @@ class ScenarioService {
       });
   }
 
-  // Create new scenario
+  // Tworzenie nowego scenariusza
   createScenario(title: string, description: string, dueDate: string): ServiceResult<Scenario> {
     if (!title.trim()) {
       return { success: false, error: "Title is required" };
@@ -94,14 +99,14 @@ class ScenarioService {
       const { addScenario } = useScenarioStore.getState();
       const { addFolder } = useDataStore.getState();
       
-      // Create unique ID for scenario
+      // Tworzenie unikalnego ID dla scenariusza
       const id = crypto.randomUUID();
       
-      // Create associated folder
+      // Tworzenie powiązanego folderu
       const folderResult = addFolder({
         id: crypto.randomUUID(),
         name: title,
-        parentId: "scenarios" // Use the scenarios root folder
+        parentId: "scenarios" // Użyj głównego folderu scenariuszy
       });
       
       if (!folderResult.success) {
@@ -131,7 +136,7 @@ class ScenarioService {
     }
   }
 
-  // Update scenario
+  // Aktualizacja scenariusza
   updateScenario(id: string, updates: Partial<Scenario>): ServiceResult<Scenario> {
     try {
       const { updateScenario } = useScenarioStore.getState();
@@ -155,19 +160,19 @@ class ScenarioService {
     }
   }
 
-  // Delete scenario
+  // Usuwanie scenariusza
   deleteScenario(id: string): ServiceResult {
     try {
       const { deleteScenario } = useScenarioStore.getState();
       const { deleteFolder } = useDataStore.getState();
       
-      // Get scenario before deletion to access its folder
+      // Pobierz scenariusz przed usunięciem, aby uzyskać dostęp do jego folderu
       const scenario = this.getScenarioById(id);
       if (!scenario) {
         return { success: false, error: "Scenario not found" };
       }
       
-      // Delete associated folder if exists
+      // Usuń powiązany folder, jeśli istnieje
       if (scenario.folderId) {
         const folderResult = deleteFolder(scenario.folderId);
         if (!folderResult.success) {
@@ -175,7 +180,7 @@ class ScenarioService {
         }
       }
       
-      // Remove scenario from store
+      // Usuń scenariusz ze store
       const result = deleteScenario(id);
       if (!result) {
         return { success: false, error: "Failed to delete scenario" };
@@ -188,7 +193,7 @@ class ScenarioService {
     }
   }
 
-  // Connect scenarios
+  // Łączenie scenariuszy
   connectScenarios(
     sourceId: string, 
     targetId: string, 
@@ -203,13 +208,13 @@ class ScenarioService {
         return { success: false, error: "One or both scenarios not found" };
       }
       
-      // Add connection
+      // Dodaj połączenie
       const addResult = addConnection(sourceId, targetId);
       if (!addResult) {
         return { success: false, error: "Failed to create connection" };
       }
       
-      // Update connection type
+      // Aktualizuj typ połączenia
       const typeResult = updateConnectionType(sourceId, connectionType);
       if (!typeResult) {
         return { success: false, error: "Failed to set connection type" };
@@ -222,7 +227,7 @@ class ScenarioService {
     }
   }
 
-  // Remove connection between scenarios
+  // Usuwanie połączenia między scenariuszami
   removeScenarioConnection(sourceId: string, targetId: string): ServiceResult {
     try {
       const { removeConnection } = useScenarioStore.getState();
@@ -232,7 +237,7 @@ class ScenarioService {
         return { success: false, error: "Source scenario not found" };
       }
       
-      // Remove connection
+      // Usuń połączenie
       const result = removeConnection(sourceId, targetId);
       if (!result) {
         return { success: false, error: "Failed to remove connection" };
@@ -246,6 +251,6 @@ class ScenarioService {
   }
 }
 
-// Create and export a singleton instance
+// Utwórz i wyeksportuj singleton serwisu
 const scenarioService = new ScenarioService();
 export default scenarioService;

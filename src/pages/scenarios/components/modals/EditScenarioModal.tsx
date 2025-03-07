@@ -1,8 +1,8 @@
-// src/pages/scenarios/components/EditScenarioModal.tsx
+// src/pages/scenarios/components/modals/EditScenarioModal.tsx
 import { useState, useEffect } from "react";
 import { Scenario } from "@/types";
 import { FormModal, Input, Label, Textarea } from "@/components/ui";
-import scenarioService from "../services/ScenarioService";
+import scenarioService from "../../services/ScenarioService";
 import { useToast } from "@/hooks/useToast";
 
 interface EditScenarioModalProps {

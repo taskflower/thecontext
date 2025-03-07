@@ -1,10 +1,7 @@
-// src/pages/scenarios/components/details/ConnectionModal.tsx
 import { useState } from "react";
 import { FormModal } from "@/components/ui/form-modal";
-import { useScenarioStore } from "@/store";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui";
-
 import scenarioService from "../../services/ScenarioService";
 import { useToast } from "@/hooks/useToast";
 
@@ -19,7 +16,6 @@ const ConnectionModal: React.FC<ConnectionModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { scenarios } = useScenarioStore();
   const { toast } = useToast();
   const [targetScenarioId, setTargetScenarioId] = useState("");
   const [connectionType, setConnectionType] = useState("related");
@@ -27,10 +23,10 @@ const ConnectionModal: React.FC<ConnectionModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Pobieranie scenariusza i dostępnych połączeń przez serwis
-  // Używanie serwisu zamiast bezpośredniego dostępu do store
   const currentScenario = scenarioService.getScenarioById(scenarioId);
   const connectedIds = currentScenario?.connections || [];
-  const availableScenarios = scenarios.filter(
+  const allScenarios = scenarioService.getAllScenariosWithStats();
+  const availableScenarios = allScenarios.filter(
     (s) => s.id !== scenarioId && !connectedIds.includes(s.id)
   );
 

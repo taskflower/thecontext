@@ -1,4 +1,3 @@
-// src/pages/scenarios/components/ScenarioCard.tsx
 import { useState } from "react";
 import { Pencil, Trash2, FolderOpen, Link2, ExternalLink } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -28,7 +27,7 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
 
   const { toast } = useToast();
   
-  // Get statistics from the service
+  // Pobieranie statystyk przez serwis
   const { completedTasks, totalTasks, progress } = scenarioService.getScenarioStats(scenario.id);
   
   // Funkcje obsługujące akcje

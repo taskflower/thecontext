@@ -1,31 +1,32 @@
-// src/pages/scenarios/components/details/ScenarioLayout.tsx
 import React, { useState, useEffect } from "react";
 import { useParams, Outlet, NavLink } from "react-router-dom";
 import { AlertTriangle, ChevronLeft } from "lucide-react";
 import { Button, Card, CardContent } from "@/components/ui";
-import { useScenarioStore, useTaskStore } from "@/store";
-import { EditScenarioModal, ScenarioHeader } from "..";
+
 import { useAdminNavigate } from "@/hooks";
+
+import scenarioService from "../../services/ScenarioService";
+import { EditScenarioModal, ScenarioHeader } from "..";
 
 const ScenarioLayout: React.FC = () => {
   const { id, lang } = useParams<{ id: string; lang: string }>();
   const navigate = useAdminNavigate();
-  const { scenarios } = useScenarioStore();
-
-  // Edit modal state
+  
+  // Stan dla modalu edycji
   const [showEditModal, setShowEditModal] = useState(false);
+  
+  // Pobieranie scenariusza przez serwis
+  const scenario = id ? scenarioService.getScenarioById(id) : undefined;
+  const scenarioTasks = id ? scenarioService.getScenarioTasks(id) : [];
 
-  // Find scenario
-  const scenario = scenarios.find((s) => s.id === id);
-
-  // Handle scenario not found
+  // Obsługa przypadku, gdy scenariusz nie istnieje
   useEffect(() => {
     if (!scenario && id) {
       navigate("/scenarios");
     }
   }, [scenario, id, navigate]);
 
-  if (!scenario) {
+  if (!scenario || !id) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
         <Card className="w-full max-w-md shadow-lg">
@@ -48,25 +49,15 @@ const ScenarioLayout: React.FC = () => {
     );
   }
 
-  // Import TaskStore
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const { tasks } = useTaskStore();
-  
-  // Helper function to get count badge for tasks
-  const getTaskCount = () => {
-    const scenarioTasks = tasks.filter((t) => t.scenarioId === id);
-    return scenarioTasks.length;
-  };
-
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      {/* Header Component */}
+      {/* Nagłówek */}
       <ScenarioHeader
         scenario={scenario}
         onEditClick={() => setShowEditModal(true)}
       />
 
-      {/* Main Content */}
+      {/* Główna zawartość */}
       <main className="flex-1 overflow-auto p-4 mx-auto w-full">
         <div className="bg-white rounded-lg shadow-sm mb-6">
           <div className="w-full justify-start border-b p-1">
@@ -90,7 +81,7 @@ const ScenarioLayout: React.FC = () => {
                   }`
                 }
               >
-                Tasks <span className="ml-2 inline-flex items-center justify-center rounded-full bg-gray-100 px-2 py-1 text-xs">{getTaskCount()}</span>
+                Tasks <span className="ml-2 inline-flex items-center justify-center rounded-full bg-gray-100 px-2 py-1 text-xs">{scenarioTasks.length}</span>
               </NavLink>
               <NavLink
                 to={`/admin/${lang || 'en'}/scenarios/${id}/connections`}
@@ -106,11 +97,11 @@ const ScenarioLayout: React.FC = () => {
           </div>
         </div>
 
-        {/* Outlet for nested routes */}
+        {/* Outlet dla zagnieżdżonych tras */}
         <Outlet context={{ scenario }} />
       </main>
 
-      {/* Edit Modal */}
+      {/* Modal edycji */}
       {showEditModal && (
         <EditScenarioModal
           scenario={scenario}

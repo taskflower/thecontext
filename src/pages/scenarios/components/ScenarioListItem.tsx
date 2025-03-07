@@ -1,4 +1,3 @@
-// src/pages/scenarios/components/ScenarioListItem.tsx
 import { FolderOpen, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Scenario } from "@/types";
@@ -22,7 +21,7 @@ const ScenarioListItem: React.FC<ScenarioListItemProps> = ({
   const { folders } = useDataStore();
   const { toast } = useToast();
 
-  // Get statistics from the service
+  // Pobieranie statystyk przez serwis
   const { completedTasks, totalTasks, progress } = scenarioService.getScenarioStats(scenario.id);
 
   const handleViewFolder = (e: React.MouseEvent) => {

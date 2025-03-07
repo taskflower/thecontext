@@ -1,30 +1,28 @@
-// src/pages/scenarios/components/details/ScenarioConnectionsPanel.tsx
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Link2, Unlink, ExternalLink } from "lucide-react";
-import { useScenarioStore } from "@/store";
-import { ConnectionModal } from "..";
 import { Button, CardDescription, CardTitle, Progress } from "@/components/ui";
 import { ConnectionTypeBadge } from "@/components/status";
 import scenarioService from "../../services/ScenarioService";
+import ConnectionModal from "./ConnectionModal";
 import { useToast } from "@/hooks/useToast";
 
 interface ScenarioConnectionsPanelProps {
   scenarioId: string;
 }
 
-export const ScenarioConnectionsPanel: React.FC<
-  ScenarioConnectionsPanelProps
-> = ({ scenarioId }) => {
+const ScenarioConnectionsPanel: React.FC<ScenarioConnectionsPanelProps> = ({ 
+  scenarioId 
+}) => {
   const { lang } = useParams();
   const navigate = useNavigate();
-  const { scenarios } = useScenarioStore();
   const { toast } = useToast();
   const [showConnectionModal, setShowConnectionModal] = useState(false);
 
-  // Używanie serwisu do pobierania danych
+  // Pobieranie danych przez serwis
   const currentScenario = scenarioService.getScenarioById(scenarioId);
   const connectedScenarios = scenarioService.getConnectedScenarios(scenarioId);
+  const scenariosCount = scenarioService.getAllScenariosWithStats().length;
 
   if (!currentScenario) {
     return null;
@@ -64,7 +62,6 @@ export const ScenarioConnectionsPanel: React.FC<
   return (
     <>
       <div className="flex justify-between mb-6">
-        
         <div>
           <CardTitle className="text-xl font-bold">
             Connected Scenarios
@@ -76,7 +73,7 @@ export const ScenarioConnectionsPanel: React.FC<
         </div>
         <Button
           onClick={toggleConnectionModal}
-          disabled={scenarios.length <= 1}
+          disabled={scenariosCount <= 1}
         >
           <Link2 className="mr-2 h-4 w-4" />
           Connect Scenario
@@ -128,7 +125,7 @@ export const ScenarioConnectionsPanel: React.FC<
 
               <div className="mt-4 flex justify-between items-center">
                 <div className="text-sm text-muted-foreground">
-                  Tasks: {scenario.completedTasks}/{scenario.tasks}
+                  Tasks: {scenario.completedTasks}/{scenario.totalTasks}
                 </div>
                 <div className="flex space-x-2">
                   <Button

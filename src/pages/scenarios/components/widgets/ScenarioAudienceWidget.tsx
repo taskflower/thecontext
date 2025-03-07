@@ -1,8 +1,7 @@
-// src/pages/scenarios/components/details/widgets/ScenarioAudienceWidget.tsx
-import React from 'react';
-import { Target } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+// src/pages/scenarios/components/widgets/ScenarioAudienceWidget.tsx
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui';
 import { Scenario } from '@/types';
+import { Target } from 'lucide-react';
 
 interface ScenarioAudienceWidgetProps {
   scenario: Scenario;

@@ -1,20 +1,14 @@
-// src/pages/scenarios/components/details/ScenarioTasksPage.tsx
 import React from 'react';
-import { useParams, useOutletContext } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { AlertTriangle, Calendar } from "lucide-react";
 import { Badge, Button, Card, CardHeader, CardContent } from "@/components/ui";
-import { Scenario } from "@/types";
-import { useTaskStore } from "@/store";
-
-type ContextType = { scenario: Scenario };
+import scenarioService from "../services/ScenarioService";
 
 const ScenarioTasksPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  useOutletContext<ContextType>();
-  const { tasks } = useTaskStore();
   
-  // Filter related data
-  const scenarioTasks = tasks.filter((t) => t.scenarioId === id);
+  // Pobieranie zadań przez serwis
+  const scenarioTasks = id ? scenarioService.getScenarioTasks(id) : [];
 
   return (
     <Card className="shadow-sm">
