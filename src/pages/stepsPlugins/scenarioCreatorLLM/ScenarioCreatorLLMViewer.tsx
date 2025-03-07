@@ -2,26 +2,31 @@
 // src/pages/stepsPlugins/scenarioCreatorLLM/ScenarioCreatorLLMViewer.tsx
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Loader2, RefreshCw, Play, CheckCircle2, User } from 'lucide-react';
-import { ViewerProps } from '../types';
 import { ConversationItem } from '@/types';
 import { registerPluginHandler, unregisterPluginHandler } from '../pluginHandlers';
 
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
-import { Textarea } from '@/components/ui/textarea';
+import { useAuthState } from '@/hooks/useAuthState';
+import { useToast } from '@/hooks/useToast';
+import { ViewerProps } from '../types';
+
+// Import component parts
+import { PromptInput } from './components/PromptInput';
+import { ResponsePreview } from './components/ResponsePreview';
+import { ActionButtons } from './components/ActionButtons';
+import { CurrentMode } from './components/CurrentMode';
+import { ErrorDisplay } from './components/ErrorDisplay';
+
+// Import services
 import ScenarioBuilderService from './service/ScenarioBuilderService';
 import LLMService from './service/LLMService';
-import { useAuthState } from '@/hooks/useAuthState';
-import { Badge } from '@/components/ui/badge';
-
+import { LLMDocumentService } from './service/LLMDocumentService';
 
 export function ScenarioCreatorLLMViewer({ step, onComplete }: ViewerProps) {
   const [llmResponse, setLlmResponse] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [creationStatus, setCreationStatus] = useState<string>('idle');
+  const [saveStatus, setSaveStatus] = useState<string>('idle');
   const [prompt, setPrompt] = useState<string>('');
   const [results, setResults] = useState<{ 
     scenarios: any[], 
@@ -31,12 +36,20 @@ export function ScenarioCreatorLLMViewer({ step, onComplete }: ViewerProps) {
   
   // Get authenticated user information
   const { user, loading: authLoading } = useAuthState();
+  const { toast } = useToast();
 
   // Get configuration with defaults
   const config = step.config || {};
   const projectPrefix = config.projectPrefix || 'LLM Campaign';
   const inputPrompt = config.inputPrompt || '';
   const mockResponse = config.mockResponse !== undefined ? config.mockResponse : true;
+  const domainContext = config.domainContext || 'marketing';
+  const customSystemPrompt = config.customSystemPrompt || '';
+  const numberOfScenarios = config.numberOfScenarios || 3;
+  const enableAutoSave = config.enableAutoSave !== undefined ? config.enableAutoSave : true;
+
+  // Determine if custom domain is being used
+  const isDomainCustom = domainContext === 'custom' && !!customSystemPrompt;
 
   // Initialize the prompt from config
   useEffect(() => {
@@ -56,12 +69,12 @@ export function ScenarioCreatorLLMViewer({ step, onComplete }: ViewerProps) {
     }
   }, [user]);
 
-  // Call the LLM Service to get response
-  const fetchFromLLM = async () => {
+  // Call the LLM Service to get response with either the current prompt or a custom one
+  const fetchFromLLM = async (customPrompt?: string) => {
     setLoading(true);
     setError(null);
     
-    console.log("[DEBUG] Fetching from LLM, mockResponse:", mockResponse);
+    
     
     try {
       // Get auth token
@@ -69,15 +82,17 @@ export function ScenarioCreatorLLMViewer({ step, onComplete }: ViewerProps) {
       
       // Use the LLM service with auth token
       const response = await LLMService.generateContent({
-        prompt,
+        prompt: customPrompt || prompt,
         useMock: mockResponse,
         userId: user?.uid || "anonymous",
-        authToken: token
+        authToken: token,
+        domainContext,
+        customSystemPrompt,
+        numberOfScenarios
       });
       
       setLlmResponse(response);
     } catch (err) {
-      console.error("[DEBUG] Error in fetchFromLLM:", err);
       setError(`Error fetching from LLM: ${(err as Error).message}`);
     } finally {
       setLoading(false);
@@ -124,11 +139,81 @@ export function ScenarioCreatorLLMViewer({ step, onComplete }: ViewerProps) {
       }, conversationData);
       
       setCreationStatus('completed');
+
+      // Auto-save to documents if enabled
+      if (enableAutoSave) {
+        await handleSaveToDocuments();
+      }
     } catch (error) {
       console.error("Error creating elements:", error);
       setError(`Error creating content: ${(error as Error).message}`);
       setCreationStatus('error');
     }
+  };
+  
+  // Save LLM response to documents
+  const handleSaveToDocuments = async () => {
+    if (!llmResponse) {
+      setError("No LLM response available to save.");
+      return;
+    }
+    
+    setSaveStatus('processing');
+    
+    try {
+      let result;
+      
+      // If we have created scenarios, save one document for each scenario
+      if (results.scenarios.length > 0) {
+        const scenarioIds = results.scenarios.map(s => s.id);
+        result = LLMDocumentService.saveResponseToMultipleDocuments(
+          llmResponse,
+          prompt,
+          scenarioIds
+        );
+        
+        if (result.successCount > 0) {
+          toast({
+            title: "Success",
+            description: `Saved LLM response to ${result.successCount} scenario document(s)`,
+            variant: "default"
+          });
+          setSaveStatus('completed');
+        } else {
+          setError("Failed to save any documents: " + result.errors.join(", "));
+          setSaveStatus('error');
+        }
+      } else {
+        // Otherwise, save one document in the main scenarios folder
+        result = LLMDocumentService.saveResponseToDocument(
+          llmResponse,
+          prompt,
+          'scenarios' // Use the scenarios folder as default
+        );
+        
+        if (result.success) {
+          toast({
+            title: "Success",
+            description: "Saved LLM response to documents",
+            variant: "default"
+          });
+          setSaveStatus('completed');
+        } else {
+          setError("Failed to save document: " + result.error);
+          setSaveStatus('error');
+        }
+      }
+    } catch (error) {
+      console.error("Error saving to documents:", error);
+      setError(`Error saving document: ${(error as Error).message}`);
+      setSaveStatus('error');
+    }
+  };
+
+  // Handle prompt submission from the PromptInput component
+  const handlePromptSubmit = (newPrompt: string) => {
+    setPrompt(newPrompt);
+    fetchFromLLM(newPrompt);
   };
   
   // Register plugin handler
@@ -155,117 +240,44 @@ export function ScenarioCreatorLLMViewer({ step, onComplete }: ViewerProps) {
         <CardDescription>
           {step.description || 'Generate scenarios, tasks, and steps using LLM'}
         </CardDescription>
-        
-        {/* Display current user information */}
-        {!authLoading && (
-          <div className="flex items-center mt-2 text-sm">
-            <User size={16} className="mr-1" />
-            <span className="font-medium mr-2">Current user:</span>
-            {user ? (
-              <Badge variant="outline" className="ml-1">
-                {user.email} (ID: {user.uid})
-              </Badge>
-            ) : (
-              <Badge variant="outline" className="bg-yellow-50">Not authenticated</Badge>
-            )}
-          </div>
-        )}
       </CardHeader>
       
-      <CardContent className="space-y-4">
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+      <CardContent className="space-y-6">
+        <ErrorDisplay error={error} />
         
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Prompt for LLM</label>
-          <Textarea 
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Describe what type of scenarios you want to generate"
-            disabled={loading || creationStatus === 'processing'}
-            className="min-h-[100px]"
-          />
-          <p className="text-xs text-muted-foreground">
-            The prompt will be sent to the LLM to generate scenarios, tasks, and steps
-          </p>
-        </div>
+        <PromptInput 
+          initialPrompt={prompt}
+          onSubmit={handlePromptSubmit}
+          isDisabled={loading || creationStatus === 'processing'}
+          isDomainCustom={isDomainCustom}
+          domainContext={domainContext}
+        />
         
-        {/* Display current mode */}
-        <Alert className="bg-blue-50">
-          <div className="text-sm">
-            <span className="font-medium">Current mode: </span>
-            {mockResponse ? "Using mock data" : "Using LLM API"}
-          </div>
-        </Alert>
+        <CurrentMode 
+          mockResponse={mockResponse}
+          user={user}
+          authLoading={authLoading}
+        />
         
         {llmResponse && (
-          <div className="border rounded-md p-4 bg-muted/20">
-            <h3 className="text-sm font-medium mb-2">LLM Generated Content Preview</h3>
-            <div className="space-y-2 text-sm">
-              <div>
-                <span className="font-medium">Scenarios:</span> {llmResponse.scenarios.length}
-              </div>
-              <div>
-                <span className="font-medium">Tasks:</span> {(llmResponse.tasks || []).length}
-              </div>
-              <div>
-                <span className="font-medium">Steps:</span> {(llmResponse.steps || []).length}
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {creationStatus === 'completed' && (
-          <Alert className="bg-green-50 border-green-200 text-green-800">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-800">
-              Successfully created {results.scenarios.length} scenarios, 
-              {results.tasks.length} tasks, and 
-              {results.steps.length} steps.
-            </AlertDescription>
-          </Alert>
+          <ResponsePreview 
+            llmResponse={llmResponse}
+            creationStatus={creationStatus}
+            results={results}
+          />
         )}
       </CardContent>
       
-      <CardFooter className="flex justify-between">
-        <Button 
-          variant="outline" 
-          onClick={fetchFromLLM}
-          disabled={loading || creationStatus === 'processing'}
-        >
-          {loading ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              Generating...
-            </>
-          ) : (
-            <>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Generate Content
-            </>
-          )}
-        </Button>
-        
-        <Button 
-          onClick={handleCreateAll}
-          disabled={loading || !llmResponse || creationStatus === 'processing' || creationStatus === 'completed'}
-        >
-          {creationStatus === 'processing' ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              Creating...
-            </>
-          ) : (
-            <>
-              <Play className="h-4 w-4 mr-2" />
-              Create All
-            </>
-          )}
-        </Button>
+      <CardFooter>
+        <ActionButtons 
+          loading={loading}
+          fetchFromLLM={() => fetchFromLLM()}
+          handleCreateAll={handleCreateAll}
+          handleSaveToDocuments={handleSaveToDocuments}
+          llmResponse={llmResponse}
+          creationStatus={creationStatus}
+          saveStatus={saveStatus}
+        />
       </CardFooter>
     </Card>
   );

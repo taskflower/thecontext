@@ -1,4 +1,3 @@
-// src/components/ui/form-modal.tsx
 import React, { ReactNode } from "react";
 import {
   Dialog,
@@ -67,13 +66,13 @@ export function FormModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className={sizeClasses[size]}>
+      <DialogContent className={`${sizeClasses[size]} max-h-[90vh] overflow-hidden flex flex-col`}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
 
-        <form onSubmit={onSubmit}>
+        <form onSubmit={onSubmit} className="flex flex-col flex-1 overflow-hidden">
           {error && (
             <Alert variant="destructive" className="mb-4">
               <AlertCircle className="h-4 w-4" />
@@ -81,7 +80,7 @@ export function FormModal({
             </Alert>
           )}
 
-          <div className="space-y-4 py-2">{children}</div>
+          <div className="space-y-4 py-2 flex-1 overflow-y-auto">{children}</div>
 
           <DialogFooter className="mt-4">
             <Button type="button" variant="outline" onClick={onClose}>

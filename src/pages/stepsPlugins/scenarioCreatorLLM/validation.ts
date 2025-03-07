@@ -13,7 +13,11 @@ export const scenarioCreatorLLMSchema = z.object({
   config: z.object({
     projectPrefix: z.string().optional().default('LLM Campaign'),
     inputPrompt: z.string().optional().default('Generate 3 marketing scenarios for a new product launch'),
-    mockResponse: z.boolean().optional().default(true)
+    mockResponse: z.boolean().optional().default(true),
+    domainContext: z.string().optional().default('marketing'),
+    customSystemPrompt: z.string().optional().default(''),
+    numberOfScenarios: z.number().int().min(1).max(10).optional().default(3),
+    enableAutoSave: z.boolean().optional().default(true)
   }).optional().default({}),
   result: z.object({
     createdScenarios: z.array(z.any()).optional(),

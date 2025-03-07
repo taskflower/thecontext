@@ -5,6 +5,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { EditorProps } from '../types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 
 export function ScenarioCreatorLLMEditor({ step, onChange }: EditorProps) {
   const config = step.config || {};
@@ -19,7 +21,7 @@ export function ScenarioCreatorLLMEditor({ step, onChange }: EditorProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="grid gap-2">
         <Label htmlFor="title">Step Title</Label>
         <Input 
@@ -38,6 +40,8 @@ export function ScenarioCreatorLLMEditor({ step, onChange }: EditorProps) {
         />
       </div>
 
+      <Separator className="my-4" />
+      
       <div className="grid gap-2">
         <Label htmlFor="inputPrompt">LLM Prompt</Label>
         <Textarea 
@@ -65,6 +69,9 @@ export function ScenarioCreatorLLMEditor({ step, onChange }: EditorProps) {
         </p>
       </div>
 
+      <Separator className="my-4" />
+      <h3 className="text-sm font-medium mb-4">Advanced Settings</h3>
+
       <div className="grid gap-2">
         <Label htmlFor="mockResponse" className="flex items-center justify-between">
           Use Mock Response
@@ -72,7 +79,6 @@ export function ScenarioCreatorLLMEditor({ step, onChange }: EditorProps) {
             id="mockResponse"
             checked={config.mockResponse !== false}
             onCheckedChange={(checked) => {
-              console.log("Setting mockResponse to:", checked);
               updateConfig("mockResponse", checked);
             }}
           />
@@ -80,6 +86,83 @@ export function ScenarioCreatorLLMEditor({ step, onChange }: EditorProps) {
         <p className="text-xs text-muted-foreground">
           When turned on: Uses pre-defined sample response instead of calling LLM API.
           When turned off: Makes a real API call to the LLM service.
+        </p>
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="domainContext">Domain Context</Label>
+        <Select
+          value={config.domainContext || 'marketing'}
+          onValueChange={(value) => updateConfig("domainContext", value)}
+        >
+          <SelectTrigger id="domainContext">
+            <SelectValue placeholder="Select a domain" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="marketing">Marketing</SelectItem>
+            <SelectItem value="software">Software Development</SelectItem>
+            <SelectItem value="productdev">Product Development</SelectItem>
+            <SelectItem value="research">Research</SelectItem>
+            <SelectItem value="education">Education</SelectItem>
+            <SelectItem value="custom">Custom</SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground">
+          The domain context for the generated scenarios
+        </p>
+      </div>
+
+      {config.domainContext === 'custom' && (
+        <div className="grid gap-2">
+          <Label htmlFor="customSystemPrompt">Custom System Prompt</Label>
+          <Textarea
+            id="customSystemPrompt"
+            value={config.customSystemPrompt || ''}
+            onChange={(e) => updateConfig("customSystemPrompt", e.target.value)}
+            placeholder="You are an AI assistant specialized in..."
+            className="min-h-[100px]"
+          />
+          <p className="text-xs text-muted-foreground">
+            Custom system prompt to use with the LLM
+          </p>
+        </div>
+      )}
+
+      <div className="grid gap-2">
+        <Label htmlFor="numberOfScenarios">Number of Scenarios</Label>
+        <Select
+          value={config.numberOfScenarios?.toString() || '3'}
+          onValueChange={(value) => updateConfig("numberOfScenarios", parseInt(value))}
+        >
+          <SelectTrigger id="numberOfScenarios">
+            <SelectValue placeholder="Number of scenarios" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="1">1</SelectItem>
+            <SelectItem value="2">2</SelectItem>
+            <SelectItem value="3">3</SelectItem>
+            <SelectItem value="4">4</SelectItem>
+            <SelectItem value="5">5</SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground">
+          How many scenarios to generate
+        </p>
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="enableAutoSave" className="flex items-center justify-between">
+          Auto-save Results to Documents
+          <Switch
+            id="enableAutoSave"
+            checked={config.enableAutoSave !== false}
+            onCheckedChange={(checked) => {
+              updateConfig("enableAutoSave", checked);
+            }}
+          />
+        </Label>
+        <p className="text-xs text-muted-foreground">
+          Automatically save LLM response to documents when scenarios are created
         </p>
       </div>
     </div>
