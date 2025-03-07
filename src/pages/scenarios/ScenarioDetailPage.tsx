@@ -1,5 +1,6 @@
+// src/pages/scenarios/components/details/ScenarioDetailPage.tsx
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation, Link } from "react-router-dom";
 import { AlertTriangle, Calendar, ChevronLeft } from "lucide-react";
 import {
   Badge,
@@ -17,21 +18,32 @@ import {
   EditScenarioModal,
   ScenarioConnectionsPanel,
   ScenarioHeader,
-} from "..";
+} from "./components";
 
-import { ScenarioAudienceWidget } from "../widgets/ScenarioAudienceWidget";
-import { ScenarioChannelsWidget } from "../widgets/ScenarioChannelsWidget";
-import { ScenarioDescriptionWidget } from "../widgets/ScenarioDescriptionWidget";
-import { ScenarioMilestonesWidget } from "../widgets/ScenarioMilestonesWidget";
-import { ScenarioProgressWidget } from "../widgets/ScenarioProgressWidget";
-import { ScenarioStatusWidget } from "../widgets/ScenarioStatusWidget";
+import { ScenarioAudienceWidget } from "./components/widgets/ScenarioAudienceWidget";
+import { ScenarioChannelsWidget } from "./components/widgets/ScenarioChannelsWidget";
+import { ScenarioDescriptionWidget } from "./components/widgets/ScenarioDescriptionWidget";
+import { ScenarioMilestonesWidget } from "./components/widgets/ScenarioMilestonesWidget";
+import { ScenarioProgressWidget } from "./components/widgets/ScenarioProgressWidget";
+import { ScenarioStatusWidget } from "./components/widgets/ScenarioStatusWidget";
 import { useAdminNavigate } from "@/hooks";
 
 const ScenarioDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useAdminNavigate();
+  const location = useLocation();
+  const { lang } = useParams<{ lang: string }>();
   const { tasks } = useTaskStore();
   const { scenarios } = useScenarioStore();
+
+  // Determine active tab from URL
+  const getActiveTab = () => {
+    if (location.pathname.endsWith('/tasks')) return "tasks";
+    if (location.pathname.endsWith('/connections')) return "connections";
+    return "overview";
+  };
+  
+  const activeTab = getActiveTab();
 
   // Edit modal state
   const [showEditModal, setShowEditModal] = useState(false);
@@ -79,15 +91,34 @@ const ScenarioDetailPage: React.FC = () => {
       />
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto p-4  mx-auto w-full">
-        <Tabs defaultValue="overview" className="w-full">
+      <main className="flex-1 overflow-auto p-4 mx-auto w-full">
+        <Tabs value={activeTab} className="w-full">
           <div className="bg-white rounded-lg shadow-sm mb-6">
             <TabsList className="w-full justify-start border-b p-1">
-              <TabsTrigger value="overview" className="flex-1 max-w-[180px]">Overview</TabsTrigger>
-              <TabsTrigger value="tasks" className="flex-1 max-w-[180px]">
-                Tasks <span className="ml-2 inline-flex items-center justify-center rounded-full bg-gray-100 px-2 py-1 text-xs">{scenarioTasks.length}</span>
-              </TabsTrigger>
-              <TabsTrigger value="connections" className="flex-1 max-w-[180px]">Connections</TabsTrigger>
+              <Link to={`/admin/${lang}/scenarios/${id}`} className="flex-1 max-w-[180px]">
+                <TabsTrigger 
+                  value="overview" 
+                  className={`w-full ${activeTab === "overview" ? "data-[state=active]" : ""}`}
+                >
+                  Overview
+                </TabsTrigger>
+              </Link>
+              <Link to={`/admin/${lang}/scenarios/${id}/tasks`} className="flex-1 max-w-[180px]">
+                <TabsTrigger 
+                  value="tasks" 
+                  className={`w-full ${activeTab === "tasks" ? "data-[state=active]" : ""}`}
+                >
+                  Tasks <span className="ml-2 inline-flex items-center justify-center rounded-full bg-gray-100 px-2 py-1 text-xs">{scenarioTasks.length}</span>
+                </TabsTrigger>
+              </Link>
+              <Link to={`/admin/${lang}/scenarios/${id}/connections`} className="flex-1 max-w-[180px]">
+                <TabsTrigger 
+                  value="connections" 
+                  className={`w-full ${activeTab === "connections" ? "data-[state=active]" : ""}`}
+                >
+                  Connections
+                </TabsTrigger>
+              </Link>
             </TabsList>
           </div>
 
