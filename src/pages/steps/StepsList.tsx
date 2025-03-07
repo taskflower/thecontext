@@ -1,5 +1,5 @@
 // src/pages/steps/StepsList.tsx
-import { Plus, Edit, PlayCircle } from "lucide-react";
+import { Plus, Edit, PlayCircle, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -25,22 +25,42 @@ export function StepsList({
   onEditStep,
 }: StepsListProps) {
   const { openWizard } = useWizardStore();
+  const sortedSteps = [...steps].sort((a, b) => a.order - b.order);
 
   const handleExecuteStep = (stepId: string) => {
-    // Wykorzystanie StepService zamiast bezpośredniego otwierania wizarda
+    // Use StepService instead of directly opening the wizard
     const success = stepService.executeStep(stepId);
     
-    // Jeśli StepService nie może automatycznie wykonać kroku,
-    // otwieramy wizard ręcznie
+    // If StepService cannot automatically execute the step,
+    // we manually open the wizard
     if (!success) {
       openWizard(taskId, stepId);
     }
   };
 
-  // Funkcja do zmiany kolejności kroków - zakomentowana do przyszłej implementacji drag&drop
-  // const handleReorderSteps = (stepIds: string[]) => {
-  //   stepService.reorderSteps(taskId, stepIds);
-  // };
+  // Handle step reordering
+  const handleMoveStep = (stepId: string, direction: 'up' | 'down') => {
+    const currentIndex = sortedSteps.findIndex(step => step.id === stepId);
+    if (currentIndex < 0) return;
+    
+    // Calculate target index
+    const targetIndex = direction === 'up' 
+      ? Math.max(0, currentIndex - 1)
+      : Math.min(sortedSteps.length - 1, currentIndex + 1);
+      
+    // Don't do anything if we're already at the boundary
+    if (targetIndex === currentIndex) return;
+    
+    // Create new order of step IDs
+    const newOrder = [...sortedSteps.map(step => step.id)];
+    
+    // Swap the positions
+    [newOrder[currentIndex], newOrder[targetIndex]] = 
+      [newOrder[targetIndex], newOrder[currentIndex]];
+    
+    // Update the order through service
+    stepService.reorderSteps(taskId, newOrder);
+  };
 
   return (
     <div>
@@ -54,18 +74,22 @@ export function StepsList({
 
       <ScrollArea className="h-full">
         <div className="space-y-3 bg-background">
-          {steps.length === 0 ? (
+          {sortedSteps.length === 0 ? (
             <div className="py-4 text-center text-sm text-muted-foreground border rounded-md">
               No steps defined yet. Add steps to complete this task.
             </div>
           ) : (
-            steps.map((step, index) => (
+            sortedSteps.map((step, index) => (
               <StepItem
                 key={step.id}
                 step={step}
                 index={index}
+                isFirst={index === 0}
+                isLast={index === sortedSteps.length - 1}
                 onEdit={() => onEditStep(index)}
                 onExecute={() => handleExecuteStep(step.id)}
+                onMoveUp={() => handleMoveStep(step.id, 'up')}
+                onMoveDown={() => handleMoveStep(step.id, 'down')}
               />
             ))
           )}
@@ -78,11 +102,24 @@ export function StepsList({
 interface StepItemProps {
   step: Step;
   index: number;
+  isFirst: boolean;
+  isLast: boolean;
   onEdit: () => void;
   onExecute: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
 }
 
-function StepItem({ step, index, onEdit, onExecute }: StepItemProps) {
+function StepItem({ 
+  step, 
+  index, 
+  isFirst, 
+  isLast, 
+  onEdit, 
+  onExecute, 
+  onMoveUp, 
+  onMoveDown 
+}: StepItemProps) {
   const plugin = getPlugin(step.type);
   const stepName = plugin?.name || "Unknown Step";
 
@@ -105,6 +142,31 @@ function StepItem({ step, index, onEdit, onExecute }: StepItemProps) {
               <StepTypeIcon type={step.type} size={14} />
               {stepName}
             </Badge>
+            
+            {/* Reordering buttons - now horizontal */}
+            <div className="flex flex-row">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={onMoveUp}
+                disabled={isFirst}
+                title="Move step up"
+              >
+                <ArrowUp className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={onMoveDown}
+                disabled={isLast}
+                title="Move step down"
+              >
+                <ArrowDown className="h-4 w-4" />
+              </Button>
+            </div>
+            
             <Button
               variant="outline"
               size="icon"
