@@ -1,5 +1,5 @@
-// src/pages/stepsPlugins/textInput/TextInputViewer.tsx
-import React, { useState, useEffect, useRef } from "react";
+// src/plugins/textInput/TextInputViewer.tsx
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -13,31 +13,34 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
-import { ViewerProps } from "../types";
-import { ConversationItem } from "@/types";
-import {
-  registerPluginHandler,
-  unregisterPluginHandler,
-} from "../pluginHandlers";
+import { StepViewerProps } from "../types";
+import { useStepExecution } from "../useStepExecution";
 
-export function TextInputViewer({ step, onComplete }: ViewerProps) {
-  const isMounted = useRef(true);
+export function TextInputViewer({ step, context, onComplete, onError }: StepViewerProps) {
   const [value, setValue] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
+  // Uzyskaj funkcje do obsługi wykonania kroku
+  const { completeStep, errorStep } = useStepExecution({
+    step, 
+    context, 
+    onComplete, 
+    onError
+  });
+
   const {
-    placeholder = "Enter your text here...",
+    placeholder = "Wprowadź tekst...",
     minLength = 0,
     maxLength = 1000,
     required = true,
     multiline = true,
     rows = 6,
     label = "",
-  } = step.config || {};
+  } = step.data || {};
 
+  // Inicjalizacja - jeśli krok ma już wynik, ustaw wartość
   useEffect(() => {
-    isMounted.current = true;
     if (step.result?.value) {
       setValue(step.result.value);
     } else {
@@ -45,11 +48,9 @@ export function TextInputViewer({ step, onComplete }: ViewerProps) {
     }
     setError(null);
     setLoading(false);
-    return () => {
-      isMounted.current = false;
-    };
   }, [step.id, step.result?.value]);
 
+  // Obsługa zmiany wartości
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -57,6 +58,7 @@ export function TextInputViewer({ step, onComplete }: ViewerProps) {
     setError(null);
   };
 
+  // Walidacja wprowadzonego tekstu
   const validateInput = (): boolean => {
     if (required && !value.trim()) {
       setError("To pole jest wymagane");
@@ -74,50 +76,21 @@ export function TextInputViewer({ step, onComplete }: ViewerProps) {
     return true;
   };
 
+  // Obsługa zatwierdzenia
   const handleSubmit = () => {
     setError(null);
     if (!validateInput()) {
       return;
     }
+    
     setLoading(true);
-    const conversationData: ConversationItem[] = [
-      { role: "assistant", content: label || "Brak etykiety" },
-      { role: "user", content: value },
-    ];
-    onComplete(
-      {
-        value,
-        timestamp: new Date().toISOString(),
-      },
-      conversationData
+    
+    // Zatwierdź krok z wartością jako wynikiem
+    completeStep(
+      { value }, // wynik
+      { [`${step.id}_value`]: value } // aktualizacja kontekstu zadania
     );
   };
-
-  useEffect(() => {
-    const validationHandler = () => {
-      if (isMounted.current) {
-        setError(null);
-        if (validateInput()) {
-          setLoading(true);
-          const conversationData: ConversationItem[] = [
-            { role: "user", content: value },
-            { role: "assistant", content: label || "Brak etykiety" },
-          ];
-          onComplete(
-            {
-              value,
-              timestamp: new Date().toISOString(),
-            },
-            conversationData
-          );
-        }
-      }
-    };
-    registerPluginHandler(step.id, validationHandler);
-    return () => {
-      unregisterPluginHandler(step.id);
-    };
-  }, [step.id, value, required, minLength, maxLength, onComplete, label]);
 
   const renderCharCount = () => {
     if (minLength <= 0 && maxLength <= 0) return null;
@@ -140,7 +113,7 @@ export function TextInputViewer({ step, onComplete }: ViewerProps) {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-xl font-semibold">{step.title || "Text Input"}</CardTitle>
+        <CardTitle className="text-xl font-medium">{step.title || "Pole tekstowe"}</CardTitle>
         {step.description && (
           <CardDescription className="text-sm mt-1">{step.description}</CardDescription>
         )}

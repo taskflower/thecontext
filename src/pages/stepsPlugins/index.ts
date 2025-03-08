@@ -9,4 +9,5 @@ import './boilerplate_action/index';
 import './boilerplate_reference/index';
 import './textInput/index';
 import './scenarioCreatorLLM/index'
+import './llmQuery/index'
 

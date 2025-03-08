@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "messages:extract": "lingui extract"
+    "messages:extract": "lingui extract",
+    "build:plugins": "node scripts/build-plugins.js",
+    "dev:plugins": "vite --config vite.plugin.config.js --watch"
   },
   "dependencies": {
     "@lingui/macro": "^4.10.1",

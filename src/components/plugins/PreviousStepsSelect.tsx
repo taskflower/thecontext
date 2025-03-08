@@ -14,6 +14,8 @@ export interface PreviousStepsSelectProps {
   label?: string;
   placeholder?: string;
   required?: boolean;
+  // Nowy parametr, który określa czy krok musi być zakończony
+  requireCompleted?: boolean;
 }
 
 /**
@@ -26,7 +28,9 @@ export function PreviousStepsSelect({
   onChange,
   label = "Referenced Step",
   placeholder = "Select a step",
-  required = false
+  required = false,
+  // Domyślnie nie wymagamy ukończonego kroku
+  requireCompleted = false
 }: PreviousStepsSelectProps) {
   const [availableSteps, setAvailableSteps] = useState<Array<{id: string, title: string, status: string}>>([]);
   const [error, setError] = useState<string | null>(null);
@@ -72,22 +76,27 @@ export function PreviousStepsSelect({
       return;
     }
 
-    // Check if the selected step exists and has a result
+    // Check if the selected step exists
     if (value && value !== 'no-steps-available') {
       const stepStore = useStepStore.getState();
       const referencedStep = stepStore.getStepById(value);
       
       if (!referencedStep) {
         setError("The referenced step no longer exists");
-      } else if (referencedStep.status !== 'completed') {
-        setError("The referenced step has not been completed yet");
-      } else if (!referencedStep.result) {
-        setError("The referenced step has no result data yet");
-      } else {
+      } 
+      // Sprawdzamy wymagania dla zakończonych kroków tylko jeśli requireCompleted=true
+      else if (requireCompleted && referencedStep.status !== 'completed') {
+        setError("The referenced step has not been completed yet (wymagane ukończone)");
+      } 
+      // Sprawdzamy wynik tylko jeśli requireCompleted=true
+      else if (requireCompleted && !referencedStep.result) {
+        setError("The referenced step has no result data yet (wymagany wynik)");
+      } 
+      else {
         setError(null);
       }
     }
-  }, [value, required]);
+  }, [value, required, requireCompleted]);
 
   return (
     <div className="grid gap-2">
@@ -116,10 +125,11 @@ export function PreviousStepsSelect({
               <SelectItem 
                 key={availableStep.id} 
                 value={availableStep.id}
-                disabled={availableStep.status !== 'completed'}
+                // Blokujemy wybór tylko jeśli requireCompleted=true i krok nie jest ukończony
+                disabled={requireCompleted && availableStep.status !== 'completed'}
               >
                 {availableStep.title}
-                {availableStep.status !== 'completed' && " (not completed)"}
+                {requireCompleted && availableStep.status !== 'completed' && " (not completed)"}
               </SelectItem>
             ))
           ) : (
@@ -142,7 +152,7 @@ export function PreviousStepsSelect({
 }
 
 // Export validation function for use in plugins
-export function validateStepReference(stepId: string, required = true): { 
+export function validateStepReference(stepId: string, required = true, requireCompleted = false): { 
   isValid: boolean; 
   errorMessage?: string 
 } {
@@ -167,14 +177,16 @@ export function validateStepReference(stepId: string, required = true): {
     };
   }
   
-  if (referencedStep.status !== 'completed') {
+  // Sprawdzamy tylko jeśli requireCompleted=true
+  if (requireCompleted && referencedStep.status !== 'completed') {
     return { 
       isValid: false, 
       errorMessage: "The referenced step has not been completed yet" 
     };
   }
   
-  if (!referencedStep.result) {
+  // Sprawdzamy tylko jeśli requireCompleted=true
+  if (requireCompleted && !referencedStep.result) {
     return { 
       isValid: false, 
       errorMessage: "The referenced step has no result data yet" 
@@ -185,9 +197,10 @@ export function validateStepReference(stepId: string, required = true): {
 }
 
 // Export helper function to get data from a step
-export function getStepData(stepId: string): {
+export function getStepData(stepId: string, requireCompleted = false): {
   data: any | null;
   title: string;
+  step?: any;
   error?: string;
 } {
   if (!stepId) {
@@ -209,24 +222,28 @@ export function getStepData(stepId: string): {
     };
   }
   
-  if (step.status !== 'completed') {
+  // Zwracamy informację o kroku, nawet jeśli nie jest ukończony
+  const baseResult = {
+    data: step.result || null,
+    title: step.title || `Step ${step.order}`,
+    step: step
+  };
+  
+  // Jeśli wymagamy zakończenia kroku, dodajemy błąd, ale i tak zwracamy podstawowe dane
+  if (requireCompleted && step.status !== 'completed') {
     return { 
-      data: null, 
-      title: step.title || `Step ${step.order}`, 
+      ...baseResult,
       error: "Step not completed" 
     };
   }
   
-  if (!step.result) {
+  // Jeśli wymagamy wyniku i go nie ma, dodajemy błąd, ale i tak zwracamy podstawowe dane o kroku
+  if (requireCompleted && !step.result) {
     return { 
-      data: null, 
-      title: step.title || `Step ${step.order}`, 
+      ...baseResult,
       error: "No result data available" 
     };
   }
   
-  return {
-    data: step.result,
-    title: step.title || `Step ${step.order}`
-  };
+  return baseResult;
 }

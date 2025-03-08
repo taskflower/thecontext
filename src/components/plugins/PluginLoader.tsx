@@ -46,7 +46,7 @@ export default function PluginLoaderToast() {
       {/* Nagłówek */}
       <div className="px-4 py-3 bg-black text-white flex justify-between items-center">
         <div className="flex items-center">
-          <span className="font-medium">Ładowanie pluginów</span>
+          <span className="text-xs font-medium">Ładowanie pluginów</span>
           <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-white text-black">
             {loadedCount}/{totalCount}
           </span>

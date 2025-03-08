@@ -1,92 +1,28 @@
-Kurwa, to proste jak drut.
 
-Na LLM Response:
-- Nazwij: "Wygeneruj Kurwa Scenariusze"
-- Opis: "Generuje przykładowe scenariusze marketingowe"
-- Prompt:
-```
-Wygeneruj 5 scenariuszy marketingowych dla projektu: "{{projectName}}". 
-Każdy musi mieć:
-- tytuł
-- opis (1-2 zdania)
-- cel (konkretny)
-- powiązania między scenariuszami
-Każdy scenariusz inny focus: strategia contentu, social media, analityka, angażowanie odbiorców i świadomość marki.
-Zwróć jako JSON z tablicą scenariuszy.
-```
-- Mock Response: Tak
-- Format odpowiedzi: JSON
-- Przykładowa odpowiedź:
-```json
-{
-  "scenarios": [
-    {
-      "id": "scenario-1",
-      "title": "Strategia Contentu",
-      "description": "Stwórz plan contentu celujący w główne segmenty odbiorców.",
-      "objective": "Zwiększenie ruchu o 30% w 3 miesiące",
-      "connections": ["scenario-2", "scenario-5"]
-    },
-    {
-      "id": "scenario-2",
-      "title": "Kampania Social Media",
-      "description": "Ogarnij kampanię na Insta, Twitter i LinkedIn.",
-      "objective": "15% zaangażowania i 5000 nowych followersów",
-      "connections": ["scenario-1"]
-    },
-    {
-      "id": "scenario-3",
-      "title": "Wdrożenie Analityki",
-      "description": "Ustaw tracking i raportowanie dla wszystkich inicjatyw.",
-      "objective": "Dashboard z KPI w czasie rzeczywistym",
-      "connections": ["scenario-4"]
-    },
-    {
-      "id": "scenario-4",
-      "title": "Strategia Zaangażowania",
-      "description": "Stwórz interaktywny content i inicjatywy budujące społeczność.",
-      "objective": "Zwiększ czas na stronie o 25%",
-      "connections": ["scenario-3", "scenario-5"]
-    },
-    {
-      "id": "scenario-5",
-      "title": "Kampania Świadomości Marki",
-      "description": "Odpal kampanię multi-channel dla zwiększenia widoczności.",
-      "objective": "Popraw metryki rozpoznawalności o 20%",
-      "connections": ["scenario-1", "scenario-4"]
-    }
-  ]
-}
-```
+Specyfikacja:
 
-Na Store Injector:
-- Nazwij: "Zapisz Te Jebane Scenariusze"
-- Opis: "Sprawdź i zapisz wygenerowane scenariusze"
-- Typ encji: scenario
-- Źródło: [ID twojego kroku "Wygeneruj Kurwa Scenariusze"]
-- Ścieżka odpowiedzi: response.scenarios
-- Pola podglądu: title, description, objective, connections
-- Wymagaj potwierdzenia: Tak
-- Metoda zapisu: addScenario
-- Transformer danych:
-```javascript
-items => items.map(item => ({
-  ...item,
-  id: item.id || `scenario-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-  progress: 0,
-  tasks: 0,
-  completedTasks: 0,
-  dueDate: (() => {
-    const date = new Date();
-    date.setDate(date.getDate() + 30);
-    return date.toISOString().split('T')[0];
-  })(),
-  connections: item.connections || []
-}))
-```
+Rejestracja pluginu:
 
-I chuj. To wszystko.
+Użyj funkcji register z pliku registry.ts.
+Plugin powinien być zarejestrowany jako obiekt zawierający następujące właściwości:
+type: unikalny identyfikator, np. "my-new-plugin".
+name: nazwa pluginu, np. "My New Plugin".
+Viewer: komponent React przyjmujący propsy { step, onComplete } – renderuje widok pluginu.
+Editor: komponent React przyjmujący propsy { step, onChange } – umożliwia edycję ustawień pluginu.
+ResultRenderer: komponent React przyjmujący propsy { step } – prezentuje wynik działania pluginu.
+defaultConfig: obiekt z domyślną konfiguracją (np. tytuł, opis, inne opcje konfiguracyjne).
+category: kategoria pluginu, np. wartość z PLUGIN_CATEGORIES (np. PLUGIN_CATEGORIES.CONTENT).
+description: krótki opis pluginu.
+Walidacja:
 
+Zdefiniuj schemat walidacji za pomocą biblioteki zod.
+Schemat powinien sprawdzać obecność pól takich jak id, type, title, taskId, order oraz konfigurację i wynik.
+Zarejestruj schemat przy użyciu funkcji registerSchema.
+Obsługa akcji (opcjonalnie):
 
+Jeżeli plugin wykonuje jakieś akcje (np. zakończenie kroku), użyj globalnych handlerów: registerPluginHandler i unregisterPluginHandler.
+Wymagania:
 
-https://claude.ai/share/2cf5d6f2-6e79-4059-b216-e2e1056b0e13
+Kod musi być kompletny i spójny z przyjętym szablonem.
+Wszystkie komponenty (Viewer, Editor, ResultRenderer) oraz walidacja muszą być zgodne z istniejącą architekturą.
+Plugin powinien być łatwy do rozszerzenia, aby kolejne pluginy mogły być tworzone według tego samego schematu.

@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/stepsPlugins/textInput/TextInputEditor.tsx
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -36,6 +35,15 @@ export function TextInputEditor({ step, onChange }: EditorProps) {
           id="description"
           value={step.description || ""}
           onChange={(e) => onChange({ description: e.target.value })}
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="label">Field Label</Label>
+        <Input
+          id="label"
+          value={config.label || ""}
+          onChange={(e) => updateConfig("label", e.target.value)}
         />
       </div>
 
