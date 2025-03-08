@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/plugins/store/pluginStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { PluginRegistration } from '../types';
+
 
 interface PluginState {
   installedPlugins: Record<string, { 

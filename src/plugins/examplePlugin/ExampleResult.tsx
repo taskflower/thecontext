@@ -1,7 +1,7 @@
 // plugins/example-input/ExampleResult.tsx
 
 import { Card, CardContent } from "@/components/ui";
-import { StepResultProps } from "../types";
+import { StepResultProps } from "../../modules/pluginSystem/types";
 
 
 export function ExampleResult({ step }: StepResultProps) {

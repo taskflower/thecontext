@@ -2,10 +2,10 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
-import AppPlugins from './plugins/components/AppPlugins';
-import { PluginMarketplace } from './plugins/components/PluginMarketplace';
-import { PluginManagerProvider } from './plugins/pluginContext';
-import PluginLoaderToast from './plugins/PluginLoader';
+import AppPlugins from './modules/pluginSystem/views/AppPlugins';
+import { PluginMarketplace } from './modules/pluginSystem/views/PluginMarketplace';
+import { PluginManagerProvider } from './modules/pluginSystem/context/pluginContext';
+import PluginLoaderToast from './modules/pluginSystem/PluginLoader';
 
 function App() {
   const [marketplaceOpen, setMarketplaceOpen] = useState(false);

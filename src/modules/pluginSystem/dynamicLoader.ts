@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/plugins/dynamicLoader.ts
-import { usePluginStore } from './store/pluginStore';
-import { PluginRegistration, PluginManifest } from './types';
+
+import { usePluginStore } from "./store/pluginStore";
+import { PluginManifest, PluginRegistration } from "./types";
+
 
 interface PluginModule {
   default: {
@@ -10,19 +12,25 @@ interface PluginModule {
   }
 }
 
+// Extending Window interface to include our custom properties
+declare global {
+  interface Window {
+    [key: string]: any; // This allows string indexing on the window object
+  }
+}
+
 // Proxy object to provide plugins with controlled access to app features
 const pluginContext = {
   store: {
     // Provide a limited API to plugins
     getState: () => {
-      const state = usePluginStore.getState();
-      // Return only what plugins should be allowed to access
+      // Nie używamy zmiennej state, bezpośrednio zwracamy potrzebne dane
       return {
-        // Add any state you want plugins to access
+        // Dodaj dane, które chcesz udostępnić pluginom
       };
     },
-    subscribe: (selector: (state: any) => any, callback: (selectedState: any) => void) => {
-      return usePluginStore.subscribe(selector, callback);
+    subscribe: (selector: (state: any) => any) => {
+      return usePluginStore.subscribe(selector);
     }
   },
   // Add other APIs you want to expose to plugins

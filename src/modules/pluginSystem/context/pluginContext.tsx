@@ -1,7 +1,8 @@
 // src/plugins/pluginContext.tsx
 import React, { createContext, useContext } from 'react';
-import { PluginManager } from './types';
-import { pluginManager } from './pluginManager';
+import { PluginManager } from '../types';
+import { pluginManager } from '../pluginManager';
+
 
 // React context for plugin manager access
 export const PluginManagerContext = createContext<PluginManager>(pluginManager);

@@ -17,8 +17,8 @@ export async function loadAllPlugins(): Promise<void> {
     
     // Ręczne importowanie wtyczek
     await Promise.all([
-      import('./textInput/index'),
-      import('./examplePlugin/index') // Dodajemy nowy plugin Example
+      import('../../plugins/textInput/index'),
+      import('../../plugins/examplePlugin/index') // Dodajemy nowy plugin Example
     ]);
     
     console.log(`Załadowano ${pluginManager.getAllPlugins().length} wtyczek`);

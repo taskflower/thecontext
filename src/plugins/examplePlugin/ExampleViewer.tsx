@@ -3,7 +3,7 @@ import React, { useState } from "react";
 
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Input } from "@/components/ui";
-import { StepViewerProps } from "../types";
+import { StepViewerProps } from "../../modules/pluginSystem/types";
 
 
 export function ExampleViewer({ step, context, onComplete, onError }: StepViewerProps) {

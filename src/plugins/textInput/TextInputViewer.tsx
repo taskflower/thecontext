@@ -13,8 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
-import { StepViewerProps } from "../types";
-import { useStepExecution } from "../useStepExecution";
+import { StepViewerProps } from "../../modules/pluginSystem/types";
+import { useStepExecution } from "../../modules/pluginSystem/useStepExecution";
 
 export function TextInputViewer({ step, context, onComplete, onError }: StepViewerProps) {
   const [value, setValue] = useState<string>("");

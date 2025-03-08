@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { StepEditorProps } from '../types';
+import { StepEditorProps } from '../../modules/pluginSystem/types';
 
 export function TextInputEditor({ step, onChange }: StepEditorProps) {
   const { data = {} } = step;

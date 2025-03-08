@@ -1,7 +1,7 @@
 // src/plugins/textInput/TextInputResult.tsx
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { StepResultProps } from '../types';
+import { StepResultProps } from '../../modules/pluginSystem/types';
 
 export function TextInputResult({ step }: StepResultProps) {
   const result = step.result;

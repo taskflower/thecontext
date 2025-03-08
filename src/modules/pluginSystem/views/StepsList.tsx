@@ -1,6 +1,5 @@
 // src/components/StepsList.tsx
-import React from 'react';
-import { StepConfig } from '@/plugins/types';
+import { StepConfig } from '@/modules/pluginSystem/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Edit, PlayCircle, CheckCircle, SkipForward, AlertCircle } from 'lucide-react';

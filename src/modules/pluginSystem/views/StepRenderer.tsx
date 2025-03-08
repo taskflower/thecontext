@@ -2,8 +2,8 @@
 // src/plugins/components/StepRenderer.tsx
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
-import { StepConfig, StepViewerProps, TaskContext } from '@/plugins/types';
-import { usePluginManager } from '../pluginContext';
+import { StepConfig, StepViewerProps, TaskContext } from '@/modules/pluginSystem/types';
+import { usePluginManager } from '../context/pluginContext';
 
 interface StepRendererProps {
   step: StepConfig;

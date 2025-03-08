@@ -5,11 +5,12 @@ import { StepConfig } from "../types";
 import { loadAllPlugins } from "../registry";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+
+import { PluginAddDialog } from "./PluginAddDialog";
+import { PluginManagerProvider } from "../context/pluginContext";
+import { usePluginStore } from "../store/pluginStore";
 import { StepsList } from "./StepsList";
 import { TaskWizard } from "./TaskWizard";
-import { PluginAddDialog } from "./PluginAddDialog";
-import { PluginManagerProvider } from "../pluginContext";
-import { usePluginStore } from "../store/pluginStore";
 
 // Demo task ID
 const DEMO_TASK_ID = 'task-demo-1';

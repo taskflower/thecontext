@@ -4,8 +4,8 @@
 import { ExampleEditor } from './ExampleEditor';
 import { ExampleViewer } from './ExampleViewer';
 import { ExampleResult } from './ExampleResult';
-import { PluginManifest, PluginRegistration } from '../types';
-import { registerPlugin } from '../registry';
+import { PluginManifest, PluginRegistration } from '../../modules/pluginSystem/types';
+import { registerPlugin } from '../../modules/pluginSystem/registry';
 
 // Plugin manifest
 export const manifest: PluginManifest = {

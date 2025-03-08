@@ -1,5 +1,5 @@
 // src/plugins/textInput/TextInputValidation.ts
-import { StepConfig, TaskContext } from '../types';
+import { StepConfig, TaskContext } from '../../modules/pluginSystem/types';
 
 export function TextInputValidation(
   step: StepConfig, 

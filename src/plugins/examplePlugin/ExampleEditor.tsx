@@ -2,7 +2,7 @@
 // plugins/example-input/ExampleEditor.tsx
 
 import { Input, Label, Switch } from "@/components/ui";
-import { StepEditorProps } from "../types";
+import { StepEditorProps } from "../../modules/pluginSystem/types";
 
 export function ExampleEditor({ step, onChange }: StepEditorProps) {
   const { data = {} } = step;

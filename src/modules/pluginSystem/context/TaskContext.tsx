@@ -1,6 +1,6 @@
 // src/plugins/TaskContext.tsx
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { TaskContext } from './types';
+import { TaskContext } from '../types';
 
 interface TaskContextProviderProps {
   taskId: string;

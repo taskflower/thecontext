@@ -1,5 +1,5 @@
 // src/plugins/textInput/index.ts
-import { registerPlugin } from '../registry';
+import { registerPlugin } from '../../modules/pluginSystem/registry';
 import { TextInputEditor } from './TextInputEditor';
 import { TextInputViewer } from './TextInputViewer';
 import { TextInputResult } from './TextInputResult';
