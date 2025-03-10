@@ -1,59 +1,73 @@
 // vite.plugin.config.js
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
 import path from 'path';
+import react from '@vitejs/plugin-react';
 import fs from 'fs';
-import { fileURLToPath } from 'url';
 
-// Uzyskaj ścieżkę bieżącego pliku i katalogu
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Pobierz nazwę pluginu z zmiennych środowiskowych
-const pluginName = process.env.PLUGIN_NAME;
-
-if (!pluginName) {
-  console.error('PLUGIN_NAME environment variable is required');
-  process.exit(1);
-}
-
-// Ścieżki
-const pluginsFolder = path.resolve(__dirname, 'plugins');
-const pluginPath = path.join(pluginsFolder, pluginName);
-
-// Sprawdź czy plugin istnieje
-if (!fs.existsSync(pluginPath)) {
-  console.error(`Plugin folder not found: ${pluginPath}`);
-  process.exit(1);
-}
-
-// Utwórz konfigurację dla pluginu
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: 'plugin-manifest',
+      closeBundle() {
+        // Generate manifest directly in the public/plugins directory
+        const pluginsDir = path.resolve(__dirname, 'public/plugins');
+        
+        // Ensure plugins directory exists
+        if (!fs.existsSync(pluginsDir)) {
+          fs.mkdirSync(pluginsDir, { recursive: true });
+        }
+        
+        // Generate manifest.json
+        const plugins = fs.readdirSync(pluginsDir)
+          .filter(file => file.endsWith('.js'));
+        
+        fs.writeFileSync(
+          path.join(pluginsDir, 'manifest.json'),
+          JSON.stringify({ plugins }, null, 2)
+        );
+        
+        console.log('Plugin manifest created:', plugins);
+      }
+    }
+  ],
   build: {
-    outDir: path.resolve(__dirname, 'public/plugins', pluginName),
+    // Output directly to public/plugins
+    outDir: 'public/plugins',
+    emptyOutDir: true, // Clean output directory before each build
     lib: {
-      entry: path.resolve(pluginPath, 'index.ts'),
-      name: `plugin-${pluginName}`,
-      fileName: 'index',
-      formats: ['es']
+      formats: ['es'],
+      // Using files from src/plugins/external with .ts and .tsx extensions only
+      entry: Object.fromEntries(
+        fs.readdirSync(path.resolve(__dirname, 'src/plugins/external'))
+          .filter(file => file.endsWith('.tsx') || file.endsWith('.ts')) 
+          .map(file => [
+            // Remove extension for the entry name
+            file.replace(/\.(tsx|ts)$/, ''),
+            // Full path to the file
+            path.resolve(__dirname, 'src/plugins/external', file)
+          ])
+      )
     },
     rollupOptions: {
-      // Upewnij się, że zewnętrzne zależności nie są bundlowane
-      external: ['react', 'react-dom'],
+      external: ['react', 'react-dom', 'zustand'],
       output: {
-        // Udostępnij globalne zmienne w buildzie UMD
-        // dla zewnętrznych zależności
+        // Don't use nested directory structure
+        preserveModules: false,
+        // Output only JS files for the actual plugins
+        entryFileNames: '[name].js',
+        // Global variables to use in UMD build for externalized deps
         globals: {
           react: 'React',
-          'react-dom': 'ReactDOM'
+          'react-dom': 'ReactDOM',
+          zustand: 'zustand'
         }
       }
     }
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src')
-    }
-  }
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
 });
