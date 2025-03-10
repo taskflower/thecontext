@@ -1,74 +1,76 @@
-// src/modules/ScenarioManagement.tsx
+// src/modules/templates_module/TemplateManagement.tsx
+// (dawniej ScenarioManagement.tsx)
 import React, { useState } from 'react';
-import { useGraphStore } from '../graph_module/graphStore';
-import { useScenarioStore } from './scenarioStore';
+
+import { useTemplateStore } from './templateStore';
+import { useScenarioStore } from '../scenarios_module/scenarioStore';
 
 
-const ScenarioManagement: React.FC = () => {
-  const { nodes, edges, exportToJson, importFromJson } = useGraphStore();
-  const { scenarios, addScenario, importScenarioAsNode } = useScenarioStore();
+const TemplateManagement: React.FC = () => {
+  const { nodes, edges, exportToJson, importFromJson } = useScenarioStore();
+  const { templates, addTemplate, importTemplateAsNode } = useTemplateStore();
   
   // State for various modals and forms
   const [showImportModal, setShowImportModal] = useState(false);
-  const [showSaveSchemaForm, setShowSaveSchemaForm] = useState(false);
-  const [selectedScenarioIndex, setSelectedScenarioIndex] = useState<string>('');
+  const [showSaveTemplateForm, setShowSaveTemplateForm] = useState(false);
+  const [selectedTemplateIndex, setSelectedTemplateIndex] = useState<string>('');
   const [mountPoint, setMountPoint] = useState('');
   const [prefix, setPrefix] = useState('');
-  const [schemaForm, setSchemaForm] = useState({ name: '', description: '' });
+  const [templateForm, setTemplateForm] = useState({ name: '', description: '' });
 
-  // Handle importing a scenario
-  const handleImportScenario = () => {
-    const index = parseInt(selectedScenarioIndex);
-    if (!isNaN(index) && scenarios[index] && mountPoint) {
-      importScenarioAsNode(index, mountPoint, prefix || 'imported');
-      setSelectedScenarioIndex('');
+  // Handle importing a template
+  const handleImportTemplate = () => {
+    const index = parseInt(selectedTemplateIndex);
+    if (!isNaN(index) && templates[index] && mountPoint) {
+      importTemplateAsNode(index, mountPoint, prefix || 'imported');
+      setSelectedTemplateIndex('');
       setMountPoint('');
       setPrefix('');
       setShowImportModal(false);
     }
   };
 
-  // Save current graph as a scenario
-  const saveCurrentAsScenario = () => {
-    if (schemaForm.name) {
-      const newScenario = {
-        name: schemaForm.name,
-        description: schemaForm.description,
+  // Save current scenario as a template
+  const saveCurrentAsTemplate = () => {
+    if (templateForm.name) {
+      const newTemplate = {
+        name: templateForm.name,
+        description: templateForm.description,
         nodes: { ...nodes },
         edges: [...edges],
       };
-      addScenario(newScenario);
-      setSchemaForm({ name: '', description: '' });
-      setShowSaveSchemaForm(false);
+      addTemplate(newTemplate);
+      setTemplateForm({ name: '', description: '' });
+      setShowSaveTemplateForm(false);
     }
   };
 
-  // Export graph as JSON file
-  const exportGraphAsJSON = () => {
-    const graphData = exportToJson();
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(graphData, null, 2));
+  // Export scenario as JSON file
+  const exportScenarioAsJSON = () => {
+    const scenarioData = exportToJson();
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(scenarioData, null, 2));
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "graph_export.json");
+    downloadAnchorNode.setAttribute("download", "scenario_export.json");
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
   };
 
-  // Export scenarios as JSON file
-  const exportScenariosAsJSON = () => {
-    const scenariosData = useScenarioStore.getState().exportScenariosToJson();
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(scenariosData, null, 2));
+  // Export templates as JSON file
+  const exportTemplatesAsJSON = () => {
+    const templatesData = useTemplateStore.getState().exportTemplatesToJson();
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(templatesData, null, 2));
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "scenarios_export.json");
+    downloadAnchorNode.setAttribute("download", "templates_export.json");
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
   };
 
-  // Import graph from JSON file
-  const importGraphFromJSON = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Import scenario from JSON file
+  const importScenarioFromJSON = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -84,17 +86,17 @@ const ScenarioManagement: React.FC = () => {
     }
   };
 
-  // Import scenarios from JSON file
-  const importScenariosFromJSON = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Import templates from JSON file
+  const importTemplatesFromJSON = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
           const data = JSON.parse(e.target!.result as string);
-          useScenarioStore.getState().importScenariosFromJson(data);
+          useTemplateStore.getState().importTemplatesFromJson(data);
         } catch (error) {
-          console.error("Błąd podczas wczytywania pliku scenariuszy JSON:", error);
+          console.error("Błąd podczas wczytywania pliku szablonów JSON:", error);
         }
       };
       reader.readAsText(file);
@@ -103,74 +105,74 @@ const ScenarioManagement: React.FC = () => {
 
   return (
     <div className="mb-6 bg-gray-100 p-4 rounded-lg border">
-      <h2 className="font-bold mb-3">Zarządzanie scenariuszami</h2>
+      <h2 className="font-bold mb-3">Zarządzanie szablonami</h2>
       <div className="grid grid-cols-2 gap-3 mb-4">
         <button 
-          onClick={() => setShowSaveSchemaForm(true)} 
+          onClick={() => setShowSaveTemplateForm(true)} 
           className="bg-purple-600 text-white p-2 rounded hover:bg-purple-700"
         >
-          Zapisz bieżący graf jako scenariusz
+          Zapisz bieżący scenariusz jako szablon
         </button>
         <button 
           onClick={() => setShowImportModal(true)} 
           className="bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700"
         >
-          Importuj scenariusz do grafu
+          Importuj szablon do scenariusza
         </button>
         <div className="grid grid-cols-2 gap-3 col-span-2">
           <button 
-            onClick={exportGraphAsJSON} 
+            onClick={exportScenarioAsJSON} 
             className="bg-teal-600 text-white p-2 rounded hover:bg-teal-700"
           >
-            Eksportuj graf do pliku JSON
+            Eksportuj scenariusz do pliku JSON
           </button>
           <div className="relative">
             <input 
               type="file" 
               accept=".json" 
-              onChange={importGraphFromJSON} 
+              onChange={importScenarioFromJSON} 
               className="absolute inset-0 opacity-0 w-full cursor-pointer" 
             />
             <button className="bg-amber-600 text-white p-2 rounded hover:bg-amber-700 w-full">
-              Wczytaj graf z pliku JSON
+              Wczytaj scenariusz z pliku JSON
             </button>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3 col-span-2">
           <button 
-            onClick={exportScenariosAsJSON} 
+            onClick={exportTemplatesAsJSON} 
             className="bg-green-600 text-white p-2 rounded hover:bg-green-700"
           >
-            Eksportuj scenariusze do pliku JSON
+            Eksportuj szablony do pliku JSON
           </button>
           <div className="relative">
             <input 
               type="file" 
               accept=".json" 
-              onChange={importScenariosFromJSON} 
+              onChange={importTemplatesFromJSON} 
               className="absolute inset-0 opacity-0 w-full cursor-pointer" 
             />
             <button className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 w-full">
-              Wczytaj scenariusze z pliku JSON
+              Wczytaj szablony z pliku JSON
             </button>
           </div>
         </div>
       </div>
 
-      {/* Saved scenarios list */}
-      {scenarios.length > 0 && (
+      {/* Saved templates list */}
+      {templates.length > 0 && (
         <div className="mt-4 bg-white p-3 rounded border">
-          <h3 className="font-medium mb-2">Zapisane scenariusze ({scenarios.length})</h3>
+          <h3 className="font-medium mb-2">Zapisane szablony ({templates.length})</h3>
           <div className="space-y-2 max-h-60 overflow-y-auto">
-            {scenarios.map((scenario, index) => (
+            {templates.map((template, index) => (
               <div key={index} className="p-2 border rounded bg-gray-50 text-sm">
-                <div className="font-medium">{scenario.name}</div>
-                {scenario.description && (
-                  <div className="text-gray-600 mt-1">{scenario.description}</div>
+                <div className="font-medium">{template.name}</div>
+                {template.description && (
+                  <div className="text-gray-600 mt-1">{template.description}</div>
                 )}
                 <div className="flex justify-between mt-1 text-xs text-gray-500">
-                  <span>Węzły: {Object.keys(scenario.nodes).length}</span>
-                  <span>Połączenia: {scenario.edges.length}</span>
+                  <span>Węzły: {Object.keys(template.nodes).length}</span>
+                  <span>Połączenia: {template.edges.length}</span>
                 </div>
               </div>
             ))}
@@ -178,43 +180,43 @@ const ScenarioManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Save scenario form modal */}
-      {showSaveSchemaForm && (
+      {/* Save template form modal */}
+      {showSaveTemplateForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg max-w-md w-full">
-            <h3 className="text-lg font-bold mb-4">Zapisz bieżący graf jako scenariusz</h3>
+            <h3 className="text-lg font-bold mb-4">Zapisz bieżący scenariusz jako szablon</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Nazwa scenariusza</label>
+                <label className="block text-sm font-medium mb-1">Nazwa szablonu</label>
                 <input 
-                  value={schemaForm.name} 
-                  onChange={(e) => setSchemaForm({ ...schemaForm, name: e.target.value })}
-                  placeholder="Nazwa scenariusza" 
+                  value={templateForm.name} 
+                  onChange={(e) => setTemplateForm({ ...templateForm, name: e.target.value })}
+                  placeholder="Nazwa szablonu" 
                   className="w-full p-2 border rounded" 
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Opis (opcjonalnie)</label>
                 <textarea 
-                  value={schemaForm.description} 
-                  onChange={(e) => setSchemaForm({ ...schemaForm, description: e.target.value })}
-                  placeholder="Krótki opis scenariusza" 
+                  value={templateForm.description} 
+                  onChange={(e) => setTemplateForm({ ...templateForm, description: e.target.value })}
+                  placeholder="Krótki opis szablonu" 
                   className="w-full p-2 border rounded h-24" 
                 />
               </div>
               <div className="flex justify-end space-x-2">
                 <button 
-                  onClick={() => setShowSaveSchemaForm(false)} 
+                  onClick={() => setShowSaveTemplateForm(false)} 
                   className="px-4 py-2 border rounded"
                 >
                   Anuluj
                 </button>
                 <button 
-                  onClick={saveCurrentAsScenario}
-                  disabled={!schemaForm.name} 
+                  onClick={saveCurrentAsTemplate}
+                  disabled={!templateForm.name} 
                   className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-300"
                 >
-                  Zapisz scenariusz
+                  Zapisz szablon
                 </button>
               </div>
             </div>
@@ -222,42 +224,42 @@ const ScenarioManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Import scenario modal */}
+      {/* Import template modal */}
       {showImportModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg max-w-md w-full">
-            <h3 className="text-lg font-bold mb-4">Importuj scenariusz do grafu</h3>
+            <h3 className="text-lg font-bold mb-4">Importuj szablon do scenariusza</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Wybierz scenariusz</label>
+                <label className="block text-sm font-medium mb-1">Wybierz szablon</label>
                 <select
-                  value={selectedScenarioIndex}
-                  onChange={(e) => setSelectedScenarioIndex(e.target.value)}
+                  value={selectedTemplateIndex}
+                  onChange={(e) => setSelectedTemplateIndex(e.target.value)}
                   className="w-full p-2 border rounded"
                 >
-                  <option value="">Wybierz scenariusz</option>
-                  {scenarios.map((scenario, index) => (
+                  <option value="">Wybierz szablon</option>
+                  {templates.map((template, index) => (
                     <option key={index} value={index}>
-                      {scenario.name}
+                      {template.name}
                     </option>
                   ))}
                 </select>
               </div>
-              {selectedScenarioIndex !== '' && (
+              {selectedTemplateIndex !== '' && (
                 <div className="bg-gray-50 p-3 rounded text-sm">
-                  <p className="font-medium">{scenarios[parseInt(selectedScenarioIndex)].name}</p>
-                  {scenarios[parseInt(selectedScenarioIndex)].description && (
-                    <p className="text-gray-600 mt-1">{scenarios[parseInt(selectedScenarioIndex)].description}</p>
+                  <p className="font-medium">{templates[parseInt(selectedTemplateIndex)].name}</p>
+                  {templates[parseInt(selectedTemplateIndex)].description && (
+                    <p className="text-gray-600 mt-1">{templates[parseInt(selectedTemplateIndex)].description}</p>
                   )}
                   <p className="mt-1">
-                    Liczba węzłów: {Object.keys(scenarios[parseInt(selectedScenarioIndex)].nodes).length}
+                    Liczba węzłów: {Object.keys(templates[parseInt(selectedTemplateIndex)].nodes).length}
                   </p>
-                  <p>Liczba połączeń: {scenarios[parseInt(selectedScenarioIndex)].edges.length}</p>
+                  <p>Liczba połączeń: {templates[parseInt(selectedTemplateIndex)].edges.length}</p>
                 </div>
               )}
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Punkt montowania (węzeł w bieżącym grafie)
+                  Punkt montowania (węzeł w bieżącym scenariuszu)
                 </label>
                 <select 
                   value={mountPoint} 
@@ -289,8 +291,8 @@ const ScenarioManagement: React.FC = () => {
                   Anuluj
                 </button>
                 <button
-                  onClick={handleImportScenario}
-                  disabled={selectedScenarioIndex === '' || !mountPoint}
+                  onClick={handleImportTemplate}
+                  disabled={selectedTemplateIndex === '' || !mountPoint}
                   className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-300"
                 >
                   Importuj
@@ -304,4 +306,4 @@ const ScenarioManagement: React.FC = () => {
   );
 };
 
-export default ScenarioManagement;
+export default TemplateManagement;

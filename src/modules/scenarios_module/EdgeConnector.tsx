@@ -1,9 +1,11 @@
-// src/components/EdgeConnector.tsx
+// src/modules/scenario_module/EdgeConnector.tsx
+// (dawniej EdgeConnector.tsx)
 import React, { useState } from 'react';
-import { useGraphStore } from './graphStore';
+import { useScenarioStore } from './scenarioStore';
+
 
 const EdgeConnector: React.FC = () => {
-  const { nodes, addEdge } = useGraphStore();
+  const { nodes, addEdge } = useScenarioStore();
   const [edgeForm, setEdgeForm] = useState({ source: '', target: '' });
 
   const handleAddEdge = () => {

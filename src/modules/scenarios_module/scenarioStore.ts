@@ -1,101 +1,148 @@
-
-// src/modules/scenarioStore.ts
-import { create } from 'zustand';
-import { useGraphStore } from '../graph_module/graphStore';
-
-
-interface Node {
-  id: string;
-  message: string;
-  category: string;
-  scenarioData?: Scenario; // For scenario nodes
-}
-
-interface Edge {
-  source: string;
-  target: string;
-}
-
-export interface Scenario {
-  name: string;
-  description: string;
-  nodes: Record<string, Node>;
-  edges: Edge[];
-}
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// src/modules/scenario_module/scenarioStore.ts
+// (dawniej graphStore.ts)
+import { create } from "zustand";
+import { Template } from "../templates_module/templateStore";
+import { Node, Edge } from "./types";
+import {
+  initialCategories,
+  initialEdges,
+  initialNodeResponses,
+  initialNodes,
+} from "../init_data/mockScenarioData";
 
 interface ScenarioState {
-  scenarios: Scenario[];
-  
-  // Actions for scenarios
-  setScenarios: (scenarios: Scenario[]) => void;
-  addScenario: (scenario: Scenario) => void;
-  removeScenario: (index: number) => void;
-  
-  // Import scenario to graph
-  importScenarioAsNode: (scenarioIndex: number, mountPoint: string, prefix?: string) => void;
-  
-  // Export/Import scenarios
-  exportScenariosToJson: () => Scenario[];
-  importScenariosFromJson: (data: Scenario[]) => void;
+  nodes: Record<string, Node>;
+  edges: Edge[];
+  categories: string[];
+  nodeResponses: Record<string, string>;
+
+  // Actions for nodes
+  setNodes: (nodes: Record<string, Node>) => void;
+  addNode: (
+    id: string,
+    message: string,
+    category: string,
+    templateData?: Template
+  ) => void;
+  removeNode: (id: string) => void;
+
+  // Actions for edges
+  setEdges: (edges: Edge[]) => void;
+  addEdge: (source: string, target: string) => void;
+  removeEdge: (source: string, target: string) => void;
+
+  // Actions for categories
+  setCategories: (categories: string[]) => void;
+  addCategory: (category: string) => void;
+
+  // Actions for responses
+  setNodeResponses: (responses: Record<string, string>) => void;
+  addNodeResponse: (nodeId: string, response: string) => void;
+  removeNodeResponse: (nodeId: string) => void;
+
+  // Export/Import scenario
+  exportToJson: () => Record<string, any>;
+  importFromJson: (data: Record<string, any>) => void;
 }
 
 export const useScenarioStore = create<ScenarioState>((set, get) => ({
-  // Sample scenarios
-  scenarios: [
-    {
-      name: 'Example Scenario',
-      description: 'Prosty scenariusz z dwoma krokami',
+  // Default scenario data loaded from mock data
+  nodes: initialNodes,
+  edges: initialEdges,
+  categories: initialCategories,
+  nodeResponses: initialNodeResponses,
+
+  // Node actions
+  setNodes: (nodes) => set({ nodes }),
+  addNode: (id, message, category, templateData) =>
+    set((state) => ({
       nodes: {
-        'node1': { id: 'node1', message: 'Pierwszy węzeł scenariusza', category: 'default' },
-        'node2': { id: 'node2', message: 'Drugi węzeł scenariusza', category: 'default' }
+        ...state.nodes,
+        [id]: { id, message, category, templateData },
       },
-      edges: [{ source: 'node1', target: 'node2' }]
-    }
-  ],
-  
-  // Scenario actions
-  setScenarios: (scenarios) => set({ scenarios }),
-  
-  addScenario: (scenario) => set((state) => ({
-    scenarios: [...state.scenarios, scenario]
-  })),
-  
-  removeScenario: (index) => set((state) => ({
-    scenarios: state.scenarios.filter((_, i) => i !== index)
-  })),
-  
-  // Import scenario to graph
-  importScenarioAsNode: (scenarioIndex, mountPoint, prefix = 'imported') => {
-    const scenario = get().scenarios[scenarioIndex];
-    if (scenario) {
-      const scenarioNodeId = `${prefix}.scenario.${scenario.name.replace(/\s+/g, '_')}`;
-      const scenarioNode = {
-        id: scenarioNodeId,
-        message: `Scenariusz: ${scenario.name}\n${scenario.description || ''}`,
-        category: 'scenario',
-        scenarioData: scenario,
-      };
-      
-      // Access graphStore to add the node and edge
-      useGraphStore.getState().addNode(
-        scenarioNodeId, 
-        scenarioNode.message, 
-        'scenario', 
-        scenario
+    })),
+  removeNode: (id) =>
+    set((state) => {
+      const newNodes = { ...state.nodes };
+      delete newNodes[id];
+
+      const filteredEdges = state.edges.filter(
+        (edge) => edge.source !== id && edge.target !== id
       );
-      
-      useGraphStore.getState().addEdge(mountPoint, scenarioNodeId);
-    }
+
+      const newResponses = { ...state.nodeResponses };
+      delete newResponses[id];
+
+      return {
+        nodes: newNodes,
+        edges: filteredEdges,
+        nodeResponses: newResponses,
+      };
+    }),
+
+  // Edge actions
+  setEdges: (edges) => set({ edges }),
+  addEdge: (source, target) =>
+    set((state) => {
+      if (state.edges.some((e) => e.source === source && e.target === target)) {
+        return { edges: state.edges };
+      }
+      return {
+        edges: [...state.edges, { source, target }],
+      };
+    }),
+  removeEdge: (source, target) =>
+    set((state) => ({
+      edges: state.edges.filter(
+        (edge) => !(edge.source === source && edge.target === target)
+      ),
+    })),
+
+  // Category actions
+  setCategories: (categories) => set({ categories }),
+  addCategory: (category) =>
+    set((state) => {
+      if (state.categories.includes(category)) {
+        return { categories: state.categories };
+      }
+      return {
+        categories: [...state.categories, category],
+      };
+    }),
+
+  // Response actions
+  setNodeResponses: (responses) => set({ nodeResponses: responses }),
+  addNodeResponse: (nodeId, response) =>
+    set((state) => ({
+      nodeResponses: {
+        ...state.nodeResponses,
+        [nodeId]: response,
+      },
+    })),
+  removeNodeResponse: (nodeId) =>
+    set((state) => {
+      const newResponses = { ...state.nodeResponses };
+      delete newResponses[nodeId];
+      return {
+        nodeResponses: newResponses,
+      };
+    }),
+
+  // Export/Import scenario
+  exportToJson: () => {
+    const { nodes, edges, categories, nodeResponses } = get();
+    return {
+      nodes,
+      edges,
+      categories,
+      nodeResponses,
+    };
   },
-  
-  // Export/Import scenarios
-  exportScenariosToJson: () => {
-    return get().scenarios;
+  importFromJson: (data) => {
+    if (data.nodes) set({ nodes: data.nodes });
+    if (data.edges) set({ edges: data.edges });
+    if (data.categories) set({ categories: data.categories });
+    if (data.nodeResponses) set({ nodeResponses: data.nodeResponses });
   },
-  
-  importScenariosFromJson: (data) => {
-    if (Array.isArray(data)) {
-      set({ scenarios: data });
-    }
-  }
 }));

@@ -1,9 +1,13 @@
+// src/modules/sequence_module/SequenceExecutor.tsx
+// (dawniej SequenceExecutor.tsx)
+
 import React, { useState } from 'react';
-import { useGraphStore } from '../graph_module/graphStore';
+import { useScenarioStore } from '../scenarios_module/scenarioStore';
+
 
 
 const SequenceExecutor: React.FC = () => {
-  const { nodes, edges, addNodeResponse } = useGraphStore();
+  const { nodes, edges, addNodeResponse } = useScenarioStore();
 
   const [messageQueue, setMessageQueue] = useState<string[]>([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
@@ -26,7 +30,6 @@ const SequenceExecutor: React.FC = () => {
     });
   };
 
- 
   const executeAll = () => {
     setCurrentProcessResponses({});
     const visited = new Set<string>();

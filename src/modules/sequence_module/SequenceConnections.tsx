@@ -1,9 +1,12 @@
+// src/modules/sequence_module/SequenceConnections.tsx
+// (dawniej SequenceConnections.tsx)
 import React from 'react';
-import { useGraphStore } from '../graph_module/graphStore';
+import { useScenarioStore } from '../scenarios_module/scenarioStore';
+
 
 
 const SequenceConnections: React.FC = () => {
-  const { edges, removeEdge } = useGraphStore();
+  const { edges, removeEdge } = useScenarioStore();
 
   return (
     <div className="bg-gray-50 p-4 rounded-lg">

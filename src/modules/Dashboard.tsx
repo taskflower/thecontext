@@ -1,33 +1,38 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/Dashboard.tsx
+// (główny komponent aplikacji)
 import React, { useState } from 'react';
-import { useGraphStore } from './graph_module/graphStore';
+
 import GraphVisualization from './graph_vizualizer/GraphVisualization';
 import UsageInfo from './UsageInfo';
 
-import EdgeConnector from './graph_module/EdgeConnector';
 
-import ScenarioManagement from './scenarios_module/ScenarioManagement';
-import SchemaManagement from './graph_module/SchemaManagement';
-import { Scenario } from './scenarios_module/scenarioStore';
-import NodeCategories from './graph_module/NodeCategories';
+
+import TemplateManagement from './templates_module/TemplateManagement';
+
+import { Template } from './templates_module/templateStore';
+
 import SequenceConnections from './sequence_module/SequenceConnections';
 import SequenceExecutor from './sequence_module/SequenceExecutor';
+import SchemaManagement from './scenarios_module/SchemaManagement';
+import { useScenarioStore } from './scenarios_module/scenarioStore';
+import EdgeConnector from './scenarios_module/EdgeConnector';
+import NodeCategories from './scenarios_module/NodeCategories';
 
 const Dashboard: React.FC = () => {
-  const { nodes, categories, nodeResponses, removeNodeResponse } = useGraphStore();
+  const { nodes, categories, nodeResponses, removeNodeResponse } = useScenarioStore();
   const [nodeForm, setNodeForm] = useState({ id: '', message: '', category: 'default' });
   const [newCategory, setNewCategory] = useState('');
   const [previewNodeId, setPreviewNodeId] = useState<string | null>(null);
-  const [activeScenario, setActiveScenario] = useState<Scenario | null>(null); // Active scenario state
+  const [activeTemplate, setActiveTemplate] = useState<Template | null>(null); // Active template state
 
   const handleNodeClick = (id: string) => {
     const node = nodes[id];
-    if (node.category === 'scenario' && node.scenarioData) {
-      // Launch the scenario process
-      console.log('Uruchamiam scenariusz:', node.scenarioData);
-      setActiveScenario(node.scenarioData);
-      // Here you can open modal or go to a dedicated view for scenario execution
+    if (node.category === 'template' && node.templateData) {
+      // Launch the template process
+      console.log('Uruchamiam szablon:', node.templateData);
+      setActiveTemplate(node.templateData);
+      // Here you can open modal or go to a dedicated view for template execution
     } else {
       setPreviewNodeId(id);
     }
@@ -43,14 +48,14 @@ const Dashboard: React.FC = () => {
 
   const handleAddCategory = () => {
     if (newCategory && !categories.includes(newCategory)) {
-      useGraphStore.getState().addCategory(newCategory);
+      useScenarioStore.getState().addCategory(newCategory);
       setNewCategory('');
     }
   };
 
   const handleAddNode = () => {
     if (nodeForm.id && nodeForm.message) {
-      useGraphStore.getState().addNode(nodeForm.id, nodeForm.message, nodeForm.category);
+      useScenarioStore.getState().addNode(nodeForm.id, nodeForm.message, nodeForm.category);
       setNodeForm({ id: '', message: '', category: nodeForm.category });
     }
   };
@@ -61,8 +66,8 @@ const Dashboard: React.FC = () => {
 
       <UsageInfo />
 
-      {/* Zarządzanie scenariuszami */}
-      <ScenarioManagement />
+      {/* Zarządzanie szablonami */}
+      <TemplateManagement />
 
       {/* Zarządzanie schematami */}
       <SchemaManagement />
@@ -128,7 +133,7 @@ const Dashboard: React.FC = () => {
       <EdgeConnector />
 
       <div className="mb-6 bg-gray-50 p-4 rounded-lg">
-        <h2 className="font-bold mb-2">Wizualizacja sekwencji</h2>
+        <h2 className="font-bold mb-2">Wizualizacja scenariusza</h2>
         <div className="border rounded-lg bg-gray-50 p-2">
           {Object.keys(nodes).length === 0 ? (
             <p className="text-gray-500 text-center py-4">Dodaj węzły, aby zobaczyć wizualizację</p>
@@ -139,7 +144,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       <div className="mb-6 bg-gray-50 p-4 rounded-lg">
-        <h2 className="font-bold mb-2">Podgląd sekwencji (węzły według kategorii)</h2>
+        <h2 className="font-bold mb-2">Podgląd scenariusza (węzły według kategorii)</h2>
         <div className="bg-white border rounded-lg p-4">
           {Object.keys(nodes).length === 0 ? (
             <p className="text-gray-500 text-center py-4">Dodaj węzły, aby zobaczyć strukturę</p>
@@ -204,27 +209,27 @@ const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Scenario modal */}
-      {activeScenario && (
+      {/* Template modal */}
+      {activeTemplate && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg max-w-3xl w-full">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold">Realizacja scenariusza: {activeScenario.name}</h3>
-              <button onClick={() => setActiveScenario(null)} className="text-gray-500 hover:text-gray-700">✕</button>
+              <h3 className="text-lg font-bold">Realizacja szablonu: {activeTemplate.name}</h3>
+              <button onClick={() => setActiveTemplate(null)} className="text-gray-500 hover:text-gray-700">✕</button>
             </div>
             <div className="mb-4">
-              {activeScenario.description && (
-                <p className="bg-gray-50 p-3 rounded mb-4">{activeScenario.description}</p>
+              {activeTemplate.description && (
+                <p className="bg-gray-50 p-3 rounded mb-4">{activeTemplate.description}</p>
               )}
               <div className="bg-yellow-50 p-3 rounded border border-yellow-200 mb-4">
-                <h4 className="font-medium mb-2">Zawartość scenariusza:</h4>
+                <h4 className="font-medium mb-2">Zawartość szablonu:</h4>
                 <div className="flex space-x-1">
-                  <span className="bg-blue-100 px-2 py-1 rounded">Węzły: {Object.keys(activeScenario.nodes).length}</span>
-                  <span className="bg-green-100 px-2 py-1 rounded">Połączenia: {activeScenario.edges.length}</span>
+                  <span className="bg-blue-100 px-2 py-1 rounded">Węzły: {Object.keys(activeTemplate.nodes).length}</span>
+                  <span className="bg-green-100 px-2 py-1 rounded">Połączenia: {activeTemplate.edges.length}</span>
                 </div>
               </div>
               <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto">
-                {Object.entries(activeScenario.nodes).map(([id, node]: [string, any]) => (
+                {Object.entries(activeTemplate.nodes).map(([id, node]: [string, any]) => (
                   <div key={id} className="border rounded p-2 bg-white">
                     <div className="font-medium">{id}</div>
                     <div className="text-xs text-gray-500">Kategoria: {node.category}</div>
@@ -235,7 +240,7 @@ const Dashboard: React.FC = () => {
             </div>
             <div className="flex justify-end space-x-3">
               <button 
-                onClick={() => setActiveScenario(null)} 
+                onClick={() => setActiveTemplate(null)} 
                 className="px-4 py-2 border rounded"
               >
                 Zamknij
@@ -243,24 +248,24 @@ const Dashboard: React.FC = () => {
               <button 
                 className="bg-indigo-600 text-white px-4 py-2 rounded"
                 onClick={() => {
-                  console.log('Uruchamianie logiki scenariusza...');
-                  // Here you can add logic for running the individual steps of the scenario
+                  console.log('Uruchamianie logiki szablonu...');
+                  // Here you can add logic for running the individual steps of the template
                   
                   // Get starting nodes (nodes without incoming edges)
-                  const startingNodes = Object.keys(activeScenario.nodes).filter(id => 
-                    !activeScenario.edges.some(edge => edge.target === id)
+                  const startingNodes = Object.keys(activeTemplate.nodes).filter(id => 
+                    !activeTemplate.edges.some(edge => edge.target === id)
                   );
                   
                   if (startingNodes.length > 0) {
                     console.log('Rozpoczynam od węzłów:', startingNodes);
                     // You could trigger the SequenceExecutor logic here
-                    // or implement custom scenario execution
+                    // or implement custom template execution
                   }
                   
-                  setActiveScenario(null);
+                  setActiveTemplate(null);
                 }}
               >
-                Uruchom scenariusz
+                Uruchom szablon
               </button>
             </div>
           </div>
