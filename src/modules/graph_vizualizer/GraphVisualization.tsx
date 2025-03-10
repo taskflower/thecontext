@@ -1,7 +1,6 @@
-// src/components/GraphVisualization.tsx
+// src/modules/GraphVisualization.tsx
 import React from 'react';
-import { useGraphStore } from './graphStore';
-
+import { useGraphStore } from '../graph_module/graphStore';
 
 interface GraphVisualizationProps {
   onNodeClick: (id: string) => void;
@@ -20,38 +19,32 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({ onNodeClick }) 
     const nodePositions: Record<string, { x: number; y: number }> = {};
     const nodeIds = Object.keys(nodes);
     
-    // Znajdź poziomy węzłów (odległość od węzłów początkowych)
+    // Wyznaczanie poziomów węzłów
     const nodeLevels: Record<string, number> = {};
     const startNodes = nodeIds.filter(id => 
       !edges.some(edge => edge.target === id)
     );
     
-    // Domyślnie każdy węzeł ma poziom 0
     nodeIds.forEach(id => {
       nodeLevels[id] = 0;
     });
     
-    // Funkcja do obliczania poziomu węzła
     const calculateLevels = (nodeId: string, level: number) => {
       if (nodeLevels[nodeId] < level) {
         nodeLevels[nodeId] = level;
       }
-      
       const outgoingNodes = edges
         .filter(edge => edge.source === nodeId)
         .map(edge => edge.target);
-      
       outgoingNodes.forEach(targetId => {
         calculateLevels(targetId, level + 1);
       });
     };
     
-    // Oblicz poziomy dla wszystkich węzłów startowych
     startNodes.forEach(startNodeId => {
       calculateLevels(startNodeId, 0);
     });
     
-    // Pogrupuj węzły według poziomów
     const levelGroups: Record<string, string[]> = {};
     Object.entries(nodeLevels).forEach(([nodeId, level]) => {
       if (!levelGroups[level]) {
@@ -60,14 +53,12 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({ onNodeClick }) 
       levelGroups[level].push(nodeId);
     });
     
-    // Rozmieść węzły na podstawie ich poziomów
     const levels = Object.keys(levelGroups).sort((a, b) => parseInt(a) - parseInt(b));
     const horizontalSpacing = canvasWidth / (Math.max(levels.length, 1));
     
     levels.forEach((level, levelIndex) => {
       const nodesInLevel = levelGroups[level];
       const verticalSpacing = canvasHeight / (Math.max(nodesInLevel.length, 1));
-      
       nodesInLevel.forEach((nodeId, nodeIndex) => {
         nodePositions[nodeId] = {
           x: horizontalSpacing * levelIndex + horizontalSpacing / 2 - nodeWidth / 2,
@@ -76,25 +67,19 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({ onNodeClick }) 
       });
     });
     
-    // Renderuj węzły i krawędzie
     return (
       <div className="overflow-auto border rounded p-2 bg-white" style={{ maxWidth: '100%', height: '500px' }}>
         <div style={{ position: 'relative', width: canvasWidth, height: canvasHeight }}>
-          {/* Rysuj linie połączeń */}
+          {/* Rysowanie krawędzi */}
           {edges.map((edge, index) => {
-            if (!nodePositions[edge.source] || !nodePositions[edge.target]) {
-              return null;
-            }
+            if (!nodePositions[edge.source] || !nodePositions[edge.target]) return null;
             
             const sourcePos = nodePositions[edge.source];
             const targetPos = nodePositions[edge.target];
-            
             const startX = sourcePos.x + nodeWidth;
-            const startY = sourcePos.y + nodeHeight/2;
+            const startY = sourcePos.y + nodeHeight / 2;
             const endX = targetPos.x;
-            const endY = targetPos.y + nodeHeight/2;
-            
-            // Oblicz punkty dla krzywej
+            const endY = targetPos.y + nodeHeight / 2;
             const controlX = (startX + endX) / 2;
             
             return (
@@ -130,11 +115,12 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({ onNodeClick }) 
             );
           })}
           
-          {/* Renderuj węzły */}
+          {/* Renderowanie węzłów */}
           {Object.entries(nodes).map(([id, node]) => {
             const pos = nodePositions[id] || { x: 0, y: 0 };
             const hasResponse = nodeResponses[id] !== undefined;
-            const categoryColor = {
+            const isScenario = node.category === 'scenario';
+            const categoryColor = isScenario ? '#fffbcc' : {
               'default': '#e5e7eb',
               'procesy': '#dbeafe',
             }[node.category] || '#f3f4f6';
@@ -160,10 +146,8 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({ onNodeClick }) 
                 onClick={() => onNodeClick(id)}
               >
                 <div style={{ fontWeight: 'bold', fontSize: '14px', marginBottom: '4px', color: '#333' }}>
-                  {id}
-                  {hasResponse && (
-                    <span style={{ marginLeft: '5px', color: '#10b981' }}>✓</span>
-                  )}
+                  {id} {isScenario && <span style={{ fontSize: '10px', color: '#d97706' }}>[Scenariusz]</span>}
+                  {hasResponse && <span style={{ marginLeft: '5px', color: '#10b981' }}>✓</span>}
                 </div>
                 <div style={{ fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {node.message.length > 30 ? `${node.message.substring(0, 30)}...` : node.message}

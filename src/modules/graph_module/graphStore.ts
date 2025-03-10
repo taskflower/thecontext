@@ -1,11 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/store/graphStore.ts
 import { create } from 'zustand';
+import { Scenario } from '../scenarios_module/scenarioStore';
+
 
 interface Node {
   id: string;
   message: string;
   category: string;
+  scenarioData?: Scenario; // For scenario nodes
 }
 
 interface Edge {
@@ -13,96 +16,79 @@ interface Edge {
   target: string;
 }
 
-interface Schema {
-  name: string;
-  description: string;
-  nodes: Record<string, Node>;
-  edges: Edge[];
-}
-
 interface GraphState {
-  // Dane grafu
   nodes: Record<string, Node>;
   edges: Edge[];
   categories: string[];
   nodeResponses: Record<string, string>;
-  
-  // Zapisane schematy
-  savedSchemas: Schema[];
-  
-  // Akcje
+
+  // Actions for nodes
   setNodes: (nodes: Record<string, Node>) => void;
-  addNode: (id: string, message: string, category: string) => void;
+  addNode: (id: string, message: string, category: string, scenarioData?: Scenario) => void;
   removeNode: (id: string) => void;
-  
+
+  // Actions for edges
   setEdges: (edges: Edge[]) => void;
   addEdge: (source: string, target: string) => void;
   removeEdge: (source: string, target: string) => void;
-  
+
+  // Actions for categories
   setCategories: (categories: string[]) => void;
   addCategory: (category: string) => void;
-  
+
+  // Actions for responses
   setNodeResponses: (responses: Record<string, string>) => void;
   addNodeResponse: (nodeId: string, response: string) => void;
   removeNodeResponse: (nodeId: string) => void;
-  
-  setSavedSchemas: (schemas: Schema[]) => void;
-  addSchema: (schema: Schema) => void;
-  
-  // Eksport/Import
+
+  // Export/Import graph
   exportToJson: () => Record<string, any>;
   importFromJson: (data: Record<string, any>) => void;
 }
 
 export const useGraphStore = create<GraphState>((set, get) => ({
-  // Stan początkowy
+  // Default graph data
   nodes: {
     'start': { id: 'start', message: 'Rozpoczynamy sekwencję promptów', category: 'default' },
-    'krok1': { id: 'krok1', message: 'Pierwszy krok w sekwencji', category: 'default' },
-    'krok2': { id: 'krok2', message: 'Drugi krok w sekwencji', category: 'procesy' }
+    'step1': { id: 'step1', message: 'Pierwszy krok sekwencji', category: 'default' },
+    'step2': { id: 'step2', message: 'Drugi krok sekwencji', category: 'flow' }
   },
   edges: [
-    { source: 'start', target: 'krok1' },
-    { source: 'krok1', target: 'krok2' }
+    { source: 'start', target: 'step1' },
+    { source: 'step1', target: 'step2' }
   ],
-  categories: ['default', 'procesy'],
+  categories: ['default', 'flow', 'scenario', 'procesy'],
   nodeResponses: {},
-  savedSchemas: [
-    {
-      name: 'Przykładowy schemat',
-      description: 'Prosty schemat z dwoma krokami',
-      nodes: {
-        'node1': { id: 'node1', message: 'Pierwszy węzeł schematu', category: 'default' },
-        'node2': { id: 'node2', message: 'Drugi węzeł schematu', category: 'default' }
-      },
-      edges: [{ source: 'node1', target: 'node2' }]
-    }
-  ],
-  
-  // Akcje dla węzłów
+
+  // Node actions
   setNodes: (nodes) => set({ nodes }),
-  addNode: (id, message, category) => set((state) => ({
+  addNode: (id, message, category, scenarioData) => set((state) => ({
     nodes: {
       ...state.nodes,
-      [id]: { id, message, category }
+      [id]: { id, message, category, scenarioData }
     }
   })),
   removeNode: (id) => set((state) => {
-    const { [id]: removed, ...restNodes } = state.nodes;
-    const filteredEdges = state.edges.filter(edge => edge.source !== id && edge.target !== id);
-    const { [id]: removedResponse, ...restResponses } = state.nodeResponses;
-    
+    const newNodes = { ...state.nodes };
+    delete newNodes[id];
+
+    const filteredEdges = state.edges.filter(
+      edge => edge.source !== id && edge.target !== id
+    );
+
+    const newResponses = { ...state.nodeResponses };
+    delete newResponses[id];
+
     return {
-      nodes: restNodes,
+      nodes: newNodes,
       edges: filteredEdges,
-      nodeResponses: restResponses
+      nodeResponses: newResponses
     };
   }),
-  
-  // Akcje dla krawędzi
+
+  // Edge actions
   setEdges: (edges) => set({ edges }),
   addEdge: (source, target) => set((state) => {
-    // Sprawdź, czy taka krawędź już istnieje
     if (state.edges.some(e => e.source === source && e.target === target)) {
       return { edges: state.edges };
     }
@@ -111,10 +97,12 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     };
   }),
   removeEdge: (source, target) => set((state) => ({
-    edges: state.edges.filter(edge => !(edge.source === source && edge.target === target))
+    edges: state.edges.filter(
+      edge => !(edge.source === source && edge.target === target)
+    )
   })),
-  
-  // Akcje dla kategorii
+
+  // Category actions
   setCategories: (categories) => set({ categories }),
   addCategory: (category) => set((state) => {
     if (state.categories.includes(category)) {
@@ -124,8 +112,8 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       categories: [...state.categories, category]
     };
   }),
-  
-  // Akcje dla odpowiedzi
+
+  // Response actions
   setNodeResponses: (responses) => set({ nodeResponses: responses }),
   addNodeResponse: (nodeId, response) => set((state) => ({
     nodeResponses: {
@@ -134,19 +122,14 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     }
   })),
   removeNodeResponse: (nodeId) => set((state) => {
-    const { [nodeId]: removed, ...rest } = state.nodeResponses;
+    const newResponses = { ...state.nodeResponses };
+    delete newResponses[nodeId];
     return {
-      nodeResponses: rest
+      nodeResponses: newResponses
     };
   }),
-  
-  // Akcje dla schematów
-  setSavedSchemas: (schemas) => set({ savedSchemas: schemas }),
-  addSchema: (schema) => set((state) => ({
-    savedSchemas: [...state.savedSchemas, schema]
-  })),
-  
-  // Eksport/Import
+
+  // Export/Import graph
   exportToJson: () => {
     const { nodes, edges, categories, nodeResponses } = get();
     return {

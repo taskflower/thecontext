@@ -3,8 +3,8 @@ import React, { useEffect } from 'react';
 // import { PluginManager } from './plugins-system/PluginManager';
 // import { PluginsDashboard } from './plugins-system/PluginsDashboard';
 import { usePluginInstaller } from './plugins-system/pluginInstaller';
+import Dashboard from './modules/Dashboard';
 
-import CategoryFolderGraph from './modules/grph';
 
 const App: React.FC = () => {
  // const { counter, increment, decrement } = useAppStore();
@@ -65,7 +65,7 @@ const App: React.FC = () => {
            <PluginManager />
          </TabsContent>
        </Tabs> */}
-       <CategoryFolderGraph/>
+       <Dashboard/>
      </main>
      
      <footer className="mt-8 text-center text-gray-500 text-sm">

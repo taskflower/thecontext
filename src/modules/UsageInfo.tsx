@@ -1,5 +1,5 @@
 // src/components/UsageInfo.tsx
-import React from 'react';
+
 
 const UsageInfo = () => {
   return (

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useGraphStore } from './graphStore';
+import { useGraphStore } from '../graph_module/graphStore';
+
 
 const SequenceExecutor: React.FC = () => {
   const { nodes, edges, addNodeResponse } = useGraphStore();
@@ -15,7 +16,7 @@ const SequenceExecutor: React.FC = () => {
     templateString: string,
     responses: { [key: string]: string } = currentProcessResponses
   ) => {
-    return templateString.replace(/\{\{([\w\.]+)\}\}/g, (match, variable) => {
+    return templateString.replace(/\{\{([\w.]+)\}\}/g, (match, variable) => {
       const parts = variable.split('.');
       if (parts.length === 2 && parts[1] === 'response') {
         const nodeId = parts[0];
@@ -25,16 +26,7 @@ const SequenceExecutor: React.FC = () => {
     });
   };
 
-  const executeNode = (nodeId: string) => {
-    setCurrentProcessResponses({});
-    const processedMessage = processTemplateString(nodes[nodeId].message, {});
-    setCurrentPrompt(processedMessage);
-    setCurrentResponse('');
-    setMessageQueue([nodeId]);
-    setCurrentMessageIndex(0);
-    setIsExecuting(true);
-  };
-
+ 
   const executeAll = () => {
     setCurrentProcessResponses({});
     const visited = new Set<string>();

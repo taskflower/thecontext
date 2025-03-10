@@ -1,5 +1,6 @@
 import React from 'react';
-import { useGraphStore } from './graphStore';
+import { useGraphStore } from '../graph_module/graphStore';
+
 
 const SequenceConnections: React.FC = () => {
   const { edges, removeEdge } = useGraphStore();
