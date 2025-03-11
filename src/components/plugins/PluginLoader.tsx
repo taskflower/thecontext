@@ -1,5 +1,5 @@
 // PluginLoaderToast.tsx
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getAllPlugins } from '@/pages/stepsPlugins/registry';
 import { AlertCircle, CheckCircle, Loader2, X, ChevronUp, ChevronDown } from 'lucide-react';
 
