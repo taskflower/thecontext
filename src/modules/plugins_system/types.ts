@@ -16,15 +16,13 @@ export interface PluginState {
 export interface PluginModule {
   id: string;
   name: string;
-  description?: string; // Make description optional
+  description?: string; 
   defaultConfig: PluginConfig;
   
-  // Key methods that plugins must implement
   processNode?: (node: Node, response?: string) => { node: Node, result: any };
   generateNode?: (config: PluginConfig) => Node;
   transformEdge?: (edge: Edge, nodes: Record<string, Node>) => Edge;
   
-  // UI Components for the plugin
   ConfigComponent: React.FC;
   ViewComponent: React.FC;
   ResultComponent: React.FC;

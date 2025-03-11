@@ -1,4 +1,4 @@
-// src/modules/scenarios_module/EdgeConnector.tsx
+// src/modules/scenarios_module/editor/EdgeConnector.tsx
 import React, { useState } from 'react';
 import { useScenarioStore } from '../scenarioStore';
 import { Button } from "@/components/ui/button";
@@ -10,8 +10,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { ArrowRightIcon } from "lucide-react";
-
+import { ArrowRight } from "lucide-react";
 
 const EdgeConnector: React.FC = () => {
   const { nodes, addEdge } = useScenarioStore();
@@ -49,7 +48,7 @@ const EdgeConnector: React.FC = () => {
         </div>
         
         <div className="lg:col-span-1 flex justify-center items-center">
-          <ArrowRightIcon className="hidden lg:block h-5 w-5 text-slate-400" />
+          <ArrowRight className="hidden lg:block h-5 w-5 text-slate-400" />
         </div>
         
         <div className="lg:col-span-3 space-y-1.5">
@@ -79,7 +78,7 @@ const EdgeConnector: React.FC = () => {
         disabled={!edgeForm.source || !edgeForm.target || edgeForm.source === edgeForm.target}
         className="w-full"
       >
-        <ArrowRightIcon className="h-4 w-4 mr-2" />
+        <ArrowRight className="h-4 w-4 mr-2" />
         Connect Nodes
       </Button>
     </div>

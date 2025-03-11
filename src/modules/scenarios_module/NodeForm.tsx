@@ -1,5 +1,4 @@
 // src/modules/scenario_module/NodeForm.tsx
-// (dawniej NodeForm.tsx)
 import React, { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,8 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Plus } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useScenarioStore } from './scenarioStore';
+import MDialog from "@/components/MDialog";
 
 const NodeForm: React.FC = () => {
   const { categories, addCategory, addNode } = useScenarioStore();
@@ -59,35 +58,13 @@ const NodeForm: React.FC = () => {
       <div className="space-y-2">
         <div className="flex justify-between items-center">
           <Label htmlFor="node-category">Category</Label>
-          <Dialog open={showCategoryDialog} onOpenChange={setShowCategoryDialog}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Plus className="h-4 w-4 mr-1" /> New Category
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add New Category</DialogTitle>
-                <DialogDescription>
-                  Create a new category to organize your nodes
-                </DialogDescription>
-              </DialogHeader>
-              <div className="py-4">
-                <Label htmlFor="new-category">Category Name</Label>
-                <Input 
-                  id="new-category"
-                  value={newCategory}
-                  onChange={(e) => setNewCategory(e.target.value)}
-                  placeholder="Enter category name"
-                  className="mt-2"
-                />
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setShowCategoryDialog(false)}>Cancel</Button>
-                <Button onClick={handleAddCategory}>Add Category</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setShowCategoryDialog(true)}
+          >
+            <Plus className="h-4 w-4 mr-1" /> New Category
+          </Button>
         </div>
         
         <Select
@@ -129,6 +106,31 @@ const NodeForm: React.FC = () => {
           </Badge>
         ))}
       </div>
+
+      {/* New Category Dialog */}
+      <MDialog
+        title="Add New Category"
+        description="Create a new category to organize your nodes"
+        isOpen={showCategoryDialog}
+        onOpenChange={setShowCategoryDialog}
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setShowCategoryDialog(false)}>Cancel</Button>
+            <Button onClick={handleAddCategory}>Add Category</Button>
+          </>
+        }
+      >
+        <div>
+          <Label htmlFor="new-category">Category Name</Label>
+          <Input 
+            id="new-category"
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            placeholder="Enter category name"
+            className="mt-2"
+          />
+        </div>
+      </MDialog>
     </div>
   );
 };

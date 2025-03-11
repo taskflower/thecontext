@@ -1,24 +1,27 @@
-// src/modules/scenarios_module/NodeBuilder.tsx
+// src/modules/scenarios_module/editor/NodeBuilder.tsx
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { PlusCircle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useScenarioStore } from '../scenarioStore';
+import MCard from "@/components/MCard";
+import MDialog from "@/components/MDialog";
 
 const NodeBuilder: React.FC = () => {
   const { categories, addNode, addCategory } = useScenarioStore();
   const [nodeForm, setNodeForm] = useState({ id: '', message: '', category: 'default' });
   const [newCategory, setNewCategory] = useState('');
+  const [showCategoryDialog, setShowCategoryDialog] = useState(false);
 
   const handleAddCategory = () => {
     if (newCategory && !categories.includes(newCategory)) {
       addCategory(newCategory);
+      setNodeForm({ ...nodeForm, category: newCategory });
       setNewCategory('');
+      setShowCategoryDialog(false);
     }
   };
 
@@ -30,15 +33,25 @@ const NodeBuilder: React.FC = () => {
   };
 
   return (
-    <Card className="lg:col-span-1">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+    <MCard
+      title={
+        <div className="flex items-center gap-2">
           <PlusCircle className="h-5 w-5" />
           Add Node
-        </CardTitle>
-        <CardDescription>Create a prompt node with content</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
+        </div>
+      }
+      description="Create a prompt node with content"
+      footer={
+        <Button 
+          onClick={handleAddNode}
+          disabled={!nodeForm.id || !nodeForm.message}
+          className="w-full"
+        >
+          <PlusCircle className="h-4 w-4 mr-2" /> Add Node
+        </Button>
+      }
+    >
+      <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="node-id">Node ID</Label>
           <Input
@@ -63,35 +76,13 @@ const NodeBuilder: React.FC = () => {
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <Label htmlFor="node-category">Category</Label>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <PlusCircle className="h-4 w-4 mr-1" /> New Category
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Add New Category</DialogTitle>
-                  <DialogDescription>
-                    Create a new category to organize your nodes
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="py-4">
-                  <Label htmlFor="new-category">Category Name</Label>
-                  <Input 
-                    id="new-category"
-                    value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value)}
-                    placeholder="Enter category name"
-                    className="mt-2"
-                  />
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setNewCategory('')}>Cancel</Button>
-                  <Button onClick={handleAddCategory}>Add Category</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setShowCategoryDialog(true)}
+            >
+              <PlusCircle className="h-4 w-4 mr-1" /> New Category
+            </Button>
           </div>
           
           <Select
@@ -110,17 +101,33 @@ const NodeBuilder: React.FC = () => {
             </SelectContent>
           </Select>
         </div>
-      </CardContent>
-      <CardFooter>
-        <Button 
-          onClick={handleAddNode}
-          disabled={!nodeForm.id || !nodeForm.message}
-          className="w-full"
-        >
-          <PlusCircle className="h-4 w-4 mr-2" /> Add Node
-        </Button>
-      </CardFooter>
-    </Card>
+      </div>
+
+      {/* New Category Dialog */}
+      <MDialog
+        title="Add New Category"
+        description="Create a new category to organize your nodes"
+        isOpen={showCategoryDialog}
+        onOpenChange={setShowCategoryDialog}
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setShowCategoryDialog(false)}>Cancel</Button>
+            <Button onClick={handleAddCategory}>Add Category</Button>
+          </>
+        }
+      >
+        <div>
+          <Label htmlFor="new-category">Category Name</Label>
+          <Input 
+            id="new-category"
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            placeholder="Enter category name"
+            className="mt-2"
+          />
+        </div>
+      </MDialog>
+    </MCard>
   );
 };
 

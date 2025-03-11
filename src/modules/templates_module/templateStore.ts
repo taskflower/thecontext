@@ -2,7 +2,6 @@
 import { create } from 'zustand';
 import { useScenarioStore } from '../scenarios_module/scenarioStore';
 import { Node, Edge } from '../scenarios_module/types';
-import { initialTemplates } from '../init_data/mockTemplateData';
 
 export interface Template {
   name: string;
@@ -14,22 +13,19 @@ export interface Template {
 interface TemplateState {
   templates: Template[];
   
-  // Actions for templates
   setTemplates: (templates: Template[]) => void;
   addTemplate: (template: Template) => void;
   removeTemplate: (index: number) => void;
-  
-  // Import template to scenario
+
   importTemplateAsNode: (templateIndex: number, mountPoint: string, prefix?: string) => void;
   
-  // Export/Import templates
   exportTemplatesToJson: () => Template[];
   importTemplatesFromJson: (data: Template[]) => void;
 }
 
 export const useTemplateStore = create<TemplateState>((set, get) => ({
-  // Load templates from mock data
-  templates: initialTemplates,
+  // Initial empty state
+  templates: [],
   
   // Template actions
   setTemplates: (templates) => set({ templates }),

@@ -4,12 +4,6 @@ import { create } from "zustand";
 import { Template } from "../templates_module/templateStore";
 import { Node, Edge } from "./types";
 import { PluginConfig } from "../plugins_system/types";
-import {
-  initialCategories,
-  initialEdges,
-  initialNodeResponses,
-  initialNodes,
-} from "../init_data/mockScenarioData";
 
 interface ScenarioState {
   nodes: Record<string, Node>;
@@ -52,11 +46,11 @@ interface ScenarioState {
 }
 
 export const useScenarioStore = create<ScenarioState>((set, get) => ({
-  // Default scenario data loaded from mock data
-  nodes: initialNodes,
-  edges: initialEdges,
-  categories: initialCategories,
-  nodeResponses: initialNodeResponses,
+  // Initial empty state
+  nodes: {},
+  edges: [],
+  categories: ['default'],
+  nodeResponses: {},
 
   // Node actions
   setNodes: (nodes) => set({ nodes }),
@@ -68,11 +62,9 @@ export const useScenarioStore = create<ScenarioState>((set, get) => ({
           id, 
           message, 
           category,
-          // Only include templateData if it's provided and not empty
           ...(templateData && Object.keys(templateData).length > 0 ? { templateData } : {})
         },
       },
-      // Add category if it doesn't exist
       categories: state.categories.includes(category) 
         ? state.categories 
         : [...state.categories, category]

@@ -4,25 +4,10 @@ import { useScenarioStore } from "./scenarioStore";
 import { useScenariosMultiStore } from "./scenariosMultiStore";
 import ScenarioList from "./ScenarioList";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-
-import { FileUpIcon, FileDownIcon, AlertTriangleIcon } from "lucide-react";
+import { FileUp, FileDown, AlertTriangle } from "lucide-react";
+import MCard from "@/components/MCard";
+import MDialog from "@/components/MDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,7 +28,7 @@ const ScenarioManagement: React.FC = () => {
   const [showImportConfirmation, setShowImportConfirmation] = useState(false);
   const [fileToImport, setFileToImport] = useState<File | null>(null);
 
-  // Eksport scenariusza do pliku JSON
+  // Export scenario to JSON file
   const exportScenarioAsJSON = () => {
     const scenarioData = exportToJson();
     const dataStr =
@@ -58,7 +43,7 @@ const ScenarioManagement: React.FC = () => {
     setShowExportModal(false);
   };
 
-  // Obsługa wyboru pliku
+  // Handle file selection
   const handleFileSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -67,7 +52,7 @@ const ScenarioManagement: React.FC = () => {
     }
   };
 
-  // Import scenariusza z pliku JSON i dodanie do listy scenariuszy
+  // Import scenario from JSON file and add to scenarios list
   const confirmImport = () => {
     if (fileToImport) {
       const reader = new FileReader();
@@ -79,8 +64,8 @@ const ScenarioManagement: React.FC = () => {
           setShowImportConfirmation(false);
           setFileToImport(null);
         } catch (error) {
-          console.error("Błąd podczas importu JSON:", error);
-          // Dodaj obsługę błędów w razie potrzeby
+          console.error("Error importing JSON:", error);
+          // Add error handling if needed
         }
       };
       reader.readAsText(fileToImport);
@@ -89,167 +74,146 @@ const ScenarioManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <Card className="bg-slate-50">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Current Scenario Stats</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white p-3 rounded-md border">
-              <div className="text-sm font-medium">Nodes</div>
-              <div className="text-2xl font-bold mt-1">
-                {Object.keys(nodes).length}
-              </div>
-            </div>
-            <div className="bg-white p-3 rounded-md border">
-              <div className="text-sm font-medium">Connections</div>
-              <div className="text-2xl font-bold mt-1">{edges.length}</div>
+      <MCard
+        title="Current Scenario Stats"
+        description="Overview of the current scenario"
+      >
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-white p-3 rounded-md border">
+            <div className="text-sm font-medium">Nodes</div>
+            <div className="text-2xl font-bold mt-1">
+              {Object.keys(nodes).length}
             </div>
           </div>
-        </CardContent>
-      </Card>
-      {/* Lista scenariuszy */}
+          <div className="bg-white p-3 rounded-md border">
+            <div className="text-sm font-medium">Connections</div>
+            <div className="text-2xl font-bold mt-1">{edges.length}</div>
+          </div>
+        </div>
+      </MCard>
+
+      {/* Scenarios List */}
       <div className="mb-6">
-        <h2 className="text-lg font-bold mb-2">Lista Scenariuszy</h2>
+        <h2 className="text-lg font-bold mb-2">Scenarios List</h2>
         <ScenarioList />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Export Scenario</CardTitle>
-            <CardDescription>
-              Zapisz bieżący scenariusz jako plik JSON.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pb-2">
-            <div className="text-sm text-slate-500">
-              Eksportuj cały scenariusz zawierający wszystkie node’y, połączenia
-              i kategorie.
-            </div>
-          </CardContent>
-          <CardFooter>
+        <MCard
+          title="Export Scenario"
+          description="Save current scenario as a JSON file"
+          footer={
             <Button
               onClick={() => setShowExportModal(true)}
               className="w-full"
               variant="outline"
               disabled={Object.keys(nodes).length === 0}
             >
-              <FileDownIcon className="h-4 w-4 mr-2" />
+              <FileDown className="h-4 w-4 mr-2" />
               Export to JSON
             </Button>
-          </CardFooter>
-        </Card>
+          }
+        >
+          <div className="text-sm text-slate-500">
+            Export the entire scenario including all nodes, connections and categories.
+          </div>
+        </MCard>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Import Scenario</CardTitle>
-            <CardDescription>
-              Wczytaj wcześniej wyeksportowany scenariusz.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pb-2">
-            <div className="text-sm text-slate-500">
-              Import scenariusza z pliku JSON. Import doda scenariusz do listy,
-              nie zastępuje bieżącego.
-            </div>
-          </CardContent>
-          <CardFooter>
+        <MCard
+          title="Import Scenario"
+          description="Load a previously exported scenario"
+          footer={
             <Button
               onClick={() => setShowImportModal(true)}
               className="w-full"
               variant="outline"
             >
-              <FileUpIcon className="h-4 w-4 mr-2" />
+              <FileUp className="h-4 w-4 mr-2" />
               Import from JSON
             </Button>
-          </CardFooter>
-        </Card>
+          }
+        >
+          <div className="text-sm text-slate-500">
+            Import a scenario from a JSON file. This will add the scenario to the list, not replace the current one.
+          </div>
+        </MCard>
       </div>
 
       {/* Export Dialog */}
-      <Dialog open={showExportModal} onOpenChange={setShowExportModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Export Current Scenario</DialogTitle>
-            <DialogDescription>
-              Scenariusz zostanie zapisany jako plik JSON, który można później
-              zaimportować.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="bg-slate-50 p-4 rounded-md border space-y-2">
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-              <div>
-                <span className="text-sm font-medium">Nodes:</span>
-                <span className="ml-2">{Object.keys(nodes).length}</span>
-              </div>
-              <div>
-                <span className="text-sm font-medium">Connections:</span>
-                <span className="ml-2">{edges.length}</span>
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter>
+      <MDialog
+        title="Export Current Scenario"
+        description="The scenario will be saved as a JSON file that can be imported later"
+        isOpen={showExportModal}
+        onOpenChange={setShowExportModal}
+        footer={
+          <>
             <Button variant="outline" onClick={() => setShowExportModal(false)}>
               Cancel
             </Button>
             <Button onClick={exportScenarioAsJSON}>
-              <FileDownIcon className="h-4 w-4 mr-2" />
+              <FileDown className="h-4 w-4 mr-2" />
               Export
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </>
+        }
+      >
+        <div className="bg-slate-50 p-4 rounded-md border space-y-2">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+            <div>
+              <span className="text-sm font-medium">Nodes:</span>
+              <span className="ml-2">{Object.keys(nodes).length}</span>
+            </div>
+            <div>
+              <span className="text-sm font-medium">Connections:</span>
+              <span className="ml-2">{edges.length}</span>
+            </div>
+          </div>
+        </div>
+      </MDialog>
 
       {/* Import Dialog */}
-      <Dialog open={showImportModal} onOpenChange={setShowImportModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Import Scenario</DialogTitle>
-            <DialogDescription>
-              Wybierz plik JSON, aby dodać nowy scenariusz.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-2">
-            <div className="flex items-center justify-center border-2 border-dashed border-slate-200 rounded-md p-8">
-              <div className="space-y-2 text-center">
-                <div className="text-slate-500">
-                  Wybierz plik JSON do importu
-                </div>
-                <div className="relative">
-                  <Input
-                    type="file"
-                    accept=".json"
-                    onChange={handleFileSelection}
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                  />
-                  <Button variant="outline">
-                    <FileUpIcon className="h-4 w-4 mr-2" />
-                    Select File
-                  </Button>
-                </div>
+      <MDialog
+        title="Import Scenario"
+        description="Select a JSON file to add a new scenario"
+        isOpen={showImportModal}
+        onOpenChange={setShowImportModal}
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setShowImportModal(false)}>
+              Cancel
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4 py-2">
+          <div className="flex items-center justify-center border-2 border-dashed border-slate-200 rounded-md p-8">
+            <div className="space-y-2 text-center">
+              <div className="text-slate-500">
+                Select a JSON file to import
               </div>
-            </div>
-
-            <div className="flex items-center p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-800">
-              <AlertTriangleIcon className="h-5 w-5 mr-2 flex-shrink-0" />
-              <div className="text-sm">
-                Import doda scenariusz do listy. Upewnij się, że wyeksportowałeś
-                swoje zmiany przed importem.
+              <div className="relative">
+                <Input
+                  type="file"
+                  accept=".json"
+                  onChange={handleFileSelection}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+                <Button variant="outline">
+                  <FileUp className="h-4 w-4 mr-2" />
+                  Select File
+                </Button>
               </div>
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowImportModal(false)}>
-              Cancel
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          <div className="flex items-center p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-800">
+            <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0" />
+            <div className="text-sm">
+              Import will add the scenario to the list. Make sure you've exported your changes before importing.
+            </div>
+          </div>
+        </div>
+      </MDialog>
 
       {/* Import Confirmation */}
       <AlertDialog
@@ -260,8 +224,7 @@ const ScenarioManagement: React.FC = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Add New Scenario?</AlertDialogTitle>
             <AlertDialogDescription>
-              Ta akcja doda zaimportowany scenariusz do listy. Operacja nie
-              zastąpi bieżącego scenariusza.
+              This action will add the imported scenario to the list. It will not replace the current scenario.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

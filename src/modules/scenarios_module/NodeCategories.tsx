@@ -24,9 +24,9 @@ import {
   ArrowLeft,
   MessageSquare,
 } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import MDialog from "@/components/MDialog";
 
 const NodeCategories: React.FC = () => {
   const { nodes, edges, categories, nodeResponses, removeNode, addNodeResponse } = useScenarioStore();
@@ -241,119 +241,108 @@ const NodeCategories: React.FC = () => {
       {categories.map((category) => renderCategoryFolder(category))}
 
       {/* Node Preview Dialog */}
-      {previewNodeId && (
-        <Dialog open={!!previewNodeId} onOpenChange={(open) => !open && setPreviewNodeId(null)}>
-          <DialogContent className="sm:max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Node Preview: {previewNodeId}</DialogTitle>
-              <DialogDescription>
-                Category: <Badge variant="outline">{nodes[previewNodeId]?.category}</Badge>
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label>Prompt Content</Label>
-                <div className="mt-1.5 bg-slate-50 p-4 rounded-md border whitespace-pre-wrap">
-                  {processTemplateString(nodes[previewNodeId]?.message || '')}
-                </div>
-              </div>
-              {nodeResponses[previewNodeId] && (
-                <div>
-                  <Label>Saved Response</Label>
-                  <div className="mt-1.5 bg-green-50 p-4 rounded-md border whitespace-pre-wrap">
-                    {nodeResponses[previewNodeId]}
-                  </div>
-                </div>
-              )}
+      <MDialog
+        title={`Node Preview: ${previewNodeId || ""}`}
+        description={previewNodeId ? `Category: ${nodes[previewNodeId]?.category}` : ""}
+        isOpen={!!previewNodeId}
+        onOpenChange={(open) => !open && setPreviewNodeId(null)}
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setPreviewNodeId(null)}>Close</Button>
+            <Button onClick={() => {
+              setPreviewNodeId(null);
+              handleExecute(previewNodeId!);
+            }}>
+              <Play className="h-4 w-4 mr-2" /> Execute Node
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <Label>Prompt Content</Label>
+            <div className="mt-1.5 bg-slate-50 p-4 rounded-md border whitespace-pre-wrap">
+              {previewNodeId && processTemplateString(nodes[previewNodeId]?.message || '')}
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setPreviewNodeId(null)}>Close</Button>
-              <Button onClick={() => {
-                setPreviewNodeId(null);
-                handleExecute(previewNodeId);
-              }}>
-                <Play className="h-4 w-4 mr-2" /> Execute Node
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+          </div>
+          {previewNodeId && nodeResponses[previewNodeId] && (
+            <div>
+              <Label>Saved Response</Label>
+              <div className="mt-1.5 bg-green-50 p-4 rounded-md border whitespace-pre-wrap">
+                {nodeResponses[previewNodeId]}
+              </div>
+            </div>
+          )}
+        </div>
+      </MDialog>
 
       {/* Response View Dialog */}
-      {responseDialogNodeId && (
-        <Dialog open={!!responseDialogNodeId} onOpenChange={(open) => !open && setResponseDialogNodeId(null)}>
-          <DialogContent className="sm:max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Node Response: {responseDialogNodeId}</DialogTitle>
-              <DialogDescription>
-                Category: <Badge variant="outline">{nodes[responseDialogNodeId]?.category}</Badge>
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label>Response Content</Label>
-                <div className="mt-1.5 bg-green-50 p-4 rounded-md border whitespace-pre-wrap max-h-96 overflow-y-auto">
-                  {nodeResponses[responseDialogNodeId]}
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setResponseDialogNodeId(null)}>Close</Button>
-              <Button onClick={() => {
-                setResponseDialogNodeId(null);
-                handleExecute(responseDialogNodeId);
-              }}>
-                <Play className="h-4 w-4 mr-2" /> Re-Execute Node
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+      <MDialog
+        title={`Node Response: ${responseDialogNodeId || ""}`}
+        description={responseDialogNodeId ? `Category: ${nodes[responseDialogNodeId]?.category}` : ""}
+        isOpen={!!responseDialogNodeId}
+        onOpenChange={(open) => !open && setResponseDialogNodeId(null)}
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setResponseDialogNodeId(null)}>Close</Button>
+            <Button onClick={() => {
+              setResponseDialogNodeId(null);
+              handleExecute(responseDialogNodeId!);
+            }}>
+              <Play className="h-4 w-4 mr-2" /> Re-Execute Node
+            </Button>
+          </>
+        }
+      >
+        <div>
+          <Label>Response Content</Label>
+          <div className="mt-1.5 bg-green-50 p-4 rounded-md border whitespace-pre-wrap max-h-96 overflow-y-auto">
+            {responseDialogNodeId && nodeResponses[responseDialogNodeId]}
+          </div>
+        </div>
+      </MDialog>
 
       {/* Node Execution Dialog */}
-      {executingNodeId && (
-        <Dialog open={!!executingNodeId} onOpenChange={(open) => !open && setExecutingNodeId(null)}>
-          <DialogContent className="sm:max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Execute Node: {executingNodeId}</DialogTitle>
-              <DialogDescription>
-                Enter your response for this node
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label>Prompt Content</Label>
-                <div className="mt-1.5 bg-slate-50 p-4 rounded-md border whitespace-pre-wrap">
-                  {processTemplateString(nodes[executingNodeId]?.message || '')}
-                </div>
-              </div>
-              <div>
-                <Label>Your Response</Label>
-                <Textarea 
-                  className="mt-1.5 min-h-[120px]" 
-                  placeholder="Enter your response..."
-                  value={currentResponse}
-                  onChange={(e) => setCurrentResponse(e.target.value)}
-                />
-              </div>
+      <MDialog
+        title={`Execute Node: ${executingNodeId || ""}`}
+        description="Enter your response for this node"
+        isOpen={!!executingNodeId}
+        onOpenChange={(open) => !open && setExecutingNodeId(null)}
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setExecutingNodeId(null)}>Cancel</Button>
+            <Button 
+              disabled={!currentResponse.trim()}
+              onClick={() => {
+                if (executingNodeId && currentResponse) {
+                  addNodeResponse(executingNodeId, currentResponse);
+                  setExecutingNodeId(null);
+                }
+              }}
+            >
+              Save Response
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <Label>Prompt Content</Label>
+            <div className="mt-1.5 bg-slate-50 p-4 rounded-md border whitespace-pre-wrap">
+              {executingNodeId && processTemplateString(nodes[executingNodeId]?.message || '')}
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setExecutingNodeId(null)}>Cancel</Button>
-              <Button 
-                disabled={!currentResponse.trim()}
-                onClick={() => {
-                  if (executingNodeId && currentResponse) {
-                    addNodeResponse(executingNodeId, currentResponse);
-                    setExecutingNodeId(null);
-                  }
-                }}
-              >
-                Save Response
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+          </div>
+          <div>
+            <Label>Your Response</Label>
+            <Textarea 
+              className="mt-1.5 min-h-[120px]" 
+              placeholder="Enter your response..."
+              value={currentResponse}
+              onChange={(e) => setCurrentResponse(e.target.value)}
+            />
+          </div>
+        </div>
+      </MDialog>
     </div>
   );
 };

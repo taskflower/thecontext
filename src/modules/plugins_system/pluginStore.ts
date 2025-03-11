@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/plugins_system/pluginStore.ts
-// Uproszczony magazyn pluginów
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
@@ -18,18 +18,15 @@ interface PluginStore {
   pluginStates: Record<string, PluginState>;
   activePlugins: string[];
   
-  // Zarządzanie pluginami
   registerPlugin: (pluginId: string, pluginModule: PluginModule) => void;
   unregisterPlugin: (pluginId: string) => void;
   activatePlugin: (pluginId: string) => void;
   deactivatePlugin: (pluginId: string) => void;
   
-  // Zarządzanie stanem pluginów
   getPluginState: (pluginId: string) => PluginState | undefined;
   updatePluginConfig: (pluginId: string, configUpdates: Record<string, any>) => void;
   updatePluginResult: (pluginId: string, result: any) => void;
   
-  // Funkcje pomocnicze
   getActivePlugins: () => Array<{ id: string; plugin: PluginModule }>;
 }
 
@@ -53,7 +50,6 @@ export const usePluginStore = create<PluginStore>()(
       },
       
       unregisterPlugin: (pluginId) => {
-        // Usuń plugin z węzłów, które go używają
         const scenarioStore = useScenarioStore.getState();
         Object.entries(scenarioStore.nodes)
           .filter(([_, node]) => node.pluginId === pluginId)
@@ -61,7 +57,6 @@ export const usePluginStore = create<PluginStore>()(
             scenarioStore.removePluginFromNode(nodeId);
           });
         
-        // Usuń plugin ze store'a
         set(state => {
           const newPlugins = { ...state.plugins };
           const newStates = { ...state.pluginStates };

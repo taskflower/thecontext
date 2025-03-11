@@ -1,9 +1,22 @@
 // src/modules/templates_module/TemplateManagement.tsx
 import React, { useState } from 'react';
-
 import { useTemplateStore } from './templateStore';
 import { useScenarioStore } from '../scenarios_module/scenarioStore';
-
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import MDialog from "@/components/MDialog";
+import { Save, Import, FileJson, Upload } from "lucide-react";
 
 const TemplateManagement: React.FC = () => {
   const { nodes, edges } = useScenarioStore();
@@ -50,7 +63,7 @@ const TemplateManagement: React.FC = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(templatesData, null, 2));
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "szablony_wezlow_export.json");
+    downloadAnchorNode.setAttribute("download", "templates_export.json");
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
@@ -66,7 +79,7 @@ const TemplateManagement: React.FC = () => {
           const data = JSON.parse(e.target!.result as string);
           useTemplateStore.getState().importTemplatesFromJson(data);
         } catch (error) {
-          console.error("Błąd podczas wczytywania pliku szablonów węzłów JSON:", error);
+          console.error("Error loading template JSON file:", error);
         }
       };
       reader.readAsText(file);
@@ -74,186 +87,210 @@ const TemplateManagement: React.FC = () => {
   };
 
   return (
-    <div className="mb-6 bg-gray-100 p-4 rounded-lg border">
-      <h2 className="font-bold mb-3">Zarządzanie szablonami węzłów</h2>
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <button 
-          onClick={() => setShowSaveTemplateForm(true)} 
-          className="bg-purple-600 text-white p-2 rounded hover:bg-purple-700"
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <Button 
+          onClick={() => setShowSaveTemplateForm(true)}
+          className="w-full"
         >
-          Zapisz bieżący scenariusz jako szablon węzłów
-        </button>
-        <button 
-          onClick={() => setShowImportModal(true)} 
-          className="bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700"
+          <Save className="h-4 w-4 mr-2" />
+          Save Current Scenario as Template
+        </Button>
+        <Button 
+          onClick={() => setShowImportModal(true)}
+          className="w-full"
         >
-          Importuj szablon węzłów do scenariusza
-        </button>
+          <Import className="h-4 w-4 mr-2" />
+          Import Template to Scenario
+        </Button>
 
-        <div className="grid grid-cols-2 gap-3 col-span-2">
-          <button 
-            onClick={exportTemplatesAsJSON} 
-            className="bg-green-600 text-white p-2 rounded hover:bg-green-700"
-          >
-            Eksportuj szablony węzłów do pliku JSON
-          </button>
-          <div className="relative">
-            <input 
-              type="file" 
-              accept=".json" 
-              onChange={importTemplatesFromJSON} 
-              className="absolute inset-0 opacity-0 w-full cursor-pointer" 
-            />
-            <button className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 w-full">
-              Wczytaj szablony węzłów z pliku JSON
-            </button>
-          </div>
+        <Button 
+          onClick={exportTemplatesAsJSON}
+          className="w-full"
+        >
+          <FileJson className="h-4 w-4 mr-2" />
+          Export Templates to JSON
+        </Button>
+        
+        <div className="relative w-full">
+          <Input 
+            type="file" 
+            accept=".json" 
+            onChange={importTemplatesFromJSON} 
+            className="absolute inset-0 opacity-0 w-full cursor-pointer z-10" 
+          />
+          <Button className="w-full">
+            <Upload className="h-4 w-4 mr-2" />
+            Load Templates from JSON
+          </Button>
         </div>
       </div>
 
       {/* Saved templates list */}
       {templates.length > 0 && (
-        <div className="mt-4 bg-white p-3 rounded border">
-          <h3 className="font-medium mb-2">Zapisane szablony węzłów ({templates.length})</h3>
-          <div className="space-y-2 max-h-60 overflow-y-auto">
-            {templates.map((template, index) => (
-              <div key={index} className="p-2 border rounded bg-gray-50 text-sm">
-                <div className="font-medium">{template.name}</div>
-                {template.description && (
-                  <div className="text-gray-600 mt-1">{template.description}</div>
-                )}
-                <div className="flex justify-between mt-1 text-xs text-gray-500">
-                  <span>Węzły: {Object.keys(template.nodes).length}</span>
-                  <span>Połączenia: {template.edges.length}</span>
-                </div>
-              </div>
-            ))}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-medium">Saved Templates ({templates.length})</h3>
           </div>
+          <ScrollArea className="h-64">
+            <div className="space-y-3 p-1">
+              {templates.map((template, index) => (
+                <div key={index} className="p-3 border rounded-md bg-white">
+                  <div className="font-medium">{template.name}</div>
+                  {template.description && (
+                    <div className="text-slate-600 mt-1 text-sm">{template.description}</div>
+                  )}
+                  <div className="flex mt-2 space-x-2">
+                    <Badge variant="outline" className="bg-blue-50">
+                      Nodes: {Object.keys(template.nodes).length}
+                    </Badge>
+                    <Badge variant="outline" className="bg-green-50">
+                      Connections: {template.edges.length}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
         </div>
       )}
 
       {/* Save template form modal */}
-      {showSaveTemplateForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full">
-            <h3 className="text-lg font-bold mb-4">Zapisz bieżący scenariusz jako szablon węzłów</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Nazwa szablonu węzłów</label>
-                <input 
-                  value={templateForm.name} 
-                  onChange={(e) => setTemplateForm({ ...templateForm, name: e.target.value })}
-                  placeholder="Nazwa szablonu węzłów" 
-                  className="w-full p-2 border rounded" 
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Opis (opcjonalnie)</label>
-                <textarea 
-                  value={templateForm.description} 
-                  onChange={(e) => setTemplateForm({ ...templateForm, description: e.target.value })}
-                  placeholder="Krótki opis szablonu węzłów" 
-                  className="w-full p-2 border rounded h-24" 
-                />
-              </div>
-              <div className="flex justify-end space-x-2">
-                <button 
-                  onClick={() => setShowSaveTemplateForm(false)} 
-                  className="px-4 py-2 border rounded"
-                >
-                  Anuluj
-                </button>
-                <button 
-                  onClick={saveCurrentAsTemplate}
-                  disabled={!templateForm.name} 
-                  className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-300"
-                >
-                  Zapisz szablon węzłów
-                </button>
-              </div>
-            </div>
+      <MDialog
+        title="Save Current Scenario as Template"
+        description="Create a reusable template from your current scenario"
+        isOpen={showSaveTemplateForm}
+        onOpenChange={(open) => setShowSaveTemplateForm(open)}
+        footer={
+          <>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowSaveTemplateForm(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={saveCurrentAsTemplate}
+              disabled={!templateForm.name}
+            >
+              Save Template
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="templateName">Template Name</Label>
+            <Input 
+              id="templateName"
+              value={templateForm.name} 
+              onChange={(e) => setTemplateForm({ ...templateForm, name: e.target.value })}
+              placeholder="Template name" 
+              className="mt-1.5"
+            />
+          </div>
+          <div>
+            <Label htmlFor="templateDescription">Description (optional)</Label>
+            <Textarea 
+              id="templateDescription"
+              value={templateForm.description} 
+              onChange={(e) => setTemplateForm({ ...templateForm, description: e.target.value })}
+              placeholder="Brief description of the template" 
+              className="mt-1.5 min-h-24" 
+            />
           </div>
         </div>
-      )}
+      </MDialog>
 
-      {/* Import template modal - updated text to reflect direct node import */}
-      {showImportModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full">
-            <h3 className="text-lg font-bold mb-4">Importuj szablon węzłów do scenariusza</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Wybierz szablon węzłów</label>
-                <select
-                  value={selectedTemplateIndex}
-                  onChange={(e) => setSelectedTemplateIndex(e.target.value)}
-                  className="w-full p-2 border rounded"
-                >
-                  <option value="">Wybierz szablon węzłów</option>
-                  {templates.map((template, index) => (
-                    <option key={index} value={index}>
-                      {template.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {selectedTemplateIndex !== '' && (
-                <div className="bg-gray-50 p-3 rounded text-sm">
-                  <p className="font-medium">{templates[parseInt(selectedTemplateIndex)].name}</p>
-                  {templates[parseInt(selectedTemplateIndex)].description && (
-                    <p className="text-gray-600 mt-1">{templates[parseInt(selectedTemplateIndex)].description}</p>
-                  )}
-                  <p className="mt-1">
-                    Węzły do zaimportowania: {Object.keys(templates[parseInt(selectedTemplateIndex)].nodes).length}
-                  </p>
-                  <p>Połączenia: {templates[parseInt(selectedTemplateIndex)].edges.length}</p>
-                </div>
+      {/* Import template modal */}
+      <MDialog
+        title="Import Template to Scenario"
+        description="Add a saved template to your current scenario"
+        isOpen={showImportModal}
+        onOpenChange={(open) => setShowImportModal(open)}
+        footer={
+          <>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowImportModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleImportTemplate}
+              disabled={selectedTemplateIndex === '' || !mountPoint}
+            >
+              Import
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="templateSelect">Select Template</Label>
+            <Select
+              value={selectedTemplateIndex}
+              onValueChange={setSelectedTemplateIndex}
+            >
+              <SelectTrigger className="mt-1.5">
+                <SelectValue placeholder="Select a template" />
+              </SelectTrigger>
+              <SelectContent>
+                {templates.map((template, index) => (
+                  <SelectItem key={index} value={index.toString()}>
+                    {template.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {selectedTemplateIndex !== '' && (
+            <div className="bg-slate-50 p-3 rounded-md text-sm">
+              <p className="font-medium">{templates[parseInt(selectedTemplateIndex)].name}</p>
+              {templates[parseInt(selectedTemplateIndex)].description && (
+                <p className="text-slate-600 mt-1">{templates[parseInt(selectedTemplateIndex)].description}</p>
               )}
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Punkt montowania (węzeł w bieżącym scenariuszu)
-                </label>
-                <select 
-                  value={mountPoint} 
-                  onChange={(e) => setMountPoint(e.target.value)}
-                  className="w-full p-2 border rounded"
-                >
-                  <option value="">Wybierz węzeł</option>
-                  {Object.keys(nodes).map((id) => (
-                    <option key={id} value={id}>{id}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Prefiks dla importowanych węzłów
-                </label>
-                <input
-                  value={prefix}
-                  onChange={(e) => setPrefix(e.target.value)}
-                  placeholder="np. sekcja1 (domyślnie: imported)"
-                  className="w-full p-2 border rounded"
-                />
-              </div>
-              <div className="flex justify-end space-x-2">
-                <button 
-                  onClick={() => setShowImportModal(false)} 
-                  className="px-4 py-2 border rounded"
-                >
-                  Anuluj
-                </button>
-                <button
-                  onClick={handleImportTemplate}
-                  disabled={selectedTemplateIndex === '' || !mountPoint}
-                  className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-300"
-                >
-                  Importuj
-                </button>
+              <div className="flex mt-2 space-x-2">
+                <Badge variant="outline" className="bg-blue-50">
+                  Nodes: {Object.keys(templates[parseInt(selectedTemplateIndex)].nodes).length}
+                </Badge>
+                <Badge variant="outline" className="bg-green-50">
+                  Connections: {templates[parseInt(selectedTemplateIndex)].edges.length}
+                </Badge>
               </div>
             </div>
+          )}
+          
+          <div>
+            <Label htmlFor="mountPoint">Mount Point (node in current scenario)</Label>
+            <Select
+              value={mountPoint}
+              onValueChange={setMountPoint}
+            >
+              <SelectTrigger className="mt-1.5">
+                <SelectValue placeholder="Select a node" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.keys(nodes).map((id) => (
+                  <SelectItem key={id} value={id}>{id}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div>
+            <Label htmlFor="prefix">Prefix for Imported Nodes</Label>
+            <Input
+              id="prefix"
+              value={prefix}
+              onChange={(e) => setPrefix(e.target.value)}
+              placeholder="e.g. section1 (default: imported)"
+              className="mt-1.5"
+            />
           </div>
         </div>
-      )}
+      </MDialog>
     </div>
   );
 };

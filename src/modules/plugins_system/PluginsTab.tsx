@@ -1,15 +1,41 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/modules/plugins_system/PluginsTab.tsx
-// Uproszczona zakładka pluginów
-
-import React from "react";
+import React, { useState } from "react";
 import { usePluginStore } from "./pluginStore";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PluginContainer } from "./PluginContainer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useScenarioStore } from "../scenarios_module/scenarioStore";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
+import { Eye } from "lucide-react";
+import MCard from "@/components/MCard";
+import MDialog from "@/components/MDialog";
+
+// Plugin Dialog Component
+const PluginPreviewDialog = ({ 
+  isOpen, 
+  onClose, 
+  pluginId 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  pluginId: string 
+}) => {
+  if (!pluginId) return null;
+  
+  return (
+    <MDialog 
+      isOpen={isOpen} 
+      onOpenChange={(open) => !open && onClose()}
+      title="Plugin Preview"
+      maxWidth="sm:max-w-3xl"
+    >
+      <div className="mt-4">
+        <PluginContainer pluginId={pluginId} />
+      </div>
+    </MDialog>
+  );
+};
 
 // Komponent do zarządzania integracją węzłów z pluginami
 const NodePluginIntegration = () => {
@@ -27,11 +53,12 @@ const NodePluginIntegration = () => {
   };
 
   return (
-    <Card className="mb-6">
-      <CardHeader>
-        <CardTitle>Przypisz Plugin do Węzła</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <MCard 
+      title="Przypisz Plugin do Węzła"
+      description=""
+      className="mb-6"
+    >
+      <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-medium mb-1 block">Wybierz węzeł</label>
@@ -54,7 +81,7 @@ const NodePluginIntegration = () => {
               </SelectTrigger>
               <SelectContent>
                 {activePlugins
-                  .filter(pluginId => plugins[pluginId]) // Filtruj, aby uwzględnić tylko istniejące pluginy
+                  .filter(pluginId => plugins[pluginId]) 
                   .map(pluginId => (
                     <SelectItem key={pluginId} value={pluginId}>{plugins[pluginId].name}</SelectItem>
                   ))
@@ -70,93 +97,78 @@ const NodePluginIntegration = () => {
         >
           Przypisz Plugin do Węzła
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </MCard>
   );
 };
 
-// Komponent wyświetlający aktywne pluginy
 const ActivePlugins = () => {
   const { plugins, activePlugins, deactivatePlugin } = usePluginStore();
-  
-  // Filtracja aktywnych wtyczek, które rzeczywiście istnieją
   const validActivePlugins = activePlugins.filter(pluginId => plugins[pluginId]);
+  const [previewPluginId, setPreviewPluginId] = useState<string | null>(null);
 
   if (validActivePlugins.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Aktywne Pluginy</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-6 text-slate-500">
-            Brak aktywnych pluginów
-          </div>
-        </CardContent>
-      </Card>
+      <MCard
+        title="Aktywne Pluginy"
+        description=""
+      >
+        <div className="text-center py-6 text-slate-500">
+          Brak aktywnych pluginów
+        </div>
+      </MCard>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Aktywne Pluginy</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {validActivePlugins.map(pluginId => (
+    <>
+      <MCard
+        title="Aktywne Pluginy"
+        description=""
+      >
+        <div className="space-y-4">
+          {validActivePlugins.map(pluginId => (
             <div key={pluginId} className="flex justify-between items-center p-3 border rounded-md">
               <div>
                 <div className="font-medium">{plugins[pluginId].name}</div>
                 <div className="text-sm text-slate-500">{plugins[pluginId].description}</div>
               </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => deactivatePlugin(pluginId)}
-              >
-                Dezaktywuj
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setPreviewPluginId(pluginId)}
+                >
+                  <Eye size={16} className="mr-2" />
+                  Podgląd
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => deactivatePlugin(pluginId)}
+                >
+                  Dezaktywuj
+                </Button>
+              </div>
             </div>
           ))}
-      </CardContent>
-    </Card>
+        </div>
+      </MCard>
+      
+      <PluginPreviewDialog 
+        isOpen={!!previewPluginId} 
+        onClose={() => setPreviewPluginId(null)} 
+        pluginId={previewPluginId || ''} 
+      />
+    </>
   );
 };
 
-// Główna zakładka pluginów
-const PluginsTab: React.FC = () => {
-  const { plugins, activePlugins } = usePluginStore();
-  
-  return (
-    <div className="space-y-6 mt-6">
-      <NodePluginIntegration />
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <ActivePlugins />
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Węzły z Pluginami</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <NodePluginsView />
-          </CardContent>
-        </Card>
-      </div>
-      
-      {activePlugins
-        .filter(pluginId => plugins[pluginId]) // Filtruj, aby uwzględnić tylko istniejące pluginy
-        .map(pluginId => (
-          <PluginContainer key={pluginId} pluginId={pluginId} />
-        ))}
-    </div>
-  );
-};
-
-// Komponent wyświetlający węzły z pluginami
 const NodePluginsView = () => {
   const { nodes } = useScenarioStore();
   const { plugins } = usePluginStore();
+  const [previewPluginId, setPreviewPluginId] = useState<string | null>(null);
+  const [previewNodeId, setPreviewNodeId] = useState<string | null>(null);
   
   const nodesWithPlugins = Object.entries(nodes)
     .filter(([_, node]) => node.pluginId && plugins[node.pluginId])
@@ -170,29 +182,78 @@ const NodePluginsView = () => {
     );
   }
   
+  const handlePreviewClick = (nodeId: string, pluginId: string) => {
+    setPreviewNodeId(nodeId);
+    setPreviewPluginId(pluginId);
+  };
+  
   return (
-    <div className="space-y-3">
-      {nodesWithPlugins.map(({ nodeId, pluginId }) => (
-        <div key={nodeId} className="p-3 border rounded-md">
-          <div className="flex justify-between items-center">
-            <div>
-              <div className="font-medium">{nodeId}</div>
-              <div className="flex items-center mt-1">
-                <Badge variant="outline" className="bg-blue-50 border-blue-200">
-                  {plugins[pluginId].name}
-                </Badge>
+    <>
+      <div className="space-y-3">
+        {nodesWithPlugins.map(({ nodeId, pluginId }) => (
+          <div key={nodeId} className="p-3 border rounded-md">
+            <div className="flex justify-between items-center">
+              <div>
+                <div className="font-medium">{nodeId}</div>
+                <div className="flex items-center mt-1">
+                  <Badge variant="outline" className="bg-blue-50 border-blue-200">
+                    {plugins[pluginId].name}
+                  </Badge>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handlePreviewClick(nodeId, pluginId)}
+                >
+                  <Eye size={16} className="mr-2" />
+                  Podgląd
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => useScenarioStore.getState().removePluginFromNode(nodeId)}
+                >
+                  Odłącz
+                </Button>
               </div>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => useScenarioStore.getState().removePluginFromNode(nodeId)}
-            >
-              Odłącz
-            </Button>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
+      
+      {previewPluginId && previewNodeId && (
+        <MDialog 
+          isOpen={!!previewPluginId} 
+          onOpenChange={(open) => !open && (setPreviewPluginId(null), setPreviewNodeId(null))}
+          title="Podgląd Pluginu w Węźle"
+          maxWidth="sm:max-w-3xl"
+        >
+          <div className="mt-4">
+            <PluginContainer pluginId={previewPluginId} nodeId={previewNodeId} />
+          </div>
+        </MDialog>
+      )}
+    </>
+  );
+};
+
+const PluginsTab: React.FC = () => {
+  return (
+    <div className="space-y-6 mt-6">
+      <NodePluginIntegration />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <ActivePlugins />
+        <MCard
+          title="Węzły z Pluginami"
+          description=""
+        >
+          <NodePluginsView />
+        </MCard>
+      </div>
+      
+      {/* Usunięto wyświetlanie pluginów bezpośrednio w zakładce */}
     </div>
   );
 };
