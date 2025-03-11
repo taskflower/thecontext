@@ -1,5 +1,4 @@
 // src/modules/templates_module/TemplateManagement.tsx
-// (dawniej ScenarioManagement.tsx)
 import React, { useState } from 'react';
 
 import { useTemplateStore } from './templateStore';
@@ -7,7 +6,7 @@ import { useScenarioStore } from '../scenarios_module/scenarioStore';
 
 
 const TemplateManagement: React.FC = () => {
-  const { nodes, edges, exportToJson, importFromJson } = useScenarioStore();
+  const { nodes, edges } = useScenarioStore();
   const { templates, addTemplate, importTemplateAsNode } = useTemplateStore();
   
   // State for various modals and forms
@@ -45,45 +44,16 @@ const TemplateManagement: React.FC = () => {
     }
   };
 
-  // Export scenario as JSON file
-  const exportScenarioAsJSON = () => {
-    const scenarioData = exportToJson();
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(scenarioData, null, 2));
-    const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "scenario_export.json");
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-  };
-
   // Export templates as JSON file
   const exportTemplatesAsJSON = () => {
     const templatesData = useTemplateStore.getState().exportTemplatesToJson();
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(templatesData, null, 2));
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "templates_export.json");
+    downloadAnchorNode.setAttribute("download", "szablony_wezlow_export.json");
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
-  };
-
-  // Import scenario from JSON file
-  const importScenarioFromJSON = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const data = JSON.parse(e.target!.result as string);
-          importFromJson(data);
-        } catch (error) {
-          console.error("Błąd podczas wczytywania pliku JSON:", error);
-        }
-      };
-      reader.readAsText(file);
-    }
   };
 
   // Import templates from JSON file
@@ -96,7 +66,7 @@ const TemplateManagement: React.FC = () => {
           const data = JSON.parse(e.target!.result as string);
           useTemplateStore.getState().importTemplatesFromJson(data);
         } catch (error) {
-          console.error("Błąd podczas wczytywania pliku szablonów JSON:", error);
+          console.error("Błąd podczas wczytywania pliku szablonów węzłów JSON:", error);
         }
       };
       reader.readAsText(file);
@@ -105,45 +75,27 @@ const TemplateManagement: React.FC = () => {
 
   return (
     <div className="mb-6 bg-gray-100 p-4 rounded-lg border">
-      <h2 className="font-bold mb-3">Zarządzanie szablonami</h2>
+      <h2 className="font-bold mb-3">Zarządzanie szablonami węzłów</h2>
       <div className="grid grid-cols-2 gap-3 mb-4">
         <button 
           onClick={() => setShowSaveTemplateForm(true)} 
           className="bg-purple-600 text-white p-2 rounded hover:bg-purple-700"
         >
-          Zapisz bieżący scenariusz jako szablon
+          Zapisz bieżący scenariusz jako szablon węzłów
         </button>
         <button 
           onClick={() => setShowImportModal(true)} 
           className="bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700"
         >
-          Importuj szablon do scenariusza
+          Importuj szablon węzłów do scenariusza
         </button>
-        <div className="grid grid-cols-2 gap-3 col-span-2">
-          <button 
-            onClick={exportScenarioAsJSON} 
-            className="bg-teal-600 text-white p-2 rounded hover:bg-teal-700"
-          >
-            Eksportuj scenariusz do pliku JSON
-          </button>
-          <div className="relative">
-            <input 
-              type="file" 
-              accept=".json" 
-              onChange={importScenarioFromJSON} 
-              className="absolute inset-0 opacity-0 w-full cursor-pointer" 
-            />
-            <button className="bg-amber-600 text-white p-2 rounded hover:bg-amber-700 w-full">
-              Wczytaj scenariusz z pliku JSON
-            </button>
-          </div>
-        </div>
+
         <div className="grid grid-cols-2 gap-3 col-span-2">
           <button 
             onClick={exportTemplatesAsJSON} 
             className="bg-green-600 text-white p-2 rounded hover:bg-green-700"
           >
-            Eksportuj szablony do pliku JSON
+            Eksportuj szablony węzłów do pliku JSON
           </button>
           <div className="relative">
             <input 
@@ -153,7 +105,7 @@ const TemplateManagement: React.FC = () => {
               className="absolute inset-0 opacity-0 w-full cursor-pointer" 
             />
             <button className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 w-full">
-              Wczytaj szablony z pliku JSON
+              Wczytaj szablony węzłów z pliku JSON
             </button>
           </div>
         </div>
@@ -162,7 +114,7 @@ const TemplateManagement: React.FC = () => {
       {/* Saved templates list */}
       {templates.length > 0 && (
         <div className="mt-4 bg-white p-3 rounded border">
-          <h3 className="font-medium mb-2">Zapisane szablony ({templates.length})</h3>
+          <h3 className="font-medium mb-2">Zapisane szablony węzłów ({templates.length})</h3>
           <div className="space-y-2 max-h-60 overflow-y-auto">
             {templates.map((template, index) => (
               <div key={index} className="p-2 border rounded bg-gray-50 text-sm">
@@ -184,14 +136,14 @@ const TemplateManagement: React.FC = () => {
       {showSaveTemplateForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg max-w-md w-full">
-            <h3 className="text-lg font-bold mb-4">Zapisz bieżący scenariusz jako szablon</h3>
+            <h3 className="text-lg font-bold mb-4">Zapisz bieżący scenariusz jako szablon węzłów</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Nazwa szablonu</label>
+                <label className="block text-sm font-medium mb-1">Nazwa szablonu węzłów</label>
                 <input 
                   value={templateForm.name} 
                   onChange={(e) => setTemplateForm({ ...templateForm, name: e.target.value })}
-                  placeholder="Nazwa szablonu" 
+                  placeholder="Nazwa szablonu węzłów" 
                   className="w-full p-2 border rounded" 
                 />
               </div>
@@ -200,7 +152,7 @@ const TemplateManagement: React.FC = () => {
                 <textarea 
                   value={templateForm.description} 
                   onChange={(e) => setTemplateForm({ ...templateForm, description: e.target.value })}
-                  placeholder="Krótki opis szablonu" 
+                  placeholder="Krótki opis szablonu węzłów" 
                   className="w-full p-2 border rounded h-24" 
                 />
               </div>
@@ -216,7 +168,7 @@ const TemplateManagement: React.FC = () => {
                   disabled={!templateForm.name} 
                   className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-300"
                 >
-                  Zapisz szablon
+                  Zapisz szablon węzłów
                 </button>
               </div>
             </div>
@@ -228,16 +180,16 @@ const TemplateManagement: React.FC = () => {
       {showImportModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg max-w-md w-full">
-            <h3 className="text-lg font-bold mb-4">Importuj szablon do scenariusza</h3>
+            <h3 className="text-lg font-bold mb-4">Importuj szablon węzłów do scenariusza</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Wybierz szablon</label>
+                <label className="block text-sm font-medium mb-1">Wybierz szablon węzłów</label>
                 <select
                   value={selectedTemplateIndex}
                   onChange={(e) => setSelectedTemplateIndex(e.target.value)}
                   className="w-full p-2 border rounded"
                 >
-                  <option value="">Wybierz szablon</option>
+                  <option value="">Wybierz szablon węzłów</option>
                   {templates.map((template, index) => (
                     <option key={index} value={index}>
                       {template.name}

@@ -1,5 +1,4 @@
 // src/modules/templates_module/templateStore.ts
-// (dawniej scenarioStore.ts)
 import { create } from 'zustand';
 import { useScenarioStore } from '../scenarios_module/scenarioStore';
 import { Node, Edge } from '../scenarios_module/types';
@@ -48,11 +47,11 @@ export const useTemplateStore = create<TemplateState>((set, get) => ({
   importTemplateAsNode: (templateIndex, mountPoint, prefix = 'imported') => {
     const template = get().templates[templateIndex];
     if (template) {
-      const templateNodeId = `${prefix}.template.${template.name.replace(/\\s+/g, '_')}`;
+      const templateNodeId = `${prefix}.szablon_wezlow.${template.name.replace(/\\s+/g, '_')}`;
       const templateNode = {
         id: templateNodeId,
-        message: `Szablon: ${template.name}\\n${template.description || ''}`,
-        category: 'template',
+        message: `Szablon węzłów: ${template.name}\\n${template.description || ''}`,
+        category: 'szablon_wezlow',
         templateData: template,
       };
       
@@ -60,7 +59,7 @@ export const useTemplateStore = create<TemplateState>((set, get) => ({
       useScenarioStore.getState().addNode(
         templateNodeId, 
         templateNode.message, 
-        'template', 
+        'szablon_wezlow', 
         template
       );
       
