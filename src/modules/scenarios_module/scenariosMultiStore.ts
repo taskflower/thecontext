@@ -1,6 +1,7 @@
-// src/modules/scenarios_module/scenariosStore.ts
+// src/modules/scenarios_module/scenariosMultiStore.ts
 import { create } from "zustand";
 import { Node, Edge } from "./types";
+import { useScenarioStore } from "./scenarioStore";
 
 export interface MultiScenario {
   id: string;
@@ -13,18 +14,20 @@ export interface MultiScenario {
 interface ScenariosMultiState {
   scenarios: Record<string, MultiScenario>;
   currentScenarioId: string | null;
-  // Ustawia aktywny scenariusz
+  // Sets the active scenario
   setCurrentScenario: (id: string | null) => void;
-  // Dodaje nowy scenariusz i ustawia go jako aktywny
+  // Adds a new scenario and sets it as active
   addScenario: (scenario: MultiScenario) => void;
-  // Aktualizuje scenariusz poprzez funkcję modyfikującą
+  // Updates a scenario using a modifier function
   updateScenario: (id: string, updater: (scenario: MultiScenario) => MultiScenario) => void;
-  // Usuwa scenariusz o podanym ID
+  // Removes a scenario with the given ID
   removeScenario: (id: string) => void;
-  // Eksportuje dany scenariusz
+  // Exports a scenario
   exportScenario: (id: string) => MultiScenario | null;
-  // Importuje scenariusz (dodaje go do store)
+  // Imports a scenario (adds it to the store)
   importScenario: (scenario: MultiScenario) => void;
+  // Syncs the currently selected scenario to the active scenario store
+  syncCurrentScenarioToActive: () => boolean;
 }
 
 export const useScenariosMultiStore = create<ScenariosMultiState>((set, get) => ({
@@ -57,8 +60,28 @@ export const useScenariosMultiStore = create<ScenariosMultiState>((set, get) => 
     return scenario ? { ...scenario } : null;
   },
 
-  importScenario: (scenario) => set((state) => ({
-    scenarios: { ...state.scenarios, [scenario.id]: scenario },
-    currentScenarioId: scenario.id,
-  })),
+  importScenario: (scenario) => set((state) => {
+    const newState = {
+      scenarios: { ...state.scenarios, [scenario.id]: scenario },
+      currentScenarioId: scenario.id,
+    };
+    
+    // After updating the state, sync to active scenario
+    setTimeout(() => {
+      useScenarioStore.getState().importFromJson(scenario);
+    }, 0);
+    
+    return newState;
+  }),
+
+  syncCurrentScenarioToActive: () => {
+    const { currentScenarioId, scenarios } = get();
+    if (currentScenarioId && scenarios[currentScenarioId]) {
+      const scenarioData = scenarios[currentScenarioId];
+      // Use the importFromJson function from scenarioStore to load the data
+      useScenarioStore.getState().importFromJson(scenarioData);
+      return true;
+    }
+    return false;
+  },
 }));

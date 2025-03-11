@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import MCard from "@/components/MCard";
 
 const ScenarioList: React.FC = () => {
-  const { scenarios, currentScenarioId, setCurrentScenario } = useScenariosMultiStore();
+  const { scenarios, currentScenarioId, setCurrentScenario, syncCurrentScenarioToActive } = useScenariosMultiStore();
   const scenarioEntries = Object.entries(scenarios || {});
 
   if (scenarioEntries.length === 0) {
@@ -25,7 +25,11 @@ const ScenarioList: React.FC = () => {
             <div>Categories: {(scenario.categories ?? []).length}</div>
           </div>}
           footer={<Button
-            onClick={() => setCurrentScenario(id)}
+            onClick={() => {
+              setCurrentScenario(id);
+              // Sync the selected scenario to the active store
+              syncCurrentScenarioToActive();
+            }}
             className="w-full"
             variant={currentScenarioId === id ? "default" : "outline"}
           >

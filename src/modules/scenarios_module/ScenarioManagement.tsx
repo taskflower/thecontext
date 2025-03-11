@@ -9,10 +9,11 @@ import MCard from "@/components/MCard";
 import { exportToJsonFile, parseJsonFile } from "../shared/jsonUtils";
 import JsonExportModal from "../shared/JsonExportModal";
 import JsonImportModal from "../shared/JsonImportModal";
+import ScenarioStats from "./editor/ScenarioStats";
 
 const ScenarioManagement: React.FC = () => {
   const { nodes, edges, exportToJson } = useScenarioStore();
-  const { importScenario } = useScenariosMultiStore();
+  const { importScenario, syncCurrentScenarioToActive } = useScenariosMultiStore();
   
   const [showExportModal, setShowExportModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
@@ -38,6 +39,12 @@ const ScenarioManagement: React.FC = () => {
         
         // Import the scenario
         importScenario(data);
+        
+        // This should now be handled by importScenario automatically
+        // but we'll add it as a backup
+        setTimeout(() => {
+          syncCurrentScenarioToActive();
+        }, 100);
       } else {
         alert("Invalid scenario format. The file must contain a 'nodes' property.");
       }
@@ -63,23 +70,7 @@ const ScenarioManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <MCard
-        title="Current Scenario Stats"
-        description="Overview of the current scenario"
-      >
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-white p-3 rounded-md border">
-            <div className="text-sm font-medium">Nodes</div>
-            <div className="text-2xl font-bold mt-1">
-              {Object.keys(nodes).length}
-            </div>
-          </div>
-          <div className="bg-white p-3 rounded-md border">
-            <div className="text-sm font-medium">Connections</div>
-            <div className="text-2xl font-bold mt-1">{edges.length}</div>
-          </div>
-        </div>
-      </MCard>
+      <ScenarioStats />
 
       {/* Scenarios List */}
       <div className="mb-6">
