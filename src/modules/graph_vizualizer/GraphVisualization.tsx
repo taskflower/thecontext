@@ -24,7 +24,7 @@ interface ScenarioVisualizationProps {
 const ScenarioNode = ({ data }: any) => {
   // Light background with colored accents
   const bgColor = 'white';
-  const borderColor = data.hasResponse ? 'hsl(142 70% 45%)' : `hsl(${data.hue} 95% 39%)`;
+  const borderColor = data.hasResponse ? 'hsl(200 60% 50%)' : `hsl(${data.hue} 45% 45%)`;
   
   return (
     <div className="relative" style={{ width: '150px' }}>
@@ -38,13 +38,13 @@ const ScenarioNode = ({ data }: any) => {
       >
         {/* Category badge */}
         <div className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold text-white"
-          style={{ backgroundColor: `hsl(${data.hue} 95% 39%)` }}>
+          style={{ backgroundColor: `hsl(${data.hue} 45% 45%)` }}>
           {data.category}
         </div>
         
         {/* Response indicator */}
         {data.hasResponse && (
-          <div className="absolute -top-1 -left-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold text-white bg-green-500">
+          <div className="absolute -top-1 -left-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold text-white bg-blue-500">
             Response
           </div>
         )}
@@ -52,7 +52,7 @@ const ScenarioNode = ({ data }: any) => {
         {/* Node ID */}
         <div 
           className="text-xs font-medium mb-1 text-center truncate" 
-          style={{ color: `hsl(${data.hue} 95% 39%)` }}
+          style={{ color: `hsl(${data.hue} 45% 45%)` }}
           title={data.id}
         >
           {data.id}
@@ -89,21 +89,21 @@ const nodeTypes = {
 const ScenarioVisualizationInner: React.FC<ScenarioVisualizationProps> = ({ onNodeClick }) => {
   const { nodes: storeNodes, edges: storeEdges, nodeResponses } = useScenarioStore();
 
-  // Color scale for categories - using HSL hues for better control with NY style
+  // Color scale for categories - using more muted HSL colors
   const categoryColorMap = useMemo(() => {
     const categories = new Set(Object.values(storeNodes).map(node => node.category));
-    // HSL hue values
+    // HSL hue values with more muted saturation and lightness settings
     const hues = [
       210, // blue
-      25,  // orange
-      142, // green
-      354, // red
-      280, // purple
-      14,  // brown
-      330, // pink
-      220, // indigo
-      54,  // yellow
-      190  // cyan
+      25,  // muted orange
+      170, // teal (instead of green)
+      354, // muted red
+      280, // muted purple
+      40,  // muted gold
+      330, // muted pink
+      250, // muted indigo
+      190, // slate blue
+      300  // lavender
     ];
     
     const colorMap: Record<string, number> = {};
@@ -211,13 +211,13 @@ const ScenarioVisualizationInner: React.FC<ScenarioVisualizationProps> = ({ onNo
                 <div key={category} className="flex items-center">
                   <div 
                     className="w-3 h-3 rounded-full mr-2" 
-                    style={{ backgroundColor: `hsl(${hue} 95% 39%)` }}
+                    style={{ backgroundColor: `hsl(${hue} 45% 45%)` }}
                   ></div>
                   <span>{category}</span>
                 </div>
               ))}
               <div className="flex items-center">
-                <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
                 <span>Has Response</span>
               </div>
             </div>

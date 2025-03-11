@@ -25,6 +25,8 @@ const SequenceExecutor: React.FC = () => {
   const [currentPrompt, setCurrentPrompt] = useState('');
   const [currentResponse, setCurrentResponse] = useState('');
   const [currentProcessResponses, setCurrentProcessResponses] = useState<{ [key: string]: string }>({});
+  // Keep track of total steps for accurate progress calculation
+  const [totalSteps, setTotalSteps] = useState(0);
 
   const processTemplateString = (
     templateString: string,
@@ -44,24 +46,34 @@ const SequenceExecutor: React.FC = () => {
     setCurrentProcessResponses({});
     const visited = new Set<string>();
     const newMessageQueue: string[] = [];
+    
+    // Find starting nodes (nodes with no incoming edges)
     const allNodeIds = Object.keys(nodes);
     const nodesWithIncoming = new Set(edges.map(edge => edge.target));
     const startingNodes = allNodeIds.filter(id => !nodesWithIncoming.has(id));
     const nodesToStart = startingNodes.length > 0 ? startingNodes : (allNodeIds.length > 0 ? [allNodeIds[0]] : []);
 
+    // Create a function to traverse the graph and build the initial execution order
     const traverseAndCollect = (nodeId: string, visited: Set<string>, result: string[]) => {
       if (visited.has(nodeId)) return;
       visited.add(nodeId);
       result.push(nodeId);
+      
+      // Find all outgoing nodes
       const outgoingNodes = edges.filter(edge => edge.source === nodeId).map(edge => edge.target);
       outgoingNodes.forEach(nextNodeId => traverseAndCollect(nextNodeId, visited, result));
     };
 
+    // Build the initial message queue
     nodesToStart.forEach(startNodeId => traverseAndCollect(startNodeId, visited, newMessageQueue));
 
     if (newMessageQueue.length > 0) {
+      // Set the initial queue and total expected steps
       setMessageQueue(newMessageQueue);
+      setTotalSteps(newMessageQueue.length);
       setCurrentMessageIndex(0);
+      
+      // Set up the first prompt
       const firstNodeId = newMessageQueue[0];
       const processedMessage = processTemplateString(nodes[firstNodeId].message, {});
       setCurrentPrompt(processedMessage);
@@ -72,32 +84,28 @@ const SequenceExecutor: React.FC = () => {
 
   const handleResponseSubmit = () => {
     const currentNodeId = messageQueue[currentMessageIndex];
+    
+    // Save the response
     addNodeResponse(currentNodeId, currentResponse);
     const newResponses = { ...currentProcessResponses, [currentNodeId]: currentResponse };
     setCurrentProcessResponses(newResponses);
 
-    const outgoingNodes = edges
-      .filter(edge => edge.source === currentNodeId)
-      .map(edge => edge.target);
-
-    if (currentMessageIndex < messageQueue.length - 1 || outgoingNodes.length > 0) {
-      // There are more nodes to process
-      if (outgoingNodes.length > 0) {
-        setMessageQueue([...messageQueue, ...outgoingNodes]);
-      }
-      
+    // Move to next node in queue
+    if (currentMessageIndex < messageQueue.length - 1) {
+      // There are more nodes in the existing queue
       const nextIndex = currentMessageIndex + 1;
       setCurrentMessageIndex(nextIndex);
       
-      const nextNodeId = outgoingNodes.length > 0 ? outgoingNodes[0] : messageQueue[nextIndex];
+      const nextNodeId = messageQueue[nextIndex];
       const processedMessage = processTemplateString(nodes[nextNodeId].message, newResponses);
       setCurrentPrompt(processedMessage);
       setCurrentResponse('');
     } else {
-      // Finished processing all nodes
+      // We've reached the end of the queue
       setIsExecuting(false);
       setCurrentPrompt('');
       setCurrentResponse('');
+      setCurrentMessageIndex(0);
     }
   };
 
@@ -107,11 +115,12 @@ const SequenceExecutor: React.FC = () => {
     setCurrentResponse('');
     setMessageQueue([]);
     setCurrentMessageIndex(0);
+    setTotalSteps(0);
   };
 
-  // Calculate progress percentage
-  const progressPercentage = messageQueue.length > 0 
-    ? Math.round((currentMessageIndex / messageQueue.length) * 100)
+  // Calculate progress percentage based on current index and the initial total steps
+  const progressPercentage = totalSteps > 0 
+    ? Math.round((currentMessageIndex + 1) / totalSteps * 100)
     : 0;
 
   return (
@@ -141,7 +150,7 @@ const SequenceExecutor: React.FC = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
               <span>
-                Sequence Execution: Step {currentMessageIndex + 1} of {messageQueue.length}
+                Sequence Execution: Step {currentMessageIndex + 1} of {totalSteps}
               </span>
               <Badge variant="outline">
                 Node: {messageQueue[currentMessageIndex]}
