@@ -1,10 +1,20 @@
 // src/modules/sequence_module/SequenceExecutor.tsx
-// (dawniej SequenceExecutor.tsx)
-
 import React, { useState } from 'react';
 import { useScenarioStore } from '../scenarios_module/scenarioStore';
-
-
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle 
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { PlayIcon, XIcon, ChevronRightIcon } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 const SequenceExecutor: React.FC = () => {
   const { nodes, edges, addNodeResponse } = useScenarioStore();
@@ -70,15 +80,21 @@ const SequenceExecutor: React.FC = () => {
       .filter(edge => edge.source === currentNodeId)
       .map(edge => edge.target);
 
-    if (outgoingNodes.length > 0) {
-      setMessageQueue([...messageQueue, ...outgoingNodes]);
+    if (currentMessageIndex < messageQueue.length - 1 || outgoingNodes.length > 0) {
+      // There are more nodes to process
+      if (outgoingNodes.length > 0) {
+        setMessageQueue([...messageQueue, ...outgoingNodes]);
+      }
+      
       const nextIndex = currentMessageIndex + 1;
       setCurrentMessageIndex(nextIndex);
-      const nextNodeId = outgoingNodes[0];
+      
+      const nextNodeId = outgoingNodes.length > 0 ? outgoingNodes[0] : messageQueue[nextIndex];
       const processedMessage = processTemplateString(nodes[nextNodeId].message, newResponses);
       setCurrentPrompt(processedMessage);
       setCurrentResponse('');
     } else {
+      // Finished processing all nodes
       setIsExecuting(false);
       setCurrentPrompt('');
       setCurrentResponse('');
@@ -93,48 +109,99 @@ const SequenceExecutor: React.FC = () => {
     setCurrentMessageIndex(0);
   };
 
+  // Calculate progress percentage
+  const progressPercentage = messageQueue.length > 0 
+    ? Math.round((currentMessageIndex / messageQueue.length) * 100)
+    : 0;
+
   return (
     <>
-      {isExecuting && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-3xl w-full">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold">
-                Krok {currentMessageIndex + 1} z {messageQueue.length}: {messageQueue[currentMessageIndex]}
-              </h3>
-              <button onClick={handleCancelExecution} className="text-gray-500 hover:text-gray-700">✕</button>
-            </div>
-            <div className="mb-4">
-              <div className="font-medium mb-2">Prompt:</div>
-              <div className="bg-gray-100 p-3 rounded border whitespace-pre-wrap">{currentPrompt}</div>
-            </div>
+      <div className="flex flex-col items-center justify-center space-y-6 py-4">
+        <div className="text-center space-y-2 max-w-xl">
+          <h3 className="text-lg font-medium">Execute Your Prompt Sequence</h3>
+          <p className="text-slate-500">
+            Run your entire sequence to collect responses for each node in the flow.
+          </p>
+        </div>
+        
+        <Button 
+          onClick={executeAll} 
+          size="lg"
+          disabled={Object.keys(nodes).length === 0}
+          className="px-8"
+        >
+          <PlayIcon className="h-4 w-4 mr-2" />
+          Execute Sequence
+        </Button>
+      </div>
+
+      {/* Execution Dialog */}
+      <Dialog open={isExecuting} onOpenChange={(open) => !open && handleCancelExecution()}>
+        <DialogContent className="sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>
+                Sequence Execution: Step {currentMessageIndex + 1} of {messageQueue.length}
+              </span>
+              <Badge variant="outline">
+                Node: {messageQueue[currentMessageIndex]}
+              </Badge>
+            </DialogTitle>
+            <DialogDescription>
+              <Progress value={progressPercentage} className="mt-2" />
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 my-2">
             <div>
-              <div className="font-medium mb-2">Twoja odpowiedź:</div>
-              <textarea
+              <div className="font-medium text-sm mb-2 flex items-center">
+                <span className="text-slate-800">Prompt:</span>
+                <Badge variant="outline" className="ml-2 bg-blue-50 text-blue-800 border-blue-200">
+                  {nodes[messageQueue[currentMessageIndex]]?.category}
+                </Badge>
+              </div>
+              <ScrollArea className="h-48">
+                <div className="bg-slate-50 p-4 rounded-md border whitespace-pre-wrap text-slate-800">
+                  {currentPrompt}
+                </div>
+              </ScrollArea>
+            </div>
+            
+            <div>
+              <div className="font-medium text-sm mb-2 text-slate-800">Your Response:</div>
+              <Textarea
                 value={currentResponse}
                 onChange={(e) => setCurrentResponse(e.target.value)}
-                className="w-full p-3 border rounded min-h-32"
-                placeholder="Wpisz swoją odpowiedź..."
+                placeholder="Enter your response..."
+                className="min-h-32"
               />
             </div>
-            <div className="flex justify-end mt-4">
-              <button
-                onClick={handleResponseSubmit}
-                disabled={!currentResponse.trim()}
-                className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-300"
-              >
-                {currentMessageIndex < messageQueue.length - 1 ? 'Kontynuuj' : 'Zakończ'}
-              </button>
-            </div>
           </div>
-        </div>
-      )}
-      {/* Przykładowy przycisk uruchamiający całą sekwencję */}
-      <div className="text-center mt-4">
-        <button onClick={executeAll} className="bg-indigo-600 text-white px-8 py-3 rounded-lg shadow-md hover:bg-indigo-700">
-          Uruchom sekwencję
-        </button>
-      </div>
+          
+          <DialogFooter className="sm:justify-between flex flex-row items-center">
+            <Button 
+              variant="outline" 
+              onClick={handleCancelExecution}
+            >
+              <XIcon className="h-4 w-4 mr-2" />
+              Cancel
+            </Button>
+            <Button
+              onClick={handleResponseSubmit}
+              disabled={!currentResponse.trim()}
+            >
+              {currentMessageIndex < messageQueue.length - 1 ? (
+                <>
+                  <ChevronRightIcon className="h-4 w-4 mr-2" />
+                  Continue
+                </>
+              ) : (
+                'Finish'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

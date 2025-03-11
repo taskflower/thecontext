@@ -1,38 +1,52 @@
 // src/modules/sequence_module/SequenceConnections.tsx
-// (dawniej SequenceConnections.tsx)
 import React from 'react';
 import { useScenarioStore } from '../scenarios_module/scenarioStore';
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRightIcon, Trash2 } from "lucide-react";
 
-
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const SequenceConnections: React.FC = () => {
   const { edges, removeEdge } = useScenarioStore();
 
+  if (edges.length === 0) {
+    return (
+      <div className="text-center py-6 text-slate-500">
+        No connections defined yet. Connect nodes to create a sequence.
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-gray-50 p-4 rounded-lg">
-      <h2 className="font-bold mb-2">Połączenia sekwencji</h2>
-      {edges.length === 0 ? (
-        <p className="text-gray-500">Brak połączeń</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          {edges.map((edge, index) => (
-            <div key={index} className="flex justify-between bg-white p-2 rounded border">
-              <div>
-                <span className="bg-blue-100 px-1 rounded">{edge.source}</span>
-                <span className="mx-2">→</span>
-                <span className="bg-green-100 px-1 rounded">{edge.target}</span>
-              </div>
-              <button 
-                onClick={() => removeEdge(edge.source, edge.target)} 
-                className="bg-red-500 text-white px-2 py-1 rounded text-xs"
-              >
-                Usuń
-              </button>
+    <ScrollArea className={edges.length > 6 ? "h-60" : undefined}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 p-0.5">
+        {edges.map((edge, index) => (
+          <div 
+            key={index} 
+            className="flex justify-between items-center bg-white p-3 rounded-md border hover:border-slate-300 transition-colors"
+          >
+            <div className="flex items-center space-x-2">
+              <Badge variant="outline" className="bg-blue-50 border-blue-200">
+                {edge.source}
+              </Badge>
+              <ArrowRightIcon className="h-4 w-4 text-slate-400" />
+              <Badge variant="outline" className="bg-green-50 border-green-200">
+                {edge.target}
+              </Badge>
             </div>
-          ))}
-        </div>
-      )}
-    </div>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => removeEdge(edge.source, edge.target)} 
+              className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+      </div>
+    </ScrollArea>
   );
 };
 
