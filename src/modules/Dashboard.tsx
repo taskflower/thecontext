@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/Dashboard.tsx
+// Updated Dashboard component with Plugins Tab
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Play, Folder, Trash2 } from "lucide-react";
+import { Play, Folder, Trash2, Puzzle } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -21,6 +23,8 @@ import { useScenarioStore } from './scenarios_module/scenarioStore';
 import NodeCategories from './scenarios_module/NodeCategories';
 import UsageInfo from './UsageInfo';
 import NodeConnectionsContainer from './scenarios_module/editor/NodeConnectionsContainer';
+import PluginsTab from './plugins_system/PluginsTab';
+
 
 
 const Dashboard: React.FC = () => {
@@ -66,15 +70,18 @@ const Dashboard: React.FC = () => {
     <div className="container mx-auto py-6 max-w-7xl px-4 sm:px-6">
       <div className="space-y-6">
         
-
         <UsageInfo />
 
         <Tabs defaultValue="builder" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="builder">Builder</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="execution">Execution</TabsTrigger>
             <TabsTrigger value="management">Management</TabsTrigger>
+            <TabsTrigger value="plugins">
+              <Puzzle className="h-4 w-4 mr-2" />
+              Plugins
+            </TabsTrigger>
           </TabsList>
 
           {/* Builder Tab */}
@@ -202,6 +209,11 @@ const Dashboard: React.FC = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Plugins Tab */}
+          <TabsContent value="plugins" className="space-y-6 mt-6">
+            <PluginsTab />
+          </TabsContent>
         </Tabs>
       </div>
 
@@ -248,7 +260,7 @@ const Dashboard: React.FC = () => {
             <DialogHeader>
               <DialogTitle>Execute Node: {previewNodeId}</DialogTitle>
               <DialogDescription>
-                Enter your response for this node (Dialor from dashboard)
+                Enter your response for this node
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -323,9 +335,8 @@ const Dashboard: React.FC = () => {
               </ScrollArea>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setActiveTemplate(null)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setActiveTemplate(null)}>Close</Button>
               <Button onClick={() => {
-                console.log('Starting template execution...');
                 // Template execution logic here
                 setActiveTemplate(null);
               }}>

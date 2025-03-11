@@ -1,17 +1,18 @@
-import React, { useEffect } from "react";
+
 // import { useAppStore } from './plugins-system/store';
 // import { PluginManager } from './plugins-system/PluginManager';
 // import { PluginsDashboard } from './plugins-system/PluginsDashboard';
-import { usePluginInstaller } from "./plugins-system/pluginInstaller";
+// import { usePluginInstaller } from "./plugins-system/pluginInstaller";
 import Dashboard from "./modules/Dashboard";
+import { PluginInitializer } from "./modules/plugins_system/initPlugins";
 
 const App: React.FC = () => {
   // const { counter, increment, decrement } = useAppStore();
-  const { installDevPlugins } = usePluginInstaller();
+  // const { installDevPlugins } = usePluginInstaller();
 
-  useEffect(() => {
-    installDevPlugins();
-  }, []);
+  // useEffect(() => {
+  //   installDevPlugins();
+  // }, []);
 
   return (
     <div className="container mx-auto p-6">
@@ -60,6 +61,7 @@ const App: React.FC = () => {
          </TabsContent>
        </Tabs> */}
         <Dashboard />
+        <PluginInitializer />
       </main>
 
       <footer className="mt-8 text-center text-gray-500 text-sm">

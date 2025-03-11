@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/modules/scenario_module/scenarioStore.ts
-// (dawniej graphStore.ts)
+// src/modules/scenarios_module/scenarioStore.ts
 import { create } from "zustand";
 import { Template } from "../templates_module/templateStore";
 import { Node, Edge } from "./types";
+import { PluginConfig } from "../plugins_system/types";
 import {
   initialCategories,
   initialEdges,
@@ -26,6 +26,11 @@ interface ScenarioState {
     templateData?: Template
   ) => void;
   removeNode: (id: string) => void;
+  
+  // Plugin related actions
+  assignPluginToNode: (nodeId: string, pluginId: string, initialConfig?: PluginConfig) => void;
+  updateNodePluginConfig: (nodeId: string, configUpdates: Partial<PluginConfig>) => void;
+  removePluginFromNode: (nodeId: string) => void;
 
   // Actions for edges
   setEdges: (edges: Edge[]) => void;
@@ -78,6 +83,57 @@ export const useScenarioStore = create<ScenarioState>((set, get) => ({
         nodes: newNodes,
         edges: filteredEdges,
         nodeResponses: newResponses,
+      };
+    }),
+    
+  // Plugin related actions  
+  assignPluginToNode: (nodeId, pluginId, initialConfig = {}) =>
+    set((state) => {
+      if (!state.nodes[nodeId]) return state;
+      
+      return {
+        nodes: {
+          ...state.nodes,
+          [nodeId]: {
+            ...state.nodes[nodeId],
+            pluginId,
+            pluginConfig: initialConfig,
+          },
+        },
+      };
+    }),
+    
+  updateNodePluginConfig: (nodeId, configUpdates) =>
+    set((state) => {
+      if (!state.nodes[nodeId] || !state.nodes[nodeId].pluginId) return state;
+      
+      return {
+        nodes: {
+          ...state.nodes,
+          [nodeId]: {
+            ...state.nodes[nodeId],
+            pluginConfig: {
+              ...(state.nodes[nodeId].pluginConfig || {}),
+              ...configUpdates,
+            },
+          },
+        },
+      };
+    }),
+    
+  removePluginFromNode: (nodeId) =>
+    set((state) => {
+      if (!state.nodes[nodeId]) return state;
+      
+      const updatedNode = { ...state.nodes[nodeId] };
+      delete updatedNode.pluginId;
+      delete updatedNode.pluginConfig;
+      
+      return {
+        nodes: {
+          ...state.nodes,
+          [nodeId]: updatedNode,
+        },
       };
     }),
 

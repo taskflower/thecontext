@@ -22,6 +22,7 @@ import {
   Trash2,
   ArrowRight,
   ArrowLeft,
+  MessageSquare,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -29,16 +30,12 @@ import { Textarea } from "@/components/ui/textarea";
 
 const NodeCategories: React.FC = () => {
   const { nodes, edges, categories, nodeResponses, removeNode, addNodeResponse } = useScenarioStore();
-  
-  // State for expanded categories
+
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
-  // State for expanded responses
-  const [expandedResponses, setExpandedResponses] = useState<Record<string, boolean>>({});
-  // State for node execution
   const [executingNodeId, setExecutingNodeId] = useState<string | null>(null);
   const [currentResponse, setCurrentResponse] = useState<string>('');
-  // State for node preview
   const [previewNodeId, setPreviewNodeId] = useState<string | null>(null);
+  const [responseDialogNodeId, setResponseDialogNodeId] = useState<string | null>(null);
 
   useEffect(() => {
     const initialExpanded: Record<string, boolean> = {};
@@ -52,8 +49,8 @@ const NodeCategories: React.FC = () => {
     setExpandedCategories((prev) => ({ ...prev, [category]: !prev[category] }));
   };
 
-  const toggleResponse = (nodeId: string) => {
-    setExpandedResponses((prev) => ({ ...prev, [nodeId]: !prev[nodeId] }));
+  const viewNodeResponse = (nodeId: string) => {
+    setResponseDialogNodeId(nodeId);
   };
 
   const getNodeConnections = (nodeId: string) => {
@@ -97,121 +94,100 @@ const NodeCategories: React.FC = () => {
           {categoryNodes.map(([id]) => {
             const { outgoing, incoming } = getNodeConnections(id);
             const hasResponse = nodeResponses[id] !== undefined;
-            const isResponseExpanded = expandedResponses[id] || false;
 
             return (
-              <React.Fragment key={id}>
-                <TableRow className="hover:bg-slate-50">
-                  <TableCell className="font-medium"><div className="min-w-72 grid truncate">{id}</div></TableCell>
-                  <TableCell>
-                    {hasResponse ? (
+              <TableRow key={id} className="hover:bg-slate-50">
+                <TableCell className="font-medium"><div className="min-w-72 grid truncate">{id}</div></TableCell>
+                <TableCell>
+                  {hasResponse ? (
+                    <div className="flex items-center gap-2">
                       <Badge className="bg-green-100 text-green-800 hover:bg-green-200 border-0">
                         Completed
                       </Badge>
-                    ) : (
-                      <Badge variant="outline" className="bg-gray-100">
-                        Pending
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {incoming.length > 0 && (
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs text-slate-400 whitespace-nowrap">
-                            <ArrowLeft className="h-3 w-3 inline mr-1" />From:
-                          </span>
-                          {incoming.map((src, i) => (
-                            <Badge
-                              key={i}
-                              variant="outline"
-                              className="bg-blue-50 border-blue-200 text-xs"
-                            >
-                              {src}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                      {outgoing.length > 0 && (
-                        <div className="flex items-center gap-1 ml-2">
-                          <span className="text-xs text-slate-400 whitespace-nowrap">
-                            <ArrowRight className="h-3 w-3 inline mr-1" />To:
-                          </span>
-                          {outgoing.map((tgt, i) => (
-                            <Badge
-                              key={i}
-                              variant="outline"
-                              className="bg-green-50 border-green-200 text-xs"
-                            >
-                              {tgt}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end space-x-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handlePreview(id)}
-                        className="h-8 w-8"
-                        title="Preview"
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6 p-0 ml-1"
+                        onClick={() => viewNodeResponse(id)}
+                        title="View Response"
                       >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleExecute(id)}
-                        className="h-8 w-8"
-                        title="Execute"
-                      >
-                        <Play className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeNode(id)}
-                        className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
-                        title="Delete"
-                      >
-                        <Trash2 className="h-4 w-4" />
+                        <MessageSquare className="h-4 w-4 text-green-700" />
                       </Button>
                     </div>
-                  </TableCell>
-                </TableRow>
-                {hasResponse && (
-                  <TableRow>
-                    <TableCell colSpan={4} className="p-0 border-t-0">
-                      <div className="px-4 pb-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="p-0 h-6 mb-1"
-                          onClick={() => toggleResponse(id)}
-                        >
-                          {isResponseExpanded ? (
-                            <ChevronDown className="h-4 w-4 mr-1" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4 mr-1" />
-                          )}
-                          <span className="text-xs font-medium text-slate-600">Response</span>
-                        </Button>
-                        
-                        {isResponseExpanded && (
-                          <div className="bg-slate-50 p-3 rounded-md border text-sm text-slate-700">
-                            {nodeResponses[id].length > 200
-                              ? nodeResponses[id].substring(0, 200) + "..."
-                              : nodeResponses[id]}
-                          </div>
-                        )}
+                  ) : (
+                    <Badge variant="outline" className="bg-gray-100">
+                      Pending
+                    </Badge>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {incoming.length > 0 && (
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-slate-400 whitespace-nowrap">
+                          <ArrowLeft className="h-3 w-3 inline mr-1" />From:
+                        </span>
+                        {incoming.map((src, i) => (
+                          <Badge
+                            key={i}
+                            variant="outline"
+                            className="bg-blue-50 border-blue-200 text-xs"
+                          >
+                            {src}
+                          </Badge>
+                        ))}
                       </div>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </React.Fragment>
+                    )}
+                    {outgoing.length > 0 && (
+                      <div className="flex items-center gap-1 ml-2">
+                        <span className="text-xs text-slate-400 whitespace-nowrap">
+                          <ArrowRight className="h-3 w-3 inline mr-1" />To:
+                        </span>
+                        {outgoing.map((tgt, i) => (
+                          <Badge
+                            key={i}
+                            variant="outline"
+                            className="bg-green-50 border-green-200 text-xs"
+                          >
+                            {tgt}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end space-x-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handlePreview(id)}
+                      className="h-8 w-8"
+                      title="Preview"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleExecute(id)}
+                      className="h-8 w-8"
+                      title="Execute"
+                    >
+                      <Play className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeNode(id)}
+                      className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                      title="Delete"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
             );
           })}
         </TableBody>
@@ -303,15 +279,45 @@ const NodeCategories: React.FC = () => {
         </Dialog>
       )}
 
+      {/* Response View Dialog */}
+      {responseDialogNodeId && (
+        <Dialog open={!!responseDialogNodeId} onOpenChange={(open) => !open && setResponseDialogNodeId(null)}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Node Response: {responseDialogNodeId}</DialogTitle>
+              <DialogDescription>
+                Category: <Badge variant="outline">{nodes[responseDialogNodeId]?.category}</Badge>
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Response Content</Label>
+                <div className="mt-1.5 bg-green-50 p-4 rounded-md border whitespace-pre-wrap max-h-96 overflow-y-auto">
+                  {nodeResponses[responseDialogNodeId]}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setResponseDialogNodeId(null)}>Close</Button>
+              <Button onClick={() => {
+                setResponseDialogNodeId(null);
+                handleExecute(responseDialogNodeId);
+              }}>
+                <Play className="h-4 w-4 mr-2" /> Re-Execute Node
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
       {/* Node Execution Dialog */}
-      {}
       {executingNodeId && (
         <Dialog open={!!executingNodeId} onOpenChange={(open) => !open && setExecutingNodeId(null)}>
           <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle>Execute Node: {executingNodeId}</DialogTitle>
               <DialogDescription>
-                Enter your response for this node (dialog from nedeCategories.tsx)
+                Enter your response for this node
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">

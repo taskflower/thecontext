@@ -1,6 +1,7 @@
 // src/modules/sequence_module/SequenceExecutor.tsx
 import React, { useState } from 'react';
 import { useScenarioStore } from '../scenarios_module/scenarioStore';
+import { usePluginStore } from '../plugins_system/pluginStore';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -13,11 +14,12 @@ import {
   DialogTitle 
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { PlayIcon, XIcon, ChevronRightIcon } from "lucide-react";
+import { PlayIcon, XIcon, ChevronRightIcon, Settings } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 const SequenceExecutor: React.FC = () => {
   const { nodes, edges, addNodeResponse } = useScenarioStore();
+  const { plugins, updatePluginConfig, updatePluginResult } = usePluginStore();
 
   const [messageQueue, setMessageQueue] = useState<string[]>([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
@@ -25,8 +27,8 @@ const SequenceExecutor: React.FC = () => {
   const [currentPrompt, setCurrentPrompt] = useState('');
   const [currentResponse, setCurrentResponse] = useState('');
   const [currentProcessResponses, setCurrentProcessResponses] = useState<{ [key: string]: string }>({});
-  // Keep track of total steps for accurate progress calculation
   const [totalSteps, setTotalSteps] = useState(0);
+  const [showPluginConfig, setShowPluginConfig] = useState(false);
 
   const processTemplateString = (
     templateString: string,
@@ -84,11 +86,17 @@ const SequenceExecutor: React.FC = () => {
 
   const handleResponseSubmit = () => {
     const currentNodeId = messageQueue[currentMessageIndex];
+    const currentNode = nodes[currentNodeId];
     
     // Save the response
     addNodeResponse(currentNodeId, currentResponse);
     const newResponses = { ...currentProcessResponses, [currentNodeId]: currentResponse };
     setCurrentProcessResponses(newResponses);
+
+    // If there's a plugin associated with this node, update its result
+    if (currentNode.pluginId && plugins[currentNode.pluginId]) {
+      updatePluginResult(currentNode.pluginId, currentResponse);
+    }
 
     // Move to next node in queue
     if (currentMessageIndex < messageQueue.length - 1) {
@@ -123,6 +131,26 @@ const SequenceExecutor: React.FC = () => {
     ? Math.round((currentMessageIndex + 1) / totalSteps * 100)
     : 0;
 
+  // Get the current node and check if it has an associated plugin
+  const currentNodeId = messageQueue[currentMessageIndex];
+  const currentNode = currentNodeId ? nodes[currentNodeId] : null;
+  const hasPlugin = currentNode && currentNode.pluginId && plugins[currentNode.pluginId];
+  const currentPlugin = hasPlugin ? plugins[currentNode.pluginId] : null;
+
+  // Handle plugin configuration update for the current node
+  const handlePluginConfigUpdate = (configUpdates: any) => {
+    if (currentNode && currentNode.pluginId) {
+      // Update both the plugin state and the node's pluginConfig
+      updatePluginConfig(currentNode.pluginId, configUpdates);
+      
+      // Use scenarioStore to update the node's pluginConfig
+      useScenarioStore.getState().updateNodePluginConfig(
+        currentNodeId, 
+        configUpdates
+      );
+    }
+  };
+
   return (
     <>
       <div className="flex flex-col items-center justify-center space-y-6 py-4">
@@ -152,9 +180,16 @@ const SequenceExecutor: React.FC = () => {
               <span>
                 Sequence Execution: Step {currentMessageIndex + 1} of {totalSteps}
               </span>
-              <Badge variant="outline">
-                Node: {messageQueue[currentMessageIndex]}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline">
+                  Node: {messageQueue[currentMessageIndex]}
+                </Badge>
+                {hasPlugin && (
+                  <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
+                    Plugin: {currentPlugin?.name}
+                  </Badge>
+                )}
+              </div>
             </DialogTitle>
             <DialogDescription>
               <Progress value={progressPercentage} className="mt-2" />
@@ -163,11 +198,25 @@ const SequenceExecutor: React.FC = () => {
           
           <div className="space-y-4 my-2">
             <div>
-              <div className="font-medium text-sm mb-2 flex items-center">
-                <span className="text-slate-800">Prompt:</span>
-                <Badge variant="outline" className="ml-2 bg-blue-50 text-blue-800 border-blue-200">
-                  {nodes[messageQueue[currentMessageIndex]]?.category}
-                </Badge>
+              <div className="font-medium text-sm mb-2 flex items-center justify-between">
+                <div className="flex items-center">
+                  <span className="text-slate-800">Prompt:</span>
+                  <Badge variant="outline" className="ml-2 bg-blue-50 text-blue-800 border-blue-200">
+                    {nodes[messageQueue[currentMessageIndex]]?.category}
+                  </Badge>
+                </div>
+                
+                {hasPlugin && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setShowPluginConfig(!showPluginConfig)}
+                    className="text-xs"
+                  >
+                    <Settings className="h-3 w-3 mr-1" />
+                    Plugin Settings
+                  </Button>
+                )}
               </div>
               <ScrollArea className="h-48">
                 <div className="bg-slate-50 p-4 rounded-md border whitespace-pre-wrap text-slate-800">
@@ -177,14 +226,48 @@ const SequenceExecutor: React.FC = () => {
             </div>
             
             <div>
-              <div className="font-medium text-sm mb-2 text-slate-800">Your Response:</div>
-              <Textarea
-                value={currentResponse}
-                onChange={(e) => setCurrentResponse(e.target.value)}
-                placeholder="Enter your response..."
-                className="min-h-32"
-              />
+              <div className="font-medium text-sm mb-2 text-slate-800">
+                {hasPlugin ? 'Plugin Interface:' : 'Your Response:'}
+              </div>
+              
+              {hasPlugin && currentPlugin ? (
+                // Render the plugin's ViewComponent for response
+                <div className="border rounded-md p-4 min-h-32 bg-white">
+                  <div className="plugin-container">
+                    <currentPlugin.ViewComponent 
+                      nodeId={currentNodeId}
+                      config={currentNode.pluginConfig || {}}
+                      onConfigChange={handlePluginConfigUpdate}
+                      onResponseChange={setCurrentResponse}
+                    />
+                  </div>
+                </div>
+              ) : (
+                // Render the default textarea for response
+                <Textarea
+                  value={currentResponse}
+                  onChange={(e) => setCurrentResponse(e.target.value)}
+                  placeholder="Enter your response..."
+                  className="min-h-32"
+                />
+              )}
             </div>
+            
+            {/* Plugin Configuration Panel */}
+            {hasPlugin && showPluginConfig && (
+              <div className="border rounded-md p-4 bg-slate-50">
+                <h4 className="text-sm font-medium mb-3">Plugin Configuration</h4>
+                <div className="plugin-config-container">
+                  {currentPlugin && (
+                    <currentPlugin.ConfigComponent
+                      nodeId={currentNodeId}
+                      config={currentNode.pluginConfig || {}}
+                      onConfigChange={handlePluginConfigUpdate}
+                    />
+                  )}
+                </div>
+              </div>
+            )}
           </div>
           
           <DialogFooter className="sm:justify-between flex flex-row items-center">
