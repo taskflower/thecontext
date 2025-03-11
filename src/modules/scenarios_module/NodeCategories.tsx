@@ -23,18 +23,22 @@ import {
   ArrowRight,
   ArrowLeft,
 } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 const NodeCategories: React.FC = () => {
-  const nodes = useScenarioStore((state) => state.nodes);
-  const edges = useScenarioStore((state) => state.edges);
-  const categories = useScenarioStore((state) => state.categories);
-  const nodeResponses = useScenarioStore((state) => state.nodeResponses);
-  const removeNode = useScenarioStore((state) => state.removeNode);
-
+  const { nodes, edges, categories, nodeResponses, removeNode, addNodeResponse } = useScenarioStore();
+  
   // State for expanded categories
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   // State for expanded responses
   const [expandedResponses, setExpandedResponses] = useState<Record<string, boolean>>({});
+  // State for node execution
+  const [executingNodeId, setExecutingNodeId] = useState<string | null>(null);
+  const [currentResponse, setCurrentResponse] = useState<string>('');
+  // State for node preview
+  const [previewNodeId, setPreviewNodeId] = useState<string | null>(null);
 
   useEffect(() => {
     const initialExpanded: Record<string, boolean> = {};
@@ -58,8 +62,25 @@ const NodeCategories: React.FC = () => {
     return { outgoing, incoming };
   };
 
-  const handlePreview = (id: string) => console.log("Preview node:", id);
-  const handleExecute = (id: string) => console.log("Execute node:", id);
+  const handlePreview = (id: string) => {
+    setPreviewNodeId(id);
+  };
+
+  const handleExecute = (id: string) => {
+    setExecutingNodeId(id);
+    setCurrentResponse('');
+  };
+
+  const processTemplateString = (templateString: string) => {
+    return templateString.replace(/\{\{([\w.]+)\}\}/g, (match, variable) => {
+      const parts = variable.split('.');
+      if (parts.length === 2 && parts[1] === 'response') {
+        const nodeId = parts[0];
+        return nodeResponses[nodeId] || match;
+      }
+      return match;
+    });
+  };
 
   const renderNodeTable = (categoryNodes: [string, any][]) => {
     return (
@@ -239,7 +260,96 @@ const NodeCategories: React.FC = () => {
     );
   };
 
-  return <div>{categories.map((category) => renderCategoryFolder(category))}</div>;
+  return (
+    <div>
+      {categories.map((category) => renderCategoryFolder(category))}
+
+      {/* Node Preview Dialog */}
+      {previewNodeId && (
+        <Dialog open={!!previewNodeId} onOpenChange={(open) => !open && setPreviewNodeId(null)}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Node Preview: {previewNodeId}</DialogTitle>
+              <DialogDescription>
+                Category: <Badge variant="outline">{nodes[previewNodeId]?.category}</Badge>
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Prompt Content</Label>
+                <div className="mt-1.5 bg-slate-50 p-4 rounded-md border whitespace-pre-wrap">
+                  {processTemplateString(nodes[previewNodeId]?.message || '')}
+                </div>
+              </div>
+              {nodeResponses[previewNodeId] && (
+                <div>
+                  <Label>Saved Response</Label>
+                  <div className="mt-1.5 bg-green-50 p-4 rounded-md border whitespace-pre-wrap">
+                    {nodeResponses[previewNodeId]}
+                  </div>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setPreviewNodeId(null)}>Close</Button>
+              <Button onClick={() => {
+                setPreviewNodeId(null);
+                handleExecute(previewNodeId);
+              }}>
+                <Play className="h-4 w-4 mr-2" /> Execute Node
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Node Execution Dialog */}
+      {}
+      {executingNodeId && (
+        <Dialog open={!!executingNodeId} onOpenChange={(open) => !open && setExecutingNodeId(null)}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Execute Node: {executingNodeId}</DialogTitle>
+              <DialogDescription>
+                Enter your response for this node (dialog from nedeCategories.tsx)
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Prompt Content</Label>
+                <div className="mt-1.5 bg-slate-50 p-4 rounded-md border whitespace-pre-wrap">
+                  {processTemplateString(nodes[executingNodeId]?.message || '')}
+                </div>
+              </div>
+              <div>
+                <Label>Your Response</Label>
+                <Textarea 
+                  className="mt-1.5 min-h-[120px]" 
+                  placeholder="Enter your response..."
+                  value={currentResponse}
+                  onChange={(e) => setCurrentResponse(e.target.value)}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setExecutingNodeId(null)}>Cancel</Button>
+              <Button 
+                disabled={!currentResponse.trim()}
+                onClick={() => {
+                  if (executingNodeId && currentResponse) {
+                    addNodeResponse(executingNodeId, currentResponse);
+                    setExecutingNodeId(null);
+                  }
+                }}
+              >
+                Save Response
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
+  );
 };
 
 export default NodeCategories;

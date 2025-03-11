@@ -9,6 +9,7 @@ import { Play, Folder, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
 
 
 import GraphVisualization from './graph_vizualizer/GraphVisualization';
@@ -23,9 +24,11 @@ import NodeConnectionsContainer from './scenarios_module/editor/NodeConnectionsC
 
 
 const Dashboard: React.FC = () => {
-  const { nodes, nodeResponses, removeNodeResponse } = useScenarioStore();
+  const { nodes, nodeResponses, removeNodeResponse, addNodeResponse } = useScenarioStore();
   const [previewNodeId, setPreviewNodeId] = useState<string | null>(null);
   const [activeTemplate, setActiveTemplate] = useState<Template | null>(null);
+  const [isExecutingNode, setIsExecutingNode] = useState<boolean>(false);
+  const [currentNodeResponse, setCurrentNodeResponse] = useState<string>('');
 
   const handleNodeClick = (id: string) => {
     const node = nodes[id];
@@ -41,7 +44,22 @@ const Dashboard: React.FC = () => {
   };
 
   const processTemplateString = (templateString: string) => {
-    return templateString.replace(/\{\{([\w.]+)\}\}/g, (match) => match);
+    return templateString.replace(/\{\{([\w.]+)\}\}/g, (match, variable) => {
+      const parts = variable.split('.');
+      if (parts.length === 2 && parts[1] === 'response') {
+        const nodeId = parts[0];
+        return nodeResponses[nodeId] || match;
+      }
+      return match;
+    });
+  };
+
+  const executeNode = (nodeId: string) => {
+    if (!nodeId) return;
+    
+    setIsExecutingNode(true);
+    // Reset current response when executing a node
+    setCurrentNodeResponse('');
   };
 
   return (
@@ -215,8 +233,54 @@ const Dashboard: React.FC = () => {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={closePreview}>Close</Button>
-              <Button>
+              <Button onClick={() => executeNode(previewNodeId)}>
                 <Play className="h-4 w-4 mr-2" /> Execute Node
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Node execution dialog */}
+      {isExecutingNode && previewNodeId && (
+        <Dialog open={isExecutingNode} onOpenChange={(open) => !open && setIsExecutingNode(false)}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Execute Node: {previewNodeId}</DialogTitle>
+              <DialogDescription>
+                Enter your response for this node (Dialor from dashboard)
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Prompt Content</Label>
+                <div className="mt-1.5 bg-slate-50 p-4 rounded-md border whitespace-pre-wrap">
+                  {processTemplateString(nodes[previewNodeId]?.message || '')}
+                </div>
+              </div>
+              <div>
+                <Label>Your Response</Label>
+                <Textarea 
+                  className="mt-1.5 min-h-[120px]" 
+                  placeholder="Enter your response..."
+                  value={currentNodeResponse}
+                  onChange={(e) => setCurrentNodeResponse(e.target.value)}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsExecutingNode(false)}>Cancel</Button>
+              <Button 
+                disabled={!currentNodeResponse.trim()}
+                onClick={() => {
+                  if (previewNodeId && currentNodeResponse) {
+                    addNodeResponse(previewNodeId, currentNodeResponse);
+                    setIsExecutingNode(false);
+                    closePreview();
+                  }
+                }}
+              >
+                Save Response
               </Button>
             </DialogFooter>
           </DialogContent>
