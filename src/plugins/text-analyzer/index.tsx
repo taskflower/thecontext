@@ -160,7 +160,7 @@ class TextAnalyzerPlugin extends PluginBase {
   };
   
   // Komponent wyników
-  ResultComponent: React.FC<PluginProps> = ({ nodeId, config }) => {
+  ResultComponent: React.FC<PluginProps> = ({ nodeId }) => {
     const [result, setResult] = useState<string | null>(null);
     
     // Pobierz zapisany wynik dla węzła (jeśli istnieje)

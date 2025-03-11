@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/sequence_module/SequenceExecutor.tsx
 import React, { useState } from 'react';
 import { useScenarioStore } from '../scenarios_module/scenarioStore';

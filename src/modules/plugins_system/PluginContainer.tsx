@@ -2,7 +2,6 @@
 // src/modules/plugins_system/PluginContainer.tsx
 // Uproszczony kontener pluginu
 
-import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Settings, Eye, PieChart } from 'lucide-react';
@@ -16,7 +15,7 @@ interface PluginContainerProps {
 }
 
 export const PluginContainer: React.FC<PluginContainerProps> = ({ pluginId, nodeId }) => {
-  const { plugins, getPluginState, updatePluginConfig, updatePluginResult } = usePluginStore();
+  const { plugins, getPluginState, updatePluginConfig } = usePluginStore();
   const { nodes } = useScenarioStore();
   
   const plugin = plugins[pluginId];
