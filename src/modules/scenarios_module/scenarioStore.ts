@@ -64,8 +64,18 @@ export const useScenarioStore = create<ScenarioState>((set, get) => ({
     set((state) => ({
       nodes: {
         ...state.nodes,
-        [id]: { id, message, category, templateData },
+        [id]: { 
+          id, 
+          message, 
+          category,
+          // Only include templateData if it's provided and not empty
+          ...(templateData && Object.keys(templateData).length > 0 ? { templateData } : {})
+        },
       },
+      // Add category if it doesn't exist
+      categories: state.categories.includes(category) 
+        ? state.categories 
+        : [...state.categories, category]
     })),
   removeNode: (id) =>
     set((state) => {

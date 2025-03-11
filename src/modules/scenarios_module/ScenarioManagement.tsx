@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { FileUpIcon, FileDownIcon, AlertTriangleIcon } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui";
 
-const SchemaManagement: React.FC = () => {
+const ScenarioManagement: React.FC = () => {
   const { nodes, edges, exportToJson, importFromJson } = useScenarioStore();
 
   const [showExportModal, setShowExportModal] = useState(false);
@@ -251,4 +251,4 @@ const SchemaManagement: React.FC = () => {
   );
 };
 
-export default SchemaManagement;
+export default ScenarioManagement;

@@ -18,7 +18,7 @@ import GraphVisualization from './graph_vizualizer/GraphVisualization';
 import TemplateManagement from './templates_module/TemplateManagement';
 import { Template } from './templates_module/templateStore';
 import SequenceExecutor from './sequence_module/SequenceExecutor';
-import SchemaManagement from './scenarios_module/SchemaManagement';
+import ScenarioManagement from './scenarios_module/ScenarioManagement';
 import { useScenarioStore } from './scenarios_module/scenarioStore';
 import NodeCategories from './scenarios_module/NodeCategories';
 import UsageInfo from './UsageInfo';
@@ -201,11 +201,11 @@ const Dashboard: React.FC = () => {
           <TabsContent value="management" className="space-y-6 mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>Schema Management</CardTitle>
+                <CardTitle>Scenario Management</CardTitle>
                 <CardDescription>Export and import scenarios</CardDescription>
               </CardHeader>
               <CardContent>
-                <SchemaManagement />
+                <ScenarioManagement />
               </CardContent>
             </Card>
           </TabsContent>

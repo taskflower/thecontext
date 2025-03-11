@@ -176,7 +176,7 @@ const TemplateManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Import template modal */}
+      {/* Import template modal - updated text to reflect direct node import */}
       {showImportModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg max-w-md w-full">
@@ -204,9 +204,9 @@ const TemplateManagement: React.FC = () => {
                     <p className="text-gray-600 mt-1">{templates[parseInt(selectedTemplateIndex)].description}</p>
                   )}
                   <p className="mt-1">
-                    Liczba węzłów: {Object.keys(templates[parseInt(selectedTemplateIndex)].nodes).length}
+                    Węzły do zaimportowania: {Object.keys(templates[parseInt(selectedTemplateIndex)].nodes).length}
                   </p>
-                  <p>Liczba połączeń: {templates[parseInt(selectedTemplateIndex)].edges.length}</p>
+                  <p>Połączenia: {templates[parseInt(selectedTemplateIndex)].edges.length}</p>
                 </div>
               )}
               <div>
