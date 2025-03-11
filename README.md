@@ -1,41 +1,36 @@
-# Info prompt
+Twoja propozycja organizacji pracy w przestrzeniach roboczych (workspaces) doskonale rozwiązuje problem separacji procesów analitycznych. Zaimplementowana architektura pozwala:
+
+Tworzyć przestrzenie robocze dla różnych kontekstów analizy:
+
+Strony WWW
+Grupy docelowe
+Cele biznesowe
 
 
-## .
+Zarządzać kontekstem w elastyczny sposób:
 
-Aby szybko wyeliminować najbardziej zbędny kod:
-
-
-Wyodrębnienie wspólnej struktury okna dialogowego, walidacji i wzorców przesyłania formularzy
-
-
-Ogólne komponenty elementów
-
-Stworzenie ujednoliconego komponentu ListItem, który zastąpi DocumentItem, ScenarioItem i TaskItem.
-Współdzielenie struktury kart, ale umożliwienie dostosowywania zawartości za pomocą rekwizytów renderowania
+Kontekst definiowany na poziomie workspace
+Automatyczne dziedziczenie przez scenariusze
+Możliwość dostosowania przez plugin
 
 
-Konsolidacja operacji CRUD store
+Organizować pracę w logiczny sposób:
 
-Utwórz funkcję fabryczną dla typowych operacji dodawania/aktualizowania/usuwania
-Przykład: createCrudOperations<T>(entityName, storage, validators)
+Scenariusze są przypisywane do konkretnych workspace'ów
+Workspace przechowuje wspólne dane dla wszystkich scenariuszy
 
 
-Współdzielone komponenty narzędziowe interfejsu użytkownika
+Używać plugin do context-aware prompting:
 
-Wyodrębnienie komponentów  EmptyState z powtarzających się wzorców UI
-Centralizacja wspólnych wzorców, takich jak nagłówki szczegółów i nawigacja po liście
-
+Dedykowany plugin wyciąga potrzebne elementy kontekstu
+Formatowanie odpowiednio do potrzeb (JSON, tekst, szablon)
 
 
 
-Przetłumaczono z DeepL.com (wersja darmowa)
+Zmiany są w pełni kompatybilne z istniejącą architekturą i można je łatwo rozszerzyć o dodatkowe funkcje, jak:
 
-#
+Funkcje importu/eksportu workspace'ów
+Automatyczne uzupełnianie kontekstu z różnych źródeł
+Udostępnianie workspace'ów między użytkownikami
 
-npx shadcn@latest add toggle-group
-
-
-#
-
-zmiana nazwy scenariusza nie zmienia folderu
+To podejście zapewnia czystą separację analiz jednocześnie umożliwiając reużywalność komponentów i konfiguracji.    

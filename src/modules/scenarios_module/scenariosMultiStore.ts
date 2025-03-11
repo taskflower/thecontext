@@ -2,13 +2,21 @@
 import { create } from "zustand";
 import { Node, Edge } from "./types";
 import { useScenarioStore } from "./scenarioStore";
+import { WorkspaceContext } from "../workspaces_module/workspaceStore";
 
 export interface MultiScenario {
   id: string;
+  name?: string;
   nodes: Record<string, Node>;
   edges: Edge[];
   categories: string[];
   nodeResponses: Record<string, string>;
+  // Workspace connection
+  workspaceId?: string;
+  workspaceContext?: WorkspaceContext;
+  // Metadata
+  createdAt?: number;
+  updatedAt?: number;
 }
 
 interface ScenariosMultiState {
@@ -28,6 +36,8 @@ interface ScenariosMultiState {
   importScenario: (scenario: MultiScenario) => void;
   // Syncs the currently selected scenario to the active scenario store
   syncCurrentScenarioToActive: () => boolean;
+  // Updates the workspace context for a scenario
+  updateScenarioWorkspaceContext: (id: string, workspaceContext: WorkspaceContext) => void;
 }
 
 export const useScenariosMultiStore = create<ScenariosMultiState>((set, get) => ({
@@ -36,16 +46,32 @@ export const useScenariosMultiStore = create<ScenariosMultiState>((set, get) => 
 
   setCurrentScenario: (id) => set({ currentScenarioId: id }),
 
-  addScenario: (scenario) => set((state) => ({
-    scenarios: { ...state.scenarios, [scenario.id]: scenario },
-    currentScenarioId: scenario.id,
-  })),
+  addScenario: (scenario) => {
+    const now = Date.now();
+    const scenarioWithMeta = {
+      ...scenario,
+      createdAt: scenario.createdAt || now,
+      updatedAt: now
+    };
+    
+    set((state) => ({
+      scenarios: { ...state.scenarios, [scenario.id]: scenarioWithMeta },
+      currentScenarioId: scenario.id,
+    }));
+  },
 
   updateScenario: (id, updater) => set((state) => {
     const scenario = state.scenarios[id];
-    if (!scenario) return {};
-    const updatedScenario = updater(scenario);
-    return { scenarios: { ...state.scenarios, [id]: updatedScenario } };
+    if (!scenario) return state;
+    
+    const updatedScenario = {
+      ...updater(scenario),
+      updatedAt: Date.now()
+    };
+    
+    return { 
+      scenarios: { ...state.scenarios, [id]: updatedScenario } 
+    };
   }),
 
   removeScenario: (id) => set((state) => {
@@ -60,19 +86,27 @@ export const useScenariosMultiStore = create<ScenariosMultiState>((set, get) => 
     return scenario ? { ...scenario } : null;
   },
 
-  importScenario: (scenario) => set((state) => {
-    const newState = {
-      scenarios: { ...state.scenarios, [scenario.id]: scenario },
-      currentScenarioId: scenario.id,
+  importScenario: (scenario) => {
+    const now = Date.now();
+    const scenarioWithMeta = {
+      ...scenario,
+      updatedAt: now
     };
     
-    // After updating the state, sync to active scenario
-    setTimeout(() => {
-      useScenarioStore.getState().importFromJson(scenario);
-    }, 0);
-    
-    return newState;
-  }),
+    set((state) => {
+      const newState = {
+        scenarios: { ...state.scenarios, [scenario.id]: scenarioWithMeta },
+        currentScenarioId: scenario.id,
+      };
+      
+      // After updating the state, sync to active scenario
+      setTimeout(() => {
+        useScenarioStore.getState().importFromJson(scenario);
+      }, 0);
+      
+      return newState;
+    });
+  },
 
   syncCurrentScenarioToActive: () => {
     const { currentScenarioId, scenarios } = get();
@@ -84,4 +118,20 @@ export const useScenariosMultiStore = create<ScenariosMultiState>((set, get) => 
     }
     return false;
   },
+  
+  updateScenarioWorkspaceContext: (id, workspaceContext) => set((state) => {
+    const scenario = state.scenarios[id];
+    if (!scenario) return state;
+    
+    return {
+      scenarios: {
+        ...state.scenarios,
+        [id]: {
+          ...scenario,
+          workspaceContext,
+          updatedAt: Date.now()
+        }
+      }
+    };
+  })
 }));

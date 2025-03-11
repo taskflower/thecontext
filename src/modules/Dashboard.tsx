@@ -1,12 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/Dashboard.tsx
-// Updated Dashboard component with Plugins Tab and MDialog
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Play, Folder, Trash2, Puzzle } from "lucide-react";
+import { Play, Folder, Trash2, Puzzle, Globe, Layers } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,13 +21,34 @@ import PluginsTab from "./plugins_system/PluginsTab";
 import MCard from "@/components/MCard";
 import MDialog from "@/components/MDialog";
 
+import { useScenariosMultiStore } from "./scenarios_module/scenariosMultiStore";
+import { useWorkspaceStore } from "./workspace_module/workspaceStore";
+import WorkspaceManagement from "./workspace_module/WorkspaceManagement";
+import WorkspaceScenarios from "./workspace_module/WorkspaceScenarios";
+
 const Dashboard: React.FC = () => {
   const { nodes, nodeResponses, removeNodeResponse, addNodeResponse } =
     useScenarioStore();
+  const { workspaces, currentWorkspaceId } = useWorkspaceStore();
+  const { currentScenarioId } = useScenariosMultiStore();
+  
   const [previewNodeId, setPreviewNodeId] = useState<string | null>(null);
   const [activeTemplate, setActiveTemplate] = useState<Template | null>(null);
   const [isExecutingNode, setIsExecutingNode] = useState<boolean>(false);
   const [currentNodeResponse, setCurrentNodeResponse] = useState<string>("");
+
+  // Auto-create a default workspace if none exists
+  useEffect(() => {
+    const workspaceCount = Object.keys(workspaces).length;
+    if (workspaceCount === 0) {
+      useWorkspaceStore.getState().createWorkspace(
+        "Default Workspace",
+        "general",
+        "Domyślna przestrzeń robocza",
+        {}
+      );
+    }
+  }, [workspaces]);
 
   const handleNodeClick = (id: string) => {
     const node = nodes[id];
@@ -64,13 +82,39 @@ const Dashboard: React.FC = () => {
     setCurrentNodeResponse("");
   };
 
+  const getCurrentContextInfo = () => {
+    const workspace = currentWorkspaceId ? workspaces[currentWorkspaceId] : null;
+    if (!workspace) return null;
+    
+    return (
+      <div className="flex items-center gap-2 text-sm text-slate-600">
+        <Globe className="h-4 w-4 text-blue-500" />
+        <span>{workspace.name}</span>
+        {currentScenarioId && (
+          <>
+            <span className="text-slate-400">/</span>
+            <Layers className="h-4 w-4 text-green-500" />
+            <span>{currentScenarioId}</span>
+          </>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="container mx-auto py-6 max-w-7xl px-4 sm:px-6">
       <div className="space-y-6">
-        <UsageInfo />
+        <div className="flex justify-between items-center">
+          <UsageInfo />
+          {getCurrentContextInfo()}
+        </div>
 
-        <Tabs defaultValue="builder" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+        <Tabs defaultValue="workspaces" className="w-full">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="workspaces">
+              <Globe className="h-4 w-4 mr-2" />
+              Workspaces
+            </TabsTrigger>
             <TabsTrigger value="builder">Builder</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="execution">Execution</TabsTrigger>
@@ -81,9 +125,41 @@ const Dashboard: React.FC = () => {
             </TabsTrigger>
           </TabsList>
 
+          {/* Workspaces Tab */}
+          <TabsContent value="workspaces" className="space-y-6 mt-6">
+            <WorkspaceManagement />
+            
+            {/* Show scenarios for current workspace */}
+            {currentWorkspaceId && (
+              <WorkspaceScenarios workspaceId={currentWorkspaceId} />
+            )}
+          </TabsContent>
+
           {/* Builder Tab */}
           <TabsContent value="builder" className="space-y-6 mt-6">
-            {/* Node and Connection Builder Section (now a separate component) */}
+            {/* Workspace context badge */}
+            {currentWorkspaceId && (
+              <MCard
+                title="Aktywny workspace"
+                description="Kontekst workspace dostępny dla scenariusza"
+              >
+                <div className="flex gap-2 flex-wrap">
+                  {Object.entries(workspaces[currentWorkspaceId]?.context || {}).map(([key, value]) => (
+                    <Badge key={key} variant="outline" className="bg-blue-50 flex items-center gap-1">
+                      <span className="font-medium">{key}:</span> 
+                      <span>{typeof value === 'string' ? value : (Array.isArray(value) ? `[${value.length}]` : '{...}')}</span>
+                    </Badge>
+                  ))}
+                  {Object.keys(workspaces[currentWorkspaceId]?.context || {}).length === 0 && (
+                    <div className="text-slate-500">
+                      Brak kontekstu workspace. Możesz dodać kontekst w zakładce Workspaces.
+                    </div>
+                  )}
+                </div>
+              </MCard>
+            )}
+            
+            {/* Node and Connection Builder Section */}
             <NodeConnectionsContainer />
 
             {/* Graph Visualization */}
@@ -226,7 +302,7 @@ const Dashboard: React.FC = () => {
           <>
             <div>
               <Label>Prompt Content</Label>
-              <div className="mt-1.5 bg-slate-50 p-4 rounded-md border whitespace-pre-wrap">
+                              <div className="mt-1.5 bg-slate-50 p-4 rounded-md border whitespace-pre-wrap">
                 {processTemplateString(nodes[previewNodeId]?.message || "")}
               </div>
             </div>
@@ -328,7 +404,7 @@ const Dashboard: React.FC = () => {
             <ScrollArea className="h-60">
               <div className="space-y-2">
                 {Object.entries(activeTemplate.nodes).map(
-                  ([id, node]: [string, any]) => (
+                  ([id, node]) => (
                     <div key={id} className="border rounded-md p-3 bg-white">
                       <div className="font-medium">{id}</div>
                       <div className="text-xs text-slate-500">
