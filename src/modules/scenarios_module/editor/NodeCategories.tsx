@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // src/modules/scenarios_module/NodeCategories.tsx
 import React, { useState, useEffect } from "react";
-import { useScenarioStore } from "./scenarioStore";
+import { useScenarioStore } from "../scenarioStore";
 
 import {
   Table,

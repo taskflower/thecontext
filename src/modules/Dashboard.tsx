@@ -17,7 +17,7 @@ import { Template } from "./templates_module/templateStore";
 import SequenceExecutor from "./sequence_module/SequenceExecutor";
 import ScenarioManagement from "./scenarios_module/ScenarioManagement";
 import { useScenarioStore } from "./scenarios_module/scenarioStore";
-import NodeCategories from "./scenarios_module/NodeCategories";
+import NodeCategories from "./scenarios_module/editor/NodeCategories";
 import UsageInfo from "./UsageInfo";
 import NodeConnectionsContainer from "./scenarios_module/editor/NodeConnectionsContainer";
 import PluginsTab from "./plugins_system/PluginsTab";
