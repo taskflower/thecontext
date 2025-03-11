@@ -17,20 +17,26 @@ import {
 } from "@/components/ui/select";
 import MDialog from "@/components/MDialog";
 import { Save, Import, FileJson, Upload } from "lucide-react";
+import { exportToJsonFile, parseJsonFile } from '../shared/jsonUtils';
+import JsonExportModal from '../shared/JsonExportModal';
+import JsonImportModal from '../shared/JsonImportModal';
+
 
 const TemplateManagement: React.FC = () => {
   const { nodes, edges } = useScenarioStore();
-  const { templates, addTemplate, importTemplateAsNode } = useTemplateStore();
+  const { templates, addTemplate, importTemplateAsNode, importTemplatesFromJson } = useTemplateStore();
   
   // State for various modals and forms
+  const [showExportModal, setShowExportModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showImportTemplateModal, setShowImportTemplateModal] = useState(false);
   const [showSaveTemplateForm, setShowSaveTemplateForm] = useState(false);
   const [selectedTemplateIndex, setSelectedTemplateIndex] = useState<string>('');
   const [mountPoint, setMountPoint] = useState('');
   const [prefix, setPrefix] = useState('');
   const [templateForm, setTemplateForm] = useState({ name: '', description: '' });
 
-  // Handle importing a template
+  // Handle importing a template to the current scenario
   const handleImportTemplate = () => {
     const index = parseInt(selectedTemplateIndex);
     if (!isNaN(index) && templates[index] && mountPoint) {
@@ -38,7 +44,7 @@ const TemplateManagement: React.FC = () => {
       setSelectedTemplateIndex('');
       setMountPoint('');
       setPrefix('');
-      setShowImportModal(false);
+      setShowImportTemplateModal(false);
     }
   };
 
@@ -57,34 +63,39 @@ const TemplateManagement: React.FC = () => {
     }
   };
 
-  // Export templates as JSON file
-  const exportTemplatesAsJSON = () => {
+  // Handle export all templates
+  const handleExportTemplates = () => {
     const templatesData = useTemplateStore.getState().exportTemplatesToJson();
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(templatesData, null, 2));
-    const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "templates_export.json");
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
+    exportToJsonFile(templatesData, "templates_export.json");
+    setShowExportModal(false);
   };
 
-  // Import templates from JSON file
-  const importTemplatesFromJSON = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const data = JSON.parse(e.target!.result as string);
-          useTemplateStore.getState().importTemplatesFromJson(data);
-        } catch (error) {
-          console.error("Error loading template JSON file:", error);
-        }
-      };
-      reader.readAsText(file);
+  // Handle file selection for template import
+  const handleTemplateFileSelect = async (file: File) => {
+    try {
+      const data = await parseJsonFile(file);
+      
+      // Ensure data is an array of templates
+      if (Array.isArray(data)) {
+        importTemplatesFromJson(data);
+      } else {
+        alert("Invalid templates format. The file must contain an array of templates.");
+      }
+    } catch (error) {
+      alert("Error importing templates. Please make sure the file contains valid JSON.");
+      console.error(error);
     }
   };
+
+  // Export statistics for display
+  const exportStats = (
+    <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+      <div>
+        <span className="text-sm font-medium">Templates:</span>
+        <span className="ml-2">{templates.length}</span>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-4">
@@ -97,7 +108,7 @@ const TemplateManagement: React.FC = () => {
           Save Current Scenario as Template
         </Button>
         <Button 
-          onClick={() => setShowImportModal(true)}
+          onClick={() => setShowImportTemplateModal(true)}
           className="w-full"
         >
           <Import className="h-4 w-4 mr-2" />
@@ -105,25 +116,20 @@ const TemplateManagement: React.FC = () => {
         </Button>
 
         <Button 
-          onClick={exportTemplatesAsJSON}
+          onClick={() => setShowExportModal(true)}
           className="w-full"
         >
           <FileJson className="h-4 w-4 mr-2" />
           Export Templates to JSON
         </Button>
         
-        <div className="relative w-full">
-          <Input 
-            type="file" 
-            accept=".json" 
-            onChange={importTemplatesFromJSON} 
-            className="absolute inset-0 opacity-0 w-full cursor-pointer z-10" 
-          />
-          <Button className="w-full">
-            <Upload className="h-4 w-4 mr-2" />
-            Load Templates from JSON
-          </Button>
-        </div>
+        <Button
+          onClick={() => setShowImportModal(true)}
+          className="w-full"
+        >
+          <Upload className="h-4 w-4 mr-2" />
+          Load Templates from JSON
+        </Button>
       </div>
 
       {/* Saved templates list */}
@@ -202,17 +208,17 @@ const TemplateManagement: React.FC = () => {
         </div>
       </MDialog>
 
-      {/* Import template modal */}
+      {/* Import template to scenario modal */}
       <MDialog
         title="Import Template to Scenario"
         description="Add a saved template to your current scenario"
-        isOpen={showImportModal}
-        onOpenChange={(open) => setShowImportModal(open)}
+        isOpen={showImportTemplateModal}
+        onOpenChange={(open) => setShowImportTemplateModal(open)}
         footer={
           <>
             <Button 
               variant="outline" 
-              onClick={() => setShowImportModal(false)}
+              onClick={() => setShowImportTemplateModal(false)}
             >
               Cancel
             </Button>
@@ -291,6 +297,28 @@ const TemplateManagement: React.FC = () => {
           </div>
         </div>
       </MDialog>
+
+      {/* Export Templates Modal */}
+      <JsonExportModal
+        isOpen={showExportModal}
+        onOpenChange={setShowExportModal}
+        title="Export Templates"
+        description="Save all templates as a JSON file"
+        onExport={handleExportTemplates}
+        statistics={exportStats}
+      />
+
+      {/* Import Templates Modal */}
+      <JsonImportModal
+        isOpen={showImportModal}
+        onOpenChange={setShowImportModal}
+        title="Import Templates"
+        description="Select a JSON file to import templates"
+        warningMessage="Importing templates will add them to your existing templates. Make sure you've exported your changes first."
+        confirmTitle="Import Templates?"
+        confirmDescription="This action will add the imported templates to your existing templates."
+        onFileSelect={handleTemplateFileSelect}
+      />
     </div>
   );
 };
