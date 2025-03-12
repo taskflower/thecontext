@@ -3,7 +3,7 @@
 import { BrowserRouter as Router, Routes, Route, NavLink } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 // Import components
 import PluginsTab from "./components/plugins/PluginsTab";
@@ -22,6 +22,9 @@ import {
   Play,
   Database,
   LayoutDashboard,
+  ChevronDown,
+  FileCode,
+  Network
 } from "lucide-react";
 
 // Import utilities
@@ -31,6 +34,7 @@ import { useWorkspaceStore } from "./stores/workspaceStore";
 import { useEffect } from "react";
 import { registerAllPlugins } from "./plugins/registerPlugins";
 import { cn } from "./utils/utils";
+import { useScenarioStore } from "./stores/scenarioStore";
 
 // Initialize plugin system
 registerStoresForPlugins();
@@ -179,31 +183,59 @@ function RouteTitle({ title }:any) {
   return <h1 className="text-xl font-bold">{title}</h1>;
 }
 
-function AppContent() {
+function AppHeader() {
   const { getCurrentWorkspace } = useWorkspaceStore();
+  const { getCurrentScenario } = useScenarioStore();
+  
   const workspace = getCurrentWorkspace();
+  const scenario = getCurrentScenario();
   
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between p-6">
-        <div>
-          <Routes>
-            <Route path="/" element={<RouteTitle title="Workspaces" />} />
-            <Route path="/scenarios" element={<RouteTitle title="Scenarios" />} />
-            <Route path="/flow-editor" element={<RouteTitle title="Flow Editor" />} />
-            <Route path="/plugins" element={<RouteTitle title="Plugins" />} />
-            <Route path="/execute" element={<RouteTitle title="Execute" />} />
-          </Routes>
-        </div>
-        
-        {workspace && (
-          <div className="flex items-center text-sm border border-sidebar-foreground rounded-lg p-3 px-4 shadow-sidebar">
-            <Folder className="h-4 w-4 mr-1" />
-            Current workspace:{" "}
-            <span className="font-medium ml-1">{workspace.name}</span>
-          </div>
-        )}
+    <div className="flex items-center justify-between p-6">
+      <div>
+        <Routes>
+          <Route path="/" element={<RouteTitle title="Workspaces" />} />
+          <Route path="/scenarios" element={<RouteTitle title="Scenarios" />} />
+          <Route path="/flow-editor" element={<RouteTitle title="Flow Editor" />} />
+          <Route path="/plugins" element={<RouteTitle title="Plugins" />} />
+          <Route path="/execute" element={<RouteTitle title="Execute" />} />
+        </Routes>
       </div>
+      
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" className="flex items-center text-sm border border-sidebar-foreground rounded-lg p-3 px-4 shadow-sidebar">
+            <Folder className="h-4 w-4 mr-1" />
+            {workspace ? workspace.name : "No workspace"}
+            <ChevronDown className="h-4 w-4 ml-2" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-60">
+          <DropdownMenuItem className="flex items-center">
+            <Folder className="h-4 w-4 mr-2" />
+            <span className="font-medium">Workspace:</span>
+            <span className="ml-1">{workspace ? workspace.name : "None"}</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem className="flex items-center">
+            <FileCode className="h-4 w-4 mr-2" />
+            <span className="font-medium">Scenario:</span>
+            <span className="ml-1">{scenario ? scenario.name : "None"}</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem className="flex items-center">
+            <Network className="h-4 w-4 mr-2" />
+            <span className="font-medium">Nodes:</span>
+            <span className="ml-1">{workspace && workspace.nodes ? workspace.nodes.length : 0}</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}
+
+function AppContent() {
+  return (
+    <div className="flex flex-col h-full">
+      <AppHeader />
       
       <ScrollArea className="flex-1">
         <div className="p-6 pt-0">
