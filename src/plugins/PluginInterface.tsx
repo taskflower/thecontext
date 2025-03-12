@@ -1,171 +1,255 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/plugins/PluginInterface.ts
-import React from 'react';
-import { Node } from '../stores/nodeStore';
+// src/plugins/PluginInterface.tsx
+import React, { createContext, useContext, useState } from 'react';
+import { usePluginStore } from '@/stores/pluginStore';
+import { useNodeStore } from '@/stores/nodeStore';
+import { useWorkspaceStore } from '@/stores/workspaceStore';
 
 
-// Common props for all plugin components
-export interface PluginComponentProps {
-  nodeId?: string;
-  config: Record<string, any>;
-  onConfigChange?: (updates: Record<string, any>) => void;
+// Plugin API interface
+export interface PluginAPI {
+  getNodeData: () => any;
+  updateNodeData: (updates: any) => void;
+  getPluginConfig: () => any;
+  updatePluginConfig: (updates: any) => void;
+  setResult: (result: any) => void;
+  getResult: () => any;
+  
+  // Add workspace API
+  workspace: {
+    getContext: (workspaceId: string) => any;
+    updateContext: (workspaceId: string, updates: any) => void;
+  };
 }
 
-// Result of plugin processing
-export interface PluginProcessResult {
-  output: string;
-  result: any;
-}
-
-// Input for plugin processing
-export interface PluginProcessInput {
-  node: Node;
-  input: string;
-  config: Record<string, any>;
-}
-
-// Core plugin interface
+// Plugin module interface
 export interface PluginModule {
   id: string;
   name: string;
   description: string;
   version: string;
-  
-  // Default configuration
-  defaultConfig: Record<string, any>;
-  
-  // UI Components
-  ViewComponent: React.FC<PluginComponentProps>;
-  ConfigComponent: React.FC<PluginComponentProps>;
-  ResultComponent: React.FC<PluginComponentProps>;
-  
-  // Processing methods
-  processNode?: (input: PluginProcessInput) => Promise<PluginProcessResult> | PluginProcessResult;
+  activateByDefault?: boolean;
+  ViewComponent: React.ComponentType<any>;
+  ConfigComponent?: React.ComponentType<any>;
+  ResultComponent?: React.ComponentType<any>;
+  defaultConfig?: Record<string, any>;
+  processNode?: (params: PluginProcessInput) => Promise<PluginProcessResult> | PluginProcessResult;
 }
 
-// Base class for plugin implementation
+// Plugin process input interface
+export interface PluginProcessInput {
+  node?: any;
+  input: string;
+  config: any;
+}
+
+// Plugin process result interface
+export interface PluginProcessResult {
+  output: string;
+  result: any;
+}
+
+// Plugin component props interface
+export interface PluginComponentProps {
+  nodeId?: string;
+  config?: any;
+  onConfigChange?: (updates: any) => void;
+}
+
+// Context for providing plugin API to components
+const PluginContext = createContext<PluginAPI | null>(null);
+
+// Props for PluginProvider
+export interface PluginProviderProps {
+  pluginId?: string;
+  nodeId?: string;
+  children: React.ReactNode;
+}
+
+// Create a Plugin Provider component
+export const PluginProvider: React.FC<PluginProviderProps> = ({ 
+  pluginId, 
+  nodeId, 
+  children 
+}) => {
+  const pluginStore = usePluginStore();
+  const nodeStore = useNodeStore();
+  const workspaceStore = useWorkspaceStore();
+  
+  // Get node and plugin state
+  const node = nodeId ? nodeStore.getNode(nodeId) : null;
+  const pluginState = pluginId ? pluginStore.getPluginState(pluginId) : null;
+  
+  // Create plugin API
+  const api: PluginAPI = {
+    getNodeData: () => {
+      return node ? node.data : null;
+    },
+    
+    updateNodeData: (updates) => {
+      if (nodeId) {
+        nodeStore.updateNodeData(nodeId, updates);
+      }
+    },
+    
+    getPluginConfig: () => {
+      if (nodeId && node?.data.pluginConfig) {
+        return node.data.pluginConfig;
+      }
+      return pluginState?.config || {};
+    },
+    
+    updatePluginConfig: (updates) => {
+      if (nodeId && pluginId) {
+        nodeStore.updateNodePluginConfig(nodeId, updates);
+      } else if (pluginId) {
+        pluginStore.updatePluginConfig(pluginId, updates);
+      }
+    },
+    
+    setResult: (result) => {
+      if (pluginId) {
+        pluginStore.updatePluginResult(pluginId, result);
+      }
+    },
+    
+    getResult: () => {
+      return pluginState?.result || null;
+    },
+    
+    // Workspace API
+    workspace: {
+      getContext: (workspaceId) => {
+        return workspaceStore.getWorkspaceContext(workspaceId);
+      },
+      updateContext: (workspaceId, updates) => {
+        workspaceStore.updateWorkspaceContext(workspaceId, updates);
+      }
+    }
+  };
+  
+  return (
+    <PluginContext.Provider value={api}>
+      {children}
+    </PluginContext.Provider>
+  );
+};
+
+// Hook for accessing plugin API
+export const usePluginAPI = () => {
+  const context = useContext(PluginContext);
+  if (!context) {
+    throw new Error('usePluginAPI must be used within a PluginProvider');
+  }
+  return context;
+};
+
+// Plugin base class that plugins can extend
 export abstract class PluginBase implements PluginModule {
   id: string;
   name: string;
   description: string;
   version: string;
-  defaultConfig: Record<string, any>;
+  activateByDefault?: boolean;
+  defaultConfig?: Record<string, any>;
+  
+  abstract ViewComponent: React.FC<PluginComponentProps>;
+  abstract ConfigComponent?: React.FC<PluginComponentProps>;
+  abstract ResultComponent?: React.FC<PluginComponentProps>;
   
   constructor(options: {
     id: string;
     name: string;
-    description?: string;
-    version?: string;
+    description: string;
+    version: string;
+    activateByDefault?: boolean;
     defaultConfig?: Record<string, any>;
   }) {
     this.id = options.id;
     this.name = options.name;
-    this.description = options.description || '';
-    this.version = options.version || '1.0.0';
+    this.description = options.description;
+    this.version = options.version;
+    this.activateByDefault = options.activateByDefault || false;
     this.defaultConfig = options.defaultConfig || {};
   }
   
-  // UI Components to be implemented by specific plugins
-  abstract ViewComponent: React.FC<PluginComponentProps>;
-  abstract ConfigComponent: React.FC<PluginComponentProps>;
-  abstract ResultComponent: React.FC<PluginComponentProps>;
-  
-  // Default implementation of processNode (can be overridden)
   processNode(input: PluginProcessInput): PluginProcessResult {
     return {
-      output: input.input, // Pass through by default
+      output: input.input,
       result: null
     };
   }
 }
 
-// Type to help with plugin registration
-export type PluginFactory = () => PluginModule;
+// Plugin container component
+export interface PluginContainerProps {
+  pluginId: string;
+  nodeId?: string;
+}
 
-// Helper to load plugins dynamically
-export const loadPlugins = async (): Promise<PluginModule[]> => {
-  if (typeof window === 'undefined' || !import.meta.env.DEV) return [];
+export const PluginContainer: React.FC<PluginContainerProps> = ({ 
+  pluginId,
+  nodeId
+}) => {
+  const [error, setError] = useState<string | null>(null);
+  const { plugins } = usePluginStore();
+  
+  const plugin = plugins[pluginId];
+  
+  if (!plugin) {
+    return <div className="p-4 bg-red-50 text-red-700 rounded">Plugin not found: {pluginId}</div>;
+  }
+  
+  if (!plugin.ViewComponent) {
+    return (
+      <div className="p-4 bg-yellow-50 text-yellow-700 rounded">
+        This plugin doesn't provide a view component
+      </div>
+    );
+  }
   
   try {
-    // Use Vite's dynamic import with glob pattern to find all plugins
-    const modules = import.meta.glob('../plugins/*/index.ts', { eager: true });
+    const ViewComponent = plugin.ViewComponent;
+    
+    return (
+      <div className="plugin-container border rounded-md overflow-hidden">
+        {error ? (
+          <div className="p-4 bg-red-50 text-red-700">{error}</div>
+        ) : (
+          <ViewComponent nodeId={nodeId} />
+        )}
+      </div>
+    );
+  } catch (err) {
+    setError(`Error rendering plugin: ${err instanceof Error ? err.message : String(err)}`);
+    return <div className="p-4 bg-red-50 text-red-700 rounded">{error}</div>;
+  }
+};
+
+// Dynamic plugin loading
+export const loadPlugins = async (): Promise<PluginModule[]> => {
+  try {
+    // Use Vite's import.meta.glob to load all plugin modules
+    const modules = import.meta.glob('./*/index.{ts,tsx}', { eager: true });
     const plugins: PluginModule[] = [];
     
     for (const path in modules) {
-      const module = modules[path] as { default?: PluginModule | PluginFactory };
-      
-      if (module.default) {
-        // Handle both direct plugin exports and factory functions
-        const plugin = typeof module.default === 'function' 
-          ? module.default() 
-          : module.default;
-          
-        if (plugin && plugin.id && plugin.name) {
-          plugins.push(plugin);
+      try {
+        const module = modules[path] as any;
+        if (module && module.default) {
+          const plugin = module.default as PluginModule;
+          if (plugin.id && plugin.name) {
+            plugins.push(plugin);
+          }
         }
+      } catch (err) {
+        console.error(`Error loading plugin from ${path}:`, err);
       }
     }
     
     return plugins;
-  } catch (error) {
-    console.error('Error loading plugins:', error);
+  } catch (err) {
+    console.error('Error loading plugins:', err);
     return [];
   }
-};
-
-// Plugin API for accessing store functions safely
-export interface PluginAPI {
-  workspace: {
-    getContext: (workspaceId: string) => Record<string, any> | null;
-    updateContext: (workspaceId: string, updates: Record<string, any>) => void;
-  };
-  scenario: {
-    getScenario: (scenarioId: string) => any;
-  };
-  node: {
-    getNode: (nodeId: string) => Node | null;
-    updateNodeData: (nodeId: string, data: any) => void;
-  };
-  execution: {
-    getResults: (executionId: string) => Record<string, any> | null;
-  };
-}
-
-// Plugin context provider for React components
-export const PluginContext = React.createContext<{
-  api: PluginAPI | null;
-}>({
-  api: null
-});
-
-// Hook for plugins to access the API
-export const usePluginAPI = (): PluginAPI => {
-  const context = React.useContext(PluginContext);
-  
-  if (!context.api) {
-    throw new Error('usePluginAPI must be used within a PluginProvider');
-  }
-  
-  return context.api;
-};
-
-// Provider component for plugin API
-// Fix the syntax error in your PluginProvider component
-export const PluginProvider: React.FC<{
-  children: React.ReactNode;
-}> = ({ children }) => {
-  const [api, setApi] = React.useState<PluginAPI | null>(null);
-  
-  React.useEffect(() => {
-    // Access the API from window
-    if (typeof window !== 'undefined' && (window as any).storeAPI) {
-      setApi((window as any).storeAPI);
-    }
-  }, []);
-  
-  return (
-    <PluginContext.Provider value={{ api }}>
-      {children}
-    </PluginContext.Provider>
-  );
 };

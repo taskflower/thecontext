@@ -4,9 +4,7 @@ import React, { useEffect } from 'react';
 
 
 // Built-in plugins
-import WorkspaceContextUpdater from '../plugins/workspace-context-updater';
 
-import TextAnalyzer from '../plugins/text-analyzer';
 
 import { registerStoresForPlugins } from '@/stores';
 import { loadPlugins } from './PluginInterface';
@@ -14,11 +12,7 @@ import { usePluginStore } from '@/stores/pluginStore';
 import { useNodeStore } from '@/stores/nodeStore';
 
 // Define our core/built-in plugins
-const CORE_PLUGINS = [
-  WorkspaceContextUpdater,
 
-  TextAnalyzer
-];
 
 export const PluginInitializer: React.FC = () => {
   const { 
@@ -37,17 +31,6 @@ export const PluginInitializer: React.FC = () => {
       
       // Register store API for plugins
       registerStoresForPlugins();
-      
-      // Register and activate core plugins
-      console.log('Registering core plugins...');
-      CORE_PLUGINS.forEach(plugin => {
-        if (!plugins[plugin.id]) {
-          console.log(`Registering core plugin: ${plugin.name} (${plugin.id})`);
-          registerPlugin(plugin.id, plugin);
-          activatePlugin(plugin.id); // Core plugins are active by default
-        }
-      });
-      
       // Load dynamic plugins in development mode
       if (import.meta.env.DEV) {
         try {

@@ -4,16 +4,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Import store hooks
 
-
 // Import components
 
 import PluginsTab from "./components/plugins/PluginsTab";
 
-
-
 // Import icons
 import {
-
   Folder,
   Code,
   Puzzle,
@@ -32,6 +28,9 @@ import { ScenarioExecution } from "./components/scenarios/ScenarioExecution";
 import { WorkspacesList } from "./components/workspaces/WorkspacesList";
 import { WorkspaceContextPanel } from "./components/workspaces/WorkspaceContextPanel";
 import { useWorkspaceStore } from "./stores/workspaceStore";
+import { useEffect } from "react";
+import { registerAllPlugins } from "./plugins/registerPlugins";
+
 
 // Initialize plugin system
 registerStoresForPlugins();
@@ -39,6 +38,15 @@ registerStoresForPlugins();
 function App() {
   const { getCurrentWorkspace } = useWorkspaceStore();
   const workspace = getCurrentWorkspace();
+  
+
+  useEffect(() => {
+    // Register all plugins on application start
+    registerAllPlugins();
+    
+    // Register store API for plugin access
+    registerStoresForPlugins();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -50,16 +58,13 @@ function App() {
 
       <div className="container mx-auto py-8 px-4">
         <header className="mb-8 flex items-center justify-between">
-<div>
-<p className="">
-            THE CONTEXT
-          </p>
-         
-          <p className="text-muted-foreground">
-            Build, test, and iterate on prompt workflows with plugins
-          </p>
-</div>
-        
+          <div>
+            <p className="">THE CONTEXT</p>
+
+            <p className="text-muted-foreground">
+              Build, test, and iterate on prompt workflows with plugins
+            </p>
+          </div>
 
           {workspace && (
             <div className="mt-2 flex items-center text-sm border border-sidebar-foreground rounded-lg p-3 px-4 shadow-sidebar">
@@ -85,7 +90,7 @@ function App() {
                 <Code className="h-4 w-4 mr-2" />
                 Flow Editor
               </TabsTrigger>
-           
+
               <TabsTrigger value="plugins">
                 <Puzzle className="h-4 w-4 mr-2" />
                 Plugins
@@ -118,8 +123,6 @@ function App() {
                 <FlowEditor />
               </div>
             </TabsContent>
-
-           
 
             <TabsContent value="plugins">
               <PluginsTab />
@@ -178,8 +181,7 @@ function App() {
 
         <footer className="mt-12 text-center text-sm text-slate-500">
           <p>
-            © {new Date().getFullYear()} THE CONTEXT - Redesigned
-            Architecture
+            © {new Date().getFullYear()} THE CONTEXT - Redesigned Architecture
           </p>
         </footer>
       </div>

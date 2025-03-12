@@ -10,8 +10,6 @@ import { useNodeStore } from '@/stores/nodeStore';
 import { PluginProvider } from './PluginInterface';
 
 
-
-
 interface PluginContainerProps {
   pluginId: string;
   nodeId?: string;
@@ -77,7 +75,7 @@ export const PluginContainer: React.FC<PluginContainerProps> = ({
     : plugin.name;
   
   return (
-    <PluginProvider>
+    <PluginProvider pluginId={pluginId} nodeId={nodeId}>
       <Card className="w-full">
         <CardHeader>
           <div className="flex items-start justify-between">
@@ -99,14 +97,18 @@ export const PluginContainer: React.FC<PluginContainerProps> = ({
               <Eye className="w-4 h-4 mr-2" />
               View
             </TabsTrigger>
-            <TabsTrigger value="config">
-              <Settings className="w-4 h-4 mr-2" />
-              Configuration
-            </TabsTrigger>
-            <TabsTrigger value="results">
-              <BarChart className="w-4 h-4 mr-2" />
-              Results
-            </TabsTrigger>
+            {plugin.ConfigComponent && (
+              <TabsTrigger value="config">
+                <Settings className="w-4 h-4 mr-2" />
+                Configuration
+              </TabsTrigger>
+            )}
+            {plugin.ResultComponent && (
+              <TabsTrigger value="results">
+                <BarChart className="w-4 h-4 mr-2" />
+                Results
+              </TabsTrigger>
+            )}
           </TabsList>
           
           <CardContent className="p-6">
@@ -120,24 +122,28 @@ export const PluginContainer: React.FC<PluginContainerProps> = ({
               </div>
             </TabsContent>
             
-            <TabsContent value="config" className="mt-0">
-              <div className="border rounded-md p-4">
-                <plugin.ConfigComponent 
-                  nodeId={nodeId}
-                  config={config}
-                  onConfigChange={handleConfigChange}
-                />
-              </div>
-            </TabsContent>
+            {plugin.ConfigComponent && (
+              <TabsContent value="config" className="mt-0">
+                <div className="border rounded-md p-4">
+                  <plugin.ConfigComponent 
+                    nodeId={nodeId}
+                    config={config}
+                    onConfigChange={handleConfigChange}
+                  />
+                </div>
+              </TabsContent>
+            )}
             
-            <TabsContent value="results" className="mt-0">
-              <div className="border rounded-md p-4">
-                <plugin.ResultComponent 
-                  nodeId={nodeId}
-                  config={config}
-                />
-              </div>
-            </TabsContent>
+            {plugin.ResultComponent && (
+              <TabsContent value="results" className="mt-0">
+                <div className="border rounded-md p-4">
+                  <plugin.ResultComponent 
+                    nodeId={nodeId}
+                    config={config}
+                  />
+                </div>
+              </TabsContent>
+            )}
           </CardContent>
         </Tabs>
       </Card>
