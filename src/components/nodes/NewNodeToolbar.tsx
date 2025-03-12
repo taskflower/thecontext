@@ -186,12 +186,13 @@ const NewNodeToolbar: React.FC<NewNodeToolbarProps> = ({ scenarioId }) => {
       ) : (
         <button
           onClick={() => setExpanded(true)}
-          className="flex items-center px-4 py-2 text-blue-600 hover:bg-blue-50"
+          className="flex items-center px-3 py-2 text-blue-600 hover:bg-blue-50 border-l-3 border-blue-500"
+          style={{ borderLeft: '3px solid #8ab4f8' }}
         >
-          <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
-          <span>Add Node</span>
+          <span className="text-sm">Add Node</span>
         </button>
       )}
     </div>
