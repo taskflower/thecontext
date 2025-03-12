@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// src/modules/scenarios_module/NodeCategories.tsx
 import React, { useState, useEffect } from "react";
 import { useScenarioStore } from "../scenarioStore";
 
@@ -23,9 +20,11 @@ import {
   ArrowRight,
   ArrowLeft,
   MessageSquare,
+  Edit,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import MDialog from "@/components/MDialog";
 
 const NodeCategories: React.FC = () => {
@@ -36,6 +35,10 @@ const NodeCategories: React.FC = () => {
   const [currentResponse, setCurrentResponse] = useState<string>('');
   const [previewNodeId, setPreviewNodeId] = useState<string | null>(null);
   const [responseDialogNodeId, setResponseDialogNodeId] = useState<string | null>(null);
+  const [editNodeId, setEditNodeId] = useState<string | null>(null);
+  const [editNodeMessage, setEditNodeMessage] = useState<string>('');
+  const [editNodeCategory, setEditNodeCategory] = useState<string>('');
+  const [editNodeDefaultResponse, setEditNodeDefaultResponse] = useState<string>('');
 
   useEffect(() => {
     const initialExpanded: Record<string, boolean> = {};
@@ -44,6 +47,14 @@ const NodeCategories: React.FC = () => {
     });
     setExpandedCategories(initialExpanded);
   }, [categories]);
+
+  useEffect(() => {
+    if (editNodeId && nodes[editNodeId]) {
+      setEditNodeMessage(nodes[editNodeId].message || '');
+      setEditNodeCategory(nodes[editNodeId].category || '');
+      setEditNodeDefaultResponse(nodes[editNodeId].defaultUserResponse || '');
+    }
+  }, [editNodeId, nodes]);
 
   const toggleCategory = (category: string) => {
     setExpandedCategories((prev) => ({ ...prev, [category]: !prev[category] }));
@@ -65,7 +76,31 @@ const NodeCategories: React.FC = () => {
 
   const handleExecute = (id: string) => {
     setExecutingNodeId(id);
-    setCurrentResponse('');
+    setCurrentResponse(nodes[id]?.defaultUserResponse || '');
+  };
+
+  const handleEdit = (id: string) => {
+    setEditNodeId(id);
+  };
+
+  const saveNodeEdit = () => {
+    if (editNodeId && editNodeMessage && editNodeCategory) {
+      const { setNodes } = useScenarioStore.getState();
+      const updatedNodes = { ...nodes };
+      updatedNodes[editNodeId] = {
+        ...updatedNodes[editNodeId],
+        message: editNodeMessage,
+        category: editNodeCategory,
+        defaultUserResponse: editNodeDefaultResponse
+      };
+      setNodes(updatedNodes);
+      
+      // Add category if it doesn't exist
+      const { addCategory } = useScenarioStore.getState();
+      addCategory(editNodeCategory);
+      
+      setEditNodeId(null);
+    }
   };
 
   const processTemplateString = (templateString: string) => {
@@ -158,6 +193,15 @@ const NodeCategories: React.FC = () => {
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end space-x-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEdit(id)}
+                      className="h-8 w-8"
+                      title="Edit"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -339,6 +383,64 @@ const NodeCategories: React.FC = () => {
               placeholder="Enter your response..."
               value={currentResponse}
               onChange={(e) => setCurrentResponse(e.target.value)}
+            />
+          </div>
+        </div>
+      </MDialog>
+
+      {/* Node Edit Dialog */}
+      <MDialog
+        title={`Edit Node: ${editNodeId || ""}`}
+        description="Edit node content and category"
+        isOpen={!!editNodeId}
+        onOpenChange={(open) => !open && setEditNodeId(null)}
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setEditNodeId(null)}>Cancel</Button>
+            <Button 
+              disabled={!editNodeMessage.trim() || !editNodeCategory.trim()}
+              onClick={saveNodeEdit}
+            >
+              Save Changes
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="node-category">Category</Label>
+            <Input
+              id="node-category"
+              className="mt-1.5"
+              placeholder="Enter category..."
+              value={editNodeCategory}
+              onChange={(e) => setEditNodeCategory(e.target.value)}
+              list="category-options"
+            />
+            <datalist id="category-options">
+              {categories.map((cat) => (
+                <option key={cat} value={cat} />
+              ))}
+            </datalist>
+          </div>
+          <div>
+            <Label htmlFor="node-message">Node Content</Label>
+            <Textarea 
+              id="node-message"
+              className="mt-1.5 min-h-[200px]"
+              placeholder="Enter node content..."
+              value={editNodeMessage}
+              onChange={(e) => setEditNodeMessage(e.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="default-response">Default User Response</Label>
+            <Textarea 
+              id="default-response"
+              className="mt-1.5 min-h-[120px]"
+              placeholder="Enter default response (optional)..."
+              value={editNodeDefaultResponse}
+              onChange={(e) => setEditNodeDefaultResponse(e.target.value)}
             />
           </div>
         </div>
