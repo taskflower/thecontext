@@ -95,7 +95,7 @@ const SequenceExecutor: React.FC = () => {
     setCurrentProcessResponses(newResponses);
 
     // If there's a plugin associated with this node, update its result
-    if (currentNode.pluginId && plugins[currentNode.pluginId]) {
+    if (currentNode.pluginId !== undefined && plugins[currentNode.pluginId as string]) {
       updatePluginResult(currentNode.pluginId, currentResponse);
     }
 
@@ -135,12 +135,14 @@ const SequenceExecutor: React.FC = () => {
   // Get the current node and check if it has an associated plugin
   const currentNodeId = messageQueue[currentMessageIndex];
   const currentNode = currentNodeId ? nodes[currentNodeId] : null;
-  const hasPlugin = currentNode && currentNode.pluginId && plugins[currentNode.pluginId];
-  const currentPlugin = hasPlugin ? plugins[currentNode.pluginId] : null;
+  const hasPlugin = currentNode && 
+                   currentNode.pluginId !== undefined && 
+                   plugins[currentNode.pluginId as string] !== undefined;
+  const currentPlugin = hasPlugin ? plugins[currentNode.pluginId as string] : null;
 
   // Handle plugin configuration update for the current node
   const handlePluginConfigUpdate = (configUpdates: any) => {
-    if (currentNode && currentNode.pluginId) {
+    if (currentNode && currentNode.pluginId !== undefined) {
       // Update both the plugin state and the node's pluginConfig
       updatePluginConfig(currentNode.pluginId, configUpdates);
       
