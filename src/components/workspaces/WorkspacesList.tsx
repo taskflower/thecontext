@@ -4,7 +4,7 @@ import React from 'react';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Folder, Plus, Trash2, Copy, ExternalLink, Clock } from 'lucide-react';
+import { Folder, Plus, Trash2, BookCopy, Clock, SquareArrowLeft } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -98,11 +98,11 @@ export const WorkspacesList: React.FC = () => {
           {workspaceList.map((workspace:any) => (
             <Card 
               key={workspace.id} 
-              className={currentWorkspaceId === workspace.id ? 'border-2 border-blue-500' : ''}
+              className={currentWorkspaceId === workspace.id ? 'border-primary' : 'border-card'}
             >
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Folder className="h-5 w-5 text-blue-500" />
+                  <Folder className="h-5 w-5 " />
                   {workspace.name}
                 </CardTitle>
                 <CardDescription>
@@ -128,7 +128,7 @@ export const WorkspacesList: React.FC = () => {
                     onClick={() => duplicateWorkspace(workspace.id)}
                     title="Duplicate workspace"
                   >
-                    <Copy className="h-4 w-4" />
+                    <BookCopy className="h-4 w-4" />
                   </Button>
                   <Button 
                     variant="outline" 
@@ -140,11 +140,12 @@ export const WorkspacesList: React.FC = () => {
                   </Button>
                 </div>
                 <Button 
+                variant={'outline'}
                   onClick={() => setCurrentWorkspace(workspace.id)}
                   disabled={currentWorkspaceId === workspace.id}
                 >
-                  {currentWorkspaceId === workspace.id ? 'Current' : 'Open'}
-                  {currentWorkspaceId !== workspace.id && <ExternalLink className="h-4 w-4 ml-2" />}
+                  {currentWorkspaceId === workspace.id ? 'Selected' : 'Select'}
+                  {currentWorkspaceId !== workspace.id && <SquareArrowLeft className="h-4 w-4 ml-2" />}
                 </Button>
               </CardFooter>
             </Card>
