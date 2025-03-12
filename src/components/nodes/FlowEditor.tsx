@@ -77,6 +77,33 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({ onEdi
     }
   }, [scenarioId, getLatestExecution, setNodes]);
 
+  // Add a listener for node deletions
+  useEffect(() => {
+    // Subscribe to node store changes
+    const unsubscribe = useNodeStore.subscribe((state, prevState) => {
+      // Check if a node was deleted
+      const prevNodeIds = Object.keys(prevState.nodes);
+      const currentNodeIds = Object.keys(state.nodes);
+      
+      // Find deleted node IDs
+      const deletedNodeIds = prevNodeIds.filter(id => !currentNodeIds.includes(id));
+      
+      if (deletedNodeIds.length > 0) {
+        // Remove deleted nodes from ReactFlow
+        setNodes(nodes => nodes.filter(node => !deletedNodeIds.includes(node.id)));
+        
+        // Also close the node editor if the active node was deleted
+        if (state.activeNodeId === null && prevState.activeNodeId !== null) {
+          setShowNodeEditor(false);
+        }
+      }
+    });
+    
+    return () => {
+      unsubscribe();
+    };
+  }, [setNodes]);
+
   // Load nodes and edges when scenario changes
   useEffect(() => {
     console.log("Loading scenario data, scenarioId:", scenarioId);
