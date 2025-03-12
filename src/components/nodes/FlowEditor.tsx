@@ -202,7 +202,7 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
 
   // Aktualizacja pozycji węzłów w magazynie po zakończeniu przeciągania
   const onNodeDragStop = useCallback(
-    (event: React.MouseEvent, node: Node) => {
+    (_event: React.MouseEvent, node: Node) => {
       updateNode(node.id, {
         position: { x: node.position.x, y: node.position.y },
       });
@@ -246,7 +246,7 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
 
   // Obsługa kliknięcia węzła w celu otworzenia edytora
   const onNodeClick = useCallback(
-    (event: React.MouseEvent, node: Node) => {
+    (_event: React.MouseEvent, node: Node) => {
       setActiveNodeId(node.id);
       setShowNodeEditor(true);
     },

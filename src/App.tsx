@@ -207,7 +207,7 @@ function App() {
           <div className="p-6">
             <h2 className="text-lg font-bold">THE CONTEXT</h2>
             <p className="text-sm text-muted-foreground">
-              Build, test, and iterate on prompt workflows
+              Build, test, and iterate on prompt workflows. v.0.24.13
             </p>
           </div>
           <ScrollArea className="flex-1">
