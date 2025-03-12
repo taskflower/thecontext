@@ -237,67 +237,70 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
       calculateExecutionOrder: async (scenarioId) => {
         const scenarioStore = useScenarioStore.getState();
         const nodeStore = useNodeStore.getState();
-        
+      
         const scenario = scenarioStore.getScenario(scenarioId);
         if (!scenario) throw new Error(`Scenario ${scenarioId} not found`);
-        
-        const nodes = scenario.nodeIds
+      
+        // Usuń duplikaty z tablicy nodeIds
+        const uniqueNodeIds = Array.from(new Set(scenario.nodeIds));
+      
+        const nodes = uniqueNodeIds
           .map(id => nodeStore.getNode(id))
           .filter((node): node is Node => node !== null);
-        
+      
         const edges = scenario.edgeIds
           .map(id => scenarioStore.edges[id])
           .filter(edge => edge !== undefined);
-        
-        // Build graph
+      
+        // Budujemy graf
         const graph: Record<string, string[]> = {};
         const inDegree: Record<string, number> = {};
-        
-        // Initialize
+      
+        // Inicjalizacja
         nodes.forEach(node => {
           graph[node.id] = [];
           inDegree[node.id] = 0;
         });
-        
-        // Build adjacency list
+      
+        // Budujemy listę sąsiedztwa
         edges.forEach(edge => {
           if (edge && graph[edge.source] && inDegree[edge.target] !== undefined) {
             graph[edge.source].push(edge.target);
             inDegree[edge.target]++;
           }
         });
-        
-        // Topological sort using Kahn's algorithm
+      
+        // Sortowanie topologiczne metodą Kahna
         const queue: string[] = [];
         const result: string[] = [];
-        
-        // Add nodes with no dependencies to queue
+      
+        // Węzły bez zależności trafiają do kolejki
         Object.keys(inDegree).forEach(nodeId => {
           if (inDegree[nodeId] === 0) {
             queue.push(nodeId);
           }
         });
-        
+      
         while (queue.length > 0) {
           const nodeId = queue.shift()!;
           result.push(nodeId);
-          
+      
           graph[nodeId].forEach(neighborId => {
             inDegree[neighborId]--;
-            
             if (inDegree[neighborId] === 0) {
               queue.push(neighborId);
             }
           });
         }
-        
-        // Check for cycles
+      
+        // Jeśli nie udało się przetworzyć wszystkich unikalnych węzłów, zgłoś błąd
         if (result.length !== nodes.length) {
           throw new Error('Scenario contains circular dependencies');
         }
-        
+      
         return result;
       },
+      
       
       // Helper to get input for a node based on connections
       getNodeInput: async (nodeId, executionId) => {

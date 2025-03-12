@@ -175,7 +175,7 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({ onEdi
   const onNodeDragStop = useCallback((event: React.MouseEvent, node: Node) => {
     updateNode(node.id, { position: { x: node.position.x, y: node.position.y } });
   }, [updateNode]);
-
+  
   // Handle new connections between nodes
   const onConnect = useCallback((connection: Connection) => {
     // Create edge in store

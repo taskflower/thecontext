@@ -9,17 +9,17 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 import PluginsTab from "./components/plugins/PluginsTab";
 
-import NodeEditor from "./components/nodes/NodeEditor";
+
 
 // Import icons
 import {
-  LayoutDashboard,
+
   Folder,
   Code,
   Puzzle,
   Play,
   Database,
-  Cog,
+  LayoutDashboard,
 } from "lucide-react";
 
 // Import utilities
@@ -49,16 +49,20 @@ function App() {
       <Toaster />
 
       <div className="container mx-auto py-8 px-4">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-800">
-            Prompt Flow Builder
-          </h1>
-          <p className="text-slate-500">
+        <header className="mb-8 flex items-center justify-between">
+<div>
+<p className="">
+            THE CONTEXT
+          </p>
+         
+          <p className="text-muted-foreground">
             Build, test, and iterate on prompt workflows with plugins
           </p>
+</div>
+        
 
           {workspace && (
-            <div className="mt-2 flex items-center text-sm text-slate-600">
+            <div className="mt-2 flex items-center text-sm border border-sidebar-foreground rounded-lg p-3 px-4 shadow-sidebar">
               <Folder className="h-4 w-4 mr-1" />
               Current workspace:{" "}
               <span className="font-medium ml-1">{workspace.name}</span>
@@ -74,17 +78,14 @@ function App() {
                 Workspaces
               </TabsTrigger>
               <TabsTrigger value="scenarios">
-                <Cog className="h-4 w-4 mr-2" />
+                <LayoutDashboard className="h-4 w-4 mr-2" />
                 Scenarios
               </TabsTrigger>
               <TabsTrigger value="flow-editor">
                 <Code className="h-4 w-4 mr-2" />
                 Flow Editor
               </TabsTrigger>
-              <TabsTrigger value="nodes">
-                <LayoutDashboard className="h-4 w-4 mr-2" />
-                Nodes
-              </TabsTrigger>
+           
               <TabsTrigger value="plugins">
                 <Puzzle className="h-4 w-4 mr-2" />
                 Plugins
@@ -118,9 +119,7 @@ function App() {
               </div>
             </TabsContent>
 
-            <TabsContent value="nodes">
-              <NodeEditor />
-            </TabsContent>
+           
 
             <TabsContent value="plugins">
               <PluginsTab />
@@ -179,7 +178,7 @@ function App() {
 
         <footer className="mt-12 text-center text-sm text-slate-500">
           <p>
-            © {new Date().getFullYear()} Prompt Flow Builder - Redesigned
+            © {new Date().getFullYear()} THE CONTEXT - Redesigned
             Architecture
           </p>
         </footer>
