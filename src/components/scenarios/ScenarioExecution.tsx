@@ -27,7 +27,9 @@ import { useScenarioStore } from "@/stores/scenarioStore";
 import { useExecutionStore } from "@/stores/executionStore";
 import { useNodeStore } from "@/stores/nodeStore";
 import { usePluginStore } from "@/stores/pluginStore";
-import { PluginContainer } from "@/plugins/PluginContainer";
+
+// Import the PluginModule type for type checking
+import type { PluginModule } from "@/plugins/PluginInterface";
 
 export const ScenarioExecution: React.FC = () => {
   const { currentScenarioId, getScenario } = useScenarioStore();
@@ -41,7 +43,7 @@ export const ScenarioExecution: React.FC = () => {
     calculateExecutionOrder,
   } = useExecutionStore();
   const { getNode } = useNodeStore();
-  const { isPluginActive } = usePluginStore();
+  const { isPluginActive, plugins } = usePluginStore();
 
   const [isExecuting, setIsExecuting] = useState(false);
   const [exportData, setExportData] = useState<string | null>(null);
@@ -270,6 +272,32 @@ export const ScenarioExecution: React.FC = () => {
   // Current node info for display
   const currentNode = getCurrentNodeInfo();
 
+  // Custom inline plugin container component for execution view
+  const ExecutionPluginView: React.FC<{
+    pluginId: string;
+    nodeId: string;
+    onComplete: (output: string) => void;
+  }> = ({ pluginId, nodeId, onComplete }) => {
+    const plugin = plugins[pluginId] as PluginModule;
+    
+    if (!plugin || !plugin.ViewComponent) {
+      return <div>Plugin not found or missing view component</div>;
+    }
+    
+    const ViewComponent = plugin.ViewComponent;
+    const config = currentNode?.pluginConfig || plugin.defaultConfig || {};
+    
+    return (
+      <div className="plugin-execution-container">
+        <ViewComponent 
+          nodeId={nodeId} 
+          config={config}
+          onProcessComplete={onComplete}
+        />
+      </div>
+    );
+  };
+
   return (
     <>
       <Card>
@@ -434,21 +462,19 @@ export const ScenarioExecution: React.FC = () => {
                   <span className="text-sm text-slate-500">Node ID: {currentNode.id}</span>
                 </div>
 
-                {/* Plugin workflow */}
+                {/* Plugin workflow - MODIFIED TO SHOW ONLY VIEW COMPONENT */}
                 {currentNode.hasPlugin && waitingForPlugin && (
                   <div className="border rounded-md p-4">
                     <div className="mb-4 text-sm">
                       This node uses a plugin. Please complete the plugin workflow to continue.
                     </div>
-                    <PluginContainer 
-                      pluginId={currentNode.pluginId as string} 
-                      nodeId={currentNode.id}
-                    />
-                    <div className="mt-4 flex justify-end">
-                      <Button onClick={() => handlePluginComplete("Plugin process completed")}>
-                        Continue to Next Step
-                      </Button>
-                    </div>
+                    {currentNode.pluginId && (
+                      <ExecutionPluginView 
+                        pluginId={currentNode.pluginId} 
+                        nodeId={currentNode.id}
+                        onComplete={handlePluginComplete}
+                      />
+                    )}
                   </div>
                 )}
 
