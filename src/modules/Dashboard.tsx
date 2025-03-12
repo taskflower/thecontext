@@ -37,18 +37,7 @@ const Dashboard: React.FC = () => {
   const [isExecutingNode, setIsExecutingNode] = useState<boolean>(false);
   const [currentNodeResponse, setCurrentNodeResponse] = useState<string>("");
 
-  // Auto-create a default workspace if none exists
-  useEffect(() => {
-    const workspaceCount = Object.keys(workspaces).length;
-    if (workspaceCount === 0) {
-      useWorkspaceStore.getState().createWorkspace(
-        "Default Workspace",
-        "general",
-        "Domyślna przestrzeń robocza",
-        {}
-      );
-    }
-  }, [workspaces]);
+
 
   const handleNodeClick = (id: string) => {
     const node = nodes[id];
@@ -147,7 +136,13 @@ const Dashboard: React.FC = () => {
                   {Object.entries(workspaces[currentWorkspaceId]?.context || {}).map(([key, value]) => (
                     <Badge key={key} variant="outline" className="bg-blue-50 flex items-center gap-1">
                       <span className="font-medium">{key}:</span> 
-                      <span>{typeof value === 'string' ? value : (Array.isArray(value) ? `[${value.length}]` : '{...}')}</span>
+                      <span>
+                        {typeof value === 'string' 
+                          ? value 
+                          : (Array.isArray(value) 
+                              ? `[${value.length}]` 
+                              : JSON.stringify(value))}
+                      </span>
                     </Badge>
                   ))}
                   {Object.keys(workspaces[currentWorkspaceId]?.context || {}).length === 0 && (

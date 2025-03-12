@@ -2,7 +2,8 @@
 import { create } from "zustand";
 import { Node, Edge } from "./types";
 import { useScenarioStore } from "./scenarioStore";
-import { WorkspaceContext } from "../workspaces_module/workspaceStore";
+import { WorkspaceContext } from "../workspace_module/workspaceStore";
+
 
 export interface MultiScenario {
   id: string;

@@ -1,11 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/workspaces_module/workspaceStore.ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
 import { useScenariosMultiStore, MultiScenario } from '../scenarios_module/scenariosMultiStore';
 
-export type WorkspaceType = 'website' | 'audience' | 'business' | 'general';
+// Changed from enum to string for custom types
+export type WorkspaceType = string;
 
 export interface WorkspaceContext {
   url?: string;
@@ -22,6 +23,7 @@ export interface Workspace {
   name: string;
   description: string;
   type: WorkspaceType;
+  typeIcon: string; // Added typeIcon field to store the selected icon
   context: WorkspaceContext;
   scenarioIds: string[]; // IDs of scenarios in this workspace
   createdAt: number;
@@ -33,7 +35,7 @@ interface WorkspaceState {
   currentWorkspaceId: string | null;
   
   // Actions
-  createWorkspace: (name: string, type: WorkspaceType, description?: string, context?: WorkspaceContext) => string;
+  createWorkspace: (name: string, type: WorkspaceType, typeIcon: string, description?: string, context?: WorkspaceContext) => string;
   updateWorkspace: (id: string, updates: Partial<Omit<Workspace, 'id' | 'createdAt' | 'scenarioIds'>>) => void;
   deleteWorkspace: (id: string) => void;
   
@@ -61,7 +63,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       workspaces: {},
       currentWorkspaceId: null,
       
-      createWorkspace: (name, type, description = '', context = {}) => {
+      createWorkspace: (name, type, typeIcon, description = '', context = {}) => {
         const id = uuidv4();
         const now = Date.now();
         
@@ -72,6 +74,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
               id,
               name,
               type,
+              typeIcon,
               description,
               context,
               scenarioIds: [],
@@ -225,6 +228,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             ...state.workspaces,
             [data.workspace.id]: {
               ...data.workspace,
+              // Add default typeIcon if missing in imported data
+              typeIcon: data.workspace.typeIcon || 'box',
               updatedAt: Date.now()
             }
           }
