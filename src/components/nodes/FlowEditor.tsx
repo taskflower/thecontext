@@ -9,7 +9,6 @@ import ReactFlow, {
   Connection,
   Edge,
   Node,
-  NodeTypes,
   ConnectionLineType,
   Panel
 } from 'reactflow';
@@ -19,20 +18,19 @@ import { useScenarioStore } from '../../stores/scenarioStore';
 import { useNodeStore } from '../../stores/nodeStore';
 import { useExecutionStore } from '../../stores/executionStore';
 import CustomNode from './CustomNode';
-import NodeContextMenu from './NodeContextMenu';
+
 import NewNodeToolbar from './NewNodeToolbar';
 import NodeEditor from './NodeEditor';
 
 const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({ onEditNode }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId: string } | null>(null);
   const [showNodeEditor, setShowNodeEditor] = useState(false);
 
   // Get scenario data from store
   const { getScenario, createEdge, addEdgeToScenario, edges: storeEdges, getCurrentScenario } = useScenarioStore();
-  const { getNode, updateNode } = useNodeStore();
+  const { getNode, updateNode, setActiveNodeId } = useNodeStore();
   const { executeScenario, getLatestExecution } = useExecutionStore();
 
   // Get current scenario from the store
@@ -46,6 +44,7 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({ onEdi
 
   // Handler for edit node button click
   const handleEditNode = useCallback((nodeId: string) => {
+    setActiveNodeId(nodeId);
     if (onEditNode) {
       onEditNode(nodeId);
     } else {
@@ -53,9 +52,8 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({ onEdi
       setShowNodeEditor(true);
     }
     // Close any other panels
-    setSelectedNode(null);
     setContextMenu(null);
-  }, [onEditNode]);
+  }, [onEditNode, setActiveNodeId]);
 
   // Get latest execution data and refresh nodes
   const refreshNodeResponses = useCallback(() => {
@@ -171,7 +169,7 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({ onEdi
     
     // Also refresh with latest execution data
     refreshNodeResponses();
-  }, [scenarioId, getScenario, getNode, storeEdges, refreshNodeResponses, setNodes, setEdges]);
+  }, [scenarioId, getScenario, getNode, storeEdges, refreshNodeResponses, setNodes, setEdges, handleEditNode]);
 
   // Update node positions in store when dragging ends
   const onNodeDragStop = useCallback((event: React.MouseEvent, node: Node) => {
@@ -204,14 +202,15 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({ onEdi
     }
   }, [createEdge, addEdgeToScenario, scenarioId, setEdges]);
 
-  // Handle node selection for editing
+  // Modified: Handle node selection to open editor directly
   const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
-    setSelectedNode(node);
+    setActiveNodeId(node.id);
+    setShowNodeEditor(true);
     setContextMenu(null);
-  }, []);
+  }, [setActiveNodeId]);
 
   // Disable right-click menu by doing nothing
-  const onNodeContextMenu = useCallback((event: React.MouseEvent, node: Node) => {
+  const onNodeContextMenu = useCallback((event: React.MouseEvent) => {
     event.preventDefault();
     // Not setting context menu anymore
   }, []);
@@ -219,7 +218,6 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({ onEdi
   // Close context menu on background click
   const onPaneClick = useCallback(() => {
     setContextMenu(null);
-    setSelectedNode(null);
   }, []);
 
   // Execute current scenario
@@ -282,54 +280,11 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({ onEdi
         />
       )}
       
-      {/* Node Editor Dialog (shown when edit button is clicked) */}
+      {/* Node Editor Dialog (shown when a node is clicked or edit button is clicked) */}
       {showNodeEditor && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="max-w-2xl w-full">
             <NodeEditor onClose={() => setShowNodeEditor(false)} />
-          </div>
-        </div>
-      )}
-      
-      {/* Node Properties Panel (shown when node is clicked) */}
-      {selectedNode && !showNodeEditor && (
-        <div className="absolute bottom-0 right-0 w-80 max-h-1/2 bg-white shadow-lg border rounded-tl-md overflow-auto">
-          <div className="p-3 border-b bg-gray-50 flex justify-between items-center">
-            <h3 className="font-medium">Node Properties</h3>
-            <div className="flex">
-              <button
-                onClick={() => handleEditNode(selectedNode.id)}
-                className="text-blue-600 hover:text-blue-800 mr-2"
-                title="Edit node"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-              </button>
-              <button 
-                onClick={() => setSelectedNode(null)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ×
-              </button>
-            </div>
-          </div>
-          <div className="p-4">
-            <p className="mb-2 text-sm text-gray-500">ID: {selectedNode.id}</p>
-            <h4 className="font-medium mb-2">Content</h4>
-            <textarea
-              className="w-full p-2 border rounded h-32 text-sm font-mono"
-              value={selectedNode.data.content || ''}
-              readOnly
-            />
-            {selectedNode.data.response && (
-              <>
-                <h4 className="font-medium mt-4 mb-2">Response</h4>
-                <div className="p-2 border rounded bg-gray-50 max-h-48 overflow-auto text-sm">
-                  {selectedNode.data.response}
-                </div>
-              </>
-            )}
           </div>
         </div>
       )}
