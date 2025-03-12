@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/scenarios/ScenariosList.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, Trash2, Copy, ExternalLink, Clock, Cog, Terminal } from 'lucide-react';
@@ -13,6 +12,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useWorkspaceStore } from '@/stores/workspaceStore';
 import { useScenarioStore } from '@/stores/scenarioStore';
+import { useNodeStore } from '@/stores/nodeStore';
+
+// Komponent do wyświetlania liczby węzłów w scenariuszu
+const ScenarioNodeCount: React.FC<{ scenarioId: string }> = ({ scenarioId }) => {
+  // Używamy hooka useNodeStore aby reagować na zmiany w store węzłów
+  const nodeCount = useNodeStore(state => 
+    state.getNodeCountByScenario(scenarioId)
+  );
+  
+  return (
+    <>{nodeCount} {nodeCount === 1 ? 'node' : 'nodes'}</>
+  );
+};
 
 export const ScenariosList: React.FC = () => {
   const { getCurrentWorkspace } = useWorkspaceStore();
@@ -30,11 +42,11 @@ export const ScenariosList: React.FC = () => {
   
   const workspace = getCurrentWorkspace();
   
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
-  const [newScenarioName, setNewScenarioName] = React.useState('');
-  const [newScenarioDescription, setNewScenarioDescription] = React.useState('');
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [newScenarioName, setNewScenarioName] = useState('');
+  const [newScenarioDescription, setNewScenarioDescription] = useState('');
   
-  const [activeTab, setActiveTab] = React.useState('scenarios');
+  const [activeTab, setActiveTab] = useState('scenarios');
   
   const handleCreateScenario = () => {
     if (!workspace || !newScenarioName.trim()) return;
@@ -45,7 +57,7 @@ export const ScenariosList: React.FC = () => {
     setIsCreateDialogOpen(false);
   };
   
-  // If no workspace, show message
+  // Jeśli nie ma workspace, pokazujemy komunikat
   if (!workspace) {
     return (
       <Card>
@@ -56,14 +68,14 @@ export const ScenariosList: React.FC = () => {
     );
   }
   
-  // Get scenarios for this workspace
+  // Pobieramy scenariusze dla tego workspace
   const workspaceScenarios = Object.values(scenarios)
-    .filter((scenario:any) => scenario.workspaceId === workspace.id)
-    .sort((a:any, b:any) => b.updatedAt - a.updatedAt);
+    .filter((scenario) => scenario.workspaceId === workspace.id)
+    .sort((a, b) => b.updatedAt - a.updatedAt);
   
-  // Get all templates
+  // Pobieramy wszystkie szablony
   const allTemplates = Object.values(templates)
-    .sort((a:any, b:any) => b.updatedAt - a.updatedAt);
+    .sort((a, b) => b.updatedAt - a.updatedAt);
   
   return (
     <div className="space-y-6">
@@ -130,7 +142,7 @@ export const ScenariosList: React.FC = () => {
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {workspaceScenarios.map((scenario:any) => (
+              {workspaceScenarios.map((scenario) => (
                 <Card 
                   key={scenario.id} 
                   className={currentScenarioId === scenario.id ? 'border-2 border-blue-500' : ''}
@@ -151,7 +163,7 @@ export const ScenariosList: React.FC = () => {
                         Updated {formatDistanceToNow(scenario.updatedAt, { addSuffix: true })}
                       </div>
                       <div>
-                        {scenario.nodeIds.length} {scenario.nodeIds.length === 1 ? 'node' : 'nodes'}
+                        <ScenarioNodeCount scenarioId={scenario.id} />
                       </div>
                       {scenario.templateId && (
                         <Badge variant="outline" className="bg-blue-50">
@@ -210,7 +222,7 @@ export const ScenariosList: React.FC = () => {
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {allTemplates.map((template:any) => (
+              {allTemplates.map((template) => (
                 <Card key={template.id}>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -226,9 +238,6 @@ export const ScenariosList: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4" />
                         Created {formatDistanceToNow(template.createdAt, { addSuffix: true })}
-                      </div>
-                      <div>
-                        {template.nodeIds.length} {template.nodeIds.length === 1 ? 'node' : 'nodes'}
                       </div>
                     </div>
                   </CardContent>
@@ -249,6 +258,3 @@ export const ScenariosList: React.FC = () => {
     </div>
   );
 };
-
-
-

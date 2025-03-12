@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useReactFlow } from 'reactflow';
 import { useNodeStore } from '../../stores/nodeStore';
-import { useScenarioStore } from '../../stores/scenarioStore';
+
 
 interface NodeType {
   type: string;
@@ -20,7 +20,7 @@ interface NewNodeToolbarProps {
 const NewNodeToolbar: React.FC<NewNodeToolbarProps> = ({ scenarioId }) => {
   const [expanded, setExpanded] = useState(false);
   const { createNode, getNode } = useNodeStore();
-  const { addNodeToScenario } = useScenarioStore();
+
   const reactFlowInstance = useReactFlow();
 
   const nodeTypes: NodeType[] = [
@@ -92,21 +92,21 @@ const NewNodeToolbar: React.FC<NewNodeToolbarProps> = ({ scenarioId }) => {
       console.error("No scenario ID provided");
       return;
     }
-
+  
     try {
       console.log(`Adding ${nodeType.type} node to scenario ${scenarioId}`);
       
-      // Get the current viewport
+      // Pobierz aktualny widok
       const { x, y, zoom } = reactFlowInstance.getViewport();
       console.log("Current viewport:", { x, y, zoom });
       
-      // Get center position for the new node
+      // Oblicz pozycję środkową dla nowego węzła
       const center = reactFlowInstance.project({
         x: window.innerWidth / 2,
         y: window.innerHeight / 2
       });
       
-      // Add random offset
+      // Dodaj losowe przesunięcie
       const position = {
         x: center.x + Math.random() * 100 - 50,
         y: center.y + Math.random() * 100 - 50
@@ -114,23 +114,23 @@ const NewNodeToolbar: React.FC<NewNodeToolbarProps> = ({ scenarioId }) => {
       
       console.log("Node position:", position);
       
-      // Create the node in the nodeStore
+      // Tworzenie węzła w nodeStore - zawsze z ID scenariusza
       const nodeId = createNode(
         nodeType.type,
         position,
-        nodeType.defaultData,
+        {
+          ...nodeType.defaultData,
+          label: nodeType.defaultData?.label || nodeType.label
+        },
         scenarioId
       );
       
       console.log(`Node created with ID: ${nodeId}`);
       
-      // Make sure it's added to the scenario
-      addNodeToScenario(scenarioId, nodeId);
-      
-      // IMPORTANT FIX: Add node to reactFlow directly
+      // Pobierz utworzony węzeł
       const node = getNode(nodeId);
       if (node) {
-        // Add the node to ReactFlow's state
+        // Dodaj węzeł do stanu ReactFlow
         reactFlowInstance.setNodes((nodes) => [
           ...nodes,
           {
@@ -146,7 +146,7 @@ const NewNodeToolbar: React.FC<NewNodeToolbarProps> = ({ scenarioId }) => {
         ]);
       }
       
-      // Close the toolbar
+      // Zamknij pasek narzędzi
       setExpanded(false);
       
     } catch (error) {

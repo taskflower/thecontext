@@ -2,31 +2,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { nanoid } from 'nanoid';
-import { useWorkspaceStore } from './workspaceStore';
+import { Edge, Scenario } from '../types/common';
 import { useNodeStore } from './nodeStore';
-
-
-export interface Scenario {
-  id: string;
-  workspaceId: string;
-  name: string;
-  description: string;
-  createdAt: number;
-  updatedAt: number;
-  isTemplate: boolean;
-  templateId?: string;
-  nodeIds: string[];
-  edgeIds: string[];
-}
-
-export interface Edge {
-  id: string;
-  source: string;
-  target: string;
-  sourceHandle?: string;
-  targetHandle?: string;
-  label?: string;
-}
+import { useWorkspaceStore } from './workspaceStore';
 
 interface ScenarioState {
   scenarios: Record<string, Scenario>;
@@ -36,38 +14,20 @@ interface ScenarioState {
 }
 
 interface ScenarioActions {
-  // Scenario CRUD
   createScenario: (name: string, workspaceId: string, description?: string) => string;
   updateScenario: (id: string, updates: Partial<Omit<Scenario, 'id' | 'workspaceId' | 'createdAt'>>) => void;
   deleteScenario: (id: string) => void;
   duplicateScenario: (id: string, newName?: string, newWorkspaceId?: string) => string;
-  
-  // Scenario selection
   setCurrentScenario: (id: string | null) => void;
   getCurrentScenario: () => Scenario | null;
-  
-  // Node management within scenario
-  addNodeToScenario: (scenarioId: string, nodeId: string) => void;
-  removeNodeFromScenario: (scenarioId: string, nodeId: string) => void;
-  
-  // Edge management
   createEdge: (source: string, target: string, sourceHandle?: string, targetHandle?: string, label?: string) => string;
   updateEdge: (id: string, updates: Partial<Omit<Edge, 'id'>>) => void;
   deleteEdge: (id: string) => void;
   addEdgeToScenario: (scenarioId: string, edgeId: string) => void;
   removeEdgeFromScenario: (scenarioId: string, edgeId: string) => void;
-  
-  // Template management
-  createTemplate: (scenarioId: string, name?: string, description?: string) => string;
-  deleteTemplate: (templateId: string) => void;
-  applyTemplate: (templateId: string, workspaceId: string, name?: string) => string;
-  
-  // Get scenario by ID
+  getValidEdges: (scenarioId: string) => Edge[];
   getScenario: (id: string) => Scenario | null;
-  
-  // Import/Export
-  exportScenario: (id: string) => string;
-  importScenario: (data: string | object, workspaceId?: string) => string;
+  validateScenarioEdges: (scenarioId: string) => void;
 }
 
 export const useScenarioStore = create<ScenarioState & ScenarioActions>()(
@@ -78,7 +38,6 @@ export const useScenarioStore = create<ScenarioState & ScenarioActions>()(
       currentScenarioId: null,
       templates: {},
       
-      // Scenario CRUD
       createScenario: (name, workspaceId, description = '') => {
         const id = nanoid();
         const scenario: Scenario = {
@@ -89,7 +48,6 @@ export const useScenarioStore = create<ScenarioState & ScenarioActions>()(
           createdAt: Date.now(),
           updatedAt: Date.now(),
           isTemplate: false,
-          nodeIds: [],
           edgeIds: []
         };
         
@@ -98,7 +56,7 @@ export const useScenarioStore = create<ScenarioState & ScenarioActions>()(
           currentScenarioId: id
         }));
         
-        // Add to workspace
+        // Dodanie do workspace
         const workspaceStore = useWorkspaceStore.getState();
         workspaceStore.addScenarioToWorkspace(workspaceId, id);
         
@@ -127,21 +85,13 @@ export const useScenarioStore = create<ScenarioState & ScenarioActions>()(
           const scenario = state.scenarios[id];
           if (!scenario) return state;
           
-          // Get nodes to delete
-          const nodeIds = scenario.nodeIds || [];
+          // Usunięcie powiązanych węzłów
+          const nodeStore = useNodeStore.getState();
+          nodeStore.deleteNodesByScenario(id);
+          
+          // Usunięcie krawędzi
           const edgeIds = scenario.edgeIds || [];
           
-          // Delete associated nodes
-          const nodeStore = useNodeStore.getState();
-          nodeIds.forEach(nodeId => {
-            nodeStore.deleteNode(nodeId);
-          });
-          
-          // Remove from workspace
-          const workspaceStore = useWorkspaceStore.getState();
-          workspaceStore.removeScenarioFromWorkspace(scenario.workspaceId, id);
-          
-          // Create new states
           const newScenarios = { ...state.scenarios };
           delete newScenarios[id];
           
@@ -150,12 +100,16 @@ export const useScenarioStore = create<ScenarioState & ScenarioActions>()(
             delete newEdges[edgeId];
           });
           
-          // Update current scenario if needed
+          // Aktualizacja bieżącego scenariusza
           let newCurrentId = state.currentScenarioId;
           if (newCurrentId === id) {
             const remainingIds = Object.keys(newScenarios);
             newCurrentId = remainingIds.length > 0 ? remainingIds[0] : null;
           }
+          
+          // Usunięcie ze workspace
+          const workspaceStore = useWorkspaceStore.getState();
+          workspaceStore.removeScenarioFromWorkspace(scenario.workspaceId, id);
           
           return {
             scenarios: newScenarios,
@@ -173,16 +127,17 @@ export const useScenarioStore = create<ScenarioState & ScenarioActions>()(
         const name = newName || `${scenario.name} (Copy)`;
         const workspaceId = newWorkspaceId || scenario.workspaceId;
         
-        // Duplicate nodes
+        // Duplikacja węzłów
         const nodeStore = useNodeStore.getState();
+        const scenarioNodes = nodeStore.getNodesByScenario(id);
         const nodeIdMap: Record<string, string> = {};
         
-        scenario.nodeIds.forEach(nodeId => {
-          const newNodeId = nodeStore.duplicateNode(nodeId);
-          nodeIdMap[nodeId] = newNodeId;
+        scenarioNodes.forEach(node => {
+          const newNodeId = nodeStore.duplicateNode(node.id, newId);
+          nodeIdMap[node.id] = newNodeId;
         });
         
-        // Create new edges with updated references
+        // Tworzenie nowych krawędzi z zaktualizowanymi referencjami
         const newEdgeIds: string[] = [];
         scenario.edgeIds.forEach(edgeId => {
           const edge = get().edges[edgeId];
@@ -198,7 +153,7 @@ export const useScenarioStore = create<ScenarioState & ScenarioActions>()(
           }
         });
         
-        // Create new scenario
+        // Tworzenie nowego scenariusza
         const newScenario: Scenario = {
           ...scenario,
           id: newId,
@@ -206,7 +161,6 @@ export const useScenarioStore = create<ScenarioState & ScenarioActions>()(
           name,
           createdAt: Date.now(),
           updatedAt: Date.now(),
-          nodeIds: Object.values(nodeIdMap),
           edgeIds: newEdgeIds
         };
         
@@ -214,14 +168,13 @@ export const useScenarioStore = create<ScenarioState & ScenarioActions>()(
           scenarios: { ...state.scenarios, [newId]: newScenario }
         }));
         
-        // Add to workspace
+        // Dodanie do workspace
         const workspaceStore = useWorkspaceStore.getState();
         workspaceStore.addScenarioToWorkspace(workspaceId, newId);
         
         return newId;
       },
       
-      // Scenario selection
       setCurrentScenario: (id) => {
         set({ currentScenarioId: id });
       },
@@ -231,53 +184,6 @@ export const useScenarioStore = create<ScenarioState & ScenarioActions>()(
         return currentScenarioId ? scenarios[currentScenarioId] : null;
       },
       
-      // Node management within scenario
-      addNodeToScenario: (scenarioId, nodeId) => {
-        set((state) => {
-          const scenario = state.scenarios[scenarioId];
-          if (!scenario) return state;
-          
-          return {
-            scenarios: {
-              ...state.scenarios,
-              [scenarioId]: {
-                ...scenario,
-                nodeIds: [...scenario.nodeIds, nodeId],
-                updatedAt: Date.now()
-              }
-            }
-          };
-        });
-      },
-      
-      removeNodeFromScenario: (scenarioId, nodeId) => {
-        set((state) => {
-          const scenario = state.scenarios[scenarioId];
-          if (!scenario) return state;
-          
-          // Also remove edges connected to this node
-          const edgesToRemove = scenario.edgeIds.filter(edgeId => {
-            const edge = state.edges[edgeId];
-            return edge && (edge.source === nodeId || edge.target === nodeId);
-          });
-          
-          const newEdgeIds = scenario.edgeIds.filter(edgeId => !edgesToRemove.includes(edgeId));
-          
-          return {
-            scenarios: {
-              ...state.scenarios,
-              [scenarioId]: {
-                ...scenario,
-                nodeIds: scenario.nodeIds.filter(id => id !== nodeId),
-                edgeIds: newEdgeIds,
-                updatedAt: Date.now()
-              }
-            }
-          };
-        });
-      },
-      
-      // Edge management
       createEdge: (source, target, sourceHandle, targetHandle, label) => {
         const id = nanoid();
         const edge: Edge = {
@@ -317,7 +223,7 @@ export const useScenarioStore = create<ScenarioState & ScenarioActions>()(
           const newEdges = { ...state.edges };
           delete newEdges[id];
           
-          // Also remove from any scenarios
+          // Usunięcie z dowolnych scenariuszy
           const updatedScenarios = { ...state.scenarios };
           
           Object.entries(updatedScenarios).forEach(([scenarioId, scenario]) => {
@@ -340,6 +246,11 @@ export const useScenarioStore = create<ScenarioState & ScenarioActions>()(
         set((state) => {
           const scenario = state.scenarios[scenarioId];
           if (!scenario) return state;
+          
+          // Sprawdź czy krawędź już istnieje w scenariuszu
+          if (scenario.edgeIds.includes(edgeId)) {
+            return state;
+          }
           
           return {
             scenarios: {
@@ -372,204 +283,34 @@ export const useScenarioStore = create<ScenarioState & ScenarioActions>()(
         });
       },
       
-      // Template management
-      createTemplate: (scenarioId, name, description) => {
+      getValidEdges: (scenarioId) => {
         const scenario = get().scenarios[scenarioId];
-        if (!scenario) return '';
+        if (!scenario) return [];
         
-        const templateId = nanoid();
-        const templateName = name || `${scenario.name} Template`;
-        const templateDesc = description || `Template created from ${scenario.name}`;
-        
-        // Duplicate scenario structure for template
-        const template: Scenario = {
-          ...scenario,
-          id: templateId,
-          name: templateName,
-          description: templateDesc,
-          isTemplate: true,
-          createdAt: Date.now(),
-          updatedAt: Date.now()
-        };
-        
-        set((state) => ({
-          templates: { ...state.templates, [templateId]: template }
-        }));
-        
-        return templateId;
-      },
-      
-      deleteTemplate: (templateId) => {
-        set((state) => {
-          const newTemplates = { ...state.templates };
-          delete newTemplates[templateId];
-          
-          return {
-            templates: newTemplates
-          };
-        });
-      },
-      
-      applyTemplate: (templateId, workspaceId, name) => {
-        const template = get().templates[templateId];
-        if (!template) return '';
-        
-        const newName = name || `${template.name} Instance`;
-        
-        // Create new scenario from template
-        const scenarioId = get().createScenario(newName, workspaceId, template.description);
-        
-        // Update with template info
-        get().updateScenario(scenarioId, {
-          templateId,
-          updatedAt: Date.now()
-        });
-        
-        // Create nodes and edges based on template
         const nodeStore = useNodeStore.getState();
-        const nodeIdMap: Record<string, string> = {};
+        const scenarioNodes = nodeStore.getNodesByScenario(scenarioId);
+        const validNodeIds = new Set(scenarioNodes.map(node => node.id));
         
-        // Create nodes
-        template.nodeIds.forEach(originalNodeId => {
-          // Get original node template from source scenario
-          const originalNode = nodeStore.getOriginalNodeOfTemplate(originalNodeId);
-          if (originalNode) {
-            // Create node based on template
-            const newNodeId = nodeStore.createNode(
-              originalNode.type,
-              originalNode.position,
-              originalNode.data,
-              scenarioId
-            );
-            
-            nodeIdMap[originalNodeId] = newNodeId;
-            get().addNodeToScenario(scenarioId, newNodeId);
-          }
-        });
-        
-        // Create edges
-        template.edgeIds.forEach(edgeId => {
-          const edge = get().edges[edgeId];
-          if (edge && nodeIdMap[edge.source] && nodeIdMap[edge.target]) {
-            const newEdgeId = get().createEdge(
-              nodeIdMap[edge.source],
-              nodeIdMap[edge.target],
-              edge.sourceHandle,
-              edge.targetHandle,
-              edge.label
-            );
-            get().addEdgeToScenario(scenarioId, newEdgeId);
-          }
-        });
-        
-        return scenarioId;
+        return scenario.edgeIds
+          .map(edgeId => get().edges[edgeId])
+          .filter(edge => edge && validNodeIds.has(edge.source) && validNodeIds.has(edge.target));
       },
       
-      // Get scenario by ID
       getScenario: (id) => {
         return get().scenarios[id] || null;
       },
       
-      // Import/Export
-      exportScenario: (id) => {
-        const scenario = get().scenarios[id];
-        if (!scenario) return '';
+      validateScenarioEdges: (scenarioId) => {
+        const scenario = get().scenarios[scenarioId];
+        if (!scenario) return;
         
-        // Get nodes
-        const nodeStore = useNodeStore.getState();
-        const nodes = scenario.nodeIds.map(nodeId => nodeStore.getNode(nodeId));
+        const validEdges = get().getValidEdges(scenarioId);
+        const validEdgeIds = validEdges.map(edge => edge.id);
         
-        // Get edges
-        const edges = scenario.edgeIds.map(edgeId => get().edges[edgeId]);
-        
-        const exportData = {
-          scenario,
-          nodes,
-          edges
-        };
-        
-        return JSON.stringify(exportData);
-      },
-      
-      importScenario: (data, workspaceId) => {
-        try {
-          const importData = typeof data === 'string' ? JSON.parse(data) : data;
-          const { scenario, nodes, edges } = importData;
-          
-          if (!scenario || !Array.isArray(nodes) || !Array.isArray(edges)) {
-            throw new Error('Invalid import data format');
-          }
-          
-          // Generate new ID to avoid collisions
-          const newId = nanoid();
-          const targetWorkspaceId = workspaceId || scenario.workspaceId;
-          
-          // Create new scenario shell
-          const newScenario: Scenario = {
-            ...scenario,
-            id: newId,
-            workspaceId: targetWorkspaceId,
-            nodeIds: [],
-            edgeIds: [],
-            createdAt: Date.now(),
-            updatedAt: Date.now()
-          };
-          
-          // Import nodes
-          const nodeStore = useNodeStore.getState();
-          const nodeIdMap: Record<string, string> = {};
-          
-          // Create nodes
-          nodes.forEach(nodeData => {
-            if (nodeData) {
-              const originalId = nodeData.id;
-              const newNodeId = nodeStore.createNode(
-                nodeData.type,
-                nodeData.position,
-                nodeData.data,
-                newId
-              );
-              
-              nodeIdMap[originalId] = newNodeId;
-              newScenario.nodeIds.push(newNodeId);
-            }
+        if (validEdgeIds.length !== scenario.edgeIds.length) {
+          get().updateScenario(scenarioId, {
+            edgeIds: validEdgeIds
           });
-          
-          // Create edges with updated references
-          const newEdges: Record<string, Edge> = {};
-          
-          edges.forEach(edgeData => {
-            if (edgeData && nodeIdMap[edgeData.source] && nodeIdMap[edgeData.target]) {
-              const newEdgeId = nanoid();
-              const newEdge: Edge = {
-                id: newEdgeId,
-                source: nodeIdMap[edgeData.source],
-                target: nodeIdMap[edgeData.target],
-                sourceHandle: edgeData.sourceHandle,
-                targetHandle: edgeData.targetHandle,
-                label: edgeData.label
-              };
-              
-              newEdges[newEdgeId] = newEdge;
-              newScenario.edgeIds.push(newEdgeId);
-            }
-          });
-          
-          // Add to store
-          set((state) => ({
-            scenarios: { ...state.scenarios, [newId]: newScenario },
-            edges: { ...state.edges, ...newEdges },
-            currentScenarioId: newId
-          }));
-          
-          // Add to workspace
-          const workspaceStore = useWorkspaceStore.getState();
-          workspaceStore.addScenarioToWorkspace(targetWorkspaceId, newId);
-          
-          return newId;
-        } catch (e) {
-          console.error('Error importing scenario:', e);
-          return '';
         }
       }
     }),

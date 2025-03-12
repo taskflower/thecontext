@@ -7,7 +7,6 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   Connection,
-  Edge,
   Node,
   ConnectionLineType,
   Panel,
@@ -18,7 +17,6 @@ import { useScenarioStore } from "../../stores/scenarioStore";
 import { useNodeStore } from "../../stores/nodeStore";
 import { useExecutionStore } from "../../stores/executionStore";
 import CustomNode from "./CustomNode";
-
 import NewNodeToolbar from "./NewNodeToolbar";
 import NodeEditor from "./NodeEditor";
 
@@ -32,23 +30,35 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
   const [isInitialized, setIsInitialized] = useState(false);
   const loadingRef = useRef(false);
 
-  // Get scenario data from store
+  // Pobieranie danych scenariusza z magazynu
   const {
     getScenario,
     createEdge,
     addEdgeToScenario,
-    edges: storeEdges,
-    getCurrentScenario,
-  } = useScenarioStore();
-  const { getNode, updateNode, setActiveNodeId } = useNodeStore();
-  const { executeScenario, getLatestExecution } = useExecutionStore();
 
-  // Get current scenario from the store
+    getCurrentScenario,
+    getValidEdges,
+    validateScenarioEdges
+  } = useScenarioStore();
+  
+  const { 
+
+    updateNode, 
+    setActiveNodeId, 
+    getNodesByScenario 
+  } = useNodeStore();
+  
+  const { 
+    executeScenario, 
+    getLatestExecution 
+  } = useExecutionStore();
+
+  // Pobieranie bieżącego scenariusza z magazynu
   const currentScenario = getCurrentScenario();
   const scenarioId = currentScenario?.id;
   const prevScenarioIdRef = useRef<string | null>(null);
 
-  // Create a memoized nodeTypes object to avoid React Flow warnings
+  // Stworzenie zmemoizowanego obiektu nodeTypes, aby uniknąć ostrzeżeń React Flow
   const nodeTypes = React.useMemo(
     () => ({
       custom: CustomNode,
@@ -56,21 +66,21 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
     []
   );
 
-  // Handler for edit node button click
+  // Obsługa kliknięcia przycisku edycji węzła
   const handleEditNode = useCallback(
     (nodeId: string) => {
       setActiveNodeId(nodeId);
       if (onEditNode) {
         onEditNode(nodeId);
       } else {
-        // If no external handler is provided, show the built-in editor
+        // Jeśli nie dostarczono zewnętrznej obsługi, pokazujemy wbudowany edytor
         setShowNodeEditor(true);
       }
     },
     [onEditNode, setActiveNodeId]
   );
 
-  // Get latest execution data and refresh nodes
+  // Pobieranie najnowszych danych wykonania i odświeżanie węzłów
   const refreshNodeResponses = useCallback(() => {
     if (!scenarioId) {
       console.warn("Cannot refresh node responses: No scenario ID provided");
@@ -92,38 +102,7 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
     }
   }, [scenarioId, getLatestExecution, setNodes]);
 
-  // Add a listener for node deletions
-  useEffect(() => {
-    // Subscribe to node store changes
-    const unsubscribe = useNodeStore.subscribe((state, prevState) => {
-      // Check if a node was deleted
-      const prevNodeIds = Object.keys(prevState.nodes);
-      const currentNodeIds = Object.keys(state.nodes);
-
-      // Find deleted node IDs
-      const deletedNodeIds = prevNodeIds.filter(
-        (id) => !currentNodeIds.includes(id)
-      );
-
-      if (deletedNodeIds.length > 0) {
-        // Remove deleted nodes from ReactFlow
-        setNodes((nodes) =>
-          nodes.filter((node) => !deletedNodeIds.includes(node.id))
-        );
-
-        // Also close the node editor if the active node was deleted
-        if (state.activeNodeId === null && prevState.activeNodeId) {
-          setShowNodeEditor(false);
-        }
-      }
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [setNodes]);
-
-  // Load nodes and edges when scenario changes
+  // Ładowanie węzłów i krawędzi przy zmianie scenariusza
   useEffect(() => {
     console.log("Loading scenario data, scenarioId:", scenarioId);
     if (!scenarioId) {
@@ -135,13 +114,13 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
       return;
     }
 
-    // Skip reloading for the same scenario to prevent duplicate nodes
+    // Pomijamy przeładowanie dla tego samego scenariusza
     if (prevScenarioIdRef.current === scenarioId && isInitialized) {
       console.log(`Scenario ${scenarioId} already loaded, skipping reload`);
       return;
     }
 
-    // Prevent concurrent loading operations
+    // Zapobiegamy równoległym operacjom ładowania
     if (loadingRef.current) {
       console.log("Loading already in progress, skipping");
       return;
@@ -149,7 +128,7 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
 
     loadingRef.current = true;
 
-    // Reset the nodes and edges in ReactFlow state first
+    // Resetowanie węzłów i krawędzi w stanie ReactFlow
     setNodes([]);
     setEdges([]);
 
@@ -160,70 +139,60 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
       return;
     }
 
+    // Walidacja krawędzi scenariusza przed załadowaniem
+    validateScenarioEdges(scenarioId);
+
+    // Pobierz węzły bezpośrednio z nodeStore dla tego scenariusza
+    const scenarioNodes = getNodesByScenario(scenarioId);
+    
     console.log(
-      `Found scenario with ${scenario.nodeIds.length} nodes and ${scenario.edgeIds.length} edges`
+      `Found scenario with ${scenarioNodes.length} nodes and ${scenario.edgeIds.length} edges`
     );
 
-    // Ensure nodeIds are unique
-    const uniqueNodeIds = Array.from(new Set(scenario.nodeIds));
+    // Transformacja węzłów na format ReactFlow
+    const flowNodes = scenarioNodes.map((node) => ({
+      id: node.id,
+      type: "custom",
+      position: node.position,
+      data: {
+        ...node.data,
+        label: node.data.label || node.type,
+        response: node.data.response || "",
+        onEditNode: handleEditNode,
+      },
+    }));
 
-    // Transform nodes from store format to ReactFlow format
-    const flowNodes = uniqueNodeIds
-      .map((nodeId) => {
-        const node = getNode(nodeId);
-        if (!node) return null;
-
-        return {
-          id: node.id,
-          type: "custom",
-          position: node.position,
-          data: {
-            ...node.data,
-            label: node.data.label || node.type,
-            response: node.data.response || "",
-            onEditNode: handleEditNode, // Pass the edit handler through data prop
-          },
-        };
-      })
-      .filter(Boolean) as Node[];
-
-    // Ensure edgeIds are unique
-    const uniqueEdgeIds = Array.from(new Set(scenario.edgeIds));
-
-    // Transform edges from store format to ReactFlow format
-    const flowEdges = uniqueEdgeIds
-      .map((edgeId) => {
-        const edge = storeEdges[edgeId];
-        if (!edge) return null;
-
-        return {
-          id: edge.id,
-          source: edge.source,
-          target: edge.target,
-          sourceHandle: edge.sourceHandle,
-          targetHandle: edge.targetHandle,
-          label: edge.label,
-          type: "smoothstep",
-          animated: true,
-        };
-      })
-      .filter(Boolean) as Edge[];
+    // Pobierz tylko prawidłowe krawędzie dla tego scenariusza
+    const validEdges = getValidEdges(scenarioId);
+    
+    // Transformacja krawędzi na format ReactFlow
+    const flowEdges = validEdges.map((edge) => ({
+      id: edge.id,
+      source: edge.source,
+      target: edge.target,
+      sourceHandle: edge.sourceHandle,
+      targetHandle: edge.targetHandle,
+      label: edge.label,
+      type: "smoothstep",
+      animated: true,
+    }));
 
     setNodes(flowNodes);
     setEdges(flowEdges);
 
-    // Also refresh with latest execution data
+    // Odświeżenie odpowiedzi z ostatniego wykonania
     refreshNodeResponses();
 
-    // Update refs and state to indicate loading is complete
+    // Aktualizacja referencji i stanu
     prevScenarioIdRef.current = scenarioId;
     setIsInitialized(true);
     loadingRef.current = false;
   }, [
     scenarioId,
     getScenario,
-    getNode,
-    storeEdges,
+    getNodesByScenario,
+    getValidEdges,
+    validateScenarioEdges,
     refreshNodeResponses,
     setNodes,
     setEdges,
@@ -231,7 +200,7 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
     isInitialized,
   ]);
 
-  // Update node positions in store when dragging ends
+  // Aktualizacja pozycji węzłów w magazynie po zakończeniu przeciągania
   const onNodeDragStop = useCallback(
     (event: React.MouseEvent, node: Node) => {
       updateNode(node.id, {
@@ -241,10 +210,10 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
     [updateNode]
   );
 
-  // Handle new connections between nodes
+  // Obsługa nowych połączeń między węzłami
   const onConnect = useCallback(
     (connection: Connection) => {
-      // Create edge in store
+      // Tworzenie krawędzi w magazynie
       if (connection.source && connection.target) {
         const edgeId = createEdge(
           connection.source,
@@ -253,12 +222,12 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
           connection.targetHandle as string | undefined
         );
 
-        // Add to scenario
+        // Dodanie do scenariusza
         if (scenarioId) {
           addEdgeToScenario(scenarioId, edgeId);
         }
 
-        // Add to flow
+        // Dodanie do przepływu
         setEdges((eds) =>
           addEdge(
             {
@@ -275,7 +244,7 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
     [createEdge, addEdgeToScenario, scenarioId, setEdges]
   );
 
-  // Modified: Handle node selection to open editor directly
+  // Obsługa kliknięcia węzła w celu otworzenia edytora
   const onNodeClick = useCallback(
     (event: React.MouseEvent, node: Node) => {
       setActiveNodeId(node.id);
@@ -284,13 +253,12 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
     [setActiveNodeId]
   );
 
-  // Disable right-click menu by doing nothing
+  // Wyłączenie menu kontekstowego prawego przycisku myszy
   const onNodeContextMenu = useCallback((event: React.MouseEvent) => {
     event.preventDefault();
-    // Not setting context menu anymore
   }, []);
 
-  // Execute current scenario
+  // Wykonanie bieżącego scenariusza
   const runScenario = useCallback(() => {
     if (scenarioId) {
       executeScenario(scenarioId).then(() => {
@@ -318,8 +286,8 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
         onNodeClick={onNodeClick}
         onNodeDragStop={onNodeDragStop}
         onNodeContextMenu={onNodeContextMenu}
-        maxZoom={1.25} // Added this line to limit maximum zoom level
-        minZoom={0.5} // Optional: also set minimum zoom level
+        maxZoom={1.25}
+        minZoom={0.5}
         nodeTypes={nodeTypes}
         connectionLineType={ConnectionLineType.SmoothStep}
         fitView
@@ -338,7 +306,7 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
           <NewNodeToolbar scenarioId={scenarioId} />
         </Panel>
 
-        {/* Debug info */}
+        {/* Informacje debugowania */}
         <Panel
           position="bottom-left"
           className="bg-white p-2 rounded shadow-md text-xs"
@@ -350,7 +318,7 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
         </Panel>
       </ReactFlow>
 
-      {/* Node Editor Dialog (shown when a node is clicked or edit button is clicked) */}
+      {/* Dialog edytora węzłów (pokazywany po kliknięciu węzła lub przycisku edycji) */}
       {showNodeEditor && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="max-w-2xl w-full">
