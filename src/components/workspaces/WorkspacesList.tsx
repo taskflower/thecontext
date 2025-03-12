@@ -39,8 +39,8 @@ export const WorkspacesList: React.FC = () => {
   
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Workspaces</h2>
+      <div className="flex justify-end items-center">
+       
         
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>

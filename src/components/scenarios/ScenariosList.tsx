@@ -36,8 +36,8 @@ export const ScenariosList: React.FC = () => {
     setCurrentScenario,
     deleteScenario,
     duplicateScenario,
-    createTemplate,
-    applyTemplate
+    // createTemplate, TODO - DONT REMOVE - TO IMPLEMENT
+    // applyTemplate
   } = useScenarioStore();
   
   const workspace = getCurrentWorkspace();
@@ -181,14 +181,14 @@ export const ScenariosList: React.FC = () => {
                     >
                       <Copy className="h-4 w-4" />
                     </Button>
-                    <Button 
+                    {/* <Button 
                       variant="outline" 
                       size="sm"
                       onClick={() => createTemplate(scenario.id)}
                       title="Save as template"
                     >
                       <Terminal className="h-4 w-4 text-green-600" />
-                    </Button>
+                    </Button> */}
                     <Button 
                       variant="outline" 
                       size="sm"
@@ -241,14 +241,14 @@ export const ScenariosList: React.FC = () => {
                       </div>
                     </div>
                   </CardContent>
-                  <CardFooter>
+                  {/* <CardFooter>
                     <Button 
                       onClick={() => applyTemplate(template.id, workspace.id, `${template.name} Instance`)}
                       className="w-full"
                     >
                       Use Template
                     </Button>
-                  </CardFooter>
+                  </CardFooter> */}
                 </Card>
               ))}
             </div>

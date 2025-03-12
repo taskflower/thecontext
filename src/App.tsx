@@ -113,7 +113,7 @@ const ScenariosPage = () => <ScenariosList />;
 const FlowEditorPage = () => (
   <div
     className="border rounded-md bg-white"
-    style={{ height: "calc(100vh - 240px)" }}
+    style={{ height: "100%" }}
   >
     <FlowEditor />
   </div>
@@ -176,7 +176,7 @@ const ExecutePage = () => {
 
 // Route titles component
 function RouteTitle({ title }:any) {
-  return <h1 className="text-2xl font-bold">{title}</h1>;
+  return <h1 className="text-xl font-bold">{title}</h1>;
 }
 
 function AppContent() {
@@ -184,8 +184,8 @@ function AppContent() {
   const workspace = getCurrentWorkspace();
   
   return (
-    <main className="flex-1 p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between p-6">
         <div>
           <Routes>
             <Route path="/" element={<RouteTitle title="Workspaces" />} />
@@ -205,14 +205,24 @@ function AppContent() {
         )}
       </div>
       
-      <Routes>
-        <Route path="/" element={<WorkspacePage />} />
-        <Route path="/scenarios" element={<ScenariosPage />} />
-        <Route path="/flow-editor" element={<FlowEditorPage />} />
-        <Route path="/plugins" element={<PluginsPage />} />
-        <Route path="/execute" element={<ExecutePage />} />
-      </Routes>
-    </main>
+      <ScrollArea className="flex-1">
+        <div className="p-6 pt-0">
+          <Routes>
+            <Route path="/" element={<WorkspacePage />} />
+            <Route path="/scenarios" element={<ScenariosPage />} />
+            <Route path="/flow-editor" element={<FlowEditorPage />} />
+            <Route path="/plugins" element={<PluginsPage />} />
+            <Route path="/execute" element={<ExecutePage />} />
+          </Routes>
+        </div>
+      </ScrollArea>
+      
+      <footer className="p-6 text-center text-sm text-slate-500">
+        <p>
+          © {new Date().getFullYear()} THE CONTEXT - Redesigned Architecture
+        </p>
+      </footer>
+    </div>
   );
 }
 
@@ -227,7 +237,7 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen h-screen flex bg-gray-50">
         {/* Load plugins */}
         <PluginInitializer />
 
@@ -235,14 +245,14 @@ function App() {
         <Toaster />
 
         {/* Sidebar */}
-        <aside className="w-64 border-r bg-white h-screen">
+        <aside className="w-64 border-r bg-white h-full overflow-hidden flex flex-col">
           <div className="p-6">
             <h2 className="text-lg font-bold">THE CONTEXT</h2>
             <p className="text-sm text-muted-foreground">
               Build, test, and iterate on prompt workflows
             </p>
           </div>
-          <ScrollArea className="h-[calc(100vh-100px)]">
+          <ScrollArea className="flex-1">
             <div className="px-3 py-2">
               <SidebarNav />
             </div>
@@ -250,14 +260,8 @@ function App() {
         </aside>
 
         {/* Main content */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col overflow-hidden">
           <AppContent />
-          
-          <footer className="p-6 text-center text-sm text-slate-500 mt-auto">
-            <p>
-              © {new Date().getFullYear()} THE CONTEXT - Redesigned Architecture
-            </p>
-          </footer>
         </div>
       </div>
     </Router>
