@@ -1,6 +1,7 @@
 // src/components/nodes/CustomNode.tsx
 import React, { memo } from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
+import { useNodeStore } from '../../stores/nodeStore';
 
 const nodeColors: Record<string, string> = {
   input: '#9dd29d',
@@ -10,9 +11,25 @@ const nodeColors: Record<string, string> = {
   default: '#d3d3d3'
 };
 
-const CustomNode: React.FC<NodeProps> = ({ data, isConnectable }) => {
+// Define the extended props for CustomNode
+interface CustomNodeProps extends NodeProps {
+  onEditNode?: (nodeId: string) => void;
+}
+
+const CustomNode: React.FC<NodeProps> = (props) => {
+  const { data, isConnectable, id } = props;
+  const onEditNode = props.data?.onEditNode;
   const nodeType = data.type || 'default';
   const backgroundColor = nodeColors[nodeType] || nodeColors.default;
+  const { setActiveNodeId } = useNodeStore();
+  
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveNodeId(id);
+    if (onEditNode) {
+      onEditNode(id);
+    }
+  };
   
   return (
     <div className="relative p-0.5">
@@ -22,11 +39,22 @@ const CustomNode: React.FC<NodeProps> = ({ data, isConnectable }) => {
       >
         <div className="py-2 px-3 font-semibold text-gray-800 border-b border-gray-300 bg-opacity-90 flex justify-between items-center">
           <div>{data.label || 'Node'}</div>
-          {data.pluginId && (
-            <div className="text-xs px-2 py-0.5 bg-gray-700 text-white rounded-full">
-              Plugin
-            </div>
-          )}
+          <div className="flex items-center">
+            {data.pluginId && (
+              <div className="text-xs px-2 py-0.5 bg-gray-700 text-white rounded-full mr-2">
+                Plugin
+              </div>
+            )}
+            <button 
+              onClick={handleEditClick}
+              className="p-1 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded"
+              title="Edit node"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </button>
+          </div>
         </div>
         
         <div className="p-3 bg-white">

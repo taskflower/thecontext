@@ -21,20 +21,14 @@ import { useExecutionStore } from '../../stores/executionStore';
 import CustomNode from './CustomNode';
 import NodeContextMenu from './NodeContextMenu';
 import NewNodeToolbar from './NewNodeToolbar';
+import NodeEditor from './NodeEditor';
 
-const nodeTypes: NodeTypes = {
-  custom: CustomNode,
-};
-
-interface FlowEditorProps {
-  onEditNode?: (nodeId: string) => void;
-}
-
-const FlowEditor: React.FC<FlowEditorProps> = ({ onEditNode }) => {
+const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({ onEditNode }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId: string } | null>(null);
+  const [showNodeEditor, setShowNodeEditor] = useState(false);
 
   // Get scenario data from store
   const { getScenario, createEdge, addEdgeToScenario, edges: storeEdges, getCurrentScenario } = useScenarioStore();
@@ -44,6 +38,24 @@ const FlowEditor: React.FC<FlowEditorProps> = ({ onEditNode }) => {
   // Get current scenario from the store
   const currentScenario = getCurrentScenario();
   const scenarioId = currentScenario?.id;
+
+  // Create a memoized nodeTypes object to avoid React Flow warnings
+  const nodeTypes = React.useMemo(() => ({
+    custom: CustomNode
+  }), []);
+
+  // Handler for edit node button click
+  const handleEditNode = useCallback((nodeId: string) => {
+    if (onEditNode) {
+      onEditNode(nodeId);
+    } else {
+      // If no external handler is provided, show the built-in editor
+      setShowNodeEditor(true);
+    }
+    // Close any other panels
+    setSelectedNode(null);
+    setContextMenu(null);
+  }, [onEditNode]);
 
   // Get latest execution data and refresh nodes
   const refreshNodeResponses = useCallback(() => {
@@ -131,7 +143,8 @@ const FlowEditor: React.FC<FlowEditorProps> = ({ onEditNode }) => {
         data: {
           ...node.data,
           label: node.data.label || node.type,
-          response: node.data.response || ''
+          response: node.data.response || '',
+          onEditNode: handleEditNode // Pass the edit handler through data prop
         },
       };
     }).filter(Boolean) as Node[];
@@ -195,22 +208,12 @@ const FlowEditor: React.FC<FlowEditorProps> = ({ onEditNode }) => {
   const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
     setSelectedNode(node);
     setContextMenu(null);
-    
-    // Check if double-click to edit
-    if (event.detail === 2 && onEditNode) {
-      onEditNode(node.id);
-    }
-  }, [onEditNode]);
+  }, []);
 
-  // Handle right-click for context menu
+  // Disable right-click menu by doing nothing
   const onNodeContextMenu = useCallback((event: React.MouseEvent, node: Node) => {
     event.preventDefault();
-    const boundingRect = (event.target as HTMLElement).getBoundingClientRect();
-    setContextMenu({
-      x: event.clientX - boundingRect.left,
-      y: event.clientY - boundingRect.top,
-      nodeId: node.id
-    });
+    // Not setting context menu anymore
   }, []);
 
   // Close context menu on background click
@@ -259,7 +262,6 @@ const FlowEditor: React.FC<FlowEditorProps> = ({ onEditNode }) => {
           </button>
         </Panel>
         <Panel position="top-left">
-          {/* Pass scenarioId explicitly */}
           <NewNodeToolbar scenarioId={scenarioId} />
         </Panel>
         
@@ -276,20 +278,41 @@ const FlowEditor: React.FC<FlowEditorProps> = ({ onEditNode }) => {
           y={contextMenu.y}
           nodeId={contextMenu.nodeId}
           onClose={() => setContextMenu(null)}
-          onEdit={onEditNode}
+          onEdit={handleEditNode}
         />
       )}
       
-      {selectedNode && (
+      {/* Node Editor Dialog (shown when edit button is clicked) */}
+      {showNodeEditor && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="max-w-2xl w-full">
+            <NodeEditor onClose={() => setShowNodeEditor(false)} />
+          </div>
+        </div>
+      )}
+      
+      {/* Node Properties Panel (shown when node is clicked) */}
+      {selectedNode && !showNodeEditor && (
         <div className="absolute bottom-0 right-0 w-80 max-h-1/2 bg-white shadow-lg border rounded-tl-md overflow-auto">
           <div className="p-3 border-b bg-gray-50 flex justify-between items-center">
             <h3 className="font-medium">Node Properties</h3>
-            <button 
-              onClick={() => setSelectedNode(null)}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              ×
-            </button>
+            <div className="flex">
+              <button
+                onClick={() => handleEditNode(selectedNode.id)}
+                className="text-blue-600 hover:text-blue-800 mr-2"
+                title="Edit node"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+              <button 
+                onClick={() => setSelectedNode(null)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ×
+              </button>
+            </div>
           </div>
           <div className="p-4">
             <p className="mb-2 text-sm text-gray-500">ID: {selectedNode.id}</p>
