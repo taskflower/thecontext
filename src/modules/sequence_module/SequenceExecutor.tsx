@@ -14,9 +14,11 @@ import {
   DialogHeader, 
   DialogTitle 
 } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { PlayIcon, XIcon, ChevronRightIcon, Settings } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Separator } from '@/components/ui';
+
 
 const SequenceExecutor: React.FC = () => {
   const { nodes, edges, addNodeResponse } = useScenarioStore();
@@ -199,8 +201,8 @@ const SequenceExecutor: React.FC = () => {
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-4 my-2">
-            <div>
+          <div className="space-y-4 my-2 h-[70vh] flex flex-col ">
+            <div className='flex-1'>
               <div className="font-medium text-sm mb-2 flex items-center justify-between">
                 <div className="flex items-center">
                   <span className="text-slate-800">Prompt:</span>
@@ -221,14 +223,14 @@ const SequenceExecutor: React.FC = () => {
                   </Button>
                 )}
               </div>
-              <ScrollArea className="h-48">
+              
                 <div className="bg-slate-50 p-4 rounded-md border whitespace-pre-wrap text-slate-800">
                   {currentPrompt}
                 </div>
-              </ScrollArea>
+              
             </div>
-            
-            <div>
+            <Separator/>
+            <div className='mb-8'>
               <div className="font-medium text-sm mb-2 text-slate-300">
                 {hasPlugin ? 'Plugin Interface:' : 'Your Response:'}
               </div>
