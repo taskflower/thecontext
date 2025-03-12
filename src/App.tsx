@@ -1,10 +1,14 @@
 import Dashboard from "./modules/Dashboard";
 import { PluginInitializer } from "./modules/plugins_system/initPlugins";
 import { initScenarioSync } from "./modules/scenarios_module/scenarioSync";
+import { registerStores } from './modules/plugins_system/registerStores';
 const App: React.FC = () => {
   /* TODO - przeanalizuj sens scenarioSync a w całej architwkturze systemu, 
   mechanika workspeces została dodana stosunkowo pozno  */
   initScenarioSync();
+  /* TODO - przeanalizuj sens registerStores a w całej architwkturze systemu, 
+  mechanika pluginow powinna miec dostep z poziomu samego pluginu  */
+  registerStores();
   return (
     <div className="container mx-auto p-6">
       <main className="space-y-8">

@@ -40,26 +40,23 @@ const WorkspaceScenarios: React.FC<WorkspaceScenariosProps> = ({ workspaceId }) 
 
   // Add this useEffect to sync active scenario changes
   useEffect(() => {
-    // Get active scenario data
-    const { nodes, edges } = useScenarioStore.getState();
+    // Upewnij się, że aktualny scenariusz jest zsynchronizowany
     const { currentScenarioId } = useScenariosMultiStore.getState();
     
-    // If there's an active scenario, sync its data to the multi-store
+    // Jeśli jest aktywny scenariusz, synchronizuj jego dane
     if (currentScenarioId) {
       useScenariosMultiStore.getState().syncActiveScenarioToCurrent();
     }
     
-    // Set up subscription to scenario store changes
-    const unsubscribe = useScenarioStore.subscribe(
-      () => {
-        const { currentScenarioId } = useScenariosMultiStore.getState();
-        if (currentScenarioId) {
-          useScenariosMultiStore.getState().syncActiveScenarioToCurrent();
-        }
+    // Ustaw subskrypcję do zmian w scenarioStore
+    const unsubscribe = useScenarioStore.subscribe(() => {
+      const { currentScenarioId } = useScenariosMultiStore.getState();
+      if (currentScenarioId) {
+        useScenariosMultiStore.getState().syncActiveScenarioToCurrent();
       }
-    );
+    });
     
-    // Clean up subscription on unmount
+    // Wyczyść subskrypcję przy odmontowaniu
     return () => {
       unsubscribe();
     };

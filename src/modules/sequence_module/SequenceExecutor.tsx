@@ -227,13 +227,13 @@ const SequenceExecutor: React.FC = () => {
             </div>
             
             <div>
-              <div className="font-medium text-sm mb-2 text-slate-800">
+              <div className="font-medium text-sm mb-2 text-slate-300">
                 {hasPlugin ? 'Plugin Interface:' : 'Your Response:'}
               </div>
               
               {hasPlugin && currentPlugin ? (
                 // Render the plugin's ViewComponent for response
-                <div className="border rounded-md p-4 min-h-32 bg-white">
+               
                   <div className="plugin-container">
                     <currentPlugin.ViewComponent 
                       nodeId={currentNodeId}
@@ -242,7 +242,7 @@ const SequenceExecutor: React.FC = () => {
                       onResponseChange={setCurrentResponse}
                     />
                   </div>
-                </div>
+              
               ) : (
                 // Render the default textarea for response
                 <Textarea
