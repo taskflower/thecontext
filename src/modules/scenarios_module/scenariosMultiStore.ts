@@ -4,6 +4,7 @@ import { persist } from "zustand/middleware";
 import { Node, Edge } from "./types";
 import { useScenarioStore } from "./scenarioStore";
 import { WorkspaceContext } from "../workspace_module/workspaceStore";
+import { usePluginStore } from "../plugins_system/pluginStore";
 
 
 export interface MultiScenario {
@@ -92,37 +93,48 @@ export const useScenariosMultiStore = create<ScenariosMultiState>()(
         return scenario ? { ...scenario } : null;
       },
 
-      importScenario: (scenario) => {
-        try {
-          const now = Date.now();
-          const scenarioWithMeta = {
-            ...scenario,
-            updatedAt: now
-          };
+      importScenario: (scenario: MultiScenario) => {
+        // First check for plugin references and ensure they're active
+        if (scenario.nodes) {
+          const { plugins, activatePlugin } = usePluginStore.getState();
           
-          set((state) => {
-            const newState = {
-              scenarios: { ...state.scenarios, [scenario.id]: scenarioWithMeta },
-              currentScenarioId: scenario.id,
-            };
-            
-            // Synchronizuj do aktywnego scenariusza
-            useScenarioStore.getState().importFromJson(scenario);
-            
-            return newState;
+          // Keep track of plugin connections that need fixing
+          const pluginConnections = [];
+          
+          // Find all plugin references in nodes
+          Object.entries(scenario.nodes).forEach(([nodeId, node]) => {
+            if (node.pluginId) {
+              if (plugins[node.pluginId]) {
+                // Plugin exists, ensure it's activated
+                activatePlugin(node.pluginId);
+                pluginConnections.push({
+                  nodeId,
+                  pluginId: node.pluginId
+                });
+              } else {
+                console.warn(`Imported node "${nodeId}" references missing plugin "${node.pluginId}"`);
+              }
+            }
           });
           
-          // Po pewnym czasie, synchronizuj z powrotem
-          // używając właściwej metody z właściwego store
-          setTimeout(() => {
-            useScenariosMultiStore.getState().syncActiveScenarioToCurrent();
-          }, 200);
-          
-          return scenario.id;
-        } catch (error) {
-          console.error("Błąd podczas importowania scenariusza:", error);
-          return null;
+          if (pluginConnections.length > 0) {
+            console.log(`Restored ${pluginConnections.length} plugin connections for scenario "${scenario.name}"`);
+          }
         }
+        
+        // Now import the scenario itself
+        set((state) => ({
+          scenarios: {
+            ...state.scenarios,
+            [scenario.id]: {
+              ...scenario,
+              updatedAt: scenario.updatedAt || Date.now(),
+              createdAt: scenario.createdAt || Date.now(),
+            },
+          },
+        }));
+        
+        return scenario.id;
       },
 
       syncCurrentScenarioToActive: () => {

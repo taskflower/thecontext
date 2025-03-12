@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
 import { useScenariosMultiStore, MultiScenario } from '../scenarios_module/scenariosMultiStore';
+import { usePluginStore } from '../plugins_system/pluginStore';
 
 // Changed from enum to string for custom types
 export type WorkspaceType = string;
@@ -235,16 +236,52 @@ export const useWorkspaceStore = create<WorkspaceState>()(
               typeIcon: data.workspace.typeIcon || 'box',
               updatedAt: Date.now()
             }
-          }
+          },
+          // Set this as the current workspace
+          currentWorkspaceId: data.workspace.id
         }));
         
-        // Import scenarios
+        // Prepare to handle plugin connections
+        const { plugins, activatePlugin } = usePluginStore.getState();
+        const usedPluginIds = new Set();
+        
+        // Discover all plugin IDs referenced in the import
         if (Array.isArray(data.scenarios)) {
-          data.scenarios.forEach((scenario: MultiScenario) => {
+          data.scenarios.forEach((scenario:any) => {
+            if (scenario.nodes) {
+              Object.values(scenario.nodes).forEach((node:any) => {
+                if (node.pluginId) {
+                  usedPluginIds.add(node.pluginId);
+                }
+              });
+            }
+          });
+          
+          // Activate all required plugins before importing scenarios
+          usedPluginIds.forEach((pluginId:any) => {
+            if (plugins[pluginId]) {
+              console.log(`Activating plugin ${pluginId} for imported workspace`);
+              activatePlugin(pluginId);
+            } else {
+              console.warn(`Plugin ${pluginId} used in import not available - plugin connections will be broken`);
+            }
+          });
+          
+          // Import all scenarios
+          data.scenarios.forEach((scenario:any) => {
             useScenariosMultiStore.getState().importScenario(scenario);
           });
+          
+          // Set the current scenario to the first one from the workspace
+          if (data.scenarios.length > 0) {
+            useScenariosMultiStore.getState().setCurrentScenario(data.scenarios[0].id);
+            
+            // Sync scenario data
+            useScenariosMultiStore.getState().syncCurrentScenarioToActive();
+          }
         }
         
+        console.log(`Imported workspace "${data.workspace.name}" with ${usedPluginIds.size} plugin dependencies`);
         return data.workspace.id;
       },
       
