@@ -24,6 +24,7 @@ export interface Execution {
   startTime: number;
   endTime?: number;
   status: 'running' | 'completed' | 'error' | 'interrupted';
+  currentNodeId?: string; // Track current node for step-by-step execution
   results: Record<string, ExecutionResult>;
   error?: string;
 }
@@ -68,6 +69,10 @@ interface ExecutionActions {
   // Execution management
   deleteExecution: (id: string) => void;
   clearHistory: (scenarioId?: string) => void;
+  
+  // Step execution tracking
+  setCurrentNodeInExecution: (executionId: string, nodeId: string) => void;
+  getCurrentNodeInExecution: (executionId: string) => string | undefined;
 }
 
 export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
@@ -164,6 +169,9 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
             throw new Error(`Node ${nodeId} not found`);
           }
           
+          // Set current node for this execution
+          get().setCurrentNodeInExecution(executionId, nodeId);
+          
           // Process input with template variables
           const processedInput = await get().processVariables(input, executionId);
           
@@ -241,7 +249,7 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         const scenario = scenarioStore.getScenario(scenarioId);
         if (!scenario) throw new Error(`Scenario ${scenarioId} not found`);
       
-        // Usuń duplikaty z tablicy nodeIds
+        // Remove duplicates from nodeIds array
         const uniqueNodeIds = Array.from(new Set(scenario.nodeIds));
       
         const nodes = uniqueNodeIds
@@ -252,17 +260,17 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
           .map(id => scenarioStore.edges[id])
           .filter(edge => edge !== undefined);
       
-        // Budujemy graf
+        // Build graph
         const graph: Record<string, string[]> = {};
         const inDegree: Record<string, number> = {};
       
-        // Inicjalizacja
+        // Initialize
         nodes.forEach(node => {
           graph[node.id] = [];
           inDegree[node.id] = 0;
         });
       
-        // Budujemy listę sąsiedztwa
+        // Build adjacency list
         edges.forEach(edge => {
           if (edge && graph[edge.source] && inDegree[edge.target] !== undefined) {
             graph[edge.source].push(edge.target);
@@ -270,11 +278,11 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
           }
         });
       
-        // Sortowanie topologiczne metodą Kahna
+        // Topological sort using Kahn's algorithm
         const queue: string[] = [];
         const result: string[] = [];
       
-        // Węzły bez zależności trafiają do kolejki
+        // Nodes without dependencies go to the queue
         Object.keys(inDegree).forEach(nodeId => {
           if (inDegree[nodeId] === 0) {
             queue.push(nodeId);
@@ -293,14 +301,13 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
           });
         }
       
-        // Jeśli nie udało się przetworzyć wszystkich unikalnych węzłów, zgłoś błąd
+        // If not all unique nodes were processed, report an error
         if (result.length !== nodes.length) {
           throw new Error('Scenario contains circular dependencies');
         }
       
         return result;
       },
-      
       
       // Helper to get input for a node based on connections
       getNodeInput: async (nodeId, executionId) => {
@@ -434,6 +441,28 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
             };
           }
         });
+      },
+      
+      // Step execution tracking methods
+      setCurrentNodeInExecution: (executionId, nodeId) => {
+        set((state) => {
+          if (!state.executions[executionId]) return state;
+          
+          return {
+            executions: {
+              ...state.executions,
+              [executionId]: {
+                ...state.executions[executionId],
+                currentNodeId: nodeId
+              }
+            }
+          };
+        });
+      },
+      
+      getCurrentNodeInExecution: (executionId) => {
+        const execution = get().executions[executionId];
+        return execution ? execution.currentNodeId : undefined;
       }
     }),
     {
