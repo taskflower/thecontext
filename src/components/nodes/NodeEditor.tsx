@@ -223,21 +223,42 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
           )}
         </div>
         
-        <div className="mt-6 flex justify-end space-x-3">
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-          )}
+        <div className="mt-6 flex justify-between">
+          {/* Delete button on the left */}
           <button
-            onClick={handleSave}
-            className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700"
+            onClick={() => {
+              if (window.confirm('Are you sure you want to delete this node?')) {
+                const nodeStore = useNodeStore.getState();
+                if (activeNodeId) {
+                  nodeStore.deleteNode(activeNodeId);
+                }
+                if (onClose) {
+                  onClose();
+                }
+              }
+            }}
+            className="px-4 py-2 bg-red-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-red-700"
           >
-            Save Changes
+            Delete Node
           </button>
+          
+          {/* Cancel and Save buttons on the right */}
+          <div className="flex space-x-3">
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+            )}
+            <button
+              onClick={handleSave}
+              className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700"
+            >
+              Save Changes
+            </button>
+          </div>
         </div>
       </div>
     </div>
