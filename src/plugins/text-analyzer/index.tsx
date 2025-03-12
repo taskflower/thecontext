@@ -1,202 +1,285 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/plugins/text-analyzer/index.tsx
-// Przykładowy prosty plugin analizatora tekstu
+import React, { useState } from 'react';
+import { 
+  PluginBase, 
+  PluginComponentProps, 
+  PluginProcessInput, 
+  PluginProcessResult 
+} from '../PluginInterface';
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card } from "@/components/ui/card";
 
-import React, { useState, useEffect } from 'react';
-import { PluginBase, PluginProps } from '../../modules/plugins_system/PluginInterface';
-import { Node } from '../../modules/scenarios_module/types';
-import { useScenarioStore } from '../../modules/scenarios_module/scenarioStore';
-
-// Interfejs konfiguracji pluginu
+// Plugin config type
 interface TextAnalyzerConfig {
   includeWordCount: boolean;
   includeSentenceCount: boolean;
   includeReadingTime: boolean;
+  includeCharacterCount: boolean;
 }
 
-// Implementacja pluginu analizatora tekstu
+// Analysis result type
+interface AnalysisResult {
+  wordCount?: number;
+  sentenceCount?: number;
+  readingTimeMinutes?: number;
+  characterCount?: number;
+}
+
 class TextAnalyzerPlugin extends PluginBase {
   constructor() {
-    super(
-      'text-analyzer',
-      'Text Analyzer',
-      'Analizuje tekst pod kątem liczby słów, zdań i czasu czytania'
-    );
-    
-    // Domyślna konfiguracja
-    this.defaultConfig = {
-      includeWordCount: true,
-      includeSentenceCount: true,
-      includeReadingTime: true
-    };
+    super({
+      id: 'text-analyzer',
+      name: 'Text Analyzer',
+      description: 'Analyzes text for word count, sentences, and reading time',
+      version: '1.0.0',
+      defaultConfig: {
+        includeWordCount: true,
+        includeSentenceCount: true,
+        includeReadingTime: true,
+        includeCharacterCount: false
+      }
+    });
   }
   
-  // Komponent widoku
-  ViewComponent: React.FC<PluginProps> = ({ config, onResponseChange }) => {
+  // Configuration component
+  ConfigComponent: React.FC<PluginComponentProps> = ({ 
+    config, 
+    onConfigChange = () => {} 
+  }) => {
+    const pluginConfig = { ...this.defaultConfig, ...config } as TextAnalyzerConfig;
+    
+    const handleToggle = (key: keyof TextAnalyzerConfig) => {
+      onConfigChange({ [key]: !pluginConfig[key] });
+    };
+    
+    return (
+      <div className="space-y-4">
+        <h3 className="font-medium">Text Analyzer Configuration</h3>
+        
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="wordCount" 
+              checked={pluginConfig.includeWordCount}
+              onCheckedChange={() => handleToggle('includeWordCount')}
+            />
+            <Label htmlFor="wordCount">Word count</Label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="sentenceCount" 
+              checked={pluginConfig.includeSentenceCount}
+              onCheckedChange={() => handleToggle('includeSentenceCount')}
+            />
+            <Label htmlFor="sentenceCount">Sentence count</Label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="readingTime" 
+              checked={pluginConfig.includeReadingTime}
+              onCheckedChange={() => handleToggle('includeReadingTime')}
+            />
+            <Label htmlFor="readingTime">Estimated reading time</Label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="characterCount" 
+              checked={pluginConfig.includeCharacterCount}
+              onCheckedChange={() => handleToggle('includeCharacterCount')}
+            />
+            <Label htmlFor="characterCount">Character count</Label>
+          </div>
+        </div>
+      </div>
+    );
+  };
+  
+  // Main view component
+  ViewComponent: React.FC<PluginComponentProps> = ({ 
+    config,
+    onConfigChange = () => {}
+  }) => {
     const [text, setText] = useState('');
-    const [analysis, setAnalysis] = useState<Record<string, any>>({});
+    const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+    
+    const pluginConfig = { ...this.defaultConfig, ...config } as TextAnalyzerConfig;
     
     const analyzeText = () => {
-      const wordCount = text.split(/\s+/).filter(word => word.length > 0).length;
-      const sentenceCount = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
-      const readingTimeMinutes = Math.ceil(wordCount / 200); // Średnio 200 słów na minutę
-      
-      const results: Record<string, any> = {};
-      
-      if (config?.includeWordCount) {
-        results.wordCount = wordCount;
+      if (!text.trim()) {
+        setAnalysis(null);
+        return;
       }
       
-      if (config?.includeSentenceCount) {
-        results.sentenceCount = sentenceCount;
+      const results: AnalysisResult = {};
+      
+      // Word count
+      if (pluginConfig.includeWordCount) {
+        results.wordCount = text.split(/\s+/).filter(word => word.length > 0).length;
       }
       
-      if (config?.includeReadingTime) {
-        results.readingTimeMinutes = readingTimeMinutes;
+      // Sentence count
+      if (pluginConfig.includeSentenceCount) {
+        results.sentenceCount = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
+      }
+      
+      // Reading time
+      if (pluginConfig.includeReadingTime) {
+        const wordsPerMinute = 200; // Average reading speed
+        const wordCount = text.split(/\s+/).filter(word => word.length > 0).length;
+        results.readingTimeMinutes = Math.max(1, Math.ceil(wordCount / wordsPerMinute));
+      }
+      
+      // Character count
+      if (pluginConfig.includeCharacterCount) {
+        results.characterCount = text.length;
       }
       
       setAnalysis(results);
-      
-      // Przekształć wyniki w odpowiedź tekstową
-      const responseText = Object.entries(results)
-        .map(([key, value]) => {
-          switch(key) {
-            case 'wordCount': return `Liczba słów: ${value}`;
-            case 'sentenceCount': return `Liczba zdań: ${value}`;
-            case 'readingTimeMinutes': return `Szacowany czas czytania: ${value} min`;
-            default: return `${key}: ${value}`;
-          }
-        })
-        .join('\n');
-      
-      if (onResponseChange) {
-        onResponseChange(responseText);
-      }
     };
     
     return (
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Tekst do analizy</label>
-          <textarea
+          <Label htmlFor="textInput">Text to analyze</Label>
+          <Textarea
+            id="textInput"
+            placeholder="Enter text to analyze..."
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Wprowadź tekst do analizy..."
-            className="w-full p-2 border rounded-md min-h-32"
+            rows={5}
+            className="mt-1 font-sans"
           />
         </div>
         
-        <button
+        <Button 
           onClick={analyzeText}
           disabled={!text.trim()}
-          className="px-4 py-2 bg-blue-500 text-white rounded-md disabled:bg-gray-300"
         >
-          Analizuj
-        </button>
+          Analyze Text
+        </Button>
         
-        {Object.keys(analysis).length > 0 && (
-          <div className="p-4 border rounded-md bg-gray-50">
-            <h3 className="font-medium mb-2">Wyniki analizy:</h3>
+        {analysis && (
+          <Card className="p-4 bg-slate-50">
+            <h4 className="font-medium mb-2">Analysis Results</h4>
             <ul className="space-y-1">
-              {Object.entries(analysis).map(([key, value]) => (
-                <li key={key}>
-                  {key === 'wordCount' && <span>Liczba słów: {value}</span>}
-                  {key === 'sentenceCount' && <span>Liczba zdań: {value}</span>}
-                  {key === 'readingTimeMinutes' && <span>Szacowany czas czytania: {value} min</span>}
-                </li>
-              ))}
+              {analysis.wordCount !== undefined && (
+                <li>Word count: <span className="font-medium">{analysis.wordCount}</span></li>
+              )}
+              {analysis.sentenceCount !== undefined && (
+                <li>Sentence count: <span className="font-medium">{analysis.sentenceCount}</span></li>
+              )}
+              {analysis.readingTimeMinutes !== undefined && (
+                <li>Estimated reading time: <span className="font-medium">{analysis.readingTimeMinutes} min</span></li>
+              )}
+              {analysis.characterCount !== undefined && (
+                <li>Character count: <span className="font-medium">{analysis.characterCount}</span></li>
+              )}
             </ul>
-          </div>
+          </Card>
         )}
       </div>
     );
   };
   
-  // Komponent konfiguracji
-  ConfigComponent: React.FC<PluginProps> = ({ config, onConfigChange }) => {
-    const handleCheckboxChange = (key: keyof TextAnalyzerConfig) => {
-      if (onConfigChange) {
-        onConfigChange({ [key]: !(config as TextAnalyzerConfig)?.[key] });
-      }
-    };
+  // Results component
+  ResultComponent: React.FC<PluginComponentProps> = ({ 
+    nodeId,
+    config
+  }) => {
+    // Get the plugin result from the store
+    const { getPluginState } = usePluginStore();
+    const pluginState = getPluginState(this.id);
+    const analysisResult = pluginState?.result;
     
-    return (
-      <div className="space-y-3">
-        <h3 className="font-medium">Konfiguracja analizatora tekstu</h3>
-        
-        <div className="space-y-2">
-          <label className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={config?.includeWordCount || false}
-              onChange={() => handleCheckboxChange('includeWordCount')}
-              className="rounded"
-            />
-            <span>Liczba słów</span>
-          </label>
-          
-          <label className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={config?.includeSentenceCount || false}
-              onChange={() => handleCheckboxChange('includeSentenceCount')}
-              className="rounded"
-            />
-            <span>Liczba zdań</span>
-          </label>
-          
-          <label className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={config?.includeReadingTime || false}
-              onChange={() => handleCheckboxChange('includeReadingTime')}
-              className="rounded"
-            />
-            <span>Szacowany czas czytania</span>
-          </label>
-        </div>
-      </div>
-    );
-  };
-  
-  // Komponent wyników
-  ResultComponent: React.FC<PluginProps> = ({ nodeId }) => {
-    const [result, setResult] = useState<string | null>(null);
-    
-    // Pobierz zapisany wynik dla węzła (jeśli istnieje)
-    useEffect(() => {
-      if (nodeId) {
-        const nodeResponse = useScenarioStore.getState().nodeResponses[nodeId];
-        if (nodeResponse) {
-          setResult(nodeResponse);
-        }
-      }
-    }, [nodeId]);
-    
-    if (!result) {
+    if (!analysisResult) {
       return (
-        <div className="p-4 text-center text-gray-500">
-          Brak wyników analizy. Użyj zakładki "View" aby przeanalizować tekst.
+        <div className="p-4 text-slate-500 bg-slate-50 rounded-md border border-slate-200 text-sm text-center">
+          No analysis results available. Use the View tab to analyze text.
         </div>
       );
     }
     
     return (
-      <div className="p-4 border rounded-md bg-gray-50">
-        <h3 className="font-medium mb-2">Wyniki analizy:</h3>
-        <pre className="whitespace-pre-wrap">{result}</pre>
+      <div className="p-4 border rounded-md bg-slate-50">
+        <h3 className="font-medium mb-2">Text Analysis Results</h3>
+        <ul className="space-y-1">
+          {analysisResult.wordCount !== undefined && (
+            <li>Word count: <span className="font-medium">{analysisResult.wordCount}</span></li>
+          )}
+          {analysisResult.sentenceCount !== undefined && (
+            <li>Sentence count: <span className="font-medium">{analysisResult.sentenceCount}</span></li>
+          )}
+          {analysisResult.readingTimeMinutes !== undefined && (
+            <li>Estimated reading time: <span className="font-medium">{analysisResult.readingTimeMinutes} min</span></li>
+          )}
+          {analysisResult.characterCount !== undefined && (
+            <li>Character count: <span className="font-medium">{analysisResult.characterCount}</span></li>
+          )}
+        </ul>
       </div>
     );
   };
   
-  // Przetwarzanie węzła
-  processNode(node: Node, response?: string): { node: Node, result: any } {
-    // W tym przypadku po prostu przekazujemy odpowiedź jako wynik
-    return { 
-      node,
-      result: response
+  // Process node with this plugin
+  processNode(input: PluginProcessInput): PluginProcessResult {
+    const { config, input: text } = input;
+    const pluginConfig = { ...this.defaultConfig, ...config } as TextAnalyzerConfig;
+    
+    // Skip empty input
+    if (!text || !text.trim()) {
+      return {
+        output: "No text provided for analysis",
+        result: null
+      };
+    }
+    
+    const results: AnalysisResult = {};
+    let outputLines: string[] = ["Text Analysis Results:"];
+    
+    // Word count
+    if (pluginConfig.includeWordCount) {
+      const wordCount = text.split(/\s+/).filter(word => word.length > 0).length;
+      results.wordCount = wordCount;
+      outputLines.push(`Word count: ${wordCount}`);
+    }
+    
+    // Sentence count
+    if (pluginConfig.includeSentenceCount) {
+      const sentenceCount = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
+      results.sentenceCount = sentenceCount;
+      outputLines.push(`Sentence count: ${sentenceCount}`);
+    }
+    
+    // Reading time
+    if (pluginConfig.includeReadingTime) {
+      const wordsPerMinute = 200; // Average reading speed
+      const wordCount = text.split(/\s+/).filter(word => word.length > 0).length;
+      const readingTimeMinutes = Math.max(1, Math.ceil(wordCount / wordsPerMinute));
+      results.readingTimeMinutes = readingTimeMinutes;
+      outputLines.push(`Estimated reading time: ${readingTimeMinutes} min`);
+    }
+    
+    // Character count
+    if (pluginConfig.includeCharacterCount) {
+      const characterCount = text.length;
+      results.characterCount = characterCount;
+      outputLines.push(`Character count: ${characterCount}`);
+    }
+    
+    return {
+      output: outputLines.join("\n"),
+      result: results
     };
   }
 }
+
+// Import plugins store for results component
+import { usePluginStore } from '../../stores/pluginStore';
 
 export default new TextAnalyzerPlugin();

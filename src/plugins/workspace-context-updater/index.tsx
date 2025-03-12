@@ -1,7 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/plugins/workspace_context_updater/index.tsx
+// src/plugins/workspace-context-updater/index.tsx
 import React, { useState, useEffect } from 'react';
-import { PluginBase, PluginProps } from '../../modules/plugins_system/PluginInterface';
+import { 
+  PluginBase, 
+  PluginComponentProps, 
+  PluginProcessInput, 
+  PluginProcessResult,
+  usePluginAPI
+} from '../PluginInterface';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,7 +14,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Save, Database } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useWorkspaceStore } from '@/stores/workspaceStore';
 
+
+// Plugin config type
 interface ContextUpdaterConfig {
   contextKey: string;
   valueType: 'string' | 'array' | 'object';
@@ -19,133 +27,135 @@ interface ContextUpdaterConfig {
 
 class WorkspaceContextUpdaterPlugin extends PluginBase {
   constructor() {
-    super('workspace-context-updater', 'Workspace Context Updater', 
-      'Aktualizuje lub dodaje dane do kontekstu workspace');
-    
-    this.defaultConfig = {
-      contextKey: 'customData',
-      valueType: 'string',
-      defaultValue: '',
-      description: 'Dane dodane przez plugin'
-    };
+    super({
+      id: 'workspace-context-updater',
+      name: 'Workspace Context Updater',
+      description: 'Update or add data to the workspace context',
+      version: '1.0.0',
+      defaultConfig: {
+        contextKey: 'customData',
+        valueType: 'string',
+        defaultValue: '',
+        description: 'Data added by plugin'
+      }
+    });
   }
   
-  // Komponent konfiguracyjny
-  ConfigComponent: React.FC<PluginProps> = ({ config = {}, onConfigChange = () => {} }) => {
-    const pluginConfig = { ...this.defaultConfig, ...config };
+  // Configuration component
+  ConfigComponent: React.FC<PluginComponentProps> = ({ config, onConfigChange = () => {} }) => {
+    const pluginConfig = { ...this.defaultConfig, ...config } as ContextUpdaterConfig;
     
     return (
       <div className="space-y-4">
         <div>
-          <Label htmlFor="contextKey">Nazwa klucza w workspace</Label>
+          <Label htmlFor="contextKey">Context key name</Label>
           <Input 
             id="contextKey"
             value={pluginConfig.contextKey} 
             onChange={(e) => onConfigChange({ contextKey: e.target.value })}
-            placeholder="np. keywords, audience, customData"
+            placeholder="e.g. keywords, audience, customData"
           />
         </div>
         
         <div>
-          <Label htmlFor="valueType">Typ wartości</Label>
+          <Label htmlFor="valueType">Value type</Label>
           <Select 
             value={pluginConfig.valueType} 
             onValueChange={(value) => onConfigChange({ valueType: value })}
           >
             <SelectTrigger id="valueType">
-              <SelectValue placeholder="Wybierz typ wartości" />
+              <SelectValue placeholder="Select value type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="string">Tekst</SelectItem>
-              <SelectItem value="array">Lista (rozdzielana przecinkami)</SelectItem>
-              <SelectItem value="object">Obiekt JSON</SelectItem>
+              <SelectItem value="string">Text</SelectItem>
+              <SelectItem value="array">List (comma separated)</SelectItem>
+              <SelectItem value="object">JSON Object</SelectItem>
             </SelectContent>
           </Select>
         </div>
         
         <div>
-          <Label htmlFor="defaultValue">Domyślna wartość</Label>
+          <Label htmlFor="defaultValue">Default value</Label>
           <Textarea 
             id="defaultValue"
             value={pluginConfig.defaultValue} 
             onChange={(e) => onConfigChange({ defaultValue: e.target.value })}
             placeholder={
-              pluginConfig.valueType === 'array' ? 'element1, element2, element3' : 
+              pluginConfig.valueType === 'array' ? 'item1, item2, item3' : 
               pluginConfig.valueType === 'object' ? '{"key": "value"}' : 
-              'wartość tekstowa'
+              'text value'
             }
             rows={3}
           />
         </div>
         
         <div>
-          <Label htmlFor="description">Opis klucza</Label>
+          <Label htmlFor="description">Key description</Label>
           <Input 
             id="description"
             value={pluginConfig.description} 
             onChange={(e) => onConfigChange({ description: e.target.value })}
-            placeholder="Opis tego, co zawiera ten klucz"
+            placeholder="Description of what this key contains"
           />
         </div>
       </div>
     );
   };
   
-  // Główny komponent widoku
-  ViewComponent: React.FC<PluginProps> = ({ 
-    config = {}, 
+  // Main view component
+  ViewComponent: React.FC<PluginComponentProps> = ({ 
+    config, 
    
-    onResponseChange = () => {}
   }) => {
+    const { getCurrentWorkspace } = useWorkspaceStore();
+    const api = usePluginAPI();
+    
     const pluginConfig = { ...this.defaultConfig, ...config } as ContextUpdaterConfig;
     const [currentValue, setCurrentValue] = useState(pluginConfig.defaultValue || '');
-    const [workspaceId, setWorkspaceId] = useState<string | null>(null);
     const [status, setStatus] = useState<{message: string, type: 'success' | 'error' | 'info' | null}>({
       message: '', type: null
     });
     
-    // Pobierz ID aktualnego workspace
+    // Get the current workspace
+    const workspace = getCurrentWorkspace();
+    
+    // Load existing value if available
     useEffect(() => {
-      if (typeof window !== 'undefined' && (window as any).workspaceStore) {
-        const currentId = (window as any).workspaceStore.getState().currentWorkspaceId;
-        setWorkspaceId(currentId);
+      if (workspace && pluginConfig.contextKey) {
+        const context = api.workspace.getContext(workspace.id);
         
-        // Sprawdź, czy wartość już istnieje w workspace
-        if (currentId) {
-          const workspace = (window as any).workspaceStore.getState().workspaces[currentId];
-          if (workspace && workspace.context && pluginConfig.contextKey in workspace.context) {
-            const existingValue = workspace.context[pluginConfig.contextKey];
-            
-            // Konwertuj wartość do formatu dla textarea
-            if (typeof existingValue === 'string') {
-              setCurrentValue(existingValue);
-            } else if (Array.isArray(existingValue)) {
-              setCurrentValue(existingValue.join(', '));
-            } else if (typeof existingValue === 'object') {
-              setCurrentValue(JSON.stringify(existingValue, null, 2));
-            }
-            
-            setStatus({
-              message: 'Załadowano istniejącą wartość z workspace',
-              type: 'info'
-            });
+        if (context && pluginConfig.contextKey in context) {
+          const existingValue = context[pluginConfig.contextKey];
+          
+          // Convert value to string format for editing
+          if (typeof existingValue === 'string') {
+            setCurrentValue(existingValue);
+          } else if (Array.isArray(existingValue)) {
+            setCurrentValue(existingValue.join(', '));
+          } else if (typeof existingValue === 'object') {
+            setCurrentValue(JSON.stringify(existingValue, null, 2));
           }
+          
+          setStatus({
+            message: 'Loaded existing value from workspace context',
+            type: 'info'
+          });
         }
       }
-    }, [pluginConfig.contextKey]);
+    }, [pluginConfig.contextKey, workspace?.id]);
     
-    // Funkcja aktualizująca kontekst workspace
+    // Function to update workspace context
     const updateWorkspaceContext = () => {
-      if (!workspaceId) {
+      if (!workspace) {
         setStatus({
-          message: 'Nie znaleziono aktywnego workspace',
+          message: 'No active workspace found',
           type: 'error'
         });
         return;
       }
       
       try {
-        // Przekształć wartość do odpowiedniego formatu
+        // Convert value to appropriate type
         let valueToSave: string | string[] | object = currentValue;
         
         if (pluginConfig.valueType === 'array') {
@@ -153,33 +163,28 @@ class WorkspaceContextUpdaterPlugin extends PluginBase {
         } else if (pluginConfig.valueType === 'object') {
           try {
             valueToSave = JSON.parse(currentValue);
-          } catch  {
+          } catch (e) {
             setStatus({
-              message: 'Błąd parsowania JSON. Sprawdź format.',
+              message: 'Error parsing JSON. Check the format.',
               type: 'error'
             });
             return;
           }
         }
         
-        // Aktualizuj kontekst workspace
-        const { updateWorkspaceContext } = (window as any).workspaceStore.getState();
-        updateWorkspaceContext(workspaceId, {
+        // Update workspace context
+        api.workspace.updateContext(workspace.id, {
           [pluginConfig.contextKey]: valueToSave
         });
         
-        // Ustaw odpowiedź dla sekwencji
-        const responseText = `Zaktualizowano klucz "${pluginConfig.contextKey}" w kontekście workspace.`;
-        onResponseChange(responseText);
-        
         setStatus({
-          message: 'Zapisano pomyślnie do kontekstu workspace',
+          message: 'Successfully saved to workspace context',
           type: 'success'
         });
       } catch (error) {
-        console.error('Błąd aktualizacji kontekstu:', error);
+        console.error('Error updating context:', error);
         setStatus({
-          message: 'Wystąpił błąd podczas aktualizacji kontekstu',
+          message: 'Error updating context',
           type: 'error'
         });
       }
@@ -188,22 +193,22 @@ class WorkspaceContextUpdaterPlugin extends PluginBase {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-2">
-          <Database className="h-5 w-5 " />
-          <h3 className="text-lg font-medium">Aktualizacja kontekstu workspace</h3>
+          <Database className="h-5 w-5" />
+          <h3 className="text-lg font-medium">Update workspace context</h3>
         </div>
         
-        <div className="flex items-center gap-2 text-sm text-slate-500 border border-blue-500 rounded p-3">
-          <span>Klucz kontekstu:</span>
+        <div className="flex items-center gap-2 text-sm text-slate-500 border border-blue-100 bg-blue-50 rounded p-3">
+          <span>Context key:</span>
           <span className="font-semibold">{pluginConfig.contextKey}</span>
           <span>({
-            pluginConfig.valueType === 'string' ? 'tekst' : 
-            pluginConfig.valueType === 'array' ? 'lista' : 'obiekt JSON'
+            pluginConfig.valueType === 'string' ? 'text' : 
+            pluginConfig.valueType === 'array' ? 'list' : 'JSON object'
           })</span>
         </div>
         
         <div>
           <Label htmlFor="valueInput">
-            {pluginConfig.description || 'Wprowadź wartość do zapisania w kontekście'}
+            {pluginConfig.description || 'Enter value to save in context'}
           </Label>
           <Textarea 
             id="valueInput"
@@ -211,9 +216,9 @@ class WorkspaceContextUpdaterPlugin extends PluginBase {
             value={currentValue} 
             onChange={(e) => setCurrentValue(e.target.value)}
             placeholder={
-              pluginConfig.valueType === 'array' ? 'element1, element2, element3' : 
+              pluginConfig.valueType === 'array' ? 'item1, item2, item3' : 
               pluginConfig.valueType === 'object' ? '{"key": "value"}' : 
-              'wartość tekstowa'
+              'text value'
             }
             rows={6}
           />
@@ -233,39 +238,42 @@ class WorkspaceContextUpdaterPlugin extends PluginBase {
           <Button 
             type="button" 
             onClick={updateWorkspaceContext}
-            disabled={!workspaceId}
+            disabled={!workspace}
           >
             <Save className="h-4 w-4 mr-2" />
-            Zapisz do workspace
+            Save to workspace
           </Button>
         </div>
       </div>
     );
   };
   
-  // Komponent wyników
-  ResultComponent: React.FC<PluginProps> = ({ 
-    config = {}, 
-   
-  }) => {
-    const pluginConfig = { ...this.defaultConfig, ...config } as ContextUpdaterConfig;
-    const [workspaceContext, setWorkspaceContext] = useState<any>(null);
+  // Results component
+  ResultComponent: React.FC<PluginComponentProps> = ({ config }) => {
+    const { getCurrentWorkspace } = useWorkspaceStore();
+    const api = usePluginAPI();
     
+    const pluginConfig = { ...this.defaultConfig, ...config } as ContextUpdaterConfig;
+    const [contextValue, setContextValue] = useState<any>(null);
+    
+    // Get the current workspace
+    const workspace = getCurrentWorkspace();
+    
+    // Load current value from context
     useEffect(() => {
-      if (typeof window !== 'undefined' && (window as any).workspaceStore) {
-        const { currentWorkspaceId, workspaces } = (window as any).workspaceStore.getState();
+      if (workspace && pluginConfig.contextKey) {
+        const context = api.workspace.getContext(workspace.id);
         
-        if (currentWorkspaceId && workspaces[currentWorkspaceId]?.context) {
-          const context = workspaces[currentWorkspaceId].context;
-          setWorkspaceContext(context[pluginConfig.contextKey]);
+        if (context && pluginConfig.contextKey in context) {
+          setContextValue(context[pluginConfig.contextKey]);
         }
       }
-    }, [pluginConfig.contextKey]);
+    }, [pluginConfig.contextKey, workspace?.id]);
     
-    if (!workspaceContext) {
+    if (!contextValue) {
       return (
         <div className="p-4 text-slate-500 bg-slate-50 rounded-md border border-slate-200 text-sm">
-          Brak danych dla klucza <span className="font-mono">{pluginConfig.contextKey}</span> w kontekście workspace.
+          No data found for key <span className="font-mono">{pluginConfig.contextKey}</span> in workspace context.
         </div>
       );
     }
@@ -274,16 +282,16 @@ class WorkspaceContextUpdaterPlugin extends PluginBase {
       <div className="space-y-3">
         <h3 className="text-sm font-medium flex items-center gap-1.5">
           <Database className="h-4 w-4 text-blue-500" />
-          Zapisano w kontekście: <span className="font-mono">{pluginConfig.contextKey}</span>
+          Saved in context: <span className="font-mono">{pluginConfig.contextKey}</span>
         </h3>
         
-        {typeof workspaceContext === 'string' ? (
+        {typeof contextValue === 'string' ? (
           <div className="p-3 bg-slate-50 rounded-md border text-sm">
-            {workspaceContext}
+            {contextValue}
           </div>
-        ) : Array.isArray(workspaceContext) ? (
+        ) : Array.isArray(contextValue) ? (
           <div className="flex flex-wrap gap-1.5 p-3 bg-slate-50 rounded-md border">
-            {workspaceContext.map((item, i) => (
+            {contextValue.map((item, i) => (
               <span key={i} className="px-2 py-1 bg-blue-50 text-blue-800 rounded-full text-xs">
                 {item}
               </span>
@@ -291,20 +299,69 @@ class WorkspaceContextUpdaterPlugin extends PluginBase {
           </div>
         ) : (
           <pre className="p-3 bg-slate-50 rounded-md border text-xs font-mono overflow-x-auto">
-            {JSON.stringify(workspaceContext, null, 2)}
+            {JSON.stringify(contextValue, null, 2)}
           </pre>
         )}
       </div>
     );
   };
   
-  // Przetwarzanie węzła
-  processNode = (node: any, response: any) => {
-    return { 
-      node, 
-      result: response || "Zaktualizowano kontekst workspace"
-    };
-  };
+  // Process node with this plugin
+  async processNode(input: PluginProcessInput): Promise<PluginProcessResult> {
+    const {input: nodeInput, config } = input;
+    
+    // Get workspace ID from node's scenario
+    const workspace = useWorkspaceStore.getState().getCurrentWorkspace();
+    
+    if (!workspace) {
+      return {
+        output: "Error: No active workspace",
+        result: null
+      };
+    }
+    
+    try {
+      const pluginConfig = { ...this.defaultConfig, ...config } as ContextUpdaterConfig;
+      
+      // Prepare value based on type
+      let valueToSave: string | string[] | object = nodeInput;
+      
+      if (pluginConfig.valueType === 'array') {
+        valueToSave = nodeInput.split(',').map((item: string) => item.trim()).filter(Boolean);
+      } else if (pluginConfig.valueType === 'object') {
+        try {
+          valueToSave = JSON.parse(nodeInput);
+        } catch (e) {
+          return {
+            output: "Error: Invalid JSON format",
+            result: { error: "Invalid JSON format" }
+          };
+        }
+      }
+      
+      // Update workspace context
+      useWorkspaceStore.getState().updateWorkspaceContext(
+        workspace.id,
+        { [pluginConfig.contextKey]: valueToSave }
+      );
+      
+      const output = `Updated context key "${pluginConfig.contextKey}" in workspace "${workspace.name}"`;
+      
+      return {
+        output,
+        result: {
+          key: pluginConfig.contextKey,
+          value: valueToSave
+        }
+      };
+    } catch (error) {
+      console.error('Error in workspace context updater plugin:', error);
+      return {
+        output: `Error updating workspace context: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        result: { error }
+      };
+    }
+  }
 }
 
 export default new WorkspaceContextUpdaterPlugin();
