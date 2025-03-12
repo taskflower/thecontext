@@ -72,7 +72,7 @@ export const PluginsTab: React.FC = () => {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="active">
-        <TabsList className="grid grid-cols-3">
+        <TabsList className="grid grid-cols-3 w-max">
           <TabsTrigger value="active">Active Plugins</TabsTrigger>
           <TabsTrigger value="all">All Plugins</TabsTrigger>
           <TabsTrigger value="nodes">Nodes with Plugins</TabsTrigger>

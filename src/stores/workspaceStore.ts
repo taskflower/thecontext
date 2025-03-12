@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/stores/workspaceStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
@@ -38,7 +39,8 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
           createdAt: Date.now(),
           updatedAt: Date.now(),
           context: {},
-          scenarioIds: []
+          scenarioIds: [],
+          nodes: [] // Add the missing nodes property
         };
         
         set((state) => ({
@@ -108,7 +110,8 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
           name,
           createdAt: Date.now(),
           updatedAt: Date.now(),
-          scenarioIds: []
+          scenarioIds: [],
+          nodes: [...workspace.nodes] // Properly copy the nodes array
         };
         
         // Dodajemy najpierw workspace do stanu

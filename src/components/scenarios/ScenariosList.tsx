@@ -79,8 +79,8 @@ export const ScenariosList: React.FC = () => {
   
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Scenarios</h2>
+      <div className="flex justify-end   items-center">
+       
         
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
@@ -126,8 +126,8 @@ export const ScenariosList: React.FC = () => {
         </Dialog>
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-2 mb-4">
+      <Tabs  value={activeTab} onValueChange={setActiveTab}>
+        <TabsList  className="grid grid-cols-2 mb-4 w-max">
           <TabsTrigger value="scenarios">Scenarios</TabsTrigger>
           <TabsTrigger value="templates">Templates</TabsTrigger>
         </TabsList>

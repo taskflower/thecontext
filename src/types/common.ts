@@ -78,4 +78,5 @@ export interface Position {
     updatedAt: number;
     context: Record<string, any>;
     scenarioIds: string[];
+    nodes: any[]; 
   }

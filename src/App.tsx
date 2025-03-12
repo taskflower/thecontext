@@ -1,9 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/App.tsx
-import { BrowserRouter as Router, Routes, Route, NavLink } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  NavLink,
+} from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 // Import components
 import PluginsTab from "./components/plugins/PluginsTab";
@@ -13,6 +17,7 @@ import { ScenariosList } from "./components/scenarios/ScenariosList";
 import { ScenarioExecution } from "./components/scenarios/ScenarioExecution";
 import { WorkspacesList } from "./components/workspaces/WorkspacesList";
 import { WorkspaceContextPanel } from "./components/workspaces/WorkspaceContextPanel";
+import AppHeader from "./components/layout/AppHeader";
 
 // Import icons
 import {
@@ -22,9 +27,6 @@ import {
   Play,
   Database,
   LayoutDashboard,
-  ChevronDown,
-  FileCode,
-  Network
 } from "lucide-react";
 
 // Import utilities
@@ -34,7 +36,6 @@ import { useWorkspaceStore } from "./stores/workspaceStore";
 import { useEffect } from "react";
 import { registerAllPlugins } from "./plugins/registerPlugins";
 import { cn } from "./utils/utils";
-import { useScenarioStore } from "./stores/scenarioStore";
 
 // Initialize plugin system
 registerStoresForPlugins();
@@ -42,41 +43,29 @@ registerStoresForPlugins();
 function SidebarNav() {
   return (
     <div className="space-y-1">
-      <SidebarItem 
-        href="/" 
-        icon={<Folder className="h-4 w-4 mr-2" />}
-      >
+      <SidebarItem href="/" icon={<Folder className="h-4 w-4 mr-2" />}>
         Workspaces
       </SidebarItem>
-      <SidebarItem 
-        href="/scenarios" 
+      <SidebarItem
+        href="/scenarios"
         icon={<LayoutDashboard className="h-4 w-4 mr-2" />}
       >
         Scenarios
       </SidebarItem>
-      <SidebarItem 
-        href="/flow-editor" 
-        icon={<Code className="h-4 w-4 mr-2" />}
-      >
+      <SidebarItem href="/flow-editor" icon={<Code className="h-4 w-4 mr-2" />}>
         Flow Editor
       </SidebarItem>
-      <SidebarItem 
-        href="/plugins" 
-        icon={<Puzzle className="h-4 w-4 mr-2" />}
-      >
+      <SidebarItem href="/plugins" icon={<Puzzle className="h-4 w-4 mr-2" />}>
         Plugins
       </SidebarItem>
-      <SidebarItem 
-        href="/execute" 
-        icon={<Play className="h-4 w-4 mr-2" />}
-      >
+      <SidebarItem href="/execute" icon={<Play className="h-4 w-4 mr-2" />}>
         Execute
       </SidebarItem>
     </div>
   );
 }
 
-function SidebarItem({ href, icon, children }:any) {
+function SidebarItem({ href, icon, children }: any) {
   return (
     <NavLink to={href}>
       {({ isActive }) => (
@@ -84,7 +73,9 @@ function SidebarItem({ href, icon, children }:any) {
           variant="ghost"
           className={cn(
             "w-full justify-start",
-            isActive ? "bg-accent text-accent-foreground" : "hover:bg-accent hover:text-accent-foreground"
+            isActive
+              ? "bg-accent text-accent-foreground"
+              : "hover:bg-accent hover:text-accent-foreground"
           )}
         >
           {icon}
@@ -99,7 +90,7 @@ function SidebarItem({ href, icon, children }:any) {
 const WorkspacePage = () => {
   const { getCurrentWorkspace } = useWorkspaceStore();
   const workspace = getCurrentWorkspace();
-  
+
   return (
     <div className="space-y-6">
       <WorkspacesList />
@@ -114,21 +105,14 @@ const WorkspacePage = () => {
 
 const ScenariosPage = () => <ScenariosList />;
 
-const FlowEditorPage = () => (
-  <div
-    className="border rounded-md bg-white"
-    style={{ height: "100%" }}
-  >
-    <FlowEditor />
-  </div>
-);
+const FlowEditorPage = () => <FlowEditor />;
 
 const PluginsPage = () => <PluginsTab />;
 
 const ExecutePage = () => {
   const { getCurrentWorkspace } = useWorkspaceStore();
   const workspace = getCurrentWorkspace();
-  
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <ScenarioExecution />
@@ -144,22 +128,18 @@ const ExecutePage = () => {
             {workspace ? (
               Object.keys(workspace.context).length > 0 ? (
                 <div className="space-y-2">
-                  {Object.entries(workspace.context).map(
-                    ([key, value]) => (
-                      <div key={key} className="border rounded p-3">
-                        <div className="font-medium text-sm">
-                          {key}
-                        </div>
-                        <div className="mt-1 text-xs bg-slate-50 p-2 rounded overflow-x-auto">
-                          <pre>
-                            {typeof value === "object"
-                              ? JSON.stringify(value, null, 2)
-                              : String(value)}
-                          </pre>
-                        </div>
+                  {Object.entries(workspace.context).map(([key, value]) => (
+                    <div key={key} className="border rounded p-3">
+                      <div className="font-medium text-sm">{key}</div>
+                      <div className="mt-1 text-xs bg-slate-50 p-2 rounded overflow-x-auto">
+                        <pre>
+                          {typeof value === "object"
+                            ? JSON.stringify(value, null, 2)
+                            : String(value)}
+                        </pre>
                       </div>
-                    )
-                  )}
+                    </div>
+                  ))}
                 </div>
               ) : (
                 <div className="text-center py-6 text-slate-500">
@@ -178,67 +158,13 @@ const ExecutePage = () => {
   );
 };
 
-// Route titles component
-function RouteTitle({ title }:any) {
-  return <h1 className="text-xl font-bold">{title}</h1>;
-}
-
-function AppHeader() {
-  const { getCurrentWorkspace } = useWorkspaceStore();
-  const { getCurrentScenario } = useScenarioStore();
-  
-  const workspace = getCurrentWorkspace();
-  const scenario = getCurrentScenario();
-  
-  return (
-    <div className="flex items-center justify-between p-6">
-      <div>
-        <Routes>
-          <Route path="/" element={<RouteTitle title="Workspaces" />} />
-          <Route path="/scenarios" element={<RouteTitle title="Scenarios" />} />
-          <Route path="/flow-editor" element={<RouteTitle title="Flow Editor" />} />
-          <Route path="/plugins" element={<RouteTitle title="Plugins" />} />
-          <Route path="/execute" element={<RouteTitle title="Execute" />} />
-        </Routes>
-      </div>
-      
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="flex items-center text-sm border border-sidebar-foreground rounded-lg p-3 px-4 shadow-sidebar">
-            <Folder className="h-4 w-4 mr-1" />
-            {workspace ? workspace.name : "No workspace"}
-            <ChevronDown className="h-4 w-4 ml-2" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-60">
-          <DropdownMenuItem className="flex items-center">
-            <Folder className="h-4 w-4 mr-2" />
-            <span className="font-medium">Workspace:</span>
-            <span className="ml-1">{workspace ? workspace.name : "None"}</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem className="flex items-center">
-            <FileCode className="h-4 w-4 mr-2" />
-            <span className="font-medium">Scenario:</span>
-            <span className="ml-1">{scenario ? scenario.name : "None"}</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem className="flex items-center">
-            <Network className="h-4 w-4 mr-2" />
-            <span className="font-medium">Nodes:</span>
-            <span className="ml-1">{workspace && workspace.nodes ? workspace.nodes.length : 0}</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
-  );
-}
-
 function AppContent() {
   return (
     <div className="flex flex-col h-full">
       <AppHeader />
-      
+
       <ScrollArea className="flex-1">
-        <div className="p-6 pt-0">
+        <div className="p-6 pt-0 h-[calc(100vh-theme(spacing.6)-theme(spacing.16))]">
           <Routes>
             <Route path="/" element={<WorkspacePage />} />
             <Route path="/scenarios" element={<ScenariosPage />} />
@@ -248,7 +174,7 @@ function AppContent() {
           </Routes>
         </div>
       </ScrollArea>
-      
+
       <footer className="p-6 text-center text-sm text-slate-500">
         <p>
           © {new Date().getFullYear()} THE CONTEXT - Redesigned Architecture
@@ -262,14 +188,14 @@ function App() {
   useEffect(() => {
     // Register all plugins on application start
     registerAllPlugins();
-    
+
     // Register store API for plugin access
     registerStoresForPlugins();
   }, []);
 
   return (
     <Router>
-      <div className="min-h-screen h-screen flex bg-gray-50">
+      <div className="min-h-screen h-screen flex ">
         {/* Load plugins */}
         <PluginInitializer />
 
@@ -277,7 +203,7 @@ function App() {
         <Toaster />
 
         {/* Sidebar */}
-        <aside className="w-64 border-r bg-white h-full overflow-hidden flex flex-col">
+        <aside className="w-64 bg-white h-full overflow-hidden flex flex-col">
           <div className="p-6">
             <h2 className="text-lg font-bold">THE CONTEXT</h2>
             <p className="text-sm text-muted-foreground">
