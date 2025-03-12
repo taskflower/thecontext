@@ -1,5 +1,5 @@
 // src/components/nodes/FlowEditor.tsx
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import ReactFlow, {
   addEdge,
   Controls,
@@ -27,6 +27,8 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({ onEdi
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId: string } | null>(null);
   const [showNodeEditor, setShowNodeEditor] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const loadingRef = useRef(false);
 
   // Get scenario data from store
   const { getScenario, createEdge, addEdgeToScenario, edges: storeEdges, getCurrentScenario } = useScenarioStore();
@@ -36,6 +38,7 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({ onEdi
   // Get current scenario from the store
   const currentScenario = getCurrentScenario();
   const scenarioId = currentScenario?.id;
+  const prevScenarioIdRef = useRef<string | null>(null);
 
   // Create a memoized nodeTypes object to avoid React Flow warnings
   const nodeTypes = React.useMemo(() => ({
@@ -74,63 +77,50 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({ onEdi
     }
   }, [scenarioId, getLatestExecution, setNodes]);
 
-  // Subscribe to nodeStore changes
-  useEffect(() => {
-    // Subscribe to nodeStore changes related to this scenario
-    const unsubNodeStore = useNodeStore.subscribe((state, prevState) => {
-      if (!scenarioId) return;
-      
-      // Check if there are new nodes for this scenario
-      const prevScenarioNodes = Object.values(prevState.nodes)
-        .filter(node => node.scenarioId === scenarioId);
-      
-      const currentScenarioNodes = Object.values(state.nodes)
-        .filter(node => node.scenarioId === scenarioId);
-      
-      // If the node count has changed or nodes have been updated
-      if (prevScenarioNodes.length !== currentScenarioNodes.length ||
-          JSON.stringify(prevScenarioNodes) !== JSON.stringify(currentScenarioNodes)) {
-        
-        // Transform nodes from store format to ReactFlow format
-        const updatedFlowNodes = currentScenarioNodes.map(node => ({
-          id: node.id,
-          type: 'custom',
-          position: node.position,
-          data: {
-            ...node.data,
-            label: node.data.label || node.type,
-            response: node.data.response || ''
-          },
-        }));
-
-        setNodes(updatedFlowNodes);
-      }
-    });
-
-    // Cleanup
-    return () => {
-      unsubNodeStore();
-    };
-  }, [scenarioId, setNodes]);
-
   // Load nodes and edges when scenario changes
   useEffect(() => {
     console.log("Loading scenario data, scenarioId:", scenarioId);
     if (!scenarioId) {
       console.warn("Cannot load flow data: No scenario ID provided");
+      prevScenarioIdRef.current = null;
+      setNodes([]);
+      setEdges([]);
+      setIsInitialized(false);
       return;
     }
 
+    // Skip reloading for the same scenario to prevent duplicate nodes
+    if (prevScenarioIdRef.current === scenarioId && isInitialized) {
+      console.log(`Scenario ${scenarioId} already loaded, skipping reload`);
+      return;
+    }
+
+    // Prevent concurrent loading operations
+    if (loadingRef.current) {
+      console.log("Loading already in progress, skipping");
+      return;
+    }
+
+    loadingRef.current = true;
+
+    // Reset the nodes and edges in ReactFlow state first
+    setNodes([]);
+    setEdges([]);
+    
     const scenario = getScenario(scenarioId);
     if (!scenario) {
       console.error(`Scenario ${scenarioId} not found`);
+      loadingRef.current = false;
       return;
     }
 
     console.log(`Found scenario with ${scenario.nodeIds.length} nodes and ${scenario.edgeIds.length} edges`);
 
+    // Ensure nodeIds are unique
+    const uniqueNodeIds = Array.from(new Set(scenario.nodeIds));
+    
     // Transform nodes from store format to ReactFlow format
-    const flowNodes = scenario.nodeIds.map(nodeId => {
+    const flowNodes = uniqueNodeIds.map(nodeId => {
       const node = getNode(nodeId);
       if (!node) return null;
 
@@ -147,8 +137,11 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({ onEdi
       };
     }).filter(Boolean) as Node[];
 
+    // Ensure edgeIds are unique
+    const uniqueEdgeIds = Array.from(new Set(scenario.edgeIds));
+
     // Transform edges from store format to ReactFlow format
-    const flowEdges = scenario.edgeIds.map(edgeId => {
+    const flowEdges = uniqueEdgeIds.map(edgeId => {
       const edge = storeEdges[edgeId];
       if (!edge) return null;
 
@@ -169,7 +162,13 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({ onEdi
     
     // Also refresh with latest execution data
     refreshNodeResponses();
-  }, [scenarioId, getScenario, getNode, storeEdges, refreshNodeResponses, setNodes, setEdges, handleEditNode]);
+    
+    // Update refs and state to indicate loading is complete
+    prevScenarioIdRef.current = scenarioId;
+    setIsInitialized(true);
+    loadingRef.current = false;
+    
+  }, [scenarioId, getScenario, getNode, storeEdges, refreshNodeResponses, setNodes, setEdges, handleEditNode, isInitialized]);
 
   // Update node positions in store when dragging ends
   const onNodeDragStop = useCallback((event: React.MouseEvent, node: Node) => {

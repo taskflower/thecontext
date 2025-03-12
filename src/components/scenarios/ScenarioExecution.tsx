@@ -10,24 +10,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Play,
-  Clock,
-  X,
-  DownloadCloud,
-  Loader,
-  ArrowRight,
-} from "lucide-react";
+import { Play, Clock, X, DownloadCloud, Loader, ArrowRight } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
   DialogDescription,
-  DialogFooter,
+  DialogFooter 
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useScenarioStore } from "@/stores/scenarioStore";
@@ -44,7 +37,6 @@ export const ScenarioExecution: React.FC = () => {
     clearHistory,
     startExecution,
     executeNode,
-
     completeExecution,
     calculateExecutionOrder,
   } = useExecutionStore();
@@ -54,7 +46,7 @@ export const ScenarioExecution: React.FC = () => {
   const [isExecuting, setIsExecuting] = useState(false);
   const [exportData, setExportData] = useState<string | null>(null);
   const [executionId, setExecutionId] = useState<string | null>(null);
-
+  
   // Step-by-step execution states
   const [isExecutionDialogOpen, setIsExecutionDialogOpen] = useState(false);
   const [currentNodeIndex, setCurrentNodeIndex] = useState(0);
@@ -90,10 +82,10 @@ export const ScenarioExecution: React.FC = () => {
   // Function to get info about the current node
   const getCurrentNodeInfo = () => {
     if (!currentNodeId) return null;
-
+    
     const node = getNode(currentNodeId);
     if (!node) return null;
-
+    
     return {
       id: node.id,
       type: node.type,
@@ -107,15 +99,15 @@ export const ScenarioExecution: React.FC = () => {
   // Function to process the current node
   const processCurrentNode = async () => {
     if (!executionId || !currentNodeId) return;
-
+    
     const node = getNode(currentNodeId);
     if (!node) return;
-
+    
     // Check if node has an active plugin
     if (node.data.pluginId && isPluginActive(node.data.pluginId)) {
       setWaitingForPlugin(true);
       setWaitingForUserInput(false);
-
+      
       // Plugin execution will be handled by the plugin component
       // We'll wait for the plugin to signal completion
     } else {
@@ -130,26 +122,22 @@ export const ScenarioExecution: React.FC = () => {
   // Handle submitting user input for the current node
   const handleSubmitUserInput = async () => {
     if (!executionId || !currentNodeId) return;
-
+    
     try {
       // Execute node with user input
       const output = await executeNode(executionId, currentNodeId, userInput);
-
+      
       // Store result
-      setExecutionResults((prev) => ({
+      setExecutionResults(prev => ({
         ...prev,
-        [currentNodeId]: { input: userInput, output },
+        [currentNodeId]: { input: userInput, output }
       }));
-
+      
       // Move to next node
       moveToNextNode();
     } catch (error) {
       console.error("Error processing node:", error);
-      completeExecution(
-        executionId,
-        "error",
-        error instanceof Error ? error.message : String(error)
-      );
+      completeExecution(executionId, "error", error instanceof Error ? error.message : String(error));
       setIsExecutionDialogOpen(false);
     }
   };
@@ -157,15 +145,15 @@ export const ScenarioExecution: React.FC = () => {
   // Handle plugin completion
   const handlePluginComplete = async (output: string) => {
     if (!executionId || !currentNodeId) return;
-
+    
     // Store result
-    setExecutionResults((prev) => ({
+    setExecutionResults(prev => ({
       ...prev,
-      [currentNodeId]: { output },
+      [currentNodeId]: { output }
     }));
-
+    
     setWaitingForPlugin(false);
-
+    
     // Move to next node
     moveToNextNode();
   };
@@ -177,7 +165,7 @@ export const ScenarioExecution: React.FC = () => {
     setNodeContent("");
     setWaitingForUserInput(false);
     setWaitingForPlugin(false);
-
+    
     // Check if we're at the end
     if (currentNodeIndex >= executionOrder.length - 1) {
       // Execution complete
@@ -188,7 +176,7 @@ export const ScenarioExecution: React.FC = () => {
       setIsExecuting(false);
       return;
     }
-
+    
     // Move to next node
     const nextIndex = currentNodeIndex + 1;
     setCurrentNodeIndex(nextIndex);
@@ -198,18 +186,18 @@ export const ScenarioExecution: React.FC = () => {
   // Initialize step-by-step execution
   const initializeStepExecution = async () => {
     if (!scenario) return;
-
+    
     setIsExecuting(true);
-
+    
     try {
       // Start a new execution
       const newExecutionId = startExecution(scenario.id);
       setExecutionId(newExecutionId);
-
+      
       // Calculate execution order
       const order = await calculateExecutionOrder(scenario.id);
       setExecutionOrder(order);
-
+      
       // If there are nodes to execute
       if (order.length > 0) {
         setCurrentNodeIndex(0);
@@ -358,10 +346,7 @@ export const ScenarioExecution: React.FC = () => {
               ) : (
                 <div>
                   {executions.map((execution: any) => (
-                    <div
-                      key={execution.id}
-                      className="mb-4 border rounded-md p-3"
-                    >
+                    <div key={execution.id} className="mb-4 border rounded-md p-3">
                       <div className="flex items-center gap-2 text-sm mb-2">
                         <span
                           className={
@@ -414,9 +399,7 @@ export const ScenarioExecution: React.FC = () => {
                         {execution.error && (
                           <Alert variant="destructive">
                             <AlertTitle>Error</AlertTitle>
-                            <AlertDescription>
-                              {execution.error}
-                            </AlertDescription>
+                            <AlertDescription>{execution.error}</AlertDescription>
                           </Alert>
                         )}
                       </div>
@@ -430,15 +413,14 @@ export const ScenarioExecution: React.FC = () => {
       </Card>
 
       {/* Step-by-step execution dialog */}
-      <Dialog
-        open={isExecutionDialogOpen}
-        onOpenChange={(open) => {
-          if (!open) handleDialogClose();
-        }}
-      >
+      <Dialog open={isExecutionDialogOpen} onOpenChange={(open) => {
+        if (!open) handleDialogClose();
+      }}>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Executing Scenario: {scenario.name}</DialogTitle>
+            <DialogTitle>
+              Executing Scenario: {scenario.name}
+            </DialogTitle>
             <DialogDescription>
               Step {currentNodeIndex + 1} of {executionOrder.length}
             </DialogDescription>
@@ -449,28 +431,21 @@ export const ScenarioExecution: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-medium">{currentNode.type}</h3>
-                  <span className="text-sm text-slate-500">
-                    Node ID: {currentNode.id}
-                  </span>
+                  <span className="text-sm text-slate-500">Node ID: {currentNode.id}</span>
                 </div>
 
                 {/* Plugin workflow */}
                 {currentNode.hasPlugin && waitingForPlugin && (
                   <div className="border rounded-md p-4">
                     <div className="mb-4 text-sm">
-                      This node uses a plugin. Please complete the plugin
-                      workflow to continue.
+                      This node uses a plugin. Please complete the plugin workflow to continue.
                     </div>
-                    <PluginContainer
-                      pluginId={currentNode.pluginId as string}
+                    <PluginContainer 
+                      pluginId={currentNode.pluginId as string} 
                       nodeId={currentNode.id}
                     />
                     <div className="mt-4 flex justify-end">
-                      <Button
-                        onClick={() =>
-                          handlePluginComplete("Plugin process completed")
-                        }
-                      >
+                      <Button onClick={() => handlePluginComplete("Plugin process completed")}>
                         Continue to Next Step
                       </Button>
                     </div>
@@ -481,19 +456,12 @@ export const ScenarioExecution: React.FC = () => {
                 {!currentNode.hasPlugin && waitingForUserInput && (
                   <div className="space-y-4">
                     <div className="border rounded-md p-3 bg-slate-50">
-                      <div className="text-sm font-medium mb-2">
-                        Content/Prompt:
-                      </div>
-                      <div className="whitespace-pre-wrap text-sm">
-                        {nodeContent}
-                      </div>
+                      <div className="text-sm font-medium mb-2">Content/Prompt:</div>
+                      <div className="whitespace-pre-wrap text-sm">{nodeContent}</div>
                     </div>
-
+                    
                     <div>
-                      <label
-                        htmlFor="userInput"
-                        className="block text-sm font-medium mb-1"
-                      >
+                      <label htmlFor="userInput" className="block text-sm font-medium mb-1">
                         Your Response:
                       </label>
                       <Textarea
@@ -522,11 +490,14 @@ export const ScenarioExecution: React.FC = () => {
           <DialogFooter>
             {waitingForUserInput && (
               <div className="flex gap-2 w-full justify-between">
-                <Button variant="outline" onClick={handleDialogClose}>
+                <Button 
+                  variant="outline" 
+                  onClick={handleDialogClose}
+                >
                   Cancel Execution
                 </Button>
-                <Button
-                  onClick={handleSubmitUserInput}
+                <Button 
+                  onClick={handleSubmitUserInput} 
                   disabled={!userInput.trim()}
                 >
                   Submit <ArrowRight className="ml-2 h-4 w-4" />

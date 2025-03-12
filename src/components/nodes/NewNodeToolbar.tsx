@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/nodes/NewNodeToolbar.tsx
 import React, { useState } from 'react';
 import { useReactFlow } from 'reactflow';
