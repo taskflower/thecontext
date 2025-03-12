@@ -13,13 +13,17 @@ import ScenarioStats from "./editor/ScenarioStats";
 
 const ScenarioManagement: React.FC = () => {
   const { nodes, edges, exportToJson } = useScenarioStore();
-  const { importScenario, syncCurrentScenarioToActive } = useScenariosMultiStore();
-  
+  const { importScenario, syncCurrentScenarioToActive } =
+    useScenariosMultiStore();
+
   const [showExportModal, setShowExportModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
 
   // Handle export operation
   const handleExport = () => {
+    // Synchronizuj aktywny scenariusz do aktualnego przed eksportem
+    useScenariosMultiStore.getState().syncActiveScenarioToCurrent();
+
     const scenarioData = exportToJson();
     exportToJsonFile(scenarioData, "scenario_export.json");
     setShowExportModal(false);
@@ -29,27 +33,31 @@ const ScenarioManagement: React.FC = () => {
   const handleFileSelect = async (file: File) => {
     try {
       const data = await parseJsonFile(file);
-      
+
       // Ensure data has the required structure
-      if (data && typeof data === 'object' && data.nodes) {
+      if (data && typeof data === "object" && data.nodes) {
         // Add an ID if missing
         if (!data.id) {
           data.id = `scenario_${Date.now()}`;
         }
-        
+
         // Import the scenario
         importScenario(data);
-        
+
         // This should now be handled by importScenario automatically
         // but we'll add it as a backup
         setTimeout(() => {
           syncCurrentScenarioToActive();
         }, 100);
       } else {
-        alert("Invalid scenario format. The file must contain a 'nodes' property.");
+        alert(
+          "Invalid scenario format. The file must contain a 'nodes' property."
+        );
       }
     } catch (error) {
-      alert("Error importing scenario. Please make sure the file contains valid JSON.");
+      alert(
+        "Error importing scenario. Please make sure the file contains valid JSON."
+      );
       console.error(error);
     }
   };
@@ -95,7 +103,8 @@ const ScenarioManagement: React.FC = () => {
           }
         >
           <div className="text-sm text-slate-500">
-            Export the entire scenario including all nodes, connections and categories.
+            Export the entire scenario including all nodes, connections and
+            categories.
           </div>
         </MCard>
 
@@ -114,7 +123,8 @@ const ScenarioManagement: React.FC = () => {
           }
         >
           <div className="text-sm text-slate-500">
-            Import a scenario from a JSON file. This will add the scenario to the list, not replace the current one.
+            Import a scenario from a JSON file. This will add the scenario to
+            the list, not replace the current one.
           </div>
         </MCard>
       </div>

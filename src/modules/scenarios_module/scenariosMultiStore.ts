@@ -39,6 +39,8 @@ interface ScenariosMultiState {
   syncCurrentScenarioToActive: () => boolean;
   // Updates the workspace context for a scenario
   updateScenarioWorkspaceContext: (id: string, workspaceContext: WorkspaceContext) => void;
+  // Syncs the active scenario from scenarioStore back to the current scenario in the multi-store
+  syncActiveScenarioToCurrent: () => void;
 }
 
 export const useScenariosMultiStore = create<ScenariosMultiState>((set, get) => ({
@@ -88,25 +90,36 @@ export const useScenariosMultiStore = create<ScenariosMultiState>((set, get) => 
   },
 
   importScenario: (scenario) => {
-    const now = Date.now();
-    const scenarioWithMeta = {
-      ...scenario,
-      updatedAt: now
-    };
-    
-    set((state) => {
-      const newState = {
-        scenarios: { ...state.scenarios, [scenario.id]: scenarioWithMeta },
-        currentScenarioId: scenario.id,
+    try {
+      const now = Date.now();
+      const scenarioWithMeta = {
+        ...scenario,
+        updatedAt: now
       };
       
-      // After updating the state, sync to active scenario
-      setTimeout(() => {
+      set((state) => {
+        const newState = {
+          scenarios: { ...state.scenarios, [scenario.id]: scenarioWithMeta },
+          currentScenarioId: scenario.id,
+        };
+        
+        // Synchronizuj do aktywnego scenariusza
         useScenarioStore.getState().importFromJson(scenario);
-      }, 0);
+        
+        return newState;
+      });
       
-      return newState;
-    });
+      // Po pewnym czasie, synchronizuj z powrotem
+      // aby upewnić się, że zmiany są zachowane
+      setTimeout(() => {
+        useScenarioStore.getState().syncActiveScenarioToCurrent();
+      }, 200);
+      
+      return scenario.id;
+    } catch (error) {
+      console.error("Błąd podczas importowania scenariusza:", error);
+      return null;
+    }
   },
 
   syncCurrentScenarioToActive: () => {
@@ -119,6 +132,32 @@ export const useScenariosMultiStore = create<ScenariosMultiState>((set, get) => 
     }
     return false;
   },
+
+  syncActiveScenarioToCurrent: () => {
+    const { currentScenarioId, scenarios } = get();
+    if (!currentScenarioId || !scenarios[currentScenarioId]) return;
+  
+    const activeScenario = useScenarioStore.getState();
+    const currentScenario = scenarios[currentScenarioId];
+    
+    set((state) => ({
+      scenarios: {
+        ...state.scenarios,
+        [currentScenarioId]: {
+          ...currentScenario,
+          nodes: { ...activeScenario.nodes },
+          edges: [...activeScenario.edges],
+          categories: [...activeScenario.categories],
+          nodeResponses: { ...activeScenario.nodeResponses },
+          // Preserve workspace connection
+          workspaceId: currentScenario.workspaceId,
+          workspaceContext: currentScenario.workspaceContext,
+          updatedAt: Date.now()
+        }
+      }
+    }));
+  },
+
   
   updateScenarioWorkspaceContext: (id, workspaceContext) => set((state) => {
     const scenario = state.scenarios[id];

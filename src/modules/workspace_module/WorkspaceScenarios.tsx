@@ -1,5 +1,5 @@
 // src/modules/workspaces_module/WorkspaceScenarios.tsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useWorkspaceStore } from './workspaceStore';
 import { useScenariosMultiStore } from '../scenarios_module/scenariosMultiStore';
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useScenarioStore } from '../scenarios_module/scenarioStore';
 
 interface WorkspaceScenariosProps {
   workspaceId: string;
@@ -36,9 +37,38 @@ const WorkspaceScenarios: React.FC<WorkspaceScenariosProps> = ({ workspaceId }) 
   const [showCreateScenarioModal, setShowCreateScenarioModal] = useState(false);
   const [newScenarioName, setNewScenarioName] = useState('');
   const [scenarioToDelete, setScenarioToDelete] = useState<string | null>(null);
+
+  // Add this useEffect to sync active scenario changes
+  useEffect(() => {
+    // Get active scenario data
+    const { nodes, edges } = useScenarioStore.getState();
+    const { currentScenarioId } = useScenariosMultiStore.getState();
+    
+    // If there's an active scenario, sync its data to the multi-store
+    if (currentScenarioId) {
+      useScenariosMultiStore.getState().syncActiveScenarioToCurrent();
+    }
+    
+    // Set up subscription to scenario store changes
+    const unsubscribe = useScenarioStore.subscribe(
+      () => {
+        const { currentScenarioId } = useScenariosMultiStore.getState();
+        if (currentScenarioId) {
+          useScenariosMultiStore.getState().syncActiveScenarioToCurrent();
+        }
+      }
+    );
+    
+    // Clean up subscription on unmount
+    return () => {
+      unsubscribe();
+    };
+  }, []);
   
   const workspace = workspaces[workspaceId];
   if (!workspace) return null;
+
+  
   
   // Fix for the TypeScript error - don't include 'id' explicitly as it's already in scenarios[id]
   const workspaceScenarios = workspace.scenarioIds

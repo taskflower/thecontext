@@ -207,6 +207,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       },
       
       exportWorkspaceToJson: (id) => {
+        // Upewnij się, że aktywny scenariusz jest zsynchronizowany przed eksportem
+        useScenariosMultiStore.getState().syncActiveScenarioToCurrent();
+        
         const workspace = get().workspaces[id];
         if (!workspace) return null;
         
