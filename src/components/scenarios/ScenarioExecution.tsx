@@ -115,8 +115,9 @@ export const ScenarioExecution: React.FC = () => {
       // We'll wait for the plugin to signal completion
     } else {
       // No plugin, show content and wait for user input
-      const content = node.data.content || node.data.prompt || "";
-      setNodeContent(content);
+      const displayContent = node.data.content || node.data.prompt || "";
+      
+      setNodeContent(displayContent);
       setWaitingForUserInput(true);
       setWaitingForPlugin(false);
     }
@@ -127,14 +128,38 @@ export const ScenarioExecution: React.FC = () => {
     if (!executionId || !currentNodeId) return;
     
     try {
-      // Execute node with user input
-      const output = await executeNode(executionId, currentNodeId, userInput);
+      console.log("Odpowiedź użytkownika:", userInput);
       
-      // Store result
-      setExecutionResults(prev => ({
-        ...prev,
-        [currentNodeId]: { input: userInput, output }
-      }));
+      // Execute node with user input
+      const node = getNode(currentNodeId);
+      
+      // If node has a plugin, use nodeContent as input
+      if (node && node.data.pluginId) {
+        const output = await executeNode(executionId, currentNodeId, nodeContent);
+        
+        // Store result
+        setExecutionResults(prev => ({
+          ...prev,
+          [currentNodeId]: { input: nodeContent, output }
+        }));
+      } else {
+        // Directly save result without calling executeNode
+        const executionStore = useExecutionStore.getState();
+        executionStore.recordResult(
+          executionId,
+          currentNodeId,
+          nodeContent,        // Node content as input
+          userInput,          // User response as output
+          undefined,               // No plugin
+          undefined,               // No plugin result
+          0                   // No duration
+        );
+        
+        setExecutionResults(prev => ({
+          ...prev,
+          [currentNodeId]: { input: nodeContent, output: userInput }
+        }));
+      }
       
       // Move to next node
       moveToNextNode();
@@ -197,16 +222,16 @@ export const ScenarioExecution: React.FC = () => {
       const newExecutionId = startExecution(scenario.id);
       setExecutionId(newExecutionId);
       
-      // Calculate execution order z lepszą obsługą błędów
-      let order;
+      // Calculate execution order with better error handling
+      let order:any;
       try {
         order = await calculateExecutionOrder(scenario.id);
         if (!Array.isArray(order)) {
-          console.error("calculateExecutionOrder nie zwróciło tablicy");
+          console.error("calculateExecutionOrder didn't return an array");
           order = [];
         }
       } catch (error) {
-        console.error("Błąd podczas obliczania kolejności wykonania:", error);
+        console.error("Error calculating execution order:", error);
         order = [];
       }
       
@@ -425,6 +450,12 @@ export const ScenarioExecution: React.FC = () => {
                                 </div>
                                 <div className="text-xs mt-1">
                                   <div className="font-medium text-slate-500 mb-1">
+                                    Input:
+                                  </div>
+                                  <pre className="bg-slate-50 p-2 rounded whitespace-pre-wrap overflow-x-auto">
+                                    {result.input}
+                                  </pre>
+                                  <div className="font-medium text-slate-500 mb-1 mt-2">
                                     Output:
                                   </div>
                                   <pre className="bg-slate-50 p-2 rounded whitespace-pre-wrap overflow-x-auto">

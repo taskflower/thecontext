@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/components/nodes/NodeEditor.tsx - poprawiona wersja
+// src/components/nodes/NodeEditor.tsx - cleaned version without rawContent and variable references
 import React, { useState, useEffect } from 'react';
 import { useNodeStore } from '../../stores/nodeStore';
 import { usePluginStore } from '../../stores/pluginStore';
 import { useScenarioStore } from '../../stores/scenarioStore';
 
 const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
-  // Istniejące hooki pozostają bez zmian
+  // Hooks
   const { activeNodeId, getNode, updateNodeData, assignPluginToNode, removePluginFromNode, getNodesByScenario } = 
     useNodeStore(state => state as unknown as NodeStoreWithActive);
   
@@ -27,7 +27,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
     description: plugin.description
   }));
 
-  // Aktualizuj stan lokalny gdy zmienia się aktywny węzeł
+  // Update local state when active node changes
   useEffect(() => {
     if (activeNodeId) {
       const currentNode = getNode(activeNodeId);
@@ -41,19 +41,21 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
     }
   }, [activeNodeId, getNode]);
 
-  // Zapisz zmiany w węźle
+  // Save changes to the node
   const handleSave = () => {
     if (!activeNodeId || !node) return;
     
-    // Jeśli ustawiamy węzeł jako startowy, resetujemy flagę dla innych węzłów
+    console.log('Saving node with content:', content);
+    
+    // If setting this node as start node, reset flag for other nodes
     if (isStartNode) {
       const scenarioId = node.scenarioId;
       
-      // Pobierz inne węzły dla tego scenariusza
+      // Get other nodes for this scenario
       const otherNodes = getNodesByScenario(scenarioId)
         .filter(otherNode => otherNode.id !== activeNodeId);
       
-      // Resetuj flagę startową dla innych węzłów
+      // Reset start flag for other nodes
       otherNodes.forEach(otherNode => {
         if (otherNode.data.isStartNode) {
           updateNodeData(otherNode.id, {
@@ -64,14 +66,14 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
       });
     }
     
-    // Aktualizacja danych węzła z AKTUALNYM stanem isStartNode
+    // Update node data with current state
     updateNodeData(activeNodeId, {
-      content,
+      content: content,
       label,
-      isStartNode: isStartNode // POPRAWIONE: używanie stanu isStartNode zamiast node.data.isStartNode
+      isStartNode: isStartNode
     });
     
-    // Obsługa wtyczek pozostaje bez zmian
+    // Handle plugins
     if (selectedPluginId) {
       if (selectedPluginId !== node.data.pluginId) {
         assignPluginToNode(activeNodeId, selectedPluginId);
@@ -80,7 +82,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
       removePluginFromNode(activeNodeId);
     }
     
-    // Odśwież dane węzła w lokalnym stanie
+    // Refresh node data in local state
     setNode(getNode(activeNodeId));
     
     if (onClose) {
@@ -94,7 +96,6 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-lg border border-gray-200 max-w-2xl">
-      {/* Nagłówek i inne elementy pozostają bez zmian */}
       <div className="flex justify-between items-center px-4 py-3 border-b border-gray-200 bg-gray-50 rounded-t-lg">
         <h2 className="text-lg font-medium text-gray-800">Edit Node</h2>
         {onClose && (
@@ -122,7 +123,6 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
           />
         </div>
 
-        {/* TYLKO JEDEN CHECKBOX - usunięto duplikat */}
         <div className="mb-4">
           <div className="flex items-center">
             <input
@@ -133,12 +133,12 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
             <label htmlFor="isStartNode" className="ml-2 block text-sm text-gray-900">
-              Ustaw jako węzeł startowy
+              Set as start node
             </label>
           </div>
           <p className="mt-1 text-xs text-gray-500">
-            Węzeł startowy zostanie wykonany jako pierwszy w scenariuszu.
-            Tylko jeden węzeł może być oznaczony jako startowy.
+            The start node will be executed first in the scenario.
+            Only one node can be marked as start node.
           </p>
         </div>
         
@@ -156,12 +156,6 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
             >
               Plugin
             </button>
-            <button
-              className={`py-2 px-4 ${activeTab === 'variables' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-              onClick={() => setActiveTab('variables')}
-            >
-              Variables
-            </button>
           </div>
           
           {activeTab === 'content' && (
@@ -176,9 +170,6 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
                 placeholder="Enter node content or prompt here..."
               />
-              <p className="mt-1 text-xs text-gray-500">
-                You can use variables like {`{{nodeId.response}}`} to reference output from other nodes.
-              </p>
             </div>
           )}
           
@@ -214,36 +205,6 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
                       </pre>
                     </div>
                   )}
-                </div>
-              )}
-            </div>
-          )}
-          
-          {activeTab === 'variables' && (
-            <div className="mt-3">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Variables
-              </label>
-              <div className="bg-gray-50 p-3 rounded-md">
-                <p className="text-sm">
-                  Variables allow you to reference this node's output in other nodes.
-                </p>
-                <div className="mt-2 p-2 bg-gray-100 rounded font-mono text-xs">
-                  {`{{${node.id}.response}}`}
-                </div>
-              </div>
-              
-              {node.data.variables && Object.keys(node.data.variables).length > 0 && (
-                <div className="mt-3">
-                  <h4 className="text-sm font-medium">Current Variables</h4>
-                  <ul className="mt-1 space-y-1">
-                    {Object.entries(node.data.variables).map(([key, value]:any) => (
-                      <li key={key} className="flex justify-between text-xs bg-blue-50 p-2 rounded">
-                        <span className="font-medium">{key}:</span>
-                        <span className="font-mono">{value}</span>
-                      </li>
-                    ))}
-                  </ul>
                 </div>
               )}
             </div>

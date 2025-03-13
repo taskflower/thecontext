@@ -14,9 +14,9 @@ import { useWorkspaceStore } from '@/stores/workspaceStore';
 import { useScenarioStore } from '@/stores/scenarioStore';
 import { useNodeStore } from '@/stores/nodeStore';
 
-// Komponent do wyświetlania liczby węzłów w scenariuszu
+// Component to display the number of nodes in a scenario
 const ScenarioNodeCount: React.FC<{ scenarioId: string }> = ({ scenarioId }) => {
-  // Używamy hooka useNodeStore aby reagować na zmiany w store węzłów
+  // Use useNodeStore hook to react to changes in the node store
   const nodeCount = useNodeStore(state => 
     state.getNodeCountByScenario(scenarioId)
   );
@@ -57,7 +57,7 @@ export const ScenariosList: React.FC = () => {
     setIsCreateDialogOpen(false);
   };
   
-  // Jeśli nie ma workspace, pokazujemy komunikat
+  // If no workspace, show message
   if (!workspace) {
     return (
       <Card>
@@ -68,18 +68,18 @@ export const ScenariosList: React.FC = () => {
     );
   }
   
-  // Pobieramy scenariusze dla tego workspace
+  // Get scenarios for this workspace
   const workspaceScenarios = Object.values(scenarios)
     .filter((scenario) => scenario.workspaceId === workspace.id)
     .sort((a, b) => b.updatedAt - a.updatedAt);
   
-  // Pobieramy wszystkie szablony
+  // Get all templates
   const allTemplates = Object.values(templates)
     .sort((a, b) => b.updatedAt - a.updatedAt);
   
   return (
     <div className="space-y-6">
-      <div className="flex justify-end   items-center">
+      <div className="flex justify-end items-center">
        
         
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -126,8 +126,8 @@ export const ScenariosList: React.FC = () => {
         </Dialog>
       </div>
       
-      <Tabs  value={activeTab} onValueChange={setActiveTab}>
-        <TabsList  className="grid grid-cols-2 mb-4 w-max">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-2 mb-4 w-max">
           <TabsTrigger value="scenarios">Scenarios</TabsTrigger>
           <TabsTrigger value="templates">Templates</TabsTrigger>
         </TabsList>
