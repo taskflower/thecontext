@@ -141,7 +141,6 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
       
 
       executeNode: async (executionId, nodeId, message = "") => {
-
         const startTime = Date.now();
       
         try {
@@ -151,10 +150,16 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
           if (!node) {
             throw new Error(`Node ${nodeId} not found`);
           }
-
-          console.log('JAPIRDOLO',node,message)
       
-          const prompt =  node.data.prompt || ""
+          // Pobierz oryginalny prompt
+          let prompt = node.data.prompt || "";
+          
+          // Przetwórz zmienne w promptcie
+          prompt = get().processVariables(prompt, executionId);
+          
+          // Zapisz przetworzony prompt z powrotem do node.data.processedPrompt
+          nodeStore.updateNodeData(nodeId, { processedPrompt: prompt });
+          
           let pluginResult = null;
       
           if (node.data.pluginId) {
@@ -172,7 +177,7 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
           return get().recordResult(
             executionId,
             nodeId,
-            prompt, // Używamy surowej treści
+            prompt, // Używamy przetworzonego promptu
             message,
             node.data.pluginId ?? undefined,
             pluginResult,
@@ -198,6 +203,18 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         const execution = get().executions[executionId];
         if (!execution) return text;
 
+        console.log("DEBUG processVariables:", {
+          text,
+          executionId,
+          resultsAvailable: Object.keys(execution.results),
+          variablesFound: [...text.matchAll(/\{\{([^}]+)\.response\}\}/g)].map(m => ({
+            fullMatch: m[0],
+            nodeId: m[1],
+            hasResult: execution.results[m[1]] !== undefined,
+            resultValue: execution.results[m[1]] ? execution.results[m[1]].message : "N/A"
+          }))
+        });
+      
         // Przetwarzaj zmienne w formacie {{nodeId.response}}
         let processedText = text;
         
@@ -211,7 +228,8 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
           
           // Sprawdź czy jest wynik dla tego węzła
           if (execution.results[nodeId]) {
-            const output = execution.results[nodeId].prompt;
+            // Zmiana z "prompt" na "message"
+            const output = execution.results[nodeId].message;
             processedText = processedText.replace(fullMatch, output || "");
           }
         }

@@ -106,18 +106,23 @@ export const ScenarioExecution: React.FC = () => {
   };
 
   // Function to process the current node
+  // Function to process the current node
   const processCurrentNode = async () => {
     if (!executionId || !currentNodeId) return;
-
+  
     const node = getNode(currentNodeId);
     if (!node) return;
-
+  
+    // Używamy przetworzonego promptu jeśli istnieje, w przeciwnym razie używamy oryginalnego
+    const displayPrompt = node.data.processedPrompt || node.data.prompt || "";
+  
     // Check if node has an active plugin
     if (node.data.pluginId && isPluginActive(node.data.pluginId)) {
+      setNodeContent(displayPrompt);
       setWaitingForPlugin(true);
       setWaitingForUserMessage(false);
     } else {
-      setNodeContent(node.data.prompt || "");
+      setNodeContent(displayPrompt);
       setWaitingForUserMessage(true);
       setWaitingForPlugin(false);
     }
