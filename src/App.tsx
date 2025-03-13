@@ -114,9 +114,12 @@ const ExecutePage = () => {
   const workspace = getCurrentWorkspace();
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="md:col-span-2">
       <ScenarioExecution />
-      <div className="border rounded-md">
+
+      </div>
+           <div className="border rounded-md">
         <div className="p-4 border-b">
           <h2 className="font-bold flex items-center">
             <Database className="h-4 w-4 mr-2 text-blue-500" />

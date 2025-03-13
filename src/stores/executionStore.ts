@@ -25,8 +25,8 @@ interface ExecutionActions {
   recordResult: (
     executionId: string,
     nodeId: string,
-    input: string,
-    output: string,
+    prompt: string,
+    message: string,
     pluginId?: string,
     pluginResult?: any,
     duration?: number
@@ -36,7 +36,6 @@ interface ExecutionActions {
     nodeId: string,
     input?: string
   ) => Promise<string>;
-  executeScenario: (scenarioId: string) => Promise<string>;
   processVariables: (text: string, executionId: string) => string;
   calculateExecutionOrder: (scenarioId: string) => string[];
   getNodeInput: (nodeId: string, executionId: string) => string;
@@ -97,27 +96,27 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
       },
 
       recordResult: (
-        executionId,
-        nodeId,
-        input,
-        output,
-        pluginId,
-        pluginResult,
-        duration = 0
+        executionId: string,
+        nodeId: string,
+        prompt: string,
+        message: string,
+        pluginId?: string,
+        pluginResult?: any,
+        duration: number = 0
       ) => {
         set((state) => {
           if (!state.executions[executionId]) return state;
-
+      
           const result: ExecutionResult = {
             nodeId,
-            input,
-            output,
+            prompt, // zachowujemy oryginalną wartość
+            message,
             pluginId,
             pluginResult,
             timestamp: Date.now(),
             duration,
           };
-
+      
           return {
             executions: {
               ...state.executions,
@@ -132,55 +131,49 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
             },
           };
         });
-
+      
         // Aktualizacja odpowiedzi węzła w NodeStore
         const nodeStore = useNodeStore.getState();
-        nodeStore.setNodeResponse(nodeId, output);
-
-        return output;
+        nodeStore.setNodeResponse(nodeId, message);
+      
+        return message;
       },
+      
 
-      executeNode: async (executionId, nodeId, input = "") => {
+      executeNode: async (executionId, nodeId, message = "") => {
+
         const startTime = Date.now();
-
+      
         try {
           const nodeStore = useNodeStore.getState();
           const node = nodeStore.getNode(nodeId);
-
+      
           if (!node) {
             throw new Error(`Node ${nodeId} not found`);
           }
 
-          // Pobierz własny content węzła
-          const nodeContent = node.data.content || node.data.prompt || "";
-          
-          // Użyj podanego input jeśli istnieje, w przeciwnym razie użyj treści węzła
-          const contentToProcess = input || nodeContent;
-          
-          // Przetwórz zmienne w treści
-          const processedContent = get().processVariables(contentToProcess, executionId);
-          
-          // Wykonaj plugin, jeśli przypisany
-          let output = processedContent;
+          console.log('JAPIRDOLO',node,message)
+      
+          const prompt =  node.data.prompt || ""
           let pluginResult = null;
-
+      
           if (node.data.pluginId) {
             const pluginStore = usePluginStore.getState();
             const result = await pluginStore.processNodeWithPlugin(
               nodeId,
-              processedContent
+              message // Używamy surowej treści
             );
-            output = result.output;
+            message = result.output;
             pluginResult = result.result;
           }
-
+      
           // Zapisz wynik
           const duration = Date.now() - startTime;
           return get().recordResult(
             executionId,
             nodeId,
-            processedContent,
-            output,
+            prompt, // Używamy surowej treści
+            message,
             node.data.pluginId ?? undefined,
             pluginResult,
             duration
@@ -192,46 +185,11 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
             "error",
             error instanceof Error ? error.message : String(error)
           );
-          return input;
+          return prompt;
         }
       },
 
-      executeScenario: async (scenarioId) => {
-        const nodeStore = useNodeStore.getState();
-        const scenarioStore = useScenarioStore.getState();
-        
-        // Rozpocznij wykonanie
-        const executionId = get().startExecution(scenarioId);
-
-        try {
-          // Oblicz kolejność wykonania
-          const executionOrder = get().calculateExecutionOrder(scenarioId);
-          
-          if (executionOrder.length === 0) {
-            throw new Error("No nodes to execute");
-          }
-
-          // Wykonaj węzły w kolejności
-          for (const nodeId of executionOrder) {
-            const node = nodeStore.getNode(nodeId);
-            if (!node) continue;
-
-            // Wykonaj węzeł, używając jego własnej treści jako wejścia
-            await get().executeNode(executionId, nodeId);
-          }
-
-          get().completeExecution(executionId, "completed");
-        } catch (error) {
-          console.error(`Error executing scenario ${scenarioId}:`, error);
-          get().completeExecution(
-            executionId,
-            "error",
-            error instanceof Error ? error.message : String(error)
-          );
-        }
-
-        return executionId;
-      },
+     
 
       // Uproszczona funkcja przetwarzania zmiennych
       processVariables: (text, executionId) => {
@@ -253,7 +211,7 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
           
           // Sprawdź czy jest wynik dla tego węzła
           if (execution.results[nodeId]) {
-            const output = execution.results[nodeId].output;
+            const output = execution.results[nodeId].prompt;
             processedText = processedText.replace(fullMatch, output || "");
           }
         }
@@ -410,13 +368,10 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         
         return result;
       },
-      getNodeInput: (nodeId, executionId) => {
+      getNodeInput: (nodeId) => {
         const nodeStore = useNodeStore.getState();
         const node = nodeStore.getNode(nodeId);
-        
-        if (!node) return "";
-        
-        return node.data.content || node.data.prompt || "";
+        return node ? node.data.prompt : "";
       },
 
       getExecution: (id) => {

@@ -1,3 +1,4 @@
+// 2. NewNodeToolbar.tsx - Update defaultData with prompt instead of content
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/nodes/NewNodeToolbar.tsx
 import React, { useState } from 'react';
@@ -36,7 +37,7 @@ const NewNodeToolbar: React.FC<NewNodeToolbarProps> = ({ scenarioId }) => {
       defaultData: {
         label: 'Input',
         type: 'input',
-        content: ''
+        prompt: ''
       }
     },
     {
@@ -51,7 +52,7 @@ const NewNodeToolbar: React.FC<NewNodeToolbarProps> = ({ scenarioId }) => {
       defaultData: {
         label: 'Process',
         type: 'process',
-        content: ''
+        prompt: ''
       }
     },
     {
@@ -66,7 +67,7 @@ const NewNodeToolbar: React.FC<NewNodeToolbarProps> = ({ scenarioId }) => {
       defaultData: {
         label: 'Output',
         type: 'output',
-        content: ''
+        prompt: ''
       }
     },
     {
@@ -81,7 +82,7 @@ const NewNodeToolbar: React.FC<NewNodeToolbarProps> = ({ scenarioId }) => {
       defaultData: {
         label: 'Plugin',
         type: 'plugin',
-        content: '',
+        prompt: '',
         pluginId: null
       }
     }
@@ -135,7 +136,7 @@ const NewNodeToolbar: React.FC<NewNodeToolbarProps> = ({ scenarioId }) => {
             data: {
               ...node.data,
               label: node.data.label || node.type,
-              response: node.data.response || ''
+              message: node.data.message || ''
             },
           }
         ]);

@@ -19,7 +19,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
 
   
   const [node, setNode] = useState(activeNodeId ? getNode(activeNodeId) : null);
-  const [content, setContent] = useState(node?.data.content || '');
+  const [prompt, setPrompt] = useState(node?.data.prompt || '');
   const [label, setLabel] = useState(node?.data.label || '');
   const [isStartNode, setIsStartNode] = useState(node?.data.isStartNode || false);
   const [activeTab, setActiveTab] = useState('content');
@@ -38,7 +38,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
       const currentNode = getNode(activeNodeId);
       if (currentNode) {
         setNode(currentNode);
-        setContent(currentNode.data.content || '');
+        setPrompt(currentNode.data.prompt || '');
         setLabel(currentNode.data.label || '');
         setIsStartNode(currentNode.data.isStartNode || false);
         setSelectedPluginId(currentNode.data.pluginId || '');
@@ -72,7 +72,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
     
     // Update node data with current state
     updateNodeData(activeNodeId, {
-      content: content,
+      prompt: prompt,
       label,
       isStartNode: isStartNode
     });
@@ -165,11 +165,11 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
           {activeTab === 'content' && (
             <div className="mt-3">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Content/Prompt
+                Prompt/Content
               </label>
               <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
                 rows={10}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
                 placeholder="Enter node content or prompt here..."

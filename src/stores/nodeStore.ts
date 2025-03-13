@@ -47,7 +47,12 @@ export const useNodeStore = create<NodeState & NodeActions>()(
           id,
           type,
           position,
-          data: { ...data, label: data.label || type },
+          data: {
+            prompt: data.prompt || '',
+            message: data.message || '',
+            label: data.label || type,
+            ...data
+          },
           scenarioId: scenarioId || '',
           createdAt: Date.now(),
           updatedAt: Date.now()
@@ -146,10 +151,9 @@ export const useNodeStore = create<NodeState & NodeActions>()(
         });
       },
       
-      setNodeResponse: (id, response) => {
+      setNodeResponse: (id, message) => {
         set((state) => {
           if (!state.nodes[id]) return state;
-          
           return {
             nodes: {
               ...state.nodes,
@@ -157,7 +161,7 @@ export const useNodeStore = create<NodeState & NodeActions>()(
                 ...state.nodes[id],
                 data: {
                   ...state.nodes[id].data,
-                  response
+                  message
                 },
                 updatedAt: Date.now()
               }

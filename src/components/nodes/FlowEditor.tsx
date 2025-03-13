@@ -19,6 +19,8 @@ import { useExecutionStore } from "../../stores/executionStore";
 import CustomNode from "./CustomNode";
 import NewNodeToolbar from "./NewNodeToolbar";
 import NodeEditor from "./NodeEditor";
+import { NavLink } from "react-router-dom";
+import { Button } from "../ui";
 
 const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
   onEditNode,
@@ -38,19 +40,12 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
     addEdgeToScenario,
     getCurrentScenario,
     getValidEdges,
-    validateScenarioEdges
+    validateScenarioEdges,
   } = useScenarioStore();
-  
-  const { 
-    updateNode, 
-    setActiveNodeId, 
-    getNodesByScenario 
-  } = useNodeStore();
-  
-  const { 
-    executeScenario, 
-    getLatestExecution 
-  } = useExecutionStore();
+
+  const { updateNode, setActiveNodeId, getNodesByScenario } = useNodeStore();
+
+  const { getLatestExecution } = useExecutionStore();
 
   // Get current scenario from store
   const currentScenario = getCurrentScenario();
@@ -59,7 +54,7 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
 
   // Function to force refresh
   const forceRefresh = useCallback(() => {
-    setRefreshToken(prev => prev + 1);
+    setRefreshToken((prev) => prev + 1);
   }, []);
 
   // Create memoized nodeTypes object to avoid React Flow warnings
@@ -98,8 +93,8 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
           ...node,
           data: {
             ...node.data,
-            response:
-              execution.results[node.id]?.output || node.data.response || "",
+            message:
+              execution.results[node.id]?.output || node.data.message || "",
           },
         }))
       );
@@ -127,7 +122,7 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
     if (loadingRef.current) {
       console.log("Loading already in progress, skipping");
       return;
-    } 
+    }
 
     loadingRef.current = true;
 
@@ -147,7 +142,7 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
 
     // Get nodes directly from nodeStore for this scenario
     const scenarioNodes = getNodesByScenario(scenarioId);
-    
+
     // Transform nodes to ReactFlow format
     const flowNodes = scenarioNodes.map((node) => ({
       id: node.id,
@@ -156,7 +151,7 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
       data: {
         ...node.data,
         label: node.data.label || node.type,
-        response: node.data.response || "",
+        message: node.data.message || "",
         isStartNode: node.data.isStartNode || false,
         onEditNode: handleEditNode,
       },
@@ -164,7 +159,7 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
 
     // Get only valid edges for this scenario
     const validEdges = getValidEdges(scenarioId);
-    
+
     // Transform edges to ReactFlow format
     const flowEdges = validEdges.map((edge) => ({
       id: edge.id,
@@ -203,29 +198,37 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
   // Effect to refresh node properties with added refreshToken
   useEffect(() => {
     if (!scenarioId || !isInitialized) return;
-    
+
     // Get nodes directly from nodeStore for this scenario
     const scenarioNodes = getNodesByScenario(scenarioId);
-    
+
     // Update node properties (including isStartNode) without changing position
-    setNodes(nodes => nodes.map(node => {
-      const updatedNodeData = scenarioNodes.find(n => n.id === node.id);
-      if (updatedNodeData) {
-        return {
-          ...node,
-          data: {
-            ...node.data,
-            ...updatedNodeData.data,
-            label: updatedNodeData.data.label || updatedNodeData.type,
-            isStartNode: updatedNodeData.data.isStartNode || false,
-            onEditNode: handleEditNode
-          }
-        };
-      }
-      return node;
-    }));
-    
-  }, [scenarioId, getNodesByScenario, handleEditNode, isInitialized, setNodes, refreshToken]);
+    setNodes((nodes) =>
+      nodes.map((node) => {
+        const updatedNodeData = scenarioNodes.find((n) => n.id === node.id);
+        if (updatedNodeData) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              ...updatedNodeData.data,
+              label: updatedNodeData.data.label || updatedNodeData.type,
+              isStartNode: updatedNodeData.data.isStartNode || false,
+              onEditNode: handleEditNode,
+            },
+          };
+        }
+        return node;
+      })
+    );
+  }, [
+    scenarioId,
+    getNodesByScenario,
+    handleEditNode,
+    isInitialized,
+    setNodes,
+    refreshToken,
+  ]);
 
   // Update node positions in store after drag ends
   const onNodeDragStop = useCallback(
@@ -285,15 +288,6 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
     event.preventDefault();
   }, []);
 
-  // Execute current scenario
-  const runScenario = useCallback(() => {
-    if (scenarioId) {
-      executeScenario(scenarioId).then(() => {
-        refreshNodeResponses();
-      });
-    }
-  }, [scenarioId, executeScenario, refreshNodeResponses]);
-
   if (!scenarioId) {
     return (
       <div className="p-4 text-center text-red-500">
@@ -322,12 +316,9 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
         <Controls />
         <Background color="#aaa" gap={16} />
         <Panel position="top-right">
-          <button
-            onClick={runScenario}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-          >
-            Run Scenario
-          </button>
+          <NavLink to={"/execute"}>
+            <Button>Execute Scenario</Button>
+          </NavLink>
         </Panel>
         <Panel position="top-left">
           <NewNodeToolbar scenarioId={scenarioId} />
@@ -345,14 +336,15 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
         </Panel>
       </ReactFlow>
 
-     
       {showNodeEditor && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="max-w-2xl w-full">
-            <NodeEditor onClose={() => {
-              setShowNodeEditor(false);
-              forceRefresh(); // Force refresh after editor closes
-            }} />
+            <NodeEditor
+              onClose={() => {
+                setShowNodeEditor(false);
+                forceRefresh(); // Force refresh after editor closes
+              }}
+            />
           </div>
         </div>
       )}

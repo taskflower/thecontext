@@ -47,7 +47,6 @@ const CustomNode: React.FC<NodeProps> = (props) => {
   const nodeType = data.type || "default";
   const colorScheme = nodeColors[nodeType] || nodeColors.default;
 
-
   return (
     <div className="relative group">
       <Card
@@ -82,29 +81,29 @@ const CustomNode: React.FC<NodeProps> = (props) => {
 </CardHeader>
 
         <CardContent className="p-3 pt-0">
-          {/* Content preview */}
+          {/* Prompt preview */}
           <div className="text-xs font-mono bg-white/50 rounded p-2 max-h-24 overflow-hidden text-gray-700 border border-gray-100">
-            {data.content ? (
-              data.content.length > 150 ? (
-                data.content.substring(0, 150) + "..."
+            {data.prompt ? (
+              data.prompt.length > 150 ? (
+                data.prompt.substring(0, 150) + "..."
               ) : (
-                data.content
+                data.prompt
               )
             ) : (
-              <span className="text-gray-400 italic">No content</span>
+              <span className="text-gray-400 italic">No prompt</span>
             )}
           </div>
 
-          {/* Response preview if available */}
-          {data.response && (
+          {/* Message preview if available */}
+          {data.message && (
             <div className="mt-2">
               <p className="text-xs font-medium text-gray-500 mb-1">
-                Response:
+              Message:
               </p>
               <div className="text-xs bg-white/60 border-l-2 border-blue-300 p-2 max-h-20 overflow-hidden">
-                {data.response.length > 100
-                  ? data.response.substring(0, 100) + "..."
-                  : data.response}
+                {data.message.length > 100
+                  ? data.message.substring(0, 100) + "..."
+                  : data.message}
               </div>
             </div>
           )}

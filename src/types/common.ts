@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/types/common.ts
-import { Node as ReactFlowNode } from 'reactflow';
+
 
 export interface Position {
     x: number;
@@ -8,14 +8,14 @@ export interface Position {
   }
   
   export interface NodeData {
-    content?: string;
     prompt?: string;
-    response?: string;
+    message?: string;
     variables?: Record<string, string>;
     pluginId?: string | null;
     pluginConfig?: Record<string, any>;
     label?: string;
     type?: string;
+    isStartNode?: boolean;
     status?: 'completed' | 'error' | 'running' | string;
     [key: string]: any;
   }
@@ -54,8 +54,8 @@ export interface Position {
   
   export interface ExecutionResult {
     nodeId: string;
-    input: string;
-    output: string;
+    prompt: string;
+    message: string;
     pluginId?: string;
     pluginResult?: any;
     timestamp: number;
