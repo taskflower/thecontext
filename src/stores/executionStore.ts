@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/stores/executionStore.ts
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -126,7 +128,7 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
               nodeId,
               prompt,
               message,
-              pluginId: node.data.pluginId,
+              pluginId: node.data.pluginId ?? undefined,
               pluginResult,
               timestamp: Date.now(),
               duration,
@@ -206,10 +208,10 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         // If there's a start node, execute only from it down the graph
         if (startNode) {
           // Build directed graph
-          const graph = {};
+          const graph:any = {};
           
           // Initialize graph
-          nodes.forEach(node => {
+          nodes.forEach((node:any) => {
             graph[node.id] = [];
           });
           
@@ -225,7 +227,7 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
           const queue = [startNode.id];
           
           while (queue.length > 0) {
-            const currentId = queue.shift();
+            const currentId:any = queue.shift();
             
             if (graph[currentId]) {
               for (const nextId of graph[currentId]) {
@@ -244,8 +246,8 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
           );
           
           // Build graph for sorting
-          const sortGraph = {};
-          const inDegree = {};
+          const sortGraph:any = {};
+          const inDegree:any = {};
           
           relevantNodes.forEach(node => {
             sortGraph[node.id] = [];
@@ -265,10 +267,10 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
           sortQueue.push(startNode.id);
           
           while (sortQueue.length > 0) {
-            const nodeId = sortQueue.shift();
+            const nodeId:any = sortQueue.shift();
             result.push(nodeId);
             
-            sortGraph[nodeId].forEach(nextId => {
+            sortGraph[nodeId].forEach((nextId:any) => {
               inDegree[nextId]--;
               if (inDegree[nextId] === 0) {
                 sortQueue.push(nextId);
@@ -289,8 +291,8 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         
         // If no start node, use standard topological sort
         // Build graph
-        const graph = {};
-        const inDegree = {};
+        const graph:any = {};
+        const inDegree:any = {};
         
         nodes.forEach(node => {
           graph[node.id] = [];
@@ -304,7 +306,7 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         
         // Execute Kahn's algorithm
         const result = [];
-        const queue = [];
+        const queue:any = [];
         
         // Add all nodes with no dependencies
         nodes.forEach(node => {
@@ -314,10 +316,10 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         });
         
         while (queue.length > 0) {
-          const nodeId = queue.shift();
+          const nodeId:any = queue.shift();
           result.push(nodeId);
           
-          graph[nodeId].forEach(nextId => {
+          graph[nodeId].forEach((nextId:any) => {
             inDegree[nextId]--;
             if (inDegree[nextId] === 0) {
               queue.push(nextId);

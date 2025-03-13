@@ -39,6 +39,7 @@ import type { PluginModule } from "@/plugins/PluginInterface";
 
 export const ScenarioExecution: React.FC = () => {
   const { currentScenarioId, getScenario, getValidEdges } = useScenarioStore();
+  const executeExecutionStore = useExecutionStore();
   const {
     getLatestExecution,
     getExecutionsByScenario,
@@ -47,7 +48,7 @@ export const ScenarioExecution: React.FC = () => {
     executeNode,
     completeExecution,
     calculateExecutionOrder,
-  } = useExecutionStore();
+  } = executeExecutionStore;
   const { getNode } = useNodeStore();
   const { isPluginActive, plugins } = usePluginStore();
 
@@ -111,18 +112,29 @@ export const ScenarioExecution: React.FC = () => {
     const node = getNode(currentNodeId);
     if (!node) return;
   
-    // Use the processed prompt if it exists, otherwise use the original
-    const displayPrompt = node.data.processedPrompt || node.data.prompt || "";
-  
-    // Set the node content to display
-    setNodeContent(displayPrompt);
-    
-    // If node has an active plugin, wait for plugin processing
-    // Otherwise, wait for user input
-    if (node.data.pluginId && isPluginActive(node.data.pluginId)) {
-      setWaitingForPlugin(true);
-      setWaitingForUserInput(false);
-    } else {
+    // Process variables first - this will update node.data.processedPrompt
+    try {
+      // Get the original prompt
+      const originalPrompt = node.data.prompt || "";
+      
+      // Process variables in the prompt right now
+      const processedPrompt = await executeExecutionStore.processVariables(originalPrompt, executionId);
+      
+      // Set the processed content for display
+      setNodeContent(processedPrompt);
+      
+      // If node has an active plugin, wait for plugin processing
+      // Otherwise, wait for user input
+      if (node.data.pluginId && isPluginActive(node.data.pluginId)) {
+        setWaitingForPlugin(true);
+        setWaitingForUserInput(false);
+      } else {
+        setWaitingForUserInput(true);
+        setWaitingForPlugin(false);
+      }
+    } catch (error) {
+      console.error("Error processing node variables:", error);
+      setNodeContent(node.data.prompt || "");
       setWaitingForUserInput(true);
       setWaitingForPlugin(false);
     }
@@ -191,6 +203,15 @@ export const ScenarioExecution: React.FC = () => {
     setIsExecuting(true);
 
     try {
+      // Reset any previous processedPrompt values in all nodes
+      const nodeStore = useNodeStore.getState();
+      const scenarioNodes = nodeStore.getNodesByScenario(scenario.id);
+      scenarioNodes.forEach(node => {
+        if (node.data.processedPrompt) {
+          nodeStore.updateNodeData(node.id, { processedPrompt: null });
+        }
+      });
+
       // Start a new execution
       const newExecutionId = startExecution(scenario.id);
       setExecutionId(newExecutionId);
