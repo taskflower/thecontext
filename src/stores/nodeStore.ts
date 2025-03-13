@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/stores/nodeStore.ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { nanoid } from 'nanoid';
@@ -32,7 +32,14 @@ interface NodeActions {
   getActiveNode: () => Node | null;
   deleteNodesByScenario: (scenarioId: string) => void;
   setStartNode: (nodeId: string, scenarioId: string) => void;
-getStartNode: (scenarioId: string) => Node | null;
+  getStartNode: (scenarioId: string) => Node | null;
+  updateOrAddNode: (
+    nodeId: string | null, 
+    type: string, 
+    position: Position, 
+    data: Partial<NodeData>, 
+    scenarioId: string
+  ) => string;
 }
 
 export const useNodeStore = create<NodeState & NodeActions>()(
@@ -125,7 +132,7 @@ export const useNodeStore = create<NodeState & NodeActions>()(
         set((state) => {
           if (!state.nodes[id]) return state;
           
-          // Jeśli ustawiamy węzeł jako startowy, zresetuj flagę dla innych węzłów w tym samym scenariuszu
+          // Jeśli ustawiamy węzeł jako startowy, resetuj flagę dla innych węzłów w tym samym scenariuszu
           if (data.isStartNode === true) {
             const currentNode = state.nodes[id];
             const scenarioId = currentNode.scenarioId;
@@ -255,9 +262,9 @@ export const useNodeStore = create<NodeState & NodeActions>()(
         const activeId = get().activeNodeId;
         return activeId ? get().nodes[activeId] : null;
       },
+      
       setStartNode: (nodeId, scenarioId) => {
         set((state) => {
-          // Najpierw resetujemy wszystkie węzły startowe w danym scenariuszu
           const updatedNodes = { ...state.nodes };
           
           Object.values(updatedNodes)
@@ -269,7 +276,6 @@ export const useNodeStore = create<NodeState & NodeActions>()(
               };
             });
           
-          // Ustawiamy nowy węzeł startowy
           if (updatedNodes[nodeId] && updatedNodes[nodeId].scenarioId === scenarioId) {
             updatedNodes[nodeId] = {
               ...updatedNodes[nodeId],
@@ -284,12 +290,8 @@ export const useNodeStore = create<NodeState & NodeActions>()(
       getStartNode: (scenarioId) => {
         const scenarioNodes = Object.values(get().nodes)
           .filter(node => node.scenarioId === scenarioId);
-        
-        // Najpierw szukamy węzła oznaczonego jako startowy
         const startNode = scenarioNodes.find(node => node.isStartNode);
         if (startNode) return startNode;
-        
-        // Jeśli nie znaleziono, zwracamy najstarszy węzeł
         return scenarioNodes.sort((a, b) => a.createdAt - b.createdAt)[0] || null;
       },
       
@@ -312,6 +314,17 @@ export const useNodeStore = create<NodeState & NodeActions>()(
             activeNodeId: newActiveNodeId
           };
         });
+      },
+
+      // Funkcja łącząca aktualizację i dodawanie węzła
+      updateOrAddNode: (nodeId, type, position, data, scenarioId) => {
+        const store = get();
+        if (nodeId && store.nodes[nodeId]) {
+          store.updateNodeData(nodeId, data);
+          return nodeId;
+        } else {
+          return store.createNode(type, position, data, scenarioId);
+        }
       }
     }),
     {

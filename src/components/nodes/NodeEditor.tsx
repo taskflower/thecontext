@@ -1,29 +1,37 @@
+// src/components/nodes/NodeEditor.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/components/nodes/NodeEditor.tsx - cleaned version without rawContent and variable references
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNodeStore } from '../../stores/nodeStore';
 import { usePluginStore } from '../../stores/pluginStore';
 
 interface NodeEditorProps {
   onClose: () => void;
-  // Add other prop types as needed
+  scenarioId: string;
 }
 
-
-const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
-  // Hooks
-  const { activeNodeId, getNode, updateNodeData, assignPluginToNode, removePluginFromNode, getNodesByScenario } = 
-    useNodeStore(state => state);
-  
+const NodeEditor: React.FC<NodeEditorProps> = ({ onClose, scenarioId }) => {
+  const { activeNodeId, getNode, updateOrAddNode, assignPluginToNode, removePluginFromNode, setActiveNodeId } = useNodeStore((state) => state);
   const { getAllPlugins } = usePluginStore();
 
-  
-  const [node, setNode] = useState(activeNodeId ? getNode(activeNodeId) : null);
-  const [prompt, setPrompt] = useState(node?.data.prompt || '');
-  const [label, setLabel] = useState(node?.data.label || '');
-  const [isStartNode, setIsStartNode] = useState(node?.data.isStartNode || false);
+  // Zmemoizowany defaultNode – zależny tylko od scenarioId
+  const defaultNode = useMemo(() => ({
+    id: null,
+    type: 'default',
+    position: { x: 100, y: 100 },
+    data: { prompt: '', label: '', isStartNode: false },
+    scenarioId,
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  }), [scenarioId]);
+
+  const initialNode:any = activeNodeId ? getNode(activeNodeId) : defaultNode;
+
+  const [node, setNode] = useState(initialNode);
+  const [prompt, setPrompt] = useState(initialNode.data.prompt || '');
+  const [label, setLabel] = useState(initialNode.data.label || '');
+  const [isStartNode, setIsStartNode] = useState(initialNode.data.isStartNode || false);
   const [activeTab, setActiveTab] = useState('content');
-  const [selectedPluginId, setSelectedPluginId] = useState(node?.data.pluginId || '');
+  const [selectedPluginId, setSelectedPluginId] = useState(initialNode.data.pluginId || '');
   
   const plugins = getAllPlugins();
   const pluginOptions = plugins.map(plugin => ({
@@ -32,7 +40,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
     description: plugin.description
   }));
 
-  // Update local state when active node changes
+  // Uaktualniamy stan tylko przy zmianie activeNodeId lub scenarioId (nie defaultNode, bo jest memoizowany)
   useEffect(() => {
     if (activeNodeId) {
       const currentNode = getNode(activeNodeId);
@@ -43,71 +51,54 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
         setIsStartNode(currentNode.data.isStartNode || false);
         setSelectedPluginId(currentNode.data.pluginId || '');
       }
+    } else {
+      // Brak aktywnego węzła – ustawiamy wartości domyślne
+      setNode(defaultNode);
+      setPrompt('');
+      setLabel('');
+      setIsStartNode(false);
+      setSelectedPluginId('');
     }
-  }, [activeNodeId, getNode]);
+  }, [activeNodeId, getNode, scenarioId]);
 
-  // Save changes to the node
   const handleSave = () => {
-    if (!activeNodeId || !node) return;
-  
+    const newNodeId = updateOrAddNode(
+      activeNodeId, 
+      node.type, 
+      node.position, 
+      { prompt, label, isStartNode }, 
+      node.scenarioId
+    );
+
+    setActiveNodeId(newNodeId);
     
-    // If setting this node as start node, reset flag for other nodes
-    if (isStartNode) {
-      const scenarioId = node.scenarioId;
-      
-      // Get other nodes for this scenario
-      const otherNodes = getNodesByScenario(scenarioId)
-        .filter((otherNode:any) => otherNode.id !== activeNodeId);
-      
-      // Reset start flag for other nodes
-      otherNodes.forEach((otherNode:any) => {
-        if (otherNode.data.isStartNode) {
-          updateNodeData(otherNode.id, {
-            ...otherNode.data,
-            isStartNode: false
-          });
-        }
-      });
-    }
-    
-    // Update node data with current state
-    updateNodeData(activeNodeId, {
-      prompt: prompt,
-      label,
-      isStartNode: isStartNode
-    });
-    
-    // Handle plugins
     if (selectedPluginId) {
       if (selectedPluginId !== node.data.pluginId) {
-        assignPluginToNode(activeNodeId, selectedPluginId);
+        assignPluginToNode(newNodeId, selectedPluginId);
       }
     } else if (node.data.pluginId) {
-      removePluginFromNode(activeNodeId);
+      removePluginFromNode(newNodeId);
     }
     
-    // Refresh node data in local state
-    setNode(getNode(activeNodeId));
+    setNode(getNode(newNodeId));
     
     if (onClose) {
       onClose();
     }
   };
 
-  if (!node || !activeNodeId) {
-    return <div className="p-4 text-red-500">No node selected</div>;
-  }
-
   return (
     <div className="bg-white rounded-lg shadow-lg border border-gray-200 max-w-2xl">
       <div className="flex justify-between items-center px-4 py-3 border-b border-gray-200 bg-gray-50 rounded-t-lg">
-        <h2 className="text-lg font-medium text-gray-800">Edit Node</h2>
+        <h2 className="text-lg font-medium text-gray-800">
+          {activeNodeId ? "Edit Node" : "Add Node"}
+        </h2>
         {onClose && (
           <button 
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -216,22 +207,24 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
         </div>
         
         <div className="mt-6 flex justify-between">
-          <button
-            onClick={() => {
-              if (window.confirm('Are you sure you want to delete this node?')) {
-                const nodeStore = useNodeStore.getState();
-                if (activeNodeId) {
-                  nodeStore.deleteNode(activeNodeId);
+          {activeNodeId && (
+            <button
+              onClick={() => {
+                if (window.confirm('Are you sure you want to delete this node?')) {
+                  const nodeStore = useNodeStore.getState();
+                  if (activeNodeId) {
+                    nodeStore.deleteNode(activeNodeId);
+                  }
+                  if (onClose) {
+                    onClose();
+                  }
                 }
-                if (onClose) {
-                  onClose();
-                }
-              }
-            }}
-            className="px-4 py-2 bg-red-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-red-700"
-          >
-            Delete Node
-          </button>
+              }}
+              className="px-4 py-2 bg-red-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-red-700"
+            >
+              Delete Node
+            </button>
+          )}
           
           <div className="flex space-x-3">
             {onClose && (

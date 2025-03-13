@@ -48,7 +48,7 @@ function AppHeader() {
             variant="outline"
             className="flex items-center text-sm gap-2 shadow-sm"
           >
-            <Folder className="h-4 w-4" />
+            <Folder className="h-4 w-4" /> <span>Selected Workspase:</span>
             {workspace ? workspace.name : "No workspace"}
             <ChevronDown className="h-4 w-4 opacity-50" />
           </Button>

@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/workspace/WorkspaceExportImport.tsx
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DownloadCloud, UploadCloud, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -24,7 +24,7 @@ export const WorkspaceExportImport: React.FC = () => {
     if (!currentWorkspace) return;
     
     // Create export object with all related data
-    const exportData = {
+    const exportData:any = {
       version: '1.0',
       exportedAt: new Date().toISOString(),
       workspace: currentWorkspace,
@@ -237,14 +237,7 @@ export const WorkspaceExportImport: React.FC = () => {
   };
   
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Workspace Export & Import</CardTitle>
-        <CardDescription>
-          Export your current workspace or import one from a file
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <>
         <div className="flex flex-wrap gap-4">
           <Button
             onClick={handleExport}
@@ -279,7 +272,6 @@ export const WorkspaceExportImport: React.FC = () => {
             <AlertDescription>{importSuccess}</AlertDescription>
           </Alert>
         )}
-      </CardContent>
-    </Card>
+     </>
   );
 };

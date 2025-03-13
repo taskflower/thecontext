@@ -15,27 +15,27 @@ const nodeColors: Record<
   { bg: string; border: string; hover: string }
 > = {
   input: {
-    bg: "bg-green-50",
+    bg: "bg-green-50/50",
     border: "border-green-200",
     hover: "hover:bg-green-100",
   },
   process: {
-    bg: "bg-blue-50",
+    bg: "bg-blue-50/50",
     border: "border-blue-200",
     hover: "hover:bg-blue-100",
   },
   output: {
-    bg: "bg-red-50",
+    bg: "bg-red-50/50",
     border: "border-red-200",
     hover: "hover:bg-red-100",
   },
   plugin: {
-    bg: "bg-yellow-50",
+    bg: "bg-yellow-50/50",
     border: "border-yellow-200",
     hover: "hover:bg-yellow-100",
   },
   default: {
-    bg: "bg-gray-50",
+    bg: "bg-gray-50/50",
     border: "border-gray-200",
     hover: "hover:bg-gray-100",
   },
@@ -52,33 +52,33 @@ const CustomNode: React.FC<NodeProps> = (props) => {
       <Card
         className={`w-72 shadow-sm transition-all duration-200 ${colorScheme.bg} ${colorScheme.border} border-2 ${colorScheme.hover}`}
       >
-       <CardHeader className="py-2 px-3 flex flex-row justify-between items-center space-y-0">
-  <CardTitle className="text-sm font-medium flex items-center">
-    {data.isStartNode && (
-      <Flag className="h-4 w-4 mr-1 text-blue-600" />
-    )}
-    {data.label || "Node"}
-  </CardTitle>
-  <div className="flex items-center space-x-1">
-    {data.isStartNode && (
-      <Badge
-        variant="outline"
-        className="text-xs py-0 h-5 flex items-center gap-1 bg-blue-100 text-blue-800 border-blue-300"
-      >
-        Start
-      </Badge>
-    )}
-    {data.pluginId && (
-      <Badge
-        variant="outline"
-        className="text-xs py-0 h-5 flex items-center gap-1 bg-white"
-      >
-        <Puzzle size={12} />
-        {data.pluginId}
-      </Badge>
-    )}
-  </div>
-</CardHeader>
+        <CardHeader className="py-2 px-3 flex flex-row justify-between items-center space-y-0">
+          <CardTitle className="text-sm font-medium flex items-center">
+            {data.isStartNode && (
+              <Flag className="h-4 w-4 mr-1 text-blue-600" />
+            )}
+            {data.label || "Node"}
+          </CardTitle>
+          <div className="flex items-center space-x-1">
+            {data.isStartNode && (
+              <Badge
+                variant="outline"
+                className="text-xs py-0 h-5 flex items-center gap-1 bg-blue-100 text-blue-800 border-blue-300"
+              >
+                Start
+              </Badge>
+            )}
+            {data.pluginId && (
+              <Badge
+                variant="outline"
+                className="text-xs py-0 h-5 flex items-center gap-1 bg-white"
+              >
+                <Puzzle size={12} />
+                {data.pluginId}
+              </Badge>
+            )}
+          </div>
+        </CardHeader>
 
         <CardContent className="p-3 pt-0">
           {/* Prompt preview */}
@@ -97,9 +97,7 @@ const CustomNode: React.FC<NodeProps> = (props) => {
           {/* Message preview if available */}
           {data.message && (
             <div className="mt-2">
-              <p className="text-xs font-medium text-gray-500 mb-1">
-              Message:
-              </p>
+              <p className="text-xs font-medium text-gray-500 mb-1">Message:</p>
               <div className="text-xs bg-white/60 border-l-2 border-blue-300 p-2 max-h-20 overflow-hidden">
                 {data.message.length > 100
                   ? data.message.substring(0, 100) + "..."
