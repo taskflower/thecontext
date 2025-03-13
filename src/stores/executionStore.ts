@@ -304,17 +304,26 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
             }
           });
           
+          // Zbiór węzłów, które są częścią połączonego grafu
+          const connectedNodes = new Set();
+          
+          // Dodaj wszystkie węzły, które są częścią krawędzi
+          edges.forEach(edge => {
+            connectedNodes.add(edge.source);
+            connectedNodes.add(edge.target);
+          });
+          
           // Algorytm sortowania topologicznego Kahna
           const queue = [];
           const result = [];
           
-          // Najpierw dodaj węzeł startowy, jeśli istnieje i nie ma zależności
-          if (startNode && inDegree[startNode.id] === 0) {
+          // Najpierw dodaj węzeł startowy, jeśli istnieje, jest połączony i nie ma zależności
+          if (startNode && connectedNodes.has(startNode.id) && inDegree[startNode.id] === 0) {
             queue.push(startNode.id);
           } else {
-            // Dodaj wszystkie węzły bez zależności
+            // Dodaj wszystkie węzły bez zależności, które są częścią połączonego grafu
             Object.keys(inDegree).forEach(id => {
-              if (inDegree[id] === 0 && (!startNode || id !== startNode.id)) {
+              if (inDegree[id] === 0 && connectedNodes.has(id) && (!startNode || id !== startNode.id)) {
                 queue.push(id);
               }
             });
@@ -333,17 +342,6 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
             });
           }
           
-          // Sprawdź, czy wszystkie węzły zostały uwzględnione (czy nie ma cykli)
-          if (result.length !== nodes.length) {
-            // Dodaj pozostałe węzły w kolejności utworzenia
-            const processed = new Set(result);
-            const remaining = nodes
-              .filter(node => !processed.has(node.id))
-              .sort((a, b) => a.createdAt - b.createdAt);
-            
-            remaining.forEach(node => result.push(node.id));
-          }
-          
           return result;
         } 
         
@@ -352,7 +350,6 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
           .sort((a, b) => a.createdAt - b.createdAt)
           .map(node => node.id);
       },
-
       getNodeInput: (nodeId, executionId) => {
         const nodeStore = useNodeStore.getState();
         const node = nodeStore.getNode(nodeId);
