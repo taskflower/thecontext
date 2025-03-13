@@ -180,7 +180,7 @@ function AppContent() {
 
       <footer className="p-6 text-center text-sm text-slate-500">
         <p>
-          © {new Date().getFullYear()} THE CONTEXT - Redesigned Architecture
+          © {new Date().getFullYear()} DEEP CONTEXT - Redesigned Architecture
         </p>
       </footer>
     </div>
@@ -208,7 +208,7 @@ function App() {
         {/* Sidebar */}
         <aside className="w-64 bg-white h-full overflow-hidden flex flex-col">
           <div className="p-6">
-            <h2 className="text-lg font-bold">THE CONTEXT</h2>
+            <h2 className="text-lg font-bold">DEEP CONTEXT</h2>
             <p className="text-sm text-muted-foreground">
               Build, test, and iterate on prompt workflows. v.0.24.13
             </p>
