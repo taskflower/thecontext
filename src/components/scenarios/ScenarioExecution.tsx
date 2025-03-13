@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/scenarios/ScenarioExecution.tsx
 import React, { useState, useEffect } from "react";
 
@@ -39,7 +38,7 @@ import { usePluginStore } from "@/stores/pluginStore";
 import type { PluginModule } from "@/plugins/PluginInterface";
 
 export const ScenarioExecution: React.FC = () => {
-  const { currentScenarioId, getScenario } = useScenarioStore();
+  const { currentScenarioId, getScenario, getValidEdges } = useScenarioStore();
   const {
     getLatestExecution,
     getExecutionsByScenario,
@@ -52,20 +51,20 @@ export const ScenarioExecution: React.FC = () => {
   const { getNode } = useNodeStore();
   const { isPluginActive, plugins } = usePluginStore();
 
+  // Execution states
   const [isExecuting, setIsExecuting] = useState(false);
   const [exportData, setExportData] = useState<string | null>(null);
   const [executionId, setExecutionId] = useState<string | null>(null);
-
-  // Step-by-step execution states
   const [isExecutionDialogOpen, setIsExecutionDialogOpen] = useState(false);
+  
+  // Step execution states
   const [currentNodeIndex, setCurrentNodeIndex] = useState(0);
   const [executionOrder, setExecutionOrder] = useState<string[]>([]);
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
-  const [userMessage, setuserMessage] = useState("");
+  const [userMessage, setUserMessage] = useState("");
   const [nodeContent, setNodeContent] = useState("");
-  const [waitingForUserMessage, setWaitingForUserMessage] = useState(false);
+  const [waitingForUserInput, setWaitingForUserInput] = useState(false);
   const [waitingForPlugin, setWaitingForPlugin] = useState(false);
-  const [, setExecutionResults] = useState<Record<string, any>>({});
 
   // Get current scenario
   const scenario = currentScenarioId ? getScenario(currentScenarioId) : null;
@@ -75,20 +74,20 @@ export const ScenarioExecution: React.FC = () => {
     ? getExecutionsByScenario(scenario.id).slice(0, 5) // Only show last 5 executions
     : [];
 
+  // Reset execution state between runs
   const resetExecutionState = () => {
     setIsExecutionDialogOpen(false);
     setCurrentNodeIndex(0);
     setExecutionOrder([]);
     setCurrentNodeId(null);
-    setuserMessage("");
+    setUserMessage("");
     setNodeContent("");
-    setWaitingForUserMessage(false);
+    setWaitingForUserInput(false);
     setWaitingForPlugin(false);
-    setExecutionResults({});
     setExecutionId(null);
   };
 
-  // Function to get info about the current node
+  // Get current node info for display
   const getCurrentNodeInfo = () => {
     if (!currentNodeId) return null;
 
@@ -105,35 +104,36 @@ export const ScenarioExecution: React.FC = () => {
     };
   };
 
-  // Function to process the current node
-  // Function to process the current node
+  // Process the current node - show prompt, trigger plugin, or get user input
   const processCurrentNode = async () => {
     if (!executionId || !currentNodeId) return;
   
     const node = getNode(currentNodeId);
     if (!node) return;
   
-    // Używamy przetworzonego promptu jeśli istnieje, w przeciwnym razie używamy oryginalnego
+    // Use the processed prompt if it exists, otherwise use the original
     const displayPrompt = node.data.processedPrompt || node.data.prompt || "";
   
-    // Check if node has an active plugin
+    // Set the node content to display
+    setNodeContent(displayPrompt);
+    
+    // If node has an active plugin, wait for plugin processing
+    // Otherwise, wait for user input
     if (node.data.pluginId && isPluginActive(node.data.pluginId)) {
-      setNodeContent(displayPrompt);
       setWaitingForPlugin(true);
-      setWaitingForUserMessage(false);
+      setWaitingForUserInput(false);
     } else {
-      setNodeContent(displayPrompt);
-      setWaitingForUserMessage(true);
+      setWaitingForUserInput(true);
       setWaitingForPlugin(false);
     }
   };
 
-  // Handle submitting user input for the current node
-  const handleSubmituserMessage = async () => {
+  // Handle user input submission for the current node
+  const handleSubmitUserMessage = async () => {
     if (!executionId || !currentNodeId) return;
 
     try {
-      // Przekazujemy userMessage jako trzeci argument
+      // Pass the user message to execute the node
       await executeNode(executionId, currentNodeId, userMessage);
       moveToNextNode();
     } catch (error) {
@@ -160,12 +160,12 @@ export const ScenarioExecution: React.FC = () => {
     }
   };
 
-  // Function to move to the next node in the execution order
+  // Move to the next node in the execution order
   const moveToNextNode = () => {
     // Reset state for next node
-    setuserMessage("");
+    setUserMessage("");
     setNodeContent("");
-    setWaitingForUserMessage(false);
+    setWaitingForUserInput(false);
     setWaitingForPlugin(false);
 
     // Check if we're at the end
@@ -184,30 +184,22 @@ export const ScenarioExecution: React.FC = () => {
     setCurrentNodeId(executionOrder[nextIndex]);
   };
 
-  // Initialize step-by-step execution
-  const initializeProcessExecution = async () => {
+  // Initialize and start the execution process
+  const startScenarioExecution = async () => {
     if (!scenario) return;
 
     setIsExecuting(true);
 
     try {
+      // Start a new execution
       const newExecutionId = startExecution(scenario.id);
       setExecutionId(newExecutionId);
 
-      let order;
-      try {
-        order = await calculateExecutionOrder(scenario.id);
-        if (!Array.isArray(order)) {
-          console.error("calculateExecutionOrder nie zwróciło tablicy");
-          order = [];
-        }
-      } catch (error) {
-        console.error("Błąd podczas obliczania kolejności wykonania:", error);
-        order = [];
-      }
+      // Calculate execution order once at the beginning
+      const order = await calculateExecutionOrder(scenario.id);
+      setExecutionOrder(Array.isArray(order) ? order : []);
 
-      setExecutionOrder(order);
-
+      // Begin execution if there are nodes to execute
       if (order.length > 0) {
         setCurrentNodeIndex(0);
         setCurrentNodeId(order[0]);
@@ -222,7 +214,7 @@ export const ScenarioExecution: React.FC = () => {
     }
   };
 
-  // Effect to process current node when it changes
+  // Process current node when it changes
   useEffect(() => {
     if (isExecutionDialogOpen && currentNodeId) {
       processCurrentNode();
@@ -238,6 +230,7 @@ export const ScenarioExecution: React.FC = () => {
     setIsExecuting(false);
   };
 
+  // Export execution results
   const handleExportResults = () => {
     if (!scenario) return;
 
@@ -255,11 +248,13 @@ export const ScenarioExecution: React.FC = () => {
     setExportData(JSON.stringify(exportObj, null, 2));
   };
 
+  // Clear execution history
   const handleClearHistory = () => {
     if (!scenario) return;
     clearHistory(scenario.id);
   };
 
+  // No active scenario message
   if (!scenario) {
     return (
       <Card>
@@ -273,7 +268,7 @@ export const ScenarioExecution: React.FC = () => {
   // Current node info for display
   const currentNode = getCurrentNodeInfo();
 
-  // Custom inline plugin container component for execution view
+  // Plugin component for execution view
   const ExecutionPluginView: React.FC<{
     pluginId: string;
     nodeId: string;
@@ -317,7 +312,7 @@ export const ScenarioExecution: React.FC = () => {
           <div className="space-y-4">
             <div className="flex flex-wrap gap-2">
               <Button
-                onClick={initializeProcessExecution}
+                onClick={startScenarioExecution}
                 disabled={isExecuting}
                 className="flex-grow"
               >
@@ -373,7 +368,7 @@ export const ScenarioExecution: React.FC = () => {
                 </div>
               ) : (
                 <div>
-                  {executions.map((execution: any) => (
+                  {executions.map((execution) => (
                     <div
                       key={execution.id}
                       className="mb-4 border rounded-md p-3"
@@ -412,7 +407,7 @@ export const ScenarioExecution: React.FC = () => {
                           </thead>
                           <tbody>
                             {Object.entries(execution.results).map(
-                              ([nodeId, result]: any) => {
+                              ([nodeId, result]) => {
                                 const node = getNode(nodeId);
                                 return (
                                   <tr key={nodeId} className="border-b">
@@ -451,7 +446,7 @@ export const ScenarioExecution: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Step-by-step execution dialog */}
+      {/* Execution dialog */}
       <Dialog
         open={isExecutionDialogOpen}
         onOpenChange={(open) => {
@@ -482,7 +477,7 @@ export const ScenarioExecution: React.FC = () => {
                   </span>
                 </div>
 
-                {/* Plugin workflow */}
+                {/* Plugin execution */}
                 {currentNode.hasPlugin && waitingForPlugin && (
                   <>
                     <div className="mb-4 text-sm">
@@ -499,8 +494,8 @@ export const ScenarioExecution: React.FC = () => {
                   </>
                 )}
 
-                {/* Manual input workflow */}
-                {!currentNode.hasPlugin && waitingForUserMessage && (
+                {/* User input workflow */}
+                {!currentNode.hasPlugin && waitingForUserInput && (
                   <div className="space-y-4">
                     {nodeContent && (
                       <div className="border rounded-md p-3 bg-slate-50">
@@ -520,7 +515,7 @@ export const ScenarioExecution: React.FC = () => {
                       <Textarea
                         id="userMessage"
                         value={userMessage}
-                        onChange={(e) => setuserMessage(e.target.value)}
+                        onChange={(e) => setUserMessage(e.target.value)}
                         placeholder="Enter your response..."
                         rows={6}
                         className="w-full"
@@ -530,7 +525,7 @@ export const ScenarioExecution: React.FC = () => {
                 )}
 
                 {/* Loading state */}
-                {!waitingForUserMessage && !waitingForPlugin && (
+                {!waitingForUserInput && !waitingForPlugin && (
                   <div className="py-8 flex flex-col items-center justify-center">
                     <Loader className="h-8 w-8 animate-spin text-blue-500 mb-2" />
                     <p>Processing node...</p>
@@ -541,13 +536,13 @@ export const ScenarioExecution: React.FC = () => {
           </div>
 
           <DialogFooter>
-            {waitingForUserMessage && (
+            {waitingForUserInput && (
               <div className="flex gap-2 w-full justify-between">
                 <Button variant="outline" onClick={handleDialogClose}>
                   Cancel Execution
                 </Button>
                 <Button
-                  onClick={handleSubmituserMessage}
+                  onClick={handleSubmitUserMessage}
                   disabled={!userMessage.trim()}
                 >
                   Submit <ArrowRight className="ml-2 h-4 w-4" />

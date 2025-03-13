@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/stores/executionStore.ts
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -22,15 +20,6 @@ interface ExecutionActions {
     status?: "completed" | "error" | "interrupted",
     error?: string
   ) => void;
-  recordResult: (
-    executionId: string,
-    nodeId: string,
-    prompt: string,
-    message: string,
-    pluginId?: string,
-    pluginResult?: any,
-    duration?: number
-  ) => string;
   executeNode: (
     executionId: string,
     nodeId: string,
@@ -38,15 +27,10 @@ interface ExecutionActions {
   ) => Promise<string>;
   processVariables: (text: string, executionId: string) => string;
   calculateExecutionOrder: (scenarioId: string) => string[];
-  getNodeInput: (nodeId: string, executionId: string) => string;
   getExecution: (id: string) => Execution | null;
   getExecutionsByScenario: (scenarioId: string) => Execution[];
   getLatestExecution: (scenarioId: string) => Execution | null;
-  getResults: (executionId: string) => Record<string, ExecutionResult> | null;
-  deleteExecution: (id: string) => void;
   clearHistory: (scenarioId?: string) => void;
-  setCurrentNodeInExecution: (executionId: string, nodeId: string) => void;
-  getCurrentNodeInExecution: (executionId: string) => string | undefined;
 }
 
 export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
@@ -56,6 +40,7 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
       currentExecutionId: null,
       executionHistory: [],
 
+      // Start a new execution for a scenario
       startExecution: (scenarioId) => {
         const id = nanoid();
         const execution: Execution = {
@@ -75,6 +60,7 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         return id;
       },
 
+      // Complete an execution with a status
       completeExecution: (id, status = "completed", error) => {
         set((state) => {
           if (!state.executions[id]) return state;
@@ -95,51 +81,7 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         });
       },
 
-      recordResult: (
-        executionId: string,
-        nodeId: string,
-        prompt: string,
-        message: string,
-        pluginId?: string,
-        pluginResult?: any,
-        duration: number = 0
-      ) => {
-        set((state) => {
-          if (!state.executions[executionId]) return state;
-      
-          const result: ExecutionResult = {
-            nodeId,
-            prompt, // zachowujemy oryginalną wartość
-            message,
-            pluginId,
-            pluginResult,
-            timestamp: Date.now(),
-            duration,
-          };
-      
-          return {
-            executions: {
-              ...state.executions,
-              [executionId]: {
-                ...state.executions[executionId],
-                results: {
-                  ...state.executions[executionId].results,
-                  [nodeId]: result,
-                },
-                currentNodeId: nodeId,
-              },
-            },
-          };
-        });
-      
-        // Aktualizacja odpowiedzi węzła w NodeStore
-        const nodeStore = useNodeStore.getState();
-        nodeStore.setNodeResponse(nodeId, message);
-      
-        return message;
-      },
-      
-
+      // Execute a node with optional input
       executeNode: async (executionId, nodeId, message = "") => {
         const startTime = Date.now();
       
@@ -151,38 +93,64 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
             throw new Error(`Node ${nodeId} not found`);
           }
       
-          // Pobierz oryginalny prompt
+          // Get the original prompt
           let prompt = node.data.prompt || "";
           
-          // Przetwórz zmienne w promptcie
+          // Process variables in the prompt
           prompt = get().processVariables(prompt, executionId);
           
-          // Zapisz przetworzony prompt z powrotem do node.data.processedPrompt
+          // Save processed prompt back to node data
           nodeStore.updateNodeData(nodeId, { processedPrompt: prompt });
           
           let pluginResult = null;
       
+          // If node has a plugin, process with plugin
           if (node.data.pluginId) {
             const pluginStore = usePluginStore.getState();
             const result = await pluginStore.processNodeWithPlugin(
               nodeId,
-              message // Używamy surowej treści
+              message
             );
             message = result.output;
             pluginResult = result.result;
           }
       
-          // Zapisz wynik
+          // Record the result and duration
           const duration = Date.now() - startTime;
-          return get().recordResult(
-            executionId,
-            nodeId,
-            prompt, // Używamy przetworzonego promptu
-            message,
-            node.data.pluginId ?? undefined,
-            pluginResult,
-            duration
-          );
+          
+          // Save the result to the execution
+          set((state) => {
+            if (!state.executions[executionId]) return state;
+            
+            const result: ExecutionResult = {
+              nodeId,
+              prompt,
+              message,
+              pluginId: node.data.pluginId,
+              pluginResult,
+              timestamp: Date.now(),
+              duration,
+            };
+            
+            return {
+              executions: {
+                ...state.executions,
+                [executionId]: {
+                  ...state.executions[executionId],
+                  results: {
+                    ...state.executions[executionId].results,
+                    [nodeId]: result,
+                  },
+                  currentNodeId: nodeId,
+                },
+              },
+            };
+          });
+          
+          // Update node response in NodeStore
+          nodeStore.setNodeResponse(nodeId, message);
+          
+          return message;
         } catch (error) {
           console.error(`Error executing node ${nodeId}:`, error);
           get().completeExecution(
@@ -190,45 +158,28 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
             "error",
             error instanceof Error ? error.message : String(error)
           );
-          return prompt;
+          return "";
         }
       },
 
-     
-
-      // Uproszczona funkcja przetwarzania zmiennych
+      // Process variables in text - replace {{nodeId.response}} with actual responses
       processVariables: (text, executionId) => {
         if (!text) return "";
         
         const execution = get().executions[executionId];
         if (!execution) return text;
-
-        console.log("DEBUG processVariables:", {
-          text,
-          executionId,
-          resultsAvailable: Object.keys(execution.results),
-          variablesFound: [...text.matchAll(/\{\{([^}]+)\.response\}\}/g)].map(m => ({
-            fullMatch: m[0],
-            nodeId: m[1],
-            hasResult: execution.results[m[1]] !== undefined,
-            resultValue: execution.results[m[1]] ? execution.results[m[1]].message : "N/A"
-          }))
-        });
       
-        // Przetwarzaj zmienne w formacie {{nodeId.response}}
+        // Match all variables in format {{nodeId.response}}
         let processedText = text;
-        
-        // Dopasuj wszystkie zmienne
         const variableRegex = /\{\{([^}]+)\.response\}\}/g;
         let match;
         
         while ((match = variableRegex.exec(text)) !== null) {
-          const fullMatch = match[0];  // {{nodeId.response}}
-          const nodeId = match[1];     // nodeId
+          const fullMatch = match[0];
+          const nodeId = match[1];
           
-          // Sprawdź czy jest wynik dla tego węzła
+          // Check if there's a result for this node
           if (execution.results[nodeId]) {
-            // Zmiana z "prompt" na "message"
             const output = execution.results[nodeId].message;
             processedText = processedText.replace(fullMatch, output || "");
           }
@@ -237,39 +188,39 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         return processedText;
       },
 
-      // Obliczanie kolejności wykonania na podstawie węzła startowego i/lub krawędzi
+      // Calculate execution order based on graph topology
       calculateExecutionOrder: (scenarioId) => {
         const nodeStore = useNodeStore.getState();
         const scenarioStore = useScenarioStore.getState();
       
-        // Pobierz węzły i krawędzie
+        // Get nodes and edges
         const nodes = nodeStore.getNodesByScenario(scenarioId);
         const edges = scenarioStore.getValidEdges(scenarioId);
         
         if (nodes.length === 0) return [];
         if (nodes.length === 1) return [nodes[0].id];
       
-        // Znajdź węzeł startowy
+        // Find start node if one is marked
         const startNode = nodes.find(node => node.data.isStartNode === true);
         
-        // Jeśli jest węzeł startowy, wykonujemy tylko od niego w dół grafu
+        // If there's a start node, execute only from it down the graph
         if (startNode) {
-          // Budujemy graf w kierunku przepływu
+          // Build directed graph
           const graph = {};
           
-          // Inicjalizacja grafu
+          // Initialize graph
           nodes.forEach(node => {
             graph[node.id] = [];
           });
           
-          // Dodawanie krawędzi
+          // Add edges
           edges.forEach(edge => {
             if (graph[edge.source]) {
               graph[edge.source].push(edge.target);
             }
           });
           
-          // Wyszukujemy wszystkie węzły dostępne od węzła startowego używając BFS
+          // Find all nodes reachable from start node using BFS
           const visited = new Set([startNode.id]);
           const queue = [startNode.id];
           
@@ -286,13 +237,13 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
             }
           }
           
-          // Teraz wykonujemy sortowanie topologiczne tylko dla węzłów dostępnych od startowego
+          // Perform topological sort only on reachable nodes
           const relevantNodes = nodes.filter(node => visited.has(node.id));
           const relevantEdges = edges.filter(edge => 
             visited.has(edge.source) && visited.has(edge.target)
           );
           
-          // Budujemy graf potrzebny do sortowania
+          // Build graph for sorting
           const sortGraph = {};
           const inDegree = {};
           
@@ -306,11 +257,11 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
             inDegree[edge.target]++;
           });
           
-          // Wykonujemy algorytm Kahna, zaczynając od startowego węzła
+          // Execute Kahn's algorithm, starting from start node
           const result = [];
           const sortQueue = [];
           
-          // Najpierw dodajemy węzeł startowy
+          // First add start node
           sortQueue.push(startNode.id);
           
           while (sortQueue.length > 0) {
@@ -325,7 +276,7 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
             });
           }
           
-          // Jeśli jakieś węzły z naszego zestawu nie zostały odwiedzone (cykle), dodajemy je
+          // If any nodes from our set weren't visited (cycles), add them
           const processedIds = new Set(result);
           relevantNodes.forEach(node => {
             if (!processedIds.has(node.id)) {
@@ -336,8 +287,8 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
           return result;
         }
         
-        // Jeśli nie ma węzła startowego, używamy standardowego sortowania topologicznego
-        // Budujemy graf
+        // If no start node, use standard topological sort
+        // Build graph
         const graph = {};
         const inDegree = {};
         
@@ -351,11 +302,11 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
           inDegree[edge.target]++;
         });
         
-        // Wykonujemy algorytm Kahna
+        // Execute Kahn's algorithm
         const result = [];
         const queue = [];
         
-        // Dodajemy wszystkie węzły bez zależności
+        // Add all nodes with no dependencies
         nodes.forEach(node => {
           if (inDegree[node.id] === 0) {
             queue.push(node.id);
@@ -374,7 +325,7 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
           });
         }
         
-        // Jeśli jakieś węzły nie zostały odwiedzone (cykle), dodajemy je
+        // If any nodes weren't visited (cycles), add them
         if (result.length !== nodes.length) {
           const processed = new Set(result);
           nodes.forEach(node => {
@@ -386,12 +337,8 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         
         return result;
       },
-      getNodeInput: (nodeId) => {
-        const nodeStore = useNodeStore.getState();
-        const node = nodeStore.getNode(nodeId);
-        return node ? node.data.prompt : "";
-      },
 
+      // Getters for executions
       getExecution: (id) => {
         return get().executions[id] || null;
       },
@@ -407,31 +354,11 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         return executions.length > 0 ? executions[0] : null;
       },
 
-      getResults: (executionId) => {
-        const execution = get().executions[executionId];
-        return execution ? execution.results : null;
-      },
-
-      deleteExecution: (id) => {
-        set((state) => {
-          const newExecutions = { ...state.executions };
-          delete newExecutions[id];
-
-          return {
-            executions: newExecutions,
-            executionHistory: state.executionHistory.filter(
-              (execId) => execId !== id
-            ),
-            currentExecutionId:
-              state.currentExecutionId === id ? null : state.currentExecutionId,
-          };
-        });
-      },
-
+      // Clear execution history
       clearHistory: (scenarioId) => {
         set((state) => {
           if (scenarioId) {
-            // Wyczyść tylko dla określonego scenariusza
+            // Clear only for specific scenario
             const executionsToKeep = Object.entries(state.executions)
               .filter(([_, execution]) => execution.scenarioId !== scenarioId)
               .reduce(
@@ -452,7 +379,7 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
                   : state.currentExecutionId,
             };
           } else {
-            // Wyczyść całą historię
+            // Clear all history
             return {
               executions: {},
               executionHistory: [],
@@ -460,27 +387,6 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
             };
           }
         });
-      },
-
-      setCurrentNodeInExecution: (executionId, nodeId) => {
-        set((state) => {
-          if (!state.executions[executionId]) return state;
-
-          return {
-            executions: {
-              ...state.executions,
-              [executionId]: {
-                ...state.executions[executionId],
-                currentNodeId: nodeId,
-              },
-            },
-          };
-        });
-      },
-
-      getCurrentNodeInExecution: (executionId) => {
-        const execution = get().executions[executionId];
-        return execution ? execution.currentNodeId : undefined;
       },
     }),
     {
