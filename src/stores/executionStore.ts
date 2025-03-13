@@ -196,42 +196,85 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         }
       },
 
-      executeScenario: async (scenarioId) => {
-        const nodeStore = useNodeStore.getState();
-        const scenarioStore = useScenarioStore.getState();
+     // W pliku src/stores/executionStore.ts - sekcja executeScenario
+
+executeScenario: async (scenarioId) => {
+  const nodeStore = useNodeStore.getState();
+  const scenarioStore = useScenarioStore.getState();
+  
+  // Rozpocznij wykonanie
+  const executionId = get().startExecution(scenarioId);
+
+  try {
+    // Oblicz kolejność wykonania
+    const executionOrder = get().calculateExecutionOrder(scenarioId);
+    
+    if (executionOrder.length === 0) {
+      throw new Error("No nodes to execute");
+    }
+
+    // Wykonaj węzły w kolejności
+    for (const nodeId of executionOrder) {
+      const node = nodeStore.getNode(nodeId);
+      if (!node) continue;
+
+      // Najpierw zachowaj oryginalną treść węzła jako input
+      const nodeContent = node.data.content || node.data.prompt || "";
+      
+      // Wykonaj węzeł
+      let output = "";
+      let pluginResult = null;
+      
+      try {
+        // Wykonaj węzeł używając executeNode
+        output = await get().executeNode(executionId, nodeId);
         
-        // Rozpocznij wykonanie
-        const executionId = get().startExecution(scenarioId);
-
-        try {
-          // Oblicz kolejność wykonania
-          const executionOrder = get().calculateExecutionOrder(scenarioId);
+        // Jeśli węzeł ma plugin, upewnij się, że wynik jest zapisany z oryginalnym inputem
+        if (node.data.pluginId) {
+          const execution = get().getExecution(executionId);
           
-          if (executionOrder.length === 0) {
-            throw new Error("No nodes to execute");
+          // Sprawdź czy wynik został poprawnie zapisany
+          if (!execution?.results[nodeId] || !execution.results[nodeId].input) {
+            // Jeśli nie ma wyniku lub nie ma inputu, zapisz ręcznie
+            get().recordResult(
+              executionId,
+              nodeId,
+              nodeContent,               // Oryginalny input
+              output,                    // Output z pluginu
+              node.data.pluginId,
+              pluginResult,
+              0
+            );
           }
-
-          // Wykonaj węzły w kolejności
-          for (const nodeId of executionOrder) {
-            const node = nodeStore.getNode(nodeId);
-            if (!node) continue;
-
-            // Wykonaj węzeł, używając jego własnej treści jako wejścia
-            await get().executeNode(executionId, nodeId);
-          }
-
-          get().completeExecution(executionId, "completed");
-        } catch (error) {
-          console.error(`Error executing scenario ${scenarioId}:`, error);
-          get().completeExecution(
-            executionId,
-            "error",
-            error instanceof Error ? error.message : String(error)
-          );
         }
+      } catch (error) {
+        console.error(`Error executing node ${nodeId}:`, error);
+        
+        // W przypadku błędu, również zapisz wynik, aby węzeł był widoczny
+        get().recordResult(
+          executionId,
+          nodeId,
+          nodeContent,
+          "Error executing node: " + (error instanceof Error ? error.message : String(error)),
+          node.data.pluginId,
+          null,
+          0
+        );
+      }
+    }
 
-        return executionId;
-      },
+    get().completeExecution(executionId, "completed");
+  } catch (error) {
+    console.error(`Error executing scenario ${scenarioId}:`, error);
+    get().completeExecution(
+      executionId,
+      "error",
+      error instanceof Error ? error.message : String(error)
+    );
+  }
+
+  return executionId;
+},
 
       // Uproszczona funkcja przetwarzania zmiennych
       processVariables: (text, executionId) => {
