@@ -14,13 +14,9 @@ import { useWorkspaceStore } from '@/stores/workspaceStore';
 import { useScenarioStore } from '@/stores/scenarioStore';
 import { useNodeStore } from '@/stores/nodeStore';
 
-// Component to display the number of nodes in a scenario
+// Komponent wyświetlający liczbę węzłów w scenariuszu
 const ScenarioNodeCount: React.FC<{ scenarioId: string }> = ({ scenarioId }) => {
-  // Use useNodeStore hook to react to changes in the node store
-  const nodeCount = useNodeStore(state => 
-    state.getNodeCountByScenario(scenarioId)
-  );
-  
+  const nodeCount = useNodeStore(state => state.getNodeCountByScenario(scenarioId));
   return (
     <>{nodeCount} {nodeCount === 1 ? 'node' : 'nodes'}</>
   );
@@ -36,8 +32,6 @@ export const ScenariosList: React.FC = () => {
     setCurrentScenario,
     deleteScenario,
     duplicateScenario,
-    // createTemplate, TODO - DONT REMOVE - TO IMPLEMENT
-    // applyTemplate
   } = useScenarioStore();
   
   const workspace = getCurrentWorkspace();
@@ -57,10 +51,9 @@ export const ScenariosList: React.FC = () => {
     setIsCreateDialogOpen(false);
   };
   
-  // If no workspace, show message
   if (!workspace) {
     return (
-      <Card>
+      <Card className="border-dashed">
         <CardContent className="pt-6 text-center text-slate-500">
           No active workspace. Please select or create a workspace.
         </CardContent>
@@ -68,20 +61,16 @@ export const ScenariosList: React.FC = () => {
     );
   }
   
-  // Get scenarios for this workspace
   const workspaceScenarios = Object.values(scenarios)
     .filter((scenario) => scenario.workspaceId === workspace.id)
     .sort((a, b) => b.updatedAt - a.updatedAt);
   
-  // Get all templates
   const allTemplates = Object.values(templates)
     .sort((a, b) => b.updatedAt - a.updatedAt);
   
   return (
     <div className="space-y-6">
       <div className="flex justify-end items-center">
-       
-        
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -145,7 +134,7 @@ export const ScenariosList: React.FC = () => {
               {workspaceScenarios.map((scenario) => (
                 <Card 
                   key={scenario.id} 
-                  className={currentScenarioId === scenario.id ? 'border-2 border-blue-500' : ''}
+                  className={currentScenarioId === scenario.id ? 'border-primary' : 'border-card'}
                 >
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -181,14 +170,6 @@ export const ScenariosList: React.FC = () => {
                     >
                       <Copy className="h-4 w-4" />
                     </Button>
-                    {/* <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => createTemplate(scenario.id)}
-                      title="Save as template"
-                    >
-                      <Terminal className="h-4 w-4 text-green-600" />
-                    </Button> */}
                     <Button 
                       variant="outline" 
                       size="sm"
@@ -223,7 +204,7 @@ export const ScenariosList: React.FC = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {allTemplates.map((template) => (
-                <Card key={template.id}>
+                <Card key={template.id} className="border-card">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Terminal className="h-5 w-5 text-green-600" />
@@ -241,14 +222,6 @@ export const ScenariosList: React.FC = () => {
                       </div>
                     </div>
                   </CardContent>
-                  {/* <CardFooter>
-                    <Button 
-                      onClick={() => applyTemplate(template.id, workspace.id, `${template.name} Instance`)}
-                      className="w-full"
-                    >
-                      Use Template
-                    </Button>
-                  </CardFooter> */}
                 </Card>
               ))}
             </div>
