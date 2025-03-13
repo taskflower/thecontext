@@ -16,7 +16,6 @@ import {
   Trash2,
   Clock,
   SquareArrowLeft,
-  Network,
   FileCode,
   MoreVertical,
   Box,
@@ -98,7 +97,10 @@ export const WorkspacesList: React.FC = () => {
             </DialogContent>
           </Dialog>
           
-          <Button 
+        
+        </div>
+        <div className="flex items-center gap-2">
+        <Button 
             variant="outline" 
             onClick={() => setIsContextSheetOpen(true)}
             disabled={!currentWorkspaceId}
@@ -106,9 +108,7 @@ export const WorkspacesList: React.FC = () => {
           >
             <Database className="h-4 w-4 mr-2" />
             Context
-          </Button>
-        </div>
-        
+          </Button> 
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -154,6 +154,7 @@ export const WorkspacesList: React.FC = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+       </div>
       </div>
 
       {/* Context Sheet */}
@@ -222,12 +223,14 @@ export const WorkspacesList: React.FC = () => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="start">
-                        <DropdownMenuItem asChild>
-                          <NavLink to="/flow-editor" className="flex items-center gap-2 w-full">
-                            <Network className="h-4 w-4" />
-                            Flow Editor
-                          </NavLink>
+                      <DropdownMenuItem 
+                          onClick={() => setIsContextSheetOpen(true)}
+                          className="flex items-center gap-2"
+                        >
+                          <Database className="h-4 w-4" />
+                          Manage Context
                         </DropdownMenuItem>
+                        
                         <DropdownMenuItem 
                           onClick={() => duplicateWorkspace(workspace.id)}
                           className="flex items-center gap-2"
@@ -235,13 +238,7 @@ export const WorkspacesList: React.FC = () => {
                           <Copy className="h-4 w-4" />
                           Duplicate
                         </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={() => setIsContextSheetOpen(true)}
-                          className="flex items-center gap-2"
-                        >
-                          <Database className="h-4 w-4" />
-                          Manage Context
-                        </DropdownMenuItem>
+                        
                         <DropdownMenuItem 
                           onClick={() => deleteWorkspace(workspace.id)}
                           className="flex items-center gap-2 text-red-500"

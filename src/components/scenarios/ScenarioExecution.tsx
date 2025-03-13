@@ -497,7 +497,7 @@ export const ScenarioExecution: React.FC = () => {
               <div className="space-y-4">
                 <div className="mb-6 border-b">
                   <h3 className="text-4xl font-bold uppercase">
-                    {currentNode.type}
+                  {currentNode.type}
                   </h3>
                   <span className="text-xs text-slate-300">
                     Node ID: {currentNode.id}

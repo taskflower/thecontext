@@ -90,21 +90,14 @@ export const WorkspaceContextPanel: React.FC = () => {
   
   return (
     
-        <Tabs defaultValue="view">
+        <Tabs defaultValue="edit">
           <TabsList className="grid grid-cols-2 mb-4">
-            <TabsTrigger value="view">View Context</TabsTrigger>
+            
             <TabsTrigger value="edit">Edit Context</TabsTrigger>
+            <TabsTrigger value="view">View Context</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="view">
-            {contextEntries.length === 0 ? (
-              <div className="text-center py-6 text-slate-500">
-                No context data yet. Add data using the Edit tab.
-              </div>
-            ) : (
-              <JsonView data={workspace.context} />
-            )}
-          </TabsContent>
+          
           
           <TabsContent value="edit">
             <div className="space-y-4">
@@ -146,7 +139,7 @@ export const WorkspaceContextPanel: React.FC = () => {
                       ) : (
                         <div className="flex justify-between items-start">
                           <div>
-                            <div className="font-medium text-sm">{key}</div>
+                            <div className="font-medium text-sm px-1">{key}</div>
                             <div className="text-xs font-mono bg-slate-50 p-2 rounded mt-1 overflow-x-auto max-h-32">
                               {typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)}
                             </div>
@@ -189,6 +182,15 @@ export const WorkspaceContextPanel: React.FC = () => {
                 </Button>
               </div>
             </div>
+          </TabsContent>
+          <TabsContent value="view">
+            {contextEntries.length === 0 ? (
+              <div className="text-center py-6 text-slate-500">
+                No context data yet. Add data using the Edit tab.
+              </div>
+            ) : (
+              <JsonView data={workspace.context} />
+            )}
           </TabsContent>
         </Tabs>
      
