@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/stores/importExportStore.ts - nowy store do zarządzania eksportem/importem
 import { create } from 'zustand';
 import { useWorkspaceStore } from './workspaceStore';
@@ -21,7 +22,7 @@ interface ImportExportActions {
   resetErrors: () => void;
 }
 
-export const useImportExportStore = create<ImportExportState & ImportExportActions>()((set, get) => ({
+export const useImportExportStore = create<ImportExportState & ImportExportActions>()((set) => ({
   isExporting: false,
   isImporting: false,
   lastExportedAt: null,
