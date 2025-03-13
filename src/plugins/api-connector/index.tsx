@@ -5,6 +5,7 @@ import { Loader } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { authService } from '@/services/authService';
 import { useAuthState } from '@/hooks/useAuthState';
+import { useNodeStore } from '@/stores/nodeStore'; // DODANE: import useNodeStore
 
 // Import types
 import type { PluginProcessInput, PluginProcessResult, PluginComponentProps } from '../PluginInterface';
@@ -17,7 +18,8 @@ interface ApiConnectorViewProps extends PluginComponentProps {
 const ApiConnectorView: React.FC<ApiConnectorViewProps> = ({ 
   config, 
   onConfigChange,
-  onProcessComplete 
+  onProcessComplete,
+  nodeId // DODANE: Potrzebujemy nodeId do bezpośredniej aktualizacji
 }) => {
   const [waiting, setWaiting] = useState(true);
   const [processing, setProcessing] = useState(false);
@@ -31,18 +33,31 @@ const ApiConnectorView: React.FC<ApiConnectorViewProps> = ({
 
   // Helper to signal completion
   const signalCompletion = (message: string, wasSuccessful: boolean) => {
+    console.log('API Connector: signalCompletion config before update:', JSON.stringify(config));
+    console.log('API Connector: Signaling completion with message:', message);
+    
+    // Przygotuj zaktualizowaną konfigurację
+    const updatedConfig = {
+      ...config,
+      requestSent: true,
+      requestSuccessful: wasSuccessful,
+      completionMessage: message
+    };
+    
+    // ZMIANA: Jeśli mamy nodeId, aktualizuj bezpośrednio stan węzła
+    if (nodeId) {
+      console.log('API Connector: Aktualizuję stan węzła bezpośrednio:', nodeId);
+      useNodeStore.getState().updateNodePluginConfig(nodeId, updatedConfig);
+    }
+    
     // Update plugin state
     if (onConfigChange) {
-      onConfigChange({
-        ...config,
-        requestSent: true,
-        requestSuccessful: wasSuccessful,
-        completionMessage: message
-      });
+      onConfigChange(updatedConfig);
     }
     
     // Signal execution component
     if (onProcessComplete) {
+      console.log('API Connector: Wywołuję onProcessComplete z:', message);
       onProcessComplete(message);
     }
   };
@@ -78,6 +93,8 @@ const ApiConnectorView: React.FC<ApiConnectorViewProps> = ({
         userId: user.uid || "user123" // Use actual user ID if available
       };
       
+      console.log('API Connector: Sending request with payload:', payload);
+      
       // Get API URL from environment or config 
       const baseApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
       const endpoint = apiUrl.startsWith('http') ? apiUrl : `${baseApiUrl}${apiUrl.startsWith('/') ? '' : '/'}${apiUrl}`;
@@ -98,15 +115,31 @@ const ApiConnectorView: React.FC<ApiConnectorViewProps> = ({
       
       // Parse the response
       const data = await response.json();
+      console.log('API Connector: Received response:', data);
       
-      // Update UI and signal completion
+      // Extract the actual LLM content from the response
+      const llmContent = data.data?.message?.content || "Brak odpowiedzi";
+      
+      console.log('API Connector: Extracted LLM content:', llmContent);
+      
+      // Update UI and signal completion with the actual LLM response
       setProcessing(false);
-      setResult(`Request completed successfully!\nResponse: ${JSON.stringify(data)}`);
-      signalCompletion(`API request completed. Response: ${JSON.stringify(data)}`, true);
+      setResult(`Request completed successfully!\nResponse: ${llmContent}`);
+
+      console.log('API Connector: Updated config after API call:', JSON.stringify({
+        ...config,
+        requestSent: true,
+        requestSuccessful: true,
+        completionMessage: llmContent
+      }));
+      
+      // This is the key change - pass the actual LLM content as the output
+      signalCompletion(llmContent, true);
       
     } catch (err) {
       // Handle errors
       const errorMessage = err instanceof Error ? err.message : String(err);
+      console.error('API Connector: Error during request:', errorMessage);
       setProcessing(false);
       setError(errorMessage);
       setResult('Request failed. See error details.');
@@ -264,9 +297,32 @@ const ApiConnectorResult: React.FC<PluginComponentProps> = ({ config }) => {
   );
 };
 
-// Processing function for execution flow
+// ZMIENIONA funkcja processNode
 const processNode = async (params: PluginProcessInput): Promise<PluginProcessResult> => {
+  console.log('API Connector processNode: Raw config received:', JSON.stringify(params));
   const { input, config, node } = params;
+  
+  console.log('API Connector processNode: Processing node with input:', input);
+  console.log('API Connector processNode: Current config:', config);
+  
+  // ZMIANA: Sprawdź najpierw pluginConfig w danych węzła
+  console.log('API Connector processNode: Node data:', node?.data);
+  
+  const nodePluginConfig = node?.data?.pluginConfig || {};
+  console.log('API Connector processNode: Node plugin config:', nodePluginConfig);
+  
+  // ZMIANA: Jeśli w konfiguracji węzła jest już odpowiedź, użyj jej
+  if (nodePluginConfig.requestSent === true && nodePluginConfig.completionMessage) {
+    console.log('API Connector processNode: Using node plugin config with completionMessage:', nodePluginConfig.completionMessage);
+    return {
+      output: nodePluginConfig.completionMessage,
+      result: {
+        status: 'completed',
+        message: 'API request completed.',
+        requiresUserAction: false
+      }
+    };
+  }
   
   // Store the input message and prompt for use in the API request
   const updatedConfig = {
@@ -279,6 +335,7 @@ const processNode = async (params: PluginProcessInput): Promise<PluginProcessRes
   const canContinue = config?.requestSent === true;
   
   if (!canContinue) {
+    console.log('API Connector processNode: Waiting for user action');
     // Return a special result to indicate process should be paused
     return {
       output: "API request pending. Waiting for user action.",
@@ -291,12 +348,14 @@ const processNode = async (params: PluginProcessInput): Promise<PluginProcessRes
     };
   }
   
-  // Process can continue, pass through the input
+  console.log('API Connector processNode: Request completed, returning LLM response');
+  
+  // Process can continue, return the LLM response from completionMessage
   return {
-    output: input,
+    output: config?.completionMessage || input,
     result: {
       status: 'completed',
-      message: config?.completionMessage || 'API request completed.',
+      message: 'API request completed.',
       requiresUserAction: false
     }
   };
