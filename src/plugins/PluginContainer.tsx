@@ -113,35 +113,35 @@ export const PluginContainer: React.FC<PluginContainerProps> = ({
           
           <CardContent className="p-6">
             <TabsContent value="view" className="mt-0">
-              <div className="border rounded-md p-4">
+              
                 <plugin.ViewComponent 
                   nodeId={nodeId}
                   config={config}
                   onConfigChange={handleConfigChange}
                 />
-              </div>
+             
             </TabsContent>
             
             {plugin.ConfigComponent && (
               <TabsContent value="config" className="mt-0">
-                <div className="border rounded-md p-4">
+                
                   <plugin.ConfigComponent 
                     nodeId={nodeId}
                     config={config}
                     onConfigChange={handleConfigChange}
                   />
-                </div>
+                
               </TabsContent>
             )}
             
             {plugin.ResultComponent && (
               <TabsContent value="results" className="mt-0">
-                <div className="border rounded-md p-4">
+               
                   <plugin.ResultComponent 
                     nodeId={nodeId}
                     config={config}
                   />
-                </div>
+               
               </TabsContent>
             )}
           </CardContent>

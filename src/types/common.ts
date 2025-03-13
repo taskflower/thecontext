@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/types/common.ts
+import { Node as ReactFlowNode } from 'reactflow';
+
 export interface Position {
     x: number;
     y: number;
@@ -79,4 +81,19 @@ export interface Position {
     context: Record<string, any>;
     scenarioIds: string[];
     nodes: any[]; 
+  }
+
+  export interface ExportedData {
+    version: string;
+    exportedAt: string;
+    workspace: Workspace;
+    scenarios: Record<string, Scenario>;
+    nodes: Record<string, Node>;
+    edges: Record<string, Edge>;
+    plugins: Record<string, ExportedPluginData>;
+  }
+  
+  export interface ExportedPluginData {
+    id: string;
+    config: Record<string, any>;
   }

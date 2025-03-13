@@ -94,7 +94,7 @@ const NewNodeToolbar: React.FC<NewNodeToolbarProps> = ({ scenarioId }) => {
     }
   
     try {
-      console.log(`Adding ${nodeType.type} node to scenario ${scenarioId}`);
+     
       
       // Pobierz aktualny widok
       const { x, y, zoom } = reactFlowInstance.getViewport();
@@ -112,7 +112,7 @@ const NewNodeToolbar: React.FC<NewNodeToolbarProps> = ({ scenarioId }) => {
         y: center.y + Math.random() * 100 - 50
       };
       
-      console.log("Node position:", position);
+
       
       // Tworzenie węzła w nodeStore - zawsze z ID scenariusza
       const nodeId = createNode(
@@ -125,7 +125,7 @@ const NewNodeToolbar: React.FC<NewNodeToolbarProps> = ({ scenarioId }) => {
         scenarioId
       );
       
-      console.log(`Node created with ID: ${nodeId}`);
+
       
       // Pobierz utworzony węzeł
       const node = getNode(nodeId);

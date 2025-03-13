@@ -56,7 +56,7 @@ const ProcessControlView: React.FC<ProcessControlViewProps> = ({
   };
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-4">
       {waiting ? (
         <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
           {result}

@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { formatDistanceToNow } from 'date-fns';
 import { useWorkspaceStore } from '@/stores/workspaceStore';
+import { WorkspaceExportImport } from './WorkspaceExportImport';
 
 export const WorkspacesList: React.FC = () => {
   const { 
@@ -41,7 +42,7 @@ export const WorkspacesList: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-end items-center">
        
-        
+        <WorkspaceExportImport/>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button>

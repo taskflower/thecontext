@@ -140,6 +140,8 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
       },
 
       executeNode: async (executionId, nodeId, input = "") => {
+        console.log(`[executeNode] Start dla węzła: ${nodeId}, input: "${input.substring(0, 100)}..."`);
+        console.log(`[executeNode] executionId: ${executionId}`);
         const startTime = Date.now();
 
         try {
@@ -153,11 +155,28 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
           // Ustawienie bieżącego węzła dla wykonania
           get().setCurrentNodeInExecution(executionId, nodeId);
 
+          const currentExecution = get().executions[executionId];
+    console.log(`[executeNode] Stan wykonania:`, {
+      id: executionId,
+      isValid: !!currentExecution,
+      status: currentExecution?.status,
+      resultCount: currentExecution ? Object.keys(currentExecution.results).length : 0,
+      resultKeys: currentExecution ? Object.keys(currentExecution.results) : []
+    });
+
+    // Przetworzenie zmiennych w tekście
+    console.log(`[executeNode] Przed processVariables input: "${input.substring(0, 100)}..."`);
+    console.log(`[executeNode] Input zawiera zmienne?:`, input.includes("{{") && input.includes(".response}}"));
+    
+
           // Przetworzenie zmiennych w tekście
           const processedInput = await get().processVariables(
             input,
             executionId
           );
+
+          console.log(`[executeNode] Po processVariables: "${processedInput.substring(0, 100)}..."`);
+    console.log(`[executeNode] Czy input został zmieniony?:`, input !== processedInput);
 
           // Wykonanie pluginu, jeśli przypisany
           let output = processedInput;
@@ -346,24 +365,26 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
 
       // Metoda pomocnicza do przetwarzania zmiennych w tekście
       processVariables: async (text, executionId) => {
+        console.log("PROCESSING VARIABLES - Input:", text);
         if (!text) return "";
 
         // Dopasuj wszystkie odniesienia do zmiennych {{nodeId.response}}
         const variableRegex = /\{\{([^}]+)\.response\}\}/g;
         const matches = text.match(variableRegex);
-
+        console.log("VARIABLE MATCHES:", matches);
         if (!matches) return text;
 
         let processedText = text;
 
         for (const match of matches) {
           const nodeId = match.slice(2, -11); // Wyodrębnij nodeId z {{nodeId.response}}
-
+          console.log("PROCESSING NODE ID:", nodeId);
           // Pobierz wynik z wykonania
           const result = get().executions[executionId]?.results[nodeId];
-
+          console.log("RESULT FOR NODE:", result);
           if (result) {
             processedText = processedText.replace(match, result.output);
+            console.log("AFTER REPLACEMENT:", processedText);
           }
         }
 

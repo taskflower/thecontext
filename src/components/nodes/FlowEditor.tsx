@@ -104,7 +104,7 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
 
   // Ładowanie węzłów i krawędzi przy zmianie scenariusza
   useEffect(() => {
-    console.log("Loading scenario data, scenarioId:", scenarioId);
+   
     if (!scenarioId) {
       console.warn("Cannot load flow data: No scenario ID provided");
       prevScenarioIdRef.current = null;
@@ -145,10 +145,7 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
     // Pobierz węzły bezpośrednio z nodeStore dla tego scenariusza
     const scenarioNodes = getNodesByScenario(scenarioId);
     
-    console.log(
-      `Found scenario with ${scenarioNodes.length} nodes and ${scenario.edgeIds.length} edges`
-    );
-
+   
     // Transformacja węzłów na format ReactFlow
     const flowNodes = scenarioNodes.map((node) => ({
       id: node.id,

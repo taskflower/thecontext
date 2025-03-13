@@ -27,31 +27,31 @@ export const PluginInitializer: React.FC = () => {
   // Initialize the plugin system
   useEffect(() => {
     const initializePlugins = async () => {
-      console.log('Initializing plugin system...');
+    
       
       // Register store API for plugins
       registerStoresForPlugins();
       // Load dynamic plugins in development mode
       if (import.meta.env.DEV) {
         try {
-          console.log('Loading dynamic plugins...');
+       
           const dynamicPlugins = await loadPlugins();
           
           dynamicPlugins.forEach(plugin => {
             if (!plugins[plugin.id]) {
-              console.log(`Registering dynamic plugin: ${plugin.name} (${plugin.id})`);
+           
               registerPlugin(plugin.id, plugin);
               // Dynamic plugins are not activated by default
             }
           });
           
-          console.log(`Loaded ${dynamicPlugins.length} dynamic plugins`);
+        
         } catch (error) {
           console.error('Error loading dynamic plugins:', error);
         }
       }
       
-      console.log('Plugin system initialized');
+    
     };
     
     initializePlugins();
@@ -66,7 +66,7 @@ export const PluginInitializer: React.FC = () => {
     nodesWithPlugins.forEach((node:any) => {
       const pluginId = node.data.pluginId;
       if (pluginId && !isPluginActive(pluginId)) {
-        console.log(`Activating plugin ${pluginId} used by node ${node.id}`);
+      
         activatePlugin(pluginId);
       }
     });

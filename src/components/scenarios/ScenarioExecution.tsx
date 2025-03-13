@@ -31,6 +31,7 @@ import { usePluginStore } from "@/stores/pluginStore";
 // Import the PluginModule type for type checking
 import type { PluginModule } from "@/plugins/PluginInterface";
 
+
 export const ScenarioExecution: React.FC = () => {
   const { currentScenarioId, getScenario } = useScenarioStore();
   const {
@@ -444,27 +445,35 @@ export const ScenarioExecution: React.FC = () => {
       <Dialog open={isExecutionDialogOpen} onOpenChange={(open) => {
         if (!open) handleDialogClose();
       }}>
-        <DialogContent className="sm:max-w-2xl">
+        <DialogContent className="sm:max-w-2xl h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>
-              Executing Scenario: {scenario.name}
+              <p className="font-medium pb-2">
+              Executing Scenario: 
+              </p>
+              <p className="pb-0.5">
+              {scenario.name}
+              </p>
+           
             </DialogTitle>
             <DialogDescription>
               Step {currentNodeIndex + 1} of {executionOrder.length}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="py-4">
+          <div className="py-4 flex-1 flex flex-col">
+            <div className="flex-1"></div>
             {currentNode && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium">{currentNode.type}</h3>
-                  <span className="text-sm text-slate-500">Node ID: {currentNode.id}</span>
+                <div className="mb-6 border-b">
+                  <h3 className="text-4xl font-bold uppercase">{currentNode.type}</h3>
+                  <span className="text-xs text-slate-300">Node ID: {currentNode.id}</span>
                 </div>
+                
 
                 {/* Plugin workflow - MODIFIED TO SHOW ONLY VIEW COMPONENT */}
                 {currentNode.hasPlugin && waitingForPlugin && (
-                  <div className="border rounded-md p-4">
+                  <>
                     <div className="mb-4 text-sm">
                       This node uses a plugin. Please complete the plugin workflow to continue.
                     </div>
@@ -475,16 +484,16 @@ export const ScenarioExecution: React.FC = () => {
                         onComplete={handlePluginComplete}
                       />
                     )}
-                  </div>
+                  </>
                 )}
 
                 {/* Manual input workflow */}
                 {!currentNode.hasPlugin && waitingForUserInput && (
                   <div className="space-y-4">
-                    <div className="border rounded-md p-3 bg-slate-50">
+                    {nodeContent && <div className="border rounded-md p-3 bg-slate-50">
                       <div className="text-sm font-medium mb-2">Content/Prompt:</div>
                       <div className="whitespace-pre-wrap text-sm">{nodeContent}</div>
-                    </div>
+                    </div>}
                     
                     <div>
                       <label htmlFor="userInput" className="block text-sm font-medium mb-1">
