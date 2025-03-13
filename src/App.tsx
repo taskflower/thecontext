@@ -16,7 +16,6 @@ import PluginInitializer from "./plugins/PluginInitializer";
 import { ScenariosList } from "./components/scenarios/ScenariosList";
 import { ScenarioExecution } from "./components/scenarios/ScenarioExecution";
 import { WorkspacesList } from "./components/workspaces/WorkspacesList";
-import { WorkspaceContextPanel } from "./components/workspaces/WorkspaceContextPanel";
 import AppHeader from "./components/layout/AppHeader";
 
 // Import icons
@@ -90,17 +89,13 @@ function SidebarItem({ href, icon, children }: any) {
 
 // Individual page components
 const WorkspacePage = () => {
-  const { getCurrentWorkspace } = useWorkspaceStore();
-  const workspace = getCurrentWorkspace();
+
+
 
   return (
     <div className="space-y-6">
       <WorkspacesList />
-      {workspace && (
-        <div className="mt-8">
-          <WorkspaceContextPanel />
-        </div>
-      )}
+     
     </div>
   );
 };

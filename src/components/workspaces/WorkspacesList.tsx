@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import {
   Plus,
   Trash2,
-
   Clock,
   SquareArrowLeft,
   Network,
@@ -22,6 +21,7 @@ import {
   MoreVertical,
   Box,
   Copy,
+  Database,
 } from "lucide-react";
 import {
   Dialog,
@@ -44,6 +44,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { formatDistanceToNow } from "date-fns";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { WorkspaceExportImport } from "./WorkspaceExportImport";
+import { WorkspaceContextSheet } from "./WorkspaceContextSheet";
 import { NavLink } from "react-router-dom";
 
 export const WorkspacesList: React.FC = () => {
@@ -58,6 +59,7 @@ export const WorkspacesList: React.FC = () => {
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
   const [isExportImportDialogOpen, setIsExportImportDialogOpen] = React.useState(false);
+  const [isContextSheetOpen, setIsContextSheetOpen] = React.useState(false);
   const [newWorkspaceName, setNewWorkspaceName] = React.useState("");
   const [newWorkspaceDescription, setNewWorkspaceDescription] = React.useState("");
 
@@ -77,23 +79,36 @@ export const WorkspacesList: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center space-x-2">
-        <Dialog open={isExportImportDialogOpen} onOpenChange={setIsExportImportDialogOpen}>
-          <DialogTrigger asChild>
-            <Button variant={"outline"}>
-              <FileCode className="h-4 w-4 mr-2" />
-              Export/Import
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Export / Import Workspace</DialogTitle>
-              <DialogDescription>
-                Exportuj lub zaimportuj dane workspace.
-              </DialogDescription>
-            </DialogHeader>
-            <WorkspaceExportImport />
-          </DialogContent>
-        </Dialog>
+        <div className="flex items-center gap-2">
+          <Dialog open={isExportImportDialogOpen} onOpenChange={setIsExportImportDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant={"outline"}>
+                <FileCode className="h-4 w-4 mr-2" />
+                Export/Import
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Export / Import Workspace</DialogTitle>
+                <DialogDescription>
+                  Exportuj lub zaimportuj dane workspace.
+                </DialogDescription>
+              </DialogHeader>
+              <WorkspaceExportImport />
+            </DialogContent>
+          </Dialog>
+          
+          <Button 
+            variant="outline" 
+            onClick={() => setIsContextSheetOpen(true)}
+            disabled={!currentWorkspaceId}
+            title="Open Container Context"
+          >
+            <Database className="h-4 w-4 mr-2" />
+            Context
+          </Button>
+        </div>
+        
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -140,6 +155,12 @@ export const WorkspacesList: React.FC = () => {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Context Sheet */}
+      <WorkspaceContextSheet 
+        isOpen={isContextSheetOpen} 
+        onOpenChange={setIsContextSheetOpen} 
+      />
 
       {workspaceList.length === 0 ? (
         <Card className="border-dashed">
@@ -213,6 +234,13 @@ export const WorkspacesList: React.FC = () => {
                         >
                           <Copy className="h-4 w-4" />
                           Duplicate
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => setIsContextSheetOpen(true)}
+                          className="flex items-center gap-2"
+                        >
+                          <Database className="h-4 w-4" />
+                          Manage Context
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           onClick={() => deleteWorkspace(workspace.id)}

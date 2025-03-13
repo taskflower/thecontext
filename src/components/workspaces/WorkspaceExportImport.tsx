@@ -245,7 +245,7 @@ export const WorkspaceExportImport: React.FC = () => {
             className="flex items-center gap-2"
           >
             <DownloadCloud className="h-4 w-4" />
-            Export Workspace
+            Export Container
           </Button>
           
           <Button
@@ -254,7 +254,7 @@ export const WorkspaceExportImport: React.FC = () => {
             className="flex items-center gap-2"
           >
             <UploadCloud className="h-4 w-4" />
-            Import Workspace
+            Import Container
           </Button>
         </div>
         

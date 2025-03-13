@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/workspaces/WorkspaceContextPanel.tsx
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Database, Edit, Save, X, Plus } from 'lucide-react';
+import {  Edit, Save, X, Plus } from 'lucide-react';
 import { JsonView } from '../shared/JsonView';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '../ui/textarea';
@@ -89,20 +89,7 @@ export const WorkspaceContextPanel: React.FC = () => {
   const contextEntries = Object.entries(workspace.context || {});
   
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Database className="h-5 w-5 " />
-            Container Context
-          </div>
-          
-        </CardTitle>
-        <CardDescription>
-          Data shared across all scenarios in this workspace
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    
         <Tabs defaultValue="view">
           <TabsList className="grid grid-cols-2 mb-4">
             <TabsTrigger value="view">View Context</TabsTrigger>
@@ -204,7 +191,6 @@ export const WorkspaceContextPanel: React.FC = () => {
             </div>
           </TabsContent>
         </Tabs>
-      </CardContent>
-    </Card>
+     
   );
 };
