@@ -8,6 +8,8 @@ import { Execution, ExecutionResult } from "../types/common";
 import { useScenarioStore } from "./scenarioStore";
 import { useNodeStore } from "./nodeStore";
 import { usePluginStore } from "./pluginStore";
+import { calculateExecutionOrder } from "./utils/graphUtils";
+
 
 interface ExecutionState {
   executions: Record<string, Execution>;
@@ -190,7 +192,7 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         return processedText;
       },
 
-      // Calculate execution order based on graph topology
+      // Calculate execution order using utility function
       calculateExecutionOrder: (scenarioId) => {
         const nodeStore = useNodeStore.getState();
         const scenarioStore = useScenarioStore.getState();
@@ -199,145 +201,8 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         const nodes = nodeStore.getNodesByScenario(scenarioId);
         const edges = scenarioStore.getValidEdges(scenarioId);
         
-        if (nodes.length === 0) return [];
-        if (nodes.length === 1) return [nodes[0].id];
-      
-        // Find start node if one is marked
-        const startNode = nodes.find(node => node.data.isStartNode === true);
-        
-        // If there's a start node, execute only from it down the graph
-        if (startNode) {
-          // Build directed graph
-          const graph:any = {};
-          
-          // Initialize graph
-          nodes.forEach((node:any) => {
-            graph[node.id] = [];
-          });
-          
-          // Add edges
-          edges.forEach(edge => {
-            if (graph[edge.source]) {
-              graph[edge.source].push(edge.target);
-            }
-          });
-          
-          // Find all nodes reachable from start node using BFS
-          const visited = new Set([startNode.id]);
-          const queue = [startNode.id];
-          
-          while (queue.length > 0) {
-            const currentId:any = queue.shift();
-            
-            if (graph[currentId]) {
-              for (const nextId of graph[currentId]) {
-                if (!visited.has(nextId)) {
-                  visited.add(nextId);
-                  queue.push(nextId);
-                }
-              }
-            }
-          }
-          
-          // Perform topological sort only on reachable nodes
-          const relevantNodes = nodes.filter(node => visited.has(node.id));
-          const relevantEdges = edges.filter(edge => 
-            visited.has(edge.source) && visited.has(edge.target)
-          );
-          
-          // Build graph for sorting
-          const sortGraph:any = {};
-          const inDegree:any = {};
-          
-          relevantNodes.forEach(node => {
-            sortGraph[node.id] = [];
-            inDegree[node.id] = 0;
-          });
-          
-          relevantEdges.forEach(edge => {
-            sortGraph[edge.source].push(edge.target);
-            inDegree[edge.target]++;
-          });
-          
-          // Execute Kahn's algorithm, starting from start node
-          const result = [];
-          const sortQueue = [];
-          
-          // First add start node
-          sortQueue.push(startNode.id);
-          
-          while (sortQueue.length > 0) {
-            const nodeId:any = sortQueue.shift();
-            result.push(nodeId);
-            
-            sortGraph[nodeId].forEach((nextId:any) => {
-              inDegree[nextId]--;
-              if (inDegree[nextId] === 0) {
-                sortQueue.push(nextId);
-              }
-            });
-          }
-          
-          // If any nodes from our set weren't visited (cycles), add them
-          const processedIds = new Set(result);
-          relevantNodes.forEach(node => {
-            if (!processedIds.has(node.id)) {
-              result.push(node.id);
-            }
-          });
-          
-          return result;
-        }
-        
-        // If no start node, use standard topological sort
-        // Build graph
-        const graph:any = {};
-        const inDegree:any = {};
-        
-        nodes.forEach(node => {
-          graph[node.id] = [];
-          inDegree[node.id] = 0;
-        });
-        
-        edges.forEach(edge => {
-          graph[edge.source].push(edge.target);
-          inDegree[edge.target]++;
-        });
-        
-        // Execute Kahn's algorithm
-        const result = [];
-        const queue:any = [];
-        
-        // Add all nodes with no dependencies
-        nodes.forEach(node => {
-          if (inDegree[node.id] === 0) {
-            queue.push(node.id);
-          }
-        });
-        
-        while (queue.length > 0) {
-          const nodeId:any = queue.shift();
-          result.push(nodeId);
-          
-          graph[nodeId].forEach((nextId:any) => {
-            inDegree[nextId]--;
-            if (inDegree[nextId] === 0) {
-              queue.push(nextId);
-            }
-          });
-        }
-        
-        // If any nodes weren't visited (cycles), add them
-        if (result.length !== nodes.length) {
-          const processed = new Set(result);
-          nodes.forEach(node => {
-            if (!processed.has(node.id)) {
-              result.push(node.id);
-            }
-          });
-        }
-        
-        return result;
+        // Use the extracted utility function
+        return calculateExecutionOrder(nodes, edges);
       },
 
       // Getters for executions

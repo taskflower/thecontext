@@ -38,7 +38,7 @@ import { usePluginStore } from "@/stores/pluginStore";
 import type { PluginModule } from "@/plugins/PluginInterface";
 
 export const ScenarioExecution: React.FC = () => {
-  const { currentScenarioId, getScenario, getValidEdges } = useScenarioStore();
+  const { currentScenarioId, getScenario } = useScenarioStore();
   const executeExecutionStore = useExecutionStore();
   const {
     getLatestExecution,
