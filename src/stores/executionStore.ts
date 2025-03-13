@@ -9,6 +9,7 @@ import { useScenarioStore } from "./scenarioStore";
 import { useNodeStore } from "./nodeStore";
 import { usePluginStore } from "./pluginStore";
 import { calculateExecutionOrder } from "./utils/graphUtils";
+import { useWorkspaceStore } from "./workspaceStore";
 
 
 interface ExecutionState {
@@ -86,86 +87,134 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
       },
 
       // Execute a node with optional input
-      executeNode: async (executionId, nodeId, message = "") => {
-        const startTime = Date.now();
-      
-        try {
-          const nodeStore = useNodeStore.getState();
-          const node = nodeStore.getNode(nodeId);
-      
-          if (!node) {
-            throw new Error(`Node ${nodeId} not found`);
-          }
-      
-          // Get the original prompt
-          let prompt = node.data.prompt || "";
-          
-          // Process variables in the prompt
-          prompt = get().processVariables(prompt, executionId);
-          
-          // Save processed prompt back to node data
-          nodeStore.updateNodeData(nodeId, { processedPrompt: prompt });
-          
-          let pluginResult = null;
-      
-          // If node has a plugin, process with plugin
-          if (node.data.pluginId) {
-            const pluginStore = usePluginStore.getState();
-            const result = await pluginStore.processNodeWithPlugin(
-              nodeId,
-              message
-            );
-            message = result.output;
-            pluginResult = result.result;
-          }
-      
-          // Record the result and duration
-          const duration = Date.now() - startTime;
-          
-          // Save the result to the execution
-          set((state) => {
-            if (!state.executions[executionId]) return state;
-            
-            const result: ExecutionResult = {
-              nodeId,
-              prompt,
-              message,
-              pluginId: node.data.pluginId ?? undefined,
-              pluginResult,
-              timestamp: Date.now(),
-              duration,
-            };
-            
-            return {
-              executions: {
-                ...state.executions,
-                [executionId]: {
-                  ...state.executions[executionId],
-                  results: {
-                    ...state.executions[executionId].results,
-                    [nodeId]: result,
-                  },
-                  currentNodeId: nodeId,
-                },
-              },
-            };
-          });
-          
-          // Update node response in NodeStore
-          nodeStore.setNodeResponse(nodeId, message);
-          
-          return message;
-        } catch (error) {
-          console.error(`Error executing node ${nodeId}:`, error);
-          get().completeExecution(
-            executionId,
-            "error",
-            error instanceof Error ? error.message : String(error)
-          );
-          return "";
-        }
-      },
+     // Modify the executeNode function in src/stores/executionStore.ts
 
+// Add this near the end of the executeNode function, just before returning the message
+executeNode: async (executionId, nodeId, message = "") => {
+  const startTime = Date.now();
+
+  try {
+    const nodeStore = useNodeStore.getState();
+    const workspaceStore = useWorkspaceStore.getState();
+    const scenarioStore = useScenarioStore.getState();
+    const node = nodeStore.getNode(nodeId);
+
+    if (!node) {
+      throw new Error(`Node ${nodeId} not found`);
+    }
+
+    // Get the original prompt
+    let prompt = node.data.prompt || "";
+    
+    // Process variables in the prompt
+    prompt = get().processVariables(prompt, executionId);
+    
+    // Save processed prompt back to node data
+    nodeStore.updateNodeData(nodeId, { processedPrompt: prompt });
+    
+    let pluginResult = null;
+
+    // If node has a plugin, process with plugin
+    if (node.data.pluginId) {
+      const pluginStore = usePluginStore.getState();
+      const result = await pluginStore.processNodeWithPlugin(
+        nodeId,
+        message
+      );
+      message = result.output;
+      pluginResult = result.result;
+    }
+
+    // Record the result and duration
+    const duration = Date.now() - startTime;
+    
+    // Save the result to the execution
+    set((state) => {
+      if (!state.executions[executionId]) return state;
+      
+      const result: ExecutionResult = {
+        nodeId,
+        prompt,
+        message,
+        pluginId: node.data.pluginId ?? undefined,
+        pluginResult,
+        timestamp: Date.now(),
+        duration,
+      };
+      
+      return {
+        executions: {
+          ...state.executions,
+          [executionId]: {
+            ...state.executions[executionId],
+            results: {
+              ...state.executions[executionId].results,
+              [nodeId]: result,
+            },
+            currentNodeId: nodeId,
+          },
+        },
+      };
+    });
+    
+    // Update node response in NodeStore
+    nodeStore.setNodeResponse(nodeId, message);
+    
+    // Add context update logic with a delay to ensure plugins complete
+    if (node.data.contextKey && node.data.contextKey !== '') {
+      console.log(`[CONTEXT UPDATE] Node ${nodeId} has contextKey: ${node.data.contextKey}`);
+      
+      // Get the scenario to find the correct workspaceId
+      const scenarioStore = useScenarioStore.getState();
+      const scenario = scenarioStore.getScenario(node.scenarioId);
+      const workspaceId = scenario?.workspaceId || node.workspaceId || node.scenarioId.split('-')[0];
+      
+      console.log(`[CONTEXT UPDATE] Using workspaceId: ${workspaceId} for node ${nodeId}`);
+      console.log(`[CONTEXT UPDATE] Current message before delay: "${message}"`);
+      
+      // Delay updating the context to ensure plugins have finished updating the message
+     
+        console.log(`[CONTEXT UPDATE] Timeout executing for node ${nodeId}, contextKey ${node.data.contextKey}`);
+        
+        // Get the current node again to ensure we have the latest message
+        const updatedNode = nodeStore.getNode(nodeId);
+        console.log(`[CONTEXT UPDATE] Updated node:`, updatedNode);
+        
+        if (updatedNode && updatedNode.data.message) {
+          console.log(`[CONTEXT UPDATE] Updating workspace ${workspaceId} with key "${updatedNode.data.contextKey}" and value: "${updatedNode.data.message}"`);
+          
+          // Get current workspace context for logging
+          const currentContext = workspaceStore.getWorkspaceContext(workspaceId);
+          console.log(`[CONTEXT UPDATE] Current workspace context:`, currentContext);
+          
+          workspaceStore.updateWorkspaceContext(
+            workspaceId, 
+            { [updatedNode.data.contextKey]: updatedNode.data.message }
+          );
+          
+          // Verify the update happened
+          const updatedContext = workspaceStore.getWorkspaceContext(workspaceId);
+          console.log(`[CONTEXT UPDATE] Updated workspace context:`, updatedContext);
+          console.log(`[CONTEXT UPDATE] Completed for key "${updatedNode.data.contextKey}" with value "${updatedNode.data.message}"`);
+        } else {
+          console.error(`[CONTEXT UPDATE] Failed - updatedNode or message missing`, updatedNode);
+        }
+     
+    } else {
+      console.log(`[CONTEXT UPDATE] Node ${nodeId} has no contextKey defined, skipping context update`);
+    }
+    
+    return message;
+  } catch (error) {
+    console.error(`Error executing node ${nodeId}:`, error);
+    get().completeExecution(
+      executionId,
+      "error",
+      error instanceof Error ? error.message : String(error)
+    );
+    return "";
+  }
+},
       // Process variables in text - replace {{nodeId.response}} with actual responses
       processVariables: (text, executionId) => {
         if (!text) return "";

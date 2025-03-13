@@ -29,6 +29,7 @@ export interface Position {
     createdAt: number;
     updatedAt: number;
     isStartNode?: boolean; // Nowa flaga określająca węzeł startowy
+    workspaceId?: string; // Added explicit workspaceId property
   }
   
   export interface Edge {
