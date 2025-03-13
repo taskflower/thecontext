@@ -49,7 +49,7 @@ export const ScenarioExecution: React.FC = () => {
     completeExecution,
     calculateExecutionOrder,
   } = executeExecutionStore;
-  const { getNode } = useNodeStore();
+  const { getNode, updateNodePluginConfig } = useNodeStore();
   const { isPluginActive, plugins } = usePluginStore();
 
   // Execution states
@@ -112,20 +112,23 @@ export const ScenarioExecution: React.FC = () => {
     const node = getNode(currentNodeId);
     if (!node) return;
   
-    // Process variables first - this will update node.data.processedPrompt
     try {
-      // Get the original prompt
       const originalPrompt = node.data.prompt || "";
-      
-      // Process variables in the prompt right now
       const processedPrompt = await executeExecutionStore.processVariables(originalPrompt, executionId);
       
-      // Set the processed content for display
       setNodeContent(processedPrompt);
       
-      // If node has an active plugin, wait for plugin processing
-      // Otherwise, wait for user input
+      // Jeśli node ma plugin, zaktualizuj jego konfigurację
       if (node.data.pluginId && isPluginActive(node.data.pluginId)) {
+        const currentConfig = node.data.pluginConfig || {};
+        
+        // Zaktualizuj konfigurację pluginu o aktualne dane
+        updateNodePluginConfig(currentNodeId, {
+          ...currentConfig,
+          nodePrompt: processedPrompt,
+          // Możesz dodać nodeResponse jeśli masz dostęp do poprzedniego wyniku
+        });
+        
         setWaitingForPlugin(true);
         setWaitingForUserInput(false);
       } else {
