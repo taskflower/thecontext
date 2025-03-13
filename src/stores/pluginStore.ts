@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/stores/pluginStore.ts
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 import { useNodeStore } from './nodeStore';
 import { PluginModule } from '@/plugins/PluginInterface';
@@ -44,13 +44,18 @@ interface PluginStoreActions {
 export const usePluginStore = create<PluginStoreState & PluginStoreActions>()(
   persist(
     (set, get) => ({
+      // After hydration from localStorage, we need to make sure
+      // the plugins stay active based on the loaded state
       plugins: {},
       pluginStates: {},
       
       // Plugin registration
       registerPlugin: (pluginId, pluginModule) => {
-        // Initialize plugin state with default config
-        const initialState: PluginState = {
+        // Check if we have persisted state for this plugin
+        const existingState = get().pluginStates[pluginId];
+        
+        // Initialize plugin state with default config or use existing persisted state
+        const initialState: PluginState = existingState || {
           config: pluginModule.defaultConfig || {},
           result: null,
           isActive: false
@@ -215,9 +220,16 @@ export const usePluginStore = create<PluginStoreState & PluginStoreActions>()(
     }),
     {
       name: 'plugin-storage',
+      storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         pluginStates: state.pluginStates
-      })
+      }),
+      // Adding onRehydrateStorage to handle state recovery after page reload
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          console.log('Plugin state hydrated from localStorage');
+        }
+      }
     }
   )
 );
