@@ -3,15 +3,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNodeStore } from '../../stores/nodeStore';
 import { usePluginStore } from '../../stores/pluginStore';
-import { useScenarioStore } from '../../stores/scenarioStore';
+
+interface NodeEditorProps {
+  onClose: () => void;
+  // Add other prop types as needed
+}
+
 
 const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
   // Hooks
   const { activeNodeId, getNode, updateNodeData, assignPluginToNode, removePluginFromNode, getNodesByScenario } = 
-    useNodeStore(state => state as unknown as NodeStoreWithActive);
+    useNodeStore(state => state);
   
   const { getAllPlugins } = usePluginStore();
-  const { getCurrentScenario } = useScenarioStore();
+
   
   const [node, setNode] = useState(activeNodeId ? getNode(activeNodeId) : null);
   const [content, setContent] = useState(node?.data.content || '');
@@ -53,10 +58,10 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
       
       // Get other nodes for this scenario
       const otherNodes = getNodesByScenario(scenarioId)
-        .filter(otherNode => otherNode.id !== activeNodeId);
+        .filter((otherNode:any) => otherNode.id !== activeNodeId);
       
       // Reset start flag for other nodes
-      otherNodes.forEach(otherNode => {
+      otherNodes.forEach((otherNode:any) => {
         if (otherNode.data.isStartNode) {
           updateNodeData(otherNode.id, {
             ...otherNode.data,

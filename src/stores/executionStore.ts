@@ -279,7 +279,7 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         // Jeśli jest węzeł startowy, wykonujemy tylko od niego w dół grafu
         if (startNode) {
           // Budujemy graf w kierunku przepływu
-          const graph = {};
+          const graph:any = {};
           
           // Inicjalizacja grafu
           nodes.forEach(node => {
@@ -298,7 +298,7 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
           const queue = [startNode.id];
           
           while (queue.length > 0) {
-            const currentId = queue.shift();
+            const currentId:any = queue.shift();
             
             if (graph[currentId]) {
               for (const nextId of graph[currentId]) {
@@ -317,8 +317,8 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
           );
           
           // Budujemy graf potrzebny do sortowania
-          const sortGraph = {};
-          const inDegree = {};
+          const sortGraph:any = {};
+          const inDegree:any = {};
           
           relevantNodes.forEach(node => {
             sortGraph[node.id] = [];
@@ -338,10 +338,10 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
           sortQueue.push(startNode.id);
           
           while (sortQueue.length > 0) {
-            const nodeId = sortQueue.shift();
+            const nodeId:any = sortQueue.shift();
             result.push(nodeId);
             
-            sortGraph[nodeId].forEach(nextId => {
+            sortGraph[nodeId].forEach((nextId:any) => {
               inDegree[nextId]--;
               if (inDegree[nextId] === 0) {
                 sortQueue.push(nextId);
@@ -362,8 +362,8 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         
         // Jeśli nie ma węzła startowego, używamy standardowego sortowania topologicznego
         // Budujemy graf
-        const graph = {};
-        const inDegree = {};
+        const graph:any = {};
+        const inDegree:any = {};
         
         nodes.forEach(node => {
           graph[node.id] = [];
@@ -377,7 +377,7 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         
         // Wykonujemy algorytm Kahna
         const result = [];
-        const queue = [];
+        const queue:any = [];
         
         // Dodajemy wszystkie węzły bez zależności
         nodes.forEach(node => {
@@ -390,7 +390,7 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
           const nodeId = queue.shift();
           result.push(nodeId);
           
-          graph[nodeId].forEach(nextId => {
+          graph[nodeId].forEach((nextId:any) => {
             inDegree[nextId]--;
             if (inDegree[nextId] === 0) {
               queue.push(nextId);
