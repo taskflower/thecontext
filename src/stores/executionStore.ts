@@ -266,89 +266,149 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         const nodeStore = useNodeStore.getState();
         const scenarioStore = useScenarioStore.getState();
       
-        // Pobierz wszystkie węzły dla tego scenariusza
+        // Pobierz węzły i krawędzie
         const nodes = nodeStore.getNodesByScenario(scenarioId);
         const edges = scenarioStore.getValidEdges(scenarioId);
         
-        // Jeśli nie ma węzłów, zwróć pustą tablicę
         if (nodes.length === 0) return [];
-        
-        // Jeśli jest tylko jeden węzeł, zwróć go
         if (nodes.length === 1) return [nodes[0].id];
       
-        // 1. Najpierw sprawdź, czy jest węzeł startowy
+        // Znajdź węzeł startowy
         const startNode = nodes.find(node => node.data.isStartNode === true);
-      
-        // 2. Jeśli nie ma krawędzi, ale jest węzeł startowy - ZWRÓĆ TYLKO WĘZEŁ STARTOWY
-        if (edges.length === 0 && startNode) {
-          return [startNode.id];
-        }
-      
-        // 3. Jeśli są krawędzie, użyj ich do obliczenia porządku topologicznego
-        if (edges.length > 0) {
-          // Budowanie grafu
+        
+        // Jeśli jest węzeł startowy, wykonujemy tylko od niego w dół grafu
+        if (startNode) {
+          // Budujemy graf w kierunku przepływu
           const graph = {};
-          const inDegree = {};
           
-          // Inicjalizacja
+          // Inicjalizacja grafu
           nodes.forEach(node => {
             graph[node.id] = [];
-            inDegree[node.id] = 0;
           });
           
-          // Dodawanie krawędzi do grafu
+          // Dodawanie krawędzi
           edges.forEach(edge => {
             if (graph[edge.source]) {
               graph[edge.source].push(edge.target);
-              inDegree[edge.target]++;
             }
           });
           
-          // Zbiór węzłów, które są częścią połączonego grafu
-          const connectedNodes = new Set();
+          // Wyszukujemy wszystkie węzły dostępne od węzła startowego używając BFS
+          const visited = new Set([startNode.id]);
+          const queue = [startNode.id];
           
-          // Dodaj wszystkie węzły, które są częścią krawędzi
-          edges.forEach(edge => {
-            connectedNodes.add(edge.source);
-            connectedNodes.add(edge.target);
+          while (queue.length > 0) {
+            const currentId = queue.shift();
+            
+            if (graph[currentId]) {
+              for (const nextId of graph[currentId]) {
+                if (!visited.has(nextId)) {
+                  visited.add(nextId);
+                  queue.push(nextId);
+                }
+              }
+            }
+          }
+          
+          // Teraz wykonujemy sortowanie topologiczne tylko dla węzłów dostępnych od startowego
+          const relevantNodes = nodes.filter(node => visited.has(node.id));
+          const relevantEdges = edges.filter(edge => 
+            visited.has(edge.source) && visited.has(edge.target)
+          );
+          
+          // Budujemy graf potrzebny do sortowania
+          const sortGraph = {};
+          const inDegree = {};
+          
+          relevantNodes.forEach(node => {
+            sortGraph[node.id] = [];
+            inDegree[node.id] = 0;
           });
           
-          // Algorytm sortowania topologicznego Kahna
-          const queue = [];
+          relevantEdges.forEach(edge => {
+            sortGraph[edge.source].push(edge.target);
+            inDegree[edge.target]++;
+          });
+          
+          // Wykonujemy algorytm Kahna, zaczynając od startowego węzła
           const result = [];
+          const sortQueue = [];
           
-          // Najpierw dodaj węzeł startowy, jeśli istnieje, jest połączony i nie ma zależności
-          if (startNode && connectedNodes.has(startNode.id) && inDegree[startNode.id] === 0) {
-            queue.push(startNode.id);
-          } else {
-            // Dodaj wszystkie węzły bez zależności, które są częścią połączonego grafu
-            Object.keys(inDegree).forEach(id => {
-              if (inDegree[id] === 0 && connectedNodes.has(id) && (!startNode || id !== startNode.id)) {
-                queue.push(id);
-              }
-            });
-          }
+          // Najpierw dodajemy węzeł startowy
+          sortQueue.push(startNode.id);
           
-          // Wykonaj sortowanie topologiczne
-          while (queue.length > 0) {
-            const nodeId = queue.shift();
+          while (sortQueue.length > 0) {
+            const nodeId = sortQueue.shift();
             result.push(nodeId);
             
-            graph[nodeId].forEach(nextId => {
+            sortGraph[nodeId].forEach(nextId => {
               inDegree[nextId]--;
               if (inDegree[nextId] === 0) {
-                queue.push(nextId);
+                sortQueue.push(nextId);
               }
             });
           }
           
+          // Jeśli jakieś węzły z naszego zestawu nie zostały odwiedzone (cykle), dodajemy je
+          const processedIds = new Set(result);
+          relevantNodes.forEach(node => {
+            if (!processedIds.has(node.id)) {
+              result.push(node.id);
+            }
+          });
+          
           return result;
-        } 
+        }
         
-        // 4. Jeśli brak krawędzi i brak węzła startowego, zwróć węzły w kolejności utworzenia
-        return nodes
-          .sort((a, b) => a.createdAt - b.createdAt)
-          .map(node => node.id);
+        // Jeśli nie ma węzła startowego, używamy standardowego sortowania topologicznego
+        // Budujemy graf
+        const graph = {};
+        const inDegree = {};
+        
+        nodes.forEach(node => {
+          graph[node.id] = [];
+          inDegree[node.id] = 0;
+        });
+        
+        edges.forEach(edge => {
+          graph[edge.source].push(edge.target);
+          inDegree[edge.target]++;
+        });
+        
+        // Wykonujemy algorytm Kahna
+        const result = [];
+        const queue = [];
+        
+        // Dodajemy wszystkie węzły bez zależności
+        nodes.forEach(node => {
+          if (inDegree[node.id] === 0) {
+            queue.push(node.id);
+          }
+        });
+        
+        while (queue.length > 0) {
+          const nodeId = queue.shift();
+          result.push(nodeId);
+          
+          graph[nodeId].forEach(nextId => {
+            inDegree[nextId]--;
+            if (inDegree[nextId] === 0) {
+              queue.push(nextId);
+            }
+          });
+        }
+        
+        // Jeśli jakieś węzły nie zostały odwiedzone (cykle), dodajemy je
+        if (result.length !== nodes.length) {
+          const processed = new Set(result);
+          nodes.forEach(node => {
+            if (!processed.has(node.id)) {
+              result.push(node.id);
+            }
+          });
+        }
+        
+        return result;
       },
       getNodeInput: (nodeId, executionId) => {
         const nodeStore = useNodeStore.getState();
