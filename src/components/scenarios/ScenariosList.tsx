@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2, Copy, ExternalLink, Clock, Cog, Terminal } from 'lucide-react';
+import { Plus, Trash2, Copy, ExternalLink, Clock, Cog, Terminal, MoreVertical } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { formatDistanceToNow } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useWorkspaceStore } from '@/stores/workspaceStore';
 import { useScenarioStore } from '@/stores/scenarioStore';
 import { useNodeStore } from '@/stores/nodeStore';
@@ -161,27 +162,39 @@ export const ScenariosList: React.FC = () => {
                       )}
                     </div>
                   </CardContent>
-                  <CardFooter className="flex flex-wrap gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => duplicateScenario(scenario.id)}
-                      title="Duplicate scenario"
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => deleteScenario(scenario.id)}
-                      title="Delete scenario"
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
+                  <CardFooter className="flex justify-between items-center">
+                    <div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            title="Tools"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                          <DropdownMenuItem 
+                            onClick={() => duplicateScenario(scenario.id)}
+                            className="flex items-center gap-2"
+                          >
+                            <Copy className="h-4 w-4" />
+                            Duplicate
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => deleteScenario(scenario.id)}
+                            className="flex items-center gap-2 text-red-500"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                     <Button 
                       onClick={() => setCurrentScenario(scenario.id)}
                       disabled={currentScenarioId === scenario.id}
-                      className="ml-auto"
                     >
                       {currentScenarioId === scenario.id ? 'Current' : 'Open'}
                       {currentScenarioId !== scenario.id && <ExternalLink className="h-4 w-4 ml-2" />}

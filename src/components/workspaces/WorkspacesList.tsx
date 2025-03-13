@@ -20,6 +20,7 @@ import {
   SquareArrowLeft,
   Network,
   FileCode,
+  MoreVertical,
 } from "lucide-react";
 import {
   Dialog,
@@ -30,6 +31,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -180,32 +187,40 @@ export const WorkspacesList: React.FC = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
-                <div className="flex gap-2">
-                  <NavLink to="/flow-editor">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      title="Delete workspace"
-                    >
-                      <Network className="h-4 w-4 " />
-                    </Button>
-                  </NavLink>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => duplicateWorkspace(workspace.id)}
-                    title="Duplicate workspace"
-                  >
-                    <BookCopy className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => deleteWorkspace(workspace.id)}
-                    title="Delete workspace"
-                  >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
+                <div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        title="Tools"
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                      <DropdownMenuItem asChild>
+                        <NavLink to="/flow-editor" className="flex items-center gap-2 w-full">
+                          <Network className="h-4 w-4" />
+                          Flow Editor
+                        </NavLink>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => duplicateWorkspace(workspace.id)}
+                        className="flex items-center gap-2"
+                      >
+                        <BookCopy className="h-4 w-4" />
+                        Duplicate
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => deleteWorkspace(workspace.id)}
+                        className="flex items-center gap-2 text-red-500"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
                 <div className="flex gap-2">
                   {currentWorkspaceId === workspace.id && (
