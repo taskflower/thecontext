@@ -108,10 +108,10 @@ export const ScenarioExecution: React.FC = () => {
   // Function to process the current node
   const processCurrentNode = async () => {
     if (!executionId || !currentNodeId) return;
-  
+
     const node = getNode(currentNodeId);
     if (!node) return;
-  
+
     // Check if node has an active plugin
     if (node.data.pluginId && isPluginActive(node.data.pluginId)) {
       setWaitingForPlugin(true);
@@ -127,7 +127,6 @@ export const ScenarioExecution: React.FC = () => {
   const handleSubmituserMessage = async () => {
     if (!executionId || !currentNodeId) return;
 
-  
     try {
       // Przekazujemy userMessage jako trzeci argument
       await executeNode(executionId, currentNodeId, userMessage);
@@ -364,7 +363,8 @@ export const ScenarioExecution: React.FC = () => {
               <h3 className="text-lg font-medium mb-2">Recent Executions</h3>
               {executions.length === 0 ? (
                 <div className="text-center py-4 text-slate-500 border rounded-md">
-                  No executions yet. Click "Execute Scenario" to run this scenario.
+                  No executions yet. Click "Execute Scenario" to run this
+                  scenario.
                 </div>
               ) : (
                 <div>
@@ -398,11 +398,11 @@ export const ScenarioExecution: React.FC = () => {
                       </div>
                       <div className="overflow-x-auto">
                         <table className="min-w-full text-left text-xs">
-                          <thead className="border-b">
+                          <thead className="border-b text-gray-400">
                             <tr>
-                              <th className="px-2 py-1">Step</th>
-                              <th className="px-2 py-1">Prompt</th>
-                              <th className="px-2 py-1">Message</th>
+                              <th className="px-2 py-1 w-1/5">Step</th>
+                              <th className="px-2 py-1 w-2/5">Prompt</th>
+                              <th className="px-2 py-1 w-2/5">Message</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -434,9 +434,7 @@ export const ScenarioExecution: React.FC = () => {
                       {execution.error && (
                         <Alert variant="destructive" className="mt-2">
                           <AlertTitle>Error</AlertTitle>
-                          <AlertDescription>
-                            {execution.error}
-                          </AlertDescription>
+                          <AlertDescription>{execution.error}</AlertDescription>
                         </Alert>
                       )}
                     </div>
@@ -483,7 +481,8 @@ export const ScenarioExecution: React.FC = () => {
                 {currentNode.hasPlugin && waitingForPlugin && (
                   <>
                     <div className="mb-4 text-sm">
-                      This node uses a plugin. Please complete the plugin workflow to continue.
+                      This node uses a plugin. Please complete the plugin
+                      workflow to continue.
                     </div>
                     {currentNode.pluginId && (
                       <ExecutionPluginView
