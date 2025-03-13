@@ -57,7 +57,7 @@ export const ScenarioExecution: React.FC = () => {
   const [exportData, setExportData] = useState<string | null>(null);
   const [executionId, setExecutionId] = useState<string | null>(null);
   const [isExecutionDialogOpen, setIsExecutionDialogOpen] = useState(false);
-  
+
   // Step execution states
   const [currentNodeIndex, setCurrentNodeIndex] = useState(0);
   const [executionOrder, setExecutionOrder] = useState<string[]>([]);
@@ -108,27 +108,30 @@ export const ScenarioExecution: React.FC = () => {
   // Process the current node - show prompt, trigger plugin, or get user input
   const processCurrentNode = async () => {
     if (!executionId || !currentNodeId) return;
-  
+
     const node = getNode(currentNodeId);
     if (!node) return;
-  
+
     try {
       const originalPrompt = node.data.prompt || "";
-      const processedPrompt = await executeExecutionStore.processVariables(originalPrompt, executionId);
-      
+      const processedPrompt = await executeExecutionStore.processVariables(
+        originalPrompt,
+        executionId
+      );
+
       setNodeContent(processedPrompt);
-      
+
       // Jeśli node ma plugin, zaktualizuj jego konfigurację
       if (node.data.pluginId && isPluginActive(node.data.pluginId)) {
         const currentConfig = node.data.pluginConfig || {};
-        
+
         // Zaktualizuj konfigurację pluginu o aktualne dane
         updateNodePluginConfig(currentNodeId, {
           ...currentConfig,
           nodePrompt: processedPrompt,
           // Możesz dodać nodeResponse jeśli masz dostęp do poprzedniego wyniku
         });
-        
+
         setWaitingForPlugin(true);
         setWaitingForUserInput(false);
       } else {
@@ -209,7 +212,7 @@ export const ScenarioExecution: React.FC = () => {
       // Reset any previous processedPrompt values in all nodes
       const nodeStore = useNodeStore.getState();
       const scenarioNodes = nodeStore.getNodesByScenario(scenario.id);
-      scenarioNodes.forEach(node => {
+      scenarioNodes.forEach((node) => {
         if (node.data.processedPrompt) {
           nodeStore.updateNodeData(node.id, { processedPrompt: null });
         }
@@ -477,13 +480,13 @@ export const ScenarioExecution: React.FC = () => {
           if (!open) handleDialogClose();
         }}
       >
-        <DialogContent className="sm:max-w-2xl h-[90vh] flex flex-col">
+        <DialogContent className="sm:max-w-2xl h-[90vh] flex flex-col  ">
           <DialogHeader>
             <DialogTitle>
-              <p className="font-medium pb-2">Executing Scenario:</p>
-              <p className="pb-0.5">{scenario.name}</p>
+              <p className="font-medium pb-2 text-sm">Executing Scenario:</p>
+              <p className="pb-0.5 text-xl">{scenario.name}</p>
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-sm">
               Step {currentNodeIndex + 1} of {executionOrder.length}
             </DialogDescription>
           </DialogHeader>
@@ -542,7 +545,7 @@ export const ScenarioExecution: React.FC = () => {
                         onChange={(e) => setUserMessage(e.target.value)}
                         placeholder="Enter your response..."
                         rows={6}
-                        className="w-full"
+                        className="w-full border-black border-2"
                       />
                     </div>
                   </div>
@@ -562,10 +565,15 @@ export const ScenarioExecution: React.FC = () => {
           <DialogFooter>
             {waitingForUserInput && (
               <div className="flex gap-2 w-full justify-between">
-                <Button variant="outline" onClick={handleDialogClose}>
+                <Button
+                  size={"lg"}
+                  variant="outline"
+                  onClick={handleDialogClose}
+                >
                   Cancel Execution
                 </Button>
                 <Button
+                  size={"lg"}
                   onClick={handleSubmitUserMessage}
                   disabled={!userMessage.trim()}
                 >

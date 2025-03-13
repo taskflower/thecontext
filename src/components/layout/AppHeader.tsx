@@ -73,7 +73,7 @@ function AppHeader() {
               <ChevronDown className="h-4 w-4 opacity-50" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64">
+          <DropdownMenuContent align="start" className="w-96">
             <div className="flex flex-col p-2">
               <h4 className="font-medium text-sm mb-1">Current Context</h4>
             </div>
