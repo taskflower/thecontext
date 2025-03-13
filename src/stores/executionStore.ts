@@ -196,85 +196,42 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         }
       },
 
-     // W pliku src/stores/executionStore.ts - sekcja executeScenario
-
-executeScenario: async (scenarioId) => {
-  const nodeStore = useNodeStore.getState();
-  const scenarioStore = useScenarioStore.getState();
-  
-  // Rozpocznij wykonanie
-  const executionId = get().startExecution(scenarioId);
-
-  try {
-    // Oblicz kolejność wykonania
-    const executionOrder = get().calculateExecutionOrder(scenarioId);
-    
-    if (executionOrder.length === 0) {
-      throw new Error("No nodes to execute");
-    }
-
-    // Wykonaj węzły w kolejności
-    for (const nodeId of executionOrder) {
-      const node = nodeStore.getNode(nodeId);
-      if (!node) continue;
-
-      // Najpierw zachowaj oryginalną treść węzła jako input
-      const nodeContent = node.data.content || node.data.prompt || "";
-      
-      // Wykonaj węzeł
-      let output = "";
-      let pluginResult = null;
-      
-      try {
-        // Wykonaj węzeł używając executeNode
-        output = await get().executeNode(executionId, nodeId);
+      executeScenario: async (scenarioId) => {
+        const nodeStore = useNodeStore.getState();
+        const scenarioStore = useScenarioStore.getState();
         
-        // Jeśli węzeł ma plugin, upewnij się, że wynik jest zapisany z oryginalnym inputem
-        if (node.data.pluginId) {
-          const execution = get().getExecution(executionId);
+        // Rozpocznij wykonanie
+        const executionId = get().startExecution(scenarioId);
+
+        try {
+          // Oblicz kolejność wykonania
+          const executionOrder = get().calculateExecutionOrder(scenarioId);
           
-          // Sprawdź czy wynik został poprawnie zapisany
-          if (!execution?.results[nodeId] || !execution.results[nodeId].input) {
-            // Jeśli nie ma wyniku lub nie ma inputu, zapisz ręcznie
-            get().recordResult(
-              executionId,
-              nodeId,
-              nodeContent,               // Oryginalny input
-              output,                    // Output z pluginu
-              node.data.pluginId,
-              pluginResult,
-              0
-            );
+          if (executionOrder.length === 0) {
+            throw new Error("No nodes to execute");
           }
+
+          // Wykonaj węzły w kolejności
+          for (const nodeId of executionOrder) {
+            const node = nodeStore.getNode(nodeId);
+            if (!node) continue;
+
+            // Wykonaj węzeł, używając jego własnej treści jako wejścia
+            await get().executeNode(executionId, nodeId);
+          }
+
+          get().completeExecution(executionId, "completed");
+        } catch (error) {
+          console.error(`Error executing scenario ${scenarioId}:`, error);
+          get().completeExecution(
+            executionId,
+            "error",
+            error instanceof Error ? error.message : String(error)
+          );
         }
-      } catch (error) {
-        console.error(`Error executing node ${nodeId}:`, error);
-        
-        // W przypadku błędu, również zapisz wynik, aby węzeł był widoczny
-        get().recordResult(
-          executionId,
-          nodeId,
-          nodeContent,
-          "Error executing node: " + (error instanceof Error ? error.message : String(error)),
-          node.data.pluginId,
-          null,
-          0
-        );
-      }
-    }
 
-    get().completeExecution(executionId, "completed");
-  } catch (error) {
-    console.error(`Error executing scenario ${scenarioId}:`, error);
-    get().completeExecution(
-      executionId,
-      "error",
-      error instanceof Error ? error.message : String(error)
-    );
-  }
-
-  return executionId;
-},
+        return executionId;
+      },
 
       // Uproszczona funkcja przetwarzania zmiennych
       processVariables: (text, executionId) => {
@@ -322,7 +279,7 @@ executeScenario: async (scenarioId) => {
         // Jeśli jest węzeł startowy, wykonujemy tylko od niego w dół grafu
         if (startNode) {
           // Budujemy graf w kierunku przepływu
-          const graph:any = {};
+          const graph = {};
           
           // Inicjalizacja grafu
           nodes.forEach(node => {
@@ -341,7 +298,7 @@ executeScenario: async (scenarioId) => {
           const queue = [startNode.id];
           
           while (queue.length > 0) {
-            const currentId:any = queue.shift();
+            const currentId = queue.shift();
             
             if (graph[currentId]) {
               for (const nextId of graph[currentId]) {
@@ -360,8 +317,8 @@ executeScenario: async (scenarioId) => {
           );
           
           // Budujemy graf potrzebny do sortowania
-          const sortGraph:any = {};
-          const inDegree:any = {};
+          const sortGraph = {};
+          const inDegree = {};
           
           relevantNodes.forEach(node => {
             sortGraph[node.id] = [];
@@ -381,10 +338,10 @@ executeScenario: async (scenarioId) => {
           sortQueue.push(startNode.id);
           
           while (sortQueue.length > 0) {
-            const nodeId:any = sortQueue.shift();
+            const nodeId = sortQueue.shift();
             result.push(nodeId);
             
-            sortGraph[nodeId].forEach((nextId:any) => {
+            sortGraph[nodeId].forEach(nextId => {
               inDegree[nextId]--;
               if (inDegree[nextId] === 0) {
                 sortQueue.push(nextId);
@@ -405,8 +362,8 @@ executeScenario: async (scenarioId) => {
         
         // Jeśli nie ma węzła startowego, używamy standardowego sortowania topologicznego
         // Budujemy graf
-        const graph:any = {};
-        const inDegree:any = {};
+        const graph = {};
+        const inDegree = {};
         
         nodes.forEach(node => {
           graph[node.id] = [];
@@ -420,7 +377,7 @@ executeScenario: async (scenarioId) => {
         
         // Wykonujemy algorytm Kahna
         const result = [];
-        const queue:any = [];
+        const queue = [];
         
         // Dodajemy wszystkie węzły bez zależności
         nodes.forEach(node => {
@@ -433,7 +390,7 @@ executeScenario: async (scenarioId) => {
           const nodeId = queue.shift();
           result.push(nodeId);
           
-          graph[nodeId].forEach((nextId:any) => {
+          graph[nodeId].forEach(nextId => {
             inDegree[nextId]--;
             if (inDegree[nextId] === 0) {
               queue.push(nextId);
