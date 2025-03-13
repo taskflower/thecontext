@@ -21,13 +21,14 @@ import AppHeader from "./components/layout/AppHeader";
 
 // Import icons
 import {
-  Folder,
-  Code,
+
+
   Puzzle,
   Play,
   Database,
-  LayoutDashboard,
+  Cog,
   Box,
+  Network,
 } from "lucide-react";
 
 // Import utilities
@@ -49,11 +50,11 @@ function SidebarNav() {
       </SidebarItem>
       <SidebarItem
         href="/scenarios"
-        icon={<LayoutDashboard className="h-4 w-4 mr-2" />}
+        icon={<Cog className="h-4 w-4 mr-2" />}
       >
         Scenarios
       </SidebarItem>
-      <SidebarItem href="/flow-editor" icon={<Code className="h-4 w-4 mr-2" />}>
+      <SidebarItem href="/flow-editor" icon={<Network className="h-4 w-4 mr-2" />}>
         Flow Editor
       </SidebarItem>
       <SidebarItem href="/plugins" icon={<Puzzle className="h-4 w-4 mr-2" />}>

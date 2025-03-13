@@ -16,12 +16,13 @@ import { useAuthState } from "../../hooks/useAuthState";
 // Import icons
 import {
   Box,
-  FileCode,
+
   Network,
   Play,
   ChevronDown,
   LogOut,
   Mail,
+  Cog,
 } from "lucide-react";
 import { signInWithPopup } from "firebase/auth";
 
@@ -100,7 +101,7 @@ function AppHeader() {
               className="flex items-center gap-2 cursor-pointer"
               onClick={() => navigate("/scenarios")}
             >
-              <FileCode className="h-4 w-4 " />
+              <Cog className="h-4 w-4 " />
               <span className="font-medium">Scenario:</span>
               <span className="ml-1 text-sm opacity-80">
                 {scenario ? scenario.name : "None"}

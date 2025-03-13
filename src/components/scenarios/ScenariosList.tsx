@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2, Copy, ExternalLink, Clock, Cog, Terminal, MoreVertical } from 'lucide-react';
+import { Plus, Trash2, Copy, ExternalLink, Clock, Cog, Terminal, MoreVertical, Network } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,6 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useWorkspaceStore } from '@/stores/workspaceStore';
 import { useScenarioStore } from '@/stores/scenarioStore';
 import { useNodeStore } from '@/stores/nodeStore';
+import { NavLink } from 'react-router-dom';
 
 // Komponent wyświetlający liczbę węzłów w scenariuszu
 const ScenarioNodeCount: React.FC<{ scenarioId: string }> = ({ scenarioId }) => {
@@ -139,7 +140,7 @@ export const ScenariosList: React.FC = () => {
                 >
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Cog className="h-5 w-5 text-blue-500" />
+                      <Cog className="h-5 w-5 text-black" />
                       {scenario.name}
                     </CardTitle>
                     <CardDescription>
@@ -164,41 +165,61 @@ export const ScenariosList: React.FC = () => {
                   </CardContent>
                   <CardFooter className="flex justify-between items-center">
                     <div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            title="Tools"
-                          >
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start">
-                          <DropdownMenuItem 
-                            onClick={() => duplicateScenario(scenario.id)}
-                            className="flex items-center gap-2"
-                          >
-                            <Copy className="h-4 w-4" />
-                            Duplicate
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => deleteScenario(scenario.id)}
-                            className="flex items-center gap-2 text-red-500"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      {currentScenarioId === scenario.id && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              title="Tools"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="start">
+                            <DropdownMenuItem 
+                              onClick={() => duplicateScenario(scenario.id)}
+                              className="flex items-center gap-2"
+                            >
+                              <Copy className="h-4 w-4" />
+                              Duplicate
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => deleteScenario(scenario.id)}
+                              className="flex items-center gap-2 text-red-500"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                     </div>
-                    <Button 
-                      onClick={() => setCurrentScenario(scenario.id)}
-                      disabled={currentScenarioId === scenario.id}
-                    >
-                      {currentScenarioId === scenario.id ? 'Current' : 'Open'}
-                      {currentScenarioId !== scenario.id && <ExternalLink className="h-4 w-4 ml-2" />}
-                    </Button>
+                    <div className="flex gap-2">
+                      {currentScenarioId === scenario.id && (
+                        <NavLink to="/flow-editor">
+                          <Button variant="outline" title="Flow Editor">
+                            <Network className="h-4 w-4 mr-2" /> Flow Editor
+                          </Button>
+                        </NavLink>
+                      )}
+                      {currentScenarioId !== scenario.id ? (
+                        <Button 
+                          variant="outline"
+                          onClick={() => setCurrentScenario(scenario.id)}
+                        >
+                          Open
+                          <ExternalLink className="h-4 w-4 ml-2" />
+                        </Button>
+                      ) : (
+                        <Button 
+                          variant="outline"
+                          disabled
+                        >
+                          Current
+                        </Button>
+                      )}
+                    </div>
                   </CardFooter>
                 </Card>
               ))}
@@ -220,7 +241,7 @@ export const ScenariosList: React.FC = () => {
                 <Card key={template.id} className="border-card">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Terminal className="h-5 w-5 text-green-600" />
+                      <Terminal className="h-5 w-5 text-black" />
                       {template.name}
                     </CardTitle>
                     <CardDescription>
