@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Puzzle } from "lucide-react";
+import { Puzzle, Flag } from "lucide-react";
 
 const nodeColors: Record<
   string,
@@ -47,27 +47,39 @@ const CustomNode: React.FC<NodeProps> = (props) => {
   const nodeType = data.type || "default";
   const colorScheme = nodeColors[nodeType] || nodeColors.default;
 
+
   return (
     <div className="relative group">
       <Card
         className={`w-72 shadow-sm transition-all duration-200 ${colorScheme.bg} ${colorScheme.border} border-2 ${colorScheme.hover}`}
       >
-        <CardHeader className="py-2 px-3 flex flex-row justify-between items-center space-y-0">
-          <CardTitle className="text-sm font-medium">
-            {data.label || "Node"}
-          </CardTitle>
-          <div className="flex items-center space-x-1">
-            {data.pluginId && (
-              <Badge
-                variant="outline"
-                className="text-xs py-0 h-5 flex items-center gap-1 bg-white"
-              >
-                <Puzzle size={12} />
-                {data.pluginId}
-              </Badge>
-            )}
-          </div>
-        </CardHeader>
+       <CardHeader className="py-2 px-3 flex flex-row justify-between items-center space-y-0">
+  <CardTitle className="text-sm font-medium flex items-center">
+    {data.isStartNode && (
+      <Flag className="h-4 w-4 mr-1 text-blue-600" />
+    )}
+    {data.label || "Node"}
+  </CardTitle>
+  <div className="flex items-center space-x-1">
+    {data.isStartNode && (
+      <Badge
+        variant="outline"
+        className="text-xs py-0 h-5 flex items-center gap-1 bg-blue-100 text-blue-800 border-blue-300"
+      >
+        Start
+      </Badge>
+    )}
+    {data.pluginId && (
+      <Badge
+        variant="outline"
+        className="text-xs py-0 h-5 flex items-center gap-1 bg-white"
+      >
+        <Puzzle size={12} />
+        {data.pluginId}
+      </Badge>
+    )}
+  </div>
+</CardHeader>
 
         <CardContent className="p-3 pt-0">
           {/* Content preview */}

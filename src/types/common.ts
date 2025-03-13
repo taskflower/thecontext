@@ -28,6 +28,7 @@ export interface Position {
     scenarioId: string;
     createdAt: number;
     updatedAt: number;
+    isStartNode?: boolean; // Nowa flaga określająca węzeł startowy
   }
   
   export interface Edge {

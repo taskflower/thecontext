@@ -28,6 +28,7 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
 
   const [showNodeEditor, setShowNodeEditor] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [refreshToken, setRefreshToken] = useState(0); // Dodane: stan wymuszający odświeżenie
   const loadingRef = useRef(false);
 
   // Pobieranie danych scenariusza z magazynu
@@ -35,14 +36,12 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
     getScenario,
     createEdge,
     addEdgeToScenario,
-
     getCurrentScenario,
     getValidEdges,
     validateScenarioEdges
   } = useScenarioStore();
   
   const { 
-
     updateNode, 
     setActiveNodeId, 
     getNodesByScenario 
@@ -57,6 +56,11 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
   const currentScenario = getCurrentScenario();
   const scenarioId = currentScenario?.id;
   const prevScenarioIdRef = useRef<string | null>(null);
+
+  // Dodane: funkcja wymuszająca odświeżenie
+  const forceRefresh = useCallback(() => {
+    setRefreshToken(prev => prev + 1);
+  }, []);
 
   // Stworzenie zmemoizowanego obiektu nodeTypes, aby uniknąć ostrzeżeń React Flow
   const nodeTypes = React.useMemo(
@@ -104,7 +108,6 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
 
   // Ładowanie węzłów i krawędzi przy zmianie scenariusza
   useEffect(() => {
-   
     if (!scenarioId) {
       console.warn("Cannot load flow data: No scenario ID provided");
       prevScenarioIdRef.current = null;
@@ -145,7 +148,6 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
     // Pobierz węzły bezpośrednio z nodeStore dla tego scenariusza
     const scenarioNodes = getNodesByScenario(scenarioId);
     
-   
     // Transformacja węzłów na format ReactFlow
     const flowNodes = scenarioNodes.map((node) => ({
       id: node.id,
@@ -155,6 +157,7 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
         ...node.data,
         label: node.data.label || node.type,
         response: node.data.response || "",
+        isStartNode: node.data.isStartNode || false,
         onEditNode: handleEditNode,
       },
     }));
@@ -196,6 +199,35 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
     handleEditNode,
     isInitialized,
   ]);
+
+  // ZMODYFIKOWANE: Nowy efekt do odświeżania właściwości węzłów z dodanym refreshToken
+  useEffect(() => {
+    if (!scenarioId || !isInitialized) return;
+    
+    console.log("Refreshing nodes from store, token:", refreshToken);
+    
+    // Pobierz węzły bezpośrednio z nodeStore dla tego scenariusza
+    const scenarioNodes = getNodesByScenario(scenarioId);
+    
+    // Aktualizuj właściwości węzłów (w tym isStartNode) bez zmiany pozycji
+    setNodes(nodes => nodes.map(node => {
+      const updatedNodeData = scenarioNodes.find(n => n.id === node.id);
+      if (updatedNodeData) {
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            ...updatedNodeData.data,
+            label: updatedNodeData.data.label || updatedNodeData.type,
+            isStartNode: updatedNodeData.data.isStartNode || false,
+            onEditNode: handleEditNode
+          }
+        };
+      }
+      return node;
+    }));
+    
+  }, [scenarioId, getNodesByScenario, handleEditNode, isInitialized, setNodes, refreshToken]);
 
   // Aktualizacja pozycji węzłów w magazynie po zakończeniu przeciągania
   const onNodeDragStop = useCallback(
@@ -315,11 +347,14 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
         </Panel>
       </ReactFlow>
 
-      {/* Dialog edytora węzłów (pokazywany po kliknięciu węzła lub przycisku edycji) */}
+     
       {showNodeEditor && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="max-w-2xl w-full">
-            <NodeEditor onClose={() => setShowNodeEditor(false)} />
+            <NodeEditor onClose={() => {
+              setShowNodeEditor(false);
+              forceRefresh(); // Wymuszenie odświeżenia po zamknięciu edytora
+            }} />
           </div>
         </div>
       )}

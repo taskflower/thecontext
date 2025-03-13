@@ -31,6 +31,8 @@ interface NodeActions {
   setActiveNodeId: (id: string | null) => void;
   getActiveNode: () => Node | null;
   deleteNodesByScenario: (scenarioId: string) => void;
+  setStartNode: (nodeId: string, scenarioId: string) => void;
+getStartNode: (scenarioId: string) => Node | null;
 }
 
 export const useNodeStore = create<NodeState & NodeActions>()(
@@ -117,6 +119,19 @@ export const useNodeStore = create<NodeState & NodeActions>()(
       updateNodeData: (id, data) => {
         set((state) => {
           if (!state.nodes[id]) return state;
+          
+          // Jeśli ustawiamy węzeł jako startowy, zresetuj flagę dla innych węzłów w tym samym scenariuszu
+          if (data.isStartNode === true) {
+            const currentNode = state.nodes[id];
+            const scenarioId = currentNode.scenarioId;
+            
+            // Resetowanie flagi dla innych węzłów
+            Object.values(state.nodes).forEach(node => {
+              if (node.scenarioId === scenarioId && node.id !== id && node.data.isStartNode) {
+                node.data.isStartNode = false;
+              }
+            });
+          }
           
           return {
             nodes: {
@@ -235,6 +250,43 @@ export const useNodeStore = create<NodeState & NodeActions>()(
       getActiveNode: () => {
         const activeId = get().activeNodeId;
         return activeId ? get().nodes[activeId] : null;
+      },
+      setStartNode: (nodeId, scenarioId) => {
+        set((state) => {
+          // Najpierw resetujemy wszystkie węzły startowe w danym scenariuszu
+          const updatedNodes = { ...state.nodes };
+          
+          Object.values(updatedNodes)
+            .filter(node => node.scenarioId === scenarioId && node.isStartNode)
+            .forEach(node => {
+              updatedNodes[node.id] = {
+                ...node,
+                isStartNode: false
+              };
+            });
+          
+          // Ustawiamy nowy węzeł startowy
+          if (updatedNodes[nodeId] && updatedNodes[nodeId].scenarioId === scenarioId) {
+            updatedNodes[nodeId] = {
+              ...updatedNodes[nodeId],
+              isStartNode: true
+            };
+          }
+          
+          return { nodes: updatedNodes };
+        });
+      },
+      
+      getStartNode: (scenarioId) => {
+        const scenarioNodes = Object.values(get().nodes)
+          .filter(node => node.scenarioId === scenarioId);
+        
+        // Najpierw szukamy węzła oznaczonego jako startowy
+        const startNode = scenarioNodes.find(node => node.isStartNode);
+        if (startNode) return startNode;
+        
+        // Jeśli nie znaleziono, zwracamy najstarszy węzeł
+        return scenarioNodes.sort((a, b) => a.createdAt - b.createdAt)[0] || null;
       },
       
       deleteNodesByScenario: (scenarioId) => {

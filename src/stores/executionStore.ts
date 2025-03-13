@@ -37,9 +37,9 @@ interface ExecutionActions {
     input?: string
   ) => Promise<string>;
   executeScenario: (scenarioId: string) => Promise<string>;
-  processVariables: (text: string, executionId: string) => Promise<string>;
-  calculateExecutionOrder: (scenarioId: string) => Promise<string[]>;
-  getNodeInput: (nodeId: string, executionId: string) => Promise<string>;
+  processVariables: (text: string, executionId: string) => string;
+  calculateExecutionOrder: (scenarioId: string) => string[];
+  getNodeInput: (nodeId: string, executionId: string) => string;
   getExecution: (id: string) => Execution | null;
   getExecutionsByScenario: (scenarioId: string) => Execution[];
   getLatestExecution: (scenarioId: string) => Execution | null;
@@ -127,6 +127,7 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
                   ...state.executions[executionId].results,
                   [nodeId]: result,
                 },
+                currentNodeId: nodeId,
               },
             },
           };
@@ -140,8 +141,6 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
       },
 
       executeNode: async (executionId, nodeId, input = "") => {
-        console.log(`[executeNode] Start dla węzła: ${nodeId}, input: "${input.substring(0, 100)}..."`);
-        console.log(`[executeNode] executionId: ${executionId}`);
         const startTime = Date.now();
 
         try {
@@ -152,52 +151,35 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
             throw new Error(`Node ${nodeId} not found`);
           }
 
-          // Ustawienie bieżącego węzła dla wykonania
-          get().setCurrentNodeInExecution(executionId, nodeId);
-
-          const currentExecution = get().executions[executionId];
-    console.log(`[executeNode] Stan wykonania:`, {
-      id: executionId,
-      isValid: !!currentExecution,
-      status: currentExecution?.status,
-      resultCount: currentExecution ? Object.keys(currentExecution.results).length : 0,
-      resultKeys: currentExecution ? Object.keys(currentExecution.results) : []
-    });
-
-    // Przetworzenie zmiennych w tekście
-    console.log(`[executeNode] Przed processVariables input: "${input.substring(0, 100)}..."`);
-    console.log(`[executeNode] Input zawiera zmienne?:`, input.includes("{{") && input.includes(".response}}"));
-    
-
-          // Przetworzenie zmiennych w tekście
-          const processedInput = await get().processVariables(
-            input,
-            executionId
-          );
-
-          console.log(`[executeNode] Po processVariables: "${processedInput.substring(0, 100)}..."`);
-    console.log(`[executeNode] Czy input został zmieniony?:`, input !== processedInput);
-
-          // Wykonanie pluginu, jeśli przypisany
-          let output = processedInput;
+          // Pobierz własny content węzła
+          const nodeContent = node.data.content || node.data.prompt || "";
+          
+          // Użyj podanego input jeśli istnieje, w przeciwnym razie użyj treści węzła
+          const contentToProcess = input || nodeContent;
+          
+          // Przetwórz zmienne w treści
+          const processedContent = get().processVariables(contentToProcess, executionId);
+          
+          // Wykonaj plugin, jeśli przypisany
+          let output = processedContent;
           let pluginResult = null;
 
           if (node.data.pluginId) {
             const pluginStore = usePluginStore.getState();
             const result = await pluginStore.processNodeWithPlugin(
               nodeId,
-              processedInput
+              processedContent
             );
             output = result.output;
             pluginResult = result.result;
           }
 
-          // Zapisanie wyniku
+          // Zapisz wynik
           const duration = Date.now() - startTime;
           return get().recordResult(
             executionId,
             nodeId,
-            processedInput,
+            processedContent,
             output,
             node.data.pluginId ?? undefined,
             pluginResult,
@@ -210,38 +192,32 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
             "error",
             error instanceof Error ? error.message : String(error)
           );
-          return input; // Zwrócenie oryginalnego wejścia w przypadku błędu
+          return input;
         }
       },
 
       executeScenario: async (scenarioId) => {
+        const nodeStore = useNodeStore.getState();
         const scenarioStore = useScenarioStore.getState();
-        const scenario = scenarioStore.getScenario(scenarioId);
-
-        if (!scenario) {
-          throw new Error(`Scenario ${scenarioId} not found`);
-        }
-
+        
+        // Rozpocznij wykonanie
         const executionId = get().startExecution(scenarioId);
 
         try {
-          // Obliczenie kolejności wykonania na podstawie struktury grafu
-          const executionOrder = await get().calculateExecutionOrder(
-            scenarioId
-          );
+          // Oblicz kolejność wykonania
+          const executionOrder = get().calculateExecutionOrder(scenarioId);
+          
+          if (executionOrder.length === 0) {
+            throw new Error("No nodes to execute");
+          }
 
-          // Wykonanie węzłów w kolejności
+          // Wykonaj węzły w kolejności
           for (const nodeId of executionOrder) {
-            const nodeStore = useNodeStore.getState();
             const node = nodeStore.getNode(nodeId);
-
             if (!node) continue;
 
-            // Określenie wejścia na podstawie połączeń węzła
-            const input = await get().getNodeInput(nodeId, executionId);
-
-            // Wykonanie węzła
-            await get().executeNode(executionId, nodeId, input);
+            // Wykonaj węzeł, używając jego własnej treści jako wejścia
+            await get().executeNode(executionId, nodeId);
           }
 
           get().completeExecution(executionId, "completed");
@@ -257,141 +233,135 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         return executionId;
       },
 
-      // Metoda pomocnicza do obliczania kolejności wykonania
-      calculateExecutionOrder: async (scenarioId) => {
-        const scenarioStore = useScenarioStore.getState();
-        const nodeStore = useNodeStore.getState();
-
-        const scenario = scenarioStore.getScenario(scenarioId);
-        if (!scenario) throw new Error(`Scenario ${scenarioId} not found`);
-
-        // Pobierz węzły bezpośrednio z nodeStore zamiast przez scenariusz
-        const nodes = nodeStore.getNodesByScenario(scenarioId);
-        // const nodeIds = nodes.map((node) => node.id);
-
-        // Pobierz tylko te krawędzie, które łączą istniejące węzły
-        const edges = scenarioStore.getValidEdges(scenarioId);
-
-        // Buduj graf
-        const graph: Record<string, string[]> = {};
-        const inDegree: Record<string, number> = {};
-
-        // Inicjalizacja
-        nodes.forEach((node) => {
-          graph[node.id] = [];
-          inDegree[node.id] = 0;
-        });
-
-        // Buduj listę sąsiedztwa
-        edges.forEach((edge) => {
-          if (graph[edge.source] && inDegree[edge.target] !== undefined) {
-            graph[edge.source].push(edge.target);
-            inDegree[edge.target]++;
-          }
-        });
-
-        // Sortowanie topologiczne algorytmem Kahna
-        const queue: string[] = [];
-        const result: string[] = [];
-
-        // Węzły bez zależności trafiają do kolejki
-        Object.keys(inDegree).forEach((nodeId) => {
-          if (inDegree[nodeId] === 0) {
-            queue.push(nodeId);
-          }
-        });
-
-        while (queue.length > 0) {
-          const nodeId = queue.shift()!;
-          result.push(nodeId);
-
-          graph[nodeId].forEach((neighborId) => {
-            inDegree[neighborId]--;
-            if (inDegree[neighborId] === 0) {
-              queue.push(neighborId);
-            }
-          });
-        }
-
-        // Jeśli nie wszystkie węzły zostały przetworzone, zgłoś ostrzeżenie
-        if (result.length !== nodes.length) {
-          console.warn("Scenario may contain circular dependencies");
-        }
-
-        return result;
-      },
-
-      // Metoda pomocnicza do pobierania wejścia dla węzła na podstawie połączeń
-      getNodeInput: async (nodeId, executionId) => {
-        const nodeStore = useNodeStore.getState();
-        const scenarioStore = useScenarioStore.getState();
-
-        const node = nodeStore.getNode(nodeId);
-        if (!node) return "";
-
-        const scenario = scenarioStore.getScenario(node.scenarioId);
-        if (!scenario) return "";
-
-        // Znajdź krawędzie wchodzące
-        const incomingEdges = scenarioStore
-          .getValidEdges(scenario.id)
-          .filter((edge) => edge.target === nodeId);
-
-        if (incomingEdges.length === 0) {
-          // Brak krawędzi wchodzących, użyj własnej treści/promptu węzła
-          return node.data.content || node.data.prompt || "";
-        }
-
-        // Pobierz wyniki z węzłów źródłowych
-        let input = node.data.content || node.data.prompt || "";
-
-        // Dla każdej krawędzi wchodzącej, zastosuj wynik węzła źródłowego do wejścia
-        for (const edge of incomingEdges) {
-          const sourceNode = nodeStore.getNode(edge.source);
-          if (!sourceNode) continue;
-
-          // Pobierz wynik węzła źródłowego z tego wykonania
-          const result = get().executions[executionId]?.results[edge.source];
-
-          if (result) {
-            // Zastąp odniesienia do zmiennych wynikiem
-            const variableName = `{{${edge.source}.response}}`;
-            input = input.replace(variableName, result.output);
-          }
-        }
-
-        return input;
-      },
-
-      // Metoda pomocnicza do przetwarzania zmiennych w tekście
-      processVariables: async (text, executionId) => {
-        console.log("PROCESSING VARIABLES - Input:", text);
+      // Uproszczona funkcja przetwarzania zmiennych
+      processVariables: (text, executionId) => {
         if (!text) return "";
+        
+        const execution = get().executions[executionId];
+        if (!execution) return text;
 
-        // Dopasuj wszystkie odniesienia do zmiennych {{nodeId.response}}
-        const variableRegex = /\{\{([^}]+)\.response\}\}/g;
-        const matches = text.match(variableRegex);
-        console.log("VARIABLE MATCHES:", matches);
-        if (!matches) return text;
-
+        // Przetwarzaj zmienne w formacie {{nodeId.response}}
         let processedText = text;
-
-        for (const match of matches) {
-          const nodeId = match.slice(2, -11); // Wyodrębnij nodeId z {{nodeId.response}}
-          console.log("PROCESSING NODE ID:", nodeId);
-          // Pobierz wynik z wykonania
-          const result = get().executions[executionId]?.results[nodeId];
-          console.log("RESULT FOR NODE:", result);
-          if (result) {
-            processedText = processedText.replace(match, result.output);
-            console.log("AFTER REPLACEMENT:", processedText);
+        
+        // Dopasuj wszystkie zmienne
+        const variableRegex = /\{\{([^}]+)\.response\}\}/g;
+        let match;
+        
+        while ((match = variableRegex.exec(text)) !== null) {
+          const fullMatch = match[0];  // {{nodeId.response}}
+          const nodeId = match[1];     // nodeId
+          
+          // Sprawdź czy jest wynik dla tego węzła
+          if (execution.results[nodeId]) {
+            const output = execution.results[nodeId].output;
+            processedText = processedText.replace(fullMatch, output || "");
           }
         }
-
+        
         return processedText;
       },
 
-      // Pobieranie wykonania
+      // Obliczanie kolejności wykonania na podstawie węzła startowego i/lub krawędzi
+      calculateExecutionOrder: (scenarioId) => {
+        const nodeStore = useNodeStore.getState();
+        const scenarioStore = useScenarioStore.getState();
+      
+        // Pobierz wszystkie węzły dla tego scenariusza
+        const nodes = nodeStore.getNodesByScenario(scenarioId);
+        const edges = scenarioStore.getValidEdges(scenarioId);
+        
+        // Jeśli nie ma węzłów, zwróć pustą tablicę
+        if (nodes.length === 0) return [];
+        
+        // Jeśli jest tylko jeden węzeł, zwróć go
+        if (nodes.length === 1) return [nodes[0].id];
+      
+        // 1. Najpierw sprawdź, czy jest węzeł startowy
+        const startNode = nodes.find(node => node.data.isStartNode === true);
+      
+        // 2. Jeśli nie ma krawędzi, ale jest węzeł startowy - ZWRÓĆ TYLKO WĘZEŁ STARTOWY
+        if (edges.length === 0 && startNode) {
+          return [startNode.id];
+        }
+      
+        // 3. Jeśli są krawędzie, użyj ich do obliczenia porządku topologicznego
+        if (edges.length > 0) {
+          // Budowanie grafu
+          const graph = {};
+          const inDegree = {};
+          
+          // Inicjalizacja
+          nodes.forEach(node => {
+            graph[node.id] = [];
+            inDegree[node.id] = 0;
+          });
+          
+          // Dodawanie krawędzi do grafu
+          edges.forEach(edge => {
+            if (graph[edge.source]) {
+              graph[edge.source].push(edge.target);
+              inDegree[edge.target]++;
+            }
+          });
+          
+          // Algorytm sortowania topologicznego Kahna
+          const queue = [];
+          const result = [];
+          
+          // Najpierw dodaj węzeł startowy, jeśli istnieje i nie ma zależności
+          if (startNode && inDegree[startNode.id] === 0) {
+            queue.push(startNode.id);
+          } else {
+            // Dodaj wszystkie węzły bez zależności
+            Object.keys(inDegree).forEach(id => {
+              if (inDegree[id] === 0 && (!startNode || id !== startNode.id)) {
+                queue.push(id);
+              }
+            });
+          }
+          
+          // Wykonaj sortowanie topologiczne
+          while (queue.length > 0) {
+            const nodeId = queue.shift();
+            result.push(nodeId);
+            
+            graph[nodeId].forEach(nextId => {
+              inDegree[nextId]--;
+              if (inDegree[nextId] === 0) {
+                queue.push(nextId);
+              }
+            });
+          }
+          
+          // Sprawdź, czy wszystkie węzły zostały uwzględnione (czy nie ma cykli)
+          if (result.length !== nodes.length) {
+            // Dodaj pozostałe węzły w kolejności utworzenia
+            const processed = new Set(result);
+            const remaining = nodes
+              .filter(node => !processed.has(node.id))
+              .sort((a, b) => a.createdAt - b.createdAt);
+            
+            remaining.forEach(node => result.push(node.id));
+          }
+          
+          return result;
+        } 
+        
+        // 4. Jeśli brak krawędzi i brak węzła startowego, zwróć węzły w kolejności utworzenia
+        return nodes
+          .sort((a, b) => a.createdAt - b.createdAt)
+          .map(node => node.id);
+      },
+
+      getNodeInput: (nodeId, executionId) => {
+        const nodeStore = useNodeStore.getState();
+        const node = nodeStore.getNode(nodeId);
+        
+        if (!node) return "";
+        
+        return node.data.content || node.data.prompt || "";
+      },
+
       getExecution: (id) => {
         return get().executions[id] || null;
       },
@@ -412,7 +382,6 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         return execution ? execution.results : null;
       },
 
-      // Zarządzanie wykonaniem
       deleteExecution: (id) => {
         set((state) => {
           const newExecutions = { ...state.executions };
@@ -463,7 +432,6 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
         });
       },
 
-      // Metody śledzenia wykonania krok po kroku
       setCurrentNodeInExecution: (executionId, nodeId) => {
         set((state) => {
           if (!state.executions[executionId]) return state;

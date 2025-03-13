@@ -197,8 +197,19 @@ export const ScenarioExecution: React.FC = () => {
       const newExecutionId = startExecution(scenario.id);
       setExecutionId(newExecutionId);
       
-      // Calculate execution order
-      const order = await calculateExecutionOrder(scenario.id);
+      // Calculate execution order z lepszą obsługą błędów
+      let order;
+      try {
+        order = await calculateExecutionOrder(scenario.id);
+        if (!Array.isArray(order)) {
+          console.error("calculateExecutionOrder nie zwróciło tablicy");
+          order = [];
+        }
+      } catch (error) {
+        console.error("Błąd podczas obliczania kolejności wykonania:", error);
+        order = [];
+      }
+      
       setExecutionOrder(order);
       
       // If there are nodes to execute
