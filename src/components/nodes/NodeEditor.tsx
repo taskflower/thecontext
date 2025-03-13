@@ -49,8 +49,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose }) => {
   // Save changes to the node
   const handleSave = () => {
     if (!activeNodeId || !node) return;
-    
-    console.log('Saving node with content:', content);
+  
     
     // If setting this node as start node, reset flag for other nodes
     if (isStartNode) {

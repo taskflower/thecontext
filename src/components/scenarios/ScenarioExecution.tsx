@@ -127,16 +127,9 @@ export const ScenarioExecution: React.FC = () => {
     if (!executionId || !currentNodeId) return;
     
     try {
-      // Execute node with user input
-      const output = await executeNode(executionId, currentNodeId, userInput);
-      
-      // Store result
-      setExecutionResults(prev => ({
-        ...prev,
-        [currentNodeId]: { input: userInput, output }
-      }));
-      
-      // Move to next node
+      // Wywołujemy executeNode, który zapisuje wynik do globalnego store
+      // Nie musimy już przechowywać output lokalnie
+      await executeNode(executionId, currentNodeId, userInput);
       moveToNextNode();
     } catch (error) {
       console.error("Error processing node:", error);
@@ -149,16 +142,23 @@ export const ScenarioExecution: React.FC = () => {
   const handlePluginComplete = async (output: string) => {
     if (!executionId || !currentNodeId) return;
     
-    // Store result
-    setExecutionResults(prev => ({
-      ...prev,
-      [currentNodeId]: { output }
-    }));
-    
-    setWaitingForPlugin(false);
-    
-    // Move to next node
-    moveToNextNode();
+    try {
+      // DODANE: Zapisanie wyniku pluginu do globalnego store
+      // Możemy użyć pustego stringa jako input, bo prawdziwy input przetworzył plugin
+      await executeNode(executionId, currentNodeId, output);
+      // LUB bezpośrednio:
+      // await executionStore.getState().recordResult(
+      //   executionId, currentNodeId, "", output, 
+      //   currentNode?.pluginId, null, 0
+      // );
+      
+      setWaitingForPlugin(false);
+      moveToNextNode();
+    } catch (error) {
+      console.error("Error processing plugin result:", error);
+      completeExecution(executionId, "error", error instanceof Error ? error.message : String(error));
+      setIsExecutionDialogOpen(false);
+    }
   };
 
   // Function to move to the next node in the execution order
@@ -244,11 +244,6 @@ export const ScenarioExecution: React.FC = () => {
     setIsExecuting(false);
   };
 
-  // Handle legacy execute scenario (keep for backward compatibility)
-  const handleExecuteScenario = async () => {
-    initializeStepExecution();
-  };
-
   const handleExportResults = () => {
     if (!scenario) return;
 
@@ -328,7 +323,7 @@ export const ScenarioExecution: React.FC = () => {
           <div className="space-y-4">
             <div className="flex flex-wrap gap-2">
               <Button
-                onClick={handleExecuteScenario}
+                onClick={initializeStepExecution}
                 disabled={isExecuting}
                 className="flex-grow"
               >

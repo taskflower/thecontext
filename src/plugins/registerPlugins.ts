@@ -16,7 +16,7 @@ export const registerAllPlugins = () => {
       const plugin = (module as any).default as PluginModule;
       
       if (plugin && plugin.id && plugin.name) {
-        console.log(`Registering plugin: ${plugin.name} (${plugin.id})`);
+
         
         // Register the plugin
         pluginStore.registerPlugin(plugin.id, plugin);
@@ -32,6 +32,4 @@ export const registerAllPlugins = () => {
       console.error(`Error loading plugin from ${path}:`, error);
     }
   });
-  
-  console.log(`Registered ${Object.keys(pluginStore.plugins).length} plugins`);
 };

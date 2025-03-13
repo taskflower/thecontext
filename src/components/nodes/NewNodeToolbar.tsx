@@ -94,11 +94,6 @@ const NewNodeToolbar: React.FC<NewNodeToolbarProps> = ({ scenarioId }) => {
     }
   
     try {
-     
-      
-      // Pobierz aktualny widok
-      const { x, y, zoom } = reactFlowInstance.getViewport();
-      console.log("Current viewport:", { x, y, zoom });
       
       // Oblicz pozycję środkową dla nowego węzła
       const center = reactFlowInstance.project({
