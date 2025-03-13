@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  Folder,
   Plus,
   Trash2,
   BookCopy,
@@ -21,6 +20,7 @@ import {
   Network,
   FileCode,
   MoreVertical,
+  Box,
 } from "lucide-react";
 import {
   Dialog,
@@ -97,14 +97,14 @@ export const WorkspacesList: React.FC = () => {
           <DialogTrigger asChild>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
-              New Workspace
+              New Container
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create New Workspace</DialogTitle>
+              <DialogTitle>Create New Container</DialogTitle>
               <DialogDescription>
-                Create a new workspace to organize your scenarios and prompts.
+                Create a new container to organize your scenarios and prompts.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
@@ -143,9 +143,9 @@ export const WorkspacesList: React.FC = () => {
       {workspaceList.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="pt-6 text-center text-slate-500">
-            <Folder className="h-12 w-12 text-slate-300 mx-auto mb-2" />
+            <Box className="h-12 w-12 text-slate-300 mx-auto mb-2" />
             <p>
-              No workspaces yet. Create your first workspace to get started.
+              No containers yet. Create your first container to get started.
             </p>
           </CardContent>
         </Card>
@@ -162,7 +162,7 @@ export const WorkspacesList: React.FC = () => {
             >
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Folder className="h-5 w-5 " />
+                  <Box className="h-5 w-5 " />
                   {workspace.name}
                 </CardTitle>
                 <CardDescription>

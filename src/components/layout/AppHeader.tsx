@@ -14,7 +14,15 @@ import { auth, googleProvider } from "@/firebase/config";
 import { useAuthState } from "../../hooks/useAuthState";
 
 // Import icons
-import { Folder, FileCode, Network, Play, ChevronDown, LogOut, Mail } from "lucide-react";
+import {
+  Box,
+  FileCode,
+  Network,
+  Play,
+  ChevronDown,
+  LogOut,
+  Mail,
+} from "lucide-react";
 import { signInWithPopup } from "firebase/auth";
 
 // Route titles component
@@ -49,7 +57,7 @@ function AppHeader() {
     <div className="flex items-center border-b justify-between p-6 mb-6 bg-white">
       <div>
         <Routes>
-          <Route path="/" element={<RouteTitle title="Workspaces" />} />
+          <Route path="/" element={<RouteTitle title="Containers" />} />
           <Route path="/scenarios" element={<RouteTitle title="Scenarios" />} />
           <Route
             path="/flow-editor"
@@ -68,7 +76,7 @@ function AppHeader() {
               variant="outline"
               className="flex items-center text-sm gap-2 shadow-sm"
             >
-              <Folder className="h-4 w-4" /> <span>Selected Workspace:</span>
+              <Box className="h-4 w-4" /> <span>Selected Container:</span>
               {workspace ? workspace.name : "No workspace"}
               <ChevronDown className="h-4 w-4 opacity-50" />
             </Button>
@@ -82,8 +90,8 @@ function AppHeader() {
               className="flex items-center gap-2 cursor-pointer"
               onClick={() => navigate("/")}
             >
-              <Folder className="h-4 w-4 text-blue-600" />
-              <span className="font-medium">Workspace:</span>
+              <Box className="h-4 w-4 " />
+              <span className="font-medium">Container:</span>
               <span className="ml-1 text-sm opacity-80">
                 {workspace ? workspace.name : "None"}
               </span>
@@ -92,7 +100,7 @@ function AppHeader() {
               className="flex items-center gap-2 cursor-pointer"
               onClick={() => navigate("/scenarios")}
             >
-              <FileCode className="h-4 w-4 text-emerald-600" />
+              <FileCode className="h-4 w-4 " />
               <span className="font-medium">Scenario:</span>
               <span className="ml-1 text-sm opacity-80">
                 {scenario ? scenario.name : "None"}
@@ -102,7 +110,7 @@ function AppHeader() {
               className="flex items-center gap-2 cursor-pointer"
               onClick={() => navigate("/flow-editor")}
             >
-              <Network className="h-4 w-4 text-purple-600" />
+              <Network className="h-4 w-4 " />
               <span className="font-medium">Nodes:</span>
               <span className="ml-1 text-sm opacity-80">
                 {workspace && workspace.nodes ? workspace.nodes.length : 0}
@@ -113,7 +121,7 @@ function AppHeader() {
               className="flex items-center gap-2 cursor-pointer"
               onClick={() => navigate("/execute")}
             >
-              <Play className="h-4 w-4 text-green-600" />
+              <Play className="h-4 w-4 " />
               <span>Execute Current Scenario</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -123,7 +131,10 @@ function AppHeader() {
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex items-center text-sm gap-2 shadow-sm">
+              <Button
+                variant="outline"
+                className="flex items-center text-sm gap-2 shadow-sm"
+              >
                 <Mail className="h-4 w-4" />
                 <span>{user.email}</span>
                 <ChevronDown className="h-4 w-4 opacity-50" />
@@ -140,8 +151,8 @@ function AppHeader() {
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <Button 
-            size="default" 
+          <Button
+            size="default"
             className="flex items-center gap-2"
             onClick={handleGoogleLogin}
           >

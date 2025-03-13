@@ -27,6 +27,7 @@ import {
   Play,
   Database,
   LayoutDashboard,
+  Box,
 } from "lucide-react";
 
 // Import utilities
@@ -43,8 +44,8 @@ registerStoresForPlugins();
 function SidebarNav() {
   return (
     <div className="space-y-1">
-      <SidebarItem href="/" icon={<Folder className="h-4 w-4 mr-2" />}>
-        Workspaces
+      <SidebarItem href="/" icon={<Box className="h-4 w-4 mr-2" />}>
+        Containers
       </SidebarItem>
       <SidebarItem
         href="/scenarios"
@@ -123,7 +124,7 @@ const ExecutePage = () => {
         <div className="p-4 border-b">
           <h2 className="font-bold flex items-center">
             <Database className="h-4 w-4 mr-2 text-blue-500" />
-            Workspace Context
+            Container Context
           </h2>
         </div>
         <ScrollArea className="h-[500px]">

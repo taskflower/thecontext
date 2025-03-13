@@ -279,7 +279,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose, scenarioId }) => {
           {activeTab === "context" && (
             <div className="mt-3 min-h-64">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Workspace Context Key
+                Container Context Key
               </label>
               <div className="mb-2">
                 <p className="text-xs text-gray-500">

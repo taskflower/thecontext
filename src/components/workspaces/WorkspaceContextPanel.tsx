@@ -14,7 +14,7 @@ export const WorkspaceContextPanel: React.FC = () => {
   const { getCurrentWorkspace, updateWorkspaceContext } = useWorkspaceStore();
   const workspace = getCurrentWorkspace();
   
-  const [editMode, setEditMode] = useState(false);
+
   const [contextKey, setContextKey] = useState('');
   const [contextValue, setContextValue] = useState('');
   const [editKey, setEditKey] = useState<string | null>(null);
@@ -93,17 +93,10 @@ export const WorkspaceContextPanel: React.FC = () => {
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Database className="h-5 w-5 text-blue-500" />
-            Workspace Context
+            <Database className="h-5 w-5 " />
+            Container Context
           </div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setEditMode(!editMode)}
-          >
-            <Edit className="h-4 w-4 mr-2" />
-            {editMode ? 'View Mode' : 'Edit Mode'}
-          </Button>
+          
         </CardTitle>
         <CardDescription>
           Data shared across all scenarios in this workspace
