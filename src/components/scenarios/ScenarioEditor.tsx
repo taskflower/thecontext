@@ -1,6 +1,6 @@
 // src/components/scenarios/ScenarioEditor.tsx
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -127,7 +127,7 @@ export const ScenarioEditor: React.FC<ScenarioEditorProps> = ({ scenarioId, onCl
   };
 
   return (
-    <Card className="border-primary">
+    <>
       <CardHeader>
         <CardTitle>Edit Scenario</CardTitle>
         <CardDescription>
@@ -277,6 +277,6 @@ export const ScenarioEditor: React.FC<ScenarioEditorProps> = ({ scenarioId, onCl
           </div>
         </Tabs>
       </CardContent>
-    </Card>
+</>
   );
 };

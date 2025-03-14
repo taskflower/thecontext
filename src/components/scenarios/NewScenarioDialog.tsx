@@ -7,27 +7,27 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus } from "lucide-react";
 import { useScenarioStore } from "@/stores/scenarioStore";
+import { useDialog } from "@/context/DialogContext";
 
-interface NewScenarioDialogProps {
-  workspaceId: string;
-}
-
-export const NewScenarioDialog: React.FC<NewScenarioDialogProps> = ({
-  workspaceId,
-}) => {
+export const NewScenarioDialog: React.FC = () => {
   const { createScenario } = useScenarioStore();
+  const { isDialogOpen, closeDialog, getDialogProps } = useDialog();
   
-  const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+
+  const open = isDialogOpen('newScenario');
+  const { workspaceId } = getDialogProps('newScenario');
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) closeDialog('newScenario');
+  };
 
   const handleCreateScenario = () => {
     if (!workspaceId || !name.trim()) return;
@@ -35,17 +35,11 @@ export const NewScenarioDialog: React.FC<NewScenarioDialogProps> = ({
     createScenario(name.trim(), workspaceId, description.trim());
     setName("");
     setDescription("");
-    setIsOpen(false);
+    closeDialog('newScenario');
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          New Scenario
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create New Scenario</DialogTitle>
