@@ -33,16 +33,16 @@ import { NavLink } from "react-router-dom";
 
 import { scenarioMatchesFilters, addFilterFromScenario, useFilterStore } from "./FilterComponents";
 import { Scenario } from "@/types/common";
+import { useDialog } from "@/context/DialogContext";
+import { useNodeStore } from "@/stores/nodeStore";
 
 
 interface ScenarioCardProps {
   scenario: Scenario;
-  onEdit: (scenarioId: string) => void;
 }
 
 export const ScenarioCard: React.FC<ScenarioCardProps> = ({
   scenario,
-  onEdit,
 }) => {
   const {
     currentScenarioId,
@@ -51,12 +51,18 @@ export const ScenarioCard: React.FC<ScenarioCardProps> = ({
     duplicateScenario,
   } = useScenarioStore();
   const { filteringEnabled } = useFilterStore();
+  const { openDialog } = useDialog(); // Add this hook
 
   const matchesFilter = scenarioMatchesFilters(scenario);
   const hasFilters =
     scenario.context &&
     scenario.context.filterConditions &&
     scenario.context.filterConditions.length > 0;
+
+  // Handler for edit button
+  const handleEdit = (scenarioId: string) => {
+    openDialog('editScenario', { scenarioId });
+  };
 
   return (
     <Card
@@ -112,7 +118,7 @@ export const ScenarioCard: React.FC<ScenarioCardProps> = ({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
                 <DropdownMenuItem
-                  onClick={() => onEdit(scenario.id)}
+                  onClick={() => handleEdit(scenario.id)}
                   className="flex items-center gap-2"
                 >
                   <Edit className="h-4 w-4" />
@@ -177,3 +183,15 @@ export const ScenarioCard: React.FC<ScenarioCardProps> = ({
     </Card>
   );
 };
+
+// This is a simple component imported from the original file
+const ScenarioNodeCount: React.FC<{ scenarioId: string }> = ({ scenarioId }) => {
+  const { getNodeCountByScenario } = useNodeStore();
+  const nodeCount = getNodeCountByScenario(scenarioId);
+  return (
+    <>
+      {nodeCount} {nodeCount === 1 ? "node" : "nodes"}
+    </>
+  );
+};
+

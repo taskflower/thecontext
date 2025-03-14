@@ -26,6 +26,10 @@ import { registerStoresForPlugins } from "./stores";
 import { registerAllPlugins } from "./plugins/registerPlugins";
 import { useWorkspaceStore } from "./stores/workspaceStore";
 
+// Dialog System
+import { AppDialogs } from "./components/dialogs/AppDialogs";
+import { DialogProvider } from "./context/DialogContext";
+
 // Initialize plugin system
 registerStoresForPlugins();
 
@@ -45,12 +49,15 @@ const App = () => {
 
   return (
     <Router>
-      <div className="min-h-screen h-screen flex">
-        <PluginInitializer />
-        <Toaster />
-        <Sidebar />
-        <MainContent />
-      </div>
+      <DialogProvider>
+        <div className="min-h-screen h-screen flex">
+          <PluginInitializer />
+          <Toaster />
+          <Sidebar />
+          <MainContent />
+          <AppDialogs />
+        </div>
+      </DialogProvider>
     </Router>
   );
 };

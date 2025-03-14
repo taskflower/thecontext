@@ -42,6 +42,7 @@ export interface Position {
   }
   
   export interface Scenario {
+    context: any;
     id: string;
     workspaceId: string;
     name: string;
