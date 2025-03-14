@@ -103,7 +103,7 @@ const NewNodeToolbar: React.FC<NewNodeToolbarProps> = ({ scenarioId }) => {
       });
       
       // Dodaj losowe przesunięcie
-      const position = {
+      const position:any = {
         x: center.x + Math.random() * 100 - 50,
         y: center.y + Math.random() * 100 - 50
       };

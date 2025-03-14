@@ -46,7 +46,7 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = () => {
   }
   const scenarioId = currentScenario?.id;
 
-  const { getLatestExecution } = useExecutionStore();
+
 
   const forceRefresh = useCallback(() => {
     setRefreshToken((prev) => prev + 1);

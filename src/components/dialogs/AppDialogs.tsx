@@ -18,7 +18,7 @@ export const AppDialogs: React.FC = () => {
       >
         <DialogContent>
           <NewScenarioDialog 
-            workspaceId={getDialogProps('newScenario').workspaceId} 
+          
           />
         </DialogContent>
       </Dialog>
@@ -52,7 +52,7 @@ export const AppDialogs: React.FC = () => {
         open={isDialogOpen('filterHelp')} 
         onOpenChange={(open) => !open && closeDialog('filterHelp')}
       >
-        <DialogContent className="sm:max-w-4xl">
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <FilteringHelpComponent />
         </DialogContent>
       </Dialog>
