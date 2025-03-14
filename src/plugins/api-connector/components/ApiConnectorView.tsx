@@ -79,13 +79,13 @@ const ApiConnectorView: React.FC<ApiConnectorViewProps> = ({
       const nodeResponse = config?.nodeResponse || '';
       const nodePrompt = config?.nodePrompt || '';
       
-      // Use custom content if available and enabled, otherwise use node prompt
-      const requestContent = showContentInput && customContent ? customContent : nodePrompt;
+      // Przygotuj wartość dla pola "user" - użyj customContent jeśli jest dostępne
+      const userContent = showContentInput && customContent ? customContent : nodeResponse;
       
-      // Use the API Connector Service
+      // Use the API Connector Service - odwróć kolejność argumentów
       const llmContent = await apiConnectorService.sendLlmRequest(
-        requestContent,
-        nodeResponse,
+        nodePrompt,          // Teraz zawsze używamy nodePrompt jako treści dla asystenta
+        userContent,         // A userContent jako treści użytkownika
         apiUrl,
         user.uid
       );

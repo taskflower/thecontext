@@ -235,6 +235,11 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose, scenarioId }) => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
                 placeholder="Enter node content or prompt here..."
               />
+              <div className="mt-2 text-xs text-gray-500 font-mono">
+                {`{{`}
+                {activeNodeId}
+                {`.response}}`}
+              </div>
             </div>
           )}
 
@@ -374,15 +379,13 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose, scenarioId }) => {
           {activeNodeId && (
             <button
               onClick={() => {
-               
-                  const nodeStore = useNodeStore.getState();
-                  if (activeNodeId) {
-                    nodeStore.deleteNode(activeNodeId);
-                  }
-                  if (onClose) {
-                    onClose();
-                  }
-                
+                const nodeStore = useNodeStore.getState();
+                if (activeNodeId) {
+                  nodeStore.deleteNode(activeNodeId);
+                }
+                if (onClose) {
+                  onClose();
+                }
               }}
               className="px-4 py-2 bg-red-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-red-700"
             >
