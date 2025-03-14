@@ -374,9 +374,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose, scenarioId }) => {
           {activeNodeId && (
             <button
               onClick={() => {
-                if (
-                  window.confirm("Are you sure you want to delete this node?")
-                ) {
+               
                   const nodeStore = useNodeStore.getState();
                   if (activeNodeId) {
                     nodeStore.deleteNode(activeNodeId);
@@ -384,7 +382,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ onClose, scenarioId }) => {
                   if (onClose) {
                     onClose();
                   }
-                }
+                
               }}
               className="px-4 py-2 bg-red-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-red-700"
             >

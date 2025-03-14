@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // src/components/nodes/FlowEditor.tsx
-import React, { useCallback, useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import ReactFlow, {
   addEdge,
   Controls,
@@ -23,9 +23,7 @@ import NodeEditor from "./NodeEditor";
 import { NavLink } from "react-router-dom";
 import { Button } from "../ui";
 
-const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = ({
-  onEditNode,
-}) => {
+const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = () => {
   // Stan ReactFlow dla węzłów i krawędzi
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);

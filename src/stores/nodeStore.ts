@@ -3,7 +3,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { nanoid } from 'nanoid';
-import { Node, NodeData, Position } from '../types/common';
+import { Node, NodeData,  } from '../types/common';
+import { Position } from 'reactflow';
+
+
 
 interface NodeState {
   nodes: Record<string, Node>;
@@ -63,7 +66,7 @@ export const useNodeStore = create<NodeState & NodeActions>()(
           scenarioId: scenarioId || '',
           createdAt: Date.now(),
           updatedAt: Date.now()
-        };
+        } as any;
         
         set((state) => ({
           nodes: { ...state.nodes, [id]: node }

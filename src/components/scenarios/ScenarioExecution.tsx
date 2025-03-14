@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/scenarios/ScenarioExecution.tsx
 import React, { useState, useEffect } from "react";
 
@@ -434,7 +435,7 @@ export const ScenarioExecution: React.FC = () => {
                           </thead>
                           <tbody>
                             {Object.entries(execution.results).map(
-                              ([nodeId, result]) => {
+                              ([nodeId, result]:any) => {
                                 const node = getNode(nodeId);
                                 return (
                                   <tr key={nodeId} className="border-b">

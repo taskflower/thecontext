@@ -10,6 +10,7 @@ import { usePluginStore } from "./pluginStore";
 import { calculateExecutionOrder } from "./utils/graphUtils";
 import { useWorkspaceStore } from "./workspaceStore";
 interface Execution {
+  error: any;
   id: string;
   scenarioId: string;
   startTime: number;
@@ -68,6 +69,7 @@ export const useExecutionStore = create<ExecutionState & ExecutionActions>()(
           startTime: Date.now(),
           status: "running",
           results: {},
+          error: undefined
         };
 
         set((state) => ({
@@ -110,7 +112,6 @@ executeNode: async (executionId, nodeId, message = "") => {
   try {
     const nodeStore = useNodeStore.getState();
     const workspaceStore = useWorkspaceStore.getState();
-    const scenarioStore = useScenarioStore.getState();
     const node = nodeStore.getNode(nodeId);
 
     if (!node) {

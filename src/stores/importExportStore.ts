@@ -5,7 +5,7 @@ import { useWorkspaceStore } from './workspaceStore';
 import { useScenarioStore } from './scenarioStore';
 import { useNodeStore } from './nodeStore';
 import { usePluginStore } from './pluginStore';
-import { ExportedData } from '../types/common';
+
 
 interface ImportExportState {
   isExporting: boolean;
@@ -14,6 +14,15 @@ interface ImportExportState {
   lastImportedAt: string | null;
   exportError: string | null;
   importError: string | null;
+}
+interface ExportedData {
+  version: string;
+  exportedAt: string;
+  workspace: any; // or a more specific type if you have one
+  scenarios: any; // or a more specific type if you have one
+  nodes: any; // or a more specific type if you have one
+  edges: any; // or a more specific type if you have one
+  plugins: any; // or a more specific type if you have one
 }
 
 interface ImportExportActions {

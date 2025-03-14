@@ -33,7 +33,6 @@ import { NavLink } from "react-router-dom";
 
 import { scenarioMatchesFilters, addFilterFromScenario, useFilterStore } from "./FilterComponents";
 import { Scenario } from "@/types/common";
-import { ScenarioNodeCount } from "./ScenarioNodeCount";
 
 
 interface ScenarioCardProps {
