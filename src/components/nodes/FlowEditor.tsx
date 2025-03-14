@@ -16,7 +16,6 @@ import "reactflow/dist/style.css";
 
 import { useScenarioStore } from "../../stores/scenarioStore";
 import { useNodeStore } from "../../stores/nodeStore";
-import { useExecutionStore } from "../../stores/executionStore";
 import CustomNode from "./CustomNode";
 import NewNodeToolbar from "./NewNodeToolbar";
 import NodeEditor from "./NodeEditor";

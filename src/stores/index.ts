@@ -2,7 +2,7 @@
 // src/stores/index.ts
 // Central export file for all stores
 
-import { useExecutionStore } from "./executionStore";
+//import { useExecutionStore } from "./executionStore";
 import { useNodeStore } from "./nodeStore";
 import { useScenarioStore } from "./scenarioStore";
 import { useWorkspaceStore } from "./workspaceStore";
@@ -28,7 +28,7 @@ export const registerStoresForPlugins = () => {
         updateNodeData: (nodeId: string, data: any) => useNodeStore.getState().updateNodeData(nodeId, data)
       },
       execution: {
-        getResults: (executionId: string) => useExecutionStore.getState().getResults(executionId)
+        // getResults: (executionId: string) => useExecutionStore.getState().getResults(executionId)
       }
     };
   }
