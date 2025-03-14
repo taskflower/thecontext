@@ -172,7 +172,10 @@ const FlowEditor: React.FC<{ onEditNode?: (nodeId: string) => void }> = () => {
       >
         <Controls />
         <Background color="#aaa" gap={16} />
-        <Panel position="top-right">
+        <Panel position="top-right" className="gap-2 flex">
+        <NavLink to={"/plugins"}>
+            <Button variant={'outline'}>Plugins</Button>
+          </NavLink>
           <NavLink to={"/execute"}>
             <Button>Execute Scenario</Button>
           </NavLink>
