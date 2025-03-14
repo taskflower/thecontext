@@ -4,14 +4,28 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { nanoid } from "nanoid";
-import { Execution, ExecutionResult } from "../types/common";
 import { useScenarioStore } from "./scenarioStore";
 import { useNodeStore } from "./nodeStore";
 import { usePluginStore } from "./pluginStore";
 import { calculateExecutionOrder } from "./utils/graphUtils";
 import { useWorkspaceStore } from "./workspaceStore";
+interface Execution {
+  id: string;
+  scenarioId: string;
+  startTime: number;
+  status: string;
+  results: any; // or define a specific type for results
+}
 
-
+interface ExecutionResult {
+  nodeId: string;
+  prompt: string;
+  message: string;
+  pluginId?: string;
+  pluginResult: any;
+  timestamp: number;
+  duration: number;
+}
 interface ExecutionState {
   executions: Record<string, Execution>;
   currentExecutionId: string | null;
