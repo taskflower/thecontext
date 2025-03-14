@@ -2,6 +2,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import type { PluginComponentProps } from '../../PluginInterface';
 
 const ApiConnectorConfig: React.FC<PluginComponentProps> = ({ config, onConfigChange }) => {
@@ -12,6 +14,15 @@ const ApiConnectorConfig: React.FC<PluginComponentProps> = ({ config, onConfigCh
       onConfigChange({
         ...config,
         [name]: value
+      });
+    }
+  };
+
+  const handleSwitchChange = (checked: boolean) => {
+    if (onConfigChange) {
+      onConfigChange({
+        ...config,
+        showContentInput: checked
       });
     }
   };
@@ -64,6 +75,15 @@ const ApiConnectorConfig: React.FC<PluginComponentProps> = ({ config, onConfigCh
           onChange={handleInputChange}
           className="w-full"
         />
+      </div>
+      
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="showContentInput"
+          checked={config?.showContentInput || false}
+          onCheckedChange={handleSwitchChange}
+        />
+        <Label htmlFor="showContentInput">Show content input field in process view</Label>
       </div>
       
       {config?.requestSent && (

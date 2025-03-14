@@ -99,6 +99,7 @@ export const ScenarioExecution: React.FC = () => {
     return {
       id: node.id,
       type: node.type,
+      label: node.data.label || node.type,
       prompt: node.data.prompt || "",
       hasPlugin: !!node.data.pluginId,
       pluginId: node.data.pluginId,
@@ -435,7 +436,7 @@ export const ScenarioExecution: React.FC = () => {
                           </thead>
                           <tbody>
                             {Object.entries(execution.results).map(
-                              ([nodeId, result]:any) => {
+                              ([nodeId, result]: any) => {
                                 const node = getNode(nodeId);
                                 return (
                                   <tr key={nodeId} className="border-b">
@@ -498,7 +499,7 @@ export const ScenarioExecution: React.FC = () => {
               <div className="space-y-4">
                 <div className="mb-6 border-b">
                   <h3 className="text-4xl font-bold uppercase">
-                  {currentNode.type}
+                    {currentNode.label}
                   </h3>
                   <span className="text-xs text-slate-300">
                     Node ID: {currentNode.id}
@@ -508,10 +509,6 @@ export const ScenarioExecution: React.FC = () => {
                 {/* Plugin execution */}
                 {currentNode.hasPlugin && waitingForPlugin && (
                   <>
-                    <div className="mb-4 text-sm">
-                      This node uses a plugin. Please complete the plugin
-                      workflow to continue.
-                    </div>
                     {currentNode.pluginId && (
                       <ExecutionPluginView
                         pluginId={currentNode.pluginId}

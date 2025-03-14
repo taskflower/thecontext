@@ -1,10 +1,11 @@
 // src/plugins/api-connector/components/ApiConnectorView.tsx
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { Loader } from 'lucide-react';
-import { authService } from '@/services/authService';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useNodeStore } from '@/stores/nodeStore';
+import { apiConnectorService } from '../services/apiConnectorService';
 import type { PluginComponentProps } from '../../PluginInterface';
 
 interface ApiConnectorViewProps extends PluginComponentProps {
@@ -21,18 +22,20 @@ const ApiConnectorView: React.FC<ApiConnectorViewProps> = ({
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState('API request paused. Click button to send request.');
   const [error, setError] = useState<string | null>(null);
+  const [customContent, setCustomContent] = useState('');
   
   const { user } = useAuthState(); // Get current user from auth state
   
   const buttonText = config?.buttonText || 'Send API Request';
   const apiUrl = config?.apiUrl || '/api/v1/services/chat/completion';
+  const showContentInput = config?.showContentInput || false;
 
   // Helper to signal completion
   const signalCompletion = (message: string, wasSuccessful: boolean) => {
     console.log('API Connector: signalCompletion config before update:', JSON.stringify(config));
     console.log('API Connector: Signaling completion with message:', message);
     
-    // Przygotuj zaktualizowaną konfigurację
+    // Prepare updated configuration
     const updatedConfig = {
       ...config,
       requestSent: true,
@@ -40,9 +43,9 @@ const ApiConnectorView: React.FC<ApiConnectorViewProps> = ({
       completionMessage: message
     };
     
-    // Jeśli mamy nodeId, aktualizuj bezpośrednio stan węzła
+    // If we have nodeId, update node state directly
     if (nodeId) {
-      console.log('API Connector: Aktualizuję stan węzła bezpośrednio:', nodeId);
+      console.log('API Connector: Updating node state directly:', nodeId);
       useNodeStore.getState().updateNodePluginConfig(nodeId, updatedConfig);
     }
     
@@ -53,9 +56,13 @@ const ApiConnectorView: React.FC<ApiConnectorViewProps> = ({
     
     // Signal execution component
     if (onProcessComplete) {
-      console.log('API Connector: Wywołuję onProcessComplete z:', message);
+      console.log('API Connector: Calling onProcessComplete with:', message);
       onProcessComplete(message);
     }
+  };
+
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setCustomContent(e.target.value);
   };
 
   const handleSendRequest = async () => {
@@ -69,54 +76,19 @@ const ApiConnectorView: React.FC<ApiConnectorViewProps> = ({
     setError(null);
     
     try {
-      // Get the authentication token using authService
-      const token = await authService.getCurrentUserToken();
-      
-      if (!token) {
-        throw new Error('Failed to get authentication token');
-      }
-      
-      // Get the node data to access the prompt
       const nodeResponse = config?.nodeResponse || '';
       const nodePrompt = config?.nodePrompt || '';
       
-      // Prepare request payload according to the specified format
-      const payload = {
-        messages: [
-          { role: "assistant", content: nodePrompt },
-          { role: "user", content: nodeResponse }
-        ],
-        userId: user.uid || "user123" // Use actual user ID if available
-      };
+      // Use custom content if available and enabled, otherwise use node prompt
+      const requestContent = showContentInput && customContent ? customContent : nodePrompt;
       
-      console.log('API Connector: Sending request with payload:', payload);
-      
-      // Get API URL from environment or config 
-      const baseApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-      const endpoint = apiUrl.startsWith('http') ? apiUrl : `${baseApiUrl}${apiUrl.startsWith('/') ? '' : '/'}${apiUrl}`;
-      
-      // Send the API request
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
-      
-      if (!response.ok) {
-        throw new Error(`API request failed with status: ${response.status}`);
-      }
-      
-      // Parse the response
-      const data = await response.json();
-      console.log('API Connector: Received response:', data);
-      
-      // Extract the actual LLM content from the response
-      const llmContent = data.data?.message?.content || "Brak odpowiedzi";
-      
-      console.log('API Connector: Extracted LLM content:', llmContent);
+      // Use the API Connector Service
+      const llmContent = await apiConnectorService.sendLlmRequest(
+        requestContent,
+        nodeResponse,
+        apiUrl,
+        user.uid
+      );
       
       // Update UI and signal completion with the actual LLM response
       setProcessing(false);
@@ -145,6 +117,21 @@ const ApiConnectorView: React.FC<ApiConnectorViewProps> = ({
 
   return (
     <div className="space-y-4">
+      {showContentInput && waiting && (
+        <div className="mb-4">
+          <label htmlFor="customContent" className="block mb-1 text-sm font-medium">
+            Enter content for the API request:
+          </label>
+          <Textarea
+            id="customContent"
+            value={customContent}
+            onChange={handleContentChange}
+            placeholder="Enter your content here..."
+            className="w-full min-h-32"
+          />
+        </div>
+      )}
+      
       {waiting ? (
         <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
           {result}

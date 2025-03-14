@@ -73,7 +73,7 @@ export default {
   id: 'api-connector',
   name: 'API Connector',
   description: 'Sends data from the node to an API endpoint with authentication',
-  version: '1.0.0',
+  version: '1.0.1',
   activateByDefault: true,
   defaultConfig: {
     buttonText: 'Send API Request',
