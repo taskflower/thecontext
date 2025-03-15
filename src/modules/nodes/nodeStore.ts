@@ -1,13 +1,12 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { ElementType, GraphEdge, GraphNode, Position, Scenario, Workspace } from '../types';
+import { ElementType, GraphEdge, GraphNode, Position } from '../types';
 import { useWorkspaceStore } from '../workspaces';
 
-
 export interface NodeState {
-  currentNodes: GraphNode[];
+  nodes: GraphNode[];
   
-  getCurrentNodes: () => GraphNode[];
+  refreshNodes: () => void;
   addNode: (payload: { label: string; value: number; position?: Position }) => void;
   deleteNode: (nodeId: string) => void;
   updateNodePosition: (nodeId: string, position: Position) => void;
@@ -15,13 +14,13 @@ export interface NodeState {
 
 export const useNodeStore = create<NodeState>()(
   immer((set) => ({
-    currentNodes: [] as GraphNode[],
+    nodes: [],
     
-    getCurrentNodes: () => {
+    refreshNodes: () => {
       const { items, selected } = useWorkspaceStore.getState();
-      const workspace = items.find((w: Workspace) => w.id === selected.workspace);
-      const scenario = workspace?.children?.find((s: Scenario) => s.id === selected.scenario);
-      return scenario?.children || [];
+      const workspace = items.find(w => w.id === selected.workspace);
+      const scenario = workspace?.children?.find(s => s.id === selected.scenario);
+      set({ nodes: scenario?.children || [] });
     },
     
     addNode: (payload) => {
@@ -36,8 +35,8 @@ export const useNodeStore = create<NodeState>()(
       };
       
       const newItems = JSON.parse(JSON.stringify(items));
-      const workspace = newItems.find((w: Workspace) => w.id === selected.workspace);
-      const scenario = workspace?.children?.find((s: Scenario) => s.id === selected.scenario);
+      const workspace = newItems.find(w => w.id === selected.workspace);
+      const scenario = workspace?.children?.find(s => s.id === selected.scenario);
       
       if (scenario) {
         if (!scenario.children) {
@@ -50,8 +49,9 @@ export const useNodeStore = create<NodeState>()(
           stateVersion: stateVersion + 1
         });
         
+        // Update local store
         set(state => {
-          state.currentNodes = [...scenario.children];
+          state.nodes = [...scenario.children];
         });
       }
     },
@@ -60,11 +60,11 @@ export const useNodeStore = create<NodeState>()(
       const { items, selected, stateVersion } = useWorkspaceStore.getState();
       
       const newItems = JSON.parse(JSON.stringify(items));
-      const workspace = newItems.find((w: Workspace) => w.id === selected.workspace);
-      const scenario = workspace?.children?.find((s: Scenario) => s.id === selected.scenario);
+      const workspace = newItems.find(w => w.id === selected.workspace);
+      const scenario = workspace?.children?.find(s => s.id === selected.scenario);
       
       if (scenario?.children) {
-        const index = scenario.children.findIndex((n: GraphNode) => n.id === nodeId);
+        const index = scenario.children.findIndex(n => n.id === nodeId);
         if (index !== -1) {
           scenario.children.splice(index, 1);
           
@@ -82,8 +82,9 @@ export const useNodeStore = create<NodeState>()(
             stateVersion: stateVersion + 1
           });
           
+          // Update local store
           set(state => {
-            state.currentNodes = [...scenario.children];
+            state.nodes = [...scenario.children];
           });
         }
       }
@@ -93,9 +94,9 @@ export const useNodeStore = create<NodeState>()(
       const { items, selected, stateVersion } = useWorkspaceStore.getState();
       
       const newItems = JSON.parse(JSON.stringify(items));
-      const workspace = newItems.find((w: Workspace) => w.id === selected.workspace);
-      const scenario = workspace?.children?.find((s: Scenario) => s.id === selected.scenario);
-      const node = scenario?.children?.find((n: GraphNode) => n.id === nodeId);
+      const workspace = newItems.find(w => w.id === selected.workspace);
+      const scenario = workspace?.children?.find(s => s.id === selected.scenario);
+      const node = scenario?.children?.find(n => n.id === nodeId);
       
       if (node) {
         node.position = position;
@@ -103,6 +104,14 @@ export const useNodeStore = create<NodeState>()(
         useWorkspaceStore.setState({
           items: newItems,
           stateVersion: stateVersion + 1
+        });
+        
+        // Update local store
+        set(state => {
+          const nodeIndex = state.nodes.findIndex(n => n.id === nodeId);
+          if (nodeIndex !== -1) {
+            state.nodes[nodeIndex].position = position;
+          }
         });
       }
     },

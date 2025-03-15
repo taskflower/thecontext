@@ -1,16 +1,18 @@
 import React from 'react';
 import { useDialogState } from '@/hooks';
-
-
-import { useNodeStore } from './nodeStore';
+import { useAppStore } from '../store';
 import { CardPanel, Dialog, ItemList } from '@/components/APPUI';
 import { GraphNode } from '../types';
 
 export const NodesList: React.FC = () => {
-  // Use state directly instead of functional selectors
-  const nodes = useNodeStore(state => state.getCurrentNodes());
-  const deleteNode = useNodeStore(state => state.deleteNode);
-  const addNode = useNodeStore(state => state.addNode);
+  const getCurrentScenario = useAppStore(state => state.getCurrentScenario);
+  const deleteNode = useAppStore(state => state.deleteNode);
+  const addNode = useAppStore(state => state.addNode);
+  // Force component to update when state changes
+  useAppStore(state => state.stateVersion);
+  
+  const scenario = getCurrentScenario();
+  const nodes = scenario?.children || [];
   
   const { isOpen, formData, openDialog, handleChange, setIsOpen } = useDialogState({ label: '', value: '' });
   

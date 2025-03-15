@@ -1,32 +1,41 @@
-
-import { useFlowNavigation } from '@/hooks';
-
-import { useCallback } from 'react';
-import { calculateFlowPath } from './flowUtils';
+import React, { useCallback, useState } from 'react';
+import { useAppStore } from '../store';
 import { StepModal } from '@/components/APPUI';
-import { useScenarioStore } from '../scenarios';
-
+import { GraphNode } from '../types';
+import { calculateFlowPath } from './flowUtils';
 
 export const FlowPlayer: React.FC = () => {
-  const getCurrentScenario = useScenarioStore(state => state.getCurrentScenario);
+  const getCurrentScenario = useAppStore(state => state.getCurrentScenario);
+  // Force component to update when state changes
+  useAppStore(state => state.stateVersion);
   
-  const {
-    isPlaying,
-    currentStepIndex,
-    steps,
-    startFlow,
-    nextStep,
-    prevStep,
-    stopFlow
-  } = useFlowNavigation();
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentNodeIndex, setCurrentNodeIndex] = useState(0);
+  const [flowPath, setFlowPath] = useState<GraphNode[]>([]);
   
   const handlePlay = useCallback(() => {
     const scenario = getCurrentScenario();
     if (scenario) {
       const path = calculateFlowPath(scenario.children, scenario.edges);
-      startFlow(path);
+      if (path.length > 0) {
+        setFlowPath(path);
+        setCurrentNodeIndex(0);
+        setIsPlaying(true);
+      }
     }
-  }, [getCurrentScenario, startFlow]);
+  }, [getCurrentScenario]);
+  
+  const handleNext = () => {
+    setCurrentNodeIndex(prev => Math.min(prev + 1, flowPath.length - 1));
+  };
+  
+  const handlePrev = () => {
+    setCurrentNodeIndex(prev => Math.max(prev - 1, 0));
+  };
+  
+  const handleClose = () => {
+    setIsPlaying(false);
+  };
   
   return (
     <>
@@ -39,13 +48,13 @@ export const FlowPlayer: React.FC = () => {
         </button>
       </div>
       
-      {isPlaying && steps.length > 0 && (
+      {isPlaying && flowPath.length > 0 && (
         <StepModal 
-          steps={steps}
-          currentStep={currentStepIndex}
-          onNext={nextStep}
-          onPrev={prevStep}
-          onClose={stopFlow}
+          steps={flowPath}
+          currentStep={currentNodeIndex}
+          onNext={handleNext}
+          onPrev={handlePrev}
+          onClose={handleClose}
         />
       )}
     </>

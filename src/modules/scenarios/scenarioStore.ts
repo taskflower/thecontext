@@ -2,12 +2,13 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { ElementType, Scenario } from '../types';
 import { useWorkspaceStore } from '../workspaces';
-
-
-
+import { useNodeStore } from '../nodes/nodeStore';
+import { useEdgeStore } from '../edges/edgeStore';
 
 export interface ScenarioState {
-  getCurrentScenario: () => Scenario | null;
+  currentScenario: Scenario | null;
+  
+  refreshCurrentScenario: () => void;
   selectScenario: (scenarioId: string) => void;
   addScenario: (payload: { name: string; description?: string }) => void;
   deleteScenario: (scenarioId: string) => void;
@@ -15,22 +16,36 @@ export interface ScenarioState {
 
 export const useScenarioStore = create<ScenarioState>()(
   immer((set) => ({
-    getCurrentScenario: () => {
+    currentScenario: null,
+    
+    refreshCurrentScenario: () => {
       const { items, selected } = useWorkspaceStore.getState();
       const workspace = items.find(w => w.id === selected.workspace);
-      if (!workspace) return null;
-      return workspace.children?.find(s => s.id === selected.scenario) || null;
+      const scenario = workspace?.children?.find(s => s.id === selected.scenario) || null;
+      set({ currentScenario: scenario });
     },
     
-    selectScenario: (scenarioId) => set(() => {
+    selectScenario: (scenarioId) => {
       const { selected, stateVersion } = useWorkspaceStore.getState();
+      
       useWorkspaceStore.setState({
         selected: { ...selected, scenario: scenarioId },
         stateVersion: stateVersion + 1
       });
-    }),
+      
+      // Refresh dependent stores
+      const nodeStore = useNodeStore.getState();
+      const edgeStore = useEdgeStore.getState();
+      
+      setTimeout(() => {
+        nodeStore.refreshNodes();
+        edgeStore.refreshEdges();
+      }, 0);
+      
+      set(() => ({ currentScenario: null }));
+    },
     
-    addScenario: (payload) => set(() => {
+    addScenario: (payload) => {
       const { items, selected, stateVersion } = useWorkspaceStore.getState();
       
       const newScenario: Scenario = {
@@ -56,10 +71,21 @@ export const useScenarioStore = create<ScenarioState>()(
           selected: { ...selected, scenario: newScenario.id },
           stateVersion: stateVersion + 1
         });
+        
+        set({ currentScenario: newScenario });
+        
+        // Refresh dependent stores
+        const nodeStore = useNodeStore.getState();
+        const edgeStore = useEdgeStore.getState();
+        
+        setTimeout(() => {
+          nodeStore.refreshNodes();
+          edgeStore.refreshEdges();
+        }, 0);
       }
     }),
     
-    deleteScenario: (scenarioId) => set(() => {
+    deleteScenario: (scenarioId) => {
       const { items, selected, stateVersion } = useWorkspaceStore.getState();
       
       const newItems = [...items];
@@ -84,6 +110,17 @@ export const useScenarioStore = create<ScenarioState>()(
             selected: newSelected,
             stateVersion: stateVersion + 1
           });
+          
+          set({ currentScenario: null });
+          
+          // Clear dependent stores
+          const nodeStore = useNodeStore.getState();
+          const edgeStore = useEdgeStore.getState();
+          
+          setTimeout(() => {
+            nodeStore.refreshNodes();
+            edgeStore.refreshEdges();
+          }, 0);
         }
       }
     }),

@@ -1,17 +1,17 @@
-// Przykładowe poprawki komponentów używających store
-
+import React from "react";
 import { useDialogState } from "@/hooks";
-import { useWorkspaceStore } from ".";
+import { useAppStore } from '../store';
 import { CardPanel, Dialog, ItemList } from "@/components/APPUI";
 import { Workspace } from "../types";
 
-
 export const WorkspacesList: React.FC = () => {
-  const items = useWorkspaceStore(state => state.items);
-  const selected = useWorkspaceStore(state => state.selected);
-  const selectWorkspace = useWorkspaceStore(state => state.selectWorkspace);
-  const deleteWorkspace = useWorkspaceStore(state => state.deleteWorkspace);
-  const addWorkspace = useWorkspaceStore(state => state.addWorkspace);
+  const items = useAppStore(state => state.items);
+  const selected = useAppStore(state => state.selected);
+  const selectWorkspace = useAppStore(state => state.selectWorkspace);
+  const deleteWorkspace = useAppStore(state => state.deleteWorkspace);
+  const addWorkspace = useAppStore(state => state.addWorkspace);
+  // Force component to update when state changes
+  useAppStore(state => state.stateVersion);
   
   const { isOpen, formData, openDialog, handleChange, setIsOpen } = useDialogState({ title: '' });
   

@@ -1,7 +1,7 @@
 import { AppState, ElementType } from "./types";
 
 // Initial app state
-export const initialState: AppState = {
+export const initialState: Pick<AppState, 'items' | 'selected'> = {
   items: [
     {
       id: 'workspace1', type: ElementType.WORKSPACE, title: 'Project Alpha',
@@ -19,6 +19,5 @@ export const initialState: AppState = {
       ]
     }
   ],
-  selected: { workspace: 'workspace1', scenario: 'scenario1' },
-  stateVersion: 0
+  selected: { workspace: 'workspace1', scenario: 'scenario1' }
 };

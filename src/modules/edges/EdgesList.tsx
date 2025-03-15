@@ -1,17 +1,20 @@
-
+import React from 'react';
 import { useDialogState } from "@/hooks";
-import { useNodeStore } from "../nodes";
-import { useEdgeStore } from "./edgeStore";
+import { useAppStore } from '../store';
 import { CardPanel, Dialog, ItemList } from "@/components/APPUI";
 import { Link } from "lucide-react";
 import { GraphEdge } from "../types";
 
-
 export const EdgesList: React.FC = () => {
-  const nodes = useNodeStore(state => state.getCurrentNodes());
-  const edges = useEdgeStore(state => state.getCurrentEdges());
-  const deleteEdge = useEdgeStore(state => state.deleteEdge);
-  const addEdge = useEdgeStore(state => state.addEdge);
+  const getCurrentScenario = useAppStore(state => state.getCurrentScenario);
+  const deleteEdge = useAppStore(state => state.deleteEdge);
+  const addEdge = useAppStore(state => state.addEdge);
+  // Force component to update when state changes
+  useAppStore(state => state.stateVersion);
+  
+  const scenario = getCurrentScenario();
+  const edges = scenario?.edges || [];
+  const nodes = scenario?.children || [];
   
   const { isOpen, formData, openDialog, handleChange, setIsOpen } = 
     useDialogState({ source: '', target: '', label: '' });

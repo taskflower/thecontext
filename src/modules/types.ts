@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/types/app.ts
-import { Node as ReactFlowNode, Edge as ReactFlowEdgeType } from 'reactflow';
+import { Edge as ReactFlowEdgeType, Node as ReactFlowNodeType } from 'reactflow';
 
 export enum ElementType {
   WORKSPACE = 'workspace',
   SCENARIO = 'scenario',
-  GRAPH_NODE = 'node' // Changed ElementType.NODE to GRAPH_NODE
+  GRAPH_NODE = 'node'
 }
 
 export type Position = {
@@ -24,7 +23,6 @@ export interface DialogField {
   options?: { value: string; label: string }[];
 }
 
-// Renamed Node to GraphNode to avoid conflicts with built-in Node type
 export interface GraphNode {
   id: string;
   type: ElementType.GRAPH_NODE;
@@ -63,9 +61,33 @@ export interface AppState {
     scenario: string;
   };
   stateVersion: number;
+  
+  // Workspace methods
+  selectWorkspace: (workspaceId: string) => void;
+  addWorkspace: (payload: { title: string }) => void;
+  deleteWorkspace: (workspaceId: string) => void;
+  
+  // Scenario methods
+  selectScenario: (scenarioId: string) => void;
+  addScenario: (payload: { name: string; description?: string }) => void;
+  deleteScenario: (scenarioId: string) => void;
+  
+  // Node methods
+  addNode: (payload: { label: string; value: number; position?: Position }) => void;
+  deleteNode: (nodeId: string) => void;
+  updateNodePosition: (nodeId: string, position: Position) => void;
+  
+  // Edge methods
+  addEdge: (payload: { source: string; target: string; label?: string }) => void;
+  deleteEdge: (edgeId: string) => void;
+  
+  // Helper methods
+  getCurrentScenario: () => Scenario | null;
+  getActiveScenarioData: () => FlowData;
 }
 
 export type ReactFlowEdge = ReactFlowEdgeType<any>;
+export type ReactFlowNode = ReactFlowNodeType;
 
 export interface FlowData {
   nodes: ReactFlowNode[];
