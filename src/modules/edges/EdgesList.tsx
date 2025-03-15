@@ -1,17 +1,17 @@
-// components/features/edges/EdgesList.tsx
-import React from 'react';
-import { Link } from 'lucide-react';
-import { useAppStore } from '../../../store';
-import { useDialogState } from '../../../hooks/useDialogState';
-import { CardPanel, Dialog, ItemList } from '@/components/APPUI';
-import { Edge } from '@/types/app';
+
+import { useDialogState } from "@/hooks";
+import { useNodeStore } from "../nodes";
+import { useEdgeStore } from "./edgeStore";
+import { CardPanel, Dialog, ItemList } from "@/components/APPUI";
+import { Link } from "lucide-react";
+import { GraphEdge } from "../types";
+
 
 export const EdgesList: React.FC = () => {
-  // Używamy bezpośrednio stanu zamiast selektorów funkcyjnych
-  const edges = useAppStore(state => state.currentEdges);
-  const nodes = useAppStore(state => state.currentNodes);
-  const deleteEdge = useAppStore(state => state.deleteEdge);
-  const addEdge = useAppStore(state => state.addEdge);
+  const nodes = useNodeStore(state => state.getCurrentNodes());
+  const edges = useEdgeStore(state => state.getCurrentEdges());
+  const deleteEdge = useEdgeStore(state => state.deleteEdge);
+  const addEdge = useEdgeStore(state => state.addEdge);
   
   const { isOpen, formData, openDialog, handleChange, setIsOpen } = 
     useDialogState({ source: '', target: '', label: '' });
@@ -45,7 +45,7 @@ export const EdgesList: React.FC = () => {
           label: '' 
         });
       }}>
-        <ItemList<Edge> 
+        <ItemList<GraphEdge> 
           items={edges}
           selected=""
           onClick={() => {}}

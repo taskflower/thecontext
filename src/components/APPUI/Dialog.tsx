@@ -1,7 +1,7 @@
 // components/ui/Dialog.tsx
 import React, { ChangeEvent } from 'react';
 import { X } from 'lucide-react';
-import { DialogField, FormData } from '@/types/app';
+import { DialogField, FormData } from '@/modules/modules';
 
 interface DialogProps {
   title: string;

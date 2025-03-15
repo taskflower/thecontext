@@ -1,15 +1,16 @@
-// components/features/nodes/NodesList.tsx
 import React from 'react';
-import { useAppStore } from '../../../store';
 import { useDialogState } from '@/hooks';
+
+
+import { useNodeStore } from './nodeStore';
 import { CardPanel, Dialog, ItemList } from '@/components/APPUI';
-import { Node } from '@/types/app';
+import { GraphNode } from '../types';
 
 export const NodesList: React.FC = () => {
-  // Używamy bezpośrednio stanu zamiast selektorów funkcyjnych
-  const nodes = useAppStore(state => state.currentNodes);
-  const deleteNode = useAppStore(state => state.deleteNode);
-  const addNode = useAppStore(state => state.addNode);
+  // Use state directly instead of functional selectors
+  const nodes = useNodeStore(state => state.getCurrentNodes());
+  const deleteNode = useNodeStore(state => state.deleteNode);
+  const addNode = useNodeStore(state => state.addNode);
   
   const { isOpen, formData, openDialog, handleChange, setIsOpen } = useDialogState({ label: '', value: '' });
   
@@ -26,7 +27,7 @@ export const NodesList: React.FC = () => {
   return (
     <>
       <CardPanel title="Nodes" onAddClick={() => openDialog({ label: '', value: '' })}>
-        <ItemList<Node> 
+        <ItemList<GraphNode> 
           items={nodes}
           selected=""
           onClick={() => {}}

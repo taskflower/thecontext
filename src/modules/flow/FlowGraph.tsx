@@ -1,4 +1,3 @@
-// components/features/flow/FlowGraph.tsx
 import React, { useCallback, useEffect } from "react";
 import ReactFlow, {
   MiniMap,
@@ -10,18 +9,21 @@ import ReactFlow, {
   Connection,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import { useAppStore } from "../../../store";
+import { useEdgeStore } from "../edges/edgeStore";
+
 import { FlowPlayer } from "./FlowPlayer";
+import { useFlowStore } from "./flowStore";
+import { useNodeStore } from "../nodes";
+import { useWorkspaceStore } from "../workspaces";
+
 
 export const FlowGraph: React.FC = () => {
-  const getActiveScenarioData = useAppStore(
-    (state) => state.getActiveScenarioData
-  );
-  const addEdge = useAppStore((state) => state.addEdge);
-  const updateNodePosition = useAppStore((state) => state.updateNodePosition);
-  const stateVersion = useAppStore((state) => state.stateVersion);
-  const selectedWorkspace = useAppStore(state => state.selected.workspace);
-  const selectedScenario = useAppStore(state => state.selected.scenario);
+  const getActiveScenarioData = useFlowStore(state => state.getActiveScenarioData);
+  const addEdge = useEdgeStore(state => state.addEdge);
+  const updateNodePosition = useNodeStore(state => state.updateNodePosition);
+  const stateVersion = useWorkspaceStore(state => state.stateVersion);
+  const selectedWorkspace = useWorkspaceStore(state => state.selected.workspace);
+  const selectedScenario = useWorkspaceStore(state => state.selected.scenario);
   
   const { nodes: initialNodes, edges: initialEdges } = getActiveScenarioData();
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -54,7 +56,7 @@ export const FlowGraph: React.FC = () => {
   );
 
   return (
-    <div className="bg-white rounded-md shadow-sm p-0 h-[400px] relative">
+    <div className="bg-white rounded-md p-0 h-full relative">
       <ReactFlow
         nodes={nodes}
         edges={edges}

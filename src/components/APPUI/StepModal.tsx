@@ -1,10 +1,10 @@
 // components/ui/StepModal.tsx
 import React from 'react';
 import { X } from 'lucide-react';
-import { Node } from '@/types/app';
+import { GraphNode } from '@/modules/modules';
 
 interface StepModalProps {
-  steps: Node[];
+  steps: GraphNode[];
   currentStep: number;
   onNext: () => void;
   onPrev: () => void;

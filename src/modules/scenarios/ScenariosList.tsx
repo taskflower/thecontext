@@ -1,16 +1,16 @@
-// src/components/features/scenarios/ScenariosList.tsx
-import React from 'react';
-import { CardPanel, Dialog, ItemList } from '@/components/APPUI';
-import { useDialogState } from '@/hooks';
-import { useAppStore } from '@/store';
-import { Scenario } from '@/types/app';
+import { useDialogState } from "@/hooks";
+import { useScenarioStore } from ".";
+import { useWorkspaceStore } from "../workspaces";
+import { CardPanel, Dialog, ItemList } from "@/components/APPUI";
+import { Scenario } from "../types";
+
 
 export const ScenariosList: React.FC = () => {
-  const items = useAppStore(state => state.items);
-  const selected = useAppStore(state => state.selected);
-  const selectScenario = useAppStore(state => state.selectScenario);
-  const deleteScenario = useAppStore(state => state.deleteScenario);
-  const addScenario = useAppStore(state => state.addScenario);
+  const items = useWorkspaceStore(state => state.items);
+  const selected = useWorkspaceStore(state => state.selected);
+  const selectScenario = useScenarioStore(state => state.selectScenario);
+  const deleteScenario = useScenarioStore(state => state.deleteScenario);
+  const addScenario = useScenarioStore(state => state.addScenario);
   
   const workspace = items.find(w => w.id === selected.workspace);
   const scenarios = workspace?.children || [];
@@ -60,3 +60,5 @@ export const ScenariosList: React.FC = () => {
     </>
   );
 };
+
+

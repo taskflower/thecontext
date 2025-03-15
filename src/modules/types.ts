@@ -5,7 +5,7 @@ import { Node as ReactFlowNode, Edge as ReactFlowEdgeType } from 'reactflow';
 export enum ElementType {
   WORKSPACE = 'workspace',
   SCENARIO = 'scenario',
-  NODE = 'node'
+  GRAPH_NODE = 'node' // Changed ElementType.NODE to GRAPH_NODE
 }
 
 export type Position = {
@@ -24,15 +24,16 @@ export interface DialogField {
   options?: { value: string; label: string }[];
 }
 
-export interface Node {
+// Renamed Node to GraphNode to avoid conflicts with built-in Node type
+export interface GraphNode {
   id: string;
-  type: ElementType.NODE;
+  type: ElementType.GRAPH_NODE;
   label: string;
   value: number;
   position: Position;
 }
 
-export interface Edge {
+export interface GraphEdge {
   id: string;
   source: string;
   target: string;
@@ -44,8 +45,8 @@ export interface Scenario {
   type: ElementType.SCENARIO;
   name: string;
   description?: string;
-  children: Node[];
-  edges: Edge[];
+  children: GraphNode[]; 
+  edges: GraphEdge[]; 
 }
 
 export interface Workspace {

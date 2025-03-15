@@ -1,6 +1,6 @@
 // src/hooks/useDialogState.ts
 import { useState, ChangeEvent } from 'react';
-import { FormData } from '@/types/app';
+import { FormData } from '@/modules/modules';
 
 export const useDialogState = (initialState: FormData) => {
   const [isOpen, setIsOpen] = useState(false);

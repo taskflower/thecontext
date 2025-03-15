@@ -1,42 +1,37 @@
-// src/hooks/useFlowNavigation.ts
 import { useState, useCallback } from 'react';
-import { Node } from '@/types/app';
+import { Node } from '@/modules/modules';
 
 export const useFlowNavigation = () => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [steps, setSteps] = useState<Node[]>([]);
-
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  
   const startFlow = useCallback((path: Node[]) => {
-    if (path && path.length > 0) {
+    if (path.length > 0) {
       setSteps(path);
       setCurrentStepIndex(0);
       setIsPlaying(true);
     }
   }, []);
-
+  
   const nextStep = useCallback(() => {
-    if (currentStepIndex < steps.length - 1) {
-      setCurrentStepIndex(prev => prev + 1);
-    }
-  }, [currentStepIndex, steps.length]);
-
+    setCurrentStepIndex(prevIndex => Math.min(prevIndex + 1, steps.length - 1));
+  }, [steps.length]);
+  
   const prevStep = useCallback(() => {
-    if (currentStepIndex > 0) {
-      setCurrentStepIndex(prev => prev - 1);
-    }
-  }, [currentStepIndex]);
-
+    setCurrentStepIndex(prevIndex => Math.max(prevIndex - 1, 0));
+  }, []);
+  
   const stopFlow = useCallback(() => {
     setIsPlaying(false);
     setSteps([]);
     setCurrentStepIndex(0);
   }, []);
-
+  
   return {
     isPlaying,
-    currentStepIndex,
     steps,
+    currentStepIndex,
     startFlow,
     nextStep,
     prevStep,
