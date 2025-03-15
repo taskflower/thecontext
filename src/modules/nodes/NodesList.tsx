@@ -16,13 +16,13 @@ export const NodesList: React.FC = () => {
   const scenario = getCurrentScenario();
   const nodes = scenario?.children || [];
   
-  const { isOpen, formData, openDialog, handleChange, setIsOpen } = useDialogState({ label: '', value: '' });
+  const { isOpen, formData, openDialog, handleChange, setIsOpen } = useDialogState({ label: '', assistant: '' });
   
   const handleAdd = () => {
-    if (formData.label?.toString().trim() && formData.value?.toString().trim()) {
+    if (formData.label?.toString().trim()) {
       addNode({
         label: String(formData.label),
-        value: Number(formData.value)
+        assistant: String(formData.assistant || '')
       });
       setIsOpen(false);
     }
@@ -30,7 +30,7 @@ export const NodesList: React.FC = () => {
   
   return (
     <>
-      <CardPanel title="Nodes" onAddClick={() => openDialog({ label: '', value: '' })}>
+      <CardPanel title="Nodes" onAddClick={() => openDialog({ label: '', assistant: '' })}>
         <ItemList<GraphNode> 
           items={nodes}
           selected={selected.node || ""}
@@ -40,7 +40,7 @@ export const NodesList: React.FC = () => {
             <div className="flex items-center p-2">
               <div className="font-medium">{item.label}</div>
               <span className="p-2 ml-auto inline-flex items-center px-1 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-700 text-[10px] h-4">
-                {item.value}
+                {item.assistant}
               </span>
             </div>
           )}
@@ -54,7 +54,7 @@ export const NodesList: React.FC = () => {
           onAdd={handleAdd}
           fields={[
             { name: 'label', placeholder: 'Node name' },
-            { name: 'value', placeholder: 'Value', type: 'number' }
+            { name: 'assistant', placeholder: 'Assistant message' }
           ]}
           formData={formData}
           onChange={handleChange}

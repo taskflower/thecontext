@@ -15,6 +15,7 @@ export const useAppStore = create<AppState>()(
     items: initialState.items,
     selected: initialState.selected,
     stateVersion: 0,
+    conversation: [],
 
     // Workspace actions
     selectWorkspace: (workspaceId) =>
@@ -153,7 +154,7 @@ export const useAppStore = create<AppState>()(
           id: `node-${Date.now()}`,
           type: ElementType.GRAPH_NODE,
           label: payload.label,
-          value: payload.value,
+          assistant: payload.assistant,
           position: payload.position || { x: 100, y: 100 },
         };
 
@@ -224,6 +225,22 @@ export const useAppStore = create<AppState>()(
 
         if (node) {
           node.position = position;
+          state.stateVersion++;
+        }
+      }),
+      
+    setUserMessage: (nodeId, message) =>
+      set((state) => {
+        const workspace = state.items.find(
+          (w) => w.id === state.selected.workspace
+        );
+        const scenario = workspace?.children?.find(
+          (s) => s.id === state.selected.scenario
+        );
+        const node = scenario?.children?.find((n) => n.id === nodeId);
+
+        if (node) {
+          node.userMessage = message;
           state.stateVersion++;
         }
       }),
@@ -304,6 +321,22 @@ export const useAppStore = create<AppState>()(
         state.selected.edge = undefined;
         state.stateVersion++;
       }),
+      
+    // Conversation methods
+    addToConversation: (payload) =>
+      set((state) => {
+        state.conversation.push({
+          role: payload.role,
+          message: payload.message
+        });
+        state.stateVersion++;
+      }),
+      
+    clearConversation: () =>
+      set((state) => {
+        state.conversation = [];
+        state.stateVersion++;
+      }),
 
     // Helper methods
     getCurrentScenario: () => {
@@ -333,7 +366,7 @@ export const useAppStore = create<AppState>()(
       const nodes =
         scenario.children?.map((node) => ({
           id: node.id,
-          data: { label: `${node.label} (${node.value})` },
+          data: { label: `${node.label}\n${node.assistant ? '(Assistant)' : ''}` },
           position: node.position,
           selected: node.id === state.selected.node,
         })) || [];

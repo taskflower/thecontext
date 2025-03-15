@@ -1,65 +1,80 @@
-// components/ui/StepModal.tsx
-import React from 'react';
-import { X } from 'lucide-react';
-import { GraphNode } from '@/modules/modules';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// This is a proposed update to your existing StepModal component in @/components/APPUI
+// You may need to adapt it to fit your actual component structure
 
-interface StepModalProps {
-  steps: GraphNode[];
+import React from "react";
+
+interface StepModalProps<T> {
+  steps: T[];
   currentStep: number;
   onNext: () => void;
   onPrev: () => void;
   onClose: () => void;
+  renderStepContent?: (step: T) => React.ReactNode;
 }
 
-export const StepModal: React.FC<StepModalProps> = ({ 
-  steps, currentStep, onNext, onPrev, onClose 
-}) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-    <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
-      <div className="flex items-center justify-between p-4 border-b">
-        <h3 className="text-lg font-medium">
-          Step {currentStep + 1} of {steps.length}: {steps[currentStep].label}
-        </h3>
-        <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100">
-          <X className="h-5 w-5 text-gray-500" />
-        </button>
-      </div>
-      <div className="p-6">
-        <div className="mb-4">
-          <div className="font-medium mb-2">Node: {steps[currentStep].label}</div>
-          <div className="text-sm mb-2">Value: {steps[currentStep].value}</div>
+export const StepModal = <T extends Record<string, any>>({
+  steps,
+  currentStep,
+  onNext,
+  onPrev,
+  onClose,
+  renderStepContent,
+}: StepModalProps<T>) => {
+  const step = steps[currentStep];
+  // Force re-render on step change
+  React.useEffect(() => {}, [steps, currentStep]);
+  const isLastStep = currentStep === steps.length - 1;
+  const isFirstStep = currentStep === 0;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full">
+        <div className="p-4 border-b flex justify-between items-center">
+          <h2 className="text-xl font-bold">{step.label || `Step ${currentStep + 1}`}</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            ✕
+          </button>
         </div>
         
-        <div className="flex justify-between">
-          <button 
+        <div className="p-6">
+          {renderStepContent ? (
+            renderStepContent(step)
+          ) : (
+            <div>
+              <p>{step.label || `Step ${currentStep + 1}`}</p>
+              {step.assistant && (
+                <div className="mt-2 p-3 bg-blue-50 rounded">
+                  {step.assistant}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+        
+        <div className="p-4 border-t flex justify-between">
+          <button
             onClick={onPrev}
-            disabled={currentStep === 0}
-            className={`px-3 py-1 rounded-md text-sm ${
-              currentStep === 0 
-                ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
-                : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
+            disabled={isFirstStep}
+            className={`px-4 py-2 rounded ${
+              isFirstStep ? "bg-gray-300 cursor-not-allowed" : "bg-gray-500 hover:bg-gray-600 text-white"
             }`}
           >
             Previous
           </button>
           
-          {currentStep < steps.length - 1 ? (
-            <button 
-              onClick={onNext}
-              className="px-3 py-1 rounded-md text-sm bg-blue-500 text-white hover:bg-blue-600"
-            >
-              Next
-            </button>
-          ) : (
-            <button 
-              onClick={onClose}
-              className="px-3 py-1 rounded-md text-sm bg-green-500 text-white hover:bg-green-600"
-            >
-              Finish
-            </button>
-          )}
+          <button
+            onClick={onNext}
+            className={`px-4 py-2 rounded ${
+              isLastStep 
+                ? "bg-green-500 hover:bg-green-600 text-white" 
+                : "bg-blue-500 hover:bg-blue-600 text-white"
+            }`}
+          >
+            {isLastStep ? "Finish" : "Next"}
+          </button>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};

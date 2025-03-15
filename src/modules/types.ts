@@ -27,8 +27,9 @@ export interface GraphNode {
   id: string;
   type: ElementType.GRAPH_NODE;
   label: string;
-  value: number;
+  assistant: string; // Changed from value: number
   position: Position;
+  userMessage?: string; // Optional user message
 }
 
 export interface GraphEdge {
@@ -54,6 +55,11 @@ export interface Workspace {
   children: Scenario[];
 }
 
+export interface Conversation {
+  role: string;
+  message: string;
+}
+
 export interface AppState {
   items: Workspace[];
   selected: {
@@ -63,6 +69,7 @@ export interface AppState {
     edge?: string;
   };
   stateVersion: number;
+  conversation: Conversation[];
   
   // Workspace methods
   selectWorkspace: (workspaceId: string) => void;
@@ -75,20 +82,25 @@ export interface AppState {
   deleteScenario: (scenarioId: string) => void;
   
   // Node methods
-  addNode: (payload: { label: string; value: number; position?: Position }) => void;
+  addNode: (payload: { label: string; assistant: string; position?: Position }) => void;
   deleteNode: (nodeId: string) => void;
   updateNodePosition: (nodeId: string, position: Position) => void;
-  selectNode: (nodeId: string) => void;  // New method
+  selectNode: (nodeId: string) => void;
+  setUserMessage: (nodeId: string, message: string) => void;
   
   // Edge methods
   addEdge: (payload: { source: string; target: string; label?: string }) => void;
   deleteEdge: (edgeId: string) => void;
-  selectEdge: (edgeId: string) => void;  // New method
+  selectEdge: (edgeId: string) => void;
+  
+  // Conversation methods
+  addToConversation: (payload: { role: string; message: string }) => void;
+  clearConversation: () => void;
   
   // Helper methods
   getCurrentScenario: () => Scenario | null;
   getActiveScenarioData: () => FlowData;
-  clearSelection: () => void;  // New method
+  clearSelection: () => void;
 }
 
 export type ReactFlowEdge = ReactFlowEdgeType<any>;
