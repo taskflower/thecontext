@@ -61,7 +61,7 @@ export const EdgesList: React.FC = () => {
           onClick={handleEdgeClick}
           onDelete={deleteEdge}
           renderItem={(item) => (
-            <div className={`font-medium flex items-center ${item.id === selected.edge ? 'text-blue-500' : ''}`}>
+            <div className={`p-2 font-medium flex items-center ${item.id === selected.edge ? 'text-blue-500' : ''}`}>
               {getNodeLabel(item.source)}
               <Link className={`h-3 w-3 mx-1 ${item.id === selected.edge ? 'text-blue-500' : ''}`} />
               {getNodeLabel(item.target)}

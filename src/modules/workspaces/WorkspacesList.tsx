@@ -32,7 +32,7 @@ export const WorkspacesList: React.FC = () => {
           selected={selected.workspace}
           onClick={selectWorkspace}
           onDelete={deleteWorkspace}
-          renderItem={(item) => <div className="font-medium">{item.title}</div>}
+          renderItem={(item) => <div className="font-medium p-2">{item.title}</div>}
         />
       </CardPanel>
       

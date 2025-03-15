@@ -37,9 +37,9 @@ export const NodesList: React.FC = () => {
           onClick={selectNode}
           onDelete={deleteNode}
           renderItem={(item) => (
-            <div className="flex items-center">
+            <div className="flex items-center p-2">
               <div className="font-medium">{item.label}</div>
-              <span className="ml-auto inline-flex items-center px-1 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-700 text-[10px] h-4">
+              <span className="p-2 ml-auto inline-flex items-center px-1 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-700 text-[10px] h-4">
                 {item.value}
               </span>
             </div>

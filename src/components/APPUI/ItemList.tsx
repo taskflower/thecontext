@@ -26,7 +26,7 @@ export const ItemList = memo(
           {items.map((item) => (
             <div
               key={item.id}
-              className={`flex items-center px-2 py-1.5 rounded-sm text-xs cursor-pointer ${
+              className={`flex items-center rounded-sm text-xs cursor-pointer ${
                 item.id === selected
                   ? "bg-blue-100 text-blue-600"
                   : "hover:bg-gray-100"
@@ -36,7 +36,7 @@ export const ItemList = memo(
                 {renderItem(item)}
               </div>
               <button
-                className="p-1 opacity-70 hover:opacity-100 hover:text-red-500"
+                className="opacity-70 hover:opacity-100 hover:text-red-500"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete(item.id);

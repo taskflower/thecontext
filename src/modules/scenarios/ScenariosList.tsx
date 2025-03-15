@@ -37,10 +37,10 @@ export const ScenariosList: React.FC = () => {
           onClick={selectScenario}
           onDelete={deleteScenario}
           renderItem={(item) => (
-            <>
+            <div className="p-2">
               <div className="font-medium">{item.name}</div>
               {item.description && <div className="text-xs opacity-70 truncate">{item.description}</div>}
-            </>
+            </div>
           )}
         />
       </CardPanel>
