@@ -1,0 +1,90 @@
+// components/features/edges/EdgesList.tsx
+import React from 'react';
+import { Link } from 'lucide-react';
+import { useAppStore } from '../../../store';
+import { useDialogState } from '../../../hooks/useDialogState';
+import { CardPanel, Dialog, ItemList } from '@/components/APPUI';
+import { Edge } from '@/types/app';
+
+export const EdgesList: React.FC = () => {
+  // Używamy bezpośrednio stanu zamiast selektorów funkcyjnych
+  const edges = useAppStore(state => state.currentEdges);
+  const nodes = useAppStore(state => state.currentNodes);
+  const deleteEdge = useAppStore(state => state.deleteEdge);
+  const addEdge = useAppStore(state => state.addEdge);
+  
+  const { isOpen, formData, openDialog, handleChange, setIsOpen } = 
+    useDialogState({ source: '', target: '', label: '' });
+  
+  const handleAdd = () => {
+    if (formData.source && formData.target) {
+      addEdge({
+        source: String(formData.source),
+        target: String(formData.target),
+        label: formData.label ? String(formData.label) : undefined
+      });
+      setIsOpen(false);
+    }
+  };
+  
+  const getNodeLabel = (nodeId: string) => {
+    const node = nodes.find(n => n.id === nodeId);
+    return node ? node.label : nodeId;
+  };
+  
+  return (
+    <>
+      <CardPanel title="Edges" onAddClick={() => {
+        if (nodes.length < 2) {
+          alert("Need at least 2 nodes to create an edge");
+          return;
+        }
+        openDialog({ 
+          source: nodes[0]?.id || '', 
+          target: nodes[1]?.id || '', 
+          label: '' 
+        });
+      }}>
+        <ItemList<Edge> 
+          items={edges}
+          selected=""
+          onClick={() => {}}
+          onDelete={deleteEdge}
+          renderItem={(item) => (
+            <div className="font-medium flex items-center">
+              {getNodeLabel(item.source)}
+              <Link className="h-3 w-3 mx-1" />
+              {getNodeLabel(item.target)}
+              {item.label && <span className="ml-1 text-gray-500">({item.label})</span>}
+            </div>
+          )}
+        />
+      </CardPanel>
+      
+      {isOpen && (
+        <Dialog 
+          title="New Edge"
+          onClose={() => setIsOpen(false)}
+          onAdd={handleAdd}
+          fields={[
+            { 
+              name: 'source', 
+              placeholder: 'Source node',
+              type: 'select',
+              options: nodes.map(n => ({ value: n.id, label: n.label }))
+            },
+            { 
+              name: 'target', 
+              placeholder: 'Target node',
+              type: 'select',
+              options: nodes.map(n => ({ value: n.id, label: n.label }))
+            },
+            { name: 'label', placeholder: 'Edge label (optional)' }
+          ]}
+          formData={formData}
+          onChange={handleChange}
+        />
+      )}
+    </>
+  );
+};
