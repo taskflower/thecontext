@@ -59,6 +59,8 @@ export interface AppState {
   selected: {
     workspace: string;
     scenario: string;
+    node?: string;
+    edge?: string;
   };
   stateVersion: number;
   
@@ -76,14 +78,17 @@ export interface AppState {
   addNode: (payload: { label: string; value: number; position?: Position }) => void;
   deleteNode: (nodeId: string) => void;
   updateNodePosition: (nodeId: string, position: Position) => void;
+  selectNode: (nodeId: string) => void;  // New method
   
   // Edge methods
   addEdge: (payload: { source: string; target: string; label?: string }) => void;
   deleteEdge: (edgeId: string) => void;
+  selectEdge: (edgeId: string) => void;  // New method
   
   // Helper methods
   getCurrentScenario: () => Scenario | null;
   getActiveScenarioData: () => FlowData;
+  clearSelection: () => void;  // New method
 }
 
 export type ReactFlowEdge = ReactFlowEdgeType<any>;

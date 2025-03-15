@@ -27,6 +27,11 @@ export const useAppStore = create<AppState>()(
         } else {
           state.selected.scenario = "";
         }
+        
+        // Clear node/edge selection
+        state.selected.node = undefined;
+        state.selected.edge = undefined;
+        
         state.stateVersion++;
       }),
 
@@ -41,6 +46,11 @@ export const useAppStore = create<AppState>()(
         state.items.push(newWorkspace);
         state.selected.workspace = newWorkspace.id;
         state.selected.scenario = "";
+        
+        // Clear node/edge selection
+        state.selected.node = undefined;
+        state.selected.edge = undefined;
+        
         state.stateVersion++;
       }),
 
@@ -58,6 +68,10 @@ export const useAppStore = create<AppState>()(
               state.selected.workspace = "";
               state.selected.scenario = "";
             }
+            
+            // Clear node/edge selection
+            state.selected.node = undefined;
+            state.selected.edge = undefined;
           }
           state.stateVersion++;
         }
@@ -67,6 +81,11 @@ export const useAppStore = create<AppState>()(
     selectScenario: (scenarioId) =>
       set((state) => {
         state.selected.scenario = scenarioId;
+        
+        // Clear node/edge selection
+        state.selected.node = undefined;
+        state.selected.edge = undefined;
+        
         state.stateVersion++;
       }),
 
@@ -90,6 +109,11 @@ export const useAppStore = create<AppState>()(
           }
           workspace.children.push(newScenario);
           state.selected.scenario = newScenario.id;
+          
+          // Clear node/edge selection
+          state.selected.node = undefined;
+          state.selected.edge = undefined;
+          
           state.stateVersion++;
         }
       }),
@@ -112,6 +136,10 @@ export const useAppStore = create<AppState>()(
               } else {
                 state.selected.scenario = "";
               }
+              
+              // Clear node/edge selection
+              state.selected.node = undefined;
+              state.selected.edge = undefined;
             }
             state.stateVersion++;
           }
@@ -141,6 +169,11 @@ export const useAppStore = create<AppState>()(
             scenario.children = [];
           }
           scenario.children.push(newNode);
+          
+          // Select the newly created node
+          state.selected.node = newNode.id;
+          state.selected.edge = undefined;
+          
           state.stateVersion++;
         }
       }),
@@ -168,7 +201,12 @@ export const useAppStore = create<AppState>()(
                   edge.source !== nodeId && edge.target !== nodeId
               );
             }
-
+            
+            // Clear selection if the deleted node was selected
+            if (state.selected.node === nodeId) {
+              state.selected.node = undefined;
+            }
+            
             state.stateVersion++;
           }
         }
@@ -188,6 +226,14 @@ export const useAppStore = create<AppState>()(
           node.position = position;
           state.stateVersion++;
         }
+      }),
+      
+    // Selection methods
+    selectNode: (nodeId) =>
+      set((state) => {
+        state.selected.node = nodeId;
+        state.selected.edge = undefined; // Clear edge selection
+        state.stateVersion++;
       }),
 
     // Edge actions
@@ -212,6 +258,11 @@ export const useAppStore = create<AppState>()(
             scenario.edges = [];
           }
           scenario.edges.push(newEdge);
+          
+          // Select the newly created edge
+          state.selected.edge = newEdge.id;
+          state.selected.node = undefined;
+          
           state.stateVersion++;
         }
       }),
@@ -229,9 +280,29 @@ export const useAppStore = create<AppState>()(
           const index = scenario.edges.findIndex((e) => e.id === edgeId);
           if (index !== -1) {
             scenario.edges.splice(index, 1);
+            
+            // Clear selection if the deleted edge was selected
+            if (state.selected.edge === edgeId) {
+              state.selected.edge = undefined;
+            }
+            
             state.stateVersion++;
           }
         }
+      }),
+      
+    selectEdge: (edgeId) =>
+      set((state) => {
+        state.selected.edge = edgeId;
+        state.selected.node = undefined; // Clear node selection
+        state.stateVersion++;
+      }),
+      
+    clearSelection: () =>
+      set((state) => {
+        state.selected.node = undefined;
+        state.selected.edge = undefined;
+        state.stateVersion++;
       }),
 
     // Helper methods
@@ -264,6 +335,7 @@ export const useAppStore = create<AppState>()(
           id: node.id,
           data: { label: `${node.label} (${node.value})` },
           position: node.position,
+          selected: node.id === state.selected.node,
         })) || [];
 
       const edges =
@@ -272,6 +344,8 @@ export const useAppStore = create<AppState>()(
           source: edge.source,
           target: edge.target,
           label: edge.label,
+          selected: edge.id === state.selected.edge,
+          style: edge.id === state.selected.edge ? { stroke: '#3b82f6', strokeWidth: 3 } : {},
         })) || [];
 
       return { nodes, edges };

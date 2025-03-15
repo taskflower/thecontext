@@ -8,6 +8,8 @@ export const NodesList: React.FC = () => {
   const getCurrentScenario = useAppStore(state => state.getCurrentScenario);
   const deleteNode = useAppStore(state => state.deleteNode);
   const addNode = useAppStore(state => state.addNode);
+  const selectNode = useAppStore(state => state.selectNode);
+  const selected = useAppStore(state => state.selected);
   // Force component to update when state changes
   useAppStore(state => state.stateVersion);
   
@@ -31,8 +33,8 @@ export const NodesList: React.FC = () => {
       <CardPanel title="Nodes" onAddClick={() => openDialog({ label: '', value: '' })}>
         <ItemList<GraphNode> 
           items={nodes}
-          selected=""
-          onClick={() => {}}
+          selected={selected.node || ""}
+          onClick={selectNode}
           onDelete={deleteNode}
           renderItem={(item) => (
             <div className="flex items-center">
