@@ -9,6 +9,8 @@ export const EdgesList: React.FC = () => {
   const getCurrentScenario = useAppStore(state => state.getCurrentScenario);
   const deleteEdge = useAppStore(state => state.deleteEdge);
   const addEdge = useAppStore(state => state.addEdge);
+  const selectEdge = useAppStore(state => state.selectEdge);
+  const selected = useAppStore(state => state.selected);
   // Force component to update when state changes
   useAppStore(state => state.stateVersion);
   
@@ -35,6 +37,11 @@ export const EdgesList: React.FC = () => {
     return node ? node.label : nodeId;
   };
   
+  const handleEdgeClick = (edgeId: string) => {
+    // Call the selectEdge method to update store
+    selectEdge(edgeId);
+  };
+  
   return (
     <>
       <CardPanel title="Edges" onAddClick={() => {
@@ -50,15 +57,15 @@ export const EdgesList: React.FC = () => {
       }}>
         <ItemList<GraphEdge> 
           items={edges}
-          selected=""
-          onClick={() => {}}
+          selected={selected.edge || ""}
+          onClick={handleEdgeClick}
           onDelete={deleteEdge}
           renderItem={(item) => (
-            <div className="font-medium flex items-center">
+            <div className={`font-medium flex items-center ${item.id === selected.edge ? 'text-blue-500' : ''}`}>
               {getNodeLabel(item.source)}
-              <Link className="h-3 w-3 mx-1" />
+              <Link className={`h-3 w-3 mx-1 ${item.id === selected.edge ? 'text-blue-500' : ''}`} />
               {getNodeLabel(item.target)}
-              {item.label && <span className="ml-1 text-gray-500">({item.label})</span>}
+              {item.label && <span className={`ml-1 ${item.id === selected.edge ? 'text-blue-400' : 'text-gray-500'}`}>({item.label})</span>}
             </div>
           )}
         />

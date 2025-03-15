@@ -346,6 +346,8 @@ export const useAppStore = create<AppState>()(
           label: edge.label,
           selected: edge.id === state.selected.edge,
           style: edge.id === state.selected.edge ? { stroke: '#3b82f6', strokeWidth: 3 } : {},
+          className: edge.id === state.selected.edge ? 'selected-edge' : '',
+          animated: edge.id === state.selected.edge,
         })) || [];
 
       return { nodes, edges };
