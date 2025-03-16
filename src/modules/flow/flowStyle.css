@@ -5,21 +5,6 @@
   /* Add any global flow container styles here */
 }
 
-/* Style the background dots based on theme */
-.flow-background {
-  --dot-color: #aaa;
-}
-
-/* Apply different dot color in dark mode */
-.dark .flow-background {
-  --dot-color: #555;
-}
-
-/* Make the background use the custom dot color */
-.react-flow__background-pattern circle {
-  fill: var(--dot-color);
-}
-
 /* You can add additional ReactFlow element styling here */
 .react-flow__node {
   background: var(--card);
@@ -27,8 +12,20 @@
   border-color: var(--border);
 }
 
+/* Adjust dark mode node styling */
+.dark .react-flow__node {
+  background: hsl(0 0% 7%); /* Darker than the default --card value */
+  opacity: 0.9; /* Reduce brightness */
+  color: hsla(0, 0%, 80%, 0.85); /* Dimmer text in dark mode */
+}
+
 .react-flow__edge-path {
   stroke: var(--muted-foreground);
+}
+
+/* Adjust edge path in dark mode */
+.dark .react-flow__edge-path {
+  stroke: hsla(0, 0%, 45%, 0.65); /* Much less bright in dark mode */
 }
 
 .react-flow__controls {
@@ -42,7 +39,100 @@
   border-color: var(--border);
 }
 
+/* Adjust controls in dark mode */
+.dark .react-flow__controls {
+  background: hsl(0 0% 7%);
+}
+
+.dark .react-flow__controls-button {
+  background: hsl(0 0% 10%);
+  opacity: 0.85;
+}
+
 .react-flow__minimap {
   background-color: var(--card);
   border-color: var(--border);
+}
+
+/* Adjust minimap in dark mode - much darker and less bright */
+.dark .react-flow__minimap {
+  background-color: hsl(0 0% 5%);
+  opacity: 0.75;
+}
+
+/* Make minimap nodes and edges darker in dark mode */
+.dark .react-flow__minimap-node {
+  fill: hsl(0 0% 20%);
+  stroke: hsl(0 0% 30%);
+}
+
+.dark .react-flow__minimap-mask {
+  fill: hsl(0 0% 10%);
+}
+
+.dark .react-flow__minimap-connector {
+  stroke: hsl(0 0% 30%);
+}
+
+/* Additional dark mode adjustments */
+.dark .react-flow__handle {
+  background-color: hsla(0, 0%, 45%, 0.6); /* Much less bright handles */
+}
+
+/* Adjust text elements in dark mode */
+.dark .react-flow__node-default .react-flow__node-text,
+.dark .react-flow__node-input .react-flow__node-text,
+.dark .react-flow__node-output .react-flow__node-text,
+.dark .react-flow__node-group .react-flow__node-text,
+.dark .react-flow__node label,
+.dark .react-flow__node p,
+.dark .react-flow__node div {
+  color: hsla(0, 0%, 70%, 0.8); /* Dimmer text for all node content */
+  text-shadow: none; /* Remove any potential text shadow */
+}
+
+.dark .react-flow__selection {
+  background-color: hsla(210, 70%, 30%, 0.3); /* Softer selection highlight */
+}
+
+/* Adjust all text in ReactFlow for dark mode */
+.dark .react-flow {
+  color: hsla(0, 0%, 70%, 0.75);
+}
+
+/* Reduce all line brightness in dark mode */
+.dark .react-flow__edge,
+.dark .react-flow__connection,
+.dark .react-flow__edge-interaction {
+  opacity: 0.65;
+}
+
+/* Reduce all interactive element brightness */
+.dark .react-flow__node:hover,
+.dark .react-flow__handle:hover {
+  filter: brightness(0.85);
+}
+
+/* Create a custom background overlay for dark mode */
+.dark .react-flow {
+  position: relative;
+}
+
+.dark .react-flow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background-image: radial-gradient(#555500 1px, transparent 1px);
+  background-size: 20px 20px;
+  z-index: 5;
+  opacity: 0.3;
+}
+
+/* Hide the original dots in dark mode */
+.dark .react-flow__background {
+  opacity: 0 !important;
 }

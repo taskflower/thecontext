@@ -8,7 +8,7 @@ import { PluginManager } from "./modules/plugin/components/PuginManager";
 import { ThemeProvider } from "./components/ui/theme-provider";
 
 const App: React.FC = () => (
-  <ThemeProvider defaultTheme="light">
+  <ThemeProvider defaultTheme="dark">
     <div className="min-h-screen bg-background">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="md:col-span-1 grid gap-3">
@@ -18,7 +18,7 @@ const App: React.FC = () => (
           <EdgesList />
           <PluginManager />
         </div>
-        <div className="md:col-span-3">
+        <div className="md:col-span-3"> 
           <FlowGraph />
         </div>
       </div>
