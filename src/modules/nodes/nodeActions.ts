@@ -1,0 +1,108 @@
+// src/modules/nodes/nodeActions.ts
+import { ElementType, GraphNode } from "../types";
+
+export const createNodeActions = (set, get) => ({
+  addNode: (payload) =>
+    set((state) => {
+      const newNode: GraphNode = {
+        id: `node-${Date.now()}`,
+        type: ElementType.GRAPH_NODE,
+        label: payload.label,
+        assistant: payload.assistant,
+        position: payload.position || { x: 100, y: 100 },
+      };
+
+      const workspace = state.items.find(
+        (w) => w.id === state.selected.workspace
+      );
+      const scenario = workspace?.children?.find(
+        (s) => s.id === state.selected.scenario
+      );
+
+      if (scenario) {
+        if (!scenario.children) {
+          scenario.children = [];
+        }
+        scenario.children.push(newNode);
+        
+        // Select the newly created node
+        state.selected.node = newNode.id;
+        state.selected.edge = undefined;
+        
+        state.stateVersion++;
+      }
+    }),
+
+  deleteNode: (nodeId) =>
+    set((state) => {
+      const workspace = state.items.find(
+        (w) => w.id === state.selected.workspace
+      );
+      const scenario = workspace?.children?.find(
+        (s) => s.id === state.selected.scenario
+      );
+
+      if (scenario?.children) {
+        const index = scenario.children.findIndex((n) => n.id === nodeId);
+        if (index !== -1) {
+          scenario.children.splice(index, 1);
+
+          if (!scenario.edges) {
+            scenario.edges = [];
+          } else {
+            // Remove related edges
+            scenario.edges = scenario.edges.filter(
+              (edge) =>
+                edge.source !== nodeId && edge.target !== nodeId
+            );
+          }
+          
+          // Clear selection if the deleted node was selected
+          if (state.selected.node === nodeId) {
+            state.selected.node = undefined;
+          }
+          
+          state.stateVersion++;
+        }
+      }
+    }),
+
+  updateNodePosition: (nodeId, position) =>
+    set((state) => {
+      const workspace = state.items.find(
+        (w) => w.id === state.selected.workspace
+      );
+      const scenario = workspace?.children?.find(
+        (s) => s.id === state.selected.scenario
+      );
+      const node = scenario?.children?.find((n) => n.id === nodeId);
+
+      if (node) {
+        node.position = position;
+        state.stateVersion++;
+      }
+    }),
+    
+  setUserMessage: (nodeId, message) =>
+    set((state) => {
+      const workspace = state.items.find(
+        (w) => w.id === state.selected.workspace
+      );
+      const scenario = workspace?.children?.find(
+        (s) => s.id === state.selected.scenario
+      );
+      const node = scenario?.children?.find((n) => n.id === nodeId);
+
+      if (node) {
+        node.userMessage = message;
+        state.stateVersion++;
+      }
+    }),
+    
+  selectNode: (nodeId) =>
+    set((state) => {
+      state.selected.node = nodeId;
+      state.selected.edge = undefined; // Clear edge selection
+      state.stateVersion++;
+    }),
+});
