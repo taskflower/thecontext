@@ -28,7 +28,6 @@ import { ConversationPanel } from "./modules/conversation/ConversationPanel";
 import { PluginsPanel } from "./modules/plugin/components/PluginsPanel";
 import { DialogProvider } from "./components/APPUI/DialogProvider";
 
-
 const App: React.FC = () => {
   const [showLeftPanel, setShowLeftPanel] = useState(true);
   const [showRightPanel, setShowRightPanel] = useState(true);
@@ -37,13 +36,17 @@ const App: React.FC = () => {
   const [showPluginsPanel, setShowPluginsPanel] = useState(false);
   const [rightPanelTab, setRightPanelTab] = useState("nodes");
 
-  // Get current scenario name for display in header
+  // Pobierz aktualny scenariusz oraz informacje o wybranym workspace
   const getCurrentScenario = useAppStore((state) => state.getCurrentScenario);
   const selected = useAppStore((state) => state.selected);
   const stateVersion = useAppStore((state) => state.stateVersion);
   const scenario = getCurrentScenario();
+  const activeWorkspace = useAppStore((state) =>
+    state.items.find((w) => w.id === selected.workspace)
+  );
+  const activeScenario = scenario;
 
-  // Auto-open right panel and select correct tab when node or edge is selected
+  // Automatycznie otwieraj panel właściwości, gdy wybrany jest węzeł lub krawędź
   useEffect(() => {
     if (selected.node) {
       setShowRightPanel(true);
@@ -56,21 +59,21 @@ const App: React.FC = () => {
 
   return (
     <ThemeProvider defaultTheme="dark">
-      <DialogProvider> {/* Add DialogProvider here */}
+      <DialogProvider>
         <div className="min-h-screen bg-background flex flex-col overflow-hidden">
-          {/* Header Bar with slim toolbar */}
+          {/* Header */}
           <header className="border-b py-2 px-4 flex items-center justify-between bg-card">
             <div className="flex items-center gap-3">
               <h1 className="text-sm font-bold flex items-center">
                 <Focus className="mr-2 transform rotate-6" />
-                <span className="">Deep Context Studio</span>
+                <span>Deep Context Studio</span>
               </h1>
               <Separator orientation="vertical" className="h-6" />
               <div className="text-sm text-muted-foreground">
-                {scenario?.name || "No scenario selected"}
+                {activeWorkspace?.title} /{" "}
+                {activeScenario?.name || "No scenario selected"}
               </div>
             </div>
-
             <div className="flex items-center gap-2">
               <Button
                 variant={showLeftPanel ? "secondary" : "ghost"}
@@ -95,10 +98,9 @@ const App: React.FC = () => {
             </div>
           </header>
 
-          {/* Rest of your component remains the same */}
-          {/* Main Content with Flexible Panels */}
+          {/* Główna zawartość */}
           <div className="flex-1 flex overflow-hidden">
-            {/* Left Panel - Collapsible */}
+            {/* Lewy panel */}
             {showLeftPanel && (
               <aside className="w-64 border-r bg-sidebar-background flex flex-col overflow-hidden">
                 <Tabs defaultValue="workspace" className="flex-1 flex flex-col">
@@ -125,7 +127,6 @@ const App: React.FC = () => {
                       <Settings className="h-4 w-4" />
                     </TabsTrigger>
                   </TabsList>
-
                   <div className="flex-1 overflow-auto">
                     <TabsContent value="workspace" className="m-0 p-0 h-full">
                       <WorkspacesList />
@@ -143,13 +144,14 @@ const App: React.FC = () => {
               </aside>
             )}
 
-            {/* Main Content Area */}
+            {/* Główna strefa robocza */}
             <main className="flex-1 flex flex-col overflow-hidden">
-              {/* Flow Graph Area - Adjusted height based on bottom panels */}
               <div
                 className={`
                   ${
-                    showContextPanel || showConversationPanel || showPluginsPanel
+                    showContextPanel ||
+                    showConversationPanel ||
+                    showPluginsPanel
                       ? "h-[45%]"
                       : "flex-1"
                   } 
@@ -159,7 +161,7 @@ const App: React.FC = () => {
                 <FlowGraph />
               </div>
 
-              {/* Bottom Toolbar */}
+              {/* Dolny pasek narzędzi */}
               <div className="border-t bg-card py-1 px-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Button
@@ -201,20 +203,21 @@ const App: React.FC = () => {
                   </Button>
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  {scenario?.children?.length || 0} nodes ·{" "}
-                  {scenario?.edges?.length || 0} edges
+                  {activeScenario?.children?.length || 0} nodes ·{" "}
+                  {activeScenario?.edges?.length || 0} edges
                 </div>
               </div>
 
-              {/* Bottom Panels Container */}
+              {/* Dolne panele */}
               <div
                 className={`${
-                  !showContextPanel && !showConversationPanel && !showPluginsPanel
+                  !showContextPanel &&
+                  !showConversationPanel &&
+                  !showPluginsPanel
                     ? "hidden"
                     : "flex"
                 } border-t h-[55%]`}
               >
-                {/* Context Panel (if visible) */}
                 {showContextPanel && (
                   <div
                     className={`${
@@ -244,7 +247,6 @@ const App: React.FC = () => {
                   </div>
                 )}
 
-                {/* Conversation Panel (if visible) */}
                 {showConversationPanel && (
                   <div
                     className={`${showPluginsPanel ? "border-r" : ""} 
@@ -276,7 +278,6 @@ const App: React.FC = () => {
                   </div>
                 )}
 
-                {/* Plugins Panel (if visible) */}
                 {showPluginsPanel && (
                   <div
                     className={`
@@ -308,10 +309,14 @@ const App: React.FC = () => {
               </div>
             </main>
 
-            {/* Right Panel - Properties (collapsible) */}
+            {/* Prawy panel właściwości */}
             {showRightPanel && (
               <aside className="w-72 border-l bg-sidebar-background flex flex-col overflow-hidden">
-                <Tabs value={rightPanelTab} onValueChange={setRightPanelTab} className="flex-1 flex flex-col">
+                <Tabs
+                  value={rightPanelTab}
+                  onValueChange={setRightPanelTab}
+                  className="flex-1 flex flex-col"
+                >
                   <TabsList className="grid grid-cols-2 px-2 py-1 h-auto rounded-none border-b">
                     <TabsTrigger value="nodes" className="rounded-none">
                       Nodes
@@ -320,7 +325,6 @@ const App: React.FC = () => {
                       Edges
                     </TabsTrigger>
                   </TabsList>
-
                   <div className="flex-1 overflow-auto">
                     <TabsContent value="nodes" className="m-0 p-0 h-full">
                       <NodesList />
