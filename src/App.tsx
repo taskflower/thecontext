@@ -5,23 +5,25 @@ import { NodesList } from "./modules/nodes";
 import { ScenariosList } from "./modules/scenarios";
 import { WorkspacesList } from "./modules/workspaces";
 import { PluginManager } from "./modules/plugin/components/PuginManager";
-
+import { ThemeProvider } from "./components/ui/theme-provider";
 
 const App: React.FC = () => (
-  <div className="min-h-screen bg-gray-50">
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div className="md:col-span-1 grid gap-3">
-        <WorkspacesList />
-        <ScenariosList />
-        <NodesList />
-        <EdgesList />
-        <PluginManager />
-      </div>
-      <div className="md:col-span-3  bg-red-200">
-        <FlowGraph />
+  <ThemeProvider defaultTheme="light">
+    <div className="min-h-screen bg-background">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="md:col-span-1 grid gap-3">
+          <WorkspacesList />
+          <ScenariosList />
+          <NodesList />
+          <EdgesList />
+          <PluginManager />
+        </div>
+        <div className="md:col-span-3">
+          <FlowGraph />
+        </div>
       </div>
     </div>
-  </div>
+  </ThemeProvider>
 );
 
 export default App;

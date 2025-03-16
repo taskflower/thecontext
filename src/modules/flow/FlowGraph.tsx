@@ -81,7 +81,7 @@ export const FlowGraph: React.FC = () => {
   );
   
   return (
-    <div className="bg-white rounded-md p-0 h-full relative">
+    <div className="bg-card rounded-md p-0 h-full relative">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -93,10 +93,11 @@ export const FlowGraph: React.FC = () => {
         onEdgeClick={onEdgeClick}
         onPaneClick={onPaneClick}
         fitView
+        className="flow-container"
       >
         <Controls />
         <MiniMap />
-        <Background color="#aaa" gap={16} />
+        <Background gap={16} size={1} className="flow-background" />
       </ReactFlow>
       
       <FlowPlayer />

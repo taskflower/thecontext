@@ -1,27 +1,48 @@
-/* Add this to your global CSS or create a new CSS file and import it */
+/* flowStyle.css */
 
-/* Selected node styling */
-.react-flow__node.selected {
-    box-shadow: 0 0 0 1px #3b82f6;
-  }
-  
-  /* Selected edge styling */
-  .react-flow__edge.selected-edge .react-flow__edge-path {
-    stroke: #3b82f6;
-    stroke-width: 1;
-  }
-  
-  /* Animation for selected edges */
-  .react-flow__edge.selected-edge {
-    z-index: 10;
-  }
-  
-  /* Hover styles for better interaction */
-  .react-flow__node:hover {
-    box-shadow: 0 0 0 1px #60a5fa;
-  }
-  
-  .react-flow__edge:hover .react-flow__edge-path {
-    stroke-width: 1;
-    cursor: pointer;
-  }
+/* Custom styles for ReactFlow */
+.flow-container {
+  /* Add any global flow container styles here */
+}
+
+/* Style the background dots based on theme */
+.flow-background {
+  --dot-color: #aaa;
+}
+
+/* Apply different dot color in dark mode */
+.dark .flow-background {
+  --dot-color: #555;
+}
+
+/* Make the background use the custom dot color */
+.react-flow__background-pattern circle {
+  fill: var(--dot-color);
+}
+
+/* You can add additional ReactFlow element styling here */
+.react-flow__node {
+  background: var(--card);
+  color: var(--card-foreground);
+  border-color: var(--border);
+}
+
+.react-flow__edge-path {
+  stroke: var(--muted-foreground);
+}
+
+.react-flow__controls {
+  background: var(--card);
+  border-color: var(--border);
+}
+
+.react-flow__controls-button {
+  background: var(--card);
+  color: var(--card-foreground);
+  border-color: var(--border);
+}
+
+.react-flow__minimap {
+  background-color: var(--card);
+  border-color: var(--border);
+}
