@@ -1,8 +1,9 @@
 // src/modules/scenarios/scenarioActions.ts
 import { ElementType, Scenario } from "../types";
+import { SetFn } from "../typesActioss";
 
-export const createScenarioActions = (set, get) => ({
-  selectScenario: (scenarioId) =>
+export const createScenarioActions = (set: SetFn) => ({
+  selectScenario: (scenarioId: string) =>
     set((state) => {
       state.selected.scenario = scenarioId;
       
@@ -13,7 +14,7 @@ export const createScenarioActions = (set, get) => ({
       state.stateVersion++;
     }),
 
-  addScenario: (payload) =>
+  addScenario: (payload: { name: string; description?: string }) =>
     set((state) => {
       const newScenario: Scenario = {
         id: `scenario-${Date.now()}`,
@@ -42,7 +43,7 @@ export const createScenarioActions = (set, get) => ({
       }
     }),
 
-  deleteScenario: (scenarioId) =>
+  deleteScenario: (scenarioId: string) =>
     set((state) => {
       const workspace = state.items.find(
         (w) => w.id === state.selected.workspace

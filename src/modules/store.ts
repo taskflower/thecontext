@@ -11,18 +11,19 @@ import { createConversationActions } from "./conversation/conversationActions";
 import { createSelectionActions } from "./selection/selectionActions";
 import { createHelperActions } from "./helper/helperActions";
 
+// Create the store with properly typed parameters
 export const useAppStore = create<AppState>()(
   immer((set, get) => ({
     items: initialState.items,
     selected: initialState.selected,
     stateVersion: 0,
-    conversation: [],
+    conversation: initialState.conversation,
 
     // Combine all actions
-    ...createWorkspaceActions(set, get),
-    ...createScenarioActions(set, get),
-    ...createNodeActions(set, get),
-    ...createEdgeActions(set, get),
+    ...createWorkspaceActions(set),
+    ...createScenarioActions(set),
+    ...createNodeActions(set),
+    ...createEdgeActions(set),
     ...createConversationActions(set),
     ...createSelectionActions(set),
     ...createHelperActions(get),

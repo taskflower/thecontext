@@ -1,9 +1,13 @@
 // src/modules/workspaces/workspaceActions.ts
-import { ElementType, Workspace } from "../types";
+import { ElementType, Workspace, AppState } from "../types";
+import { Draft } from "immer";
 
-export const createWorkspaceActions = (set, get) => ({
-  selectWorkspace: (workspaceId) =>
-    set((state) => {
+// The set function from immer middleware takes a function that modifies the draft state
+type SetFn = (fn: (state: Draft<AppState>) => void) => void;
+
+export const createWorkspaceActions = (set: SetFn) => ({
+  selectWorkspace: (workspaceId: string) =>
+    set((state: Draft<AppState>) => {
       state.selected.workspace = workspaceId;
       const workspace = state.items.find((w) => w.id === workspaceId);
 
@@ -20,8 +24,8 @@ export const createWorkspaceActions = (set, get) => ({
       state.stateVersion++;
     }),
 
-  addWorkspace: (payload) =>
-    set((state) => {
+  addWorkspace: (payload: { title: string }) =>
+    set((state: Draft<AppState>) => {
       const newWorkspace: Workspace = {
         id: `workspace-${Date.now()}`,
         type: ElementType.WORKSPACE,
@@ -39,8 +43,8 @@ export const createWorkspaceActions = (set, get) => ({
       state.stateVersion++;
     }),
 
-  deleteWorkspace: (workspaceId) =>
-    set((state) => {
+  deleteWorkspace: (workspaceId: string) =>
+    set((state: Draft<AppState>) => {
       const index = state.items.findIndex((w) => w.id === workspaceId);
       if (index !== -1) {
         state.items.splice(index, 1);

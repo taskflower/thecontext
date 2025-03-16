@@ -1,8 +1,9 @@
 // src/modules/edges/edgeActions.ts
 import { GraphEdge } from "../types";
+import { SetFn } from "../typesActioss";
 
-export const createEdgeActions = (set, get) => ({
-  addEdge: (payload) =>
+export const createEdgeActions = (set: SetFn) => ({
+  addEdge: (payload: { source: string; target: string; label?: string }) =>
     set((state) => {
       const newEdge: GraphEdge = {
         id: `edge-${Date.now()}`,
@@ -23,16 +24,16 @@ export const createEdgeActions = (set, get) => ({
           scenario.edges = [];
         }
         scenario.edges.push(newEdge);
-        
+
         // Select the newly created edge
         state.selected.edge = newEdge.id;
         state.selected.node = undefined;
-        
+
         state.stateVersion++;
       }
     }),
 
-  deleteEdge: (edgeId) =>
+  deleteEdge: (edgeId: string) =>
     set((state) => {
       const workspace = state.items.find(
         (w) => w.id === state.selected.workspace
@@ -45,18 +46,18 @@ export const createEdgeActions = (set, get) => ({
         const index = scenario.edges.findIndex((e) => e.id === edgeId);
         if (index !== -1) {
           scenario.edges.splice(index, 1);
-          
+
           // Clear selection if the deleted edge was selected
           if (state.selected.edge === edgeId) {
             state.selected.edge = undefined;
           }
-          
+
           state.stateVersion++;
         }
       }
     }),
-    
-  selectEdge: (edgeId) =>
+
+  selectEdge: (edgeId: string) =>
     set((state) => {
       state.selected.edge = edgeId;
       state.selected.node = undefined; // Clear node selection

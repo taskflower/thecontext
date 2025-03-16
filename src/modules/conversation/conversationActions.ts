@@ -1,17 +1,21 @@
 // src/modules/conversation/conversationActions.ts
-export const createConversationActions = (set) => ({
-    addToConversation: (payload) =>
-      set((state) => {
-        state.conversation.push({
-          role: payload.role,
-          message: payload.message
-        });
-        state.stateVersion++;
-      }),
-      
-    clearConversation: () =>
-      set((state) => {
-        state.conversation = [];
-        state.stateVersion++;
-      }),
-  });
+
+import { SetFn } from "../typesActioss";
+
+
+export const createConversationActions = (set: SetFn) => ({
+  addToConversation: (payload: { role: string; message: string }) =>
+    set((state) => {
+      state.conversation.push({
+        role: payload.role,
+        message: payload.message
+      });
+      state.stateVersion++;
+    }),
+    
+  clearConversation: () =>
+    set((state) => {
+      state.conversation = [];
+      state.stateVersion++;
+    }),
+});

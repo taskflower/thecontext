@@ -1,8 +1,10 @@
 // src/modules/nodes/nodeActions.ts
-import { ElementType, GraphNode } from "../types";
+import { ElementType, GraphNode, Position } from "../types";
+import { SetFn } from "../typesActioss";
 
-export const createNodeActions = (set, get) => ({
-  addNode: (payload) =>
+
+export const createNodeActions = (set: SetFn) => ({
+  addNode: (payload: { label: string; assistant: string; position?: Position }) =>
     set((state) => {
       const newNode: GraphNode = {
         id: `node-${Date.now()}`,
@@ -33,7 +35,7 @@ export const createNodeActions = (set, get) => ({
       }
     }),
 
-  deleteNode: (nodeId) =>
+  deleteNode: (nodeId: string) =>
     set((state) => {
       const workspace = state.items.find(
         (w) => w.id === state.selected.workspace
@@ -67,7 +69,7 @@ export const createNodeActions = (set, get) => ({
       }
     }),
 
-  updateNodePosition: (nodeId, position) =>
+  updateNodePosition: (nodeId: string, position: Position) =>
     set((state) => {
       const workspace = state.items.find(
         (w) => w.id === state.selected.workspace
@@ -83,7 +85,7 @@ export const createNodeActions = (set, get) => ({
       }
     }),
     
-  setUserMessage: (nodeId, message) =>
+  setUserMessage: (nodeId: string, message: string) =>
     set((state) => {
       const workspace = state.items.find(
         (w) => w.id === state.selected.workspace
@@ -99,7 +101,7 @@ export const createNodeActions = (set, get) => ({
       }
     }),
     
-  selectNode: (nodeId) =>
+  selectNode: (nodeId: string) =>
     set((state) => {
       state.selected.node = nodeId;
       state.selected.edge = undefined; // Clear edge selection
