@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Edge as ReactFlowEdgeType, Node as ReactFlowNodeType } from 'reactflow';
+import { ContextState } from "./context/types";
 
 export enum ElementType {
   WORKSPACE = 'workspace',
   SCENARIO = 'scenario',
-  GRAPH_NODE = 'node'
+  GRAPH_NODE = 'node',
+  CONTEXT = 'context'
 }
 
 export type Position = {
@@ -31,6 +33,7 @@ export interface GraphNode {
   position: Position;
   userMessage?: string; 
   plugins?: string[];
+  contextIds?: string[]; // IDs of contexts associated with this node
 }
 
 export interface GraphEdge {
@@ -61,7 +64,8 @@ export interface Conversation {
   message: string;
 }
 
-export interface AppState {
+// AppState rozszerzone o ContextState
+export interface AppState extends ContextState {
   updateNodePlugins: any;
   items: Workspace[];
   selected: {
@@ -112,4 +116,3 @@ export interface FlowData {
   nodes: ReactFlowNode[];
   edges: ReactFlowEdge[];
 }
-

@@ -1,4 +1,4 @@
-// src/modules/store.ts
+// src/modules/store.ts - Zaktualizowany store z akcjami kontekstu
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { AppState } from "./types";
@@ -10,16 +10,21 @@ import { createEdgeActions } from "./edges/edgeActions";
 import { createConversationActions } from "./conversation/conversationActions";
 import { createSelectionActions } from "./selection/selectionActions";
 import { createHelperActions } from "./helper/helperActions";
+import { createContextActions } from "./context/contextActions"; // Dodaj ten import
 
-// Create the store with properly typed parameters
+// Stwórz store z odpowiednio typowanymi parametrami
 export const useAppStore = create<AppState>()(
   immer((set, get) => ({
     items: initialState.items,
     selected: initialState.selected,
     stateVersion: 0,
     conversation: initialState.conversation,
+    
+    // Dodaj tablicę kontekstów do state
+    contexts: initialState.contexts || [],
+    selectedContext: undefined,
 
-    // Combine all actions
+    // Połącz wszystkie akcje
     ...createWorkspaceActions(set),
     ...createScenarioActions(set),
     ...createNodeActions(set),
@@ -27,5 +32,6 @@ export const useAppStore = create<AppState>()(
     ...createConversationActions(set),
     ...createSelectionActions(set),
     ...createHelperActions(get),
+    ...createContextActions(set), // Dodaj akcje kontekstu
   }))
 );

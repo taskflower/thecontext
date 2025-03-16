@@ -9,6 +9,7 @@ import { FlowGraph } from "@/modules/flow";
 import { PluginManager } from "@/modules/plugin/components/PuginManager";
 import { ScrollArea } from "./ui/scroll-area";
 import { Card, CardContent } from "./ui/card";
+import { ContextsList } from "@/modules/context";
 
 
 
@@ -53,6 +54,7 @@ export const AppLayout: React.FC = () => {
               </div>
             </div>
           </ScrollArea>
+          <ContextsList /> 
         </div>
       </div>
       
