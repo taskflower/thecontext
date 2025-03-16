@@ -16,12 +16,12 @@ export const MessageProcessor: React.FC<MessageProcessorProps> = ({
   nodePlugins
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [originalMessage] = useState(message);
+  const [originalMessage] = useState(message || '');
   const { processMessage, hasActivePlugins, processMessageWithSpecificPlugins } = useMessageProcessor();
   
   // Automatyczne przetwarzanie wiadomości, gdy komponent jest montowany
   useEffect(() => {
-    if (autoProcess) {
+    if (autoProcess && originalMessage) {
       handleProcess();
     } else {
       // Jeśli nie ma aktywnych pluginów lub automatycznego przetwarzania, po prostu przekaż oryginalną wiadomość
@@ -31,7 +31,7 @@ export const MessageProcessor: React.FC<MessageProcessorProps> = ({
   
   // Funkcja do ręcznego przetwarzania
   const handleProcess = async () => {
-    if (isProcessing) return;
+    if (isProcessing || !originalMessage) return;
     
     setIsProcessing(true);
     try {
@@ -57,7 +57,7 @@ export const MessageProcessor: React.FC<MessageProcessorProps> = ({
     <div className="message-processor">
       <button 
         onClick={handleProcess}
-        disabled={isProcessing || (!hasActivePlugins && (!nodePlugins || nodePlugins.length === 0))}
+        disabled={isProcessing || !originalMessage || (!hasActivePlugins && (!nodePlugins || nodePlugins.length === 0))}
         className="px-2 py-1 bg-blue-500 text-white rounded-md text-sm disabled:bg-gray-300"
       >
         {isProcessing ? 'Przetwarzanie...' : 'Przetwórz z wtyczkami'}

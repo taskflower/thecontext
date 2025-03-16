@@ -2,4 +2,4 @@
 
 export { ContextsList } from "./ContextsList";
 export { ContextEditor } from "./ContextEditor";
-export * from "./types";
+export * from "../types";

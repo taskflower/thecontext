@@ -1,161 +1,66 @@
 // src/modules/context/contextActions.ts
-import { ElementType } from "../types";
-import { Context, ContextItem, ContextValueType } from "./types";
+import { ContextItem, AppState } from "../types";
 import { SetFn } from "../typesActioss";
 
 export const createContextActions = (set: SetFn) => ({
-  selectContext: (contextId: string) =>
+  addContextItem: (workspaceId: string, item: ContextItem) =>
     set((state) => {
-      state.selectedContext = contextId;
-      state.stateVersion++;
-    }),
-
-  addContext: (payload: { name: string; workspaceId: string }) =>
-    set((state) => {
-      const timestamp = Date.now();
-      const newContext: Context = {
-        id: `context-${timestamp}`,
-        type: ElementType.CONTEXT,
-        name: payload.name,
-        workspaceId: payload.workspaceId,
-        items: [],
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      };
-
-      if (!state.contexts) {
-        state.contexts = [];
+      const workspace = state.items.find(w => w.id === workspaceId);
+      if (!workspace) return;
+      
+      if (!workspace.contextItems) {
+        workspace.contextItems = [];
       }
-      
-      state.contexts.push(newContext);
-      state.selectedContext = newContext.id;
-      state.stateVersion++;
-    }),
-
-  updateContext: (contextId: string, payload: { name?: string; items?: ContextItem[] }) =>
-    set((state) => {
-      if (!state.contexts) return;
-      
-      const context = state.contexts.find(c => c.id === contextId);
-      if (!context) return;
-      
-      // Aktualizacja właściwości, jeśli zostały podane
-      if (payload.name !== undefined) context.name = payload.name;
-      if (payload.items !== undefined) context.items = payload.items;
-      
-      // Aktualizacja timestamp
-      context.updatedAt = Date.now();
-      
-      state.stateVersion++;
-    }),
-
-  deleteContext: (contextId: string) =>
-    set((state) => {
-      if (!state.contexts) return;
-      
-      const index = state.contexts.findIndex(c => c.id === contextId);
-      if (index === -1) return;
-      
-      state.contexts.splice(index, 1);
-      
-      // Wyczyść zaznaczenie, jeśli usunięty kontekst był zaznaczony
-      if (state.selectedContext === contextId) {
-        state.selectedContext = state.contexts.length > 0 ? state.contexts[0].id : undefined;
-      }
-      
-      state.stateVersion++;
-    }),
-        
-  // Dodawanie elementu kontekstu
-  addContextItem: (contextId: string, item: ContextItem) =>
-    set((state) => {
-      if (!state.contexts) return;
-      
-      const context = state.contexts.find(c => c.id === contextId);
-      if (!context) return;
       
       // Sprawdź, czy klucz już istnieje i zastąp go
-      const existingIndex = context.items.findIndex(i => i.key === item.key);
+      const existingIndex = workspace.contextItems.findIndex(i => i.key === item.key);
       if (existingIndex !== -1) {
-        context.items[existingIndex] = item;
+        workspace.contextItems[existingIndex] = item;
       } else {
-        context.items.push(item);
+        workspace.contextItems.push(item);
       }
       
-      context.updatedAt = Date.now();
+      workspace.updatedAt = Date.now();
       state.stateVersion++;
     }),
     
-  // Aktualizacja elementu kontekstu
-  updateContextItem: (contextId: string, key: string, value: string, valueType: ContextValueType) =>
+  updateContextItem: (workspaceId: string, key: string, value: string, valueType: 'text' | 'json') =>
     set((state) => {
-      if (!state.contexts) return;
+      const workspace = state.items.find(w => w.id === workspaceId);
+      if (!workspace || !workspace.contextItems) return;
       
-      const context = state.contexts.find(c => c.id === contextId);
-      if (!context) return;
-      
-      const item = context.items.find(i => i.key === key);
+      const item = workspace.contextItems.find(i => i.key === key);
       if (item) {
         item.value = value;
         item.valueType = valueType;
-        context.updatedAt = Date.now();
+        workspace.updatedAt = Date.now();
         state.stateVersion++;
       }
     }),
     
-  // Usuwanie elementu kontekstu
-  deleteContextItem: (contextId: string, key: string) =>
+  deleteContextItem: (workspaceId: string, key: string) =>
     set((state) => {
-      if (!state.contexts) return;
+      const workspace = state.items.find(w => w.id === workspaceId);
+      if (!workspace || !workspace.contextItems) return;
       
-      const context = state.contexts.find(c => c.id === contextId);
-      if (!context) return;
-      
-      const index = context.items.findIndex(i => i.key === key);
+      const index = workspace.contextItems.findIndex(i => i.key === key);
       if (index !== -1) {
-        context.items.splice(index, 1);
-        context.updatedAt = Date.now();
+        workspace.contextItems.splice(index, 1);
+        workspace.updatedAt = Date.now();
         state.stateVersion++;
       }
     }),
     
-  // Pobieranie kontekstu dla workspace
-  getContextByWorkspace: (workspaceId: string) => (state) => {
-    if (!state.contexts) return undefined;
-    return state.contexts.find(c => c.workspaceId === workspaceId);
+  getContextValue: (workspaceId: string, key: string) => (state: AppState) => {
+    const workspace = state.items.find(w => w.id === workspaceId);
+    if (!workspace || !workspace.contextItems) return null;
+    
+    const item = workspace.contextItems.find(i => i.key === key);
+    return item ? item.value : null;
   },
   
-  // Pobieranie wartości kontekstu po kluczu
-  getContextValueByKey: (workspaceId: string, key: string) => (state) => {
-    if (!state.contexts) return undefined;
-    
-    const context = state.contexts.find(c => c.workspaceId === workspaceId);
-    if (!context) return undefined;
-    
-    return context.items.find(i => i.key === key);
-  },
-  
-  // Filtrowanie na podstawie kontekstu (do przyszłego użycia)
-  filterByContext: (workspaceId: string, filterKey: string, filterValue: string) => (state) => {
-    if (!state.contexts) return false;
-    
-    const context = state.contexts.find(c => c.workspaceId === workspaceId);
-    if (!context) return false;
-    
-    const item = context.items.find(i => i.key === filterKey);
-    if (!item) return false;
-    
-    if (item.valueType === 'json') {
-      try {
-        const jsonValue = JSON.parse(item.value);
-        // Sprawdź, czy wartość jest zawarta w JSON (uproszczona implementacja)
-        return JSON.stringify(jsonValue).includes(filterValue);
-      } catch (e) {
-        return false;
-      }
-    } else {
-      // Dla wartości tekstowych sprawdź, czy zawiera szukaną wartość
-      return item.value.includes(filterValue);
-    }
+  getContextItems: (workspaceId: string) => (state: AppState) => {
+    const workspace = state.items.find(w => w.id === workspaceId);
+    return workspace && workspace.contextItems ? workspace.contextItems : [];
   },
 });

@@ -10,12 +10,16 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useWorkspaceContext } from "../context/hooks/useContext";
 
 export const FlowPlayer: React.FC = () => {
   const getCurrentScenario = useAppStore((state) => state.getCurrentScenario);
   const addToConversation = useAppStore((state) => state.addToConversation);
   const clearConversation = useAppStore((state) => state.clearConversation);
   const setUserMessage = useAppStore((state) => state.setUserMessage);
+
+  // Użyj hooka kontekstu
+  const context = useWorkspaceContext();
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentNodeIndex, setCurrentNodeIndex] = useState(0);
@@ -48,14 +52,16 @@ export const FlowPlayer: React.FC = () => {
     setFlowPath(currentPath => {
       const currentNode = currentPath[currentNodeIndex];
       
-      // Add assistant message to conversation
       if (currentNode && currentNode.assistant) {
-        // Use processed message if available, otherwise original
-        const messageToAdd = processedMessage || currentNode.assistant;
+        // Zastąp tokeny kontekstu w wiadomości asystenta
+        const messageWithContext = context.processTemplate(currentNode.assistant);
+        
+        // Użyj przetworzonej wiadomości lub wiadomości z kontekstem
+        const finalMessage = processedMessage || messageWithContext;
         
         addToConversation({
           role: "assistant",
-          message: messageToAdd
+          message: finalMessage
         });
       }
       
@@ -75,7 +81,7 @@ export const FlowPlayer: React.FC = () => {
     
     // Move to the next node
     setCurrentNodeIndex(prev => Math.min(prev + 1, flowPath.length - 1));
-  }, [currentNodeIndex, flowPath.length, processedMessage, addToConversation]);
+  }, [currentNodeIndex, flowPath.length, processedMessage, addToConversation, context]);
 
   const handlePrev = useCallback(() => {
     // We don't remove from conversation history when going back
@@ -152,14 +158,14 @@ export const FlowPlayer: React.FC = () => {
                   
                   {/* Hidden message processor */}
                   <MessageProcessor 
-                    message={step.assistant}
+                    message={context.processTemplate(step.assistant)}
                     onProcessed={setProcessedMessage}
                     autoProcess={true}
                     nodePlugins={step.plugins}
                   />
                   
                   <div className="text-sm whitespace-pre-line">
-                    {processedMessage || step.assistant}
+                    {processedMessage || context.processTemplate(step.assistant)}
                   </div>
                 </div>
               </Card>

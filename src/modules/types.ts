@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// src/modules/types.ts
 import { Edge as ReactFlowEdgeType, Node as ReactFlowNodeType } from 'reactflow';
-import { ContextState } from "./context/types";
 
 export enum ElementType {
   WORKSPACE = 'workspace',
   SCENARIO = 'scenario',
   GRAPH_NODE = 'node',
-  CONTEXT = 'context'
+  CONTEXT = 'context'  
 }
 
 export type Position = {
@@ -25,6 +25,12 @@ export interface DialogField {
   options?: { value: string; label: string }[];
 }
 
+export interface ContextItem {
+  key: string;
+  value: string;
+  valueType: 'text' | 'json';
+}
+
 export interface GraphNode {
   id: string;
   type: ElementType.GRAPH_NODE;
@@ -33,7 +39,6 @@ export interface GraphNode {
   position: Position;
   userMessage?: string; 
   plugins?: string[];
-  contextIds?: string[]; // IDs of contexts associated with this node
 }
 
 export interface GraphEdge {
@@ -57,6 +62,9 @@ export interface Workspace {
   type: ElementType.WORKSPACE;
   title: string;
   children: Scenario[];
+  contextItems: ContextItem[]; // Kontekst bezpośrednio w workspace
+  createdAt?: number;
+  updatedAt?: number;
 }
 
 export interface Conversation {
@@ -64,9 +72,7 @@ export interface Conversation {
   message: string;
 }
 
-// AppState rozszerzone o ContextState
-export interface AppState extends ContextState {
-  updateNodePlugins: any;
+export interface AppState {
   items: Workspace[];
   selected: {
     workspace: string;
@@ -93,6 +99,7 @@ export interface AppState extends ContextState {
   updateNodePosition: (nodeId: string, position: Position) => void;
   selectNode: (nodeId: string) => void;
   setUserMessage: (nodeId: string, message: string) => void;
+  updateNodePlugins: (nodeId: string, plugins: string[]) => void;
   
   // Edge methods
   addEdge: (payload: { source: string; target: string; label?: string }) => void;
@@ -102,6 +109,13 @@ export interface AppState extends ContextState {
   // Conversation methods
   addToConversation: (payload: { role: string; message: string }) => void;
   clearConversation: () => void;
+  
+  // Context methods
+  addContextItem: (workspaceId: string, item: ContextItem) => void;
+  updateContextItem: (workspaceId: string, key: string, value: string, valueType: 'text' | 'json') => void;
+  deleteContextItem: (workspaceId: string, key: string) => void;
+  getContextValue: (workspaceId: string, key: string) => (state: any) => string | null;
+  getContextItems: (workspaceId: string) => (state: any) => ContextItem[];
   
   // Helper methods
   getCurrentScenario: () => Scenario | null;
