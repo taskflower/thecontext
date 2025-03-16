@@ -1,11 +1,11 @@
-// src/modules/workspaces/WorkspacesList.tsx
+// src/modules/workspaces/WorkspacesList.tsx (Refactored)
 import React from "react";
-import { useDialogState } from "@/hooks";
 import { useAppStore } from '../store';
-import { Dialog, ItemList } from "@/components/APPUI";
+import { ItemList } from "@/components/APPUI";
 import { Workspace } from "../types";
 import { FolderOpen, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useDialogManager } from '@/hooks/useDialogManager';
 
 export const WorkspacesList: React.FC = () => {
   const items = useAppStore(state => state.items);
@@ -16,15 +16,24 @@ export const WorkspacesList: React.FC = () => {
   // Force component to update when state changes
   useAppStore(state => state.stateVersion);
   
-  const { isOpen, formData, openDialog, handleChange, setIsOpen } = useDialogState({ title: '' });
+  // Use the new dialog manager hook
+  const { createDialog } = useDialogManager();
   
-  const handleAdd = () => {
-    if (formData.title?.toString().trim()) {
-      addWorkspace({
-        title: String(formData.title)
-      });
-      setIsOpen(false);
-    }
+  const handleAddWorkspace = () => {
+    createDialog(
+      "New Workspace",
+      [{ name: 'title', placeholder: 'Workspace name' }],
+      (data) => {
+        if (data.title?.toString().trim()) {
+          addWorkspace({
+            title: String(data.title)
+          });
+        }
+      },
+      {
+        confirmText: "Add"
+      }
+    );
   };
   
   return (
@@ -34,7 +43,7 @@ export const WorkspacesList: React.FC = () => {
         <Button 
           variant="ghost" 
           size="icon" 
-          onClick={() => openDialog({ title: '' })} 
+          onClick={handleAddWorkspace} 
           className="h-7 w-7 rounded-full hover:bg-muted"
         >
           <Plus className="h-4 w-4" />
@@ -56,17 +65,6 @@ export const WorkspacesList: React.FC = () => {
           height="h-full"
         />
       </div>
-      
-      {isOpen && (
-        <Dialog 
-          title="New Workspace"
-          onClose={() => setIsOpen(false)}
-          onAdd={handleAdd}
-          fields={[{ name: 'title', placeholder: 'Workspace name' }]}
-          formData={formData}
-          onChange={handleChange}
-        />
-      )}
     </div>
   );
 };

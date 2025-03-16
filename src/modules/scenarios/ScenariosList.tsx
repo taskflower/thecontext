@@ -1,11 +1,11 @@
-// src/modules/scenarios/ScenariosList.tsx
+// src/modules/scenarios/ScenariosList.tsx (Refactored)
 import React from "react";
-import { useDialogState } from "@/hooks";
 import { useAppStore } from '../store';
-import { Dialog, ItemList } from "@/components/APPUI";
+import { ItemList } from "@/components/APPUI";
 import { Scenario } from "../types";
 import { FileText, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useDialogManager } from '@/hooks/useDialogManager';
 
 export const ScenariosList: React.FC = () => {
   const items = useAppStore(state => state.items);
@@ -19,16 +19,28 @@ export const ScenariosList: React.FC = () => {
   const workspace = items.find(w => w.id === selected.workspace);
   const scenarios = workspace?.children || [];
   
-  const { isOpen, formData, openDialog, handleChange, setIsOpen } = useDialogState({ name: '', description: '' });
+  // Use the new dialog manager hook
+  const { createDialog } = useDialogManager();
   
-  const handleAdd = () => {
-    if (formData.name?.toString().trim()) {
-      addScenario({
-        name: String(formData.name),
-        description: formData.description ? String(formData.description) : undefined
-      });
-      setIsOpen(false);
-    }
+  const handleAddScenario = () => {
+    createDialog(
+      "New Scenario",
+      [
+        { name: 'name', placeholder: 'Scenario name' },
+        { name: 'description', placeholder: 'Description' }
+      ],
+      (data) => {
+        if (data.name?.toString().trim()) {
+          addScenario({
+            name: String(data.name),
+            description: data.description ? String(data.description) : undefined
+          });
+        }
+      },
+      {
+        confirmText: "Add"
+      }
+    );
   };
   
   return (
@@ -38,7 +50,7 @@ export const ScenariosList: React.FC = () => {
         <Button 
           variant="ghost" 
           size="icon" 
-          onClick={() => openDialog({ name: '', description: '' })} 
+          onClick={handleAddScenario} 
           className="h-7 w-7 rounded-full hover:bg-muted"
         >
           <Plus className="h-4 w-4" />
@@ -67,20 +79,6 @@ export const ScenariosList: React.FC = () => {
           height="h-full"
         />
       </div>
-      
-      {isOpen && (
-        <Dialog 
-          title="New Scenario"
-          onClose={() => setIsOpen(false)}
-          onAdd={handleAdd}
-          fields={[
-            { name: 'name', placeholder: 'Scenario name' },
-            { name: 'description', placeholder: 'Description' }
-          ]}
-          formData={formData}
-          onChange={handleChange}
-        />
-      )}
     </div>
   );
-};
+};  

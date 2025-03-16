@@ -1,3 +1,4 @@
+// src/modules/flow/FlowPlayer.tsx
 import React, { useCallback, useState, useEffect } from "react";
 import { Play } from "lucide-react";
 import { useAppStore } from "../store";
@@ -18,7 +19,7 @@ export const FlowPlayer: React.FC = () => {
   const clearConversation = useAppStore((state) => state.clearConversation);
   const setUserMessage = useAppStore((state) => state.setUserMessage);
 
-  // Użyj hooka kontekstu
+  // Use context hook
   const context = useWorkspaceContext();
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -53,10 +54,10 @@ export const FlowPlayer: React.FC = () => {
       const currentNode = currentPath[currentNodeIndex];
       
       if (currentNode && currentNode.assistant) {
-        // Zastąp tokeny kontekstu w wiadomości asystenta
+        // Replace context tokens in assistant message
         const messageWithContext = context.processTemplate(currentNode.assistant);
         
-        // Użyj przetworzonej wiadomości lub wiadomości z kontekstem
+        // Use processed message or message with context
         const finalMessage = processedMessage || messageWithContext;
         
         addToConversation({
@@ -142,6 +143,7 @@ export const FlowPlayer: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-semibold">Assistant</h3>
                     
+                    {/* Wyświetlanie pluginów, ale bez przycisku X */}
                     {step.plugins && step.plugins.length > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {step.plugins.map(pluginId => {

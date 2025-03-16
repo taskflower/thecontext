@@ -1,13 +1,13 @@
-// src/modules/nodes/NodesList.tsx
+// src/modules/nodes/NodesList.tsx (Refactored)
 import React, { useState } from 'react';
-import { useDialogState } from '@/hooks';
 import { useAppStore } from '../store';
-import { Dialog, ItemList } from '@/components/APPUI';
-import { GraphNode } from '../types';
+import { ItemList } from '@/components/APPUI';
+import { GraphNode } from "../types";
 import { pluginRegistry } from '../plugin/plugin-registry';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Puzzle, MessageCircle, Plus } from 'lucide-react';
+import { useDialogManager } from '@/hooks/useDialogManager';
 import {
   Dialog as PluginDialog,
   DialogContent,
@@ -32,11 +32,8 @@ export const NodesList: React.FC = () => {
   const scenario = getCurrentScenario();
   const nodes = scenario?.children || [];
   
-  const { isOpen, formData, openDialog, handleChange, setIsOpen } = useDialogState({ 
-    label: '', 
-    assistant: '',
-    plugins: [] 
-  });
+  // Use the new dialog manager hook
+  const { createDialog } = useDialogManager();
   
   const [showPluginDialog, setShowPluginDialog] = useState(false);
   const [selectedNodeForPlugins, setSelectedNodeForPlugins] = useState<string | null>(null);
@@ -44,19 +41,30 @@ export const NodesList: React.FC = () => {
   // Get all available plugins
   const availablePlugins = pluginRegistry.getAllPlugins();
   
-  const handleAdd = () => {
-    if (formData.label?.toString().trim()) {
-      addNode({
-        label: String(formData.label),
-        assistant: String(formData.assistant || ''),
-        plugins: Array.isArray(formData.plugins) ? formData.plugins : []
-      });
-      setIsOpen(false);
-    }
+  const handleAddNode = () => {
+    createDialog(
+      "New Node",
+      [
+        { name: 'label', placeholder: 'Node name' },
+        { name: 'assistant', placeholder: 'Assistant message', type: 'textarea' }
+      ],
+      (data) => {
+        if (data.label?.toString().trim()) {
+          addNode({
+            label: String(data.label),
+            assistant: String(data.assistant || ''),
+            plugins: []
+          });
+        }
+      },
+      {
+        confirmText: "Add"
+      }
+    );
   };
   
   const handlePluginSelection = (nodeId: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Zapobiegamy propagacji zdarzenia
+    e.stopPropagation(); // Prevent event propagation
     setSelectedNodeForPlugins(nodeId);
     
     // Find node and set its currently selected plugins
@@ -96,7 +104,7 @@ export const NodesList: React.FC = () => {
         <Button 
           variant="ghost" 
           size="icon" 
-          onClick={() => openDialog({ label: '', assistant: '', plugins: [] })} 
+          onClick={handleAddNode} 
           className="h-7 w-7 rounded-full hover:bg-muted"
         >
           <Plus className="h-4 w-4" />
@@ -107,7 +115,7 @@ export const NodesList: React.FC = () => {
         <ItemList<GraphNode> 
           items={nodes}
           selected={selected.node || ""}
-          onClick={selectNode} // ItemList teraz używa onMouseDown, więc zaznaczenie będzie natychmiastowe
+          onClick={selectNode}
           onDelete={deleteNode}
           renderItem={(item) => (
             <div className="flex items-center justify-between">
@@ -138,20 +146,6 @@ export const NodesList: React.FC = () => {
           height="h-full"
         />
       </div>
-      
-      {isOpen && (
-        <Dialog 
-          title="New Node"
-          onClose={() => setIsOpen(false)}
-          onAdd={handleAdd}
-          fields={[
-            { name: 'label', placeholder: 'Node name' },
-            { name: 'assistant', placeholder: 'Assistant message' }
-          ]}
-          formData={formData}
-          onChange={handleChange}
-        />
-      )}
       
       {showPluginDialog && (
         <PluginDialog open={showPluginDialog} onOpenChange={(open) => !open && setShowPluginDialog(false)}>
@@ -207,3 +201,4 @@ export const NodesList: React.FC = () => {
     </div>
   );
 };
+

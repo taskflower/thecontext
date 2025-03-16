@@ -1,12 +1,12 @@
-// src/modules/edges/EdgesList.tsx
+// src/modules/edges/EdgesList.tsx (Refactored)
 import React from 'react';
-import { useDialogState } from "@/hooks";
 import { useAppStore } from '../store';
-import { Dialog, ItemList } from "@/components/APPUI";
+import { ItemList } from "@/components/APPUI";
 import { ArrowRightCircle, Plus } from "lucide-react";
 import { GraphEdge } from "../types";
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useDialogManager } from '@/hooks/useDialogManager';
 
 export const EdgesList: React.FC = () => {
   const getCurrentScenario = useAppStore(state => state.getCurrentScenario);
@@ -21,18 +21,50 @@ export const EdgesList: React.FC = () => {
   const edges = scenario?.edges || [];
   const nodes = scenario?.children || [];
   
-  const { isOpen, formData, openDialog, handleChange, setIsOpen } = 
-    useDialogState({ source: '', target: '', label: '' });
+  // Use the new dialog manager hook
+  const { createDialog } = useDialogManager();
   
-  const handleAdd = () => {
-    if (formData.source && formData.target) {
-      addEdge({
-        source: String(formData.source),
-        target: String(formData.target),
-        label: formData.label ? String(formData.label) : undefined
-      });
-      setIsOpen(false);
+  const handleAddEdge = () => {
+    if (nodes.length < 2) {
+      alert("Need at least 2 nodes to create an edge");
+      return;
     }
+    
+    createDialog(
+      "New Edge",
+      [
+        { 
+          name: 'source', 
+          placeholder: 'Source node',
+          type: 'select',
+          options: nodes.map(n => ({ value: n.id, label: n.label }))
+        },
+        { 
+          name: 'target', 
+          placeholder: 'Target node',
+          type: 'select',
+          options: nodes.map(n => ({ value: n.id, label: n.label }))
+        },
+        { name: 'label', placeholder: 'Edge label (optional)' }
+      ],
+      (data) => {
+        if (data.source && data.target) {
+          addEdge({
+            source: String(data.source),
+            target: String(data.target),
+            label: data.label ? String(data.label) : undefined
+          });
+        }
+      },
+      {
+        confirmText: "Add",
+        initialData: { 
+          source: nodes[0]?.id || '', 
+          target: nodes[1]?.id || '', 
+          label: '' 
+        }
+      }
+    );
   };
   
   const getNodeLabel = (nodeId: string) => {
@@ -47,17 +79,7 @@ export const EdgesList: React.FC = () => {
         <Button 
           variant="ghost" 
           size="icon" 
-          onClick={() => {
-            if (nodes.length < 2) {
-              alert("Need at least 2 nodes to create an edge");
-              return;
-            }
-            openDialog({ 
-              source: nodes[0]?.id || '', 
-              target: nodes[1]?.id || '', 
-              label: '' 
-            });
-          }} 
+          onClick={handleAddEdge} 
           className="h-7 w-7 rounded-full hover:bg-muted"
         >
           <Plus className="h-4 w-4" />
@@ -68,7 +90,7 @@ export const EdgesList: React.FC = () => {
         <ItemList<GraphEdge> 
           items={edges}
           selected={selected.edge || ""}
-          onClick={selectEdge} // ItemList teraz używa onMouseDown, więc zaznaczenie będzie natychmiastowe
+          onClick={selectEdge}
           onDelete={deleteEdge}
           renderItem={(item) => (
             <div className="p-2 font-medium flex items-center gap-1.5">
@@ -85,31 +107,6 @@ export const EdgesList: React.FC = () => {
           height="h-full"
         />
       </div>
-      
-      {isOpen && (
-        <Dialog 
-          title="New Edge"
-          onClose={() => setIsOpen(false)}
-          onAdd={handleAdd}
-          fields={[
-            { 
-              name: 'source', 
-              placeholder: 'Source node',
-              type: 'select',
-              options: nodes.map(n => ({ value: n.id, label: n.label }))
-            },
-            { 
-              name: 'target', 
-              placeholder: 'Target node',
-              type: 'select',
-              options: nodes.map(n => ({ value: n.id, label: n.label }))
-            },
-            { name: 'label', placeholder: 'Edge label (optional)' }
-          ]}
-          formData={formData}
-          onChange={handleChange}
-        />
-      )}
     </div>
   );
 };

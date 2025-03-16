@@ -3,10 +3,9 @@ import React from "react";
 import { useAppStore } from "../store";
 
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const ConversationModal: React.FC<{
   isOpen: boolean;
