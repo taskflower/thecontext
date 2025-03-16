@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -48,7 +47,7 @@ export const ContextEditor: React.FC<ContextEditorProps> = ({ onClose }) => {
 
   const [items, setItems] = useState<ContextItem[]>([]);
 
-  // Stan dla nowego elementu
+  // State for new item
   const [newItem, setNewItem] = useState<{
     key: string;
     value: string;
@@ -59,21 +58,26 @@ export const ContextEditor: React.FC<ContextEditorProps> = ({ onClose }) => {
     valueType: "text",
   });
 
-  // Stan dla edycji elementu
+  // State for editing item
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
 
-  // Ładowanie danych kontekstu przy montowaniu lub zmianie workspace
+  // Load context data on mount or workspace change
   useEffect(() => {
-    const contextItems = getContextItems(workspaceId);
-    setItems(contextItems);
+    if (workspaceId) {
+      // Get items from store and apply to state using state function
+      const contextItems = getContextItems(workspaceId)(useAppStore.getState());
+      setItems(contextItems);
+    } else {
+      setItems([]);
+    }
   }, [workspaceId, getContextItems]);
 
-  // Dodaj nowy element kontekstu
+  // Add new context item
   const handleAddItem = () => {
-    if (newItem.key.trim() === "") return;
+    if (newItem.key.trim() === "" || !workspaceId) return;
 
-    // Walidacja JSON, jeśli to typ JSON
+    // Validate JSON if that's the type
     if (newItem.valueType === "json") {
       try {
         JSON.parse(newItem.value);
@@ -83,35 +87,36 @@ export const ContextEditor: React.FC<ContextEditorProps> = ({ onClose }) => {
       }
     }
 
-    // Dodaj element
+    // Add the item
     addContextItem(workspaceId, {
       key: newItem.key,
       value: newItem.value,
       valueType: newItem.valueType,
     });
 
-    // Resetuj formularz
+    // Reset form
     setNewItem({
       key: "",
       value: "",
       valueType: "text",
     });
 
-    // Aktualizuj lokalny stan
-    setItems(getContextItems(workspaceId));
+    // Update local state
+    const updatedItems = getContextItems(workspaceId)(useAppStore.getState());
+    setItems(updatedItems);
   };
 
-  // Rozpocznij edycję elementu
+  // Start editing an item
   const handleEditStart = (item: ContextItem) => {
     setEditingItem(item.key);
     setEditValue(item.value);
   };
 
-  // Zakończ edycję i zapisz zmiany
+  // Save edit changes
   const handleEditSave = (item: ContextItem) => {
-    if (editingItem === null) return;
+    if (editingItem === null || !workspaceId) return;
 
-    // Walidacja JSON, jeśli to typ JSON
+    // Validate JSON if that's the type
     if (item.valueType === "json") {
       try {
         JSON.parse(editValue);
@@ -121,32 +126,36 @@ export const ContextEditor: React.FC<ContextEditorProps> = ({ onClose }) => {
       }
     }
 
-    // Aktualizuj element
+    // Update the item
     updateContextItem(workspaceId, item.key, editValue, item.valueType);
     setEditingItem(null);
 
-    // Aktualizuj lokalny stan
-    setItems(getContextItems(workspaceId));
+    // Update local state
+    const updatedItems = getContextItems(workspaceId)(useAppStore.getState());
+    setItems(updatedItems);
   };
 
-  // Anuluj edycję
+  // Cancel editing
   const handleEditCancel = () => {
     setEditingItem(null);
   };
 
-  // Usuń element
+  // Delete an item
   const handleDeleteItem = (key: string) => {
+    if (!workspaceId) return;
+    
     if (
       confirm(`Are you sure you want to delete the item with key "${key}"?`)
     ) {
       deleteContextItem(workspaceId, key);
 
-      // Aktualizuj lokalny stan
-      setItems(getContextItems(workspaceId));
+      // Update local state
+      const updatedItems = getContextItems(workspaceId)(useAppStore.getState());
+      setItems(updatedItems);
     }
   };
 
-  // Formatuj JSON do wyświetlenia
+  // Format JSON for display
   const formatJson = (value: string): string => {
     try {
       const parsed = JSON.parse(value);
@@ -158,166 +167,154 @@ export const ContextEditor: React.FC<ContextEditorProps> = ({ onClose }) => {
 
   return (
     <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Edit Workspace Context</DialogTitle>
         </DialogHeader>
 
-        <div className="grid gap-4 py-4 flex-1 overflow-hidden">
-          <div className="grid grid-cols-4 items-start gap-4">
-            <Label className="text-right pt-2">Items</Label>
-            <div className="col-span-3 border rounded-md p-0 overflow-hidden">
-              <div className="p-3 border-b bg-muted/30 flex items-center justify-between">
-                <h4 className="font-medium text-sm">Context Key-Value Pairs</h4>
-                <span className="text-xs text-muted-foreground">
-                  {items.length} items
-                </span>
-              </div>
-
-              <div className="p-3 border-b">
-                <div className="grid grid-cols-[2fr_3fr_1fr] gap-2">
-                  <Input
-                    placeholder="Key"
-                    value={newItem.key}
-                    onChange={(e) =>
-                      setNewItem((prev) => ({ ...prev, key: e.target.value }))
-                    }
-                  />
-                  <Input
-                    placeholder="Value"
-                    value={newItem.value}
-                    onChange={(e) =>
-                      setNewItem((prev) => ({ ...prev, value: e.target.value }))
-                    }
-                  />
-                  <Select
-                    value={newItem.valueType}
-                    onValueChange={(value) =>
-                      setNewItem((prev) => ({
-                        ...prev,
-                        valueType: value as "text" | "json",
-                      }))
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="text">Text</SelectItem>
-                      <SelectItem value="json">JSON</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button
-                  className="w-full mt-2"
-                  size="sm"
-                  onClick={handleAddItem}
-                  disabled={newItem.key.trim() === ""}
-                >
-                  <Plus className="h-3.5 w-3.5 mr-1" />
-                  Add Item
-                </Button>
-              </div>
-
-              <ScrollArea className="max-h-[300px]">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Key</TableHead>
-                      <TableHead>Value</TableHead>
-                      <TableHead className="w-[100px]">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {items.length > 0 ? (
-                      items.map((item) => (
-                        <TableRow key={item.key}>
-                          <TableCell className="font-medium">
-                            {item.key}
-                            <Badge
-                              variant={
-                                item.valueType === "json"
-                                  ? "outline"
-                                  : "secondary"
-                              }
-                              className="ml-2 text-xs"
-                            >
-                              {item.valueType}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {editingItem === item.key ? (
-                              <Textarea
-                                value={editValue}
-                                onChange={(e) => setEditValue(e.target.value)}
-                                className="min-h-[80px] font-mono text-xs"
-                              />
-                            ) : (
-                              <div className="max-h-[100px] overflow-y-auto whitespace-pre-wrap text-sm font-mono bg-muted/30 p-1 rounded">
-                                {item.valueType === "json"
-                                  ? formatJson(item.value)
-                                  : item.value}
-                              </div>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {editingItem === item.key ? (
-                              <div className="flex gap-1">
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="h-7 w-7"
-                                  onClick={() => handleEditSave(item)}
-                                >
-                                  <Check className="h-3.5 w-3.5" />
-                                </Button>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="h-7 w-7"
-                                  onClick={handleEditCancel}
-                                >
-                                  <X className="h-3.5 w-3.5" />
-                                </Button>
-                              </div>
-                            ) : (
-                              <div className="flex gap-1">
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="h-7 w-7"
-                                  onClick={() => handleEditStart(item)}
-                                >
-                                  <Edit2 className="h-3.5 w-3.5" />
-                                </Button>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="h-7 w-7 text-destructive hover:text-destructive"
-                                  onClick={() => handleDeleteItem(item.key)}
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                </Button>
-                              </div>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell
-                          colSpan={3}
-                          className="text-center h-24 text-muted-foreground"
-                        >
-                          No items in this context yet
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
-            </div>
+        <div className="flex-1 overflow-hidden flex flex-col gap-4 py-4">
+          {/* Add new item form */}
+          <div className="grid grid-cols-[2fr_3fr_1fr] gap-2 p-2 bg-muted/20 rounded-md">
+            <Input
+              placeholder="Key"
+              value={newItem.key}
+              onChange={(e) =>
+                setNewItem((prev) => ({ ...prev, key: e.target.value }))
+              }
+            />
+            <Input
+              placeholder="Value"
+              value={newItem.value}
+              onChange={(e) =>
+                setNewItem((prev) => ({ ...prev, value: e.target.value }))
+              }
+            />
+            <Select
+              value={newItem.valueType}
+              onValueChange={(value) =>
+                setNewItem((prev) => ({
+                  ...prev,
+                  valueType: value as "text" | "json",
+                }))
+              }
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="text">Text</SelectItem>
+                <SelectItem value="json">JSON</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              className="col-span-3 mt-2"
+              size="sm"
+              onClick={handleAddItem}
+              disabled={newItem.key.trim() === "" || !workspaceId}
+            >
+              <Plus className="h-3.5 w-3.5 mr-1" />
+              Add Item
+            </Button>
           </div>
+
+          {/* Items table */}
+          <ScrollArea className="flex-1">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Key</TableHead>
+                  <TableHead>Value</TableHead>
+                  <TableHead className="w-[100px]">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {items.length > 0 ? (
+                  items.map((item) => (
+                    <TableRow key={item.key}>
+                      <TableCell className="font-medium">
+                        {item.key}
+                        <Badge
+                          variant={
+                            item.valueType === "json"
+                              ? "outline"
+                              : "secondary"
+                          }
+                          className="ml-2 text-xs"
+                        >
+                          {item.valueType}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {editingItem === item.key ? (
+                          <Textarea
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            className="min-h-[80px] font-mono text-xs"
+                          />
+                        ) : (
+                          <div className="max-h-[100px] overflow-y-auto whitespace-pre-wrap text-sm font-mono bg-muted/30 p-1 rounded">
+                            {item.valueType === "json"
+                              ? formatJson(item.value)
+                              : item.value}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {editingItem === item.key ? (
+                          <div className="flex gap-1">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-7 w-7"
+                              onClick={() => handleEditSave(item)}
+                            >
+                              <Check className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-7 w-7"
+                              onClick={handleEditCancel}
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex gap-1">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-7 w-7"
+                              onClick={() => handleEditStart(item)}
+                            >
+                              <Edit2 className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-7 w-7 text-destructive hover:text-destructive"
+                              onClick={() => handleDeleteItem(item.key)}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={3}
+                      className="text-center h-24 text-muted-foreground"
+                    >
+                      No items in this context yet
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </div>
 
         <DialogFooter>
