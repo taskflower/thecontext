@@ -2,9 +2,10 @@
 import React from "react";
 import { useDialogState } from "@/hooks";
 import { useAppStore } from '../store';
-import { CardPanel, Dialog, ItemList } from "@/components/APPUI";
+import { Dialog, ItemList } from "@/components/APPUI";
 import { Workspace } from "../types";
-import { FolderOpen } from "lucide-react";
+import { FolderOpen, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const WorkspacesList: React.FC = () => {
   const items = useAppStore(state => state.items);
@@ -27,8 +28,20 @@ export const WorkspacesList: React.FC = () => {
   };
   
   return (
-    <>
-      <CardPanel title="Workspaces" onAddClick={() => openDialog({ title: '' })}>
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between px-3 py-2 border-b">
+        <h3 className="text-sm font-medium">Workspaces</h3>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => openDialog({ title: '' })} 
+          className="h-7 w-7 rounded-full hover:bg-muted"
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      </div>
+      
+      <div className="flex-1 overflow-auto">
         <ItemList<Workspace> 
           items={items}
           selected={selected.workspace}
@@ -40,8 +53,9 @@ export const WorkspacesList: React.FC = () => {
               {item.title}
             </div>
           )}
+          height="h-full"
         />
-      </CardPanel>
+      </div>
       
       {isOpen && (
         <Dialog 
@@ -53,6 +67,6 @@ export const WorkspacesList: React.FC = () => {
           onChange={handleChange}
         />
       )}
-    </>
+    </div>
   );
 };

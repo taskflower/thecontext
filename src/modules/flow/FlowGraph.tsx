@@ -50,9 +50,15 @@ export const FlowGraph: React.FC = () => {
     [addEdge]
   );
   
+  // Naprawiony handler przeciągania węzłów
   const onNodeDragStop = useCallback<NodeDragHandler>(
     (event, node) => {
-      updateNodePosition(node.id, node.position);
+      // Zaktualizuj pozycję węzła w store aplikacji
+      // Upewniamy się, że współrzędne są liczbami i są zaokrąglone
+      const posX = Math.round(node.position.x);
+      const posY = Math.round(node.position.y);
+      
+      updateNodePosition(node.id, { x: posX, y: posY });
     },
     [updateNodePosition]
   );
@@ -94,6 +100,8 @@ export const FlowGraph: React.FC = () => {
         onPaneClick={onPaneClick}
         fitView
         className="flow-container"
+        snapToGrid={true}
+        snapGrid={[10, 10]}
       >
         <Controls />
         <MiniMap />

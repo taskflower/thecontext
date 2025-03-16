@@ -2,11 +2,11 @@
 import React, { useState } from "react";
 import { useDialogState } from "@/hooks";
 import { useAppStore } from "../store";
-import { CardPanel, Dialog, ItemList } from "@/components/APPUI";
+import { Dialog, ItemList } from "@/components/APPUI";
 import { Context } from "./types";
-
-import { Database } from "lucide-react";
+import { Database, Plus } from "lucide-react";
 import { ContextEditor } from "./ContextEditor";
+import { Button } from "@/components/ui/button";
 
 export const ContextsList: React.FC = () => {
   const contexts = useAppStore(state => state.contexts || []);
@@ -31,17 +31,16 @@ export const ContextsList: React.FC = () => {
         workspaceId: selectedWorkspace
       });
       setIsOpen(false);
-      setShowEditor(true); // Pokaż edytor dla nowo utworzonego kontekstu
+      setShowEditor(true); // Show editor for newly created context
     }
   };
   
-  // Filtruj konteksty do aktualnego workspace
+  // Filter contexts to current workspace
   const workspaceContexts = contexts.filter(c => c.workspaceId === selectedWorkspace);
   
   return (
     <>
-      <CardPanel title="Context" onAddClick={() => openDialog({ name: '' })}>
-        ??????????????????
+      <div className="flex flex-col h-full">
         <ItemList<Context> 
           items={workspaceContexts}
           selected={selectedContext || ""}
@@ -63,8 +62,21 @@ export const ContextsList: React.FC = () => {
               </div>
             </div>
           )}
+          height="h-full"
         />
-      </CardPanel>
+        
+        <div className="border-t p-2 flex justify-center">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => openDialog({ name: '' })}
+            className="gap-1.5 text-xs w-full"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            New Context
+          </Button>
+        </div>
+      </div>
       
       {isOpen && (
         <Dialog 

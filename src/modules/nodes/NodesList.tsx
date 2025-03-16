@@ -2,12 +2,12 @@
 import React, { useState } from 'react';
 import { useDialogState } from '@/hooks';
 import { useAppStore } from '../store';
-import { CardPanel, Dialog, ItemList } from '@/components/APPUI';
+import { Dialog, ItemList } from '@/components/APPUI';
 import { GraphNode } from '../types';
 import { pluginRegistry } from '../plugin/plugin-registry';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Puzzle, MessageCircle } from 'lucide-react';
+import { Puzzle, MessageCircle, Plus } from 'lucide-react';
 import {
   Dialog as PluginDialog,
   DialogContent,
@@ -18,7 +18,6 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-
 
 export const NodesList: React.FC = () => {
   const getCurrentScenario = useAppStore(state => state.getCurrentScenario);
@@ -42,7 +41,7 @@ export const NodesList: React.FC = () => {
   const [showPluginDialog, setShowPluginDialog] = useState(false);
   const [selectedNodeForPlugins, setSelectedNodeForPlugins] = useState<string | null>(null);
   
-  // Pobierz wszystkie dostępne wtyczki
+  // Get all available plugins
   const availablePlugins = pluginRegistry.getAllPlugins();
   
   const handleAdd = () => {
@@ -59,7 +58,7 @@ export const NodesList: React.FC = () => {
   const handlePluginSelection = (nodeId: string) => {
     setSelectedNodeForPlugins(nodeId);
     
-    // Znajdź węzeł i ustaw jego aktualnie wybrane wtyczki
+    // Find node and set its currently selected plugins
     const node = nodes.find(n => n.id === nodeId);
     if (node) {
       setPluginSelections(node.plugins || []);
@@ -90,8 +89,20 @@ export const NodesList: React.FC = () => {
   };
   
   return (
-    <>
-      <CardPanel title="Nodes" onAddClick={() => openDialog({ label: '', assistant: '', plugins: [] })}>
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between px-3 py-2 border-b">
+        <h3 className="text-sm font-medium">Nodes</h3>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => openDialog({ label: '', assistant: '', plugins: [] })} 
+          className="h-7 w-7 rounded-full hover:bg-muted"
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      </div>
+      
+      <div className="flex-1 overflow-auto">
         <ItemList<GraphNode> 
           items={nodes}
           selected={selected.node || ""}
@@ -126,8 +137,9 @@ export const NodesList: React.FC = () => {
               </div>
             </div>
           )}
+          height="h-full"
         />
-      </CardPanel>
+      </div>
       
       {isOpen && (
         <Dialog 
@@ -194,6 +206,6 @@ export const NodesList: React.FC = () => {
           </DialogContent>
         </PluginDialog>
       )}
-    </>
+    </div>
   );
 };

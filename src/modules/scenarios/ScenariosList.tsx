@@ -2,9 +2,10 @@
 import React from "react";
 import { useDialogState } from "@/hooks";
 import { useAppStore } from '../store';
-import { CardPanel, Dialog, ItemList } from "@/components/APPUI";
+import { Dialog, ItemList } from "@/components/APPUI";
 import { Scenario } from "../types";
-import { FileText } from "lucide-react";
+import { FileText, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const ScenariosList: React.FC = () => {
   const items = useAppStore(state => state.items);
@@ -31,8 +32,20 @@ export const ScenariosList: React.FC = () => {
   };
   
   return (
-    <>
-      <CardPanel title="Scenarios" onAddClick={() => openDialog({ name: '', description: '' })}>
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between px-3 py-2 border-b">
+        <h3 className="text-sm font-medium">Scenarios</h3>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => openDialog({ name: '', description: '' })} 
+          className="h-7 w-7 rounded-full hover:bg-muted"
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      </div>
+      
+      <div className="flex-1 overflow-auto">
         <ItemList<Scenario> 
           items={scenarios}
           selected={selected.scenario}
@@ -51,8 +64,9 @@ export const ScenariosList: React.FC = () => {
               )}
             </div>
           )}
+          height="h-full"
         />
-      </CardPanel>
+      </div>
       
       {isOpen && (
         <Dialog 
@@ -67,6 +81,6 @@ export const ScenariosList: React.FC = () => {
           onChange={handleChange}
         />
       )}
-    </>
+    </div>
   );
 };

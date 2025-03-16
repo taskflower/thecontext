@@ -2,10 +2,11 @@
 import React from 'react';
 import { useDialogState } from "@/hooks";
 import { useAppStore } from '../store';
-import { CardPanel, Dialog, ItemList } from "@/components/APPUI";
-import { ArrowRightCircle } from "lucide-react";
+import { Dialog, ItemList } from "@/components/APPUI";
+import { ArrowRightCircle, Plus } from "lucide-react";
 import { GraphEdge } from "../types";
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 export const EdgesList: React.FC = () => {
   const getCurrentScenario = useAppStore(state => state.getCurrentScenario);
@@ -45,18 +46,30 @@ export const EdgesList: React.FC = () => {
   };
   
   return (
-    <>
-      <CardPanel title="Edges" onAddClick={() => {
-        if (nodes.length < 2) {
-          alert("Need at least 2 nodes to create an edge");
-          return;
-        }
-        openDialog({ 
-          source: nodes[0]?.id || '', 
-          target: nodes[1]?.id || '', 
-          label: '' 
-        });
-      }}>
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between px-3 py-2 border-b">
+        <h3 className="text-sm font-medium">Edges</h3>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => {
+            if (nodes.length < 2) {
+              alert("Need at least 2 nodes to create an edge");
+              return;
+            }
+            openDialog({ 
+              source: nodes[0]?.id || '', 
+              target: nodes[1]?.id || '', 
+              label: '' 
+            });
+          }} 
+          className="h-7 w-7 rounded-full hover:bg-muted"
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      </div>
+      
+      <div className="flex-1 overflow-auto">
         <ItemList<GraphEdge> 
           items={edges}
           selected={selected.edge || ""}
@@ -74,8 +87,9 @@ export const EdgesList: React.FC = () => {
               )}
             </div>
           )}
+          height="h-full"
         />
-      </CardPanel>
+      </div>
       
       {isOpen && (
         <Dialog 
@@ -101,6 +115,6 @@ export const EdgesList: React.FC = () => {
           onChange={handleChange}
         />
       )}
-    </>
+    </div>
   );
 };
