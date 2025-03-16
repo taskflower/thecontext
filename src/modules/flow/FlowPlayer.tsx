@@ -1,9 +1,12 @@
-import React, { useCallback, useState } from "react";
+// Modyfikacja w FlowPlayer.tsx
+import React, { useCallback, useState, useEffect } from "react";
 import { useAppStore } from "../store";
 import { StepModal } from "@/components/APPUI";
 import { GraphNode } from "../types";
 import { calculateFlowPath } from "./flowUtils";
 import { ConversationModal } from "../conversation/ConversationModal";
+import { MessageProcessor } from "../plugin/components/MessageProcessor";
+import { pluginRegistry } from "../plugin/plugin-registry";
 
 export const FlowPlayer: React.FC = () => {
   const getCurrentScenario = useAppStore((state) => state.getCurrentScenario);
@@ -17,9 +20,14 @@ export const FlowPlayer: React.FC = () => {
   const [currentNodeIndex, setCurrentNodeIndex] = useState(0);
   const [flowPath, setFlowPath] = useState<GraphNode[]>([]);
   const [showConversation, setShowConversation] = useState(false);
-
   
+  // Dodajemy stan dla przetworzonych wiadomości
+  const [processedMessage, setProcessedMessage] = useState<string | null>(null);
 
+  // Resetuj przetworzoną wiadomość przy zmianie kroku
+  useEffect(() => {
+    setProcessedMessage(null);
+  }, [currentNodeIndex]);
 
   const handlePlay = useCallback(() => {
     const scenario = getCurrentScenario();
@@ -39,10 +47,16 @@ export const FlowPlayer: React.FC = () => {
     
     // Add assistant message to conversation
     if (currentNode && currentNode.assistant) {
+      // Używamy przetworzonej wiadomości jeśli jest dostępna, w przeciwnym razie oryginalnej
+      const messageToAdd = processedMessage || currentNode.assistant;
+      
       addToConversation({
         role: "assistant",
-        message: currentNode.assistant
+        message: messageToAdd
       });
+      
+      // Resetujemy przetworzoną wiadomość po dodaniu do konwersacji
+      setProcessedMessage(null);
     }
     
     // Add user message to conversation if it exists
@@ -58,6 +72,7 @@ export const FlowPlayer: React.FC = () => {
     setCurrentNodeIndex(newIndex);
   };
 
+  // Dodana funkcja handlePrev, która była brakująca
   const handlePrev = () => {
     // We don't remove from conversation history when going back
     setCurrentNodeIndex((prev) => Math.max(prev - 1, 0));
@@ -93,13 +108,13 @@ export const FlowPlayer: React.FC = () => {
           onClick={handlePlay}
           className="p-2 rounded-md bg-blue-500 text-white text-xs font-medium hover:bg-blue-600"
         >
-          Play Flow
+          Odtwórz Flow
         </button>
         <button
           onClick={() => setShowConversation(true)}
           className="p-2 rounded-md bg-green-500 text-white text-xs font-medium hover:bg-green-600"
         >
-          Show Conversation
+          Pokaż Konwersację
         </button>
       </div>
 
@@ -113,14 +128,30 @@ export const FlowPlayer: React.FC = () => {
           renderStepContent={(step) => (
             <div className="flex flex-col space-y-4 p-2">
               <div className="bg-blue-50 p-3 rounded-lg">
-                <h3 className="text-sm font-semibold text-blue-800">Assistant:</h3>
-                <p>{step.assistant}</p>
+                <h3 className="text-sm font-semibold text-blue-800">Asystent:</h3>
+                {/* Dodajemy informację o używanych wtyczkach */}
+                {step.plugins && step.plugins.length > 0 && (
+                  <div className="mb-2 text-xs text-gray-600">
+                    Używane wtyczki: {step.plugins.map(pluginId => {
+                      const plugin = pluginRegistry.getPlugin(pluginId);
+                      return plugin ? plugin.config.name : pluginId;
+                    }).join(', ')}
+                  </div>
+                )}
+                {/* Dodajemy niewidoczny processor dla bieżącego kroku z przekazaniem wtyczek węzła */}
+                <MessageProcessor 
+                  message={step.assistant}
+                  onProcessed={setProcessedMessage}
+                  autoProcess={true}
+                  nodePlugins={step.plugins}
+                />
+                <p>{processedMessage || step.assistant}</p>
               </div>
               <div className="flex flex-col">
-                <h3 className="text-sm font-semibold text-gray-800">Your response:</h3>
+                <h3 className="text-sm font-semibold text-gray-800">Twoja odpowiedź:</h3>
                 <textarea
                   className="w-full border rounded-md p-2 min-h-[100px]"
-                  placeholder="Type your message here..."
+                  placeholder="Wpisz swoją wiadomość tutaj..."
                   value={step.userMessage || ''}
                   onChange={handleUserMessageChange}
                 />

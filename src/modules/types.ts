@@ -27,9 +27,10 @@ export interface GraphNode {
   id: string;
   type: ElementType.GRAPH_NODE;
   label: string;
-  assistant: string; // Changed from value: number
+  assistant: string; 
   position: Position;
-  userMessage?: string; // Optional user message
+  userMessage?: string; 
+  plugins?: string[];
 }
 
 export interface GraphEdge {
@@ -61,6 +62,7 @@ export interface Conversation {
 }
 
 export interface AppState {
+  updateNodePlugins: any;
   items: Workspace[];
   selected: {
     workspace: string;

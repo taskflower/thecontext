@@ -4,6 +4,8 @@ import { FlowGraph } from "./modules/flow";
 import { NodesList } from "./modules/nodes";
 import { ScenariosList } from "./modules/scenarios";
 import { WorkspacesList } from "./modules/workspaces";
+import { PluginManager } from "./modules/plugin/components/PuginManager";
+
 
 const App: React.FC = () => (
   <div className="min-h-screen bg-gray-50">
@@ -13,6 +15,7 @@ const App: React.FC = () => (
         <ScenariosList />
         <NodesList />
         <EdgesList />
+        <PluginManager />
       </div>
       <div className="md:col-span-3  bg-red-200">
         <FlowGraph />

@@ -2,9 +2,8 @@
 import { ElementType, GraphNode, Position } from "../types";
 import { SetFn } from "../typesActioss";
 
-
 export const createNodeActions = (set: SetFn) => ({
-  addNode: (payload: { label: string; assistant: string; position?: Position }) =>
+  addNode: (payload: { label: string; assistant: string; position?: Position, plugins?: string[] }) =>
     set((state) => {
       const newNode: GraphNode = {
         id: `node-${Date.now()}`,
@@ -12,6 +11,7 @@ export const createNodeActions = (set: SetFn) => ({
         label: payload.label,
         assistant: payload.assistant,
         position: payload.position || { x: 100, y: 100 },
+        plugins: payload.plugins || [],
       };
 
       const workspace = state.items.find(
@@ -81,6 +81,22 @@ export const createNodeActions = (set: SetFn) => ({
 
       if (node) {
         node.position = position;
+        state.stateVersion++;
+      }
+    }),
+    
+  updateNodePlugins: (nodeId: string, plugins: string[]) =>
+    set((state) => {
+      const workspace = state.items.find(
+        (w) => w.id === state.selected.workspace
+      );
+      const scenario = workspace?.children?.find(
+        (s) => s.id === state.selected.scenario
+      );
+      const node = scenario?.children?.find((n) => n.id === nodeId);
+
+      if (node) {
+        node.plugins = plugins;
         state.stateVersion++;
       }
     }),
