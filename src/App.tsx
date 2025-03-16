@@ -22,11 +22,13 @@ import {
   MessageSquare,
   FileCode
 } from "lucide-react";
+import { ConversationPanel } from "./modules/conversation/ConversationPanel";
 
 const App: React.FC = () => {
   const [showLeftPanel, setShowLeftPanel] = useState(true);
   const [showRightPanel, setShowRightPanel] = useState(false);
   const [showContextPanel, setShowContextPanel] = useState(false);
+  const [showConversationPanel, setShowConversationPanel] = useState(false);
   
   // Get current scenario name for display in header
   const getCurrentScenario = useAppStore(state => state.getCurrentScenario);
@@ -38,7 +40,7 @@ const App: React.FC = () => {
         {/* Header Bar with slim toolbar */}
         <header className="border-b py-2 px-4 flex items-center justify-between bg-card">
           <div className="flex items-center gap-3">
-            <h1 className="text-lg font-semibold">Flow Studio</h1>
+            <h1 className="text-lg font-semibold">Deep Context</h1>
             <Separator orientation="vertical" className="h-6" />
             <div className="text-sm text-muted-foreground">
               {scenario?.name || "No scenario selected"}
@@ -106,8 +108,14 @@ const App: React.FC = () => {
 
           {/* Main Content Area */}
           <main className="flex-1 flex flex-col overflow-hidden">
-            {/* Flow Graph Area */}
-            <div className="flex-1 overflow-hidden">
+            {/* Flow Graph Area - Adjusted height based on bottom panels */}
+            <div 
+              className={`
+                ${(showContextPanel && showConversationPanel) ? 'h-[45%]' : 
+                 (showContextPanel || showConversationPanel) ? 'h-[45%]' : 'flex-1'} 
+                overflow-hidden
+              `}
+            >
               <FlowGraph />
             </div>
 
@@ -117,7 +125,7 @@ const App: React.FC = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 gap-1.5 text-xs"
+                  className={`h-8 gap-1.5 text-xs ${showContextPanel ? 'bg-muted' : ''}`}
                   onClick={() => setShowContextPanel(!showContextPanel)}
                 >
                   <Database className="h-3.5 w-3.5" />
@@ -126,7 +134,8 @@ const App: React.FC = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 gap-1.5 text-xs"
+                  className={`h-8 gap-1.5 text-xs ${showConversationPanel ? 'bg-muted' : ''}`}
+                  onClick={() => setShowConversationPanel(!showConversationPanel)}
                 >
                   <MessageSquare className="h-3.5 w-3.5" />
                   Conversation
@@ -145,23 +154,33 @@ const App: React.FC = () => {
               </div>
             </div>
             
-            {/* Context Panel (collapsible from bottom) */}
-            {showContextPanel && (
-              <div className="border-t h-64 bg-card overflow-auto">
-                <div className="flex items-center justify-between px-3 py-2 border-b">
-                  <h3 className="text-sm font-medium">Context Manager</h3>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => setShowContextPanel(false)}
-                    className="h-7 w-7 p-0"
-                  >
-                    ×
-                  </Button>
+            {/* Bottom Panels Container */}
+            <div className={`${(!showContextPanel && !showConversationPanel) ? 'hidden' : 'flex'} border-t h-[55%]`}>
+              {/* Context Panel (if visible) */}
+              {showContextPanel && (
+                <div className={`${showConversationPanel ? 'w-1/2 border-r' : 'w-full'} bg-card overflow-auto`}>
+                  <div className="flex items-center justify-between px-3 py-2 border-b">
+                    <h3 className="text-sm font-medium">Context Manager</h3>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => setShowContextPanel(false)}
+                      className="h-7 w-7 p-0"
+                    >
+                      ×
+                    </Button>
+                  </div>
+                  <ContextsList />
                 </div>
-                <ContextsList />
-              </div>
-            )}
+              )}
+              
+              {/* Conversation Panel (if visible) */}
+              {showConversationPanel && (
+                <div className={`${showContextPanel ? 'w-1/2' : 'w-full'} bg-card overflow-auto`}>
+                  <ConversationPanel />
+                </div>
+              )}
+            </div>
           </main>
 
           {/* Right Panel - Properties (collapsible) */}

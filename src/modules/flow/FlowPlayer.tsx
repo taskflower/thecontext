@@ -1,11 +1,10 @@
 // src/modules/flow/FlowPlayer.tsx
 import React, { useCallback, useState, useEffect } from "react";
-import { Play, MessageSquare } from "lucide-react";
+import { Play } from "lucide-react";
 import { useAppStore } from "../store";
 import { StepModal } from "@/components/APPUI";
 import { GraphNode } from "../types";
 import { calculateFlowPath } from "./flowUtils";
-import { ConversationModal } from "../conversation/ConversationModal";
 import { MessageProcessor } from "../plugin/components/MessageProcessor";
 import { pluginRegistry } from "../plugin/plugin-registry";
 import { Button } from "@/components/ui/button";
@@ -24,12 +23,11 @@ export const FlowPlayer: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentNodeIndex, setCurrentNodeIndex] = useState(0);
   const [flowPath, setFlowPath] = useState<GraphNode[]>([]);
-  const [showConversation, setShowConversation] = useState(false);
   
-  // Dodajemy stan dla przetworzonych wiadomości
+  // State for processed messages
   const [processedMessage, setProcessedMessage] = useState<string | null>(null);
 
-  // Resetuj przetworzoną wiadomość przy zmianie kroku
+  // Reset processed message when step changes
   useEffect(() => {
     setProcessedMessage(null);
   }, [currentNodeIndex]);
@@ -52,7 +50,7 @@ export const FlowPlayer: React.FC = () => {
     
     // Add assistant message to conversation
     if (currentNode && currentNode.assistant) {
-      // Używamy przetworzonej wiadomości jeśli jest dostępna, w przeciwnym razie oryginalnej
+      // Use processed message if available, otherwise original
       const messageToAdd = processedMessage || currentNode.assistant;
       
       addToConversation({
@@ -60,7 +58,7 @@ export const FlowPlayer: React.FC = () => {
         message: messageToAdd
       });
       
-      // Resetujemy przetworzoną wiadomość po dodaniu do konwersacji
+      // Reset processed message after adding to conversation
       setProcessedMessage(null);
     }
     
@@ -77,7 +75,6 @@ export const FlowPlayer: React.FC = () => {
     setCurrentNodeIndex(newIndex);
   };
 
-  // Dodana funkcja handlePrev, która była brakująca
   const handlePrev = () => {
     // We don't remove from conversation history when going back
     setCurrentNodeIndex((prev) => Math.max(prev - 1, 0));
@@ -108,7 +105,7 @@ export const FlowPlayer: React.FC = () => {
 
   return (
     <>
-      <div className="absolute top-4 right-4 z-10 flex space-x-2">
+      <div className="absolute top-4 right-4 z-10">
         <Button 
           size="sm" 
           onClick={handlePlay}
@@ -116,15 +113,6 @@ export const FlowPlayer: React.FC = () => {
         >
           <Play className="h-4 w-4 mr-1" />
           <span>Play Flow</span>
-        </Button>
-        <Button 
-          size="sm" 
-          onClick={() => setShowConversation(true)}
-          variant="outline"
-          className="px-3 py-2 space-x-1"
-        >
-          <MessageSquare className="h-4 w-4 mr-1" />
-          <span>Show Conversation</span>
         </Button>
       </div>
 
@@ -183,11 +171,6 @@ export const FlowPlayer: React.FC = () => {
           )}
         />
       )}
-
-      <ConversationModal 
-        isOpen={showConversation} 
-        onClose={() => setShowConversation(false)} 
-      />
     </>
   );
 };
