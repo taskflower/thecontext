@@ -1,7 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// This is a proposed update to your existing StepModal component in @/components/APPUI
-// You may need to adapt it to fit your actual component structure
-
 import React from "react";
 
 interface StepModalProps<T> {
@@ -63,16 +60,21 @@ export const StepModal = <T extends Record<string, any>>({
             Previous
           </button>
           
-          <button
-            onClick={onNext}
-            className={`px-4 py-2 rounded ${
-              isLastStep 
-                ? "bg-green-500 hover:bg-green-600 text-white" 
-                : "bg-blue-500 hover:bg-blue-600 text-white"
-            }`}
-          >
-            {isLastStep ? "Finish" : "Next"}
-          </button>
+          {isLastStep ? (
+            <button
+              onClick={onClose}
+              className="px-4 py-2 rounded bg-green-500 hover:bg-green-600 text-white"
+            >
+              Finish
+            </button>
+          ) : (
+            <button
+              onClick={onNext}
+              className="px-4 py-2 rounded bg-blue-500 hover:bg-blue-600 text-white"
+            >
+              Next
+            </button>
+          )}
         </div>
       </div>
     </div>
