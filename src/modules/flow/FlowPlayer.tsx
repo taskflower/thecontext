@@ -1,4 +1,3 @@
-// src/modules/flow/FlowPlayer.tsx
 import React, { useCallback, useState, useEffect } from "react";
 import { Play } from "lucide-react";
 import { useAppStore } from "../store";
@@ -17,8 +16,6 @@ export const FlowPlayer: React.FC = () => {
   const addToConversation = useAppStore((state) => state.addToConversation);
   const clearConversation = useAppStore((state) => state.clearConversation);
   const setUserMessage = useAppStore((state) => state.setUserMessage);
-  // Force component to update when state changes
-  useAppStore((state) => state.stateVersion);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentNodeIndex, setCurrentNodeIndex] = useState(0);
@@ -32,6 +29,7 @@ export const FlowPlayer: React.FC = () => {
     setProcessedMessage(null);
   }, [currentNodeIndex]);
 
+  // Memoize the play handler to prevent recreation on renders
   const handlePlay = useCallback(() => {
     const scenario = getCurrentScenario();
     if (scenario) {
@@ -45,63 +43,71 @@ export const FlowPlayer: React.FC = () => {
     }
   }, [getCurrentScenario, clearConversation]);
 
-  const handleNext = () => {
-    const currentNode = flowPath[currentNodeIndex];
-    
-    // Add assistant message to conversation
-    if (currentNode && currentNode.assistant) {
-      // Use processed message if available, otherwise original
-      const messageToAdd = processedMessage || currentNode.assistant;
+  // Memoize handlers to prevent recreation on each render
+  const handleNext = useCallback(() => {
+    setFlowPath(currentPath => {
+      const currentNode = currentPath[currentNodeIndex];
       
-      addToConversation({
-        role: "assistant",
-        message: messageToAdd
-      });
+      // Add assistant message to conversation
+      if (currentNode && currentNode.assistant) {
+        // Use processed message if available, otherwise original
+        const messageToAdd = processedMessage || currentNode.assistant;
+        
+        addToConversation({
+          role: "assistant",
+          message: messageToAdd
+        });
+      }
       
-      // Reset processed message after adding to conversation
-      setProcessedMessage(null);
-    }
-    
-    // Add user message to conversation if it exists
-    if (currentNode && currentNode.userMessage) {
-      addToConversation({
-        role: "user",
-        message: currentNode.userMessage
-      });
-    }
+      // Add user message to conversation if it exists
+      if (currentNode && currentNode.userMessage) {
+        addToConversation({
+          role: "user",
+          message: currentNode.userMessage
+        });
+      }
 
+      return currentPath;
+    });
+    
+    // Reset processed message
+    setProcessedMessage(null);
+    
     // Move to the next node
-    const newIndex = Math.min(currentNodeIndex + 1, flowPath.length - 1);
-    setCurrentNodeIndex(newIndex);
-  };
+    setCurrentNodeIndex(prev => Math.min(prev + 1, flowPath.length - 1));
+  }, [currentNodeIndex, flowPath.length, processedMessage, addToConversation]);
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     // We don't remove from conversation history when going back
     setCurrentNodeIndex((prev) => Math.max(prev - 1, 0));
-  };
+  }, []);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     // Force close regardless of state
     setIsPlaying(false);
     setCurrentNodeIndex(0);
     setFlowPath([]);
-  };
+  }, []);
 
-  const handleUserMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const currentNode = flowPath[currentNodeIndex];
-    if (currentNode) {
-      // Update user message in store
-      setUserMessage(currentNode.id, e.target.value);
-      
-      // Also update local state to ensure re-render
-      const updatedPath = [...flowPath];
-      updatedPath[currentNodeIndex] = {
-        ...currentNode,
-        userMessage: e.target.value
-      };
-      setFlowPath(updatedPath);
-    }
-  };
+  const handleUserMessageChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setFlowPath(currentPath => {
+      const currentNode = currentPath[currentNodeIndex];
+      if (currentNode) {
+        // Update user message in store
+        setUserMessage(currentNode.id, value);
+        
+        // Also update local state to ensure re-render
+        const updatedPath = [...currentPath];
+        updatedPath[currentNodeIndex] = {
+          ...currentNode,
+          userMessage: value
+        };
+        return updatedPath;
+      }
+      return currentPath;
+    });
+  }, [currentNodeIndex, setUserMessage]);
 
   return (
     <>
