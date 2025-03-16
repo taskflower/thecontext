@@ -55,7 +55,8 @@ export const NodesList: React.FC = () => {
     }
   };
   
-  const handlePluginSelection = (nodeId: string) => {
+  const handlePluginSelection = (nodeId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Zapobiegamy propagacji zdarzenia
     setSelectedNodeForPlugins(nodeId);
     
     // Find node and set its currently selected plugins
@@ -106,32 +107,29 @@ export const NodesList: React.FC = () => {
         <ItemList<GraphNode> 
           items={nodes}
           selected={selected.node || ""}
-          onClick={selectNode}
+          onClick={selectNode} // ItemList teraz używa onMouseDown, więc zaznaczenie będzie natychmiastowe
           onDelete={deleteNode}
           renderItem={(item) => (
-            <div className="flex items-center justify-between p-2 gap-2">
+            <div className="flex items-center justify-between">
               <div className="font-medium truncate">{item.label}</div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center">
                 {item.plugins && item.plugins.length > 0 && (
-                  <Badge variant="secondary" className="px-1.5 h-5 text-xs">
-                    <Puzzle className="h-3 w-3 mr-1" />
+                  <Badge variant="secondary" className="px-1.5 h-5 text-xs mr-1">
+                    <Puzzle className="h-3.5 w-3.5 mr-0.5 text-muted-foreground" />
                     {item.plugins.length}
                   </Badge>
                 )}
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-6 w-6 rounded-full"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handlePluginSelection(item.id);
-                  }}
+                  className="h-7 w-7 opacity-70 hover:opacity-100 mr-1 px-0"
+                  onMouseDown={(e) => handlePluginSelection(item.id, e)}
                 >
-                  <Puzzle className="h-3 w-3" />
+                  <Puzzle className="h-3.5 w-3.5 text-muted-foreground" />
                 </Button>
                 {item.assistant && (
                   <Badge variant="outline" className="px-1.5 h-5 text-xs">
-                    <MessageCircle className="h-3 w-3 mr-1" />
+                    <MessageCircle className="h-3.5 w-3.5 mr-0.5 text-muted-foreground" />
                   </Badge>
                 )}
               </div>

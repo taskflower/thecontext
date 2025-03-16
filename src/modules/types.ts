@@ -88,7 +88,7 @@ export interface AppState extends ContextState {
   deleteScenario: (scenarioId: string) => void;
   
   // Node methods
-  addNode: (payload: { label: string; assistant: string; position?: Position }) => void;
+  addNode: (payload: { label: string; assistant: string; position?: Position; plugins?: string[] }) => void;
   deleteNode: (nodeId: string) => void;
   updateNodePosition: (nodeId: string, position: Position) => void;
   selectNode: (nodeId: string) => void;

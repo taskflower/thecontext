@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useEffect } from "react";
 import ReactFlow, {
   MiniMap,
@@ -57,16 +58,20 @@ export const FlowGraph: React.FC = () => {
     [updateNodePosition]
   );
   
+  // Używamy onNodeClick aby zachować spójność z onMouseDown w ItemList
   const onNodeClick = useCallback<NodeMouseHandler>(
     (event, node) => {
+      // Natychmiast zaznaczamy node - nie czekamy na onMouseUp
       selectNode(node.id);
       event.stopPropagation();
     },
     [selectNode]
   );
   
+  // Używamy onEdgeClick aby zachować spójność z onMouseDown w ItemList
   const onEdgeClick = useCallback<EdgeMouseHandler>(
     (event, edge) => {
+      // Natychmiast zaznaczamy edge - nie czekamy na onMouseUp
       selectEdge(edge.id);
       event.stopPropagation();
     },
@@ -74,8 +79,11 @@ export const FlowGraph: React.FC = () => {
   );
   
   const onPaneClick = useCallback(
-    () => {
-      clearSelection();
+    (event:any) => {
+      // Sprawdzamy czy to faktycznie kliknięcie w tło, a nie w node/edge
+      if (event.target === event.currentTarget) {
+        clearSelection();
+      }
     },
     [clearSelection]
   );

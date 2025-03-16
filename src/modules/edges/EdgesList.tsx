@@ -40,11 +40,6 @@ export const EdgesList: React.FC = () => {
     return node ? node.label : nodeId;
   };
   
-  const handleEdgeClick = (edgeId: string) => {
-    // Call the selectEdge method to update store
-    selectEdge(edgeId);
-  };
-  
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between px-3 py-2 border-b">
@@ -73,7 +68,7 @@ export const EdgesList: React.FC = () => {
         <ItemList<GraphEdge> 
           items={edges}
           selected={selected.edge || ""}
-          onClick={handleEdgeClick}
+          onClick={selectEdge} // ItemList teraz używa onMouseDown, więc zaznaczenie będzie natychmiastowe
           onDelete={deleteEdge}
           renderItem={(item) => (
             <div className="p-2 font-medium flex items-center gap-1.5">

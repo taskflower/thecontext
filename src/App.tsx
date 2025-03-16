@@ -1,11 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { EdgesList } from "./modules/edges";
 import { FlowGraph } from "./modules/flow";
 import { NodesList } from "./modules/nodes";
 import { ScenariosList } from "./modules/scenarios";
 import { WorkspacesList } from "./modules/workspaces";
-// Remove the PluginManager import
-// import { PluginManager } from "./modules/plugin/components/PuginManager";
 import { ThemeProvider } from "./components/ui/theme-provider";
 import { ContextsList } from "./modules/context";
 import { ThemeToggle } from "./components/APPUI/ThemeToggle";
@@ -22,22 +20,36 @@ import {
   PanelRight,
   MessageSquare,
   FileCode,
-  Puzzle, // Added for Plugins button
+  Puzzle,
   Focus,
 } from "lucide-react";
 import { ConversationPanel } from "./modules/conversation/ConversationPanel";
-import { PluginsPanel } from "./modules/plugin/components/PluginsPanel"; // Import the new PluginsPanel
+import { PluginsPanel } from "./modules/plugin/components/PluginsPanel";
 
 const App: React.FC = () => {
   const [showLeftPanel, setShowLeftPanel] = useState(true);
-  const [showRightPanel, setShowRightPanel] = useState(false);
+  const [showRightPanel, setShowRightPanel] = useState(true); // Changed default to true
   const [showContextPanel, setShowContextPanel] = useState(false);
   const [showConversationPanel, setShowConversationPanel] = useState(false);
-  const [showPluginsPanel, setShowPluginsPanel] = useState(false); // New state for plugins panel
+  const [showPluginsPanel, setShowPluginsPanel] = useState(false);
+  const [rightPanelTab, setRightPanelTab] = useState("nodes");
 
   // Get current scenario name for display in header
   const getCurrentScenario = useAppStore((state) => state.getCurrentScenario);
+  const selected = useAppStore((state) => state.selected);
+  const stateVersion = useAppStore((state) => state.stateVersion);
   const scenario = getCurrentScenario();
+
+  // Auto-open right panel and select correct tab when node or edge is selected
+  useEffect(() => {
+    if (selected.node) {
+      setShowRightPanel(true);
+      setRightPanelTab("nodes");
+    } else if (selected.edge) {
+      setShowRightPanel(true);
+      setRightPanelTab("edges");
+    }
+  }, [selected.node, selected.edge, stateVersion]);
 
   return (
     <ThemeProvider defaultTheme="dark">
@@ -57,7 +69,7 @@ const App: React.FC = () => {
 
           <div className="flex items-center gap-2">
             <Button
-              variant="ghost"
+              variant={showLeftPanel ? "secondary" : "ghost"}
               size="icon"
               className="h-8 w-8"
               onClick={() => setShowLeftPanel(!showLeftPanel)}
@@ -66,7 +78,7 @@ const App: React.FC = () => {
               <PanelLeft className="h-4 w-4" />
             </Button>
             <Button
-              variant="ghost"
+              variant={showRightPanel ? "secondary" : "ghost"}
               size="icon"
               className="h-8 w-8"
               onClick={() => setShowRightPanel(!showRightPanel)}
@@ -83,7 +95,7 @@ const App: React.FC = () => {
         <div className="flex-1 flex overflow-hidden">
           {/* Left Panel - Collapsible */}
           {showLeftPanel && (
-            <aside className="w-56 border-r bg-sidebar-background flex flex-col overflow-hidden">
+            <aside className="w-64 border-r bg-sidebar-background flex flex-col overflow-hidden">
               <Tabs defaultValue="workspace" className="flex-1 flex flex-col">
                 <TabsList className="grid grid-cols-3 px-2 py-1 h-auto rounded-none border-b">
                   <TabsTrigger
@@ -146,22 +158,18 @@ const App: React.FC = () => {
             <div className="border-t bg-card py-1 px-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Button
-                  variant="ghost"
+                  variant={showContextPanel ? "secondary" : "ghost"}
                   size="sm"
-                  className={`h-8 gap-1.5 text-xs ${
-                    showContextPanel ? "bg-muted" : ""
-                  }`}
+                  className="h-8 gap-1.5 text-xs"
                   onClick={() => setShowContextPanel(!showContextPanel)}
                 >
                   <Database className="h-3.5 w-3.5" />
                   Context
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant={showConversationPanel ? "secondary" : "ghost"}
                   size="sm"
-                  className={`h-8 gap-1.5 text-xs ${
-                    showConversationPanel ? "bg-muted" : ""
-                  }`}
+                  className="h-8 gap-1.5 text-xs"
                   onClick={() =>
                     setShowConversationPanel(!showConversationPanel)
                   }
@@ -169,13 +177,10 @@ const App: React.FC = () => {
                   <MessageSquare className="h-3.5 w-3.5" />
                   Conversation
                 </Button>
-                {/* Add Plugins Button here */}
                 <Button
-                  variant="ghost"
+                  variant={showPluginsPanel ? "secondary" : "ghost"}
                   size="sm"
-                  className={`h-8 gap-1.5 text-xs ${
-                    showPluginsPanel ? "bg-muted" : ""
-                  }`}
+                  className="h-8 gap-1.5 text-xs"
                   onClick={() => setShowPluginsPanel(!showPluginsPanel)}
                 >
                   <Puzzle className="h-3.5 w-3.5" />
@@ -300,8 +305,8 @@ const App: React.FC = () => {
 
           {/* Right Panel - Properties (collapsible) */}
           {showRightPanel && (
-            <aside className="w-64 border-l bg-sidebar-background flex flex-col overflow-hidden">
-              <Tabs defaultValue="nodes" className="flex-1 flex flex-col">
+            <aside className="w-72 border-l bg-sidebar-background flex flex-col overflow-hidden">
+              <Tabs value={rightPanelTab} onValueChange={setRightPanelTab} className="flex-1 flex flex-col">
                 <TabsList className="grid grid-cols-2 px-2 py-1 h-auto rounded-none border-b">
                   <TabsTrigger value="nodes" className="rounded-none">
                     Nodes
@@ -323,8 +328,6 @@ const App: React.FC = () => {
             </aside>
           )}
         </div>
-
-        {/* Removed the floating PluginManager button */}
       </div>
     </ThemeProvider>
   );
