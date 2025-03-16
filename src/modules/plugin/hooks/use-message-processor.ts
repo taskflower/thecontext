@@ -8,6 +8,7 @@ export function useMessageProcessor() {
   
   // Pobierz aktywne pluginy
   const activePluginIds = Object.entries(plugins)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     .filter(([_, plugin]) => plugin.active)
     .map(([id]) => id);
   

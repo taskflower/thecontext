@@ -1,5 +1,6 @@
-// Modyfikacja w FlowPlayer.tsx
+// src/modules/flow/FlowPlayer.tsx
 import React, { useCallback, useState, useEffect } from "react";
+import { Play, MessageSquare } from "lucide-react";
 import { useAppStore } from "../store";
 import { StepModal } from "@/components/APPUI";
 import { GraphNode } from "../types";
@@ -7,6 +8,10 @@ import { calculateFlowPath } from "./flowUtils";
 import { ConversationModal } from "../conversation/ConversationModal";
 import { MessageProcessor } from "../plugin/components/MessageProcessor";
 import { pluginRegistry } from "../plugin/plugin-registry";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export const FlowPlayer: React.FC = () => {
   const getCurrentScenario = useAppStore((state) => state.getCurrentScenario);
@@ -103,19 +108,24 @@ export const FlowPlayer: React.FC = () => {
 
   return (
     <>
-      <div className="absolute top-2 right-2 z-10 flex space-x-2">
-        <button
+      <div className="absolute top-4 right-4 z-10 flex space-x-2">
+        <Button 
+          size="sm" 
           onClick={handlePlay}
-          className="p-2 rounded-md bg-blue-500 text-white text-xs font-medium hover:bg-blue-600"
+          className="px-3 py-2 space-x-1"
         >
-          Odtwórz Flow
-        </button>
-        <button
+          <Play className="h-4 w-4 mr-1" />
+          <span>Play Flow</span>
+        </Button>
+        <Button 
+          size="sm" 
           onClick={() => setShowConversation(true)}
-          className="p-2 rounded-md bg-green-500 text-white text-xs font-medium hover:bg-green-600"
+          variant="outline"
+          className="px-3 py-2 space-x-1"
         >
-          Pokaż Konwersację
-        </button>
+          <MessageSquare className="h-4 w-4 mr-1" />
+          <span>Show Conversation</span>
+        </Button>
       </div>
 
       {isPlaying && flowPath.length > 0 && (
@@ -126,32 +136,45 @@ export const FlowPlayer: React.FC = () => {
           onPrev={handlePrev}
           onClose={handleClose}
           renderStepContent={(step) => (
-            <div className="flex flex-col space-y-4 p-2">
-              <div className="bg-blue-50 p-3 rounded-lg">
-                <h3 className="text-sm font-semibold text-blue-800">Asystent:</h3>
-                {/* Dodajemy informację o używanych wtyczkach */}
-                {step.plugins && step.plugins.length > 0 && (
-                  <div className="mb-2 text-xs text-gray-600">
-                    Używane wtyczki: {step.plugins.map(pluginId => {
-                      const plugin = pluginRegistry.getPlugin(pluginId);
-                      return plugin ? plugin.config.name : pluginId;
-                    }).join(', ')}
+            <div className="flex flex-col space-y-6">
+              <Card className="p-4 border-muted bg-muted/20">
+                <div className="flex flex-col space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold">Assistant</h3>
+                    
+                    {step.plugins && step.plugins.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {step.plugins.map(pluginId => {
+                          const plugin = pluginRegistry.getPlugin(pluginId);
+                          return plugin ? (
+                            <Badge key={pluginId} variant="outline" className="text-xs">
+                              {plugin.config.name}
+                            </Badge>
+                          ) : null;
+                        })}
+                      </div>
+                    )}
                   </div>
-                )}
-                {/* Dodajemy niewidoczny processor dla bieżącego kroku z przekazaniem wtyczek węzła */}
-                <MessageProcessor 
-                  message={step.assistant}
-                  onProcessed={setProcessedMessage}
-                  autoProcess={true}
-                  nodePlugins={step.plugins}
-                />
-                <p>{processedMessage || step.assistant}</p>
-              </div>
-              <div className="flex flex-col">
-                <h3 className="text-sm font-semibold text-gray-800">Twoja odpowiedź:</h3>
-                <textarea
-                  className="w-full border rounded-md p-2 min-h-[100px]"
-                  placeholder="Wpisz swoją wiadomość tutaj..."
+                  
+                  {/* Hidden message processor */}
+                  <MessageProcessor 
+                    message={step.assistant}
+                    onProcessed={setProcessedMessage}
+                    autoProcess={true}
+                    nodePlugins={step.plugins}
+                  />
+                  
+                  <div className="text-sm whitespace-pre-line">
+                    {processedMessage || step.assistant}
+                  </div>
+                </div>
+              </Card>
+              
+              <div className="flex flex-col space-y-2">
+                <h3 className="text-sm font-semibold">Your Response</h3>
+                <Textarea
+                  className="min-h-[120px] resize-none"
+                  placeholder="Type your message here..."
                   value={step.userMessage || ''}
                   onChange={handleUserMessageChange}
                 />

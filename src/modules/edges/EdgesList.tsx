@@ -1,9 +1,11 @@
+// src/modules/edges/EdgesList.tsx
 import React from 'react';
 import { useDialogState } from "@/hooks";
 import { useAppStore } from '../store';
 import { CardPanel, Dialog, ItemList } from "@/components/APPUI";
-import { Link } from "lucide-react";
+import { ArrowRightCircle } from "lucide-react";
 import { GraphEdge } from "../types";
+import { Badge } from '@/components/ui/badge';
 
 export const EdgesList: React.FC = () => {
   const getCurrentScenario = useAppStore(state => state.getCurrentScenario);
@@ -61,11 +63,15 @@ export const EdgesList: React.FC = () => {
           onClick={handleEdgeClick}
           onDelete={deleteEdge}
           renderItem={(item) => (
-            <div className={`p-2 font-medium flex items-center ${item.id === selected.edge ? 'text-blue-500' : ''}`}>
-              {getNodeLabel(item.source)}
-              <Link className={`h-3 w-3 mx-1 ${item.id === selected.edge ? 'text-blue-500' : ''}`} />
-              {getNodeLabel(item.target)}
-              {item.label && <span className={`ml-1 ${item.id === selected.edge ? 'text-blue-400' : 'text-gray-500'}`}>({item.label})</span>}
+            <div className="p-2 font-medium flex items-center gap-1.5">
+              <span className="truncate">{getNodeLabel(item.source)}</span>
+              <ArrowRightCircle className="h-3 w-3 mx-0.5 shrink-0" />
+              <span className="truncate">{getNodeLabel(item.target)}</span>
+              {item.label && (
+                <Badge variant="outline" className="ml-1.5 text-xs font-normal">
+                  {item.label}
+                </Badge>
+              )}
             </div>
           )}
         />

@@ -1,5 +1,10 @@
+// src/components/APPUI/StepModal.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
+import { X } from "lucide-react";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Button } from "../ui/button";
+
 
 interface StepModalProps<T> {
   steps: T[];
@@ -25,23 +30,28 @@ export const StepModal = <T extends Record<string, any>>({
   const isFirstStep = currentStep === 0;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full">
-        <div className="p-4 border-b flex justify-between items-center">
-          <h2 className="text-xl font-bold">{step.label || `Step ${currentStep + 1}`}</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            ✕
-          </button>
-        </div>
+    <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>{step.label || `Step ${currentStep + 1}`}</DialogTitle>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="absolute right-4 top-4"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </DialogHeader>
         
-        <div className="p-6">
+        <div className="my-6">
           {renderStepContent ? (
             renderStepContent(step)
           ) : (
             <div>
               <p>{step.label || `Step ${currentStep + 1}`}</p>
               {step.assistant && (
-                <div className="mt-2 p-3 bg-blue-50 rounded">
+                <div className="mt-4 p-4 bg-muted rounded-md">
                   {step.assistant}
                 </div>
               )}
@@ -49,34 +59,32 @@ export const StepModal = <T extends Record<string, any>>({
           )}
         </div>
         
-        <div className="p-4 border-t flex justify-between">
-          <button
+        <DialogFooter className="flex justify-between w-full">
+          <Button
+            variant="outline"
             onClick={onPrev}
             disabled={isFirstStep}
-            className={`px-4 py-2 rounded ${
-              isFirstStep ? "bg-gray-300 cursor-not-allowed" : "bg-gray-500 hover:bg-gray-600 text-white"
-            }`}
           >
             Previous
-          </button>
+          </Button>
           
           {isLastStep ? (
-            <button
+            <Button
+              variant="default"
               onClick={onClose}
-              className="px-4 py-2 rounded bg-green-500 hover:bg-green-600 text-white"
             >
               Finish
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
+              variant="default"
               onClick={onNext}
-              className="px-4 py-2 rounded bg-blue-500 hover:bg-blue-600 text-white"
             >
               Next
-            </button>
+            </Button>
           )}
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };

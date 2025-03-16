@@ -1,8 +1,10 @@
+// src/modules/workspaces/WorkspacesList.tsx
 import React from "react";
 import { useDialogState } from "@/hooks";
 import { useAppStore } from '../store';
 import { CardPanel, Dialog, ItemList } from "@/components/APPUI";
 import { Workspace } from "../types";
+import { FolderOpen } from "lucide-react";
 
 export const WorkspacesList: React.FC = () => {
   const items = useAppStore(state => state.items);
@@ -32,7 +34,12 @@ export const WorkspacesList: React.FC = () => {
           selected={selected.workspace}
           onClick={selectWorkspace}
           onDelete={deleteWorkspace}
-          renderItem={(item) => <div className="font-medium p-2">{item.title}</div>}
+          renderItem={(item) => (
+            <div className="p-2 font-medium flex items-center">
+              <FolderOpen className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+              {item.title}
+            </div>
+          )}
         />
       </CardPanel>
       

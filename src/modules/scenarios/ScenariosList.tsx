@@ -1,8 +1,10 @@
+// src/modules/scenarios/ScenariosList.tsx
 import React from "react";
 import { useDialogState } from "@/hooks";
 import { useAppStore } from '../store';
 import { CardPanel, Dialog, ItemList } from "@/components/APPUI";
 import { Scenario } from "../types";
+import { FileText } from "lucide-react";
 
 export const ScenariosList: React.FC = () => {
   const items = useAppStore(state => state.items);
@@ -38,8 +40,15 @@ export const ScenariosList: React.FC = () => {
           onDelete={deleteScenario}
           renderItem={(item) => (
             <div className="p-2">
-              <div className="font-medium">{item.name}</div>
-              {item.description && <div className="text-xs opacity-70 truncate">{item.description}</div>}
+              <div className="font-medium flex items-center">
+                <FileText className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                {item.name}
+              </div>
+              {item.description && (
+                <div className="text-xs text-muted-foreground truncate mt-0.5 ml-5.5">
+                  {item.description}
+                </div>
+              )}
             </div>
           )}
         />

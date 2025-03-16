@@ -1,7 +1,27 @@
-// src/modules/plugin/components/PluginManager.tsx
+// src/modules/plugin/components/PuginManager.tsx
 import React, { useState, useMemo } from 'react';
 import { pluginRegistry } from '../plugin-registry';
 import { usePluginStore } from '../store';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Puzzle } from 'lucide-react';
 
 export const PluginManager: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,99 +33,88 @@ export const PluginManager: React.FC = () => {
   // Get plugin status from store
   const pluginStates = usePluginStore(state => state.plugins);
   
-  if (!isOpen) {
-    return (
-      <button 
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 z-50 bg-blue-500 text-white p-2 rounded-md shadow-lg hover:bg-blue-600"
-      >
-        Plugins
-      </button>
-    );
-  }
-  
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[80vh] overflow-auto">
-        <div className="p-4 border-b flex justify-between items-center">
-          <h2 className="text-xl font-bold">Plugin Manager</h2>
-          <button 
-            onClick={() => setIsOpen(false)}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            ✕
-          </button>
-        </div>
-        
-        <div className="p-4">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border p-2 text-left">Name</th>
-                <th className="border p-2 text-left">Description</th>
-                <th className="border p-2 text-left">Version</th>
-                <th className="border p-2 text-left">Status</th>
-                <th className="border p-2 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {plugins.length > 0 ? (
-                plugins.map(plugin => {
-                  const isActive = pluginStates[plugin.config.id]?.active || false;
-                  
-                  return (
-                    <tr key={plugin.config.id} className="border-b">
-                      <td className="border p-2 font-medium">
-                        {plugin.config.name}
-                      </td>
-                      <td className="border p-2">
-                        {plugin.config.description}
-                      </td>
-                      <td className="border p-2">
-                        {plugin.config.version}
-                      </td>
-                      <td className="border p-2">
-                        <span className={`px-2 py-1 rounded-full text-xs ${isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                          {isActive ? 'Active' : 'Inactive'}
-                        </span>
-                      </td>
-                      <td className="border p-2">
-                        <button
-                          onClick={() => {
-                            if (isActive) {
-                              deactivatePlugin(plugin.config.id);
-                            } else {
-                              activatePlugin(plugin.config.id);
-                            }
-                          }}
-                          className={`px-3 py-1 rounded-md text-white text-sm ${isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
-                        >
-                          {isActive ? 'Deactivate' : 'Activate'}
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan={5} className="border p-4 text-center text-gray-500">
-                    No plugins available.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        
-        <div className="p-4 border-t flex justify-end">
-          <button
-            onClick={() => setIsOpen(false)}
-            className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
+    <>
+      <Button 
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-4 right-4 z-50 shadow-md"
+        size="sm"
+      >
+        <Puzzle className="h-4 w-4 mr-2" />
+        Plugins
+      </Button>
+
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="sm:max-w-4xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>Plugin Manager</DialogTitle>
+          </DialogHeader>
+          
+          <ScrollArea className="h-[50vh] my-6">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Version</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-[100px]">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {plugins.length > 0 ? (
+                  plugins.map(plugin => {
+                    const isActive = pluginStates[plugin.config.id]?.active || false;
+                    
+                    return (
+                      <TableRow key={plugin.config.id}>
+                        <TableCell className="font-medium">
+                          {plugin.config.name}
+                        </TableCell>
+                        <TableCell>
+                          {plugin.config.description}
+                        </TableCell>
+                        <TableCell>
+                          {plugin.config.version}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={isActive ? "success" : "secondary"} className="px-2 py-0.5">
+                            {isActive ? 'Active' : 'Inactive'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Switch
+                            checked={isActive}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                activatePlugin(plugin.config.id);
+                              } else {
+                                deactivatePlugin(plugin.config.id);
+                              }
+                            }}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
+                      No plugins available
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </ScrollArea>
+          
+          <DialogFooter>
+            <Button onClick={() => setIsOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };

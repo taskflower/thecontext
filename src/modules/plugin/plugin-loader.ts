@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/plugin/plugin-loader.ts
 import { Plugin } from './types';
 import { pluginRegistry } from './plugin-registry';
@@ -11,7 +12,7 @@ export const loadPlugins = () => {
   console.log('Available plugin modules:', Object.keys(pluginModules));
   
   // Process each imported module
-  Object.values(pluginModules).forEach((module: unknown) => {
+  Object.values(pluginModules).forEach((module: any) => {
     // Check if the module exports a plugin class by default
     if (module.default && typeof module.default === 'object' && 'config' in module.default && 'process' in module.default) {
       const plugin = module.default as Plugin;

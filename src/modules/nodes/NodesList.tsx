@@ -1,9 +1,24 @@
+// src/modules/nodes/NodesList.tsx
 import React, { useState } from 'react';
 import { useDialogState } from '@/hooks';
 import { useAppStore } from '../store';
 import { CardPanel, Dialog, ItemList } from '@/components/APPUI';
 import { GraphNode } from '../types';
 import { pluginRegistry } from '../plugin/plugin-registry';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Puzzle, MessageCircle } from 'lucide-react';
+import {
+  Dialog as PluginDialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+
 
 export const NodesList: React.FC = () => {
   const getCurrentScenario = useAppStore(state => state.getCurrentScenario);
@@ -83,26 +98,31 @@ export const NodesList: React.FC = () => {
           onClick={selectNode}
           onDelete={deleteNode}
           renderItem={(item) => (
-            <div className="flex items-center p-2">
-              <div className="font-medium">{item.label}</div>
-              <div className="flex ml-auto items-center">
+            <div className="flex items-center justify-between p-2 gap-2">
+              <div className="font-medium truncate">{item.label}</div>
+              <div className="flex items-center gap-2 shrink-0">
                 {item.plugins && item.plugins.length > 0 && (
-                  <span className="px-2 py-0.5 mr-2 text-xs bg-green-100 text-green-800 rounded-full">
-                    {item.plugins.length} plugin(s)
-                  </span>
+                  <Badge variant="secondary" className="px-1.5 h-5 text-xs">
+                    <Puzzle className="h-3 w-3 mr-1" />
+                    {item.plugins.length}
+                  </Badge>
                 )}
-                <button 
-                  className="p-1 text-xs bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-6 w-6 rounded-full"
                   onClick={(e) => {
                     e.stopPropagation();
                     handlePluginSelection(item.id);
                   }}
                 >
-                  Wtyczki
-                </button>
-                <span className="ml-2 inline-flex items-center px-1 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-700 text-[10px] h-4">
-                  {item.assistant}
-                </span>
+                  <Puzzle className="h-3 w-3" />
+                </Button>
+                {item.assistant && (
+                  <Badge variant="outline" className="px-1.5 h-5 text-xs">
+                    <MessageCircle className="h-3 w-3 mr-1" />
+                  </Badge>
+                )}
               </div>
             </div>
           )}
@@ -124,50 +144,55 @@ export const NodesList: React.FC = () => {
       )}
       
       {showPluginDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-4">
-            <h3 className="text-lg font-bold mb-4">Zarządzaj wtyczkami dla węzła</h3>
+        <PluginDialog open={showPluginDialog} onOpenChange={(open) => !open && setShowPluginDialog(false)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Manage Node Plugins</DialogTitle>
+            </DialogHeader>
             
-            <div className="max-h-60 overflow-y-auto mb-4">
-              {availablePlugins.length > 0 ? (
-                availablePlugins.map(plugin => (
-                  <div key={plugin.config.id} className="flex items-center p-2 border-b">
-                    <input
-                      type="checkbox"
-                      id={`plugin-${plugin.config.id}`}
-                      checked={pluginSelections.includes(plugin.config.id)}
-                      onChange={() => handlePluginToggle(plugin.config.id)}
-                      className="mr-2"
-                    />
-                    <label htmlFor={`plugin-${plugin.config.id}`} className="flex-1">
-                      <div className="font-medium">{plugin.config.name}</div>
-                      <div className="text-xs text-gray-500">{plugin.config.description}</div>
-                    </label>
-                  </div>
-                ))
-              ) : (
-                <div className="p-4 text-center text-gray-500">
-                  Brak dostępnych wtyczek.
+            <div className="py-4">
+              <ScrollArea className="h-[60vh] max-h-60 pr-4">
+                <div className="space-y-4">
+                  {availablePlugins.length > 0 ? (
+                    availablePlugins.map(plugin => (
+                      <div key={plugin.config.id} className="flex items-start space-x-3 pt-2">
+                        <Checkbox
+                          id={`plugin-${plugin.config.id}`}
+                          checked={pluginSelections.includes(plugin.config.id)}
+                          onCheckedChange={() => handlePluginToggle(plugin.config.id)}
+                        />
+                        <div className="grid gap-1.5 leading-none">
+                          <Label
+                            htmlFor={`plugin-${plugin.config.id}`}
+                            className="font-medium"
+                          >
+                            {plugin.config.name}
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            {plugin.config.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="py-4 text-center text-muted-foreground">
+                      No plugins available
+                    </div>
+                  )}
                 </div>
-              )}
+              </ScrollArea>
             </div>
             
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={() => setShowPluginDialog(false)}
-                className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
-              >
-                Anuluj
-              </button>
-              <button
-                onClick={savePluginSelections}
-                className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                Zapisz
-              </button>
-            </div>
-          </div>
-        </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowPluginDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={savePluginSelections}>
+                Save
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </PluginDialog>
       )}
     </>
   );
