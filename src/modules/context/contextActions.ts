@@ -65,7 +65,7 @@ export const createContextActions = (set: SetFn) => ({
       
       state.stateVersion++;
     }),
-    
+        
   // Dodawanie elementu kontekstu
   addContextItem: (contextId: string, item: ContextItem) =>
     set((state) => {

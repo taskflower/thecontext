@@ -6,6 +6,7 @@ import { ScenariosList } from "./modules/scenarios";
 import { WorkspacesList } from "./modules/workspaces";
 import { PluginManager } from "./modules/plugin/components/PuginManager";
 import { ThemeProvider } from "./components/ui/theme-provider";
+import { ContextsList } from "./modules/context";
 
 const App: React.FC = () => (
   <ThemeProvider defaultTheme="dark">
@@ -17,6 +18,7 @@ const App: React.FC = () => (
           <NodesList />
           <EdgesList />
           <PluginManager />
+          <ContextsList/>
         </div>
         <div className="md:col-span-3"> 
           <FlowGraph />

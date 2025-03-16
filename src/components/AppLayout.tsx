@@ -25,6 +25,7 @@ export const AppLayout: React.FC = () => {
             <h1 className="text-xl font-semibold tracking-tight">Conversation Flow Builder</h1>
           </div>
           
+          <ContextsList /> 
           <ScrollArea className="h-[calc(100vh-8rem)]">
             <div className="space-y-6 pr-4">
               <Card>
@@ -53,8 +54,9 @@ export const AppLayout: React.FC = () => {
                 </Card>
               </div>
             </div>
+           
           </ScrollArea>
-          <ContextsList /> 
+         
         </div>
       </div>
       

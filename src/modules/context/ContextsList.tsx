@@ -3,9 +3,10 @@ import React, { useState } from "react";
 import { useDialogState } from "@/hooks";
 import { useAppStore } from "../store";
 import { CardPanel, Dialog, ItemList } from "@/components/APPUI";
-import { Context, ContextItem, ContextValueType } from "./types";
-import { ContextEditor } from "./ContextEditor";
+import { Context } from "./types";
+
 import { Database } from "lucide-react";
+import { ContextEditor } from "./ContextEditor";
 
 export const ContextsList: React.FC = () => {
   const contexts = useAppStore(state => state.contexts || []);
@@ -40,6 +41,7 @@ export const ContextsList: React.FC = () => {
   return (
     <>
       <CardPanel title="Context" onAddClick={() => openDialog({ name: '' })}>
+        ??????????????????
         <ItemList<Context> 
           items={workspaceContexts}
           selected={selectedContext || ""}
