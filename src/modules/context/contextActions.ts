@@ -1,4 +1,3 @@
-// src/modules/context/contextActions.ts
 import { ContextItem, AppState } from "../types";
 import { SetFn } from "../typesActioss";
 
@@ -6,13 +5,13 @@ export const createContextActions = (set: SetFn) => ({
   addContextItem: (workspaceId: string, item: ContextItem) =>
     set((state) => {
       const workspace = state.items.find(w => w.id === workspaceId);
-      if (!workspace) return;
+      if (!workspace) return state; // Return state to avoid modification if workspace doesn't exist
       
       if (!workspace.contextItems) {
         workspace.contextItems = [];
       }
       
-      // Sprawdź, czy klucz już istnieje i zastąp go
+      // Check if key already exists and replace it
       const existingIndex = workspace.contextItems.findIndex(i => i.key === item.key);
       if (existingIndex !== -1) {
         workspace.contextItems[existingIndex] = item;
@@ -27,7 +26,7 @@ export const createContextActions = (set: SetFn) => ({
   updateContextItem: (workspaceId: string, key: string, value: string, valueType: 'text' | 'json') =>
     set((state) => {
       const workspace = state.items.find(w => w.id === workspaceId);
-      if (!workspace || !workspace.contextItems) return;
+      if (!workspace || !workspace.contextItems) return state; // Return state to avoid modification
       
       const item = workspace.contextItems.find(i => i.key === key);
       if (item) {
@@ -41,7 +40,7 @@ export const createContextActions = (set: SetFn) => ({
   deleteContextItem: (workspaceId: string, key: string) =>
     set((state) => {
       const workspace = state.items.find(w => w.id === workspaceId);
-      if (!workspace || !workspace.contextItems) return;
+      if (!workspace || !workspace.contextItems) return state; // Return state to avoid modification
       
       const index = workspace.contextItems.findIndex(i => i.key === key);
       if (index !== -1) {
@@ -60,6 +59,7 @@ export const createContextActions = (set: SetFn) => ({
   },
   
   getContextItems: (workspaceId: string) => (state: AppState) => {
+    // Safely find workspace and return empty array if not found
     const workspace = state.items.find(w => w.id === workspaceId);
     return workspace && workspace.contextItems ? workspace.contextItems : [];
   },

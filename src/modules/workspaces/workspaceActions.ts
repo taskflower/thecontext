@@ -24,24 +24,28 @@ export const createWorkspaceActions = (set: SetFn) => ({
       state.stateVersion++;
     }),
 
-  addWorkspace: (payload: { title: string }) =>
-    set((state: Draft<AppState>) => {
-      const newWorkspace: Workspace = {
-        id: `workspace-${Date.now()}`,
-        type: ElementType.WORKSPACE,
-        title: payload.title,
-        children: [],
-      };
-      state.items.push(newWorkspace);
-      state.selected.workspace = newWorkspace.id;
-      state.selected.scenario = "";
-      
-      // Clear node/edge selection
-      state.selected.node = undefined;
-      state.selected.edge = undefined;
-      
-      state.stateVersion++;
-    }),
+    addWorkspace: (payload: { title: string }) =>
+      set((state: Draft<AppState>) => {
+        const newWorkspace: Workspace = {
+          id: `workspace-${Date.now()}`,
+          type: ElementType.WORKSPACE,
+          title: payload.title,
+          children: [],
+          contextItems: [], // Initialize empty contextItems array
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        };
+        
+        state.items.push(newWorkspace);
+        state.selected.workspace = newWorkspace.id;
+        state.selected.scenario = "";
+        
+        // Clear node/edge selection
+        state.selected.node = undefined;
+        state.selected.edge = undefined;
+        
+        state.stateVersion++;
+      }),
 
   deleteWorkspace: (workspaceId: string) =>
     set((state: Draft<AppState>) => {
