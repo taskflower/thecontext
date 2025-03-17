@@ -65,7 +65,11 @@ export const EdgesList: React.FC = () => {
           type: 'select',
           options: nodes.map(n => ({ value: n.id, label: n.label }))
         },
-        { name: 'label', placeholder: 'Edge label (optional)' }
+        { 
+          name: 'label', 
+          placeholder: 'Edge label (optional)',
+          type: 'text'
+        }
       ],
       (data) => {
         if (data.source && data.target) {
@@ -77,12 +81,7 @@ export const EdgesList: React.FC = () => {
         }
       },
       {
-        confirmText: "Add",
-        initialData: {
-          source: nodes[0]?.id || '',
-          target: nodes[1]?.id || '',
-          label: ''
-        }
+        confirmText: "Add"
       }
     );
   };

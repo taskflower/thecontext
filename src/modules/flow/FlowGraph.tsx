@@ -111,7 +111,7 @@ export const FlowGraph: React.FC = () => {
   );
   
   const onNodeDragStop = useCallback<NodeDragHandler>(
-    (event, node) => {
+    (_event, node) => {
       updateNodePosition(node.id, node.position);
     },
     [updateNodePosition]

@@ -8,6 +8,7 @@ export const initialState: Pick<AppState, 'items' | 'selected' | 'conversation'>
       id: 'workspace1', 
       type: ElementType.WORKSPACE, 
       title: 'Project Alpha',
+      slug: 'project-alpha', // Added the required slug field
       createdAt: Date.now(),
       updatedAt: Date.now(),
       // Kontekst bezpośrednio w workspace

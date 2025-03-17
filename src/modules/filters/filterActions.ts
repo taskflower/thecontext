@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/modules/filters/filterActions.ts
 import { SetFn, GetFn } from "../typesActioss";
+import { ContextItem, AppState } from "../types";
 import { Filter, FilterOperator } from "./types";
 
 export const createFilterActions = (set: SetFn, get: GetFn) => ({
@@ -85,16 +84,16 @@ export const createFilterActions = (set: SetFn, get: GetFn) => ({
     }),
   
   // Get all filters for a scenario
-  getScenarioFilters: (scenarioId: string) => (state:any) => {
-    const workspace = state.items.find((w: { id: any; }) => w.id === state.selected.workspace);
+  getScenarioFilters: (scenarioId: string) => (state: AppState) => {
+    const workspace = state.items.find(w => w.id === state.selected.workspace);
     if (!workspace || !workspace.children) return [];
     
-    const scenario = workspace.children.find((s: { id: string; }) => s.id === scenarioId);
+    const scenario = workspace.children.find(s => s.id === scenarioId);
     return scenario?.filters || [];
   },
   
   // Check if context items match filter conditions for a scenario
-  checkScenarioFilterMatch: (scenarioId: string, contextItems: any[]) => {
+  checkScenarioFilterMatch: (scenarioId: string, contextItems: ContextItem[]) => {
     const state = get();
     const workspace = state.items.find(w => w.id === state.selected.workspace);
     if (!workspace || !workspace.children) return true;
@@ -115,7 +114,7 @@ export const createFilterActions = (set: SetFn, get: GetFn) => ({
         return filter.operator === FilterOperator.EMPTY;
       }
       
-      const { value } = contextItem;
+      const { value, valueType } = contextItem;
       
       switch (filter.operator) {
         case FilterOperator.EQUALS:
@@ -134,7 +133,29 @@ export const createFilterActions = (set: SetFn, get: GetFn) => ({
           return parseFloat(value) > parseFloat(filter.value || "0");
         case FilterOperator.LESS_THAN:
           return parseFloat(value) < parseFloat(filter.value || "0");
-        
+        case FilterOperator.JSON_PATH:
+          if (valueType === "json") {
+            try {
+              const parsedJson = JSON.parse(value);
+              // Basic JSON path implementation
+              if (filter.value && filter.value.includes('.')) {
+                const path = filter.value.split('.');
+                let result = parsedJson;
+                for (const key of path) {
+                  if (result && typeof result === 'object' && key in result) {
+                    result = result[key];
+                  } else {
+                    return false;
+                  }
+                }
+                return result !== undefined && result !== null;
+              }
+              return parsedJson[filter.value || ''] !== undefined;
+            } catch {
+              return false;
+            }
+          }
+          return false;
         default:
           return true;
       }
@@ -145,14 +166,18 @@ export const createFilterActions = (set: SetFn, get: GetFn) => ({
   getScenariosWithFilterStatus: () => {
     const state = get();
     const workspace = state.items.find(w => w.id === state.selected.workspace);
-    if (!workspace) return [];
+    if (!workspace || !workspace.children) return [];
     
     const contextItems = workspace.contextItems || [];
     
     // Add filter match status to each scenario
-    return (workspace.children || []).map(scenario => ({
-      ...scenario,
-      matchesFilter: state.checkScenarioFilterMatch(scenario.id, contextItems)
-    }));
+    return workspace.children.map(scenario => {
+      const scenarioId = scenario.id;
+      const matchesFilter = state.checkScenarioFilterMatch(scenarioId, contextItems);
+      return {
+        ...scenario,
+        matchesFilter
+      };
+    });
   }
 });

@@ -1,6 +1,3 @@
-// src/modules/filters/types.ts
-
-
 export enum FilterOperator {
   EQUALS = "equals",
   NOT_EQUALS = "notEquals",

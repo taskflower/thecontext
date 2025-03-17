@@ -5,7 +5,7 @@ import { CheckCircle, XCircle, FilterIcon } from "lucide-react";
 
 interface FilterStatusProps {
   scenarioId: string;
-  onEditClick?: () => void;
+  onEditClick?: (e: React.MouseEvent<Element, MouseEvent>) => void;
 }
 
 export const FilterStatus: React.FC<FilterStatusProps> = ({ 
