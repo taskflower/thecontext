@@ -1,4 +1,3 @@
-// src/modules/conversation/ConversationPanel.tsx
 import React from "react";
 import { useAppStore } from "../store";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -20,10 +19,17 @@ export const ConversationPanel: React.FC = () => {
           {conversation.length > 0 ? (
             conversation.map((item, index) => (
               <TableRow key={index}>
-                <TableCell className="font-medium capitalize">
+                <TableCell className=
+                {`font-medium capitalize align-top ${
+                  item.role === "assistant" ? "bg-sidebar" : ""
+                }`}>
                   {item.role}
                 </TableCell>
-                <TableCell className="whitespace-pre-line">
+                <TableCell 
+                  className={`whitespace-pre-line align-top ${
+                    item.role === "assistant" ? "bg-sidebar" : ""
+                  }`}
+                >
                   {item.message}
                 </TableCell>
               </TableRow>

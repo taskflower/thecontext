@@ -29,6 +29,10 @@ export const FlowPlayer: React.FC = () => {
   // State for processed messages
   const [processedMessage, setProcessedMessage] = useState<string | null>(null);
 
+  // Check if scenario exists
+  const currentScenario = getCurrentScenario();
+  const isScenarioSelected = !!currentScenario;
+
   // Reset processed message when step changes
   useEffect(() => {
     setProcessedMessage(null);
@@ -68,12 +72,21 @@ export const FlowPlayer: React.FC = () => {
   const handlePlay = useCallback(() => {
     const scenario = getCurrentScenario();
     if (scenario) {
+      // Clear conversation before starting new flow
+      clearConversation();
+
+      // Create a clean path with no user messages
       const path = calculateFlowPath(scenario.children, scenario.edges);
       if (path.length > 0) {
-        setFlowPath(path);
+        // Reset user messages in the path
+        const cleanPath = path.map(node => ({
+          ...node,
+          userMessage: undefined // Clear any previously stored user messages
+        }));
+        
+        setFlowPath(cleanPath);
         setCurrentNodeIndex(0);
         setIsPlaying(true);
-        clearConversation();
       }
     }
   }, [getCurrentScenario, clearConversation]);
@@ -105,7 +118,16 @@ export const FlowPlayer: React.FC = () => {
     setIsPlaying(false);
     setCurrentNodeIndex(0);
     setFlowPath([]);
-  }, [saveCurrentNodeMessages]);
+    
+    // Also clear node user messages in the store
+    if (flowPath.length > 0) {
+      flowPath.forEach(node => {
+        if (node.userMessage) {
+          setUserMessage(node.id, "");
+        }
+      });
+    }
+  }, [saveCurrentNodeMessages, flowPath, setUserMessage]);
 
   const handleUserMessageChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -133,9 +155,14 @@ export const FlowPlayer: React.FC = () => {
   return (
     <>
       <div className="absolute top-4 right-4 z-10">
-        <Button size="sm" onClick={handlePlay} className="px-3 py-2 space-x-1">
+        <Button 
+          size="sm" 
+          onClick={handlePlay} 
+          className="px-3 py-2 space-x-1"
+          disabled={!isScenarioSelected}
+        >
           <Play className="h-4 w-4 mr-1" />
-          <span>Play Flow</span>
+          <span>Play Flow {!isScenarioSelected && '(Select Scenario)'}</span>
         </Button>
       </div>
 
@@ -153,7 +180,7 @@ export const FlowPlayer: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-semibold">Assistant</h3>
 
-                    {/* Wyświetlanie pojedynczego pluginu */}
+                    {/* Display single plugin */}
                     {step.plugin && (
                       <div className="flex flex-wrap gap-1">
                         {(() => {
@@ -178,7 +205,7 @@ export const FlowPlayer: React.FC = () => {
                     onProcessed={setProcessedMessage}
                     autoProcess={true}
                     nodePlugins={step.plugin ? [step.plugin] : undefined}
-                    nodePluginOptions={step.pluginOptions} // Add this line to pass plugin options
+                    nodePluginOptions={step.pluginOptions}
                     onSimulateFinish={handleNext}
                   />
 
