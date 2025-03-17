@@ -65,10 +65,11 @@ export interface Workspace {
   id: string;
   type: ElementType.WORKSPACE;
   title: string;
+  slug: string; // Added slug field
   children: Scenario[];
-  contextItems: ContextItem[]; // Kontekst bezpośrednio w workspace
-  createdAt?: number;
-  updatedAt?: number;
+  contextItems: ContextItem[];
+  createdAt: number;
+  updatedAt: number;
 }
 
 export interface Conversation {
@@ -84,8 +85,11 @@ export interface AppState {
     node?: string;
     edge?: string;
   };
+  activeTab: string;
   stateVersion: number;
   conversation: Conversation[];
+
+  setActiveTab: (tab: string) => void;
 
   // Workspace methods
   selectWorkspace: (workspaceId: string) => void;

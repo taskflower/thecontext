@@ -1,6 +1,7 @@
 // src/modules/store.ts
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
+import { persist } from "zustand/middleware";
 import { AppState } from "./types";
 import { initialState } from "./initialState";
 import { createWorkspaceActions } from "./workspaces/workspaceActions";
@@ -12,22 +13,41 @@ import { createSelectionActions } from "./selection/selectionActions";
 import { createHelperActions } from "./helper/helperActions";
 import { createContextActions } from "./context/contextActions";
 
-// Stwórz store z odpowiednio typowanymi parametrami
+// Create store with persist middleware
 export const useAppStore = create<AppState>()(
-  immer((set, get) => ({
-    items: initialState.items,
-    selected: initialState.selected,
-    stateVersion: 0,
-    conversation: initialState.conversation,
+  persist(
+    immer((set, get) => ({
+      items: initialState.items,
+      selected: initialState.selected,
+      stateVersion: 0,
+      activeTab: "workspace",
+      setActiveTab: (tab: string) => set((state) => {
+        state.activeTab = tab;
+        state.stateVersion++;
+      }),
+      conversation: initialState.conversation,
 
-    // Połącz wszystkie akcje
-    ...createWorkspaceActions(set),
-    ...createScenarioActions(set),
-    ...createNodeActions(set),
-    ...createEdgeActions(set),
-    ...createConversationActions(set),
-    ...createSelectionActions(set),
-    ...createHelperActions(get),
-    ...createContextActions(set), // Akcje kontekstu
-  }))
+      // Combine all actions
+      ...createWorkspaceActions(set),
+      ...createScenarioActions(set),
+      ...createNodeActions(set),
+      ...createEdgeActions(set),
+      ...createConversationActions(set),
+      ...createSelectionActions(set),
+      ...createHelperActions(get),
+      ...createContextActions(set),
+    })),
+    {
+      name: "flow-builder-storage", // Storage key
+      partialize: (state) => ({
+        // Only persist these parts of the state
+        items: state.items,
+        selected: state.selected,
+        // Don't persist conversation to save storage space
+        // Don't persist stateVersion since it's a local state tracker
+      }),
+      // Optional storage configuration (uncomment if needed)
+      // storage: createJSONStorage(() => localStorage),
+    }
+  )
 );

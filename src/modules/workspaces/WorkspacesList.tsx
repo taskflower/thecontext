@@ -3,7 +3,7 @@ import React from "react";
 import { useAppStore } from '../store';
 import { ItemList } from "@/components/APPUI";
 import { Workspace } from "../types";
-import { FolderOpen, MoreHorizontal, Plus } from "lucide-react";
+import { FolderOpen, MoreHorizontal, Plus, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDialogManager } from '@/hooks/useDialogManager';
 
@@ -14,10 +14,9 @@ export const WorkspacesList: React.FC = () => {
   const deleteWorkspace = useAppStore(state => state.deleteWorkspace);
   const addWorkspace = useAppStore(state => state.addWorkspace);
   const updateWorkspace = useAppStore(state => state.updateWorkspace);
-  // Force component to update when state changes
+  const setActiveTab = useAppStore(state => state.setActiveTab);
   useAppStore(state => state.stateVersion);
   
-  // Use the new dialog manager hook
   const { createDialog } = useDialogManager();
   
   const handleAddWorkspace = () => {
@@ -50,21 +49,36 @@ export const WorkspacesList: React.FC = () => {
   const handleEditWorkspace = (workspace: Workspace) => {
     createDialog(
       "Edit Workspace",
-      [{ 
-        name: 'title', 
-        placeholder: 'Workspace name',
-        type: 'text',
-        value: workspace.title,
-        validation: {
-          required: true,
-          minLength: 1,
-          maxLength: 50
+      [
+        { 
+          name: 'title', 
+          placeholder: 'Workspace name',
+          type: 'text',
+          value: workspace.title,
+          validation: {
+            required: true,
+            minLength: 1,
+            maxLength: 50
+          }
+        },
+        {
+          name: 'slug',
+          placeholder: 'URL slug',
+          type: 'text',
+          value: workspace.slug || '',
+          validation: {
+            required: true,
+            minLength: 1,
+            maxLength: 50,
+            pattern: /^[a-z0-9-]+$/
+          }
         }
-      }],
+      ],
       (data) => {
-        if (data.title?.toString().trim()) {
+        if (data.title?.toString().trim() && data.slug?.toString().trim()) {
           updateWorkspace(workspace.id, {
-            title: String(data.title)
+            title: String(data.title),
+            slug: String(data.slug)
           });
         }
       },
@@ -73,6 +87,24 @@ export const WorkspacesList: React.FC = () => {
         size: 'sm'
       }
     );
+  };
+  
+  // Tylko wybiera workspace bez przełączania zakładki
+  const handleWorkspaceSelect = (workspaceId: string) => {
+    selectWorkspace(workspaceId);
+  };
+  
+  // Przełączenie na scenariusze i wybór workspace
+  const handleGoToScenarios = (e: React.MouseEvent, workspaceId: string) => {
+    e.stopPropagation();
+    selectWorkspace(workspaceId);
+    setActiveTab("scenarios");
+  };
+  
+  // Obsługa przycisku opcji
+  const handleOptionsClick = (e: React.MouseEvent, workspace: Workspace) => {
+    e.stopPropagation();
+    handleEditWorkspace(workspace);
   };
   
   return (
@@ -93,25 +125,36 @@ export const WorkspacesList: React.FC = () => {
         <ItemList<Workspace> 
           items={items}
           selected={selected.workspace}
-          onClick={selectWorkspace}
+          onClick={handleWorkspaceSelect}
           onDelete={deleteWorkspace}
           renderItem={(item) => (
-            <div className="p-2 font-medium flex items-center justify-between w-full">
+            <div className="text-xs font-medium flex items-center justify-between w-full">
               <div className="flex items-center">
                 <FolderOpen className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
                 {item.title}
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEditWorkspace(item);
-                }}
-              >
-                <MoreHorizontal className="h-3.5 w-3.5" />
-              </Button>
+              <div className="flex items-center gap-1">
+                {/* Przycisk do przejścia na scenariusze */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  title="Przejdź do scenariuszy"
+                  onClick={(e) => handleGoToScenarios(e, item.id)}
+                >
+                  <Layers className="h-3.5 w-3.5" />
+                </Button>
+                {/* Przycisk opcji */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  title="Opcje"
+                  onClick={(e) => handleOptionsClick(e, item)}
+                >
+                  <MoreHorizontal className="h-3.5 w-3.5" />
+                </Button>
+              </div>
             </div>
           )}
           height="h-full"

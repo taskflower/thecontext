@@ -2,20 +2,25 @@
 import React, { useState } from "react";
 import { ThemeProvider } from "../components/ui/theme-provider";
 import { DialogProvider } from "../components/APPUI/DialogProvider";
-import { 
-  LayoutGrid, 
-  Database, 
-  Settings, 
-  Layers, 
-  PanelLeft, 
-  PanelRight, 
-  MessageSquare, 
-  FileCode, 
-  Puzzle, 
-  Focus 
+import {
+  LayoutGrid,
+  Database,
+  Settings,
+  Layers,
+  PanelLeft,
+  PanelRight,
+  MessageSquare,
+  FileCode,
+  Puzzle,
+  Focus,
 } from "lucide-react";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
 import { Separator } from "../components/ui/separator";
 import { Button } from "../components/ui/button";
 import { ThemeToggle } from "../components/APPUI/ThemeToggle";
@@ -49,6 +54,10 @@ const StudioLayout: React.FC = () => {
     state.items.find((w) => w.id === selected.workspace)
   );
   const activeScenario = scenario;
+
+  const activeTab = useAppStore((state) => state.activeTab);
+const setActiveTab = useAppStore((state) => state.setActiveTab);
+
 
   // Automatycznie otwieraj panel właściwości, gdy wybrany jest węzeł lub krawędź
   React.useEffect(() => {
@@ -105,7 +114,11 @@ const StudioLayout: React.FC = () => {
             {/* Lewy panel */}
             {showLeftPanel && (
               <aside className="w-80 border-r bg-sidebar-background flex flex-col overflow-hidden">
-                <Tabs defaultValue="workspace" className="flex-1 flex flex-col">
+                  <Tabs
+  value={activeTab}
+  onValueChange={(value) => setActiveTab(value)}
+  className="flex-1 flex flex-col"
+>
                   <TabsList className="grid grid-cols-3 px-2 py-1 h-auto rounded-none border-b">
                     <TabsTrigger
                       value="workspace"

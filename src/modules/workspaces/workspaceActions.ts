@@ -5,6 +5,15 @@ import { Draft } from "immer";
 // The set function from immer middleware takes a function that modifies the draft state
 type SetFn = (fn: (state: Draft<AppState>) => void) => void;
 
+// Helper function to create a slug from a title
+const createSlug = (title: string): string => {
+  return title.toLowerCase()
+    .replace(/[^\w\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with a single one
+    .trim();
+};
+
 export const createWorkspaceActions = (set: SetFn) => ({
   selectWorkspace: (workspaceId: string) =>
     set((state: Draft<AppState>) => {
@@ -30,6 +39,7 @@ export const createWorkspaceActions = (set: SetFn) => ({
         id: `workspace-${Date.now()}`,
         type: ElementType.WORKSPACE,
         title: payload.title,
+        slug: createSlug(payload.title), // Generate slug from title
         children: [],
         contextItems: [], // Initialize empty contextItems array
         createdAt: Date.now(),
@@ -52,6 +62,11 @@ export const createWorkspaceActions = (set: SetFn) => ({
       const workspace = state.items.find((w) => w.id === workspaceId);
       
       if (workspace) {
+        // If title is being updated, also update the slug
+        if (payload.title && payload.title !== workspace.title) {
+          payload.slug = createSlug(payload.title);
+        }
+        
         Object.assign(workspace, {
           ...payload,
           updatedAt: Date.now()

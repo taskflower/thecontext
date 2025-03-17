@@ -12,7 +12,7 @@ export interface PluginsStore {
   deactivatePlugin: (pluginId: string) => void;
 }
 
-// Uproszczony store pluginów
+// Plugins store with persistence
 export const usePluginStore = create<PluginsStore>()(
   persist(
     (set) => ({
@@ -35,7 +35,7 @@ export const usePluginStore = create<PluginsStore>()(
         })),
     }),
     {
-      name: "plugin-store",
+      name: "plugin-store", // Storage key
       partialize: (state) => ({
         plugins: Object.fromEntries(
           Object.entries(state.plugins).map(([id, plugin]) => [
