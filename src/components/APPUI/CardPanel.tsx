@@ -1,9 +1,6 @@
-// src/components/APPUI/CardPanel.tsx
-import React from "react";
-
 import { Plus } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
 interface CardPanelProps {
   title: string;
@@ -23,11 +20,11 @@ export const CardPanel: React.FC<CardPanelProps> = ({
   <Card className={`border shadow-sm ${className}`}>
     <CardHeader className="px-4 py-3 flex flex-row items-center justify-between space-y-0 border-b">
       <CardTitle className="text-sm font-medium">{title}</CardTitle>
-      <Button variant="ghost" size="icon" onClick={onAddClick} className="h-7 w-7 rounded-full hover:bg-muted">
+      <Button variant="ghost" size="icon" onClick={onAddClick} className="h-8 w-8">
         <Plus className="h-4 w-4" />
       </Button>
     </CardHeader>
-    <CardContent className={noPadding ? "p-0" : "px-4 py-3"}>
+    <CardContent className={noPadding ? "p-0" : "p-4"}>
       {children}
     </CardContent>
   </Card>

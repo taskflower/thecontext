@@ -1,3 +1,7 @@
+// -------------------- Second Fix: Standardize CustomNode.tsx --------------------
+
+// src/modules/flow/CustomNode.tsx
+import { cn } from "@/utils/utils";
 import { memo } from "react";
 import { Handle, Position, NodeProps } from "reactflow";
 
@@ -22,35 +26,32 @@ const CustomNode = memo(({
         type="target"
         position={targetPosition}
         style={{ background: selected ? 'hsl(var(--primary))' : '#555' }}
+        className="transition-colors duration-150"
       />
       
-      <div 
-        style={{ 
-          color: selected ? 'hsl(var(--primary))' : 'inherit',
-          fontWeight: 500
-        }}
-      >
-        {data.label}
-      </div>
-      
-      {data.assistant && (
-        <div style={{ 
-          fontSize: '12px', 
-          color: 'hsl(var(--muted-foreground))',
-          marginTop: '4px',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis'
-        }}>
-          {data.assistant.substring(0, 40)}
-          {data.assistant.length > 40 ? "..." : ""}
+      <div className="px-3 py-2">
+        <div 
+          className={cn(
+            "font-medium transition-colors duration-150",
+            selected ? "text-primary" : "text-foreground"
+          )}
+        >
+          {data.label}
         </div>
-      )}
+        
+        {data.assistant && (
+          <div className="text-xs text-muted-foreground mt-1 truncate max-w-full">
+            {data.assistant.substring(0, 40)}
+            {data.assistant.length > 40 ? "..." : ""}
+          </div>
+        )}
+      </div>
       
       <Handle
         type="source"
         position={sourcePosition}
         style={{ background: selected ? 'hsl(var(--primary))' : '#555' }}
+        className="transition-colors duration-150"
       />
     </>
   );

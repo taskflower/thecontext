@@ -1,21 +1,19 @@
-// src/components/APPUI/ItemList.tsx
-import { ReactNode, memo } from "react";
-import { Trash2 } from "lucide-react";
-import { EmptyState } from "./EmptyState";
-import { ScrollArea } from "../ui/scroll-area";
 import { cn } from "@/utils/utils";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { Trash2 } from "lucide-react";
+import { memo } from "react";
 import { Button } from "../ui/button";
+import { EmptyState } from "./EmptyState";
 
 interface ItemListProps<T extends { id: string }> {
   items: T[];
   selected: string;
   onClick: (id: string) => void;
   onDelete: (id: string) => void;
-  renderItem: (item: T) => ReactNode;
+  renderItem: (item: T) => React.ReactNode;
   height?: string;
 }
 
-// Fix for memo with generics
 export const ItemList = memo(
   function ItemList<T extends { id: string }>({
     items,
@@ -26,38 +24,34 @@ export const ItemList = memo(
     height = "h-[220px]"
   }: ItemListProps<T>) {
     return (
-      <ScrollArea className={`${height} rounded-md`}>
-        <div className="space-y-0.5">
+      <ScrollArea className={`${height}`}>
+        <div>
           {items.map((item) => (
             <div
               key={item.id}
               className={cn(
-                "flex items-center text-sm",
+                "flex items-center justify-between",
                 "group hover:bg-accent/50 hover:text-accent-foreground cursor-pointer",
-                "transition-colors duration-150 border-l-2 border-transparent",
-                item.id === selected && "bg-accent text-accent-foreground border-l-2 border-primary"
+                item.id === selected && "bg-accent text-accent-foreground"
               )}
             >
               <div
-                className="flex-1 p-2 overflow-hidden cursor-pointer"
+                className="flex-1 p-2"
                 onMouseDown={() => onClick(item.id)}
-                // Używamy onMouseDown zamiast onClick
               >
                 {renderItem(item)}
               </div>
-              <div className="pr-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 opacity-70 hover:opacity-100 transition-opacity"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(item.id);
-                  }}
-                >
-                  <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
-                </Button>
-              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(item.id);
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           ))}
           {items.length === 0 && <EmptyState />}

@@ -76,27 +76,25 @@ const App: React.FC = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button
-                variant={showLeftPanel ? "secondary" : "ghost"}
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => setShowLeftPanel(!showLeftPanel)}
-                title="Toggle Navigation Panel"
-              >
-                <PanelLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={showRightPanel ? "secondary" : "ghost"}
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => setShowRightPanel(!showRightPanel)}
-                title="Toggle Properties Panel"
-              >
-                <PanelRight className="h-4 w-4" />
-              </Button>
-              <Separator orientation="vertical" className="h-6 mx-1" />
-              <ThemeToggle />
-            </div>
+  <Button
+    variant={showLeftPanel ? "secondary" : "ghost"}
+    size="icon"
+    className="h-8 w-8"
+    onClick={() => setShowLeftPanel(!showLeftPanel)}
+  >
+    <PanelLeft className="h-4 w-4" />
+  </Button>
+  <Button
+    variant={showRightPanel ? "secondary" : "ghost"}
+    size="icon"
+    className="h-8 w-8"
+    onClick={() => setShowRightPanel(!showRightPanel)}
+  >
+    <PanelRight className="h-4 w-4" />
+  </Button>
+  <Separator orientation="vertical" className="h-6" />
+  <ThemeToggle />
+</div>
           </header>
 
           {/* Główna zawartość */}

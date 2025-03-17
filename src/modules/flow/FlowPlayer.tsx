@@ -25,7 +25,7 @@ export const FlowPlayer: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentNodeIndex, setCurrentNodeIndex] = useState(0);
   const [flowPath, setFlowPath] = useState<GraphNode[]>([]);
-  
+
   // State for processed messages
   const [processedMessage, setProcessedMessage] = useState<string | null>(null);
 
@@ -50,40 +50,48 @@ export const FlowPlayer: React.FC = () => {
 
   // Memoize handlers to prevent recreation on each render
   const handleNext = useCallback(() => {
-    setFlowPath(currentPath => {
+    setFlowPath((currentPath) => {
       const currentNode = currentPath[currentNodeIndex];
-      
+
       if (currentNode && currentNode.assistant) {
         // Replace context tokens in assistant message
-        const messageWithContext = context.processTemplate(currentNode.assistant);
-        
+        const messageWithContext = context.processTemplate(
+          currentNode.assistant
+        );
+
         // Use processed message or message with context
         const finalMessage = processedMessage || messageWithContext;
-        
+
         // Add to conversation
         addToConversation({
           role: "assistant",
-          message: finalMessage
+          message: finalMessage,
         });
       }
-      
+
       // Add user message to conversation if it exists
       if (currentNode && currentNode.userMessage) {
         addToConversation({
           role: "user",
-          message: currentNode.userMessage
+          message: currentNode.userMessage,
         });
       }
 
       return currentPath;
     });
-    
+
     // Reset processed message
     setProcessedMessage(null);
-    
+
     // Move to the next node
-    setCurrentNodeIndex(prev => Math.min(prev + 1, flowPath.length - 1));
-  }, [currentNodeIndex, flowPath.length, processedMessage, addToConversation, context]);
+    setCurrentNodeIndex((prev) => Math.min(prev + 1, flowPath.length - 1));
+  }, [
+    currentNodeIndex,
+    flowPath.length,
+    processedMessage,
+    addToConversation,
+    context,
+  ]);
 
   const handlePrev = useCallback(() => {
     // We don't remove from conversation history when going back
@@ -97,34 +105,33 @@ export const FlowPlayer: React.FC = () => {
     setFlowPath([]);
   }, []);
 
-  const handleUserMessageChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
-    setFlowPath(currentPath => {
-      const currentNode = currentPath[currentNodeIndex];
-      if (currentNode) {
-        // Update user message in store
-        setUserMessage(currentNode.id, value);
-        
-        // Also update local state to ensure re-render
-        const updatedPath = [...currentPath];
-        updatedPath[currentNodeIndex] = {
-          ...currentNode,
-          userMessage: value
-        };
-        return updatedPath;
-      }
-      return currentPath;
-    });
-  }, [currentNodeIndex, setUserMessage]);
+  const handleUserMessageChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const value = e.target.value;
+      setFlowPath((currentPath) => {
+        const currentNode = currentPath[currentNodeIndex];
+        if (currentNode) {
+          // Update user message in store
+          setUserMessage(currentNode.id, value);
+
+          // Also update local state to ensure re-render
+          const updatedPath = [...currentPath];
+          updatedPath[currentNodeIndex] = {
+            ...currentNode,
+            userMessage: value,
+          };
+          return updatedPath;
+        }
+        return currentPath;
+      });
+    },
+    [currentNodeIndex, setUserMessage]
+  );
 
   return (
     <>
       <div className="absolute top-4 right-4 z-10">
-        <Button 
-          size="sm" 
-          onClick={handlePlay}
-          className="px-3 py-2 space-x-1"
-        >
+        <Button size="sm" onClick={handlePlay} className="px-3 py-2 space-x-1">
           <Play className="h-4 w-4 mr-1" />
           <span>Play Flow</span>
         </Button>
@@ -143,14 +150,18 @@ export const FlowPlayer: React.FC = () => {
                 <div className="flex flex-col space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-semibold">Assistant</h3>
-                    
+
                     {/* Wyświetlanie pojedynczego pluginu */}
                     {step.plugin && (
                       <div className="flex flex-wrap gap-1">
                         {(() => {
                           const plugin = pluginRegistry.getPlugin(step.plugin);
                           return plugin ? (
-                            <Badge key={step.plugin} variant="outline" className="text-xs">
+                            <Badge
+                              key={step.plugin}
+                              variant="outline"
+                              className="text-xs"
+                            >
                               {plugin.config.name}
                             </Badge>
                           ) : null;
@@ -158,28 +169,29 @@ export const FlowPlayer: React.FC = () => {
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Message processor with callback for simulation */}
-                  <MessageProcessor 
+                  <MessageProcessor
                     message={context.processTemplate(step.assistant)}
                     onProcessed={setProcessedMessage}
                     autoProcess={true}
                     nodePlugin={step.plugin}
                     onSimulateFinish={handleNext}
                   />
-                  
+
                   <div className="text-sm whitespace-pre-line">
-                    {processedMessage || context.processTemplate(step.assistant)}
+                    {processedMessage ||
+                      context.processTemplate(step.assistant)}
                   </div>
                 </div>
               </Card>
-              
+
               <div className="flex flex-col space-y-2">
                 <h3 className="text-sm font-semibold">Your Response</h3>
                 <Textarea
                   className="min-h-[120px] resize-none"
                   placeholder="Type your message here..."
-                  value={step.userMessage || ''}
+                  value={step.userMessage || ""}
                   onChange={handleUserMessageChange}
                 />
               </div>
