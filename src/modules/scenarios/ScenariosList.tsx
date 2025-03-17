@@ -1,9 +1,9 @@
-// src/modules/scenarios/ScenariosList.tsx (Refactored)
+// src/modules/scenarios/ScenariosList.tsx
 import React from "react";
 import { useAppStore } from '../store';
 import { ItemList } from "@/components/APPUI";
 import { Scenario } from "../types";
-import { FileText, Plus } from "lucide-react";
+import { FileText, Plus, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDialogManager } from '@/hooks/useDialogManager';
 
@@ -13,6 +13,7 @@ export const ScenariosList: React.FC = () => {
   const selectScenario = useAppStore(state => state.selectScenario);
   const deleteScenario = useAppStore(state => state.deleteScenario);
   const addScenario = useAppStore(state => state.addScenario);
+  const updateScenario = useAppStore(state => state.updateScenario);
   // Force component to update when state changes
   useAppStore(state => state.stateVersion);
   
@@ -25,10 +26,24 @@ export const ScenariosList: React.FC = () => {
   const handleAddScenario = () => {
     createDialog(
       "New Scenario",
-      [
-        { name: 'name', placeholder: 'Scenario name' },
-        { name: 'description', placeholder: 'Description' }
-      ],
+      [{ 
+        name: 'name', 
+        placeholder: 'Scenario name',
+        type: 'text',
+        validation: {
+          required: true,
+          minLength: 1,
+          maxLength: 50
+        }
+      }, 
+      { 
+        name: 'description', 
+        placeholder: 'Description',
+        type: 'text',
+        validation: {
+          maxLength: 200
+        }
+      }],
       (data) => {
         if (data.name?.toString().trim()) {
           addScenario({
@@ -38,9 +53,56 @@ export const ScenariosList: React.FC = () => {
         }
       },
       {
-        confirmText: "Add"
+        confirmText: "Add",
+        size: 'sm'
       }
     );
+  };
+
+  const handleEditScenario = (scenario: Scenario) => {
+    createDialog(
+      "Edit Scenario",
+      [
+        { 
+          name: 'name', 
+          placeholder: 'Scenario name',
+          type: 'text',
+          value: scenario.name,
+          validation: {
+            required: true,
+            minLength: 1,
+            maxLength: 50
+          }
+        },
+        {
+          name: 'description',
+          placeholder: 'Description',
+          type: 'text',
+          value: scenario.description || '',
+          validation: {
+            maxLength: 200
+          }
+        }
+      ],
+      (data) => {
+        if (data.name?.toString().trim()) {
+          updateScenario(scenario.id, {
+            name: String(data.name),
+            description: data.description ? String(data.description) : undefined
+          });
+        }
+      },
+      {
+        confirmText: "Update",
+        size: 'sm'
+      }
+    );
+  };
+  
+  // Handle options button click
+  const handleOptionsClick = (e: React.MouseEvent, scenario: Scenario) => {
+    e.stopPropagation();
+    handleEditScenario(scenario);
   };
   
   return (
@@ -64,16 +126,30 @@ export const ScenariosList: React.FC = () => {
           onClick={selectScenario}
           onDelete={deleteScenario}
           renderItem={(item) => (
-            <div className="p-2">
-              <div className="font-medium flex items-center">
-                <FileText className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
-                {item.name}
-              </div>
-              {item.description && (
-                <div className="text-xs text-muted-foreground truncate mt-0.5 ml-5.5">
-                  {item.description}
+            <div className="text-xs flex items-center justify-between w-full">
+              <div className="flex-1">
+                <div className="font-medium flex items-center">
+                  <FileText className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                  {item.name}
                 </div>
-              )}
+                {item.description && (
+                  <div className="text-xs text-muted-foreground truncate mt-0.5 ml-5.5 max-w-56">
+                    {item.description}
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center">
+                {/* Options button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  title="Options"
+                  onClick={(e) => handleOptionsClick(e, item)}
+                >
+                  <MoreHorizontal className="h-3.5 w-3.5" />
+                </Button>
+              </div>
             </div>
           )}
           height="h-full"
@@ -81,4 +157,4 @@ export const ScenariosList: React.FC = () => {
       </div>
     </div>
   );
-};  
+};

@@ -23,6 +23,8 @@ export const createScenarioActions = (set: SetFn) => ({
         description: payload.description,
         children: [],
         edges: [],
+        createdAt: Date.now(),
+        updatedAt: Date.now()
       };
 
       const workspace = state.items.find(
@@ -40,6 +42,28 @@ export const createScenarioActions = (set: SetFn) => ({
         state.selected.edge = undefined;
         
         state.stateVersion++;
+      }
+    }),
+
+  updateScenario: (scenarioId: string, payload: Partial<Scenario>) =>
+    set((state) => {
+      const workspace = state.items.find(
+        (w) => w.id === state.selected.workspace
+      );
+      
+      if (workspace?.children) {
+        const scenario = workspace.children.find(
+          (s) => s.id === scenarioId
+        );
+        
+        if (scenario) {
+          Object.assign(scenario, {
+            ...payload,
+            updatedAt: Date.now()
+          });
+          
+          state.stateVersion++;
+        }
       }
     }),
 

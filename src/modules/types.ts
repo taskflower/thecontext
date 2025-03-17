@@ -26,6 +26,13 @@ export interface DialogField {
   placeholder: string;
   type?: string;
   options?: { value: string; label: string }[];
+  value?: string | number;
+  validation?: {
+    required?: boolean;
+    minLength?: number;
+    maxLength?: number;
+    pattern?: RegExp;
+  };
 }
 
 export interface ContextItem {
@@ -60,6 +67,8 @@ export interface Scenario {
   description?: string;
   children: GraphNode[];
   edges: GraphEdge[];
+  createdAt?: number;
+  updatedAt?: number;
 }
 
 export interface Workspace {
@@ -101,6 +110,7 @@ export interface AppState {
   // Scenario methods
   selectScenario: (scenarioId: string) => void;
   addScenario: (payload: { name: string; description?: string }) => void;
+  updateScenario: (scenarioId: string, payload: Partial<Scenario>) => void;
   deleteScenario: (scenarioId: string) => void;
 
   // Node methods
