@@ -1,5 +1,4 @@
-
-import { useCallback, useEffect, useRef, useMemo } from "react";
+import { useCallback, useEffect, useRef, useMemo, useState } from "react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -17,7 +16,9 @@ import "reactflow/dist/style.css";
 import "./flowStyle.css";
 import { useAppStore } from "../store";
 import { FlowPlayer } from ".";
-
+import { Button } from "@/components/ui/button";
+import { FilterIcon } from "lucide-react";
+import { FilterEditor } from "../filters/FilterEditor";
 
 export const FlowGraph: React.FC = () => {
   const getActiveScenarioData = useAppStore(state => state.getActiveScenarioData);
@@ -28,6 +29,9 @@ export const FlowGraph: React.FC = () => {
   const clearSelection = useAppStore(state => state.clearSelection);
   const selected = useAppStore(state => state.selected);
   const stateVersion = useAppStore(state => state.stateVersion);
+  
+  // State for filter editor
+  const [showFilterEditor, setShowFilterEditor] = useState(false);
   
   // Reference to the ReactFlow wrapper div
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
@@ -139,12 +143,34 @@ export const FlowGraph: React.FC = () => {
     [clearSelection]
   );
   
+  const handleOpenFilterEditor = useCallback(() => {
+    setShowFilterEditor(true);
+  }, []);
+  
+  const handleCloseFilterEditor = useCallback(() => {
+    setShowFilterEditor(false);
+  }, []);
+  
   return (
     <div 
       className="bg-card rounded-md p-0 h-full relative"
       ref={reactFlowWrapper}
       // Removed custom mousedown handler to avoid selection conflicts
     >
+      {/* Filter Editor Button - Top Left */}
+      <div className="absolute top-4 left-4 z-10">
+        <Button 
+          size="sm" 
+          onClick={handleOpenFilterEditor} 
+          className="px-3 py-2 space-x-1"
+          disabled={!selected.scenario}
+          variant={'outline'}
+        >
+          <FilterIcon className="h-4 w-4 mr-1" />
+          <span>Filters {!selected.scenario && '(Select Scenario)'}</span>
+        </Button>
+      </div>
+      
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -167,6 +193,14 @@ export const FlowGraph: React.FC = () => {
       </ReactFlow>
       
       <FlowPlayer />
+      
+      {/* Render filter editor when needed */}
+      {showFilterEditor && selected.scenario && (
+        <FilterEditor
+          scenarioId={selected.scenario}
+          onClose={handleCloseFilterEditor}
+        />
+      )}
     </div>
   );
 };

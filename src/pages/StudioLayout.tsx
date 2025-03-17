@@ -56,8 +56,7 @@ const StudioLayout: React.FC = () => {
   const activeScenario = scenario;
 
   const activeTab = useAppStore((state) => state.activeTab);
-const setActiveTab = useAppStore((state) => state.setActiveTab);
-
+  const setActiveTab = useAppStore((state) => state.setActiveTab);
 
   // Automatycznie otwieraj panel właściwości, gdy wybrany jest węzeł lub krawędź
   React.useEffect(() => {
@@ -113,12 +112,12 @@ const setActiveTab = useAppStore((state) => state.setActiveTab);
           <div className="flex-1 flex overflow-hidden">
             {/* Lewy panel */}
             {showLeftPanel && (
-              <aside className="w-80 border-r bg-sidebar-background flex flex-col overflow-hidden">
-                  <Tabs
-  value={activeTab}
-  onValueChange={(value) => setActiveTab(value)}
-  className="flex-1 flex flex-col"
->
+              <aside className="w-96 border-r bg-sidebar-background flex flex-col overflow-hidden">
+                <Tabs
+                  value={activeTab}
+                  onValueChange={(value) => setActiveTab(value)}
+                  className="flex-1 flex flex-col"
+                >
                   <TabsList className="grid grid-cols-3 px-2 py-1 h-auto rounded-none border-b">
                     <TabsTrigger
                       value="workspace"

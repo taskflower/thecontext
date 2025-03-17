@@ -1,11 +1,13 @@
 // src/modules/scenarios/ScenariosList.tsx
-import React from "react";
+import React, { useState } from "react";
 import { useAppStore } from '../store';
 import { ItemList } from "@/components/APPUI";
 import { Scenario } from "../types";
-import { FileText, Plus, MoreHorizontal } from "lucide-react";
+import { FileText, Plus, MoreHorizontal, FilterIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDialogManager } from '@/hooks/useDialogManager';
+import { FilterEditor } from "../filters/FilterEditor";
+import { FilterStatus } from "../filters/FilterStatus";
 
 export const ScenariosList: React.FC = () => {
   const items = useAppStore(state => state.items);
@@ -14,14 +16,34 @@ export const ScenariosList: React.FC = () => {
   const deleteScenario = useAppStore(state => state.deleteScenario);
   const addScenario = useAppStore(state => state.addScenario);
   const updateScenario = useAppStore(state => state.updateScenario);
+  
+  // Access the store directly for checking if functions exist
+  const store = useAppStore();
+  
   // Force component to update when state changes
   useAppStore(state => state.stateVersion);
   
   const workspace = items.find(w => w.id === selected.workspace);
-  const scenarios = workspace?.children || [];
   
-  // Use the new dialog manager hook
+  // Get scenarios from appropriate source with fallback
+  let scenarios = workspace?.children || [];
+  
+  // Check if the function exists in the store and workspace is selected
+  if (typeof store.getScenariosWithFilterStatus === 'function' && selected.workspace) {
+    try {
+      scenarios = store.getScenariosWithFilterStatus();
+    } catch (error) {
+      console.error("Error using filter status:", error);
+      // Fallback to unfiltered scenarios
+      scenarios = workspace?.children || [];
+    }
+  }
+  
+  // Use the dialog manager hook
   const { createDialog } = useDialogManager();
+  
+  // State for filter editor
+  const [editingFilters, setEditingFilters] = useState<string | null>(null);
   
   const handleAddScenario = () => {
     createDialog(
@@ -105,6 +127,15 @@ export const ScenariosList: React.FC = () => {
     handleEditScenario(scenario);
   };
   
+  // Handle filter button click
+  const handleFilterClick = (e: React.MouseEvent, scenarioId: string) => {
+    e.stopPropagation();
+    setEditingFilters(scenarioId);
+  };
+  
+  // Check if filter functions exist in the store
+  const hasFilterFunctions = typeof store.getScenariosWithFilterStatus === 'function';
+  
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between px-3 py-2 border-b">
@@ -120,17 +151,24 @@ export const ScenariosList: React.FC = () => {
       </div>
       
       <div className="flex-1 overflow-auto">
-        <ItemList<Scenario> 
+        <ItemList<Scenario & { matchesFilter?: boolean }> 
           items={scenarios}
           selected={selected.scenario}
           onClick={selectScenario}
           onDelete={deleteScenario}
           renderItem={(item) => (
-            <div className="text-xs flex items-center justify-between w-full">
+            <div className={`text-xs flex items-center justify-between w-full ${item.matchesFilter === false ? 'opacity-70' : ''}`}>
               <div className="flex-1">
                 <div className="font-medium flex items-center">
                   <FileText className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
                   {item.name}
+                  {/* Only render FilterStatus if filter functions exist */}
+                  {hasFilterFunctions && (
+                    <FilterStatus 
+                      scenarioId={item.id} 
+                      onEditClick={(e: React.MouseEvent<Element, MouseEvent>) => handleFilterClick(e, item.id)}
+                    />
+                  )}
                 </div>
                 {item.description && (
                   <div className="text-xs text-muted-foreground truncate mt-0.5 ml-5.5 max-w-56">
@@ -139,6 +177,16 @@ export const ScenariosList: React.FC = () => {
                 )}
               </div>
               <div className="flex items-center">
+                {/* Filter button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  title="Manage Filters"
+                  onClick={(e) => handleFilterClick(e, item.id)}
+                >
+                  <FilterIcon className="h-3.5 w-3.5" />
+                </Button>
                 {/* Options button */}
                 <Button
                   variant="ghost"
@@ -155,6 +203,14 @@ export const ScenariosList: React.FC = () => {
           height="h-full"
         />
       </div>
+      
+      {/* Render filter editor when needed */}
+      {editingFilters && (
+        <FilterEditor
+          scenarioId={editingFilters}
+          onClose={() => setEditingFilters(null)}
+        />
+      )}
     </div>
   );
 };

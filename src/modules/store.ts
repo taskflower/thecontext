@@ -12,6 +12,7 @@ import { createConversationActions } from "./conversation/conversationActions";
 import { createSelectionActions } from "./selection/selectionActions";
 import { createHelperActions } from "./helper/helperActions";
 import { createContextActions } from "./context/contextActions";
+import { createFilterActions } from "./filters/filterActions";
 
 // Create store with persist middleware
 export const useAppStore = create<AppState>()(
@@ -36,6 +37,7 @@ export const useAppStore = create<AppState>()(
       ...createSelectionActions(set),
       ...createHelperActions(get),
       ...createContextActions(set),
+      ...createFilterActions(set, get), // Add filter actions to the store
     })),
     {
       name: "flow-builder-storage", // Storage key

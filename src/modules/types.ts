@@ -4,6 +4,7 @@ import {
   Edge as ReactFlowEdgeType,
   Node as ReactFlowNodeType,
 } from "reactflow";
+import { Filter } from "./filters/types";
 
 export enum ElementType {
   WORKSPACE = "workspace",
@@ -67,6 +68,7 @@ export interface Scenario {
   description?: string;
   children: GraphNode[];
   edges: GraphEdge[];
+  filters?: Filter[]; // Add filters property to Scenario
   createdAt?: number;
   updatedAt?: number;
 }
@@ -161,6 +163,15 @@ export interface AppState {
     key: string
   ) => (state: any) => string | null;
   getContextItems: (workspaceId: string) => (state: any) => ContextItem[];
+
+  // Filter methods (match the names from the filter actions)
+  addScenarioFilter: (scenarioId: string, filter: Omit<Filter, "id" | "createdAt" | "updatedAt">) => void;
+  updateScenarioFilter: (scenarioId: string, filterId: string, updates: Partial<Filter>) => void;
+  deleteScenarioFilter: (scenarioId: string, filterId: string) => void;
+  toggleScenarioFilter: (scenarioId: string, filterId: string) => void;
+  getScenarioFilters: (scenarioId: string) => (state: any) => Filter[];
+  checkScenarioFilterMatch: (scenarioId: string, contextItems: ContextItem[]) => boolean;
+  getScenariosWithFilterStatus: () => (Scenario & { matchesFilter: boolean })[];
 
   // Helper methods
   getCurrentScenario: () => Scenario | null;
