@@ -34,6 +34,36 @@ export const FlowPlayer: React.FC = () => {
     setProcessedMessage(null);
   }, [currentNodeIndex]);
 
+  const saveCurrentNodeMessages = useCallback(() => {
+    const currentNode = flowPath[currentNodeIndex];
+    if (currentNode) {
+      if (currentNode.assistant) {
+        const messageWithContext = context.processTemplate(
+          currentNode.assistant
+        );
+        const finalMessage = processedMessage || messageWithContext;
+
+        addToConversation({
+          role: "assistant",
+          message: finalMessage,
+        });
+      }
+
+      if (currentNode.userMessage) {
+        addToConversation({
+          role: "user",
+          message: currentNode.userMessage,
+        });
+      }
+    }
+  }, [
+    flowPath,
+    currentNodeIndex,
+    processedMessage,
+    context,
+    addToConversation,
+  ]);
+
   // Memoize the play handler to prevent recreation on renders
   const handlePlay = useCallback(() => {
     const scenario = getCurrentScenario();
@@ -48,50 +78,20 @@ export const FlowPlayer: React.FC = () => {
     }
   }, [getCurrentScenario, clearConversation]);
 
-  // Memoize handlers to prevent recreation on each render
   const handleNext = useCallback(() => {
-    setFlowPath((currentPath) => {
-      const currentNode = currentPath[currentNodeIndex];
-
-      if (currentNode && currentNode.assistant) {
-        // Replace context tokens in assistant message
-        const messageWithContext = context.processTemplate(
-          currentNode.assistant
-        );
-
-        // Use processed message or message with context
-        const finalMessage = processedMessage || messageWithContext;
-
-        // Add to conversation
-        addToConversation({
-          role: "assistant",
-          message: finalMessage,
-        });
-      }
-
-      // Add user message to conversation if it exists
-      if (currentNode && currentNode.userMessage) {
-        addToConversation({
-          role: "user",
-          message: currentNode.userMessage,
-        });
-      }
-
-      return currentPath;
-    });
+    saveCurrentNodeMessages();
 
     // Reset processed message
     setProcessedMessage(null);
 
-    // Move to the next node
-    setCurrentNodeIndex((prev) => Math.min(prev + 1, flowPath.length - 1));
-  }, [
-    currentNodeIndex,
-    flowPath.length,
-    processedMessage,
-    addToConversation,
-    context,
-  ]);
+    // Move to the next node or close if at the end
+    if (currentNodeIndex + 1 >= flowPath.length) {
+      // Last node, close the flow
+      setIsPlaying(false);
+    } else {
+      setCurrentNodeIndex((prev) => Math.min(prev + 1, flowPath.length - 1));
+    }
+  }, [saveCurrentNodeMessages, currentNodeIndex, flowPath.length]);
 
   const handlePrev = useCallback(() => {
     // We don't remove from conversation history when going back
@@ -99,11 +99,13 @@ export const FlowPlayer: React.FC = () => {
   }, []);
 
   const handleClose = useCallback(() => {
+    saveCurrentNodeMessages();
+
     // Force close regardless of state
     setIsPlaying(false);
     setCurrentNodeIndex(0);
     setFlowPath([]);
-  }, []);
+  }, [saveCurrentNodeMessages]);
 
   const handleUserMessageChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -175,7 +177,7 @@ export const FlowPlayer: React.FC = () => {
                     message={context.processTemplate(step.assistant)}
                     onProcessed={setProcessedMessage}
                     autoProcess={true}
-                    nodePlugin={step.plugin}
+                    nodePlugins={step.plugin ? [step.plugin] : undefined}
                     onSimulateFinish={handleNext}
                   />
 
