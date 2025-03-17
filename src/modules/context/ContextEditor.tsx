@@ -168,7 +168,7 @@ export const ContextEditor: React.FC<ContextEditorProps> = ({ onClose }) => {
   return (
     <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col">
-        <DialogHeader>
+        <DialogHeader >
           <DialogTitle>Edit Workspace Context</DialogTitle>
         </DialogHeader>
 

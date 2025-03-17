@@ -27,6 +27,7 @@ import {
 import { ConversationPanel } from "./modules/conversation/ConversationPanel";
 import { PluginsPanel } from "./modules/plugin/components/PluginsPanel";
 import { DialogProvider } from "./components/APPUI/DialogProvider";
+import { ScrollArea } from "./components/ui/scroll-area";
 
 const App: React.FC = () => {
   const [showLeftPanel, setShowLeftPanel] = useState(true);
@@ -221,7 +222,9 @@ const App: React.FC = () => {
                 {showContextPanel && (
                   <div
                     className={`${
-                      showConversationPanel || showPluginsPanel ? "border-r" : ""
+                      showConversationPanel || showPluginsPanel
+                        ? "border-r"
+                        : ""
                     } 
                     ${
                       showConversationPanel && showPluginsPanel
@@ -230,9 +233,9 @@ const App: React.FC = () => {
                         ? "w-1/2"
                         : "w-full"
                     } 
-                    bg-card overflow-auto`}
+                    bg-card`}
                   >
-                    <div className="flex items-center justify-between px-3 py-2 border-b">
+                    <div className="flex items-center justify-between px-3 py-2 border-b bg-background">
                       <h3 className="text-sm font-medium">Context Manager</h3>
                       <Button
                         variant="ghost"
@@ -243,7 +246,9 @@ const App: React.FC = () => {
                         ×
                       </Button>
                     </div>
-                    <ContextsList />
+                    <ScrollArea className="h-[calc(100%-40px)]">
+                      <ContextsList />
+                    </ScrollArea>
                   </div>
                 )}
 
@@ -257,9 +262,9 @@ const App: React.FC = () => {
                         ? "w-1/2"
                         : "w-full"
                     } 
-                    bg-card overflow-auto`}
+                    bg-card`}
                   >
-                    <div className="flex items-center justify-between px-3 py-2 border-b">
+                    <div className="flex items-center justify-between px-3 py-2 border-b bg-background">
                       <h3 className="text-sm font-medium">
                         Conversation History
                       </h3>
@@ -272,9 +277,9 @@ const App: React.FC = () => {
                         ×
                       </Button>
                     </div>
-                    <div className="h-[calc(100%-40px)] overflow-auto">
+                    <ScrollArea className="h-[calc(100%-40px)]">
                       <ConversationPanel />
-                    </div>
+                    </ScrollArea>
                   </div>
                 )}
 
@@ -288,9 +293,9 @@ const App: React.FC = () => {
                         ? "w-1/2"
                         : "w-full"
                     } 
-                    bg-card overflow-auto`}
+                    bg-card`}
                   >
-                    <div className="flex items-center justify-between px-3 py-2 border-b">
+                    <div className="flex items-center justify-between px-3 py-2 border-b bg-background">
                       <h3 className="text-sm font-medium">Plugins</h3>
                       <Button
                         variant="ghost"
@@ -301,9 +306,9 @@ const App: React.FC = () => {
                         ×
                       </Button>
                     </div>
-                    <div className="h-[calc(100%-40px)] overflow-auto">
+                    <ScrollArea className="h-[calc(100%-40px)]">
                       <PluginsPanel />
-                    </div>
+                    </ScrollArea>
                   </div>
                 )}
               </div>
