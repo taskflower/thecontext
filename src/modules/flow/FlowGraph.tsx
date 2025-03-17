@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useCallback, useEffect, useRef, useMemo } from "react";
+
+import { useCallback, useEffect, useRef, useMemo } from "react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -16,7 +16,8 @@ import CustomNode from "./CustomNode";
 import "reactflow/dist/style.css";
 import "./flowStyle.css";
 import { useAppStore } from "../store";
-import { FlowPlayer } from "./FlowPlayer";
+import { FlowPlayer } from ".";
+
 
 export const FlowGraph: React.FC = () => {
   const getActiveScenarioData = useAppStore(state => state.getActiveScenarioData);

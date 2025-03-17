@@ -1,31 +1,49 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { initialPluginsState, PluginsState } from '../plugin-state';
-import { createPluginActions, PluginActions } from '../plugin-actions';
+// src/modules/plugin/store/index.ts
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
+export interface PluginState {
+  active: boolean;
+}
 
-// Główny store pluginów
-export const usePluginStore = create<PluginsState & PluginActions>()(
+export interface PluginsStore {
+  plugins: Record<string, PluginState>;
+  activatePlugin: (pluginId: string) => void;
+  deactivatePlugin: (pluginId: string) => void;
+}
+
+// Uproszczony store pluginów
+export const usePluginStore = create<PluginsStore>()(
   persist(
-    (set, get, api) => ({
-      ...initialPluginsState,
-      ...createPluginActions(set, get, api)
+    (set) => ({
+      plugins: {},
+
+      activatePlugin: (pluginId: string) =>
+        set((state) => ({
+          plugins: {
+            ...state.plugins,
+            [pluginId]: { active: true },
+          },
+        })),
+
+      deactivatePlugin: (pluginId: string) =>
+        set((state) => ({
+          plugins: {
+            ...state.plugins,
+            [pluginId]: { active: false },
+          },
+        })),
     }),
     {
-      name: 'plugin-store',
-      // Zapisujemy tylko stany aktywacji pluginów i historię do localStorage
+      name: "plugin-store",
       partialize: (state) => ({
         plugins: Object.fromEntries(
-          Object.entries(state.plugins).map(([id, plugin]) => [id, { active: plugin.active }])
+          Object.entries(state.plugins).map(([id, plugin]) => [
+            id,
+            { active: plugin.active },
+          ])
         ),
-        history: state.history.slice(-20) // Zapisujemy tylko ostatnie 20 wykonań
-      })
+      }),
     }
   )
 );
-
-// Funkcja do inicjalizacji pluginów przy starcie aplikacji
-export const initializePluginStore = () => {
-  // Po załadowaniu strony, możemy tutaj zarejestrować domyślne pluginy
-  // oraz wykonać inne operacje inicjalizacyjne
-};

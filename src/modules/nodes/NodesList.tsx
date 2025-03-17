@@ -1,12 +1,13 @@
-// src/modules/nodes/NodesList.tsx (Refactored)
+// src/modules/nodes/NodesList.tsx
 import React, { useState } from 'react';
 import { useAppStore } from '../store';
 import { ItemList } from '@/components/APPUI';
 import { GraphNode } from "../types";
 import { pluginRegistry } from '../plugin/plugin-registry';
+import { usePluginStore } from '../plugin/store';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Puzzle, MessageCircle, Plus } from 'lucide-react';
+import { Puzzle, MessageCircle, Plus, Check, Power } from 'lucide-react';
 import { useDialogManager } from '@/hooks/useDialogManager';
 import {
   Dialog as PluginDialog,
@@ -16,15 +17,14 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
+import { Card } from '@/components/ui/card';
 
 export const NodesList: React.FC = () => {
   const getCurrentScenario = useAppStore(state => state.getCurrentScenario);
   const deleteNode = useAppStore(state => state.deleteNode);
   const addNode = useAppStore(state => state.addNode);
   const selectNode = useAppStore(state => state.selectNode);
-  const updateNodePlugins = useAppStore(state => state.updateNodePlugins);
+  const updateNodePlugin = useAppStore(state => state.updateNodePlugin);
   const selected = useAppStore(state => state.selected);
   // Force component to update when state changes
   useAppStore(state => state.stateVersion);
@@ -36,10 +36,13 @@ export const NodesList: React.FC = () => {
   const { createDialog } = useDialogManager();
   
   const [showPluginDialog, setShowPluginDialog] = useState(false);
-  const [selectedNodeForPlugins, setSelectedNodeForPlugins] = useState<string | null>(null);
+  const [selectedNodeForPlugin, setSelectedNodeForPlugin] = useState<string | null>(null);
   
   // Get all available plugins
   const availablePlugins = pluginRegistry.getAllPlugins();
+  
+  // Get plugin status from store
+  const pluginStates = usePluginStore(state => state.plugins);
   
   const handleAddNode = () => {
     createDialog(
@@ -53,7 +56,7 @@ export const NodesList: React.FC = () => {
           addNode({
             label: String(data.label),
             assistant: String(data.assistant || ''),
-            plugins: []
+            plugin: undefined
           });
         }
       },
@@ -65,37 +68,40 @@ export const NodesList: React.FC = () => {
   
   const handlePluginSelection = (nodeId: string, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent event propagation
-    setSelectedNodeForPlugins(nodeId);
+    setSelectedNodeForPlugin(nodeId);
     
-    // Find node and set its currently selected plugins
+    // Find node and set its currently selected plugin
     const node = nodes.find(n => n.id === nodeId);
     if (node) {
-      setPluginSelections(node.plugins || []);
+      setSelectedPlugin(node.plugin || "");
     } else {
-      setPluginSelections([]);
+      setSelectedPlugin("");
     }
     
     setShowPluginDialog(true);
   };
   
-  const [pluginSelections, setPluginSelections] = useState<string[]>([]);
+  const [selectedPlugin, setSelectedPlugin] = useState<string>("");
   
-  const handlePluginToggle = (pluginId: string) => {
-    setPluginSelections(prev => {
-      if (prev.includes(pluginId)) {
-        return prev.filter(id => id !== pluginId);
-      } else {
-        return [...prev, pluginId];
-      }
-    });
-  };
-  
-  const savePluginSelections = () => {
-    if (selectedNodeForPlugins) {
-      updateNodePlugins(selectedNodeForPlugins, pluginSelections);
+  const savePluginSelection = () => {
+    if (selectedNodeForPlugin) {
+      // If empty value was selected, pass undefined to remove the plugin
+      updateNodePlugin(selectedNodeForPlugin, selectedPlugin || undefined);
       setShowPluginDialog(false);
     }
   };
+  
+  // Rozdziel dostępne pluginy na dwie kolumny
+  const preparePluginsColumns = () => {
+    const plugins = [...availablePlugins];
+    const midpoint = Math.ceil(plugins.length / 2);
+    return {
+      leftColumn: plugins.slice(0, midpoint),
+      rightColumn: plugins.slice(midpoint)
+    };
+  };
+  
+  const { leftColumn, rightColumn } = preparePluginsColumns();
   
   return (
     <div className="flex flex-col h-full">
@@ -118,27 +124,30 @@ export const NodesList: React.FC = () => {
           onClick={selectNode}
           onDelete={deleteNode}
           renderItem={(item) => (
-            <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between">
               <div className="font-medium truncate">{item.label}</div>
-              <div className="flex items-center">
-                {item.plugins && item.plugins.length > 0 && (
-                  <Badge variant="secondary" className="px-1.5 h-5 text-xs mr-1">
-                    <Puzzle className="h-3.5 w-3.5 mr-0.5 text-muted-foreground" />
-                    {item.plugins.length}
-                  </Badge>
-                )}
+              <div className="flex items-center divide-x divide-border">
                 <Button 
                   variant="ghost" 
-                  size="icon" 
-                  className="h-7 w-7 opacity-70 hover:opacity-100 mr-1 px-0"
+                  className={`h-7 flex items-center opacity-70 hover:opacity-100 mr-0.5 px-1.5 py-0 text-xs ${item.plugin ? 'text-muted-foreground' : ''}`}
                   onMouseDown={(e) => handlePluginSelection(item.id, e)}
+                  aria-label="Wybierz plugin"
                 >
-                  <Puzzle className="h-3.5 w-3.5 text-muted-foreground" />
+                  {item.plugin ? (
+                    <Power className="h-3.5 w-3.5 text-green-500 mr-1" />
+                  ) : (
+                    <Puzzle className="h-3.5 w-3.5 text-muted-foreground" />
+                  )}
+                  {item.plugin && (
+                    <span>{pluginRegistry.getPlugin(item.plugin)?.config.name || item.plugin}</span>
+                  )}
                 </Button>
                 {item.assistant && (
-                  <Badge variant="outline" className="px-1.5 h-5 text-xs">
-                    <MessageCircle className="h-3.5 w-3.5 mr-0.5 text-muted-foreground" />
-                  </Badge>
+                  <div className="pl-0.5">
+                    <Badge variant="outline" className="px-1.5 h-5 text-xs">
+                      <MessageCircle className="h-3.5 w-3.5 mr-0.5 text-muted-foreground" />
+                    </Badge>
+                  </div>
                 )}
               </div>
             </div>
@@ -149,50 +158,130 @@ export const NodesList: React.FC = () => {
       
       {showPluginDialog && (
         <PluginDialog open={showPluginDialog} onOpenChange={(open) => !open && setShowPluginDialog(false)}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-5xl max-h-[80vh]">
             <DialogHeader>
-              <DialogTitle>Manage Node Plugins</DialogTitle>
+              <DialogTitle>Wybierz plugin dla węzła</DialogTitle>
             </DialogHeader>
             
             <div className="py-4">
-              <ScrollArea className="h-[60vh] max-h-60 pr-4">
-                <div className="space-y-4">
-                  {availablePlugins.length > 0 ? (
-                    availablePlugins.map(plugin => (
-                      <div key={plugin.config.id} className="flex items-start space-x-3 pt-2">
-                        <Checkbox
-                          id={`plugin-${plugin.config.id}`}
-                          checked={pluginSelections.includes(plugin.config.id)}
-                          onCheckedChange={() => handlePluginToggle(plugin.config.id)}
-                        />
-                        <div className="grid gap-1.5 leading-none">
-                          <Label
-                            htmlFor={`plugin-${plugin.config.id}`}
-                            className="font-medium"
-                          >
-                            {plugin.config.name}
-                          </Label>
-                          <p className="text-sm text-muted-foreground">
-                            {plugin.config.description}
-                          </p>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="py-4 text-center text-muted-foreground">
-                      No plugins available
+              <ScrollArea className="h-[60vh] max-h-[calc(80vh-150px)] pr-4">
+                {/* Opcja "Brak pluginu" oddzielnie, jako pełna szerokość */}
+                <Card 
+                  className={`p-3 mb-4 cursor-pointer border-2 transition-all ${
+                    selectedPlugin === "" ? "border-primary" : "border-muted hover:border-muted-foreground"
+                  }`}
+                  onClick={() => setSelectedPlugin("")}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium">Brak pluginu</div>
+                      <p className="text-sm text-muted-foreground">
+                        Węzeł bez dodatkowej funkcjonalności
+                      </p>
                     </div>
-                  )}
+                    {selectedPlugin === "" && (
+                      <Check className="h-5 w-5 text-primary" />
+                    )}
+                  </div>
+                </Card>
+                
+                {/* Pluginy w dwóch kolumnach */}
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Lewa kolumna */}
+                  <div className="space-y-3">
+                    {leftColumn.map(plugin => {
+                      const isActive = pluginStates[plugin.config.id]?.active || false;
+                      
+                      return (
+                        <Card 
+                          key={plugin.config.id}
+                          className={`p-3 cursor-pointer border-2 transition-all ${
+                            selectedPlugin === plugin.config.id ? "border-primary" : "border-muted hover:border-muted-foreground"
+                          }`}
+                          onClick={() => setSelectedPlugin(plugin.config.id)}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <div className="font-medium flex items-center">
+                                {plugin.config.name}
+                                <Badge 
+                                  variant={isActive ? "default" : "outline"} 
+                                  className="ml-2 text-xs"
+                                >
+                                  {isActive ? "Aktywny" : "Nieaktywny"}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {plugin.config.description}
+                              </p>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                wersja: {plugin.config.version}
+                              </div>
+                            </div>
+                            {selectedPlugin === plugin.config.id && (
+                              <Check className="h-5 w-5 text-primary ml-2 shrink-0" />
+                            )}
+                          </div>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                  
+                  {/* Prawa kolumna */}
+                  <div className="space-y-3">
+                    {rightColumn.map(plugin => {
+                      const isActive = pluginStates[plugin.config.id]?.active || false;
+                      
+                      return (
+                        <Card 
+                          key={plugin.config.id}
+                          className={`p-3 cursor-pointer border-2 transition-all ${
+                            selectedPlugin === plugin.config.id ? "border-primary" : "border-muted hover:border-muted-foreground"
+                          }`}
+                          onClick={() => setSelectedPlugin(plugin.config.id)}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <div className="font-medium flex items-center">
+                                {plugin.config.name}
+                                <Badge 
+                                  variant={isActive ? "default" : "outline"} 
+                                  className="ml-2 text-xs"
+                                >
+                                  {isActive ? "Aktywny" : "Nieaktywny"}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {plugin.config.description}
+                              </p>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                wersja: {plugin.config.version}
+                              </div>
+                            </div>
+                            {selectedPlugin === plugin.config.id && (
+                              <Check className="h-5 w-5 text-primary ml-2 shrink-0" />
+                            )}
+                          </div>
+                        </Card>
+                      );
+                    })}
+                  </div>
                 </div>
+                
+                {availablePlugins.length === 0 && (
+                  <div className="py-4 text-center text-muted-foreground">
+                    Brak dostępnych pluginów
+                  </div>
+                )}
               </ScrollArea>
             </div>
             
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowPluginDialog(false)}>
-                Cancel
+                Anuluj
               </Button>
-              <Button onClick={savePluginSelections}>
-                Save
+              <Button onClick={savePluginSelection}>
+                Zapisz
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -201,4 +290,3 @@ export const NodesList: React.FC = () => {
     </div>
   );
 };
-

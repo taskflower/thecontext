@@ -1,5 +1,5 @@
 // src/modules/flow/FlowPlayer.tsx
-import React, { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { Play } from "lucide-react";
 import { useAppStore } from "../store";
 import { StepModal } from "@/components/APPUI";
@@ -60,6 +60,7 @@ export const FlowPlayer: React.FC = () => {
         // Use processed message or message with context
         const finalMessage = processedMessage || messageWithContext;
         
+        // Add to conversation
         addToConversation({
           role: "assistant",
           message: finalMessage
@@ -143,27 +144,28 @@ export const FlowPlayer: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-semibold">Assistant</h3>
                     
-                    {/* Wyświetlanie pluginów, ale bez przycisku X */}
-                    {step.plugins && step.plugins.length > 0 && (
+                    {/* Wyświetlanie pojedynczego pluginu */}
+                    {step.plugin && (
                       <div className="flex flex-wrap gap-1">
-                        {step.plugins.map(pluginId => {
-                          const plugin = pluginRegistry.getPlugin(pluginId);
+                        {(() => {
+                          const plugin = pluginRegistry.getPlugin(step.plugin);
                           return plugin ? (
-                            <Badge key={pluginId} variant="outline" className="text-xs">
+                            <Badge key={step.plugin} variant="outline" className="text-xs">
                               {plugin.config.name}
                             </Badge>
                           ) : null;
-                        })}
+                        })()}
                       </div>
                     )}
                   </div>
                   
-                  {/* Hidden message processor */}
+                  {/* Message processor with callback for simulation */}
                   <MessageProcessor 
                     message={context.processTemplate(step.assistant)}
                     onProcessed={setProcessedMessage}
                     autoProcess={true}
-                    nodePlugins={step.plugins}
+                    nodePlugin={step.plugin}
+                    onSimulateFinish={handleNext}
                   />
                   
                   <div className="text-sm whitespace-pre-line">

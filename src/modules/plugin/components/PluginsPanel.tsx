@@ -76,4 +76,4 @@ export const PluginsPanel: React.FC = () => {
       </ScrollArea>
     </div>
   );
-};  
+};

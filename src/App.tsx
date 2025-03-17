@@ -25,9 +25,9 @@ import {
   Focus,
 } from "lucide-react";
 import { ConversationPanel } from "./modules/conversation/ConversationPanel";
-import { PluginsPanel } from "./modules/plugin/components/PluginsPanel";
 import { DialogProvider } from "./components/APPUI/DialogProvider";
 import { ScrollArea } from "./components/ui/scroll-area";
+import { PluginsPanel } from "./modules/plugin/components/PluginsPanel";
 
 const App: React.FC = () => {
   const [showLeftPanel, setShowLeftPanel] = useState(true);
@@ -103,7 +103,7 @@ const App: React.FC = () => {
           <div className="flex-1 flex overflow-hidden">
             {/* Lewy panel */}
             {showLeftPanel && (
-              <aside className="w-64 border-r bg-sidebar-background flex flex-col overflow-hidden">
+              <aside className="w-80 border-r bg-sidebar-background flex flex-col overflow-hidden">
                 <Tabs defaultValue="workspace" className="flex-1 flex flex-col">
                   <TabsList className="grid grid-cols-3 px-2 py-1 h-auto rounded-none border-b">
                     <TabsTrigger
@@ -316,7 +316,7 @@ const App: React.FC = () => {
 
             {/* Prawy panel właściwości */}
             {showRightPanel && (
-              <aside className="w-72 border-l bg-sidebar-background flex flex-col overflow-hidden">
+              <aside className="w-80 border-l bg-sidebar-background flex flex-col overflow-hidden">
                 <Tabs
                   value={rightPanelTab}
                   onValueChange={setRightPanelTab}

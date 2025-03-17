@@ -38,7 +38,7 @@ export interface GraphNode {
   assistant: string; 
   position: Position;
   userMessage?: string; 
-  plugins?: string[];
+  plugin?: string; // Zmienione z plugins?: string[] na plugin?: string
 }
 
 export interface GraphEdge {
@@ -94,12 +94,12 @@ export interface AppState {
   deleteScenario: (scenarioId: string) => void;
   
   // Node methods
-  addNode: (payload: { label: string; assistant: string; position?: Position; plugins?: string[] }) => void;
+  addNode: (payload: { label: string; assistant: string; position?: Position; plugin?: string }) => void;
   deleteNode: (nodeId: string) => void;
   updateNodePosition: (nodeId: string, position: Position) => void;
   selectNode: (nodeId: string) => void;
   setUserMessage: (nodeId: string, message: string) => void;
-  updateNodePlugins: (nodeId: string, plugins: string[]) => void;
+  updateNodePlugin: (nodeId: string, plugin: string | undefined) => void; // Zmienione z updateNodePlugins
   
   // Edge methods
   addEdge: (payload: { source: string; target: string; label?: string }) => void;

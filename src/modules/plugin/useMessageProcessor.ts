@@ -1,18 +1,17 @@
-// src/modules/plugin/hooks/use-message-processor.ts
+/* eslint-disable @typescript-eslint/no-unused-vars */
+// src/modules/plugin/useMessageProcessor.ts
 import { useCallback } from 'react';
-import { pluginRegistry } from '../plugin-registry';
-import { usePluginStore } from '../store';
+import { pluginRegistry } from './plugin-registry';
+import { usePluginStore } from './store';
+
 
 export function useMessageProcessor() {
   const plugins = usePluginStore(state => state.plugins);
   
-  // Pobierz aktywne pluginy
   const activePluginIds = Object.entries(plugins)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     .filter(([_, plugin]) => plugin.active)
     .map(([id]) => id);
   
-  // Funkcja do przetwarzania wiadomości przez aktywne pluginy
   const processMessage = useCallback(async (message: string): Promise<string> => {
     let processedMessage = message;
     
@@ -30,7 +29,6 @@ export function useMessageProcessor() {
     return processedMessage;
   }, [activePluginIds]);
   
-  // Nowa funkcja do przetwarzania wiadomości z konkretnymi wtyczkami
   const processMessageWithSpecificPlugins = useCallback(async (message: string, pluginIds: string[]): Promise<string> => {
     let processedMessage = message;
     

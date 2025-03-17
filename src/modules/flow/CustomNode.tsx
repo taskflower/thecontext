@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import { memo } from "react";
 import { Handle, Position, NodeProps } from "reactflow";
 
 // Custom comparison function for memo to prevent unnecessary rerenders

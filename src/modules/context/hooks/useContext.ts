@@ -13,10 +13,8 @@ export function useWorkspaceContext() {
   const workspaceId = selected.workspace;
   
   return {
-    // Pobieranie pojedynczej wartości
     getValue: (key: string) => getContextValue(workspaceId, key)(useAppStore.getState()),
     
-    // Pobieranie wartości z parsowaniem JSON
     getJsonValue: (key: string) => {
       const value = getContextValue(workspaceId, key)(useAppStore.getState());
       if (!value) return null;
@@ -28,15 +26,12 @@ export function useWorkspaceContext() {
         return null;
       }
     },
-    
-    // Pobieranie wszystkich elementów
+
     getAllItems: () => getContextItems(workspaceId)(useAppStore.getState()),
     
-    // Dodawanie nowego elementu
     addItem: (key: string, value: string, valueType: 'text' | 'json' = 'text') => 
       addContextItem(workspaceId, { key, value, valueType }),
     
-    // Aktualizacja elementu
     updateItem: (key: string, value: string, valueType?: 'text' | 'json') => {
       const items = getContextItems(workspaceId)(useAppStore.getState());
       const item = items.find(i => i.key === key);
@@ -52,11 +47,9 @@ export function useWorkspaceContext() {
       }
       return false;
     },
-    
-    // Usuwanie elementu
+
     deleteItem: (key: string) => deleteContextItem(workspaceId, key),
     
-    // Funkcja do zastępowania tokenów kontekstu w tekstach
     processTemplate: (template: string): string => {
       if (!template) return '';
       
