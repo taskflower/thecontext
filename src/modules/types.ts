@@ -1,12 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/types.ts
-import { Edge as ReactFlowEdgeType, Node as ReactFlowNodeType } from 'reactflow';
+import {
+  Edge as ReactFlowEdgeType,
+  Node as ReactFlowNodeType,
+} from "reactflow";
 
 export enum ElementType {
-  WORKSPACE = 'workspace',
-  SCENARIO = 'scenario',
-  GRAPH_NODE = 'node',
-  CONTEXT = 'context'  
+  WORKSPACE = "workspace",
+  SCENARIO = "scenario",
+  GRAPH_NODE = "node",
+  CONTEXT = "context",
 }
 
 export type Position = {
@@ -28,17 +31,18 @@ export interface DialogField {
 export interface ContextItem {
   key: string;
   value: string;
-  valueType: 'text' | 'json';
+  valueType: "text" | "json";
 }
 
 export interface GraphNode {
   id: string;
   type: ElementType.GRAPH_NODE;
   label: string;
-  assistant: string; 
+  assistant: string;
   position: Position;
-  userMessage?: string; 
-  plugin?: string; // Zmienione z plugins?: string[] na plugin?: string
+  userMessage?: string;
+  plugin?: string;
+  pluginOptions?: { [pluginId: string]: any }; // Store options for each plugin
 }
 
 export interface GraphEdge {
@@ -53,8 +57,8 @@ export interface Scenario {
   type: ElementType.SCENARIO;
   name: string;
   description?: string;
-  children: GraphNode[]; 
-  edges: GraphEdge[]; 
+  children: GraphNode[];
+  edges: GraphEdge[];
 }
 
 export interface Workspace {
@@ -82,42 +86,59 @@ export interface AppState {
   };
   stateVersion: number;
   conversation: Conversation[];
-  
+
   // Workspace methods
   selectWorkspace: (workspaceId: string) => void;
   addWorkspace: (payload: { title: string }) => void;
   updateWorkspace: (workspaceId: string, payload: Partial<Workspace>) => void;
   deleteWorkspace: (workspaceId: string) => void;
-  
+
   // Scenario methods
   selectScenario: (scenarioId: string) => void;
   addScenario: (payload: { name: string; description?: string }) => void;
   deleteScenario: (scenarioId: string) => void;
-  
+
   // Node methods
-  addNode: (payload: { label: string; assistant: string; position?: Position; plugin?: string }) => void;
+  addNode: (payload: {
+    label: string;
+    assistant: string;
+    position?: Position;
+    plugin?: string;
+  }) => void;
   deleteNode: (nodeId: string) => void;
   updateNodePosition: (nodeId: string, position: Position) => void;
   selectNode: (nodeId: string) => void;
   setUserMessage: (nodeId: string, message: string) => void;
   updateNodePlugin: (nodeId: string, plugin: string | undefined) => void; // Zmienione z updateNodePlugins
-  
+
   // Edge methods
-  addEdge: (payload: { source: string; target: string; label?: string }) => void;
+  addEdge: (payload: {
+    source: string;
+    target: string;
+    label?: string;
+  }) => void;
   deleteEdge: (edgeId: string) => void;
   selectEdge: (edgeId: string) => void;
-  
+
   // Conversation methods
   addToConversation: (payload: { role: string; message: string }) => void;
   clearConversation: () => void;
-  
+
   // Context methods
   addContextItem: (workspaceId: string, item: ContextItem) => void;
-  updateContextItem: (workspaceId: string, key: string, value: string, valueType: 'text' | 'json') => void;
+  updateContextItem: (
+    workspaceId: string,
+    key: string,
+    value: string,
+    valueType: "text" | "json"
+  ) => void;
   deleteContextItem: (workspaceId: string, key: string) => void;
-  getContextValue: (workspaceId: string, key: string) => (state: any) => string | null;
+  getContextValue: (
+    workspaceId: string,
+    key: string
+  ) => (state: any) => string | null;
   getContextItems: (workspaceId: string) => (state: any) => ContextItem[];
-  
+
   // Helper methods
   getCurrentScenario: () => Scenario | null;
   getActiveScenarioData: () => FlowData;

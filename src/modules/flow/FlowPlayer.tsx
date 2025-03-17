@@ -178,6 +178,7 @@ export const FlowPlayer: React.FC = () => {
                     onProcessed={setProcessedMessage}
                     autoProcess={true}
                     nodePlugins={step.plugin ? [step.plugin] : undefined}
+                    nodePluginOptions={step.pluginOptions} // Add this line to pass plugin options
                     onSimulateFinish={handleNext}
                   />
 

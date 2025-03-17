@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/nodes/NodesList.tsx
 import React, { useState, useMemo } from "react";
 import { useAppStore } from "../store";
@@ -79,7 +80,7 @@ export const NodesList: React.FC = () => {
   const { leftColumn, rightColumn } = preparePluginsColumns();
 
   // Node data update function
-  const updateNodeData = (nodeId: string, label: string, assistant: string) => {
+  const updateNodeData = (nodeId: string, label: string, assistant: string, pluginOptions?: { [pluginId: string]: any }) => {
     useAppStore.setState((state) => {
       const workspace = state.items.find(w => w.id === state.selected.workspace);
       const scenario = workspace?.children?.find(s => s.id === state.selected.scenario);
@@ -88,6 +89,9 @@ export const NodesList: React.FC = () => {
         if (targetNode) {
           targetNode.label = label;
           targetNode.assistant = assistant;
+          if (pluginOptions) {
+            targetNode.pluginOptions = pluginOptions;
+          }
           state.stateVersion++;
         }
       }

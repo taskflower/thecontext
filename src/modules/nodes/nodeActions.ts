@@ -1,4 +1,5 @@
 // src/modules/nodes/nodeActions.ts
+import { PluginOptions } from "../plugin/types";
 import { ElementType, GraphNode, Position } from "../types";
 import { SetFn } from "../typesActioss";
 
@@ -68,6 +69,25 @@ export const createNodeActions = (set: SetFn) => ({
         }
       }
     }),
+    updateNodeData: (nodeId: string, label: string, assistant: string, pluginOptions?: { [pluginId: string]: PluginOptions }) =>
+      set((state) => {
+        const workspace = state.items.find(
+          (w) => w.id === state.selected.workspace
+        );
+        const scenario = workspace?.children?.find(
+          (s) => s.id === state.selected.scenario
+        );
+        const node = scenario?.children?.find((n) => n.id === nodeId);
+    
+        if (node) {
+          node.label = label;
+          node.assistant = assistant;
+          if (pluginOptions) {
+            node.pluginOptions = pluginOptions;
+          }
+          state.stateVersion++;
+        }
+      }),
 
   updateNodePosition: (nodeId: string, position: Position) =>
     set((state) => {

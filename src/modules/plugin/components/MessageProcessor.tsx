@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// src/modules/plugin/components/MessageProcessor.tsx
 import React, { useEffect, useState } from 'react';
-
 import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
 import { useMessageProcessor } from '../useMessageProcessor';
@@ -9,7 +10,8 @@ interface MessageProcessorProps {
   onProcessed: (processedMessage: string) => void;
   autoProcess?: boolean;
   nodePlugins?: string[];
-  onSimulateFinish?: () => void; // Callback do przejścia do następnego kroku
+  nodePluginOptions?: { [pluginId: string]: any }; // Add plugin options
+  onSimulateFinish?: () => void;
 }
 
 export const MessageProcessor: React.FC<MessageProcessorProps> = ({
@@ -17,6 +19,7 @@ export const MessageProcessor: React.FC<MessageProcessorProps> = ({
   onProcessed,
   autoProcess = true,
   nodePlugins,
+  nodePluginOptions,
   onSimulateFinish
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -24,7 +27,7 @@ export const MessageProcessor: React.FC<MessageProcessorProps> = ({
   const [showSimulateButton, setShowSimulateButton] = useState(false);
   const { processMessage, hasActivePlugins, processMessageWithSpecificPlugins } = useMessageProcessor();
   
-  // Sprawdź, czy jest podłączony plugin symulatora
+  // Check if message-simulator plugin is connected
   useEffect(() => {
     if (nodePlugins?.includes('message-simulator')) {
       setShowSimulateButton(true);
@@ -33,17 +36,17 @@ export const MessageProcessor: React.FC<MessageProcessorProps> = ({
     }
   }, [nodePlugins]);
   
-  // Automatyczne przetwarzanie wiadomości, gdy komponent jest montowany
+  // Automatically process message when component mounts
   useEffect(() => {
     if (autoProcess && originalMessage) {
       handleProcess();
     } else {
-      // Jeśli nie ma aktywnych pluginów lub automatycznego przetwarzania, po prostu przekaż oryginalną wiadomość
+      // If no active plugins or automatic processing, just pass the original message
       onProcessed(originalMessage);
     }
   }, []);
   
-  // Funkcja do ręcznego przetwarzania
+  // Function to manually process
   const handleProcess = async () => {
     if (isProcessing || !originalMessage) return;
     
@@ -51,11 +54,15 @@ export const MessageProcessor: React.FC<MessageProcessorProps> = ({
     try {
       let processedMessage;
       
-      // Jeśli węzeł ma przypisane konkretne wtyczki, użyj tylko ich
+      // If the node has specific plugins assigned, use only those
       if (nodePlugins && nodePlugins.length > 0) {
-        processedMessage = await processMessageWithSpecificPlugins(originalMessage, nodePlugins);
+        processedMessage = await processMessageWithSpecificPlugins(
+          originalMessage, 
+          nodePlugins,
+          nodePluginOptions
+        );
       } else {
-        // W przeciwnym razie użyj wszystkich aktywnych wtyczek
+        // Otherwise use all active plugins
         processedMessage = await processMessage(originalMessage);
       }
       
@@ -65,24 +72,28 @@ export const MessageProcessor: React.FC<MessageProcessorProps> = ({
     }
   };
 
-  // Funkcja do symulacji wysłania wiadomości i przejścia dalej
+  // Function to simulate sending a message and proceeding
   const handleSimulate = async () => {
     setIsProcessing(true);
     try {
-      // Najpierw przetwórz wiadomość
+      // First process the message
       let processedMessage;
       if (nodePlugins && nodePlugins.length > 0) {
-        processedMessage = await processMessageWithSpecificPlugins(originalMessage, nodePlugins);
+        processedMessage = await processMessageWithSpecificPlugins(
+          originalMessage, 
+          nodePlugins,
+          nodePluginOptions
+        );
       } else {
         processedMessage = await processMessage(originalMessage);
       }
       
       onProcessed(processedMessage);
       
-      // Symuluj krótkie opóźnienie
+      // Simulate a short delay
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Przejdź do następnego kroku
+      // Proceed to the next step
       if (onSimulateFinish) {
         onSimulateFinish();
       }
@@ -91,7 +102,7 @@ export const MessageProcessor: React.FC<MessageProcessorProps> = ({
     }
   };
   
-  // Nie renderuj nic jeśli nie ma przycisku symulacji
+  // Don't render anything if no simulation button and auto processing
   if (!showSimulateButton && autoProcess) return null;
   
   return (
@@ -104,7 +115,7 @@ export const MessageProcessor: React.FC<MessageProcessorProps> = ({
           size="sm"
         >
           <Send className="h-4 w-4" />
-          {isProcessing ? 'Wysyłanie...' : 'Symuluj wysyłanie'}
+          {isProcessing ? 'Sending...' : 'Simulate sending'}
         </Button>
       )}
       
@@ -112,9 +123,10 @@ export const MessageProcessor: React.FC<MessageProcessorProps> = ({
         <Button 
           onClick={handleProcess}
           disabled={isProcessing || !originalMessage || (!hasActivePlugins && (!nodePlugins || nodePlugins.length === 0))}
-          className="px-2 py-1 bg-blue-500 text-white rounded-md text-sm disabled:bg-gray-300"
+          variant="secondary"
+          size="sm"
         >
-          {isProcessing ? 'Przetwarzanie...' : 'Przetwórz z wtyczkami'}
+          {isProcessing ? 'Processing...' : 'Process with plugins'}
         </Button>
       )}
     </div>
