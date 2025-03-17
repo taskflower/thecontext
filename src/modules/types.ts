@@ -86,6 +86,7 @@ export interface AppState {
   // Workspace methods
   selectWorkspace: (workspaceId: string) => void;
   addWorkspace: (payload: { title: string }) => void;
+  updateWorkspace: (workspaceId: string, payload: Partial<Workspace>) => void;
   deleteWorkspace: (workspaceId: string) => void;
   
   // Scenario methods

@@ -7,11 +7,26 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { DialogField } from "@/modules/types";
+
+// Enhanced DialogField type to support more validation and customization
+export interface DialogField {
+  name: string;
+  placeholder: string;
+  type: 'text' | 'number' | 'email' | 'textarea' | 'select';
+  value?: string | number;
+  options?: { value: string; label: string }[];
+  validation?: {
+    required?: boolean;
+    minLength?: number;
+    maxLength?: number;
+    pattern?: RegExp;
+    min?: number;
+    max?: number;
+  };
+}
 
 // Define dialog configurations
 export interface DialogConfig {
-  id: string;
   title: string;
   fields: DialogField[];
   onConfirm: (formData: Record<string, any>) => void;
@@ -24,10 +39,11 @@ interface DialogState {
   config: DialogConfig | null;
   isOpen: boolean;
   formData: Record<string, any>;
+  errors: Record<string, string>;
 }
 
 interface DialogContextType {
-  openDialog: (config: DialogConfig, initialData?: Record<string, any>) => void;
+  openDialog: (config: DialogConfig) => void;
   closeDialog: () => void;
   updateFormData: (key: string, value: any) => void;
 }
@@ -47,21 +63,21 @@ export const DialogProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     config: null,
     isOpen: false,
     formData: {},
+    errors: {},
   });
 
-  const openDialog = (config: DialogConfig, initialData: Record<string, any> = {}) => {
+  const openDialog = (config: DialogConfig) => {
     // Initialize form data with defaults from fields
-    const formData = { ...initialData };
+    const formData: Record<string, any> = {};
     config.fields.forEach(field => {
-      if (!(field.name in formData)) {
-        formData[field.name] = '';
-      }
+      formData[field.name] = field.value ?? '';
     });
 
     setDialogState({
       config,
       isOpen: true,
       formData,
+      errors: {},
     });
   };
 
@@ -79,14 +95,75 @@ export const DialogProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         ...prev.formData,
         [key]: value,
       },
+      errors: {
+        ...prev.errors,
+        [key]: '', // Clear any previous errors for this field
+      },
     }));
   };
 
+  const validateForm = (): boolean => {
+    if (!dialogState.config) return false;
+
+    const newErrors: Record<string, string> = {};
+    let isValid = true;
+
+    dialogState.config.fields.forEach(field => {
+      const value = dialogState.formData[field.name];
+      const validation = field.validation;
+
+      if (validation) {
+        // Required check
+        if (validation.required && (!value || value.toString().trim() === '')) {
+          newErrors[field.name] = `${field.placeholder} is required`;
+          isValid = false;
+        }
+
+        // Min/Max length for strings
+        if (typeof value === 'string') {
+          if (validation.minLength && value.length < validation.minLength) {
+            newErrors[field.name] = `Minimum length is ${validation.minLength}`;
+            isValid = false;
+          }
+          if (validation.maxLength && value.length > validation.maxLength) {
+            newErrors[field.name] = `Maximum length is ${validation.maxLength}`;
+            isValid = false;
+          }
+        }
+
+        // Min/Max for numbers
+        if (typeof value === 'number') {
+          if (validation.min !== undefined && value < validation.min) {
+            newErrors[field.name] = `Minimum value is ${validation.min}`;
+            isValid = false;
+          }
+          if (validation.max !== undefined && value > validation.max) {
+            newErrors[field.name] = `Maximum value is ${validation.max}`;
+            isValid = false;
+          }
+        }
+
+        // Pattern matching
+        if (validation.pattern && typeof value === 'string' && !validation.pattern.test(value)) {
+          newErrors[field.name] = `Invalid format`;
+          isValid = false;
+        }
+      }
+    });
+
+    setDialogState(prev => ({
+      ...prev,
+      errors: newErrors,
+    }));
+
+    return isValid;
+  };
+
   const handleConfirm = () => {
-    if (dialogState.config?.onConfirm) {
+    if (validateForm() && dialogState.config?.onConfirm) {
       dialogState.config.onConfirm(dialogState.formData);
+      closeDialog();
     }
-    closeDialog();
   };
 
   const handleSelectChange = (name: string, value: string) => {
@@ -125,21 +202,28 @@ export const DialogProvider: React.FC<{ children: ReactNode }> = ({ children }) 
                       <Label htmlFor={field.name} className="text-right">
                         {field.placeholder}
                       </Label>
-                      <Select
-                        value={dialogState.formData[field.name]?.toString() || ''}
-                        onValueChange={(value) => handleSelectChange(field.name, value)}
-                      >
-                        <SelectTrigger className="col-span-3">
-                          <SelectValue placeholder={`Select ${field.placeholder}`} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {field.options?.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="col-span-3">
+                        <Select
+                          value={dialogState.formData[field.name]?.toString() || ''}
+                          onValueChange={(value) => handleSelectChange(field.name, value)}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder={`Select ${field.placeholder}`} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {field.options?.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {dialogState.errors[field.name] && (
+                          <p className="text-destructive text-sm mt-1">
+                            {dialogState.errors[field.name]}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   );
                 } else if (field.type === 'textarea') {
@@ -148,12 +232,19 @@ export const DialogProvider: React.FC<{ children: ReactNode }> = ({ children }) 
                       <Label htmlFor={field.name} className="text-right">
                         {field.placeholder}
                       </Label>
-                      <Textarea
-                        id={field.name}
-                        value={dialogState.formData[field.name]?.toString() || ''}
-                        onChange={(e) => updateFormData(field.name, e.target.value)}
-                        className="col-span-3"
-                      />
+                      <div className="col-span-3">
+                        <Textarea
+                          id={field.name}
+                          value={dialogState.formData[field.name]?.toString() || ''}
+                          onChange={(e) => updateFormData(field.name, e.target.value)}
+                          className="w-full"
+                        />
+                        {dialogState.errors[field.name] && (
+                          <p className="text-destructive text-sm mt-1">
+                            {dialogState.errors[field.name]}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   );
                 } else {
@@ -162,14 +253,21 @@ export const DialogProvider: React.FC<{ children: ReactNode }> = ({ children }) 
                       <Label htmlFor={field.name} className="text-right">
                         {field.placeholder}
                       </Label>
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        type={field.type || "text"}
-                        value={dialogState.formData[field.name]?.toString() || ''}
-                        onChange={(e) => updateFormData(field.name, e.target.value)}
-                        className="col-span-3"
-                      />
+                      <div className="col-span-3">
+                        <Input
+                          id={field.name}
+                          name={field.name}
+                          type={field.type || "text"}
+                          value={dialogState.formData[field.name]?.toString() || ''}
+                          onChange={(e) => updateFormData(field.name, e.target.value)}
+                          className="w-full"
+                        />
+                        {dialogState.errors[field.name] && (
+                          <p className="text-destructive text-sm mt-1">
+                            {dialogState.errors[field.name]}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   );
                 }
