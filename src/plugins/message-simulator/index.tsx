@@ -1,104 +1,156 @@
 // src/plugins/message-simulator/index.tsx
-
-import { pluginRegistry } from '../../modules/plugin/plugin-registry';
-import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
+import { Plugin, PluginOptions } from '../../modules/plugin/types';
+import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import {  CardContent } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { MinusIcon, PlusIcon } from 'lucide-react';
 
-// Plugin options UI component
-const MessageSimulatorOptions = ({ options, onChange }) => {
-  return (
-    <CardContent className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="delay">Response Delay (ms)</Label>
-        <Input
-          id="delay"
-          type="number"
-          value={options.delay || 1500}
-          onChange={(e) => onChange({ ...options, delay: Number(e.target.value) })}
-        />
-      </div>
-      
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="showTimestamp"
-          checked={!!options.showTimestamp}
-          onCheckedChange={(checked) => onChange({ ...options, showTimestamp: checked })}
-        />
-        <Label htmlFor="showTimestamp">Show Timestamp</Label>
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="prefix">Response Prefix</Label>
-        <Input
-          id="prefix"
-          value={options.prefix || "[Simulation]"}
-          onChange={(e) => onChange({ ...options, prefix: e.target.value })}
-        />
-      </div>
-    </CardContent>
-  );
+interface SimulatorOptions extends PluginOptions {
+  delay: number;     // Opóźnienie w milisekundach
+  typingEffect: boolean;  // Symulacja pisania
+  typingSpeed: number;    // Szybkość pisania (ms na znak)
+}
+
+// Domyślne opcje
+const defaultOptions: SimulatorOptions = {
+  delay: 1000,
+  typingEffect: false,
+  typingSpeed: 30
 };
 
-const messageSimulatorPlugin = {
+const messageSimulatorPlugin: Plugin = {
   config: {
     id: 'message-simulator',
-    name: 'Message Simulator',
-    description: 'Simulates sending messages and receiving responses',
+    name: 'Symulator Wiadomości',
+    description: 'Symuluje opóźnienia w wysyłaniu wiadomości i efekt pisania',
     version: '1.0.0',
     optionsSchema: [
       {
         id: 'delay',
-        label: 'Response Delay (ms)',
+        label: 'Opóźnienie (ms)',
         type: 'number',
-        default: 1500
+        default: 1000
       },
       {
-        id: 'showTimestamp',
-        label: 'Show Timestamp',
+        id: 'typingEffect',
+        label: 'Efekt pisania',
         type: 'boolean',
-        default: true
+        default: false
       },
       {
-        id: 'prefix',
-        label: 'Response Prefix',
-        type: 'text',
-        default: '[Simulation]'
+        id: 'typingSpeed',
+        label: 'Szybkość pisania (ms/znak)',
+        type: 'number',
+        default: 30
       }
     ]
   },
-  
-  renderOptionsUI: (options, onChange) => {
-    return <MessageSimulatorOptions options={options} onChange={onChange} />;
-  },
-  
-  async process(input, options = {}) {
-    // Use options with defaults
-    const delay = options.delay || 1500;
-    const showTimestamp = options.showTimestamp !== undefined ? options.showTimestamp : true;
-    const prefix = options.prefix || '[Simulation]';
+
+  // Funkcja przetwarzająca wiadomość
+  async process(message: string, options?: PluginOptions): Promise<string> {
+    console.log('Message Simulator procesuje wiadomość z opcjami:', options);
     
-    // Wait for specified delay
-    await new Promise(resolve => setTimeout(resolve, delay));
+    // Użyj domyślnych opcji, jeśli nie podano innych
+    const processOptions = {
+      ...defaultOptions,
+      ...options
+    };
     
-    // Format response
-    let response = `${input}\n\n${prefix}: Message processed.`;
-    
-    // Add timestamp if enabled
-    if (showTimestamp) {
-      response += `\nTime: ${new Date().toLocaleTimeString()}`;
+    // Jeśli jest uruchomiony w prawdziwym środowisku przeglądarki, symuluj opóźnienie
+    if (typeof window !== 'undefined') {
+      // Symuluj opóźnienie przed odpowiedzią
+      await new Promise(resolve => setTimeout(resolve, processOptions.delay));
+      
+      // Symulowanie efektu pisania można zaimplementować za pomocą
+      // alternatywnej metody, np. aktualizując stan w komponencie React
+      // Tutaj zwracamy oryginalną wiadomość, a efekt pisania byłby obsługiwany po stronie UI
     }
     
-    // Display the options that were used (for demonstration)
-    response += '\n\nPlugin Options:';
-    response += `\n- Delay: ${delay}ms`;
-    response += `\n- Show Timestamp: ${showTimestamp ? 'Yes' : 'No'}`;
-    response += `\n- Prefix: "${prefix}"`;
+    return message;
+  },
+  
+  // Niestandardowy UI dla opcji
+  renderOptionsUI(options: PluginOptions, onChange: (newOptions: PluginOptions) => void) {
+    const mergedOptions = { ...defaultOptions, ...options as SimulatorOptions };
     
-    return response;
+    return (
+      <Card className="p-4 space-y-4">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="delay">Opóźnienie: {mergedOptions.delay}ms</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={() => onChange({ 
+                ...mergedOptions, 
+                delay: Math.max(0, mergedOptions.delay - 100) 
+              } as PluginOptions)}
+            >
+              <MinusIcon className="h-4 w-4" />
+            </Button>
+            
+            <Input
+              id="delay"
+              type="number"
+              min={0}
+              max={5000}
+              step={100}
+              value={mergedOptions.delay}
+              onChange={(e) => onChange({ 
+                ...mergedOptions, 
+                delay: parseInt(e.target.value) || 0 
+              } as PluginOptions)}
+              className="w-full"
+            />
+            
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={() => onChange({ 
+                ...mergedOptions, 
+                delay: Math.min(5000, mergedOptions.delay + 100) 
+              } as PluginOptions)}
+            >
+              <PlusIcon className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="typingEffect"
+            checked={mergedOptions.typingEffect}
+            onCheckedChange={(checked) => onChange({ ...mergedOptions, typingEffect: checked } as PluginOptions)}
+          />
+          <Label htmlFor="typingEffect">Efekt pisania</Label>
+        </div>
+        
+        {mergedOptions.typingEffect && (
+          <div className="space-y-2 pl-6">
+            <Label htmlFor="typingSpeed">
+              Szybkość pisania: {mergedOptions.typingSpeed}ms/znak
+            </Label>
+            <Input
+              id="typingSpeed"
+              type="number"
+              min={10}
+              max={200}
+              value={mergedOptions.typingSpeed}
+              onChange={(e) =>               onChange({ 
+                ...mergedOptions, 
+                typingSpeed: parseInt(e.target.value) || defaultOptions.typingSpeed 
+              } as PluginOptions)}
+              className="w-full"
+            />
+          </div>
+        )}
+      </Card>
+    );
   }
 };
 
-pluginRegistry.register(messageSimulatorPlugin);
 export default messageSimulatorPlugin;
