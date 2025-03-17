@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/nodes/NodesList.tsx
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useMemo } from "react";
 import { useAppStore } from "../store";
 import { ItemList } from "@/components/APPUI";
@@ -28,7 +28,9 @@ export const NodesList: React.FC = () => {
   const addNode = useAppStore((state) => state.addNode);
   const selectNode = useAppStore((state) => state.selectNode);
   const updateNodePlugin = useAppStore((state) => state.updateNodePlugin);
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
   const selected = useAppStore((state) => state.selected);
+  // Force component to update when state changes
   useAppStore((state) => state.stateVersion);
 
   const scenario = getCurrentScenario();
@@ -79,25 +81,6 @@ export const NodesList: React.FC = () => {
   };
   const { leftColumn, rightColumn } = preparePluginsColumns();
 
-  // Node data update function
-  const updateNodeData = (nodeId: string, label: string, assistant: string, pluginOptions?: { [pluginId: string]: any }) => {
-    useAppStore.setState((state) => {
-      const workspace = state.items.find(w => w.id === state.selected.workspace);
-      const scenario = workspace?.children?.find(s => s.id === state.selected.scenario);
-      if (scenario) {
-        const targetNode = scenario.children.find(n => n.id === nodeId);
-        if (targetNode) {
-          targetNode.label = label;
-          targetNode.assistant = assistant;
-          if (pluginOptions) {
-            targetNode.pluginOptions = pluginOptions;
-          }
-          state.stateVersion++;
-        }
-      }
-    });
-  };
-
   return (
     <div className="flex flex-col h-full">
       {/* List Header */}
@@ -121,7 +104,7 @@ export const NodesList: React.FC = () => {
             placeholder="Search nodes..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8"
+            className="pl-8 h-8 text-xs"
           />
         </div>
       </div>
@@ -134,33 +117,53 @@ export const NodesList: React.FC = () => {
           onClick={selectNode}
           onDelete={deleteNode}
           renderItem={(item) => (
-            <div className="flex items-center justify-between">
-              <div className="font-medium truncate">{item.label}</div>
-              <div className="flex items-center gap-2">
+            <div className="text-xs font-medium flex items-center justify-between w-full">
+              <div className="flex flex-col mr-1">
+                <span className="truncate max-w-36">{item.label}</span>
+                {item.contextSaveKey && item.contextSaveKey !== "_none" && (
+                  <div className="flex items-center mt-0.5">
+                    <svg className="w-3 h-3 mr-1 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <path d="M12 16v-4"></path>
+                      <path d="M12 8h.01"></path>
+                    </svg>
+                    <Badge variant="outline" className="text-[0.65rem] px-1 py-0 h-4">
+                      {item.contextSaveKey}
+                    </Badge>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center shrink-0">
+                {/* Plugin indicator/button */}
                 <Button
                   variant="ghost"
-                  size="sm"
-                  onMouseDown={(e) => handlePluginSelection(item.id, e)}
-                  aria-label="Select plugin"
+                  size="icon"
+                  className="h-5 w-5 mr-0.5"
+                  title={item.plugin ? 
+                    `Plugin: ${pluginRegistry.getPlugin(item.plugin)?.config.name || item.plugin}` : 
+                    "Select plugin"
+                  }
+                  onClick={(e) => handlePluginSelection(item.id, e)}
                 >
                   {item.plugin ? (
                     <Power className="h-3.5 w-3.5 text-green-500" />
                   ) : (
                     <Puzzle className="h-3.5 w-3.5 text-muted-foreground" />
                   )}
-                  {item.plugin && (
-                    <span>
-                      {pluginRegistry.getPlugin(item.plugin)?.config.name || item.plugin}
-                    </span>
-                  )}
                 </Button>
+                
+                {/* Edit button */}
                 <Button 
                   variant="ghost" 
-                  size="sm" 
-                  onClick={(e) => { e.stopPropagation(); setEditingNode(item); }}
-                  aria-label="Edit node"
+                  size="icon" 
+                  className="h-5 w-5"
+                  title="Edit node"
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    setEditingNode(item); 
+                  }}
                 >
-                  <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
+                  <MoreHorizontal className="h-3.5 w-3.5" />
                 </Button>
               </div>
             </div>

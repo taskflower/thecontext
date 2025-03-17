@@ -54,10 +54,40 @@ export const FlowPlayer: React.FC = () => {
       }
 
       if (currentNode.userMessage) {
+        // Dodaj odpowiedź użytkownika do konwersacji
         addToConversation({
           role: "user",
           message: currentNode.userMessage,
         });
+        
+        // Jeśli node ma ustawiony kontekstSaveKey i nie jest to "_none", zapisz odpowiedź użytkownika do kontekstu
+        if (currentNode.contextSaveKey && currentNode.contextSaveKey !== "_none" && currentNode.userMessage.trim()) {
+          console.log("Saving user response to context:", {
+            key: currentNode.contextSaveKey,
+            value: currentNode.userMessage
+          });
+          
+          // Sprawdź, czy klucz już istnieje
+          const existingItem = context.getAllItems().find(item => item.key === currentNode.contextSaveKey);
+          
+          if (existingItem) {
+            // Aktualizuj istniejący klucz kontekstu
+            context.updateItem(currentNode.contextSaveKey, currentNode.userMessage, 'text');
+          } else {
+            // Dodaj nowy klucz kontekstu
+            context.addItem(currentNode.contextSaveKey, currentNode.userMessage, 'text');
+          }
+          
+          // Sprawdź, czy wartość została prawidłowo zapisana
+          setTimeout(() => {
+            const items = context.getAllItems();
+            const savedItem = items.find(i => i.key === currentNode.contextSaveKey);
+            console.log("Context after save:", {
+              allItems: items,
+              savedItem
+            });
+          }, 100);
+        }
       }
     }
   }, [
@@ -152,6 +182,17 @@ export const FlowPlayer: React.FC = () => {
     [currentNodeIndex, setUserMessage]
   );
 
+  // Renderowanie informacji o zapisie do kontekstu
+  const renderContextSaveInfo = (node: GraphNode) => {
+    if (!node.contextSaveKey || node.contextSaveKey === "_none") return null;
+    
+    return (
+      <div className="mt-1 text-xs text-muted-foreground">
+        <i>Your response will be saved to context key: <strong>{node.contextSaveKey}</strong></i>
+      </div>
+    );
+  };
+
   return (
     <>
       <div className="absolute top-4 right-4 z-10">
@@ -218,6 +259,7 @@ export const FlowPlayer: React.FC = () => {
 
               <div className="flex flex-col space-y-2">
                 <h3 className="text-sm font-semibold">Your Response</h3>
+                {renderContextSaveInfo(step)}
                 <Textarea
                   className="min-h-[120px] resize-none"
                   placeholder="Type your message here..."

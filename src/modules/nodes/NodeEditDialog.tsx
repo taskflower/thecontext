@@ -12,12 +12,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useWorkspaceContext } from "../context/hooks/useContext";
 
 interface NodeEditDialogProps {
   node: GraphNode;
   open: boolean;
   onClose: () => void;
-  onUpdateNode: (nodeId: string, label: string, assistant: string, pluginOptions?: { [pluginId: string]: any }) => void;
+  onUpdateNode: (
+    nodeId: string, 
+    label: string, 
+    assistant: string, 
+    contextSaveKey?: string,
+    pluginOptions?: { [pluginId: string]: any }
+  ) => void;
 }
 
 export const NodeEditDialog: React.FC<NodeEditDialogProps> = ({ 
@@ -26,15 +33,23 @@ export const NodeEditDialog: React.FC<NodeEditDialogProps> = ({
   onClose, 
   onUpdateNode 
 }) => {
+  console.log("NodeEditDialog mounting with node:", node);
+  
   const [editNodeData, setEditNodeData] = useState({ 
     label: node.label, 
-    assistant: node.assistant 
+    assistant: node.assistant,
+    contextSaveKey: node.contextSaveKey || "_none" 
   });
   
   // Initialize plugin options state
   const [pluginOptions, setPluginOptions] = useState<any>(
     node.pluginOptions?.[node.plugin || ""] || {}
   );
+
+  // Get workspace context to display available keys
+  const context = useWorkspaceContext();
+  const contextItems = context.getAllItems();
+  const contextKeys = contextItems.map(item => item.key);
 
   // Update plugin options when node or plugin changes
   useEffect(() => {
@@ -59,11 +74,23 @@ export const NodeEditDialog: React.FC<NodeEditDialogProps> = ({
   }, [node.plugin, node.id]);
 
   const handleUpdateNode = () => {
+    console.log("handleUpdateNode called with:", editNodeData);
+    
     const updatedPluginOptions = node.plugin 
       ? { ...(node.pluginOptions || {}), [node.plugin]: pluginOptions } 
       : node.pluginOptions;
       
-    onUpdateNode(node.id, editNodeData.label, editNodeData.assistant, updatedPluginOptions);
+    const contextKey = editNodeData.contextSaveKey === "_none" ? undefined : editNodeData.contextSaveKey;
+    
+    console.log("Calling onUpdateNode with contextKey:", contextKey);
+    
+    onUpdateNode(
+      node.id, 
+      editNodeData.label, 
+      editNodeData.assistant, 
+      contextKey,
+      updatedPluginOptions
+    );
     onClose();
   };
 
@@ -170,6 +197,46 @@ export const NodeEditDialog: React.FC<NodeEditDialogProps> = ({
             placeholder="Assistant message"
             className="min-h-[80px]"
           />
+          
+          {/* Context Save Key - sekcja zapisu do kontekstu */}
+          <div className="space-y-2">
+            <Label htmlFor="contextSaveKey">Save user response to context key</Label>
+            <Select 
+              value={editNodeData.contextSaveKey}
+              onValueChange={value => {
+                console.log("Selected context key:", value);
+                setEditNodeData((prev) => ({ ...prev, contextSaveKey: value }));
+              }}
+            >
+              <SelectTrigger id="contextSaveKey">
+                <SelectValue placeholder="Select context key or leave empty" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="_none">Don't save to context</SelectItem>
+                {contextKeys.map(key => (
+                  <SelectItem key={key} value={key}>
+                    {key}
+                  </SelectItem>
+                ))}
+                <SelectItem value="__new__">+ Create new context key</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            {editNodeData.contextSaveKey === "__new__" && (
+              <div className="mt-2">
+                <Label htmlFor="newContextKey">New context key name</Label>
+                <Input
+                  id="newContextKey"
+                  placeholder="Enter new context key name"
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      setEditNodeData((prev) => ({ ...prev, contextSaveKey: e.target.value }));
+                    }
+                  }}
+                />
+              </div>
+            )}
+          </div>
           
           {/* Plugin options section */}
           {node.plugin && (

@@ -4,7 +4,13 @@ import { ElementType, GraphNode, Position } from "../types";
 import { SetFn } from "../typesActioss";
 
 export const createNodeActions = (set: SetFn) => ({
-  addNode: (payload: { label: string; assistant: string; position?: Position, plugin?: string }) =>
+  addNode: (payload: { 
+    label: string; 
+    assistant: string; 
+    position?: Position, 
+    plugin?: string, 
+    contextSaveKey?: string 
+  }) =>
     set((state) => {
       const newNode: GraphNode = {
         id: `node-${Date.now()}`,
@@ -13,7 +19,10 @@ export const createNodeActions = (set: SetFn) => ({
         assistant: payload.assistant,
         position: payload.position || { x: 100, y: 100 },
         plugin: payload.plugin,
+        contextSaveKey: payload.contextSaveKey
       };
+
+      console.log("Adding new node with:", payload);
 
       const workspace = state.items.find(
         (w) => w.id === state.selected.workspace
@@ -69,25 +78,45 @@ export const createNodeActions = (set: SetFn) => ({
         }
       }
     }),
-    updateNodeData: (nodeId: string, label: string, assistant: string, pluginOptions?: { [pluginId: string]: PluginOptions }) =>
-      set((state) => {
-        const workspace = state.items.find(
-          (w) => w.id === state.selected.workspace
-        );
-        const scenario = workspace?.children?.find(
-          (s) => s.id === state.selected.scenario
-        );
-        const node = scenario?.children?.find((n) => n.id === nodeId);
     
-        if (node) {
-          node.label = label;
-          node.assistant = assistant;
-          if (pluginOptions) {
-            node.pluginOptions = pluginOptions;
-          }
-          state.stateVersion++;
+  updateNodeData: (
+    nodeId: string, 
+    label: string, 
+    assistant: string, 
+    contextSaveKey?: string,
+    pluginOptions?: { [pluginId: string]: PluginOptions }
+  ) =>
+    set((state) => {
+      const workspace = state.items.find(
+        (w) => w.id === state.selected.workspace
+      );
+      const scenario = workspace?.children?.find(
+        (s) => s.id === state.selected.scenario
+      );
+      const node = scenario?.children?.find((n) => n.id === nodeId);
+  
+      if (node) {
+        console.log("updateNodeData - Updating node:", { 
+          nodeId, 
+          label, 
+          assistant, 
+          contextSaveKey,
+          oldContextSaveKey: node.contextSaveKey
+        });
+        
+        node.label = label;
+        node.assistant = assistant;
+        node.contextSaveKey = contextSaveKey;
+        
+        if (pluginOptions) {
+          node.pluginOptions = pluginOptions;
         }
-      }),
+        
+        state.stateVersion++;
+      } else {
+        console.error("Node not found in updateNodeData:", nodeId);
+      }
+    }),
 
   updateNodePosition: (nodeId: string, position: Position) =>
     set((state) => {

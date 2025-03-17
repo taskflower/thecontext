@@ -46,8 +46,12 @@ export const useAppStore = create<AppState>()(
         // Don't persist conversation to save storage space
         // Don't persist stateVersion since it's a local state tracker
       }),
-      // Optional storage configuration (uncomment if needed)
-      // storage: createJSONStorage(() => localStorage),
+      // Logging dla debugowania
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          console.log("Store rehydrated:", state);
+        }
+      }
     }
   )
 );

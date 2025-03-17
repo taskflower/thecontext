@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/types.ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Edge as ReactFlowEdgeType,
   Node as ReactFlowNodeType,
@@ -43,6 +43,7 @@ export interface GraphNode {
   userMessage?: string;
   plugin?: string;
   pluginOptions?: { [pluginId: string]: any }; // Store options for each plugin
+  contextSaveKey?: string; // Klucz kontekstu do zapisania odpowiedzi użytkownika
 }
 
 export interface GraphEdge {
@@ -108,12 +109,20 @@ export interface AppState {
     assistant: string;
     position?: Position;
     plugin?: string;
+    contextSaveKey?: string;
   }) => void;
   deleteNode: (nodeId: string) => void;
   updateNodePosition: (nodeId: string, position: Position) => void;
   selectNode: (nodeId: string) => void;
   setUserMessage: (nodeId: string, message: string) => void;
-  updateNodePlugin: (nodeId: string, plugin: string | undefined) => void; // Zmienione z updateNodePlugins
+  updateNodePlugin: (nodeId: string, plugin: string | undefined) => void;
+  updateNodeData: (
+    nodeId: string, 
+    label: string, 
+    assistant: string, 
+    contextSaveKey?: string,
+    pluginOptions?: { [pluginId: string]: any }
+  ) => void;
 
   // Edge methods
   addEdge: (payload: {
