@@ -7,7 +7,7 @@
   padding: 0;
   font-size: 14px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
+
 }
 
 /* Selected node styling */
@@ -25,7 +25,7 @@
 .react-flow__edge-path {
   stroke: hsl(var(--border));
   stroke-width: 1.5;
-  transition: stroke 0.2s ease;
+
 }
 
 /* Selected edge styling */
