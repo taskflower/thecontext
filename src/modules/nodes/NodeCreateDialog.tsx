@@ -1,8 +1,7 @@
 // src/modules/nodes/NodeCreateDialog.tsx
 import React from "react";
-export { NodeCreateDialog } from "./NodeCreateDialog";
-export { NodeEditDialog } from "./NodeEditDialog";
-import { useDialogManager } from "@/hooks/useDialogManager";
+
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,7 +18,7 @@ export const NodeCreateDialog: React.FC<NodeCreateDialogProps> = ({
   onClose, 
   onAddNode 
 }) => {
-  const { createDialog } = useDialogManager();
+
   const [nodeData, setNodeData] = React.useState({ label: "", assistant: "" });
 
   const handleAddNode = () => {
