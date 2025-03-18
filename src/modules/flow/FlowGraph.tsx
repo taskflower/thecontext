@@ -131,7 +131,7 @@ export const FlowGraph: React.FC = () => {
         <Background gap={16} size={1} className="flow-background" />
       </ReactFlow>
       
-      <FlowPlayer /> {/* Using imported FlowPlayer from the new module */}
+     <div className='absolute top-0 left-0 w-1/2 h-full'><FlowPlayer /></div>  {/* Using imported FlowPlayer from the new module */}
       
       {/* Render filter editor when needed */}
       {showFilterEditor && selected.scenario && (

@@ -1,72 +1,38 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/modules/plugin/components/AssistantMessageProcessor.tsx
-import React, { useState, useEffect } from 'react';
-import { useMessageProcessor } from '../processor';
+// src/modules/flowPlayer/components/MessageProcessors/AssistantMessageProcessor.tsx
+import React from "react";
 
-interface AssistantMessageProcessorProps {
-  message: string;
-  nodePlugins?: string[];
-  nodePluginOptions?: Record<string, Record<string, any>>;
-  onProcessed?: (processed: string) => void;
-  autoProcess?: boolean;
-  onSimulateFinish?: () => void;
-}
+import { Card, CardContent } from "@/components/ui/card";
+import { useFlowPlayer } from "@/modules/flowPlayer";
+import { useAppStore } from "@/modules/store";
 
-export const AssistantMessageProcessor: React.FC<AssistantMessageProcessorProps> = ({
-  message,
-  nodePlugins,
-  nodePluginOptions,
-  onProcessed,
-  autoProcess = false,
-  onSimulateFinish
-}) => {
-  const [processing, setProcessing] = useState(false);
-  const { processWithPlugins, processWithActivePlugins } = useMessageProcessor();
 
-  useEffect(() => {
-    if (!autoProcess) return;
-    
-    const processMessage = async () => {
-      setProcessing(true);
-      try {
-        let result;
-        
-        if (nodePlugins?.length) {
-          // Użyj określonych pluginów dla node
-          result = await processWithPlugins(message, nodePlugins, nodePluginOptions);
-        } else {
-          // Użyj wszystkich aktywnych pluginów
-          result = await processWithActivePlugins(message);
-        }
-        
-        if (onProcessed) onProcessed(result);
-        
-        // Symulacja zakończenia (dla FlowPlayer)
-        if (onSimulateFinish) {
-          setTimeout(onSimulateFinish, 500);
-        }
-      } catch (error) {
-        console.error('Error processing assistant message:', error);
-      } finally {
-        setProcessing(false);
-      }
-    };
-    
-    processMessage();
-  }, [
-    message, 
-    nodePlugins, 
-    nodePluginOptions, 
-    autoProcess, 
-    onProcessed,
-    onSimulateFinish,
-    processWithPlugins,
-    processWithActivePlugins
-  ]);
+export const AssistantMessageProcessor: React.FC = () => {
+  const { currentNode, currentNodeIndex } = useFlowPlayer();
+  const conversation = useAppStore((state) => state.conversation);
+  
+  // Get the last assistant message from the conversation
+  const lastAssistantMessage = conversation
+    .filter(msg => msg.role === "assistant")
+    .pop()?.message || "";
 
-  if (processing) {
-    return <div className="text-muted-foreground italic py-2">Processing assistant message...</div>;
+  if (!currentNode) {
+    return null;
   }
+  
+  // Use currentNodeIndex as key to force re-render when node changes
 
-  return null;
+  return (
+    <Card key={`assistant-message-${currentNodeIndex}`}>
+      <CardContent className="pt-4">
+        <div className="mb-2 font-medium text-sm">Assistant Response</div>
+        <div className="min-h-32 bg-muted/20 p-3 rounded-md whitespace-pre-wrap">
+          {lastAssistantMessage ? (
+            lastAssistantMessage
+          ) : (
+            <span className="text-muted-foreground">No content to display</span>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
 };

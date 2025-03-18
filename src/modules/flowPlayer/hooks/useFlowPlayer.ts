@@ -1,188 +1,143 @@
 // src/modules/flowPlayer/hooks/useFlowPlayer.ts
 import { useState, useCallback, useEffect } from "react";
 import { useAppStore } from "../../store";
-import { useWorkspaceContext } from "../../context/hooks/useContext";
 import { FlowNode } from "../../flow/types";
 import { calculateFlowPath } from "../flowUtils";
-import { FlowPlayerContext } from "../types";
 
+export interface FlowPlayerContext {
+  currentNode: FlowNode | null;
+  currentNodeIndex: number;
+  flowPath: FlowNode[];
+  userMessage: string;
+  nextNode: () => void;
+  previousNode: () => void;
+  resetFlow: () => void;
+  updateUserMessage: (value: string) => void;
+}
 
 export const useFlowPlayer = (): FlowPlayerContext => {
-  const getCurrentScenario = useAppStore((state) => state.getCurrentScenario);
-  const addToConversation = useAppStore((state) => state.addToConversation);
-  const clearConversation = useAppStore((state) => state.clearConversation);
-  const setUserMessage = useAppStore((state) => state.setUserMessage);
+  const { getCurrentScenario, selectNode, addToConversation, clearConversation, selected } = useAppStore();
+  
+  // Get scenario nodes and edges
+  const scenario = getCurrentScenario();
+  const nodes = scenario?.children || [];
+  const edges = scenario?.edges || [];
 
-  // Workspace context for variables
-  const context = useWorkspaceContext();
-
-  // Player state
-  const [isPlaying, setIsPlaying] = useState(false);
+  // Calculate flow path
+  const flowPath = calculateFlowPath(nodes, edges);
+  
+  // State for flow player
   const [currentNodeIndex, setCurrentNodeIndex] = useState(0);
-  const [flowPath, setFlowPath] = useState<FlowNode[]>([]);
-  const [processedMessage, setProcessedMessage] = useState<string | null>(null);
+  const [userMessage, setUserMessage] = useState("");
 
-  // Check if we have an active scenario
-  const currentScenario = getCurrentScenario();
-  const canPlay = !!currentScenario;
+  // Current node
+  const currentNode = flowPath.length > 0 && currentNodeIndex < flowPath.length 
+    ? flowPath[currentNodeIndex] 
+    : null;
 
-  // Reset processed message when step changes
+  // Initialize with first node and handle node selection changes
   useEffect(() => {
-    setProcessedMessage(null);
-  }, [currentNodeIndex]);
-
-  // Save messages from current node to conversation history
-  const saveCurrentNodeMessages = useCallback(() => {
-    const currentNode = flowPath[currentNodeIndex];
-    if (!currentNode) return;
-
-    // Save assistant message
-    if (currentNode.assistant) {
-      const messageWithContext = context.processTemplate(currentNode.assistant);
-      const finalMessage = processedMessage || messageWithContext;
-
-      addToConversation({
-        role: "assistant",
-        message: finalMessage,
-      });
+    if (flowPath.length > 0 && currentNode) {
+      // Add the first node's assistant message to conversation
+      if (currentNode.assistant) {
+        addToConversation({
+          role: "assistant",
+          message: currentNode.assistant
+        });
+      }
+      // Select the first node
+      selectNode(currentNode.id);
     }
-
-    // Save user response
-    if (currentNode.userMessage) {
-      // Add to conversation
-      addToConversation({
-        role: "user",
-        message: currentNode.userMessage,
-      });
-
-      // Save to context if configured
-      if (
-        currentNode.contextSaveKey &&
-        currentNode.contextSaveKey !== "_none"
-      ) {
-        const existingItem = context
-          .getAllItems()
-          .find((item) => item.key === currentNode.contextSaveKey);
-
-        if (existingItem) {
-          context.updateItem(
-            currentNode.contextSaveKey,
-            currentNode.userMessage,
-            "text"
-          );
-        } else {
-          context.addItem(
-            currentNode.contextSaveKey,
-            currentNode.userMessage,
-            "text"
-          );
-        }
+  // Only run this effect once when the flow path is first calculated
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flowPath.length]);
+  
+  // Sync UI when node selection changes externally
+  useEffect(() => {
+    if (selected.node && flowPath.length > 0) {
+      const nodeIndex = flowPath.findIndex((node) => node.id === selected.node);
+      if (nodeIndex !== -1 && nodeIndex !== currentNodeIndex) {
+        setCurrentNodeIndex(nodeIndex);
+        setUserMessage("");
       }
     }
-  }, [
-    flowPath,
-    currentNodeIndex,
-    processedMessage,
-    context,
-    addToConversation,
-  ]);
-
-  // Start flow playback
-  const startFlow = useCallback(() => {
-    const scenario = getCurrentScenario();
-    if (!scenario) return;
-
-    // Clear conversation history
-    clearConversation();
-
-    // Calculate flow path
-    const path = calculateFlowPath(scenario.children, scenario.edges);
-    if (path.length === 0) return;
-
-    // Reset path and start playback
-    const cleanPath = path.map((node) => ({
-      ...node,
-      userMessage: undefined,
-    }));
-
-    setFlowPath(cleanPath);
-    setCurrentNodeIndex(0);
-    setIsPlaying(true);
-  }, [getCurrentScenario, clearConversation]);
+  }, [selected.node, flowPath, currentNodeIndex]);
 
   // Move to next node
   const nextNode = useCallback(() => {
-    saveCurrentNodeMessages();
-    setProcessedMessage(null);
+    if (currentNodeIndex >= flowPath.length - 1 || !currentNode) return;
 
-    if (currentNodeIndex + 1 >= flowPath.length) {
-      // End of flow reached
-      setIsPlaying(false);
-    } else {
-      setCurrentNodeIndex((prev) => prev + 1);
+    // Save current user message to conversation
+    if (userMessage.trim()) {
+      addToConversation({
+        role: "user",
+        message: userMessage
+      });
     }
-  }, [saveCurrentNodeMessages, currentNodeIndex, flowPath.length]);
+
+    // Move to next node
+    const newIndex = currentNodeIndex + 1;
+    setCurrentNodeIndex(newIndex);
+    setUserMessage("");
+
+    // Add next node's assistant message to conversation
+    const nextNode = flowPath[newIndex];
+    if (nextNode && nextNode.assistant) {
+      addToConversation({
+        role: "assistant",
+        message: nextNode.assistant
+      });
+    }
+
+    // Select the node in UI
+    selectNode(nextNode.id);
+  }, [currentNode, currentNodeIndex, flowPath, userMessage, addToConversation, selectNode]);
 
   // Move to previous node
   const previousNode = useCallback(() => {
-    setCurrentNodeIndex((prev) => Math.max(prev - 1, 0));
-  }, []);
+    if (currentNodeIndex <= 0 || !currentNode) return;
 
-  // Stop playback
-  const stopFlow = useCallback(() => {
-    saveCurrentNodeMessages();
+    const newIndex = currentNodeIndex - 1;
+    setCurrentNodeIndex(newIndex);
+    setUserMessage("");
+    
+    // Select the node in UI
+    selectNode(flowPath[newIndex].id);
+  }, [currentNode, currentNodeIndex, flowPath, selectNode]);
 
-    setIsPlaying(false);
+  // Reset flow
+  const resetFlow = useCallback(() => {
     setCurrentNodeIndex(0);
+    setUserMessage("");
+    clearConversation();
 
-    // Clear user messages in store
     if (flowPath.length > 0) {
-      flowPath.forEach((node) => {
-        if (node.userMessage) {
-          setUserMessage(node.id, "");
-        }
-      });
+      const firstNode = flowPath[0];
+      selectNode(firstNode.id);
+      
+      // Add first node's assistant message to conversation
+      if (firstNode.assistant) {
+        addToConversation({
+          role: "assistant",
+          message: firstNode.assistant
+        });
+      }
     }
-
-    setFlowPath([]);
-  }, [saveCurrentNodeMessages, flowPath, setUserMessage]);
+  }, [flowPath, clearConversation, selectNode, addToConversation]);
 
   // Update user message
-  const updateUserMessage = useCallback(
-    (value: string) => {
-      setFlowPath((currentPath) => {
-        const currentNode = currentPath[currentNodeIndex];
-        if (!currentNode) return currentPath;
-
-        // Update in store
-        setUserMessage(currentNode.id, value);
-
-        // Update local state
-        const updatedPath = [...currentPath];
-        updatedPath[currentNodeIndex] = {
-          ...currentNode,
-          userMessage: value,
-        };
-
-        return updatedPath;
-      });
-    },
-    [currentNodeIndex, setUserMessage]
-  );
+  const updateUserMessage = useCallback((value: string) => {
+    setUserMessage(value);
+  }, []);
 
   return {
-    isPlaying,
-    canPlay,
-    currentNode: isPlaying ? flowPath[currentNodeIndex] : null,
-    flowPath,
+    currentNode,
     currentNodeIndex,
-    processedMessage,
-
-    startFlow,
-    stopFlow,
+    flowPath,
+    userMessage,
     nextNode,
     previousNode,
-    updateUserMessage,
-    setProcessedMessage,
+    resetFlow,
+    updateUserMessage
   };
 };

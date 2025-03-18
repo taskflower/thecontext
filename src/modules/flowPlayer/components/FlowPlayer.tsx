@@ -1,137 +1,63 @@
 // src/modules/flowPlayer/components/FlowPlayer.tsx
-import React, { useEffect, useRef } from 'react';
-import { Play } from 'lucide-react';
-import { StepModal } from '@/components/APPUI';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { AssistantMessageProcessor } from '../../plugin/components/AssistantMessageProcessor';
-import { UserMessageProcessor } from '../../plugin/components/UserMessageProcessor';
-import { useFlowPlayer } from '../hooks/useFlowPlayer';
-import { useWorkspaceContext } from '../../context/hooks/useContext';
-import { FlowNode } from '../../flow/types';
+import React from "react";
+import { FlowControls } from "./Controls/FlowControls";
+import { useFlowPlayer } from "../hooks/useFlowPlayer";
+import { ConversationPanel } from "../../conversation/ConversationPanel";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Send } from "lucide-react";
 
 export const FlowPlayer: React.FC = () => {
-  // Use ref to track if dialog is visible
-  const isVisibleRef = useRef(false);
-  
-  const {
-    isPlaying,
-    canPlay,
-    currentNodeIndex,
-    flowPath,
-    processedMessage,
-    
-    startFlow,
-    stopFlow, 
-    nextNode,
-    previousNode,
-    updateUserMessage,
-    setProcessedMessage
+  const { 
+    currentNode, 
+    userMessage, 
+    updateUserMessage, 
+    nextNode 
   } = useFlowPlayer();
   
-  // Update visibility state
-  useEffect(() => {
-    isVisibleRef.current = isPlaying && flowPath.length > 0;
-  }, [isPlaying, flowPath]);
-  
-  const context = useWorkspaceContext();
-  
-  // Manually close dialog
-  const handleStopFlow = () => {
-    stopFlow();
+  const handleSendMessage = () => {
+    if (userMessage.trim()) {
+      nextNode();
+    }
   };
   
-  // Render context save info
-  const renderContextSaveInfo = (node?: FlowNode) => {
-    if (!node?.contextSaveKey || node.contextSaveKey === "_none") return null;
-    
-    return (
-      <div className="mt-1 text-xs text-muted-foreground">
-        <i>Your response will be saved to context key: <strong>{node.contextSaveKey}</strong></i>
-      </div>
-    );
-  };
-
   return (
-    <>
-      {/* Play Button */}
-      <div className="absolute top-4 right-4 z-10">
-        <Button 
-          size="sm" 
-          onClick={startFlow} 
-          className="px-3 py-2 space-x-1"
-          disabled={!canPlay}
-        >
-          <Play className="h-4 w-4 mr-1" />
-          <span>Play Flow {!canPlay && '(Select Scenario)'}</span>
-        </Button>
-      </div>
-
-      {/* Flow Player Modal */}
-      {isPlaying && flowPath.length > 0 && (
-        <StepModal
-          steps={flowPath}
-          currentStep={currentNodeIndex}
-          onNext={nextNode}
-          onPrev={previousNode}
-          onClose={handleStopFlow}
-          renderStepContent={(step: FlowNode) => {
-            // Check if step exists and has required properties
-            if (!step) return <div>No step data available</div>;
-            
-            return (
-              <div className="flex flex-col space-y-6">
-                {/* Assistant Message */}
-                <Card className="p-4 border-muted bg-muted/20">
-                  <div className="flex flex-col space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-semibold">Assistant</h3>
-
-                      {/* Display plugin badge if present */}
-                      {step.plugin && (
-                        <Badge variant="outline" className="text-xs">
-                          {step.plugin}
-                        </Badge>
-                      )}
-                    </div>
-
-                    {/* Assistant Message Processor component - only if step.assistant exists */}
-                    {step.assistant && (
-                      <AssistantMessageProcessor
-                        message={context.processTemplate(step.assistant)}
-                        onProcessed={setProcessedMessage}
-                        autoProcess={true}
-                        nodePlugins={step.plugin ? [step.plugin] : undefined}
-                        nodePluginOptions={step.pluginOptions}
-                      />
-                    )}
-
-                    <div className="text-sm whitespace-pre-line">
-                      {processedMessage || 
-                       (step.assistant ? context.processTemplate(step.assistant) : 'No message available')}
-                    </div>
-                  </div>
-                </Card>
-
-                {/* User Response */}
-                <div className="flex flex-col space-y-2">
-                  <h3 className="text-sm font-semibold">Your Response</h3>
-                  {renderContextSaveInfo(step)}
-                  
-                  {/* User Message Processor instead of simple Textarea */}
-                  <UserMessageProcessor
-                    value={step.userMessage || ""}
-                    onChange={updateUserMessage}
-                    pluginId={step.userInputPlugin || step.plugin}
-                    pluginOptions={step.pluginOptions}
-                  />
-                </div>
+    <div className="flow-player p-4">
+      <FlowControls />
+      
+      {currentNode && (
+        <Card className="mb-6" key={currentNode.id}>
+          <CardContent className="pt-4">
+            <h3 className="text-lg font-medium mb-1">{currentNode.label || "Unnamed Node"}</h3>
+            {currentNode.type && (
+              <div className="text-xs bg-muted inline-block px-2 py-0.5 rounded-full mb-2">
+                {currentNode.type}
               </div>
-            );
-          }}
-        />
+            )}
+          </CardContent>
+        </Card>
       )}
-    </>
+      
+      <div className="flex-1 mb-6 overflow-auto">
+        <ConversationPanel />
+      </div>
+      
+      <Card>
+        <CardContent className="pt-4">
+          <div className="flex items-end gap-2">
+            <Textarea
+              value={userMessage}
+              onChange={(e) => updateUserMessage(e.target.value)}
+              placeholder="Type your message..."
+              className="min-h-20 flex-1"
+            />
+            <Button onClick={handleSendMessage} className="mb-1">
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
