@@ -1,5 +1,5 @@
 // src/modules/flow/flowUtils.ts
-import { FlowNode, FlowEdge } from './types';
+import { FlowNode, FlowEdge } from '../flow/types';
 
 export const calculateFlowPath = (nodes: FlowNode[] = [], edges: FlowEdge[] = []): FlowNode[] => {
   if (nodes.length === 0) return [];

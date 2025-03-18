@@ -8,4 +8,4 @@ export * from './types';
 export { useFlow } from './useFlow';
 
 // Helper functions
-export { calculateFlowPath } from './flowUtils';
+export { calculateFlowPath } from '../flowPlayer/flowUtils';

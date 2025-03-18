@@ -3,7 +3,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useAppStore } from '../../store';
 import { useWorkspaceContext } from '../../context/hooks/useContext';
 import { FlowNode } from '../../flow/types';
-import { calculateFlowPath } from '../../flow/flowUtils';
+import { calculateFlowPath } from '../flowUtils';
 import { FlowPlayerContext } from '../types';
 
 export const useFlowPlayer = (): FlowPlayerContext => {

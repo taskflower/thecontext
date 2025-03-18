@@ -13,7 +13,8 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { FlowPlayer } from "../modules/flow/FlowPlayer";
+import { FlowPlayer } from "@/modules/flowPlayer";
+
 
 const ScenarioCard: React.FC<{ scenario: any }> = ({ scenario }) => {
   const [showFlow, setShowFlow] = useState(false);
