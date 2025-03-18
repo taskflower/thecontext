@@ -1,21 +1,21 @@
-// src/modules/flow/flowUtils.ts
+// src/modules/flowPlayer/flowUtils.ts
 import { FlowNode, FlowEdge } from '../flow/types';
 
 export const calculateFlowPath = (nodes: FlowNode[] = [], edges: FlowEdge[] = []): FlowNode[] => {
   if (nodes.length === 0) return [];
   
-  // Znajdź węzeł startowy (bez przychodzących krawędzi)
+  // Find the start node (without incoming edges)
   const targetNodes = new Set(edges.map(edge => edge.target));
   let startNodeId = nodes.find(node => !targetNodes.has(node.id))?.id;
   
-  // Jeśli nie znaleziono wyraźnego węzła startowego, weź pierwszy węzeł
+  // If no explicit start node was found, use the first node
   if (!startNodeId && nodes.length > 0) {
     startNodeId = nodes[0].id;
   }
   
   if (!startNodeId) return [];
   
-  // Utwórz mapę sąsiedztwa dla krawędzi
+  // Create adjacency map for edges
   const adjacencyMap = new Map<string, string[]>();
   
   edges.forEach(edge => {
@@ -25,7 +25,7 @@ export const calculateFlowPath = (nodes: FlowNode[] = [], edges: FlowEdge[] = []
     adjacencyMap.get(edge.source)?.push(edge.target);
   });
   
-  // Przechodzenie grafu i zbieranie ścieżki
+  // Traverse graph and collect path
   const path: FlowNode[] = [];
   const visited = new Set<string>();
   

@@ -1,3 +1,4 @@
+// src/modules/flow/index.ts
 // Components 
 export { FlowGraph } from './FlowGraph';
 
@@ -7,5 +8,5 @@ export * from './types';
 // Hooks
 export { useFlow } from './useFlow';
 
-// Helper functions
-export { calculateFlowPath } from '../flowPlayer/flowUtils';
+// Note: We're removing the export of calculateFlowPath from here
+// to avoid circular dependencies between flow and flowPlayer modules

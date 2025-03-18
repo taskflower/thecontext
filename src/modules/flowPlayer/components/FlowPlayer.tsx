@@ -76,7 +76,7 @@ export const FlowPlayer: React.FC = () => {
           onNext={nextNode}
           onPrev={previousNode}
           onClose={handleStopFlow}
-          renderStepContent={(step) => {
+          renderStepContent={(step: FlowNode) => {
             // Check if step exists and has required properties
             if (!step) return <div>No step data available</div>;
             
@@ -119,7 +119,7 @@ export const FlowPlayer: React.FC = () => {
                   <h3 className="text-sm font-semibold">Your Response</h3>
                   {renderContextSaveInfo(step)}
                   
-                  {/* User Message Processor zamiast zwykłego Textarea */}
+                  {/* User Message Processor instead of simple Textarea */}
                   <UserMessageProcessor
                     value={step.userMessage || ""}
                     onChange={updateUserMessage}
