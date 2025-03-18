@@ -3,10 +3,10 @@ import React, { useEffect, useRef } from 'react';
 import { Play } from 'lucide-react';
 import { StepModal } from '@/components/APPUI';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MessageProcessor } from '../../plugin/components/MessageProcessor';
+import { AssistantMessageProcessor } from '../../plugin/components/AssistantMessageProcessor';
+import { UserMessageProcessor } from '../../plugin/components/UserMessageProcessor';
 import { useFlowPlayer } from '../hooks/useFlowPlayer';
 import { useWorkspaceContext } from '../../context/hooks/useContext';
 import { FlowNode } from '../../flow/types';
@@ -96,9 +96,9 @@ export const FlowPlayer: React.FC = () => {
                       )}
                     </div>
 
-                    {/* Message processor component - only if step.assistant exists */}
+                    {/* Assistant Message Processor component - only if step.assistant exists */}
                     {step.assistant && (
-                      <MessageProcessor
+                      <AssistantMessageProcessor
                         message={context.processTemplate(step.assistant)}
                         onProcessed={setProcessedMessage}
                         autoProcess={true}
@@ -118,11 +118,13 @@ export const FlowPlayer: React.FC = () => {
                 <div className="flex flex-col space-y-2">
                   <h3 className="text-sm font-semibold">Your Response</h3>
                   {renderContextSaveInfo(step)}
-                  <Textarea
-                    className="min-h-[120px] resize-none"
-                    placeholder="Type your message here..."
+                  
+                  {/* User Message Processor zamiast zwykłego Textarea */}
+                  <UserMessageProcessor
                     value={step.userMessage || ""}
-                    onChange={(e) => updateUserMessage(e.target.value)}
+                    onChange={updateUserMessage}
+                    pluginId={step.userInputPlugin || step.plugin}
+                    pluginOptions={step.pluginOptions}
                   />
                 </div>
               </div>

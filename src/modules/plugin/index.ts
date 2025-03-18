@@ -14,7 +14,8 @@ export { loadPlugins } from './loader';
 export { useMessageProcessor } from './processor';
 
 // Komponenty
-export { MessageProcessor } from './components/MessageProcessor';
+export { AssistantMessageProcessor } from './components/AssistantMessageProcessor';
+export { UserMessageProcessor } from './components/UserMessageProcessor';
 export { PluginsPanel } from './components/PluginsPanel';
 export { PluginSelector } from './components/PluginSelector';
 export { PluginOptions } from './components/PluginOptions';

@@ -8,6 +8,14 @@ export interface PluginOption {
   options?: Array<{ value: string; label: string }>;
 }
 
+// Interfejs dla funkcji obsługi wiadomości użytkownika
+export interface UserInputProcessorContext {
+  currentValue: string;
+  options: Record<string, any>;
+  onChange: (newValue: string) => void;
+  provideCustomRenderer: (renderer: React.ReactNode) => void;
+}
+
 export interface Plugin {
   id: string;
   name: string;
@@ -17,4 +25,7 @@ export interface Plugin {
   
   // Kluczowa funkcjonalność
   process: (text: string, options?: Record<string, any>) => Promise<string>;
+  
+  // Opcjonalna funkcja do obsługi wiadomości użytkownika
+  processUserInput?: (context: UserInputProcessorContext) => Promise<string | void>;
 }
