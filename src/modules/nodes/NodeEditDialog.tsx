@@ -1,18 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/modules/nodes/NodeEditDialog.tsx
-import React, { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { GraphNode } from "../types";
-import { pluginRegistry } from "../plugin/plugin-registry";
-import { Separator } from "@/components/ui/separator";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useWorkspaceContext } from "../context/hooks/useContext";
+import React, { useState} from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { GraphNode } from '../types';
+import { PluginSelector } from '../plugin/components/PluginSelector';
+import { PluginOptions } from '../plugin/components/PluginOptions';
+import { useWorkspaceContext } from '../context/hooks/useContext';
 
 interface NodeEditDialogProps {
   node: GraphNode;
@@ -23,7 +21,7 @@ interface NodeEditDialogProps {
     label: string, 
     assistant: string, 
     contextSaveKey?: string,
-    pluginOptions?: { [pluginId: string]: any }
+    pluginOptions?: Record<string, Record<string, any>>
   ) => void;
 }
 
@@ -33,225 +31,142 @@ export const NodeEditDialog: React.FC<NodeEditDialogProps> = ({
   onClose, 
   onUpdateNode 
 }) => {
-  console.log("NodeEditDialog mounting with node:", node);
-  
-  const [editNodeData, setEditNodeData] = useState({ 
-    label: node.label, 
+  const [nodeData, setNodeData] = useState({
+    label: node.label,
     assistant: node.assistant,
-    contextSaveKey: node.contextSaveKey || "_none" 
+    contextSaveKey: node.contextSaveKey || "_none",
+    plugin: node.plugin || ""
   });
   
-  // Initialize plugin options state
-  const [pluginOptions, setPluginOptions] = useState<any>(
+  // Stan opcji pluginu
+  const [pluginOptions, setPluginOptions] = useState<Record<string, any>>(
     node.pluginOptions?.[node.plugin || ""] || {}
   );
-
-  // Get workspace context to display available keys
+  
+  // Context dla zapisywania odpowiedzi użytkownika
   const context = useWorkspaceContext();
-  const contextItems = context.getAllItems();
-  const contextKeys = contextItems.map(item => item.key);
-
-  // Update plugin options when node or plugin changes
-  useEffect(() => {
-    if (node.plugin) {
-      const plugin = pluginRegistry.getPlugin(node.plugin);
-      if (plugin && plugin.config.optionsSchema) {
-        // Initialize with defaults if not set
-        const initialOptions: any = {};
-        plugin.config.optionsSchema.forEach(option => {
-          if (option.default !== undefined && !(option.id in (node.pluginOptions?.[node.plugin || ""] || {}))) {
-            initialOptions[option.id] = option.default;
-          }
-        });
-        
-        // Merge with existing options
-        setPluginOptions(() => ({
-          ...initialOptions,
-          ...(node.pluginOptions?.[node.plugin || ""] || {})
-        }));
-      }
-    }
-  }, [node.plugin, node.id]);
-
+  const contextKeys = context.getAllItems().map(item => item.key);
+  
   const handleUpdateNode = () => {
-    console.log("handleUpdateNode called with:", editNodeData);
-    
-    const updatedPluginOptions = node.plugin 
-      ? { ...(node.pluginOptions || {}), [node.plugin]: pluginOptions } 
+    // Zbierz zaktualizowane opcje pluginu
+    const updatedPluginOptions = nodeData.plugin 
+      ? { 
+          ...(node.pluginOptions || {}), 
+          [nodeData.plugin]: pluginOptions 
+        } 
       : node.pluginOptions;
-      
-    const contextKey = editNodeData.contextSaveKey === "_none" ? undefined : editNodeData.contextSaveKey;
     
-    console.log("Calling onUpdateNode with contextKey:", contextKey);
+    // Przetwórz klucz kontekstu
+    const contextKey = nodeData.contextSaveKey === "_none" 
+      ? undefined 
+      : nodeData.contextSaveKey;
     
+    // Zaktualizuj węzeł
     onUpdateNode(
-      node.id, 
-      editNodeData.label, 
-      editNodeData.assistant, 
+      node.id,
+      nodeData.label,
+      nodeData.assistant,
       contextKey,
       updatedPluginOptions
     );
+    
     onClose();
   };
-
-  // Render plugin options if a plugin is selected
-  const renderPluginOptions = () => {
-    if (!node.plugin) return null;
-    
-    const plugin = pluginRegistry.getPlugin(node.plugin);
-    if (!plugin) return null;
-    
-    // If plugin has custom options UI renderer, use it
-    if (plugin.renderOptionsUI) {
-      return plugin.renderOptionsUI(pluginOptions, setPluginOptions);
-    }
-    
-    // Otherwise, render a default options UI based on schema
-    if (plugin.config.optionsSchema && plugin.config.optionsSchema.length > 0) {
-      return (
-        <Card className="mt-4">
-          <CardHeader>
-            <CardTitle className="text-sm">Plugin Options: {plugin.config.name}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {plugin.config.optionsSchema.map(option => (
-              <div key={option.id} className="space-y-2">
-                <Label htmlFor={option.id}>{option.label}</Label>
-                
-                {option.type === 'text' && (
-                  <Input 
-                    id={option.id}
-                    value={pluginOptions[option.id] || ''}
-                    onChange={e => setPluginOptions((prev: any) => ({ ...prev, [option.id]: e.target.value }))}
-                  />
-                )}
-                
-                {option.type === 'number' && (
-                  <Input 
-                    id={option.id}
-                    type="number"
-                    value={pluginOptions[option.id] || 0}
-                    onChange={e => setPluginOptions((prev: any) => ({ ...prev, [option.id]: Number(e.target.value) }))}
-                  />
-                )}
-                
-                {option.type === 'boolean' && (
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id={option.id}
-                      checked={!!pluginOptions[option.id]}
-                      onCheckedChange={(checked) => 
-                        setPluginOptions((prev: any) => ({ ...prev, [option.id]: checked }))
-                      }
-                    />
-                    <Label htmlFor={option.id}>Enabled</Label>
-                  </div>
-                )}
-                
-                {option.type === 'select' && option.options && (
-                  <Select 
-                    value={pluginOptions[option.id] || ''}
-                    onValueChange={value => setPluginOptions((prev: any) => ({ ...prev, [option.id]: value }))}
-                  >
-                    <SelectTrigger id={option.id}>
-                      <SelectValue placeholder="Select an option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {option.options.map(opt => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      );
-    }
-    
-    return null;
-  };
-
+  
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Edit Node</DialogTitle>
+          <DialogTitle>Edytuj węzeł</DialogTitle>
         </DialogHeader>
+        
         <div className="space-y-4">
-          <Input
-            value={editNodeData.label}
-            onChange={(e) =>
-              setEditNodeData((prev) => ({ ...prev, label: e.target.value }))
-            }
-            placeholder="Node name"
-          />
-          <Textarea
-            value={editNodeData.assistant}
-            onChange={(e) =>
-              setEditNodeData((prev) => ({ ...prev, assistant: e.target.value }))
-            }
-            placeholder="Assistant message"
-            className="min-h-[80px]"
-          />
-          
-          {/* Context Save Key - sekcja zapisu do kontekstu */}
+          {/* Podstawowe dane węzła */}
           <div className="space-y-2">
-            <Label htmlFor="contextSaveKey">Save user response to context key</Label>
+            <Label htmlFor="nodeLabel">Nazwa węzła</Label>
+            <Input
+              id="nodeLabel"
+              value={nodeData.label}
+              onChange={(e) => setNodeData(prev => ({ ...prev, label: e.target.value }))}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="nodeAssistant">Wiadomość asystenta</Label>
+            <Textarea
+              id="nodeAssistant"
+              value={nodeData.assistant}
+              onChange={(e) => setNodeData(prev => ({ ...prev, assistant: e.target.value }))}
+              className="min-h-[80px]"
+            />
+          </div>
+          
+          {/* Wybór pluginu */}
+          <div className="space-y-2">
+            <Label htmlFor="nodePlugin">Plugin</Label>
+            <PluginSelector
+              value={nodeData.plugin}
+              onChange={(plugin) => setNodeData(prev => ({ ...prev, plugin }))}
+            />
+          </div>
+          
+          {/* Opcje pluginu - wyświetlane tylko jeśli wybrano plugin */}
+          {nodeData.plugin && (
+            <PluginOptions
+              pluginId={nodeData.plugin}
+              value={pluginOptions}
+              onChange={setPluginOptions}
+            />
+          )}
+          
+          <Separator />
+          
+          {/* Sekcja zapisu odpowiedzi do kontekstu */}
+          <div className="space-y-2">
+            <Label htmlFor="contextSaveKey">Zapisz odpowiedź użytkownika do klucza kontekstu</Label>
             <Select 
-              value={editNodeData.contextSaveKey}
+              value={nodeData.contextSaveKey}
               onValueChange={value => {
-                console.log("Selected context key:", value);
-                setEditNodeData((prev) => ({ ...prev, contextSaveKey: value }));
+                setNodeData(prev => ({ ...prev, contextSaveKey: value }));
               }}
             >
               <SelectTrigger id="contextSaveKey">
-                <SelectValue placeholder="Select context key or leave empty" />
+                <SelectValue placeholder="Wybierz klucz kontekstu lub zostaw puste" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="_none">Don't save to context</SelectItem>
+                <SelectItem value="_none">Nie zapisuj do kontekstu</SelectItem>
                 {contextKeys.map(key => (
                   <SelectItem key={key} value={key}>
                     {key}
                   </SelectItem>
                 ))}
-                <SelectItem value="__new__">+ Create new context key</SelectItem>
+                <SelectItem value="__new__">+ Utwórz nowy klucz kontekstu</SelectItem>
               </SelectContent>
             </Select>
             
-            {editNodeData.contextSaveKey === "__new__" && (
+            {nodeData.contextSaveKey === "__new__" && (
               <div className="mt-2">
-                <Label htmlFor="newContextKey">New context key name</Label>
+                <Label htmlFor="newContextKey">Nazwa nowego klucza kontekstu</Label>
                 <Input
                   id="newContextKey"
-                  placeholder="Enter new context key name"
+                  placeholder="Wprowadź nazwę nowego klucza kontekstu"
                   onChange={(e) => {
                     if (e.target.value) {
-                      setEditNodeData((prev) => ({ ...prev, contextSaveKey: e.target.value }));
+                      setNodeData(prev => ({ ...prev, contextSaveKey: e.target.value }));
                     }
                   }}
                 />
               </div>
             )}
           </div>
-          
-          {/* Plugin options section */}
-          {node.plugin && (
-            <>
-              <Separator />
-              {renderPluginOptions()}
-            </>
-          )}
         </div>
+        
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            Anuluj
           </Button>
           <Button onClick={handleUpdateNode}>
-            Save
+            Zapisz
           </Button>
         </DialogFooter>
       </DialogContent>

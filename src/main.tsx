@@ -5,7 +5,8 @@ import App from './App';
 import { ReactFlowProvider } from 'reactflow';
 import 'reactflow/dist/style.css';
 import './index.css';
-import { loadPlugins } from './modules/plugin/plugin-loader';
+import { loadPlugins } from './modules/plugin/loader';
+
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 loadPlugins();

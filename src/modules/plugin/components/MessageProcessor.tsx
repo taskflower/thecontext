@@ -1,134 +1,72 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/plugin/components/MessageProcessor.tsx
-import React, { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Send } from 'lucide-react';
-import { useMessageProcessor } from '../useMessageProcessor';
+import React, { useState, useEffect } from 'react';
+import { useMessageProcessor } from '../processor';
 
 interface MessageProcessorProps {
   message: string;
-  onProcessed: (processedMessage: string) => void;
-  autoProcess?: boolean;
   nodePlugins?: string[];
-  nodePluginOptions?: { [pluginId: string]: any }; // Add plugin options
+  nodePluginOptions?: Record<string, Record<string, any>>;
+  onProcessed?: (processed: string) => void;
+  autoProcess?: boolean;
   onSimulateFinish?: () => void;
 }
 
 export const MessageProcessor: React.FC<MessageProcessorProps> = ({
   message,
-  onProcessed,
-  autoProcess = true,
   nodePlugins,
   nodePluginOptions,
+  onProcessed,
+  autoProcess = false,
   onSimulateFinish
 }) => {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [originalMessage] = useState(message || '');
-  const [showSimulateButton, setShowSimulateButton] = useState(false);
-  const { processMessage, hasActivePlugins, processMessageWithSpecificPlugins } = useMessageProcessor();
-  
-  // Check if message-simulator plugin is connected
-  useEffect(() => {
-    if (nodePlugins?.includes('message-simulator')) {
-      setShowSimulateButton(true);
-    } else {
-      setShowSimulateButton(false);
-    }
-  }, [nodePlugins]);
-  
-  // Automatically process message when component mounts
-  useEffect(() => {
-    if (autoProcess && originalMessage) {
-      handleProcess();
-    } else {
-      // If no active plugins or automatic processing, just pass the original message
-      onProcessed(originalMessage);
-    }
-  }, []);
-  
-  // Function to manually process
-  const handleProcess = async () => {
-    if (isProcessing || !originalMessage) return;
-    
-    setIsProcessing(true);
-    try {
-      let processedMessage;
-      
-      // If the node has specific plugins assigned, use only those
-      if (nodePlugins && nodePlugins.length > 0) {
-        processedMessage = await processMessageWithSpecificPlugins(
-          originalMessage, 
-          nodePlugins,
-          nodePluginOptions
-        );
-      } else {
-        // Otherwise use all active plugins
-        processedMessage = await processMessage(originalMessage);
-      }
-      
-      onProcessed(processedMessage);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+  const [processing, setProcessing] = useState(false);
+  const { processWithPlugins, processWithActivePlugins } = useMessageProcessor();
 
-  // Function to simulate sending a message and proceeding
-  const handleSimulate = async () => {
-    setIsProcessing(true);
-    try {
-      // First process the message
-      let processedMessage;
-      if (nodePlugins && nodePlugins.length > 0) {
-        processedMessage = await processMessageWithSpecificPlugins(
-          originalMessage, 
-          nodePlugins,
-          nodePluginOptions
-        );
-      } else {
-        processedMessage = await processMessage(originalMessage);
+  useEffect(() => {
+    if (!autoProcess) return;
+    
+    const processMessage = async () => {
+      setProcessing(true);
+      try {
+        let result;
+        
+        if (nodePlugins?.length) {
+          // Użyj określonych pluginów dla node
+          result = await processWithPlugins(message, nodePlugins, nodePluginOptions);
+        } else {
+          // Użyj wszystkich aktywnych pluginów
+          result = await processWithActivePlugins(message);
+        }
+        
+        if (onProcessed) onProcessed(result);
+        
+        // Symulacja zakończenia (dla FlowPlayer)
+        if (onSimulateFinish) {
+          setTimeout(onSimulateFinish, 500);
+        }
+      } catch (error) {
+        console.error('Error processing message:', error);
+      } finally {
+        setProcessing(false);
       }
-      
-      onProcessed(processedMessage);
-      
-      // Simulate a short delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Proceed to the next step
-      if (onSimulateFinish) {
-        onSimulateFinish();
-      }
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-  
-  // Don't render anything if no simulation button and auto processing
-  if (!showSimulateButton && autoProcess) return null;
-  
-  return (
-    <div className="message-processor mt-2">
-      {showSimulateButton && (
-        <Button 
-          onClick={handleSimulate}
-          disabled={isProcessing}
-          className="flex items-center gap-2"
-          size="sm"
-        >
-          <Send className="h-4 w-4" />
-          {isProcessing ? 'Sending...' : 'Simulate sending'}
-        </Button>
-      )}
-      
-      {!autoProcess && !showSimulateButton && (
-        <Button 
-          onClick={handleProcess}
-          disabled={isProcessing || !originalMessage || (!hasActivePlugins && (!nodePlugins || nodePlugins.length === 0))}
-          variant="secondary"
-          size="sm"
-        >
-          {isProcessing ? 'Processing...' : 'Process with plugins'}
-        </Button>
-      )}
-    </div>
-  );
+    };
+    
+    processMessage();
+  }, [
+    message, 
+    nodePlugins, 
+    nodePluginOptions, 
+    autoProcess, 
+    onProcessed,
+    onSimulateFinish,
+    processWithPlugins,
+    processWithActivePlugins
+  ]);
+
+  if (processing) {
+    return <div className="text-muted-foreground italic py-2">Processing message...</div>;
+  }
+
+  return null;
 };

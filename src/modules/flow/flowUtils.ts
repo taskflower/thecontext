@@ -1,54 +1,46 @@
-import { GraphEdge, GraphNode } from "../types";
+// src/modules/flow/flowUtils.ts
+import { FlowNode, FlowEdge } from './types';
 
-export const calculateFlowPath = (nodes: GraphNode[] = [], edges: GraphEdge[] = []): GraphNode[] => {
+export const calculateFlowPath = (nodes: FlowNode[] = [], edges: FlowEdge[] = []): FlowNode[] => {
   if (nodes.length === 0) return [];
   
-  // Create map of incoming edges
-  const incomingMap = new Map();
-  edges.forEach((edge) => {
-    incomingMap.set(edge.target, (incomingMap.get(edge.target) || 0) + 1);
-  });
+  // Znajdź węzeł startowy (bez przychodzących krawędzi)
+  const targetNodes = new Set(edges.map(edge => edge.target));
+  let startNodeId = nodes.find(node => !targetNodes.has(node.id))?.id;
   
-  // Find starting node (outgoing edges but no incoming)
-  let startNodeId = null;
-  for (const node of nodes) {
-    const hasOutgoing = edges.some((edge) => edge.source === node.id);
-    const incomingCount = incomingMap.get(node.id) || 0;
-    
-    if (hasOutgoing && incomingCount === 0) {
-      startNodeId = node.id;
-      break;
-    }
-  }
-  
-  // If no clear start, take first node
+  // Jeśli nie znaleziono wyraźnego węzła startowego, weź pierwszy węzeł
   if (!startNodeId && nodes.length > 0) {
     startNodeId = nodes[0].id;
   }
   
   if (!startNodeId) return [];
   
-  // Create graph adjacency map
-  const edgesMap = new Map();
-  edges.forEach((edge) => {
-    if (!edgesMap.has(edge.source)) edgesMap.set(edge.source, []);
-    edgesMap.get(edge.source).push(edge.target);
+  // Utwórz mapę sąsiedztwa dla krawędzi
+  const adjacencyMap = new Map<string, string[]>();
+  
+  edges.forEach(edge => {
+    if (!adjacencyMap.has(edge.source)) {
+      adjacencyMap.set(edge.source, []);
+    }
+    adjacencyMap.get(edge.source)?.push(edge.target);
   });
   
-  // Track path using DFS
-  const path: GraphNode[] = [];
-  const visited = new Set();
+  // Przechodzenie grafu i zbieranie ścieżki
+  const path: FlowNode[] = [];
+  const visited = new Set<string>();
   
   const dfs = (nodeId: string) => {
     if (visited.has(nodeId)) return;
     
-    const nodeData = nodes.find((n) => n.id === nodeId);
-    if (nodeData) {
-      path.push(nodeData);
+    const node = nodes.find(n => n.id === nodeId);
+    if (node) {
       visited.add(nodeId);
+      path.push(node);
       
-      const nextNodes = edgesMap.get(nodeId) || [];
-      for (const next of nextNodes) dfs(next);
+      const neighbors = adjacencyMap.get(nodeId) || [];
+      for (const neighbor of neighbors) {
+        dfs(neighbor);
+      }
     }
   };
   

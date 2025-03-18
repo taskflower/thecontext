@@ -23,25 +23,26 @@ export const StepModal = <T extends Record<string, any>>({
   onClose,
   renderStepContent,
 }: StepModalProps<T>) => {
+  // Dodajemy sprawdzanie, czy steps istnieje i ma elementy
+  if (!steps || steps.length === 0 || currentStep < 0 || currentStep >= steps.length) {
+    return null;
+  }
+  
   const step = steps[currentStep];
   // Force re-render on step change
   React.useEffect(() => {}, [steps, currentStep]);
   const isLastStep = currentStep === steps.length - 1;
   const isFirstStep = currentStep === 0;
 
+  // Dodajemy bezpieczny dostęp do label z fallbackiem
+  const stepLabel = step?.label || `Step ${currentStep + 1}`;
+
   return (
     <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>{step.label || `Step ${currentStep + 1}`}</DialogTitle>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="absolute right-4 top-4"
-          >
-            <X className="h-4 w-4" />
-          </Button>
+          <DialogTitle>{stepLabel}</DialogTitle>
+         
         </DialogHeader>
         
         <div className="my-6">
@@ -49,8 +50,8 @@ export const StepModal = <T extends Record<string, any>>({
             renderStepContent(step)
           ) : (
             <div>
-              <p>{step.label || `Step ${currentStep + 1}`}</p>
-              {step.assistant && (
+              <p>{stepLabel}</p>
+              {step?.assistant && (
                 <div className="mt-4 p-4 bg-muted rounded-md">
                   {step.assistant}
                 </div>

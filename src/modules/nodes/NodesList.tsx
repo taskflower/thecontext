@@ -4,8 +4,7 @@ import React, { useState, useMemo } from "react";
 import { useAppStore } from "../store";
 import { ItemList } from "@/components/APPUI";
 import { GraphNode } from "../types";
-import { pluginRegistry } from "../plugin/plugin-registry";
-import { usePluginStore } from "../plugin/store";
+import { usePluginStore } from "../plugin/store";  // Używamy nowego store zamiast registry
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Puzzle, MoreHorizontal, Plus, Check, Power, Search } from "lucide-react";
@@ -33,14 +32,17 @@ export const NodesList: React.FC = () => {
   // Force component to update when state changes
   useAppStore((state) => state.stateVersion);
 
+  // Użyj nowego store pluginów zamiast registry
+  const { plugins, activePlugins } = usePluginStore();
+  const availablePlugins = useMemo(() => Object.values(plugins), [plugins]);
+
   const scenario = getCurrentScenario();
   const nodes = scenario?.children || [];
 
   // Plugin dialog state
   const [showPluginDialog, setShowPluginDialog] = useState(false);
   const [selectedNodeForPlugin, setSelectedNodeForPlugin] = useState<string | null>(null);
-  const availablePlugins = pluginRegistry.getAllPlugins();
-  const pluginStates = usePluginStore((state) => state.plugins);
+  const [selectedPlugin, setSelectedPlugin] = useState<string>("");
 
   // Create/Edit dialog states
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -58,7 +60,6 @@ export const NodesList: React.FC = () => {
     setShowPluginDialog(true);
   };
 
-  const [selectedPlugin, setSelectedPlugin] = useState<string>("");
   const savePluginSelection = () => {
     if (selectedNodeForPlugin) {
       updateNodePlugin(selectedNodeForPlugin, selectedPlugin || undefined);
@@ -75,11 +76,17 @@ export const NodesList: React.FC = () => {
 
   // Prepare plugins for two-column layout
   const preparePluginsColumns = () => {
-    const plugins = [...availablePlugins];
-    const midpoint = Math.ceil(plugins.length / 2);
-    return { leftColumn: plugins.slice(0, midpoint), rightColumn: plugins.slice(midpoint) };
+    const pluginsList = [...availablePlugins];
+    const midpoint = Math.ceil(pluginsList.length / 2);
+    return { leftColumn: pluginsList.slice(0, midpoint), rightColumn: pluginsList.slice(midpoint) };
   };
   const { leftColumn, rightColumn } = preparePluginsColumns();
+
+  // Pomocnicza funkcja do sprawdzania, czy plugin jest aktywny
+  const isPluginActive = (pluginId: string) => activePlugins.includes(pluginId);
+
+  // Pomocnicza funkcja do uzyskiwania nazwy pluginu
+  const getPluginName = (pluginId: string) => plugins[pluginId]?.name || pluginId;
 
   return (
     <div className="flex flex-col h-full">
@@ -140,7 +147,7 @@ export const NodesList: React.FC = () => {
                   size="icon"
                   className="h-5 w-5 mr-0.5"
                   title={item.plugin ? 
-                    `Plugin: ${pluginRegistry.getPlugin(item.plugin)?.config.name || item.plugin}` : 
+                    `Plugin: ${getPluginName(item.plugin)}` : 
                     "Select plugin"
                   }
                   onClick={(e) => handlePluginSelection(item.id, e)}
@@ -206,31 +213,31 @@ export const NodesList: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-3">
                     {leftColumn.map((plugin) => {
-                      const isActive = pluginStates[plugin.config.id]?.active || false;
+                      const isActive = isPluginActive(plugin.id);
                       return (
                         <Card
-                          key={plugin.config.id}
+                          key={plugin.id}
                           className={`p-3 cursor-pointer border-2 transition-all ${
-                            selectedPlugin === plugin.config.id ? "border-primary" : "border-muted hover:border-muted-foreground"
+                            selectedPlugin === plugin.id ? "border-primary" : "border-muted hover:border-muted-foreground"
                           }`}
-                          onClick={() => setSelectedPlugin(plugin.config.id)}
+                          onClick={() => setSelectedPlugin(plugin.id)}
                         >
                           <div className="flex items-start justify-between">
                             <div>
                               <div className="font-medium flex items-center">
-                                {plugin.config.name}
+                                {plugin.name}
                                 <Badge variant={isActive ? "default" : "outline"} className="ml-2 text-xs">
                                   {isActive ? "Active" : "Inactive"}
                                 </Badge>
                               </div>
                               <p className="text-sm text-muted-foreground mt-1">
-                                {plugin.config.description}
+                                {plugin.description}
                               </p>
                               <div className="text-xs text-muted-foreground mt-1">
-                                version: {plugin.config.version}
+                                version: {plugin.version}
                               </div>
                             </div>
-                            {selectedPlugin === plugin.config.id && (
+                            {selectedPlugin === plugin.id && (
                               <Check className="h-5 w-5 text-primary ml-2 shrink-0" />
                             )}
                           </div>
@@ -240,31 +247,31 @@ export const NodesList: React.FC = () => {
                   </div>
                   <div className="space-y-3">
                     {rightColumn.map((plugin) => {
-                      const isActive = pluginStates[plugin.config.id]?.active || false;
+                      const isActive = isPluginActive(plugin.id);
                       return (
                         <Card
-                          key={plugin.config.id}
+                          key={plugin.id}
                           className={`p-3 cursor-pointer border-2 transition-all ${
-                            selectedPlugin === plugin.config.id ? "border-primary" : "border-muted hover:border-muted-foreground"
+                            selectedPlugin === plugin.id ? "border-primary" : "border-muted hover:border-muted-foreground"
                           }`}
-                          onClick={() => setSelectedPlugin(plugin.config.id)}
+                          onClick={() => setSelectedPlugin(plugin.id)}
                         >
                           <div className="flex items-start justify-between">
                             <div>
                               <div className="font-medium flex items-center">
-                                {plugin.config.name}
+                                {plugin.name}
                                 <Badge variant={isActive ? "default" : "outline"} className="ml-2 text-xs">
                                   {isActive ? "Active" : "Inactive"}
                                 </Badge>
                               </div>
                               <p className="text-sm text-muted-foreground mt-1">
-                                {plugin.config.description}
+                                {plugin.description}
                               </p>
                               <div className="text-xs text-muted-foreground mt-1">
-                                version: {plugin.config.version}
+                                version: {plugin.version}
                               </div>
                             </div>
-                            {selectedPlugin === plugin.config.id && (
+                            {selectedPlugin === plugin.id && (
                               <Check className="h-5 w-5 text-primary ml-2 shrink-0" />
                             )}
                           </div>

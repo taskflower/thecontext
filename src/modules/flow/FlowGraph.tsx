@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useMemo, useState } from "react";
+// src/modules/flow/FlowGraph.tsx
+import React, { useMemo, useState } from 'react';
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -6,72 +7,56 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   Connection,
-  NodeDragHandler,
-  SelectionMode,
-  OnSelectionChangeParams,
-  NodeTypes
-} from "reactflow";
-import CustomNode from "./CustomNode";
-import "reactflow/dist/style.css";
-import "./flowStyle.css";
-import { useAppStore } from "../store";
-import { FlowPlayer } from ".";
-import { Button } from "@/components/ui/button";
-import { FilterIcon } from "lucide-react";
-import { FilterEditor } from "../filters/FilterEditor";
+  SelectionMode
+} from 'reactflow';
+import 'reactflow/dist/style.css';
+import './flowStyle.css';
+import CustomNode from './CustomNode';
+import { Button } from '@/components/ui/button';
+import { FilterIcon } from 'lucide-react';
+import { FilterEditor } from '../filters/FilterEditor';
+import { useFlow } from './useFlow';
+import { FlowPlayer } from './FlowPlayer';
 
 export const FlowGraph: React.FC = () => {
-  const getActiveScenarioData = useAppStore(state => state.getActiveScenarioData);
-  const addEdge = useAppStore(state => state.addEdge);
-  const updateNodePosition = useAppStore(state => state.updateNodePosition);
-  const selectNode = useAppStore(state => state.selectNode);
-  const selectEdge = useAppStore(state => state.selectEdge);
-  const clearSelection = useAppStore(state => state.clearSelection);
-  const selected = useAppStore(state => state.selected);
-  const stateVersion = useAppStore(state => state.stateVersion);
-  
+  const {
+    flowData,
+    selected,
+    onConnect,
+    onNodePositionChange,
+    onSelectionChange,
+    onPaneClick
+  } = useFlow();
+
   // State for filter editor
   const [showFilterEditor, setShowFilterEditor] = useState(false);
   
-  // Reference to the ReactFlow wrapper div
-  const reactFlowWrapper = useRef<HTMLDivElement>(null);
+  // ReactFlow state
+  const [nodes, setNodes, onNodesChange] = useNodesState(flowData.nodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(flowData.edges);
   
-  const { nodes: initialNodes, edges: initialEdges } = getActiveScenarioData();
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  
-  // Memoize nodeTypes to prevent recreating on each render
-  const nodeTypes = useMemo<NodeTypes>(() => ({
-    default: CustomNode,
-  }), []);
-  
-  // Split effects to avoid render loops
-  // Effect 1: Update nodes and edges when data changes (not on selection)
-  useEffect(() => {
-    const { nodes: newNodes, edges: newEdges } = getActiveScenarioData();
-    
-    // Make sure all nodes use the 'default' type to apply our CustomNode
-    const typedNodes = newNodes.map(node => ({
+  // Aktualizuj nodes i edges przy zmianie danych
+  React.useEffect(() => {
+    const typedNodes = flowData.nodes.map(node => ({
       ...node,
-      type: 'default' // This ensures all nodes use our CustomNode
+      type: 'default' // Użyj CustomNode dla wszystkich węzłów
     }));
     
     setNodes(typedNodes);
-    setEdges(newEdges);
-  }, [getActiveScenarioData, setNodes, setEdges, stateVersion]); // Removed selected from dependencies
+    setEdges(flowData.edges);
+  }, [flowData, setNodes, setEdges]);
   
-  // Effect 2: Update visual selection for nodes
-  useEffect(() => {
+  // Aktualizuj zaznaczenie dla nodes
+  React.useEffect(() => {
     if (selected.node) {
-      setNodes((nds) => 
-        nds.map((node) => ({
+      setNodes(nds => 
+        nds.map(node => ({
           ...node,
           selected: node.id === selected.node
         }))
       );
-      // Deselect any edges when a node is selected
-      setEdges((eds) =>
-        eds.map((edge) => ({
+      setEdges(eds =>
+        eds.map(edge => ({
           ...edge,
           selected: false
         }))
@@ -79,18 +64,17 @@ export const FlowGraph: React.FC = () => {
     }
   }, [selected.node, setNodes, setEdges]);
 
-  // Effect 3: Update visual selection for edges
-  useEffect(() => {
+  // Aktualizuj zaznaczenie dla edges
+  React.useEffect(() => {
     if (selected.edge) {
-      setEdges((eds) =>
-        eds.map((edge) => ({
+      setEdges(eds =>
+        eds.map(edge => ({
           ...edge,
           selected: edge.id === selected.edge
         }))
       );
-      // Deselect any nodes when an edge is selected
-      setNodes((nds) =>
-        nds.map((node) => ({
+      setNodes(nds =>
+        nds.map(node => ({
           ...node,
           selected: false
         }))
@@ -98,73 +82,28 @@ export const FlowGraph: React.FC = () => {
     }
   }, [selected.edge, setNodes, setEdges]);
   
-  const onConnect = useCallback(
-    (params: Connection) => {
-      if (params.source && params.target) {
-        addEdge({
-          source: params.source,
-          target: params.target,
-        });
-      }
-    },
-    [addEdge]
-  );
+  // Obsługa połączenia węzłów
+  const handleConnect = (connection: Connection) => {
+    if (connection.source && connection.target) {
+      onConnect(connection.source, connection.target);
+    }
+  };
   
-  const onNodeDragStop = useCallback<NodeDragHandler>(
-    (_event, node) => {
-      updateNodePosition(node.id, node.position);
-    },
-    [updateNodePosition]
-  );
-  
-  // Use only ReactFlow's built-in selection handling
-  const onSelectionChange = useCallback(
-    ({ nodes, edges }: OnSelectionChangeParams) => {
-      if (nodes.length > 0) {
-        // A node was selected
-        selectNode(nodes[0].id);
-      } else if (edges.length > 0) {
-        // An edge was selected
-        selectEdge(edges[0].id);
-      } else {
-        // Nothing selected, clear selection
-        clearSelection();
-      }
-    },
-    [selectNode, selectEdge, clearSelection]
-  );
-  
-  const onPaneClick = useCallback(
-    (event: React.MouseEvent) => {
-      if (event.target === event.currentTarget) {
-        clearSelection();
-      }
-    },
-    [clearSelection]
-  );
-  
-  const handleOpenFilterEditor = useCallback(() => {
-    setShowFilterEditor(true);
-  }, []);
-  
-  const handleCloseFilterEditor = useCallback(() => {
-    setShowFilterEditor(false);
-  }, []);
+  // Typy węzłów
+  const nodeTypes = useMemo(() => ({
+    default: CustomNode,
+  }), []);
   
   return (
-    <div 
-      className="bg-card rounded-md p-0 h-full relative"
-      ref={reactFlowWrapper}
-      // Removed custom mousedown handler to avoid selection conflicts
-    >
-      {/* Filter Editor Button - Top Left */}
+    <div className="bg-card rounded-md p-0 h-full relative">
+      {/* Filter Editor Button */}
       <div className="absolute top-4 left-4 z-10">
         <Button 
           size="sm" 
-          onClick={handleOpenFilterEditor} 
+          onClick={() => setShowFilterEditor(true)} 
           className="px-3 py-2 space-x-1"
           disabled={!selected.scenario}
-          variant={'outline'}
+          variant="outline"
         >
           <FilterIcon className="h-4 w-4 mr-1" />
           <span>Filters {!selected.scenario && '(Select Scenario)'}</span>
@@ -176,8 +115,8 @@ export const FlowGraph: React.FC = () => {
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onNodeDragStop={onNodeDragStop}
+        onConnect={handleConnect}
+        onNodeDragStop={(_, node) => onNodePositionChange(node.id, node.position)}
         onSelectionChange={onSelectionChange}
         onPaneClick={onPaneClick}
         selectionMode={SelectionMode.Full}
@@ -198,7 +137,7 @@ export const FlowGraph: React.FC = () => {
       {showFilterEditor && selected.scenario && (
         <FilterEditor
           scenarioId={selected.scenario}
-          onClose={handleCloseFilterEditor}
+          onClose={() => setShowFilterEditor(false)}
         />
       )}
     </div>
