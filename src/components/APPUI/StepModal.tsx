@@ -1,10 +1,8 @@
 // src/components/APPUI/StepModal.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from "react";
-import { X } from "lucide-react";
+import React, { useEffect } from "react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Button } from "../ui/button";
-
 
 interface StepModalProps<T> {
   steps: T[];
@@ -23,18 +21,19 @@ export const StepModal = <T extends Record<string, any>>({
   onClose,
   renderStepContent,
 }: StepModalProps<T>) => {
-  // Dodajemy sprawdzanie, czy steps istnieje i ma elementy
+  // Moved useEffect before any conditional returns
+  useEffect(() => {}, [steps, currentStep]);
+  
+  // Conditional check after hooks
   if (!steps || steps.length === 0 || currentStep < 0 || currentStep >= steps.length) {
     return null;
   }
   
   const step = steps[currentStep];
-  // Force re-render on step change
-  React.useEffect(() => {}, [steps, currentStep]);
   const isLastStep = currentStep === steps.length - 1;
   const isFirstStep = currentStep === 0;
 
-  // Dodajemy bezpieczny dostęp do label z fallbackiem
+  // Added safe access to label with fallback
   const stepLabel = step?.label || `Step ${currentStep + 1}`;
 
   return (
@@ -42,7 +41,6 @@ export const StepModal = <T extends Record<string, any>>({
       <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>{stepLabel}</DialogTitle>
-         
         </DialogHeader>
         
         <div className="my-6">

@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/plugin/processor.ts
-import { useState, useEffect } from 'react';
 import { usePluginStore } from './store';
 
 export const useMessageProcessor = () => {

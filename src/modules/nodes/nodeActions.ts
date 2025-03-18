@@ -1,7 +1,7 @@
 // src/modules/nodes/nodeActions.ts
-import { PluginOptions } from "../plugin/types";
 import { ElementType, GraphNode, Position } from "../types";
 import { SetFn } from "../typesActioss";
+import { PluginOptions } from "../plugin/types"; 
 
 export const createNodeActions = (set: SetFn) => ({
   addNode: (payload: { 

@@ -9,19 +9,19 @@ const options = [
   {
     id: 'staticResponse',
     label: 'Predefiniowana odpowiedź',
-    type: 'text',
+    type: 'text' as const,
     default: 'Akceptuję warunki scenariusza.'
   },
   {
     id: 'buttonText',
     label: 'Tekst przycisku',
-    type: 'text',
+    type: 'text' as const,
     default: 'Użyj szybkiej odpowiedzi'
   },
   {
     id: 'showPreview',
     label: 'Pokaż podgląd odpowiedzi',
-    type: 'boolean',
+    type: 'boolean' as const,
     default: true
   }
 ];

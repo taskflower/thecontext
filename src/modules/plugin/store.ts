@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/plugin/store.ts
 import { create } from 'zustand';
+import { Plugin } from './types';
 
 interface PluginStore {
   // Stan

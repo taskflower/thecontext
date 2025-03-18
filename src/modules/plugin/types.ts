@@ -8,6 +8,11 @@ export interface PluginOption {
   options?: Array<{ value: string; label: string }>;
 }
 
+// Eksportowany interfejs dla opcji pluginu - dodany
+export interface PluginOptions {
+  [key: string]: Plugin;
+}
+
 // Interfejs dla funkcji obsługi wiadomości użytkownika
 export interface UserInputProcessorContext {
   currentValue: string;
@@ -22,6 +27,7 @@ export interface Plugin {
   description: string;
   version: string;
   options?: PluginOption[]; // Uproszczona schema opcji
+  config?: any;
   
   // Kluczowa funkcjonalność
   process: (text: string, options?: Record<string, any>) => Promise<string>;

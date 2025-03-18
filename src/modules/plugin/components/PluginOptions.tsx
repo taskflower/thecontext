@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/plugin/components/PluginOptions.tsx
 import React from 'react';
 import { usePluginStore } from '../store';
-import { Plugin } from '../types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -41,7 +41,7 @@ export const PluginOptions: React.FC<PluginOptionsProps> = ({
             key={option.id}
             option={option}
             value={value[option.id] ?? option.default}
-            onChange={(newValue) => {
+            onChange={(newValue: any) => {
               onChange({
                 ...value,
                 [option.id]: newValue
@@ -55,7 +55,7 @@ export const PluginOptions: React.FC<PluginOptionsProps> = ({
 };
 
 // Komponent dla pojedynczej opcji
-const OptionField = ({ option, value, onChange }) => {
+const OptionField = ({ option, value, onChange }:any) => {
   switch (option.type) {
     case 'text':
       return (
@@ -106,7 +106,7 @@ const OptionField = ({ option, value, onChange }) => {
               <SelectValue placeholder={`Wybierz ${option.label}`} />
             </SelectTrigger>
             <SelectContent>
-              {option.options?.map(opt => (
+              {option.options?.map((opt:any) => (
                 <SelectItem key={opt.value} value={opt.value}>
                   {opt.label}
                 </SelectItem>
