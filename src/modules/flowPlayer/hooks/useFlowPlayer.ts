@@ -66,7 +66,7 @@ export const useFlowPlayer = (): FlowPlayerContext => {
   // Move to next node
   const nextNode = useCallback(() => {
     if (currentNodeIndex >= flowPath.length - 1 || !currentNode) return;
-
+  
     // Save current user message to conversation
     if (userMessage.trim()) {
       addToConversation({
@@ -74,23 +74,15 @@ export const useFlowPlayer = (): FlowPlayerContext => {
         message: userMessage
       });
     }
-
+  
     // Move to next node
     const newIndex = currentNodeIndex + 1;
     setCurrentNodeIndex(newIndex);
     setUserMessage("");
-
-    // Add next node's assistant message to conversation
-    const nextNode = flowPath[newIndex];
-    if (nextNode && nextNode.assistant) {
-      addToConversation({
-        role: "assistant",
-        message: nextNode.assistant
-      });
-    }
-
+  
     // Select the node in UI
-    selectNode(nextNode.id);
+    const nextNodeObj = flowPath[newIndex];
+    selectNode(nextNodeObj.id);
   }, [currentNode, currentNodeIndex, flowPath, userMessage, addToConversation, selectNode]);
 
   // Move to previous node
