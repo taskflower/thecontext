@@ -2,33 +2,33 @@
 import React, { useEffect, useState } from "react";
 import { useFlowPlayer } from "../../hooks/useFlowPlayer";
 import { Card, CardContent } from "@/components/ui/card";
-import { useAppStore } from "../../../store";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useWorkspaceContext } from "../../../context/hooks/useContext"; 
 
 export const AssistantMessageProcessor: React.FC = () => {
   const { currentNode, isNodeProcessed, markNodeAsProcessed } = useFlowPlayer();
-  const { addToConversation } = useAppStore();
+  const { processTemplate } = useWorkspaceContext();
   const [activeTab, setActiveTab] = useState<string>("message");
 
-  // Process message when node changes
+  // Process message when node changes - only for display, not adding to conversation
   useEffect(() => {
     if (!currentNode) return;
 
-    // Add assistant message only if the node hasn't been processed yet
+    // Don't add to conversation, just mark for display purposes
     if (currentNode.assistant && !isNodeProcessed(currentNode.id)) {
-      addToConversation({
-        role: "assistant",
-        message: currentNode.assistant
-      });
-      
-      // Mark node as processed
       markNodeAsProcessed(currentNode.id);
     }
-  }, [currentNode, addToConversation, isNodeProcessed, markNodeAsProcessed]);
+  }, [currentNode, isNodeProcessed, markNodeAsProcessed, processTemplate]);
 
   if (!currentNode) {
     return null;
   }
+
+  // Process message for display purposes
+  const displayMessage = currentNode.assistant 
+    ? processTemplate(currentNode.assistant)
+    : "";
 
   return (
     <Card>
@@ -41,8 +41,8 @@ export const AssistantMessageProcessor: React.FC = () => {
           
           <TabsContent value="message">
             <div className="bg-muted/20 p-3 rounded-md whitespace-pre-wrap">
-              {currentNode.assistant ? (
-                currentNode.assistant
+              {displayMessage ? (
+                displayMessage
               ) : (
                 <span className="text-muted-foreground">No assistant message in this node</span>
               )}

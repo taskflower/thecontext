@@ -5,7 +5,7 @@ import { FlowNode } from "../../flow/types";
 import { calculateFlowPath } from "../flowUtils";
 
 // Control whether to clear conversation history when opening flow
-const CLEAR_HISTORY_ON_OPEN = true;
+const CLEAR_HISTORY_ON_OPEN = false;
 
 export interface FlowPlayerContext {
   currentNode: FlowNode | null;
@@ -70,16 +70,9 @@ export const useFlowPlayer = (): FlowPlayerContext => {
       const firstNode = flowPath[0];
       selectNode(firstNode.id);
       
-      // Explicitly add the first assistant message if it exists
-      if (firstNode.assistant) {
-        addToConversation({
-          role: "assistant",
-          message: firstNode.assistant
-        });
-        processedNodesRef.current.add(firstNode.id);
-      }
+      // Removed: Don't add assistant message automatically on reset
     }
-  }, [flowPath, clearConversation, selectNode, addToConversation]);
+  }, [flowPath, clearConversation, selectNode]);
 
   // Inicjalizacja lub zmiana scenariusza
   useEffect(() => {
@@ -96,17 +89,10 @@ export const useFlowPlayer = (): FlowPlayerContext => {
         selectNode(firstNode.id);
         setCurrentNodeIndex(0);
         
-        // Explicitly process first node if not already processed
-        if (firstNode.assistant && !processedNodesRef.current.has(firstNode.id)) {
-          addToConversation({
-            role: "assistant",
-            message: firstNode.assistant
-          });
-          processedNodesRef.current.add(firstNode.id);
-        }
+        // Removed: Don't add assistant message automatically on initialization
       }
     }
-  }, [scenario?.id, flowPath, resetFlow, selectNode, addToConversation]);
+  }, [scenario?.id, flowPath, resetFlow, selectNode]);
   
   // Synchronizacja gdy zmienia się wybrany node
   useEffect(() => {
@@ -122,6 +108,14 @@ export const useFlowPlayer = (): FlowPlayerContext => {
   // Następny node
   const nextNode = useCallback(() => {
     if (currentNodeIndex >= flowPath.length - 1 || !currentNode) return;
+  
+    // Add current node's assistant message to conversation history before moving
+    if (currentNode.assistant) {
+      addToConversation({
+        role: "assistant",
+        message: currentNode.assistant
+      });
+    }
   
     // Zapisz aktualną wiadomość użytkownika do konwersacji
     if (userMessage.trim()) {

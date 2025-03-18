@@ -5,9 +5,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
+import { useWorkspaceContext } from "../../../context/hooks/useContext"; // Dodana importacja
 
 export const UserMessageProcessor: React.FC = () => {
   const { currentNode, userMessage, updateUserMessage, nextNode } = useFlowPlayer();
+  const { processTemplate } = useWorkspaceContext(); // Użycie hooka
   
   const handleSendMessage = () => {
     if (userMessage.trim()) {
@@ -25,7 +27,7 @@ export const UserMessageProcessor: React.FC = () => {
         <div className="flex items-end gap-2">
           <Textarea
             value={userMessage}
-            onChange={(e) => updateUserMessage(e.target.value)}
+            onChange={(e) => updateUserMessage(processTemplate(e.target.value))}
             placeholder="Type your message..."
             className="min-h-20 flex-1"
           />
