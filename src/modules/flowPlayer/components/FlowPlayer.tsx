@@ -1,4 +1,3 @@
-// src/modules/flowPlayer/components/FlowPlayer.tsx
 import React from "react";
 import { FlowControls } from "./Controls/FlowControls";
 import { useFlowPlayer } from "../hooks/useFlowPlayer";
@@ -23,11 +22,11 @@ export const FlowPlayer: React.FC = () => {
   };
   
   return (
-    <div className="flow-player p-4">
-      <FlowControls />
+    <div className="h-full flex flex-col ">
+      <FlowControls  />
       
       {currentNode && (
-        <Card className="mb-6" key={currentNode.id}>
+        <Card className="flex-shrink-0 mb-4">
           <CardContent className="pt-4">
             <h3 className="text-lg font-medium mb-1">{currentNode.label || "Unnamed Node"}</h3>
             {currentNode.type && (
@@ -39,11 +38,16 @@ export const FlowPlayer: React.FC = () => {
         </Card>
       )}
       
-      <div className="flex-1 mb-6 overflow-auto">
-        <ConversationPanel />
+      <div className="flex-grow overflow-hidden">
+        <div className="h-full overflow-y-auto pb-4">
+          <ConversationPanel />
+        </div>
       </div>
-      
-      <Card>
+
+
+      {/* <!-- brakuje asistant --> */}
+      {/* <!-- to jest response --> */}
+      <Card className="flex-shrink-0 mt-auto">
         <CardContent className="pt-4">
           <div className="flex items-end gap-2">
             <Textarea

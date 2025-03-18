@@ -58,6 +58,11 @@ const StudioLayout: React.FC = () => {
   const activeTab = useAppStore((state) => state.activeTab);
   const setActiveTab = useAppStore((state) => state.setActiveTab);
 
+  // Handle left panel toggling from FlowGraph
+  const handleToggleLeftPanel = (show: boolean) => {
+    setShowLeftPanel(show);
+  };
+
   // Automatycznie otwieraj panel właściwości, gdy wybrany jest węzeł lub krawędź
   React.useEffect(() => {
     if (selected.node) {
@@ -172,7 +177,7 @@ const StudioLayout: React.FC = () => {
                   overflow-hidden
                 `}
               >
-                <FlowGraph />
+                <FlowGraph onToggleLeftPanel={handleToggleLeftPanel} />
               </div>
 
               {/* Dolny pasek narzędzi */}

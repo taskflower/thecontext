@@ -19,15 +19,14 @@ export const ConversationPanel: React.FC = () => {
           {conversation.length > 0 ? (
             conversation.map((item, index) => (
               <TableRow key={index}>
-                <TableCell className=
-                {`font-medium capitalize align-top ${
-                  item.role === "assistant" ? "bg-sidebar" : ""
+                <TableCell className={`font-medium capitalize align-top ${
+                  item.role === "user" ? "bg-sidebar" : ""
                 }`}>
                   {item.role}
                 </TableCell>
                 <TableCell 
                   className={`whitespace-pre-line align-top ${
-                    item.role === "assistant" ? "bg-sidebar" : ""
+                    item.role === "user" ? "bg-sidebar" : ""
                   }`}
                 >
                   {item.message}
