@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { FilterIcon } from 'lucide-react';
 import { FilterEditor } from '../filters/FilterEditor';
 import { useFlow } from './useFlow';
-import { FlowPlayer } from './FlowPlayer';
+import { FlowPlayer } from '../flowPlayer'; // Updated import path
 
 export const FlowGraph: React.FC = () => {
   const {
@@ -35,18 +35,18 @@ export const FlowGraph: React.FC = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(flowData.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(flowData.edges);
   
-  // Aktualizuj nodes i edges przy zmianie danych
+  // Update nodes and edges when data changes
   React.useEffect(() => {
     const typedNodes = flowData.nodes.map(node => ({
       ...node,
-      type: 'default' // Użyj CustomNode dla wszystkich węzłów
+      type: 'default' // Use CustomNode for all nodes
     }));
     
     setNodes(typedNodes);
     setEdges(flowData.edges);
   }, [flowData, setNodes, setEdges]);
   
-  // Aktualizuj zaznaczenie dla nodes
+  // Update node selection
   React.useEffect(() => {
     if (selected.node) {
       setNodes(nds => 
@@ -64,7 +64,7 @@ export const FlowGraph: React.FC = () => {
     }
   }, [selected.node, setNodes, setEdges]);
 
-  // Aktualizuj zaznaczenie dla edges
+  // Update edge selection
   React.useEffect(() => {
     if (selected.edge) {
       setEdges(eds =>
@@ -82,14 +82,14 @@ export const FlowGraph: React.FC = () => {
     }
   }, [selected.edge, setNodes, setEdges]);
   
-  // Obsługa połączenia węzłów
+  // Handle node connection
   const handleConnect = (connection: Connection) => {
     if (connection.source && connection.target) {
       onConnect(connection.source, connection.target);
     }
   };
   
-  // Typy węzłów
+  // Node types
   const nodeTypes = useMemo(() => ({
     default: CustomNode,
   }), []);
@@ -131,7 +131,7 @@ export const FlowGraph: React.FC = () => {
         <Background gap={16} size={1} className="flow-background" />
       </ReactFlow>
       
-      <FlowPlayer />
+      <FlowPlayer /> {/* Using imported FlowPlayer from the new module */}
       
       {/* Render filter editor when needed */}
       {showFilterEditor && selected.scenario && (

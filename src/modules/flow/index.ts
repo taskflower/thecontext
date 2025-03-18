@@ -1,16 +1,11 @@
-// src/modules/flow/index.ts
-// Centralny punkt eksportu dla systemu flow
-
-// Komponenty 
+// Components 
 export { FlowGraph } from './FlowGraph';
-export { FlowPlayer } from './FlowPlayer';
 
-// Typy
+// Types
 export * from './types';
 
-// Hooki
+// Hooks
 export { useFlow } from './useFlow';
-export { useFlowPlayer } from './useFlowPlayer';
 
-// Funkcje pomocnicze
+// Helper functions
 export { calculateFlowPath } from './flowUtils';
