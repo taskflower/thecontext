@@ -1,8 +1,11 @@
 // src/modules/flowPlayer/hooks/useFlowPlayer.ts
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useAppStore } from "../../store";
 import { FlowNode } from "../../flow/types";
 import { calculateFlowPath } from "../flowUtils";
+
+// Control whether to clear conversation history when opening flow
+const CLEAR_HISTORY_ON_OPEN = true;
 
 export interface FlowPlayerContext {
   currentNode: FlowNode | null;
@@ -13,6 +16,9 @@ export interface FlowPlayerContext {
   previousNode: () => void;
   resetFlow: () => void;
   updateUserMessage: (value: string) => void;
+  // Nowe metody do zarządzania wiadomościami
+  isNodeProcessed: (nodeId: string) => boolean;
+  markNodeAsProcessed: (nodeId: string) => void;
 }
 
 export const useFlowPlayer = (): FlowPlayerContext => {
@@ -29,30 +35,80 @@ export const useFlowPlayer = (): FlowPlayerContext => {
   // State for flow player
   const [currentNodeIndex, setCurrentNodeIndex] = useState(0);
   const [userMessage, setUserMessage] = useState("");
+  
+  // Śledzenie przetworzonych nodeId (używamy useRef aby uniknąć re-renderów)
+  const processedNodesRef = useRef<Set<string>>(new Set());
 
   // Current node
   const currentNode = flowPath.length > 0 && currentNodeIndex < flowPath.length 
     ? flowPath[currentNodeIndex] 
     : null;
 
-  // Initialize with first node and handle node selection changes
-  useEffect(() => {
-    if (flowPath.length > 0 && currentNode) {
-      // Add the first node's assistant message to conversation
-      if (currentNode.assistant) {
+  // Czysty scenariusz
+  const scenarioIdRef = useRef<string | null>(null);
+  
+  // Sprawdź, czy node był już przetworzony
+  const isNodeProcessed = useCallback((nodeId: string) => {
+    return processedNodesRef.current.has(nodeId);
+  }, []);
+  
+  // Oznacz node jako przetworzony
+  const markNodeAsProcessed = useCallback((nodeId: string) => {
+    processedNodesRef.current.add(nodeId);
+  }, []);
+
+  // Reset flow
+  const resetFlow = useCallback(() => {
+    // First clear everything
+    clearConversation();
+    processedNodesRef.current.clear();
+    setCurrentNodeIndex(0);
+    setUserMessage("");
+
+    // Then initialize with the first node
+    if (flowPath.length > 0) {
+      const firstNode = flowPath[0];
+      selectNode(firstNode.id);
+      
+      // Explicitly add the first assistant message if it exists
+      if (firstNode.assistant) {
         addToConversation({
           role: "assistant",
-          message: currentNode.assistant
+          message: firstNode.assistant
         });
+        processedNodesRef.current.add(firstNode.id);
       }
-      // Select the first node
-      selectNode(currentNode.id);
     }
-  // Only run this effect once when the flow path is first calculated
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [flowPath.length]);
+  }, [flowPath, clearConversation, selectNode, addToConversation]);
+
+  // Inicjalizacja lub zmiana scenariusza
+  useEffect(() => {
+    // Wykryj zmianę scenariusza
+    if (scenario?.id && scenario.id !== scenarioIdRef.current) {
+      scenarioIdRef.current = scenario.id;
+      
+      if (CLEAR_HISTORY_ON_OPEN) {
+        // Use resetFlow to handle initialization consistently
+        resetFlow();
+      } else if (flowPath.length > 0) {
+        // Just select the first node without clearing history
+        const firstNode = flowPath[0];
+        selectNode(firstNode.id);
+        setCurrentNodeIndex(0);
+        
+        // Explicitly process first node if not already processed
+        if (firstNode.assistant && !processedNodesRef.current.has(firstNode.id)) {
+          addToConversation({
+            role: "assistant",
+            message: firstNode.assistant
+          });
+          processedNodesRef.current.add(firstNode.id);
+        }
+      }
+    }
+  }, [scenario?.id, flowPath, resetFlow, selectNode, addToConversation]);
   
-  // Sync UI when node selection changes externally
+  // Synchronizacja gdy zmienia się wybrany node
   useEffect(() => {
     if (selected.node && flowPath.length > 0) {
       const nodeIndex = flowPath.findIndex((node) => node.id === selected.node);
@@ -63,11 +119,11 @@ export const useFlowPlayer = (): FlowPlayerContext => {
     }
   }, [selected.node, flowPath, currentNodeIndex]);
 
-  // Move to next node
+  // Następny node
   const nextNode = useCallback(() => {
     if (currentNodeIndex >= flowPath.length - 1 || !currentNode) return;
   
-    // Save current user message to conversation
+    // Zapisz aktualną wiadomość użytkownika do konwersacji
     if (userMessage.trim()) {
       addToConversation({
         role: "user",
@@ -75,17 +131,17 @@ export const useFlowPlayer = (): FlowPlayerContext => {
       });
     }
   
-    // Move to next node
+    // Przejdź do następnego node'a
     const newIndex = currentNodeIndex + 1;
     setCurrentNodeIndex(newIndex);
     setUserMessage("");
   
-    // Select the node in UI
+    // Zaznacz nowy node w UI
     const nextNodeObj = flowPath[newIndex];
     selectNode(nextNodeObj.id);
   }, [currentNode, currentNodeIndex, flowPath, userMessage, addToConversation, selectNode]);
 
-  // Move to previous node
+  // Poprzedni node
   const previousNode = useCallback(() => {
     if (currentNodeIndex <= 0 || !currentNode) return;
 
@@ -93,31 +149,11 @@ export const useFlowPlayer = (): FlowPlayerContext => {
     setCurrentNodeIndex(newIndex);
     setUserMessage("");
     
-    // Select the node in UI
+    // Zaznacz node w UI
     selectNode(flowPath[newIndex].id);
   }, [currentNode, currentNodeIndex, flowPath, selectNode]);
 
-  // Reset flow
-  const resetFlow = useCallback(() => {
-    setCurrentNodeIndex(0);
-    setUserMessage("");
-    clearConversation();
-
-    if (flowPath.length > 0) {
-      const firstNode = flowPath[0];
-      selectNode(firstNode.id);
-      
-      // Add first node's assistant message to conversation
-      if (firstNode.assistant) {
-        addToConversation({
-          role: "assistant",
-          message: firstNode.assistant
-        });
-      }
-    }
-  }, [flowPath, clearConversation, selectNode, addToConversation]);
-
-  // Update user message
+  // Aktualizacja wiadomości użytkownika
   const updateUserMessage = useCallback((value: string) => {
     setUserMessage(value);
   }, []);
@@ -130,6 +166,8 @@ export const useFlowPlayer = (): FlowPlayerContext => {
     nextNode,
     previousNode,
     resetFlow,
-    updateUserMessage
+    updateUserMessage,
+    isNodeProcessed,
+    markNodeAsProcessed
   };
 };

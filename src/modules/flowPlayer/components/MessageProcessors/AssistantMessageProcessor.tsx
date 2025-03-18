@@ -1,35 +1,30 @@
 // src/modules/flowPlayer/components/MessageProcessors/AssistantMessageProcessor.tsx
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useFlowPlayer } from "../../hooks/useFlowPlayer";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAppStore } from "../../../store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const AssistantMessageProcessor: React.FC = () => {
-  const { currentNode } = useFlowPlayer();
+  const { currentNode, isNodeProcessed, markNodeAsProcessed } = useFlowPlayer();
   const { addToConversation } = useAppStore();
-  const prevNodeIdRef = useRef<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("message");
 
-  // Process message when current node changes
+  // Process message when node changes
   useEffect(() => {
-    if (!currentNode) {
-      return;
-    }
+    if (!currentNode) return;
 
-    // Check if node ID changed
-    if (currentNode.id !== prevNodeIdRef.current) {
-      prevNodeIdRef.current = currentNode.id;
+    // Add assistant message only if the node hasn't been processed yet
+    if (currentNode.assistant && !isNodeProcessed(currentNode.id)) {
+      addToConversation({
+        role: "assistant",
+        message: currentNode.assistant
+      });
       
-      // Add assistant message to conversation if it exists
-      if (currentNode.assistant) {
-        addToConversation({
-          role: "assistant",
-          message: currentNode.assistant
-        });
-      }
+      // Mark node as processed
+      markNodeAsProcessed(currentNode.id);
     }
-  }, [currentNode, addToConversation]);
+  }, [currentNode, addToConversation, isNodeProcessed, markNodeAsProcessed]);
 
   if (!currentNode) {
     return null;
@@ -45,7 +40,7 @@ export const AssistantMessageProcessor: React.FC = () => {
           </TabsList>
           
           <TabsContent value="message">
-            <div className=" bg-muted/20 p-3 rounded-md whitespace-pre-wrap">
+            <div className="bg-muted/20 p-3 rounded-md whitespace-pre-wrap">
               {currentNode.assistant ? (
                 currentNode.assistant
               ) : (
