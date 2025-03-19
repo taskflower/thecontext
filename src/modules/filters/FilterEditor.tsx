@@ -65,7 +65,17 @@ export const FilterEditor: React.FC<FilterEditorProps> = ({ scenarioId, onClose 
 
   // State for editing filter
   const [editingFilter, setEditingFilter] = useState<string | null>(null);
-  const [editValue, setEditValue] = useState("");
+  const [editFilter, setEditFilter] = useState<{
+    name: string;
+    contextKey: string;
+    operator: FilterOperator;
+    value: string;
+  }>({
+    name: "",
+    contextKey: "",
+    operator: FilterOperator.EQUALS,
+    value: "",
+  });
 
   // Load filters and context data on mount
   useEffect(() => {
@@ -112,15 +122,25 @@ export const FilterEditor: React.FC<FilterEditorProps> = ({ scenarioId, onClose 
   // Start editing a filter
   const handleEditStart = (filter: Filter) => {
     setEditingFilter(filter.id);
-    setEditValue(filter.value || "");
+    setEditFilter({
+      name: filter.name,
+      contextKey: filter.contextKey,
+      operator: filter.operator,
+      value: filter.value || "",
+    });
   };
 
   // Save edit changes
   const handleEditSave = (filter: Filter) => {
     if (editingFilter === null) return;
 
-    // Update the filter
-    updateScenarioFilter(scenarioId, filter.id, { value: editValue });
+    // Update the filter with all editable properties
+    updateScenarioFilter(scenarioId, filter.id, {
+      name: editFilter.name,
+      contextKey: editFilter.contextKey,
+      operator: editFilter.operator,
+      value: editFilter.value,
+    });
     setEditingFilter(null);
 
     // Update local state
@@ -302,13 +322,75 @@ export const FilterEditor: React.FC<FilterEditorProps> = ({ scenarioId, onClose 
                       <TableCell className="font-medium">{filter.name}</TableCell>
                       <TableCell>{filter.contextKey}</TableCell>
                       <TableCell>{getOperatorLabel(filter.operator)}</TableCell>
+                      <TableCell className="font-medium">
+                        {editingFilter === filter.id ? (
+                          <Input 
+                            value={editFilter.name}
+                            onChange={(e) => setEditFilter(prev => ({ ...prev, name: e.target.value }))}
+                          />
+                        ) : (
+                          filter.name
+                        )}
+                      </TableCell>
                       <TableCell>
                         {editingFilter === filter.id ? (
-                          <Input
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            disabled={!operatorNeedsValue(filter.operator)}
-                          />
+                          <Select
+                            value={editFilter.contextKey}
+                            onValueChange={(value) => setEditFilter(prev => ({ ...prev, contextKey: value }))}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select context key" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {contextItems.map((item) => (
+                                <SelectItem key={item.key} value={item.key}>
+                                  {item.key} ({item.valueType})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          filter.contextKey
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {editingFilter === filter.id ? (
+                          <Select
+                            value={editFilter.operator}
+                            onValueChange={(value) => {
+                              const newOperator = value as FilterOperator;
+                              setEditFilter(prev => ({ 
+                                ...prev, 
+                                operator: newOperator,
+                                value: operatorNeedsValue(newOperator) ? prev.value : ""
+                              }));
+                            }}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select operator" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Object.values(FilterOperator).map((op) => (
+                                <SelectItem key={op} value={op}>
+                                  {getOperatorLabel(op)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          getOperatorLabel(filter.operator)
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {editingFilter === filter.id ? (
+                          operatorNeedsValue(editFilter.operator) ? (
+                            <Input
+                              value={editFilter.value}
+                              onChange={(e) => setEditFilter(prev => ({ ...prev, value: e.target.value }))}
+                            />
+                          ) : (
+                            <span className="text-muted-foreground italic">N/A</span>
+                          )
                         ) : (
                           operatorNeedsValue(filter.operator) ? (
                             filter.value || <span className="text-muted-foreground italic">None</span>
@@ -325,7 +407,6 @@ export const FilterEditor: React.FC<FilterEditorProps> = ({ scenarioId, onClose 
                               variant="ghost"
                               className="h-7 w-7"
                               onClick={() => handleEditSave(filter)}
-                              disabled={!operatorNeedsValue(filter.operator)}
                             >
                               <Check className="h-3.5 w-3.5" />
                             </Button>
@@ -340,16 +421,14 @@ export const FilterEditor: React.FC<FilterEditorProps> = ({ scenarioId, onClose 
                           </div>
                         ) : (
                           <div className="flex gap-1">
-                            {operatorNeedsValue(filter.operator) && (
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-7 w-7"
-                                onClick={() => handleEditStart(filter)}
-                              >
-                                <Edit2 className="h-3.5 w-3.5" />
-                              </Button>
-                            )}
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-7 w-7"
+                              onClick={() => handleEditStart(filter)}
+                            >
+                              <Edit2 className="h-3.5 w-3.5" />
+                            </Button>
                             <Button
                               size="icon"
                               variant="ghost"
