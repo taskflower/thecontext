@@ -96,7 +96,7 @@ const WorkspacePage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
       <header className="border-b bg-card">
-        <div className="container mx-auto py-6">
+        <div className="max-w-4xl mx-auto py-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">
@@ -145,10 +145,10 @@ const WorkspacePage: React.FC = () => {
       </header>
 
       {/* Main content */}
-      <main className="flex-1 container mx-auto py-8">
+      <main className="flex-1 max-w-4xl mx-auto py-8">
         <h2 className="text-2xl font-semibold mb-6">Available Scenarios</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
           {/* Display all scenarios */}
           {scenariosWithStatus.map((scenario) => {
             const isActive = scenario.matchesFilter;
