@@ -16,7 +16,8 @@ export const ApiServiceProcessor: React.FC = memo(() => {
     currentNode, 
     isNodeProcessed, 
     markNodeAsProcessed,
-    nextNode
+    nextNode,
+    updateUserMessage
   } = useFlowPlayer();
   
   const { processTemplate } = useWorkspaceContext();
@@ -73,22 +74,15 @@ export const ApiServiceProcessor: React.FC = memo(() => {
     : {};
   
   // Get plugin settings
-  const buttonText = options.button_text || "Send API Request";
-  const userIdValue = user?.uid || options.user_id || "user123";
-  const messageContent = options.message_content || "Hello!";
-  const buttonColor = options.button_color || "blue";
+  const buttonText = options.button_text || "Send Request";
+  const userIdValue = user?.uid || "user123";
+  const assistantMessage = options.assistant_message || "This is the message that will be sent to the API.";
+  const fillUserInput = options.fill_user_input || false;
   
-  // Get color class based on selected color
+  // Get color class for button
   const getColorClass = () => {
     if (isLoading) return "bg-gray-400 cursor-not-allowed";
-    
-    switch (buttonColor) {
-      case "green": return "bg-green-500 hover:bg-green-600";
-      case "red": return "bg-red-500 hover:bg-red-600";
-      case "purple": return "bg-purple-500 hover:bg-purple-600";
-      case "blue":
-      default: return "bg-blue-500 hover:bg-blue-600";
-    }
+    return "bg-blue-500 hover:bg-blue-600";
   };
   
   // Process message for display
@@ -97,62 +91,97 @@ export const ApiServiceProcessor: React.FC = memo(() => {
     : "";
   
   // API call function
-  const callApi = async () => {
-    setIsLoading(true);
-    setApiResponse(null);
+// Enhanced version of the API call function
+const callApi = async () => {
+  setIsLoading(true);
+  setApiResponse(null);
+  
+  try {
+    // Get authentication token
+    const authToken = user ? await authService.getCurrentUserToken() : null;
     
-    try {
-      // Get authentication token
-      const authToken = user ? await authService.getCurrentUserToken() : null;
+    // Get API URL from environment variable
+    const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    const apiUrl = `${apiBaseUrl}/api/v1/services/chat/completion`;
+    
+    // Process assistant message for API request
+    const processedAssistantMessage = currentNode.assistant 
+      ? processTemplate(currentNode.assistant) 
+      : processTemplate(assistantMessage);
+    
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+      },
+      body: JSON.stringify({
+        messages: [
+          { role: "user", content: processedAssistantMessage }
+        ],
+        userId: userIdValue
+      }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Server responded with status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    setApiResponse(JSON.stringify(data, null, 2));
+    
+    // Add response to conversation
+    addToConversation({
+      role: "assistant",
+      message: `API Response:\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\``
+    });
+    
+    // Log response structure for debugging
+    console.log("API response structure:", {
+      hasSuccess: !!data?.success,
+      hasData: !!data?.data,
+      hasMessage: !!data?.data?.message,
+      hasContent: !!data?.data?.message?.content,
+      fillUserInputEnabled: fillUserInput
+    });
+    
+    // Extract assistant message content if it exists in the response
+    if (data?.success && data?.data?.message?.content) {
+      const assistantContent = data.data.message.content;
       
-      // Get API URL from environment variable
-      const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-      const apiUrl = `${apiBaseUrl}/api/v1/services/chat/completion`;
+      console.log("Extracted content:", assistantContent);
       
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
-        },
-        body: JSON.stringify({
-          messages: [
-            { role: "user", content: messageContent }
-          ],
-          userId: userIdValue
-        }),
-      });
+      // Always fill user input with content from API
+      console.log("Filling user input with content");
+      updateUserMessage(assistantContent);
+      // Don't move to next node when filling input
+    } else {
+      console.warn("Could not extract content from API response:", data);
       
-      if (!response.ok) {
-        throw new Error(`Server responded with status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      setApiResponse(JSON.stringify(data, null, 2));
-      
-      // Add response to conversation
+      // Add warning to conversation
       addToConversation({
         role: "assistant",
-        message: `API Response:\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\``
+        message: "Warning: Could not extract assistant content from API response."
       });
       
-      // Move to next node optionally
-      if (options.auto_progress) {
+      // Only move to next node if not filling user input
+      if (!fillUserInput) {
         nextNode("API call completed");
       }
-    } catch (error) {
-      console.error("API error:", error);
-      setApiResponse(`Error: ${error instanceof Error ? error.message : String(error)}`);
-      
-      // Add error to conversation
-      addToConversation({
-        role: "assistant",
-        message: `API Error: ${error instanceof Error ? error.message : String(error)}`
-      });
-    } finally {
-      setIsLoading(false);
     }
-  };
+  } catch (error) {
+    console.error("API error:", error);
+    setApiResponse(`Error: ${error instanceof Error ? error.message : String(error)}`);
+    
+    // Add error to conversation
+    addToConversation({
+      role: "assistant",
+      message: `API Error: ${error instanceof Error ? error.message : String(error)}`
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
   
   return (
     <Card className="assistant-message-processor border shadow-none mb-3">

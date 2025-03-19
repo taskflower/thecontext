@@ -18,32 +18,14 @@ const ApiServicePlugin: Plugin = {
       default: "Send API Request"
     },
     {
-      id: "user_id",
-      label: "User ID",
-      type: "text",
-      default: "user123"
+      id: "assistant_message",
+      label: "Assistant Message",
+      type: "textarea",
+      default: "This is the message that will be sent to the API."
     },
     {
-      id: "message_content",
-      label: "Message Content",
-      type: "text",
-      default: "Hello!"
-    },
-    {
-      id: "button_color",
-      label: "Button Color",
-      type: "select",
-      default: "blue",
-      options: [
-        { value: "blue", label: "Blue" },
-        { value: "green", label: "Green" },
-        { value: "red", label: "Red" },
-        { value: "purple", label: "Purple" }
-      ]
-    },
-    {
-      id: "auto_progress",
-      label: "Auto-progress after API call",
+      id: "fill_user_input",
+      label: "Fill user input with response",
       type: "boolean",
       default: false
     }
