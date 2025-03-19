@@ -8,16 +8,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAppStore } from "@/modules/store";
 import {
   Play,
   CheckCircle,
   Clock,
-  Book,
   ArrowRight,
   Github,
   Twitter,
   FilterIcon,
+  Box,
+  FileCode,
+  Database,
+  Plus,
+  ChevronDown,
 } from "lucide-react";
 import {
   Card,
@@ -33,11 +43,11 @@ import { Separator } from "@/components/ui/separator";
 import { FilterEditor } from "@/modules/filters/FilterEditor";
 import { FilterStatus } from "@/modules/filters/FilterStatus";
 
-const WorkspacePage: React.FC = () => {
+const WorkspacePage = () => {
   const [flowPlayerOpen, setFlowPlayerOpen] = useState(false);
-  const [editingFilters, setEditingFilters] = useState<string | null>(null);
-  
-  const { slug } = useParams<{ slug: string }>();
+  const [editingFilters, setEditingFilters] = useState(null);
+
+  const { slug } = useParams();
   const {
     items: workspaces,
     selectWorkspace,
@@ -71,19 +81,24 @@ const WorkspacePage: React.FC = () => {
   // Get all scenarios with filter match status
   const scenariosWithStatus = React.useMemo(() => {
     return getScenariosWithFilterStatus();
-  }, [getScenariosWithFilterStatus, useAppStore((state) => state.stateVersion)]);
+  }, [
+    getScenariosWithFilterStatus,
+    useAppStore((state) => state.stateVersion),
+  ]);
 
   // Get only scenarios that have defined filters
   const filteredScenarios = React.useMemo(() => {
-    return scenariosWithStatus.filter(scenario => {
+    return scenariosWithStatus.filter((scenario) => {
       // Check if scenario has defined filters
-      // We assume a scenario has filters if it has hasFilters property or similar
-      return scenario.hasFilters === true || (scenario.filters && scenario.filters.length > 0);
+      return (
+        scenario.hasFilters === true ||
+        (scenario.filters && scenario.filters.length > 0)
+      );
     });
   }, [scenariosWithStatus]);
 
   // Check if scenario active (matches filters)
-  const isScenarioActive = (scenarioId: string) => {
+  const isScenarioActive = (scenarioId) => {
     const contextItems = currentWorkspace?.contextItems || [];
     return checkScenarioFilterMatch(scenarioId, contextItems);
   };
@@ -93,87 +108,146 @@ const WorkspacePage: React.FC = () => {
   };
 
   // Filter management functions
-  const handleFilterClick = (e: React.MouseEvent, scenarioId: string) => {
+  const handleFilterClick = (e: React.MouseEvent, scenarioId) => {
     e.stopPropagation();
     setEditingFilters(scenarioId);
   };
 
+  // Format time ago function
+  const formatTimeAgo = (timestamp) => {
+    const now = new Date();
+    const date = new Date(timestamp || now);
+    const diffInSeconds = Math.floor((now - date) / 1000);
+
+    if (diffInSeconds < 60) {
+      return `${diffInSeconds} seconds ago`;
+    } else if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60);
+      return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
+    } else if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600);
+      return `about ${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+    } else {
+      const days = Math.floor(diffInSeconds / 86400);
+      return `${days} ${days === 1 ? "day" : "days"} ago`;
+    }
+  };
+
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="border-b bg-card">
-        <div className="max-w-4xl mx-auto py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">
-                {currentWorkspace?.title || "Workspace"}
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                {currentScenario
-                  ? `Current scenario: ${currentScenario.name}`
-                  : "No scenario selected"}
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              {/* Workspace Navigation */}
-              <div className="flex bg-muted rounded-md overflow-hidden mr-2">
+      <header className="border-b bg-white">
+        <div className="flex items-center justify-between p-6">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {currentWorkspace?.title === "Wise ads"
+                ? "Wise ads"
+                : currentWorkspace?.title || "Workspace"}
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              {currentScenario
+                ? `Current scenario: ${currentScenario.name}`
+                : "No scenario selected"}
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            {/* Workspace Selection Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="gap-2 border shadow-sm"
+                  id="workspace-selector"
+                >
+                  <Box className="h-4 w-4" />
+                  <span>Selected Workspace:</span>
+                  Wise ads
+                  <ChevronDown className="h-4 w-4 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[220px]">
                 {workspaces.map((workspace) => (
-                  <Button
+                  <DropdownMenuItem
                     key={workspace.id}
-                    variant={
-                      currentWorkspace?.id === workspace.id
-                        ? "secondary"
-                        : "ghost"
+                    className={
+                      currentWorkspace?.id === workspace.id ? "bg-accent" : ""
                     }
-                    size="sm"
-                    className="rounded-none h-9 px-3"
                     onClick={() => {
                       selectWorkspace(workspace.id);
                       window.history.pushState({}, "", `/${workspace.slug}`);
                     }}
                   >
-                    {workspace.title}
-                  </Button>
+                    <Box className="h-4 w-4 mr-2" />
+                    {workspace.title === "Wise ads"
+                      ? "Wise ads"
+                      : workspace.title}
+                  </DropdownMenuItem>
                 ))}
-              </div>
-              <Button
-                variant="secondary"
-                className="gap-2"
-                onClick={openFlowPlayer}
-                disabled={!currentScenario || !isScenarioActive(currentScenario.id)}
-              >
-                <Play className="h-4 w-4" />
-                Run Flow
-              </Button>
-            </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button
+              variant="secondary"
+              className="gap-2"
+              onClick={openFlowPlayer}
+              disabled={
+                !currentScenario || !isScenarioActive(currentScenario.id)
+              }
+            >
+              <Play className="h-4 w-4" />
+              Run Flow
+            </Button>
           </div>
         </div>
       </header>
 
       {/* Main content */}
-      <main className="flex-1 max-w-4xl mx-auto py-8">
-        <h2 className="text-2xl font-semibold mb-6">Available Scenarios</h2>
+      <main className="flex-1 p-6">
+        <div className="mb-6 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Button variant="outline" className="gap-2 shadow-sm">
+              <FileCode className="h-4 w-4" />
+              Export Scenarios
+            </Button>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              className="gap-2 shadow-sm"
+              title="Open Workspace Context"
+            >
+              <Database className="h-4 w-4" />
+              Documents
+            </Button>
+            <Button
+              variant="outline"
+              className="gap-2 shadow-sm bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              <Plus className="h-4 w-4" />
+              New Scenario
+            </Button>
+          </div>
+        </div>
+
+        <h2 className="text-xl font-semibold mb-4">Available Scenarios</h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Display only scenarios with defined filters */}
           {filteredScenarios.map((scenario) => {
             const isActive = scenario.matchesFilter;
             const isCurrentScenario = currentScenario?.id === scenario.id;
-            
+
             return (
-              <Card 
+              <Card
                 key={scenario.id}
                 className={`overflow-hidden hover:shadow-md transition-shadow ${
-                  !isActive ? 'opacity-50' : ''
-                } ${
-                  isCurrentScenario ? 'border-blue-500 border-2' : ''
-                }`}
+                  !isActive ? "opacity-70" : ""
+                } ${isCurrentScenario ? "border-primary border-2" : ""}`}
               >
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start">
-                    <CardTitle className="text-xl">
-                      {scenario.name}
-                    </CardTitle>
+                    <CardTitle className="text-lg">{scenario.name}</CardTitle>
                     <div className="flex items-center gap-2">
                       <Button
                         variant="ghost"
@@ -184,8 +258,8 @@ const WorkspacePage: React.FC = () => {
                       >
                         <FilterIcon className="h-3.5 w-3.5" />
                       </Button>
-                      <FilterStatus 
-                        scenarioId={scenario.id} 
+                      <FilterStatus
+                        scenarioId={scenario.id}
                         onEditClick={(e) => handleFilterClick(e, scenario.id)}
                       />
                       <Badge variant="secondary" className="text-xs">
@@ -205,38 +279,33 @@ const WorkspacePage: React.FC = () => {
                       ) : (
                         <Clock className="h-3.5 w-3.5" />
                       )}
-                      <span>
-                        {isActive ? "Active" : "Inactive"}
-                      </span>
+                      <span>{isActive ? "Active" : "Inactive"}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock className="h-3.5 w-3.5" />
-                      <span>
-                        Updated{" "}
-                        {new Date(
-                          scenario.updatedAt || Date.now()
-                        ).toLocaleDateString()}
-                      </span>
+                      <span>Updated {formatTimeAgo(scenario.updatedAt)}</span>
                     </div>
                   </div>
                 </CardContent>
                 <CardFooter className="pt-3">
                   {isCurrentScenario ? (
-                    <Button 
-                      className="w-full gap-2" 
-                      onClick={openFlowPlayer} 
+                    <Button
+                      className="w-full gap-2"
+                      onClick={openFlowPlayer}
                       disabled={!isActive}
                     >
                       <Play className="h-4 w-4" />
                       Start Flow
                     </Button>
                   ) : (
-                    <Button 
-                      variant="secondary" 
+                    <Button
+                      variant="secondary"
                       className="w-full gap-2"
                       onClick={() => {
                         selectWorkspace(currentWorkspace?.id || "");
-                        const workspace = useAppStore.getState().items.find(w => w.id === currentWorkspace?.id);
+                        const workspace = useAppStore
+                          .getState()
+                          .items.find((w) => w.id === currentWorkspace?.id);
                         if (workspace) {
                           useAppStore.getState().selectScenario(scenario.id);
                         }
@@ -252,58 +321,25 @@ const WorkspacePage: React.FC = () => {
             );
           })}
 
-          {/* Mock cards */}
-          <Card className="overflow-hidden bg-muted/40 hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-xl">Customer Support</CardTitle>
-              <CardDescription>
-                Handle common customer inquiries and support requests
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pb-2">
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Book className="h-3.5 w-3.5" />
-                  <span>12 nodes</span>
-                </div>
+          {filteredScenarios.length === 0 && (
+            <div className="col-span-full text-center p-12 border rounded-lg bg-card">
+              <div className="text-muted-foreground mb-4">
+                No scenarios with filters found
               </div>
-            </CardContent>
-            <CardFooter className="pt-3">
-              <Button variant="secondary" className="w-full">
-                <ArrowRight className="h-4 w-4 mr-2" />
-                Select
+              <Button
+                variant="outline"
+                onClick={() => navigate("/scenarios/new")}
+              >
+                Create New Scenario
               </Button>
-            </CardFooter>
-          </Card>
-
-          <Card className="overflow-hidden bg-muted/40 hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-xl">Product Onboarding</CardTitle>
-              <CardDescription>
-                Guide new users through product features and setup
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pb-2">
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Book className="h-3.5 w-3.5" />
-                  <span>8 nodes</span>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="pt-3">
-              <Button variant="secondary" className="w-full">
-                <ArrowRight className="h-4 w-4 mr-2" />
-                Select
-              </Button>
-            </CardFooter>
-          </Card>
+            </div>
+          )}
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="border-t bg-card">
-        <div className="container mx-auto py-6">
+      <footer className="border-t bg-white">
+        <div className="container mx-auto py-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2">
               <p className="text-sm text-muted-foreground">
@@ -332,14 +368,6 @@ const WorkspacePage: React.FC = () => {
               <Button variant="ghost" size="sm" className="text-xs">
                 Privacy
               </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                className="text-xs"
-                onClick={() => navigate("/studio")}
-              >
-                Studio
-              </Button>
             </div>
           </div>
         </div>
@@ -362,9 +390,9 @@ const WorkspacePage: React.FC = () => {
 
       {/* Dialog for Filters */}
       {editingFilters && (
-        <FilterEditor 
-          scenarioId={editingFilters} 
-          onClose={() => setEditingFilters(null)} 
+        <FilterEditor
+          scenarioId={editingFilters}
+          onClose={() => setEditingFilters(null)}
         />
       )}
     </div>
