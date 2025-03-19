@@ -242,7 +242,7 @@ const WorkspacePage: React.FC = () => {
                 Privacy
               </Button>
               <Button
-                variant="ghost"
+                variant="secondary"
                 size="sm"
                 className="text-xs"
                 onClick={() => navigate("/studio")}
