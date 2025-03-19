@@ -1,50 +1,22 @@
-// src/modules/flowPlayer/types.ts
-import { FlowNode } from '../flow/types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// src/modules/flow/types.ts
+import { ElementType, Position } from "../types";
 
-export interface FlowPlayerContext {
-  isPlaying: boolean;
-  canPlay: boolean;
-  currentNode: FlowNode | null;
-  currentNodeIndex: number;
-  flowPath: FlowNode[];
-  processedMessage: string | null;
-  userMessage: string;
-
-  startFlow: () => void;
-  stopFlow: () => void;
-  nextNode: (userMsg?: string) => void;
-  previousNode: () => void;
-  resetFlow: () => void;
-  updateUserMessage: (value: string) => void;
-  setProcessedMessage: (processed: string | null) => void;
+export interface FlowNode {
+  id: string;
+  type: ElementType.GRAPH_NODE;
+  label: string;
+  assistant: string;
+  position: Position;
+  plugin?: string;
+  pluginOptions?: { [pluginId: string]: Record<string, any> };
+  userMessage?: string;
+  contextSaveKey?: string; // Klucz kontekstu, do którego zostanie zapisana odpowiedź użytkownika
 }
 
-// Konteksty dla procesorów wiadomości
-export interface UserMessageContext {
-  message: string;
-  onChange: (message: string) => void;
-  currentNode: FlowNode | null;
-  flowState: FlowPlayerContext;
+export interface FlowEdge {
+  id: string;
+  source: string;
+  target: string;
+  label?: string;
 }
-
-export interface AssistantMessageContext {
-  message: string | null;
-  isProcessing: boolean;
-  currentNode: FlowNode | null;
-  flowState: FlowPlayerContext;
-}
-
-export interface FlowControlsContext {
-  isPlaying: boolean;
-  canPlay: boolean;
-  currentNode: FlowNode | null;
-  currentNodeIndex: number;
-  flowPath: FlowNode[];
-  
-  startFlow: () => void;
-  stopFlow: () => void;
-  nextNode: (userMsg?: string) => void;
-  previousNode: () => void;
-  resetFlow: () => void;
-}
-

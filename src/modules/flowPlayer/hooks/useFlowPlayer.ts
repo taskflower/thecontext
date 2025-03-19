@@ -5,7 +5,6 @@ import { calculateFlowPath } from "../flowUtils";
 import { useWorkspaceContext } from "../../context/hooks/useContext";
 import { FlowNode } from "@/modules/flow/types";
 
-
 // Control whether to clear conversation history when opening flow
 const CLEAR_HISTORY_ON_OPEN = true;
 
@@ -31,7 +30,10 @@ export const useFlowPlayer = (): FlowPlayerContext => {
     clearConversation,
     selected,
   } = useAppStore();
-  const { processTemplate } = useWorkspaceContext();
+
+  // Pobranie wszystkich potrzebnych funkcji kontekstowych
+  const { processTemplate, getValue, addItem, updateItem } =
+    useWorkspaceContext();
 
   // Get scenario nodes and edges
   const scenario = getCurrentScenario();
@@ -111,12 +113,17 @@ export const useFlowPlayer = (): FlowPlayerContext => {
     }
   }, [selected.node, flowPath, currentNodeIndex]);
 
-  // Następny node - CAŁKOWICIE ZMIENIONY
+  // Następny node - z dodanym zapisywaniem do kontekstu
   const nextNode = useCallback(
     (userMsg?: string) => {
       if (currentNodeIndex >= flowPath.length - 1 || !currentNode) return;
 
-      
+      console.log("nextNode wywołany:", {
+        userMsg: userMsg || userMessage,
+        currentNode: currentNode.label,
+        contextSaveKey: currentNode.contextSaveKey,
+      });
+
       // Obsługa wiadomości asystenta
       if (currentNode.assistant) {
         const processedAssistantMessage = processTemplate(
@@ -128,14 +135,32 @@ export const useFlowPlayer = (): FlowPlayerContext => {
         });
       }
 
+      // Używaj wiadomości przekazanej lub z bieżącego stanu
+      const messageToProcess = userMsg || userMessage;
+      const processedUserMessage = processTemplate(messageToProcess);
+
       // Obsługa wiadomości użytkownika, jeśli została podana
-      if (userMsg?.trim()) {
+      if (messageToProcess.trim()) {
         addToConversation({
           role: "user",
-          message: processTemplate(userMsg),
+          message: processedUserMessage,
         });
       }
 
+      if (
+        currentNode.contextSaveKey &&
+        currentNode.contextSaveKey !== "_none"
+      ) {
+        const existingValue = getValue(currentNode.contextSaveKey);
+
+        if (existingValue !== null) {
+          // Aktualizuj istniejący klucz
+          updateItem(currentNode.contextSaveKey, processedUserMessage);
+        } else {
+          // Dodaj nowy klucz
+          addItem(currentNode.contextSaveKey, processedUserMessage, "text");
+        }
+      }
 
       // Przejście do następnego node'a
       const newIndex = currentNodeIndex + 1;
@@ -149,9 +174,13 @@ export const useFlowPlayer = (): FlowPlayerContext => {
       currentNode,
       currentNodeIndex,
       flowPath,
+      userMessage,
       addToConversation,
       selectNode,
       processTemplate,
+      getValue,
+      addItem,
+      updateItem,
     ]
   );
 
