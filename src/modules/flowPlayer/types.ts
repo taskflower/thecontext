@@ -12,7 +12,7 @@ export interface FlowPlayerContext {
 
   startFlow: () => void;
   stopFlow: () => void;
-  nextNode: () => void;
+  nextNode: (userMsg?: string) => void;
   previousNode: () => void;
   resetFlow: () => void;
   updateUserMessage: (value: string) => void;
@@ -43,7 +43,8 @@ export interface FlowControlsContext {
   
   startFlow: () => void;
   stopFlow: () => void;
-  nextNode: () => void;
+  nextNode: (userMsg?: string) => void;
   previousNode: () => void;
   resetFlow: () => void;
 }
+

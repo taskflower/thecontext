@@ -53,7 +53,7 @@ export const AssistantMessageProcessor: React.FC = () => {
             <div className="min-h-32 bg-muted/20 p-3 rounded-md overflow-auto">
               <pre className="text-xs whitespace-pre-wrap">
                 {JSON.stringify(currentNode, null, 2)}
-              </pre>
+              </pre>  
             </div>
           </TabsContent>
         </Tabs>

@@ -5,29 +5,27 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
-import { useWorkspaceContext } from "../../../context/hooks/useContext"; // Dodana importacja
 
 export const UserMessageProcessor: React.FC = () => {
-  const { currentNode, userMessage, updateUserMessage, nextNode } = useFlowPlayer();
-  const { processTemplate } = useWorkspaceContext(); // Użycie hooka
-  
+  const { currentNode, userMessage, updateUserMessage, nextNode } =
+    useFlowPlayer();
+
   const handleSendMessage = () => {
-    if (userMessage.trim()) {
-      nextNode();
-    }
+    // Teraz wywołaj nextNode
+    nextNode(userMessage);
   };
-  
+
   if (!currentNode) {
     return null;
   }
-  
+
   return (
     <Card className="flex-shrink-0 mt-auto">
       <CardContent className="pt-4">
         <div className="flex items-end gap-2">
           <Textarea
             value={userMessage}
-            onChange={(e) => updateUserMessage(processTemplate(e.target.value))}
+            onChange={(e) => updateUserMessage(e.target.value)}
             placeholder="Type your message..."
             className="min-h-20 flex-1"
           />

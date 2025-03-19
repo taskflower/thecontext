@@ -1,88 +1,52 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/modules/plugin/components/UserMessageProcessor.tsx
-import React, { useState, useEffect } from 'react';
-import { usePluginStore } from '../store';
-import { Textarea } from '@/components/ui/textarea';
+// src/modules/flowPlayer/components/MessageProcessors/UserMessageProcessor.tsx
+import React from "react";
+import { useFlowPlayer } from "../../hooks/useFlowPlayer";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Send } from "lucide-react";
+import { useWorkspaceContext } from "../../../context/hooks/useContext";
+import { useAppStore } from "../../../store";
 
-interface UserMessageProcessorProps {
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  className?: string;
-  pluginId?: string;
-  pluginOptions?: Record<string, any>;
-  disabled?: boolean;
-}
-
-export const UserMessageProcessor: React.FC<UserMessageProcessorProps> = ({
-  value,
-  onChange,
-  placeholder = "Type your message here...",
-  className = "min-h-[120px] resize-none",
-  pluginId,
-  pluginOptions = {},
-  disabled = false
-}) => {
-  const { plugins } = usePluginStore();
-  const [customRenderer, setCustomRenderer] = useState<React.ReactNode | null>(null);
-  const [isPluginActive, setIsPluginActive] = useState(false);
-
-  // Inicjalizacja pluginu do kontroli wiadomości użytkownika
-  useEffect(() => {
-    const initializePlugin = async () => {
-      if (!pluginId) return;
-
-      const plugin = plugins[pluginId];
-      if (!plugin || !plugin.processUserInput) {
-        setIsPluginActive(false);
-        setCustomRenderer(null);
-        return;
-      }
-
-      try {
-        // Sprawdź czy plugin chce przejąć kontrolę nad interfejsem
-        const result = await plugin.processUserInput({
-          currentValue: value,
-          options: pluginOptions,
-          // Przekaż funkcje zwrotne do pluginu
-          onChange: (newValue: string) => onChange(newValue),
-          provideCustomRenderer: (renderer: React.ReactNode) => {
-            setCustomRenderer(renderer);
-            setIsPluginActive(true);
-          }
-        });
-
-        // Jeśli plugin zwrócił nową wartość, ale nie dostarczył renderera
-        if (result && typeof result === 'string' && !customRenderer) {
-          onChange(result);
-        }
-      } catch (error) {
-        console.error('Error initializing user message plugin:', error);
-        setIsPluginActive(false);
-        setCustomRenderer(null);
-      }
-    };
-
-    initializePlugin();
-  }, [pluginId, plugins, pluginOptions]);
-
-  // Renderowanie niestandardowego interfejsu pluginu lub domyślnego pola tekstowego
-  if (isPluginActive && customRenderer) {
-    return (
-      <div className="plugin-user-input">
-        {customRenderer}
-      </div>
-    );
+export const UserMessageProcessor: React.FC = () => {
+  const { currentNode, userMessage, updateUserMessage, nextNode } = useFlowPlayer();
+  const { processTemplate } = useWorkspaceContext();
+  const { addToConversation } = useAppStore();
+  
+  const handleSendMessage = () => {
+    if (userMessage.trim()) {
+      console.log('UserMessageProcessor dodaje wiadomość i wywołuje nextNode');
+      
+      // Process user message directly when sending
+      addToConversation({
+        role: "user",
+        message: processTemplate(userMessage)
+      });
+      
+      // Teraz wywołaj nextNode
+      nextNode();
+    }
+  };
+  
+  if (!currentNode) {
+    return null;
   }
-
-  // Domyślny interfejs wprowadzania wiadomości użytkownika
+  
   return (
-    <Textarea
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className={className}
-      disabled={disabled}
-    />
+    <Card className="flex-shrink-0 mt-auto">
+      <CardContent className="pt-4">
+        <div className="flex items-end gap-2">
+          <Textarea
+            value={userMessage}
+            onChange={(e) => updateUserMessage(e.target.value)}
+            placeholder="Type your message..."
+            className="min-h-20 flex-1"
+          />
+          <Button onClick={handleSendMessage} className="mb-1">
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
