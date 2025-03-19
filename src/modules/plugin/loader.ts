@@ -3,42 +3,72 @@
 import { usePluginStore } from "./store";
 import { Plugin } from "./types";
 
-export const loadPlugins = async () => {
+/**
+ * Loads plugins from the filesystem
+ * Uses Vite's import.meta.glob to dynamically load plugin modules
+ */
+export const loadPlugins = async (): Promise<void> => {
   const store = usePluginStore.getState();
   
-  // Dynamiczny import wszystkich pluginów - zachowujemy oryginalną ścieżkę
-  const pluginModules = import.meta.glob("./../../plugins/*/index.tsx", {
-    eager: true,
-  });
+  try {
+    // Dynamically import all plugins
+    const pluginModules = import.meta.glob("./../../plugins/*/index.tsx", {
+      eager: true,
+    });
 
-  console.log("Available plugin modules:", Object.keys(pluginModules));
+    console.log(`Discovered ${Object.keys(pluginModules).length} plugin modules`);
 
-  Object.values(pluginModules).forEach((module: any) => {
-    // Sprawdzamy czy eksport pluginu jest w nowym formacie
-    if (module.default?.id && typeof module.default.process === 'function') {
-      const plugin = module.default as Plugin;
-      console.log(`Registering plugin: ${plugin.name}`);
-      store.registerPlugin(plugin);
-    } 
-    // Kompatybilność wsteczna ze starym formatem
-    else if (module.default?.config?.id && typeof module.default.process === 'function') {
-      const oldPlugin = module.default;
-      // Konwertuj stary format do nowego
-      const plugin: Plugin = {
-        id: oldPlugin.config.id,
-        name: oldPlugin.config.name,
-        description: oldPlugin.config.description,
-        version: oldPlugin.config.version,
-        options: oldPlugin.config.optionsSchema,
-        process: oldPlugin.process
-      };
-      console.log(`Registering legacy plugin: ${plugin.name}`);
-      store.registerPlugin(plugin);
-    } 
-    else {
-      console.warn("Found module that doesn't export a valid plugin:", module);
-    }
-  });
+    Object.entries(pluginModules).forEach(([path, module]) => {
+      const mod = module as any;
+      
+      // Check for modern plugin format
+      if (mod.default?.id && typeof mod.default.process === 'function') {
+        const plugin = mod.default as Plugin;
+        console.log(`Registering plugin: ${plugin.name} (${plugin.id})`);
+        store.registerPlugin(plugin);
+      } 
+      // Legacy plugin format support
+      else if (mod.default?.config?.id && typeof mod.default.process === 'function') {
+        const legacy = mod.default;
+        const plugin: Plugin = {
+          id: legacy.config.id,
+          name: legacy.config.name,
+          description: legacy.config.description,
+          version: legacy.config.version,
+          options: legacy.config.optionsSchema,
+          process: legacy.process,
+          // Map any other legacy fields
+          ...(legacy.overrideComponents && { overrideComponents: legacy.overrideComponents }),
+          ...(legacy.processUserInput && { processUserInput: legacy.processUserInput })
+        };
+        
+        console.log(`Registering legacy plugin: ${plugin.name} (${plugin.id})`);
+        store.registerPlugin(plugin);
+      } 
+      else {
+        console.warn(`Invalid plugin module found at ${path}`);
+      }
+    });
 
-  console.log(`Loaded ${Object.keys(store.plugins).length} plugins`);
+    console.log(`Successfully loaded ${Object.keys(store.plugins).length} plugins`);
+  } catch (error) {
+    console.error("Error loading plugins:", error);
+  }
+};
+
+/**
+ * Check if plugins are loaded
+ */
+export const arePluginsLoaded = (): boolean => {
+  const store = usePluginStore.getState();
+  return Object.keys(store.plugins).length > 0;
+};
+
+/**
+ * Ensure plugins are loaded
+ */
+export const ensurePluginsLoaded = async (): Promise<void> => {
+  if (!arePluginsLoaded()) {
+    await loadPlugins();
+  }
 };

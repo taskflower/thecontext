@@ -1,10 +1,17 @@
-// src/modules/flowPlayer/flowUtils.ts
-import { FlowNode, FlowEdge } from '../flow/types';
+// src/modules/flowPlayer/utils/flowUtils.ts
+import { FlowNode, FlowEdge } from '../types';
 
+/**
+ * Calculates the sequential path through a flow based on nodes and edges
+ * 
+ * @param nodes - Array of flow nodes
+ * @param edges - Array of edges connecting the nodes
+ * @returns Ordered array of nodes representing the flow path
+ */
 export const calculateFlowPath = (nodes: FlowNode[] = [], edges: FlowEdge[] = []): FlowNode[] => {
   if (nodes.length === 0) return [];
   
-  // Find the start node (without incoming edges)
+  // Find the start node (node without incoming edges)
   const targetNodes = new Set(edges.map(edge => edge.target));
   let startNodeId = nodes.find(node => !targetNodes.has(node.id))?.id;
   
@@ -15,7 +22,7 @@ export const calculateFlowPath = (nodes: FlowNode[] = [], edges: FlowEdge[] = []
   
   if (!startNodeId) return [];
   
-  // Create adjacency map for edges
+  // Create adjacency map for efficient traversal
   const adjacencyMap = new Map<string, string[]>();
   
   edges.forEach(edge => {
@@ -25,7 +32,7 @@ export const calculateFlowPath = (nodes: FlowNode[] = [], edges: FlowEdge[] = []
     adjacencyMap.get(edge.source)?.push(edge.target);
   });
   
-  // Traverse graph and collect path
+  // Traverse graph using depth-first search and collect path
   const path: FlowNode[] = [];
   const visited = new Set<string>();
   

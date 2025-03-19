@@ -1,26 +1,30 @@
 // src/modules/flowPlayer/components/Controls/FlowControls.tsx
-import React from "react";
-import { useFlowPlayer } from "../../hooks/useFlowPlayer";
+import React, { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, RotateCcw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useFlowPlayer } from "../../context/FlowContext";
 
-export const FlowControls: React.FC = () => {
+export const FlowControls: React.FC = React.memo(() => {
   const { 
     currentNode, 
     currentNodeIndex, 
     flowPath,
     nextNode, 
     previousNode,
-    resetFlow
+    resetFlow,
+    isProcessing
   } = useFlowPlayer();
   
-  // Check navigation state
-  const isFirst = currentNodeIndex === 0;
-  const isLast = currentNodeIndex === flowPath.length - 1;
+  // Compute navigation state once per render
+  const { isFirst, isLast, nodeLabel } = useMemo(() => ({
+    isFirst: currentNodeIndex === 0,
+    isLast: currentNodeIndex === flowPath.length - 1,
+    nodeLabel: currentNode?.label || "Unknown"
+  }), [currentNode, currentNodeIndex, flowPath.length]);
   
   return (
-    <Card className="mb-6">
+    <Card className="mb-6 flow-controls">
       <CardContent className="pt-4">
         <div className="flex items-center justify-between">
           <div className="space-x-2">
@@ -28,7 +32,7 @@ export const FlowControls: React.FC = () => {
               variant="outline"
               size="sm"
               onClick={resetFlow}
-              disabled={!currentNode}
+              disabled={!currentNode || isProcessing}
             >
               <RotateCcw className="h-4 w-4 mr-1" />
               Reset
@@ -38,7 +42,11 @@ export const FlowControls: React.FC = () => {
           <div className="flex items-center gap-4">
             <div className="text-sm text-muted-foreground">
               {currentNode ? (
-                <>Node {currentNodeIndex + 1} of {flowPath.length}</>
+                <>
+                  <span className="font-medium">{nodeLabel}</span>
+                  <span className="mx-2">•</span>
+                  Node {currentNodeIndex + 1} of {flowPath.length}
+                </>
               ) : (
                 <>Select a flow to start</>
               )}
@@ -49,7 +57,8 @@ export const FlowControls: React.FC = () => {
                 variant="outline"
                 size="icon"
                 onClick={previousNode}
-                disabled={!currentNode || isFirst}
+                disabled={!currentNode || isFirst || isProcessing}
+                aria-label="Previous node"
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
@@ -57,8 +66,9 @@ export const FlowControls: React.FC = () => {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={nextNode}
-                disabled={!currentNode || isLast}
+                onClick={() => nextNode()}
+                disabled={!currentNode || isLast || isProcessing}
+                aria-label="Next node"
               >
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -68,4 +78,7 @@ export const FlowControls: React.FC = () => {
       </CardContent>
     </Card>
   );
-};
+});
+
+// Set display name for better debugging
+FlowControls.displayName = 'FlowControls';

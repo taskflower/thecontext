@@ -1,21 +1,18 @@
 // src/modules/plugin/index.ts
-// Centralny punkt eksportu dla systemu pluginów
+// Central export point for the plugin system
 
-// Typy
+// Types and interfaces
 export * from './types';
+export * from './componentRegistry';
 
-// Store i hook 
+// Store and hooks
 export { usePluginStore } from './store';
-
-// Loader
-export { loadPlugins } from './loader';
-
-// Procesor
 export { useMessageProcessor } from './processor';
 
-// Komponenty
-export { AssistantMessageProcessor } from './components/AssistantMessageProcessor';
-export { UserMessageProcessor } from './components/UserMessageProcessor';
+// Plugin management
+export { loadPlugins, ensurePluginsLoaded, arePluginsLoaded } from './loader';
+
+// Components
 export { PluginsPanel } from './components/PluginsPanel';
 export { PluginSelector } from './components/PluginSelector';
 export { PluginOptions } from './components/PluginOptions';

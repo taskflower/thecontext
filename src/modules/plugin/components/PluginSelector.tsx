@@ -1,25 +1,39 @@
 // src/modules/plugin/components/PluginSelector.tsx
-import React from 'react';
+import React, { useMemo } from 'react';
 import { usePluginStore } from '../store';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { ensurePluginsLoaded } from '../loader';
 
 interface PluginSelectorProps {
   value: string | undefined;
   onChange: (value: string) => void;
+  disabled?: boolean;
+  placeholder?: string;
 }
 
-export const PluginSelector: React.FC<PluginSelectorProps> = ({ 
+export const PluginSelector: React.FC<PluginSelectorProps> = React.memo(({ 
   value, 
-  onChange 
+  onChange,
+  disabled = false,
+  placeholder = "Select plugin" 
 }) => {
   const { plugins, activePlugins } = usePluginStore();
-  const pluginsList = Object.values(plugins);
   
-  // Konwersja undefined/null/pusty string na "_none"
+  // Ensure plugins are loaded
+  React.useEffect(() => {
+    ensurePluginsLoaded();
+  }, []);
+  
+  // Memoize sorted plugins list
+  const pluginsList = useMemo(() => {
+    return Object.values(plugins).sort((a, b) => a.name.localeCompare(b.name));
+  }, [plugins]);
+  
+  // Convert undefined/null/empty string to "_none"
   const safeValue = value || "_none";
   
-  // Konwersja "_none" z powrotem na undefined przy zmianie
+  // Convert "_none" back to empty string on change
   const handleChange = (newValue: string) => {
     onChange(newValue === "_none" ? "" : newValue);
   };
@@ -28,24 +42,26 @@ export const PluginSelector: React.FC<PluginSelectorProps> = ({
     <Select 
       value={safeValue}
       onValueChange={handleChange}
+      disabled={disabled}
     >
       <SelectTrigger className="w-full">
-        <SelectValue placeholder="Wybierz plugin" />
+        <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
-        {/* Używamy "_none" zamiast pustego stringa */}
-        <SelectItem value="_none">Brak pluginu</SelectItem>
+        <SelectItem value="_none">No plugin</SelectItem>
         
         {pluginsList.map(plugin => {
           const isActive = activePlugins.includes(plugin.id);
           
           return (
             <SelectItem key={plugin.id} value={plugin.id}>
-              <div className="flex items-center justify-between w-full">
+              <div className="flex items-center justify-between w-full pr-4">
                 <span>{plugin.name}</span>
-                <Badge variant={isActive ? "default" : "outline"} className="ml-2">
-                  {isActive ? "Aktywny" : "Nieaktywny"}
-                </Badge>
+                {isActive && (
+                  <Badge variant="default" className="ml-2 text-xs">
+                    Active
+                  </Badge>
+                )}
               </div>
             </SelectItem>
           );
@@ -53,4 +69,6 @@ export const PluginSelector: React.FC<PluginSelectorProps> = ({
       </SelectContent>
     </Select>
   );
-};
+});
+
+PluginSelector.displayName = 'PluginSelector';

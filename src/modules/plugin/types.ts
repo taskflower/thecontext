@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/plugin/types.ts
+import React from 'react';
+import { ComponentType } from '.';
+
+
 export interface PluginOption {
   id: string;
   label: string;
@@ -8,12 +12,7 @@ export interface PluginOption {
   options?: Array<{ value: string; label: string }>;
 }
 
-// Eksportowany interfejs dla opcji pluginu - dodany
-export interface PluginOptions {
-  [key: string]: Plugin;
-}
-
-// Interfejs dla funkcji obsługi wiadomości użytkownika
+// Interface for user input processing
 export interface UserInputProcessorContext {
   currentValue: string;
   options: Record<string, any>;
@@ -22,16 +21,21 @@ export interface UserInputProcessorContext {
 }
 
 export interface Plugin {
+  // Plugin metadata
   id: string;
   name: string;
   description: string;
   version: string;
-  options?: PluginOption[]; // Uproszczona schema opcji
-  config?: any;
   
-  // Kluczowa funkcjonalność
+  // Configuration options
+  options?: PluginOption[];
+  
+  // Component overrides for UI customization
+  overrideComponents?: {
+    [key in ComponentType]?: React.ComponentType<any>;
+  };
+  
+  // Message processing functions
   process: (text: string, options?: Record<string, any>) => Promise<string>;
-  
-  // Opcjonalna funkcja do obsługi wiadomości użytkownika
   processUserInput?: (context: UserInputProcessorContext) => Promise<string | void>;
 }
