@@ -7,7 +7,7 @@ import { UserMessageProcessor } from "./MessageProcessors/UserMessageProcessor";
 
 export const FlowPlayer: React.FC = () => {
   return (
-    <div className="h-full flex flex-col ">
+    <div className="h-full flex flex-col gap-1">
       <FlowControls />
 
       <div className="flex-grow overflow-hidden">
