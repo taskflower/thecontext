@@ -2,11 +2,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, User } from "lucide-react";
 import { useFlowPlayer } from "@/modules/flowPlayer";
 import { useWorkspaceContext } from "../../modules/context/hooks/useContext";
 import { useAppStore } from "../../modules/store";
 import { memo } from "react";
+import { authService } from "../../services/authService";
+import { useAuthState } from "../../hooks/useAuthState";
 
 export const ApiServiceProcessor: React.FC = memo(() => {
   // Get state and methods from context
@@ -19,6 +21,7 @@ export const ApiServiceProcessor: React.FC = memo(() => {
   
   const { processTemplate } = useWorkspaceContext();
   const { addToConversation } = useAppStore();
+  const { user, backendUser } = useAuthState();
   
   // State management
   const processedNodeRef = useRef<string | null>(null);
@@ -71,7 +74,7 @@ export const ApiServiceProcessor: React.FC = memo(() => {
   
   // Get plugin settings
   const buttonText = options.button_text || "Send API Request";
-  const userIdValue = options.user_id || "user123";
+  const userIdValue = user?.uid || options.user_id || "user123";
   const messageContent = options.message_content || "Hello!";
   const buttonColor = options.button_color || "blue";
   
@@ -99,6 +102,9 @@ export const ApiServiceProcessor: React.FC = memo(() => {
     setApiResponse(null);
     
     try {
+      // Get authentication token
+      const authToken = user ? await authService.getCurrentUserToken() : null;
+      
       // Get API URL from environment variable
       const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
       const apiUrl = `${apiBaseUrl}/api/v1/services/chat/completion`;
@@ -107,6 +113,7 @@ export const ApiServiceProcessor: React.FC = memo(() => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
         },
         body: JSON.stringify({
           messages: [
@@ -158,6 +165,25 @@ export const ApiServiceProcessor: React.FC = memo(() => {
             API Service
           </span>
         </div>
+        
+        {/* User information */}
+        {user && (
+          <div className="bg-gray-50 dark:bg-gray-900/30 p-3 rounded-md border border-gray-200 dark:border-gray-800 mb-3">
+            <div className="flex items-center">
+              <User className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
+              <span className="text-sm font-medium">Logged in as:</span>
+            </div>
+            <div className="mt-1 text-xs">
+              <div><strong>Email:</strong> {user.email}</div>
+              <div><strong>User ID:</strong> {user.uid}</div>
+              {backendUser && (
+                <div className="mt-1">
+                  <div><strong>Available Tokens:</strong> {backendUser.availableTokens}</div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         
         {/* Display message */}
         <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-md border border-blue-200 dark:border-blue-900/50 min-h-[100px] mb-3">
