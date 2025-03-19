@@ -7,7 +7,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-
 } from "@/components/ui/dialog";
 import { useAppStore } from "@/modules/store";
 import {
@@ -43,10 +42,8 @@ const WorkspacePage: React.FC = () => {
     items: workspaces,
     selectWorkspace,
     getCurrentScenario,
-
     checkScenarioFilterMatch,
     getScenariosWithFilterStatus,
-
   } = useAppStore();
   const navigate = useNavigate();
 
@@ -75,6 +72,15 @@ const WorkspacePage: React.FC = () => {
   const scenariosWithStatus = React.useMemo(() => {
     return getScenariosWithFilterStatus();
   }, [getScenariosWithFilterStatus, useAppStore((state) => state.stateVersion)]);
+
+  // Get only scenarios that have defined filters
+  const filteredScenarios = React.useMemo(() => {
+    return scenariosWithStatus.filter(scenario => {
+      // Check if scenario has defined filters
+      // We assume a scenario has filters if it has hasFilters property or similar
+      return scenario.hasFilters === true || (scenario.filters && scenario.filters.length > 0);
+    });
+  }, [scenariosWithStatus]);
 
   // Check if scenario active (matches filters)
   const isScenarioActive = (scenarioId: string) => {
@@ -149,8 +155,8 @@ const WorkspacePage: React.FC = () => {
         <h2 className="text-2xl font-semibold mb-6">Available Scenarios</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-          {/* Display all scenarios */}
-          {scenariosWithStatus.map((scenario) => {
+          {/* Display only scenarios with defined filters */}
+          {filteredScenarios.map((scenario) => {
             const isActive = scenario.matchesFilter;
             const isCurrentScenario = currentScenario?.id === scenario.id;
             
