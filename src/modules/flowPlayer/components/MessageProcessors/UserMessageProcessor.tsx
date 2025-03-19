@@ -87,7 +87,7 @@ export const UserMessageProcessor: React.FC = React.memo(() => {
               onChange={(e) => updateUserMessage(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type your message..."
-              className="min-h-20 pr-12 resize-none"
+              className="min-h-20 pr-12 resize-none border-2"
               disabled={isProcessing}
             />
             

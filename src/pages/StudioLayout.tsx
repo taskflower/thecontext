@@ -86,7 +86,7 @@ const StudioLayout: React.FC = () => {
   const handleGoogleLogin = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-      navigate("/");
+      navigate("/studio");
     } catch (error) {
       console.error("Login error:", error);
     }
@@ -240,16 +240,19 @@ const StudioLayout: React.FC = () => {
                     </TabsContent>
                     <TabsContent value="settings" className="m-0 p-3 h-full">
                       <div className="text-sm text-muted-foreground">
-                       
-                        <Button variant="outline" className="w-full" onClick={() => setShowExportImport(true)}>
-  Data Management
-</Button>
-{showExportImport && (
-  <ExportImport 
-    open={showExportImport}
-    onClose={() => setShowExportImport(false)}
-  />
-)}
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => setShowExportImport(true)}
+                        >
+                          Data Management
+                        </Button>
+                        {showExportImport && (
+                          <ExportImport
+                            open={showExportImport}
+                            onClose={() => setShowExportImport(false)}
+                          />
+                        )}
                       </div>
                     </TabsContent>
                   </div>
