@@ -33,9 +33,10 @@ import { NodesList } from "../modules/nodes";
 import { EdgesList } from "../modules/edges";
 import { ContextsList } from "../modules/context";
 import { ConversationPanel } from "../modules/conversation/ConversationPanel";
-import { PluginsPanel } from "../modules/plugin/components/PluginsPanel";
+
 
 import { useAppStore } from "../modules/store";
+import { PluginsPanel } from "@/modules/plugin";
 
 const StudioLayout: React.FC = () => {
   const [showLeftPanel, setShowLeftPanel] = useState(true);
