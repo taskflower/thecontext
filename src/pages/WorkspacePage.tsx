@@ -1,24 +1,49 @@
 // src/pages/WorkspacePage.tsx
 import React, { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { FlowPlayer } from "@/modules/flowPlayer";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useAppStore } from "@/modules/store";
-import { Play, CheckCircle, Clock, Book, ArrowRight, Github, Twitter } from "lucide-react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Play,
+  CheckCircle,
+  Clock,
+  Book,
+  ArrowRight,
+  Github,
+  Twitter,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
 const WorkspacePage: React.FC = () => {
   const [flowPlayerOpen, setFlowPlayerOpen] = useState(false);
   const { slug } = useParams<{ slug: string }>();
-  const { items: workspaces, selectWorkspace, getCurrentScenario } = useAppStore();
-  
+  const {
+    items: workspaces,
+    selectWorkspace,
+    getCurrentScenario,
+  } = useAppStore();
+  const navigate = useNavigate();
+
   // Find workspace by slug and select it
   React.useEffect(() => {
     if (slug) {
-      const workspace = workspaces.find(w => w.slug === slug);
+      const workspace = workspaces.find((w) => w.slug === slug);
       if (workspace) {
         selectWorkspace(workspace.id);
       }
@@ -27,7 +52,7 @@ const WorkspacePage: React.FC = () => {
 
   // Get current workspace from slug
   const currentWorkspace = React.useMemo(() => {
-    return workspaces.find(w => w.slug === slug);
+    return workspaces.find((w) => w.slug === slug);
   }, [workspaces, slug]);
 
   // Get current scenario
@@ -44,18 +69,26 @@ const WorkspacePage: React.FC = () => {
         <div className="container mx-auto py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">{currentWorkspace?.title || "Workspace"}</h1>
+              <h1 className="text-3xl font-bold tracking-tight">
+                {currentWorkspace?.title || "Workspace"}
+              </h1>
               <p className="text-muted-foreground mt-1">
-                {currentScenario ? `Current scenario: ${currentScenario.name}` : "No scenario selected"}
+                {currentScenario
+                  ? `Current scenario: ${currentScenario.name}`
+                  : "No scenario selected"}
               </p>
             </div>
             <div className="flex items-center gap-3">
               {/* Workspace Navigation */}
-              <div className="flex bg-muted rounded-md overflow-hidden mr-2">
+              <div className="flex bg-muted rounded-md overflow-hidden mr-2   ">
                 {workspaces.map((workspace) => (
                   <Button
                     key={workspace.id}
-                    variant={currentWorkspace?.id === workspace.id ? "secondary" : "ghost"}
+                    variant={
+                      currentWorkspace?.id === workspace.id
+                        ? "secondary"
+                        : "ghost"
+                    }
                     size="sm"
                     className="rounded-none h-9 px-3"
                     onClick={() => {
@@ -67,7 +100,12 @@ const WorkspacePage: React.FC = () => {
                   </Button>
                 ))}
               </div>
-              <Button variant="secondary" className="gap-2" onClick={openFlowPlayer} disabled={!currentScenario}>
+              <Button
+                variant="secondary"
+                className="gap-2"
+                onClick={openFlowPlayer}
+                disabled={!currentScenario}
+              >
                 <Play className="h-4 w-4" />
                 Run Flow
               </Button>
@@ -79,14 +117,16 @@ const WorkspacePage: React.FC = () => {
       {/* Main content */}
       <main className="flex-1 container mx-auto py-8">
         <h2 className="text-2xl font-semibold mb-6">Available Scenarios</h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Current scenario card */}
           {currentScenario && (
             <Card className="overflow-hidden hover:shadow-md transition-shadow">
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
-                  <CardTitle className="text-xl">{currentScenario.name}</CardTitle>
+                  <CardTitle className="text-xl">
+                    {currentScenario.name}
+                  </CardTitle>
                   <Badge variant="secondary" className="text-xs">
                     {currentScenario.children.length} nodes
                   </Badge>
@@ -103,7 +143,12 @@ const WorkspacePage: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="h-3.5 w-3.5" />
-                    <span>Updated {new Date(currentScenario.updatedAt || Date.now()).toLocaleDateString()}</span>
+                    <span>
+                      Updated{" "}
+                      {new Date(
+                        currentScenario.updatedAt || Date.now()
+                      ).toLocaleDateString()}
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -115,7 +160,7 @@ const WorkspacePage: React.FC = () => {
               </CardFooter>
             </Card>
           )}
-          
+
           {/* Mock cards for example */}
           <Card className="overflow-hidden bg-muted/40 hover:shadow-md transition-shadow">
             <CardHeader className="pb-3">
@@ -139,7 +184,7 @@ const WorkspacePage: React.FC = () => {
               </Button>
             </CardFooter>
           </Card>
-          
+
           <Card className="overflow-hidden bg-muted/40 hover:shadow-md transition-shadow">
             <CardHeader className="pb-3">
               <CardTitle className="text-xl">Product Onboarding</CardTitle>
@@ -175,10 +220,18 @@ const WorkspacePage: React.FC = () => {
               </p>
             </div>
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full"
+              >
                 <Github className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full"
+              >
                 <Twitter className="h-4 w-4" />
               </Button>
               <Separator orientation="vertical" className="h-6" />
@@ -187,6 +240,14 @@ const WorkspacePage: React.FC = () => {
               </Button>
               <Button variant="ghost" size="sm" className="text-xs">
                 Privacy
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs"
+                onClick={() => navigate("/studio")}
+              >
+                Studio
               </Button>
             </div>
           </div>
@@ -201,7 +262,7 @@ const WorkspacePage: React.FC = () => {
               {currentScenario?.name || "Flow Player"}
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="h-[calc(100%-4rem)] overflow-hidden p-0">
             <FlowPlayer />
           </div>
