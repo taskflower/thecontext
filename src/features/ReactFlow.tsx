@@ -2,17 +2,14 @@
 import { useState, useCallback, useEffect } from 'react';
 import ReactFlow, { 
   MiniMap, Controls, Background, Connection,
-  useNodesState, useEdgesState, NodeDragHandler, NodeMouseHandler
+  useNodesState, useEdgesState
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useAppStore } from './store';
 import { StepModal } from './Components';
-// import { TYPES } from './types';
 
 // Flow Graph Component
 const FlowGraph = () => {
-  const items = useAppStore(state => state.items);
-  const selected = useAppStore(state => state.selected);
   const getActiveScenarioData = useAppStore(state => state.getActiveScenarioData);
   const addEdge = useAppStore(state => state.addEdge);
   const updateNodePosition = useAppStore(state => state.updateNodePosition);
@@ -33,25 +30,27 @@ const FlowGraph = () => {
     const { nodes: newNodes, edges: newEdges } = getActiveScenarioData();
     setNodes(newNodes);
     setEdges(newEdges);
-  }, [getActiveScenarioData, selected.workspace, selected.scenario, selected.node, items, setNodes, setEdges, stateVersion]);
+  }, [getActiveScenarioData, setNodes, setEdges, stateVersion]);
   
   const onConnect = useCallback((params: Connection) => {
-    addEdge({
-      source: params.source || '',
-      target: params.target || '',
-      type: 'step'
-    });
+    if (params.source && params.target) {
+      addEdge({
+        source: params.source,
+        target: params.target,
+        type: 'step'
+      });
+    }
   }, [addEdge]);
   
-  const onNodeDragStop: NodeDragHandler = useCallback((_, node) => {
+  const onNodeDragStop = useCallback((_, node) => {
     updateNodePosition(node.id, node.position);
   }, [updateNodePosition]);
 
-  const onNodeClick: NodeMouseHandler = useCallback((_, node) => {
+  const onNodeClick = useCallback((_, node) => {
     selectNode(node.id);
   }, [selectNode]);
   
-  // Find start node and calculate flow path
+  // Calculate flow path for step-by-step playback
   const calculateFlowPath = useCallback(() => {
     const scenario = getCurrentScenario();
     if (!scenario) return [];
@@ -111,7 +110,7 @@ const FlowGraph = () => {
     return path;
   }, [getCurrentScenario]);
   
-  // Flow player controls
+  // Start flow playback
   const handlePlay = useCallback(() => {
     const path = calculateFlowPath();
     if (path.length > 0) {

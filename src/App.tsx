@@ -2,6 +2,7 @@
 
 import { EdgesList, NodesList, ScenariosList, WorkspacesList } from './features/Components';
 import FlowGraph from './features/ReactFlow';
+import PluginsApp from './featuresPlugins/PluginsApp';
 
 
 
@@ -18,6 +19,7 @@ const App = () => (
       </div>
       <div className="md:col-span-3">
         <FlowGraph />
+        <PluginsApp/>
       </div>
     </div>
   </div>

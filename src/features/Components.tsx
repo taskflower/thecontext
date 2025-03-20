@@ -239,51 +239,21 @@ export function useDialogState<T extends Record<string, any>>(
   return { isOpen, formData, openDialog, handleChange, setIsOpen };
 }
 
-// Generyczny komponent do obsługi paneli listy
-interface ListPanelConfig<T extends Record<string, any>> {
-  title: string;
-  emptyFormData: T;
-  dialogTitle: string;
-  fields: Array<{
-    name: string;
-    placeholder: string;
-    type?: string;
-    options?: Array<{ value: string; label: string }>;
-  }>;
-  getItems: () => Array<any>;
-  getSelected: () => string;
-  handleSelect: (id: string) => void;
-  handleDelete: (id: string) => void;
-  handleAdd: (data: T) => void;
-  renderItem: (item: any) => React.ReactNode;
-}
-
-export function GenericListPanel<T extends Record<string, any>>({
-  title,
-  emptyFormData,
-  dialogTitle,
-  fields,
-  getItems,
-  getSelected,
-  handleSelect,
-  handleDelete,
-  handleAdd,
-  renderItem,
-}: ListPanelConfig<T>) {
-  const { isOpen, formData, openDialog, handleChange, setIsOpen } =
-    useDialogState<T>(emptyFormData);
+// Optimized workspace list
+export const WorkspacesList: React.FC = () => {
+  const items = useAppStore((state) => state.items);
+  const selected = useAppStore((state) => state.selected.workspace);
+  const selectWorkspace = useAppStore((state) => state.selectWorkspace);
+  const deleteWorkspace = useAppStore((state) => state.deleteWorkspace);
+  const addWorkspace = useAppStore((state) => state.addWorkspace);
+  /* refresh */
+  useAppStore((state) => state.stateVersion);
   
-  const items = getItems();
-  const selected = getSelected();
-
+  const { isOpen, formData, openDialog, handleChange, setIsOpen } = useDialogState({ title: "" });
+  
   const onAdd = () => {
-    // Sprawdź, czy wszystkie wymagane pola są wypełnione
-    const requiredFieldsFilled = Object.entries(formData).every(
-      ([key, value]) => !fields.find(f => f.name === key)?.type?.includes('optional') ? !!value : true
-    );
-    
-    if (requiredFieldsFilled) {
-      handleAdd(formData);
+    if (formData.title) {
+      addWorkspace(formData);
       setIsOpen(false);
     }
   };
@@ -291,194 +261,251 @@ export function GenericListPanel<T extends Record<string, any>>({
   return (
     <>
       <CardPanel
-        title={title}
+        title="Workspaces"
         onAddClick={() => openDialog()}
       >
         <ItemList
           items={items}
           selected={selected}
-          onClick={handleSelect}
-          onDelete={handleDelete}
-          renderItem={renderItem}
+          onClick={selectWorkspace}
+          onDelete={deleteWorkspace}
+          renderItem={(item) => <div className="font-medium">{item.title}</div>}
         />
       </CardPanel>
 
       {isOpen && (
         <Dialog
-          title={dialogTitle}
+          title="Nowy Workspace"
           onClose={() => setIsOpen(false)}
           onAdd={onAdd}
-          fields={fields}
+          fields={[{ name: "title", placeholder: "Workspace name" }]}
           formData={formData}
           onChange={handleChange}
         />
       )}
     </>
   );
-}
-
-// Business Components using Generic List Panel
-export const WorkspacesList: React.FC = () => {
-  const items = useAppStore((state) => state.items);
-  const selected = useAppStore((state) => state.selected);
-  const selectWorkspace = useAppStore((state) => state.selectWorkspace);
-  const deleteWorkspace = useAppStore((state) => state.deleteWorkspace);
-  const addWorkspace = useAppStore((state) => state.addWorkspace);
-  const stateVersion = useAppStore((state) => state.stateVersion);
-
-  return (
-    <GenericListPanel
-      title="Workspaces"
-      emptyFormData={{ title: "" }}
-      dialogTitle="Nowy Workspace"
-      fields={[{ name: "title", placeholder: "Workspace name" }]}
-      getItems={() => items}
-      getSelected={() => selected.workspace}
-      handleSelect={selectWorkspace}
-      handleDelete={deleteWorkspace}
-      handleAdd={addWorkspace}
-      renderItem={(item) => <div className="font-medium">{item.title}</div>}
-    />
-  );
 };
 
+// Optimized scenarios list
 export const ScenariosList: React.FC = () => {
-  const items = useAppStore((state) => state.items);
-  const selected = useAppStore((state) => state.selected);
+  const workspace = useAppStore((state) => 
+    state.items.find(w => w.id === state.selected.workspace)
+  );
+  const selected = useAppStore((state) => state.selected.scenario);
   const selectScenario = useAppStore((state) => state.selectScenario);
   const deleteScenario = useAppStore((state) => state.deleteScenario);
   const addScenario = useAppStore((state) => state.addScenario);
-  const stateVersion = useAppStore((state) => state.stateVersion);
-
-  const workspace = items.find((w) => w.id === selected.workspace);
+  /* refresh */
+  useAppStore((state) => state.stateVersion);
+  useAppStore((state) => state.selected.workspace);
+  
+  const { isOpen, formData, openDialog, handleChange, setIsOpen } = useDialogState({ 
+    name: "", 
+    description: "" 
+  });
+  
   const scenarios = workspace?.children || [];
+  
+  const onAdd = () => {
+    if (formData.name) {
+      addScenario(formData);
+      setIsOpen(false);
+    }
+  };
 
   return (
-    <GenericListPanel
-      title="Scenarios"
-      emptyFormData={{ name: "", description: "" }}
-      dialogTitle="Nowy Scenario"
-      fields={[
-        { name: "name", placeholder: "Scenario name" },
-        { name: "description", placeholder: "Description" },
-      ]}
-      getItems={() => scenarios}
-      getSelected={() => selected.scenario}
-      handleSelect={selectScenario}
-      handleDelete={deleteScenario}
-      handleAdd={addScenario}
-      renderItem={(item) => (
-        <>
-          <div className="font-medium">{item.name}</div>
-          {item.description && (
-            <div className="text-xs opacity-70 truncate">
-              {item.description}
-            </div>
+    <>
+      <CardPanel
+        title="Scenarios"
+        onAddClick={() => openDialog()}
+      >
+        <ItemList
+          items={scenarios}
+          selected={selected}
+          onClick={selectScenario}
+          onDelete={deleteScenario}
+          renderItem={(item) => (
+            <>
+              <div className="font-medium">{item.name}</div>
+              {item.description && (
+                <div className="text-xs opacity-70 truncate">
+                  {item.description}
+                </div>
+              )}
+            </>
           )}
-        </>
+        />
+      </CardPanel>
+
+      {isOpen && (
+        <Dialog
+          title="Nowy Scenario"
+          onClose={() => setIsOpen(false)}
+          onAdd={onAdd}
+          fields={[
+            { name: "name", placeholder: "Scenario name" },
+            { name: "description", placeholder: "Description" },
+          ]}
+          formData={formData}
+          onChange={handleChange}
+        />
       )}
-    />
+    </>
   );
 };
 
+// Optimized nodes list
 export const NodesList: React.FC = () => {
   const getCurrentScenario = useAppStore((state) => state.getCurrentScenario);
-  const selected = useAppStore((state) => state.selected);
+  const selected = useAppStore((state) => state.selected.node);
   const selectNode = useAppStore((state) => state.selectNode);
   const deleteNode = useAppStore((state) => state.deleteNode);
   const addNode = useAppStore((state) => state.addNode);
-  const stateVersion = useAppStore((state) => state.stateVersion);
-
+  /* refresh */
+  useAppStore((state) => state.stateVersion);
+  useAppStore((state) => state.selected.scenario);
+  
+  const { isOpen, formData, openDialog, handleChange, setIsOpen } = useDialogState({ 
+    label: "", 
+    value: "" 
+  });
+  
   const scenario = getCurrentScenario();
   const nodes = scenario?.children || [];
+  
+  const onAdd = () => {
+    if (formData.label && formData.value) {
+      addNode(formData);
+      setIsOpen(false);
+    }
+  };
 
   return (
-    <GenericListPanel
-      title="Nodes"
-      emptyFormData={{ label: "", value: "" }}
-      dialogTitle="Nowy Node"
-      fields={[
-        { name: "label", placeholder: "Node name" },
-        { name: "value", placeholder: "Value", type: "number" },
-      ]}
-      getItems={() => nodes}
-      getSelected={() => selected.node}
-      handleSelect={selectNode}
-      handleDelete={deleteNode}
-      handleAdd={addNode}
-      renderItem={(item) => (
-        <div className="flex items-center">
-          <div className="font-medium">{item.label}</div>
-          <span className="ml-auto inline-flex items-center px-1 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-700 text-[10px] h-4">
-            {item.value}
-          </span>
-        </div>
+    <>
+      <CardPanel
+        title="Nodes"
+        onAddClick={() => openDialog()}
+      >
+        <ItemList
+          items={nodes}
+          selected={selected}
+          onClick={selectNode}
+          onDelete={deleteNode}
+          renderItem={(item) => (
+            <div className="flex items-center">
+              <div className="font-medium">{item.label}</div>
+              <span className="ml-auto inline-flex items-center px-1 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-700 text-[10px] h-4">
+                {item.value}
+              </span>
+            </div>
+          )}
+        />
+      </CardPanel>
+
+      {isOpen && (
+        <Dialog
+          title="Nowy Node"
+          onClose={() => setIsOpen(false)}
+          onAdd={onAdd}
+          fields={[
+            { name: "label", placeholder: "Node name" },
+            { name: "value", placeholder: "Value", type: "number" },
+          ]}
+          formData={formData}
+          onChange={handleChange}
+        />
       )}
-    />
+    </>
   );
 };
 
+// Optimized edges list
 export const EdgesList: React.FC = () => {
   const getCurrentScenario = useAppStore((state) => state.getCurrentScenario);
   const deleteEdge = useAppStore((state) => state.deleteEdge);
   const addEdge = useAppStore((state) => state.addEdge);
-  const stateVersion = useAppStore((state) => state.stateVersion);
-
+  /* refresh */
+  useAppStore((state) => state.stateVersion);
+  useAppStore((state) => state.selected.workspace);
+  useAppStore((state) => state.selected.scenario);
+  useAppStore((state) => state.selected.node);
+  
   const scenario = getCurrentScenario();
   const edges = scenario?.edges || [];
   const nodes = scenario?.children || [];
-
+  
+  const { isOpen, formData, openDialog, handleChange, setIsOpen } = useDialogState({ 
+    source: nodes[0]?.id || "", 
+    target: nodes[1]?.id || "", 
+    label: "" 
+  });
+  
   const getNodeLabel = (nodeId: string): string => {
     const node = nodes.find((n) => n.id === nodeId);
     return node ? node.label : nodeId;
   };
+  
+  const onAdd = () => {
+    if (formData.source && formData.target) {
+      addEdge({
+        source: formData.source,
+        target: formData.target,
+        label: formData.label,
+        type: "step",
+      });
+      setIsOpen(false);
+    }
+  };
 
   return (
-    <GenericListPanel
-      title="Edges"
-      emptyFormData={{ 
-        source: nodes[0]?.id || "", 
-        target: nodes[1]?.id || "", 
-        label: "" 
-      }}
-      dialogTitle="New Edge"
-      fields={[
-        {
-          name: "source",
-          placeholder: "Source node",
-          type: "select",
-          options: nodes.map((n) => ({ value: n.id, label: n.label })),
-        },
-        {
-          name: "target",
-          placeholder: "Target node",
-          type: "select",
-          options: nodes.map((n) => ({ value: n.id, label: n.label })),
-        },
-        { name: "label", placeholder: "Edge label (optional)", type: "text-optional" },
-      ]}
-      getItems={() => edges}
-      getSelected={() => ""}
-      handleSelect={() => {}}
-      handleDelete={deleteEdge}
-      handleAdd={(data) => 
-        addEdge({
-          source: data.source,
-          target: data.target,
-          label: data.label,
-          type: "step",
-        })
-      }
-      renderItem={(item) => (
-        <div className="font-medium flex items-center">
-          {getNodeLabel(item.source)}
-          <Link className="h-3 w-3 mx-1" />
-          {getNodeLabel(item.target)}
-          {item.label && (
-            <span className="ml-1 text-gray-500">({item.label})</span>
+    <>
+      <CardPanel
+        title="Edges"
+        onAddClick={() => openDialog()}
+      >
+        <ItemList
+          items={edges}
+          selected={""}
+          onClick={() => {}}
+          onDelete={deleteEdge}
+          renderItem={(item) => (
+            <div className="font-medium flex items-center">
+              {getNodeLabel(item.source)}
+              <Link className="h-3 w-3 mx-1" />
+              {getNodeLabel(item.target)}
+              {item.label && (
+                <span className="ml-1 text-gray-500">({item.label})</span>
+              )}
+            </div>
           )}
-        </div>
+        />
+      </CardPanel>
+
+      {isOpen && (
+        <Dialog
+          title="New Edge"
+          onClose={() => setIsOpen(false)}
+          onAdd={onAdd}
+          fields={[
+            {
+              name: "source",
+              placeholder: "Source node",
+              type: "select",
+              options: nodes.map((n) => ({ value: n.id, label: n.label })),
+            },
+            {
+              name: "target",
+              placeholder: "Target node",
+              type: "select",
+              options: nodes.map((n) => ({ value: n.id, label: n.label })),
+            },
+            { name: "label", placeholder: "Edge label (optional)", type: "text-optional" },
+          ]}
+          formData={formData}
+          onChange={handleChange}
+        />
       )}
-    />
+    </>
   );
 };
