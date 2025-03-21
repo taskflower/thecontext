@@ -11,7 +11,7 @@ const App = () => {
   const [bottomPanelContent, setBottomPanelContent] = useState("");
 
   // Toggle panel handlers
-  const togglePanel = (panel, setter, state) => () => setter(!state);
+  const togglePanel = ( setter, state) => () => setter(!state);
   
   // Show bottom panel with specific content
   const showPanel = (content) => {
@@ -41,41 +41,41 @@ const App = () => {
 
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left panel - increased width from w-64 to w-80 */}
+        {/* Left panel */}
         {showLeftPanel && (
           <aside className="w-96 border-r bg-sidebar-background flex flex-col overflow-hidden">
-            <div className="flex border-b">
+            <div className="flex border-b bg-gray-50">
               <button 
-                className={`flex-1 py-2 ${activeTab === 'workspace' ? 'border-b-2 border-blue-500' : ''}`}
+                className={`flex-1 py-2 text-xs ${activeTab === 'workspace' ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'text-gray-700'}`}
                 onClick={() => setActiveTab('workspace')}
               >
-                <FolderOpen className="h-4 w-4 mx-auto" />
-                <span className="text-xs mt-1 block">Workspace</span>
+                <FolderOpen className="h-4 w-4 mx-auto mb-1" />
+                Workspace
               </button>
               <button 
-                className={`flex-1 py-2 ${activeTab === 'scenarios' ? 'border-b-2 border-blue-500' : ''}`}
+                className={`flex-1 py-2 text-xs ${activeTab === 'scenarios' ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'text-gray-700'}`}
                 onClick={() => setActiveTab('scenarios')}
               >
-                <GitBranch className="h-4 w-4 mx-auto" />
-                <span className="text-xs mt-1 block">Scenarios</span>
+                <GitBranch className="h-4 w-4 mx-auto mb-1" />
+                Scenarios
               </button>
               <button 
-                className={`flex-1 py-2 ${activeTab === 'nodes' ? 'border-b-2 border-blue-500' : ''}`}
+                className={`flex-1 py-2 text-xs ${activeTab === 'nodes' ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'text-gray-700'}`}
                 onClick={() => setActiveTab('nodes')}
               >
-                <Layers className="h-4 w-4 mx-auto" />
-                <span className="text-xs mt-1 block">Nodes</span>
+                <Layers className="h-4 w-4 mx-auto mb-1" />
+                Nodes
               </button>
               <button 
-                className={`flex-1 py-2 ${activeTab === 'edges' ? 'border-b-2 border-blue-500' : ''}`}
+                className={`flex-1 py-2 text-xs ${activeTab === 'edges' ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'text-gray-700'}`}
                 onClick={() => setActiveTab('edges')}
               >
-                <Code className="h-4 w-4 mx-auto" />
-                <span className="text-xs mt-1 block">Edges</span>
+                <Code className="h-4 w-4 mx-auto mb-1" />
+                Edges
               </button>
             </div>
             
-            <div className="flex-1 overflow-auto p-2">
+            <div className="flex-1 overflow-hidden">
               {activeTab === 'workspace' && <WorkspacesList />}
               {activeTab === 'scenarios' && <ScenariosList />}
               {activeTab === 'nodes' && <NodesList />}
@@ -86,12 +86,12 @@ const App = () => {
 
         {/* Main workspace */}
         <main className="flex-1 flex flex-col overflow-hidden">
-          {/* Flow graph area - flex-1 to take remaining space when bottom panel is visible */}
+          {/* Flow graph area */}
           <div className={`flex-1 overflow-hidden ${showBottomPanel ? 'h-1/3' : 'h-full'}`}>
             <FlowGraph />
           </div>
 
-          {/* Bottom panel - directly below flow graph, above toolbar */}
+          {/* Bottom panel */}
           {showBottomPanel && (
             <div className="border-t bg-card overflow-hidden flex flex-col h-2/3">
               <div className="flex items-center justify-between px-3 py-2 border-b">
@@ -115,7 +115,7 @@ const App = () => {
             </div>
           )}
           
-          {/* Bottom toolbar - always at the bottom */}
+          {/* Bottom toolbar */}
           <div className="border-t bg-card py-1 px-3 flex items-center">
             <div className="flex items-center gap-2">
               <button 

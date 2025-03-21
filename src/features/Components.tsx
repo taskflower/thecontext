@@ -4,7 +4,6 @@ import { PlusCircle, X, Trash2, Link } from "lucide-react";
 import { useAppStore } from "./store";
 import {
   SectionHeaderProps,
-  CardPanelProps,
   DialogProps,
   ItemListProps,
   StepModalProps,
@@ -15,8 +14,8 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
   title,
   onAddClick,
 }) => (
-  <div className="flex items-center justify-between mb-2">
-    <div className="text-sm font-medium">{title}</div>
+  <div className="flex items-center justify-between px-4 py-3 border-b">
+    <div className="font-medium">{title}</div>
     <button
       className="p-1 rounded-md hover:bg-gray-100 text-gray-700"
       onClick={onAddClick}
@@ -27,21 +26,8 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
 );
 
 export const EmptyState: React.FC = () => (
-  <div className="px-2 py-4 text-center text-xs text-gray-500">
-    Brak elementów
-  </div>
-);
-
-export const CardPanel: React.FC<CardPanelProps> = ({
-  title,
-  children,
-  onAddClick,
-}) => (
-  <div className="bg-white rounded-md shadow-sm mb-3">
-    <div className="p-3">
-      <SectionHeader title={title} onAddClick={onAddClick} />
-      {children}
-    </div>
+  <div className="py-4 text-center text-xs text-gray-500">
+    No items
   </div>
 );
 
@@ -96,9 +82,9 @@ export const Dialog: React.FC<DialogProps> = ({
           )}
           <button
             onClick={onAdd}
-            className="py-1 px-2 text-xs rounded-md font-medium bg-blue-500 text-white hover:bg-blue-600"
+            className="py-1.5 px-3 text-sm rounded-md font-medium bg-blue-500 text-white hover:bg-blue-600"
           >
-            Dodaj
+            Add
           </button>
         </div>
       </div>
@@ -169,7 +155,7 @@ export const StepModal: React.FC<StepModalProps> = ({
   </div>
 );
 
-// Item List Component
+// Item List Component with email-like styling
 export function ItemList<T extends { id: string }>({
   items,
   selected,
@@ -178,28 +164,29 @@ export function ItemList<T extends { id: string }>({
   renderItem,
 }: ItemListProps<T>) {
   return (
-    <div className="overflow-auto h-[180px]">
-      <div className="space-y-1">
+    <div className="overflow-auto">
+      <div className="divide-y">
         {items.map((item) => (
           <div
             key={item.id}
-            className={`flex items-center px-2 py-1.5 rounded-sm text-xs cursor-pointer ${
+            className={`flex items-center px-4 py-1.5 w-full cursor-pointer ${
               item.id === selected
-                ? "bg-blue-100 text-blue-600"
-                : "hover:bg-gray-100"
+                ? "bg-blue-50 border-l-2 border-l-blue-500"
+                : "hover:bg-gray-50"
             }`}
+            onClick={() => onClick(item.id)}
           >
-            <div className="flex-1 truncate" onClick={() => onClick(item.id)}>
+            <div className="flex-1 truncate">
               {renderItem(item)}
             </div>
             <button
-              className="p-1 opacity-70 hover:opacity-100 hover:text-red-500"
+              className="p-1 text-gray-400 hover:text-red-500"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(item.id);
               }}
             >
-              <Trash2 className="h-3 w-3" />
+              <Trash2 className="h-4 w-4" />
             </button>
           </div>
         ))}
@@ -259,23 +246,24 @@ export const WorkspacesList: React.FC = () => {
   };
 
   return (
-    <>
-      <CardPanel
+    <div className="flex flex-col h-full">
+      <SectionHeader
         title="Workspaces"
         onAddClick={() => openDialog()}
-      >
+      />
+      <div className="flex-1 overflow-auto">
         <ItemList
           items={items}
           selected={selected}
           onClick={selectWorkspace}
           onDelete={deleteWorkspace}
-          renderItem={(item) => <div className="font-medium">{item.title}</div>}
+          renderItem={(item) => <div className="text-sm">{item.title}</div>}
         />
-      </CardPanel>
+      </div>
 
       {isOpen && (
         <Dialog
-          title="Nowy Workspace"
+          title="New Workspace"
           onClose={() => setIsOpen(false)}
           onAdd={onAdd}
           fields={[{ name: "title", placeholder: "Workspace name" }]}
@@ -283,7 +271,7 @@ export const WorkspacesList: React.FC = () => {
           onChange={handleChange}
         />
       )}
-    </>
+    </div>
   );
 };
 
@@ -315,11 +303,12 @@ export const ScenariosList: React.FC = () => {
   };
 
   return (
-    <>
-      <CardPanel
+    <div className="flex flex-col h-full">
+      <SectionHeader
         title="Scenarios"
         onAddClick={() => openDialog()}
-      >
+      />
+      <div className="flex-1 overflow-auto">
         <ItemList
           items={scenarios}
           selected={selected}
@@ -327,20 +316,20 @@ export const ScenariosList: React.FC = () => {
           onDelete={deleteScenario}
           renderItem={(item) => (
             <>
-              <div className="font-medium">{item.name}</div>
+              <div className="text-sm">{item.name}</div>
               {item.description && (
-                <div className="text-xs opacity-70 truncate">
+                <div className="text-xs text-gray-500 truncate mt-0.5">
                   {item.description}
                 </div>
               )}
             </>
           )}
         />
-      </CardPanel>
+      </div>
 
       {isOpen && (
         <Dialog
-          title="Nowy Scenario"
+          title="New Scenario"
           onClose={() => setIsOpen(false)}
           onAdd={onAdd}
           fields={[
@@ -351,7 +340,7 @@ export const ScenariosList: React.FC = () => {
           onChange={handleChange}
         />
       )}
-    </>
+    </div>
   );
 };
 
@@ -382,11 +371,12 @@ export const NodesList: React.FC = () => {
   };
 
   return (
-    <>
-      <CardPanel
+    <div className="flex flex-col h-full">
+      <SectionHeader
         title="Nodes"
         onAddClick={() => openDialog()}
-      >
+      />
+      <div className="flex-1 overflow-auto">
         <ItemList
           items={nodes}
           selected={selected}
@@ -394,18 +384,18 @@ export const NodesList: React.FC = () => {
           onDelete={deleteNode}
           renderItem={(item) => (
             <div className="flex items-center">
-              <div className="font-medium">{item.label}</div>
-              <span className="ml-auto inline-flex items-center px-1 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-700 text-[10px] h-4">
+              <div className="text-sm">{item.label}</div>
+              <span className="ml-auto inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-700">
                 {item.value}
               </span>
             </div>
           )}
         />
-      </CardPanel>
+      </div>
 
       {isOpen && (
         <Dialog
-          title="Nowy Node"
+          title="New Node"
           onClose={() => setIsOpen(false)}
           onAdd={onAdd}
           fields={[
@@ -416,7 +406,7 @@ export const NodesList: React.FC = () => {
           onChange={handleChange}
         />
       )}
-    </>
+    </div>
   );
 };
 
@@ -459,18 +449,19 @@ export const EdgesList: React.FC = () => {
   };
 
   return (
-    <>
-      <CardPanel
+    <div className="flex flex-col h-full">
+      <SectionHeader
         title="Edges"
         onAddClick={() => openDialog()}
-      >
+      />
+      <div className="flex-1 overflow-auto">
         <ItemList
           items={edges}
           selected={""}
           onClick={() => {}}
           onDelete={deleteEdge}
           renderItem={(item) => (
-            <div className="font-medium flex items-center">
+            <div className="text-sm flex items-center">
               {getNodeLabel(item.source)}
               <Link className="h-3 w-3 mx-1" />
               {getNodeLabel(item.target)}
@@ -480,7 +471,7 @@ export const EdgesList: React.FC = () => {
             </div>
           )}
         />
-      </CardPanel>
+      </div>
 
       {isOpen && (
         <Dialog
@@ -506,6 +497,6 @@ export const EdgesList: React.FC = () => {
           onChange={handleChange}
         />
       )}
-    </>
+    </div>
   );
 };
