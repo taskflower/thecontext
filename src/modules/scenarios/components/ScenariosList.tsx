@@ -3,7 +3,6 @@ import { useAppStore } from "../../store";
 import { useDialogState } from "../../common/hooks";
 import { Dialog, ItemList, SectionHeader } from "@/modules/ui/components";
 
-
 export const ScenariosList: React.FC = () => {
   const workspace = useAppStore((state) => 
     state.items.find(w => w.id === state.selected.workspace)
@@ -29,7 +28,6 @@ export const ScenariosList: React.FC = () => {
       setIsOpen(false);
     }
   };
-
   return (
     <div className="flex flex-col h-full">
       <SectionHeader
@@ -46,7 +44,7 @@ export const ScenariosList: React.FC = () => {
             <>
               <div className="text-sm">{item.name}</div>
               {item.description && (
-                <div className="text-xs text-gray-500 truncate mt-0.5">
+                <div className="text-xs text-muted-foreground truncate mt-0.5">
                   {item.description}
                 </div>
               )}
@@ -54,7 +52,6 @@ export const ScenariosList: React.FC = () => {
           )}
         />
       </div>
-
       {isOpen && (
         <Dialog
           title="New Scenario"

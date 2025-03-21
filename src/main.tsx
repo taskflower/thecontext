@@ -1,18 +1,16 @@
-// main.tsx
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import { ReactFlowProvider } from 'reactflow';
+import { ThemeProvider } from './components/ThemeProvider';
 import 'reactflow/dist/style.css';
 import './index.css';
 
+// Other imports like CSS, etc.
 
-
-const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
-root.render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ReactFlowProvider>
+    <ThemeProvider>
       <App />
-    </ReactFlowProvider>
+    </ThemeProvider>
   </React.StrictMode>
 );

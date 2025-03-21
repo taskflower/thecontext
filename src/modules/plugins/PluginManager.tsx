@@ -73,23 +73,23 @@ const PluginManager: React.FC = () => {
   };
   
   return (
-    <div className="border border-gray-300 rounded-md p-4 mt-5">
-      <h2 className="mt-0 mb-4 text-xl font-semibold">Plugin Manager</h2>
+    <div className="border border-border rounded-md p-4 mt-5">
+      <h2 className="mt-0 mb-4 text-xl font-semibold text-foreground">Plugin Manager</h2>
       
       {plugins.length === 0 ? (
-        <p>No plugins available</p>
+        <p className="text-foreground">No plugins available</p>
       ) : (
         <ul className="list-none p-0 m-0 flex flex-col gap-2">
           {plugins.map(plugin => (
-            <li key={plugin.key} className={`flex justify-between items-center p-2 rounded-md border border-gray-200 ${plugin.enabled ? 'bg-blue-50' : 'bg-gray-100'}`}>
-              <span className="font-medium">{plugin.key}</span>
+            <li key={plugin.key} className={`flex justify-between items-center p-2 rounded-md border border-border ${plugin.enabled ? 'bg-accent/20' : 'bg-muted'}`}>
+              <span className="font-medium text-foreground">{plugin.key}</span>
               <div>
-                <span className={`mr-3 font-medium ${plugin.enabled ? 'text-green-500' : 'text-gray-400'}`}>
+                <span className={`mr-3 font-medium ${plugin.enabled ? 'text-primary' : 'text-muted-foreground'}`}>
                   {plugin.enabled ? 'Enabled' : 'Disabled'}
                 </span>
                 <button 
                   onClick={() => togglePlugin(plugin.key)}
-                  className={`px-3 py-1 text-white border-none rounded-md cursor-pointer ${plugin.enabled ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
+                  className={`px-3 py-1 text-white border-none rounded-md cursor-pointer ${plugin.enabled ? 'bg-destructive hover:bg-destructive/90' : 'bg-primary hover:bg-primary/90'}`}
                 >
                   {plugin.enabled ? 'Disable' : 'Enable'}
                 </button>

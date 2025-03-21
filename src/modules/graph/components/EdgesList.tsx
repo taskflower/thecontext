@@ -4,8 +4,6 @@ import { useAppStore } from "../../store";
 import { useDialogState } from "../../common/hooks";
 import { Dialog, ItemList, SectionHeader } from "@/modules/ui/components";
 
-
-
 export const EdgesList: React.FC = () => {
   const getCurrentScenario = useAppStore((state) => state.getCurrentScenario);
   const deleteEdge = useAppStore((state) => state.deleteEdge);
@@ -61,7 +59,7 @@ export const EdgesList: React.FC = () => {
               <Link className="h-3 w-3 mx-1" />
               {getNodeLabel(item.target)}
               {item.label && (
-                <span className="ml-1 text-gray-500">({item.label})</span>
+                <span className="ml-1 text-muted-foreground">({item.label})</span>
               )}
             </div>
           )}

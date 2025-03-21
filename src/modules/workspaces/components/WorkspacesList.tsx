@@ -3,7 +3,6 @@ import { useAppStore } from "../../store";
 import { useDialogState } from "../../common/hooks";
 import { Dialog, ItemList, SectionHeader } from "@/modules/ui/components";
 
-
 export const WorkspacesList: React.FC = () => {
   const items = useAppStore((state) => state.items);
   const selected = useAppStore((state) => state.selected.workspace);
@@ -21,7 +20,6 @@ export const WorkspacesList: React.FC = () => {
       setIsOpen(false);
     }
   };
-
   return (
     <div className="flex flex-col h-full">
       <SectionHeader
@@ -37,7 +35,6 @@ export const WorkspacesList: React.FC = () => {
           renderItem={(item) => <div className="text-sm">{item.title}</div>}
         />
       </div>
-
       {isOpen && (
         <Dialog
           title="New Workspace"

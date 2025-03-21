@@ -121,11 +121,11 @@ const FlowGraph: React.FC = () => {
   }, [calculateFlowPath]);
   
   return (
-    <div className="bg-white rounded-md shadow-sm p-0 h-full w-full relative">
+    <div className="bg-card rounded-md shadow-sm p-0 h-full w-full relative">
       <div className="absolute top-2 right-2 z-10">
         <button 
           onClick={handlePlay}
-          className="p-2 rounded-md bg-blue-500 text-white text-xs font-medium hover:bg-blue-600"
+          className="p-2 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90"
         >
           Play Flow
         </button>
@@ -143,7 +143,7 @@ const FlowGraph: React.FC = () => {
       >
         <Controls />
         <MiniMap />
-        <Background color="#aaa" gap={16} />
+        <Background color="hsl(var(--muted))" gap={16} />
       </ReactFlow>
       
       {isPlaying && flowPath.length > 0 && (

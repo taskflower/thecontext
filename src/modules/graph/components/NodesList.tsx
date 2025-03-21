@@ -3,8 +3,6 @@ import { useAppStore } from "../../store";
 import { useDialogState } from "../../common/hooks";
 import { Dialog, ItemList, SectionHeader } from "@/modules/ui/components";
 
-
-
 export const NodesList: React.FC = () => {
   const getCurrentScenario = useAppStore((state) => state.getCurrentScenario);
   const selected = useAppStore((state) => state.selected.node);
@@ -45,7 +43,7 @@ export const NodesList: React.FC = () => {
           renderItem={(item) => (
             <div className="flex items-center">
               <div className="text-sm">{item.label}</div>
-              <span className="ml-auto inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-700">
+              <span className="ml-auto inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded-full bg-secondary text-secondary-foreground">
                 {item.value}
               </span>
             </div>

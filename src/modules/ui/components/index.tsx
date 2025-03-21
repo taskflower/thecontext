@@ -1,3 +1,4 @@
+// src/modules/ui/components/index.tsx
 import React from "react";
 import { X, PlusCircle } from "lucide-react";
 import { 
@@ -10,10 +11,10 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
   title,
   onAddClick,
 }) => (
-  <div className="flex items-center justify-between px-4 py-3 border-b">
-    <div className="font-medium">{title}</div>
+  <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+    <div className="font-medium text-foreground">{title}</div>
     <button
-      className="p-1 rounded-md hover:bg-gray-100 text-gray-700"
+      className="p-1 rounded-md hover:bg-accent text-muted-foreground"
       onClick={onAddClick}
     >
       <PlusCircle className="h-4 w-4" />
@@ -22,7 +23,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
 );
 
 export const EmptyState: React.FC = () => (
-  <div className="py-4 text-center text-xs text-gray-500">
+  <div className="py-4 text-center text-xs text-muted-foreground">
     No items
   </div>
 );
@@ -36,14 +37,14 @@ export const Dialog: React.FC<DialogProps> = ({
   onChange,
 }) => (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-    <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
-      <div className="flex items-center justify-between p-4 border-b">
-        <h3 className="text-lg font-medium">{title}</h3>
+    <div className="bg-card rounded-lg shadow-lg w-full max-w-md">
+      <div className="flex items-center justify-between p-4 border-b border-border">
+        <h3 className="text-lg font-medium text-card-foreground">{title}</h3>
         <button
           onClick={onClose}
-          className="p-1 rounded-full hover:bg-gray-100"
+          className="p-1 rounded-full hover:bg-accent/80"
         >
-          <X className="h-5 w-5 text-gray-500" />
+          <X className="h-5 w-5 text-muted-foreground" />
         </button>
       </div>
       <div className="p-4">
@@ -55,7 +56,7 @@ export const Dialog: React.FC<DialogProps> = ({
                 name={field.name}
                 value={formData[field.name] || ""}
                 onChange={onChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
               >
                 <option value="">-- Select {field.placeholder} --</option>
                 {field.options?.map((option) => (
@@ -72,13 +73,13 @@ export const Dialog: React.FC<DialogProps> = ({
                 onChange={onChange}
                 placeholder={field.placeholder}
                 type={field.type || "text"}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
               />
             )
           )}
           <button
             onClick={onAdd}
-            className="py-1.5 px-3 text-sm rounded-md font-medium bg-blue-500 text-white hover:bg-blue-600"
+            className="py-1.5 px-3 text-sm rounded-md font-medium bg-primary text-primary-foreground hover:bg-primary/90"
           >
             Add
           </button>
@@ -98,22 +99,22 @@ export function ItemList<T extends { id: string }>({
 }: ItemListProps<T>) {
   return (
     <div className="overflow-auto">
-      <div className="divide-y">
+      <div className="divide-y divide-border">
         {items.map((item) => (
           <div
             key={item.id}
             className={`flex items-center px-4 py-1.5 w-full cursor-pointer ${
               item.id === selected
-                ? "bg-blue-50 border-l-2 border-l-blue-500"
-                : "hover:bg-gray-50"
+                ? "bg-accent/50 border-l-2 border-l-primary"
+                : "hover:bg-accent/30"
             }`}
             onClick={() => onClick(item.id)}
           >
-            <div className="flex-1 truncate">
+            <div className="flex-1 truncate text-foreground">
               {renderItem(item)}
             </div>
             <button
-              className="p-1 text-gray-400 hover:text-red-500"
+              className="p-1 text-muted-foreground hover:text-destructive"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(item.id);
