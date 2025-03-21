@@ -9,21 +9,23 @@ import { EdgesList } from "./modules/graph/components";
 import FlowGraph from "./modules/flow/components/FlowGraph";
 import PluginsApp from "./modules/plugins/PluginsApp";
 
+type PanelContentType = "context" | "conversation" | "plugins" | "";
+
 const App = () => {
   const [showLeftPanel, setShowLeftPanel] = useState(true);
   const [showBottomPanel, setShowBottomPanel] = useState(false);
   const [activeTab, setActiveTab] = useState("workspace");
-  const [bottomPanelContent, setBottomPanelContent] = useState("");
+  const [bottomPanelContent, setBottomPanelContent] = useState<PanelContentType>("");
   const [darkMode, setDarkMode] = useState(false);
 
   // Toggle panel handlers
-  const togglePanel = ( setter, state) => () => setter(!state);
+  const togglePanel = (setter: React.Dispatch<React.SetStateAction<boolean>>, state: boolean) => () => setter(!state);
   
   // Toggle dark mode
   const toggleDarkMode = () => setDarkMode(!darkMode);
   
   // Show bottom panel with specific content
-  const showPanel = (content) => {
+  const showPanel = (content: PanelContentType) => {
     setBottomPanelContent(content);
     setShowBottomPanel(true);
   };
@@ -47,7 +49,7 @@ const App = () => {
           </button>
           <button 
             className={`p-1.5 rounded ${showLeftPanel ? 'bg-gray-200' : 'bg-transparent'}`}
-            onClick={togglePanel('left', setShowLeftPanel, showLeftPanel)}
+            onClick={togglePanel(setShowLeftPanel, showLeftPanel)}
           >
             <PanelLeft className="h-4 w-4" />
           </button>

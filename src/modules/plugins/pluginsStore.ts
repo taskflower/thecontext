@@ -1,5 +1,5 @@
+// src/modules/plugins/pluginsStore.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/store/dynamicComponentStore.ts
 import { produce } from 'immer';
 import { create } from 'zustand';
 import { ComponentType } from 'react';

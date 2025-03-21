@@ -1,5 +1,5 @@
+// src/modules/plugins/pluginsDiscovery.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/featuresPlugins/dynamicComponentDiscovery.ts
 import { ComponentType } from 'react';
 
 // Define the interface for the module
@@ -7,11 +7,11 @@ interface ComponentModule {
   default: ComponentType<any>;
 }
 
+
 export async function discoverAndLoadComponents() {
   try {
-    // Use import.meta.glob for Vite or require.context for webpack
-    // This automatically finds all components in the directory
-    const componentModules = import.meta.glob('./../dynamicComponents/*.tsx');
+    // Używamy jednej, spójnej ścieżki do komponentów
+    const componentModules = import.meta.glob('../../dynamicComponents/*.tsx');
     
     for (const path in componentModules) {
       const module = await componentModules[path]() as ComponentModule;
@@ -19,7 +19,7 @@ export async function discoverAndLoadComponents() {
       
       if (window.__DYNAMIC_COMPONENTS__ && module.default) {
         window.__DYNAMIC_COMPONENTS__.register(componentName, module.default);
-        console.log(`Auto-discovered and registered: ${componentName}`);
+        console.log(`Auto-discovered and registered: ${componentName} from ${path}`);
       }
     }
   } catch (error) {

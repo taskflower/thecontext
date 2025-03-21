@@ -1,4 +1,4 @@
-// src/featuresPlugins/PluginManager.tsx
+// src/modules/plugins/PluginManager.tsx
 import React, { useState, useEffect } from 'react';
 import useDynamicComponentStore from './pluginsStore';
 
@@ -18,15 +18,7 @@ const PluginManager: React.FC = () => {
     setPlugins(initialPlugins);
     
     // Dispatch initial plugin state
-    const pluginState = Object.fromEntries(
-      initialPlugins.map(plugin => [plugin.key, plugin.enabled])
-    );
-    
-    const event = new CustomEvent('plugin-state-change', { 
-      detail: pluginState 
-    });
-    
-    window.dispatchEvent(event);
+    dispatchPluginState(initialPlugins);
     
     // Subscribe to component registry changes
     const unsubscribe = useDynamicComponentStore.subscribe((state) => {
@@ -45,15 +37,7 @@ const PluginManager: React.FC = () => {
         const filteredPlugins = updatedPlugins.filter(p => currentKeys.includes(p.key));
         
         // Dispatch updated plugin state
-        const updatedPluginState = Object.fromEntries(
-          filteredPlugins.map(plugin => [plugin.key, plugin.enabled])
-        );
-        
-        const updateEvent = new CustomEvent('plugin-state-change', { 
-          detail: updatedPluginState 
-        });
-        
-        window.dispatchEvent(updateEvent);
+        dispatchPluginState(filteredPlugins);
         
         return filteredPlugins;
       });
@@ -64,22 +48,25 @@ const PluginManager: React.FC = () => {
     };
   }, [getComponentKeys]);
   
+  const dispatchPluginState = (plugins: Plugin[]) => {
+    const pluginState = Object.fromEntries(
+      plugins.map(plugin => [plugin.key, plugin.enabled])
+    );
+    
+    const event = new CustomEvent('plugin-state-change', { 
+      detail: pluginState 
+    });
+    
+    window.dispatchEvent(event);
+  };
+  
   const togglePlugin = (key: string) => {
     setPlugins(prevPlugins => {
       const newPlugins = prevPlugins.map(plugin => 
         plugin.key === key ? { ...plugin, enabled: !plugin.enabled } : plugin
       );
       
-      // Dispatch custom event with plugin state
-      const pluginState = Object.fromEntries(
-        newPlugins.map(plugin => [plugin.key, plugin.enabled])
-      );
-      
-      const event = new CustomEvent('plugin-state-change', { 
-        detail: pluginState 
-      });
-      
-      window.dispatchEvent(event);
+      dispatchPluginState(newPlugins);
       
       return newPlugins;
     });

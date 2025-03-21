@@ -1,34 +1,21 @@
+// src/modules/plugins/PluginsApp.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/featuresPlugins/PluginsApp.tsx
-import React, { useEffect, useState, ComponentType } from 'react';
+import React, { useEffect, useState } from 'react';
 import useDynamicComponentStore from './pluginsStore';
 import DynamicComponentWrapper from './PluginWrapper';
 import PluginManager from './PluginManager';
+import { discoverAndLoadComponents } from './pluginsDiscovery';
 
-// Define the interface for the module
-interface ComponentModule {
-  default: ComponentType<any>;
-}
-
-// Add this new function at the top of the file (or in a separate file)
-const discoverAndLoadComponents = async () => {
-  try {
-    // Use import.meta.glob for Vite or require.context for webpack
-    const componentModules = import.meta.glob('../../dynamicComponents/*.tsx');
-    
-    for (const path in componentModules) {
-      const module = await componentModules[path]() as ComponentModule;
-      const componentName = path.split('/').pop()?.replace('.tsx', '') || '';
-      
-      if (window.__DYNAMIC_COMPONENTS__ && module.default) {
-        window.__DYNAMIC_COMPONENTS__.register(componentName, module.default);
-        console.log(`Auto-discovered and registered: ${componentName}`);
-      }
-    }
-  } catch (error) {
-    console.error("Error during component discovery:", error);
+// Define a type for the window with our custom properties
+declare global {
+  interface Window {
+    __DYNAMIC_COMPONENTS__: {
+      registry: any;
+      register: (key: string, component: React.ComponentType<any>) => void;
+      unregister: (key: string) => void;
+    };
   }
-};
+}
 
 // This is our main app that will render dynamic components
 const PluginsApp: React.FC = () => {
@@ -62,7 +49,7 @@ const PluginsApp: React.FC = () => {
       };
     }
     
-    // Add component auto-discovery here
+    // Add component auto-discovery
     discoverAndLoadComponents();
     
     return () => {
@@ -73,7 +60,7 @@ const PluginsApp: React.FC = () => {
 
   // Listen for plugin state changes
   useEffect(() => {
-    const handlePluginStateChange = (event: CustomEvent) => {
+    const handlePluginStateChange = (event: CustomEvent<Record<string, boolean>>) => {
       setPluginState(event.detail);
     };
     
