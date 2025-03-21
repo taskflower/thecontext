@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Focus, PanelLeft, Puzzle, MessageSquare, Database, Layers, GitBranch, FolderOpen, Code } from "lucide-react";
+import { Focus, PanelLeft, Puzzle, MessageSquare, Database, Layers, GitBranch, FolderOpen, Code, Sun, Moon } from "lucide-react";
 import { WorkspacesList, ScenariosList, NodesList, EdgesList } from './features/Components';
 import FlowGraph from './features/ReactFlow';
 import PluginsApp from "./featuresPlugins/PluginsApp";
@@ -9,9 +9,13 @@ const App = () => {
   const [showBottomPanel, setShowBottomPanel] = useState(false);
   const [activeTab, setActiveTab] = useState("workspace");
   const [bottomPanelContent, setBottomPanelContent] = useState("");
+  const [darkMode, setDarkMode] = useState(false);
 
   // Toggle panel handlers
   const togglePanel = ( setter, state) => () => setter(!state);
+  
+  // Toggle dark mode
+  const toggleDarkMode = () => setDarkMode(!darkMode);
   
   // Show bottom panel with specific content
   const showPanel = (content) => {
@@ -20,7 +24,7 @@ const App = () => {
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col overflow-hidden">
+    <div className={`h-screen w-screen flex flex-col overflow-hidden ${darkMode ? 'dark' : ''}`}>
       {/* Header */}
       <header className="border-b py-2 px-4 flex items-center justify-between bg-card">
         <div className="flex items-center gap-3">
@@ -30,6 +34,12 @@ const App = () => {
           </h1>
         </div>
         <div className="flex items-center gap-2">
+          <button 
+            className="p-1.5 rounded hover:bg-gray-100"
+            onClick={toggleDarkMode}
+          >
+            {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
           <button 
             className={`p-1.5 rounded ${showLeftPanel ? 'bg-gray-200' : 'bg-transparent'}`}
             onClick={togglePanel('left', setShowLeftPanel, showLeftPanel)}
