@@ -1,20 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
-import {
-  Puzzle,
-  GitBranch,
-  Layers,
-  Code,
-  AlertCircle,
-  Power,
-  PowerOff,
-  Settings,
-} from "lucide-react";
+import { Puzzle, Settings } from "lucide-react";
 import useDynamicComponentStore from "./pluginsStore";
 import DynamicComponentWrapper from "./PluginWrapper";
 import PluginManager from "./PluginManager";
 import { discoverAndLoadComponents } from "./pluginsDiscovery";
-import { cn } from "@/utils/utils";
+import { 
+  TabButton, 
+  PluginCard, 
+  NoPluginsAvailableUI, 
+  PluginDisabledUI, 
+  SelectPluginMessageUI, 
+  AllPluginsDisabledMessageUI 
+} from "./components";
 
 // Define a type for the window with our custom properties
 declare global {
@@ -30,15 +28,10 @@ declare global {
 // Tab type for our tabbed interface
 type TabType = 'plugins' | 'manager';
 
-// This is our main app that will render dynamic components
 const PluginsApp: React.FC = () => {
-  const [selectedComponent, setSelectedComponent] = useState<string | null>(
-    null
-  );
+  const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('plugins');
-  const getComponentKeys = useDynamicComponentStore(
-    (state) => state.getComponentKeys
-  );
+  const getComponentKeys = useDynamicComponentStore(state => state.getComponentKeys);
   const componentKeys = getComponentKeys();
   const [pluginState, setPluginState] = useState<Record<string, boolean>>({});
 
@@ -49,12 +42,10 @@ const PluginsApp: React.FC = () => {
     }
   }, [componentKeys, selectedComponent]);
 
-  // Create a global window property to allow dynamic component registration
+  // Initialize global registry for dynamic component registration
   useEffect(() => {
-    // Extend the window interface
     const win = window as any;
 
-    // Create a global registry if it doesn't exist
     if (!win.__DYNAMIC_COMPONENTS__) {
       win.__DYNAMIC_COMPONENTS__ = {
         registry: useDynamicComponentStore.getState(),
@@ -67,13 +58,8 @@ const PluginsApp: React.FC = () => {
       };
     }
 
-    // Add component auto-discovery
+    // Auto-discover components
     discoverAndLoadComponents();
-
-    return () => {
-      // Cleanup (optional)
-      // delete win.__DYNAMIC_COMPONENTS__;
-    };
   }, []);
 
   // Listen for plugin state changes
@@ -97,7 +83,7 @@ const PluginsApp: React.FC = () => {
     };
   }, []);
 
-  // Check if selected component is enabled
+  // Check if a component is enabled
   const isComponentEnabled = (key: string) => {
     return pluginState[key] !== false; // Default to true if not specified
   };
@@ -136,98 +122,28 @@ const PluginsApp: React.FC = () => {
       </nav>
 
       {/* Tab content */}
-      {activeTab === 'manager' && (
-        <PluginManager />
-      )}
+      {activeTab === 'manager' && <PluginManager />}
 
       {activeTab === 'plugins' && (
         componentKeys.length === 0 ? (
-          <div className="rounded-lg border border-border p-6 text-center">
-            <div className="mb-4 flex justify-center">
-              <AlertCircle className="h-12 w-12 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-medium mb-2">No Plugins Available</h3>
-            <p className="text-muted-foreground mb-4">
-              No components have been registered yet. Use the global registry to
-              register components.
-            </p>
-            <div className="bg-muted p-4 rounded-md overflow-auto text-left text-sm">
-              <pre className="whitespace-pre-wrap">
-                {`// Register a component dynamically
-const MyComponent = () => <div>My Component Content</div>;
-
-// Method 1: Using the window object
-window.__DYNAMIC_COMPONENTS__.register('MyComponent', MyComponent);
-
-// Method 2: Using the exported function
-import { registerDynamicComponent } from './store/dynamicComponentStore';
-registerDynamicComponent('MyComponent', MyComponent);`}
-              </pre>
-            </div>
-          </div>
+          <NoPluginsAvailableUI />
         ) : (
           <div className="flex gap-6">
             {/* Left column: Plugin cards */}
             <div className="w-1/3 space-y-3">
               <h2 className="text-lg font-medium mb-2 px-2">Available Plugins</h2>
               {componentKeys.map((key) => (
-                <div
+                <PluginCard
                   key={key}
-                  className={cn(
-                    "border border-border rounded-lg overflow-hidden cursor-pointer transition-colors",
-                    selectedComponent === key 
-                      ? "border-primary/60 bg-primary/5" 
-                      : "hover:bg-muted/10",
-                    !isComponentEnabled(key) && "opacity-70"
-                  )}
-                  onClick={() => isComponentEnabled(key) && setSelectedComponent(key)}
-                >
-                  <div className="p-3 flex items-center justify-between">
-                    <div className="flex items-center">
-                      <ComponentIcon name={key} className="h-5 w-5 mr-3 text-primary" />
-                      <div>
-                        <h3 className="font-medium">{key}</h3>
-                        <p className="text-xs text-muted-foreground">Component Plugin</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        togglePlugin(key);
-                      }}
-                      className={cn(
-                        "p-1.5 rounded-md",
-                        isComponentEnabled(key)
-                          ? "text-destructive hover:bg-destructive/10"
-                          : "text-primary hover:bg-primary/10"
-                      )}
-                    >
-                      {isComponentEnabled(key) ? (
-                        <PowerOff className="h-4 w-4" />
-                      ) : (
-                        <Power className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
-                  <div className={cn(
-                    "px-3 py-2 text-xs border-t border-border flex justify-between items-center",
-                    isComponentEnabled(key) 
-                      ? "bg-muted/20" 
-                      : "bg-muted/40"
-                  )}>
-                    <span className={cn(
-                      "px-1.5 py-0.5 rounded-full",
-                      isComponentEnabled(key)
-                        ? "bg-primary/10 text-primary"
-                        : "bg-muted text-muted-foreground"
-                    )}>
-                      {isComponentEnabled(key) ? "Enabled" : "Disabled"}
-                    </span>
-                    {selectedComponent === key && (
-                      <span className="text-primary">Active</span>
-                    )}
-                  </div>
-                </div>
+                  pluginKey={key}
+                  isEnabled={isComponentEnabled(key)}
+                  isSelected={selectedComponent === key}
+                  onSelect={() => isComponentEnabled(key) && setSelectedComponent(key)}
+                  onToggle={(e) => {
+                    e.stopPropagation();
+                    togglePlugin(key);
+                  }}
+                />
               ))}
             </div>
 
@@ -238,20 +154,11 @@ registerDynamicComponent('MyComponent', MyComponent);`}
                 {selectedComponent && isComponentEnabled(selectedComponent) ? (
                   <DynamicComponentWrapper componentKey={selectedComponent} />
                 ) : selectedComponent ? (
-                  <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-md text-center">
-                    <AlertCircle className="h-8 w-8 text-destructive mx-auto mb-2" />
-                    <p className="text-sm">
-                      The selected component is currently disabled. Enable it to use it.
-                    </p>
-                  </div>
+                  <PluginDisabledUI />
                 ) : enabledComponentKeys.length > 0 ? (
-                  <div className="text-center p-6 text-muted-foreground">
-                    <p>Select a plugin from the left column to preview it here.</p>
-                  </div>
+                  <SelectPluginMessageUI />
                 ) : (
-                  <div className="text-center p-6 text-muted-foreground">
-                    <p>All plugins are currently disabled.</p>
-                  </div>
+                  <AllPluginsDisabledMessageUI />
                 )}
               </div>
             </div>
@@ -260,50 +167,6 @@ registerDynamicComponent('MyComponent', MyComponent);`}
       )}
     </div>
   );
-};
-
-// Tab button component (similar to App.tsx)
-const TabButton = ({ icon, label, active, onClick }: { 
-  icon: React.ReactNode, 
-  label: string, 
-  active: boolean, 
-  onClick: () => void 
-}) => {
-  return (
-    <button 
-      className={cn(
-        "flex-1 py-2 px-3 text-xs font-medium rounded-md flex flex-col items-center gap-1",
-        active 
-          ? "bg-background text-primary" 
-          : "text-muted-foreground hover:bg-muted/50"
-      )}
-      onClick={onClick}
-    >
-      {icon}
-      <span>{label}</span>
-    </button>
-  );
-};
-
-// Helper component to display an icon based on component name
-const ComponentIcon: React.FC<{ name: string; className?: string }> = ({
-  name,
-  className,
-}) => {
-  const iconProps = { className: className || "h-5 w-5" };
-
-  if (name.toLowerCase().includes("scenario")) {
-    return <GitBranch {...iconProps} />;
-  } else if (name.toLowerCase().includes("node")) {
-    return <Layers {...iconProps} />;
-  } else if (
-    name.toLowerCase().includes("edge") ||
-    name.toLowerCase().includes("connection")
-  ) {
-    return <Code {...iconProps} />;
-  }
-
-  return <Puzzle {...iconProps} />;
 };
 
 export default PluginsApp;
