@@ -2,7 +2,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import ReactFlow, { 
   MiniMap, Controls, Background, Connection,
-  useNodesState, useEdgesState
+  useNodesState, useEdgesState, Node
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useAppStore } from './store';
@@ -42,11 +42,11 @@ const FlowGraph = () => {
     }
   }, [addEdge]);
   
-  const onNodeDragStop = useCallback((_, node) => {
+  const onNodeDragStop = useCallback((_: any, node: Node) => {
     updateNodePosition(node.id, node.position);
   }, [updateNodePosition]);
 
-  const onNodeClick = useCallback((_, node) => {
+  const onNodeClick = useCallback((_: any, node: Node) => {
     selectNode(node.id);
   }, [selectNode]);
   
@@ -159,4 +159,4 @@ const FlowGraph = () => {
   );
 };
 
-export default FlowGraph;
+export default FlowGraph; 
