@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/utils/dynamicComponentLoader.ts
 import { ComponentType } from 'react';
-import { registerDynamicComponent } from "./dynamicComponentStore";
+import { registerDynamicComponent } from "./pluginsStore";
 
 // Define the interface for the module
 interface ComponentModule {

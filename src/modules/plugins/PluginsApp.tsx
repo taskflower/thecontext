@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/featuresPlugins/PluginsApp.tsx
 import React, { useEffect, useState, ComponentType } from 'react';
-import useDynamicComponentStore from './dynamicComponentStore';
-import DynamicComponentWrapper from './DynamicComponentWrapper';
+import useDynamicComponentStore from './pluginsStore';
+import DynamicComponentWrapper from './PluginWrapper';
 import PluginManager from './PluginManager';
 
 // Define the interface for the module
@@ -14,7 +14,7 @@ interface ComponentModule {
 const discoverAndLoadComponents = async () => {
   try {
     // Use import.meta.glob for Vite or require.context for webpack
-    const componentModules = import.meta.glob('../dynamicComponents/*.tsx');
+    const componentModules = import.meta.glob('../../dynamicComponents/*.tsx');
     
     for (const path in componentModules) {
       const module = await componentModules[path]() as ComponentModule;

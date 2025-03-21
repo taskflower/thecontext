@@ -1,16 +1,15 @@
-// FlowGraph.jsx - Set graph to use full available height
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import ReactFlow, { 
   MiniMap, Controls, Background, Connection,
   useNodesState, useEdgesState, Node
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { useAppStore } from './store';
-import { StepModal } from './Components';
+import { useAppStore } from '../../store';
+import { StepModal } from './StepModal';
+import '../styles.css';
 
-// Flow Graph Component
-const FlowGraph = () => {
+const FlowGraph: React.FC = () => {
   const getActiveScenarioData = useAppStore(state => state.getActiveScenarioData);
   const addEdge = useAppStore(state => state.addEdge);
   const updateNodePosition = useAppStore(state => state.updateNodePosition);

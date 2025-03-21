@@ -1,8 +1,13 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Focus, PanelLeft, Puzzle, MessageSquare, Database, Layers, GitBranch, FolderOpen, Code, Sun, Moon } from "lucide-react";
-import { WorkspacesList, ScenariosList, NodesList, EdgesList } from './features/Components';
-import FlowGraph from './features/ReactFlow';
-import PluginsApp from "./featuresPlugins/PluginsApp";
+
+
+import WorkspacesList from "./modules/workspaces/components/WorkspacesList";
+import ScenariosList from "./modules/scenarios/components/ScenariosList";
+import NodesList from "./modules/graph/components/NodesList";
+import { EdgesList } from "./modules/graph/components";
+import FlowGraph from "./modules/flow/components/FlowGraph";
+import PluginsApp from "./modules/plugins/PluginsApp";
 
 const App = () => {
   const [showLeftPanel, setShowLeftPanel] = useState(true);

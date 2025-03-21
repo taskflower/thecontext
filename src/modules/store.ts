@@ -1,15 +1,17 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { 
-  TYPES, 
-  AppState, 
-  Workspace,
-  Scenario, 
-  FlowNode,
-  Edge,
-  Position,
-} from './types';
+import { TYPES, SelectionState } from './common/types';
+import { Workspace, WorkspaceActions } from './workspaces/types';
+import { Scenario, ScenarioActions } from './scenarios/types';
+import { NodeActions, EdgeActions, FlowActions, FlowNode, Edge } from './graph/types';
 
+export interface AppState extends WorkspaceActions, ScenarioActions, NodeActions, EdgeActions, FlowActions {
+  items: Workspace[];
+  selected: SelectionState;
+  stateVersion: number;
+}
+
+// Create the store with all actions
 export const useAppStore = create<AppState>()(
   immer((set, get) => ({
     // Initial state
@@ -33,7 +35,7 @@ export const useAppStore = create<AppState>()(
     selected: { workspace: 'workspace1', scenario: 'scenario1', node: '' },
     stateVersion: 0,
 
-    // Actions
+    // Workspace actions
     selectWorkspace: (workspaceId: string) => set((state) => {
       state.selected.workspace = workspaceId;
       const workspace = state.items.find((w) => w.id === workspaceId);
@@ -46,17 +48,6 @@ export const useAppStore = create<AppState>()(
       state.stateVersion++;
     }),
 
-    selectScenario: (scenarioId: string) => set((state) => {
-      state.selected.scenario = scenarioId;
-      state.selected.node = '';
-      state.stateVersion++;
-    }),
-
-    selectNode: (nodeId: string) => set((state) => {
-      state.selected.node = nodeId;
-      state.stateVersion++;
-    }),
-
     addWorkspace: (payload: { title: string }) => set((state) => {
       const newWorkspace: Workspace = {
         id: `workspace-${Date.now()}`, 
@@ -66,6 +57,33 @@ export const useAppStore = create<AppState>()(
       };
       state.items.push(newWorkspace);
       state.selected.workspace = newWorkspace.id;
+      state.selected.scenario = '';
+      state.selected.node = '';
+      state.stateVersion++;
+    }),
+
+    deleteWorkspace: (workspaceId: string) => set((state) => {
+      const index = state.items.findIndex((w) => w.id === workspaceId);
+      if (index !== -1) {
+        state.items.splice(index, 1);
+        
+        if (workspaceId === state.selected.workspace) {
+          if (state.items.length > 0) {
+            state.selected.workspace = state.items[0].id;
+            state.selected.scenario = state.items[0].children?.[0]?.id || '';
+          } else {
+            state.selected.workspace = '';
+            state.selected.scenario = '';
+          }
+          state.selected.node = '';
+        }
+        state.stateVersion++;
+      }
+    }),
+
+    // Scenario actions
+    selectScenario: (scenarioId: string) => set((state) => {
+      state.selected.scenario = scenarioId;
       state.selected.node = '';
       state.stateVersion++;
     }),
@@ -89,71 +107,6 @@ export const useAppStore = create<AppState>()(
       state.stateVersion++;
     }),
 
-    addNode: (payload: { label: string, value: string | number, position?: Position }) => set((state) => {
-      const newNode: FlowNode = {
-        id: `node-${Date.now()}`, 
-        type: TYPES.NODE,
-        label: payload.label, 
-        value: Number(payload.value),
-        position: payload.position || { x: 100, y: 100 }
-      };
-      
-      const workspace = state.items.find((w) => w.id === state.selected.workspace);
-      const scenario = workspace?.children.find((s) => s.id === state.selected.scenario);
-      if (scenario) {
-        scenario.children.push(newNode);
-        state.selected.node = newNode.id;
-        state.stateVersion++;
-      }
-    }),
-
-    addEdge: (payload: { source: string, target: string, label?: string, type?: string }) => set((state) => {
-      const newEdge: Edge = {
-        id: `edge-${Date.now()}`,
-        type: payload.type || TYPES.EDGE, // Use provided type or default to TYPES.EDGE
-        source: payload.source,
-        target: payload.target,
-        label: payload.label || ''
-      };
-      
-      const workspace = state.items.find((w) => w.id === state.selected.workspace);
-      const scenario = workspace?.children.find((s) => s.id === state.selected.scenario);
-      if (scenario) {
-        if (!scenario.edges) scenario.edges = [];
-        scenario.edges.push(newEdge);
-        state.stateVersion++;
-      }
-    }),
-
-    updateNodePosition: (nodeId: string, position: Position) => set((state) => {
-      const workspace = state.items.find((w) => w.id === state.selected.workspace);
-      const scenario = workspace?.children.find((s) => s.id === state.selected.scenario);
-      const node = scenario?.children.find((n) => n.id === nodeId);
-      if (node) {
-        node.position = position;
-        state.stateVersion++;
-      }
-    }),
-
-    deleteWorkspace: (workspaceId: string) => set((state) => {
-      const index = state.items.findIndex((w) => w.id === workspaceId);
-      if (index !== -1) {
-        state.items.splice(index, 1);
-        
-        if (workspaceId === state.selected.workspace) {
-          if (state.items.length > 0) {
-            state.selected.workspace = state.items[0].id;
-            state.selected.scenario = state.items[0].children?.[0]?.id || '';
-          } else {
-            state.selected.workspace = '';
-            state.selected.scenario = '';
-          }
-          state.selected.node = '';
-        }
-        state.stateVersion++;
-      }
-    }),
-
     deleteScenario: (scenarioId: string) => set((state) => {
       const workspace = state.items.find((w) => w.id === state.selected.workspace);
       if (workspace) {
@@ -171,6 +124,30 @@ export const useAppStore = create<AppState>()(
           }
           state.stateVersion++;
         }
+      }
+    }),
+    
+    // Node actions
+    selectNode: (nodeId: string) => set((state) => {
+      state.selected.node = nodeId;
+      state.stateVersion++;
+    }),
+
+    addNode: (payload: { label: string, value: string | number, position?: { x: number, y: number } }) => set((state) => {
+      const newNode: FlowNode = {
+        id: `node-${Date.now()}`, 
+        type: TYPES.NODE,
+        label: payload.label, 
+        value: Number(payload.value),
+        position: payload.position || { x: 100, y: 100 }
+      };
+      
+      const workspace = state.items.find((w) => w.id === state.selected.workspace);
+      const scenario = workspace?.children.find((s) => s.id === state.selected.scenario);
+      if (scenario) {
+        scenario.children.push(newNode);
+        state.selected.node = newNode.id;
+        state.stateVersion++;
       }
     }),
 
@@ -196,6 +173,35 @@ export const useAppStore = create<AppState>()(
       }
     }),
 
+    updateNodePosition: (nodeId: string, position: { x: number, y: number }) => set((state) => {
+      const workspace = state.items.find((w) => w.id === state.selected.workspace);
+      const scenario = workspace?.children.find((s) => s.id === state.selected.scenario);
+      const node = scenario?.children.find((n) => n.id === nodeId);
+      if (node) {
+        node.position = position;
+        state.stateVersion++;
+      }
+    }),
+
+    // Edge actions
+    addEdge: (payload: { source: string, target: string, label?: string, type?: string }) => set((state) => {
+      const newEdge: Edge = {
+        id: `edge-${Date.now()}`,
+        type: payload.type || TYPES.EDGE,
+        source: payload.source,
+        target: payload.target,
+        label: payload.label || ''
+      };
+      
+      const workspace = state.items.find((w) => w.id === state.selected.workspace);
+      const scenario = workspace?.children.find((s) => s.id === state.selected.scenario);
+      if (scenario) {
+        if (!scenario.edges) scenario.edges = [];
+        scenario.edges.push(newEdge);
+        state.stateVersion++;
+      }
+    }),
+
     deleteEdge: (edgeId: string) => set((state) => {
       const workspace = state.items.find((w) => w.id === state.selected.workspace);
       const scenario = workspace?.children.find((s) => s.id === state.selected.scenario);
@@ -208,6 +214,7 @@ export const useAppStore = create<AppState>()(
       }
     }),
 
+    // Flow-related actions
     getActiveScenarioData: () => {
       const state = get();
       const workspace = state.items.find((w) => w.id === state.selected.workspace);

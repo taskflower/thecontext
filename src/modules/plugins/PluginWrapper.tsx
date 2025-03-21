@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/DynamicComponentWrapper.tsx
 import React, { useState, useEffect } from 'react';
-import useDynamicComponentStore from './dynamicComponentStore';
-import { useAppStore } from '../features/store';
+import useDynamicComponentStore from './pluginsStore';
+import { useAppStore } from '../store';
+
 
 interface DynamicComponentWrapperProps {
   componentKey: string;

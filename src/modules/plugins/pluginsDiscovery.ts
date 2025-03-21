@@ -11,7 +11,7 @@ export async function discoverAndLoadComponents() {
   try {
     // Use import.meta.glob for Vite or require.context for webpack
     // This automatically finds all components in the directory
-    const componentModules = import.meta.glob('./dynamicComponents/*.tsx');
+    const componentModules = import.meta.glob('./../dynamicComponents/*.tsx');
     
     for (const path in componentModules) {
       const module = await componentModules[path]() as ComponentModule;

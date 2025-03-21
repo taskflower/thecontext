@@ -1,6 +1,6 @@
 // src/featuresPlugins/PluginManager.tsx
 import React, { useState, useEffect } from 'react';
-import useDynamicComponentStore from './dynamicComponentStore';
+import useDynamicComponentStore from './pluginsStore';
 
 interface Plugin {
   key: string;
