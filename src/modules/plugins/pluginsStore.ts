@@ -1,29 +1,18 @@
 // src/modules/plugins/pluginsStore.ts
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { produce } from 'immer';
 import { create } from 'zustand';
-import { ComponentType } from 'react';
-
-// Define types
-type ComponentData = any;
-
-interface DynamicComponentStore {
-  components: Record<string, ComponentType<any>>;
-  componentData: Record<string, ComponentData>;
-  registerComponent: (key: string, component: ComponentType<any>) => void;
-  unregisterComponent: (key: string) => void;
-  setComponentData: (key: string, data: ComponentData) => void;
-  getComponentData: (key: string) => ComponentData;
-  getComponentKeys: () => string[];
-  getComponent: (key: string) => ComponentType<any> | null;
-}
+import { 
+  DynamicComponentStore, 
+  PluginComponentProps 
+} from './types';
 
 // Create a singleton instance that will be globally accessible
 const useDynamicComponentStore = create<DynamicComponentStore>((set, get) => ({
   components: {},
   componentData: {},
 
-  registerComponent: (key: string, component: ComponentType<any>) => 
+  registerComponent: (key, component) => 
     set(produce((state) => {
       state.components[key] = component;
       if (!state.componentData[key]) {
@@ -32,18 +21,18 @@ const useDynamicComponentStore = create<DynamicComponentStore>((set, get) => ({
       console.log(`Component registered: ${key}`);
     })),
 
-  unregisterComponent: (key: string) => 
+  unregisterComponent: (key) => 
     set(produce((state) => {
       delete state.components[key];
       console.log(`Component unregistered: ${key}`);
     })),
 
-  setComponentData: (key: string, data: ComponentData) => 
+  setComponentData: (key, data) => 
     set(produce((state) => {
       state.componentData[key] = data;
     })),
 
-  getComponentData: (key: string) => {
+  getComponentData: (key) => {
     const { componentData } = get();
     return componentData[key] || null;
   },
@@ -53,14 +42,17 @@ const useDynamicComponentStore = create<DynamicComponentStore>((set, get) => ({
     return Object.keys(components);
   },
 
-  getComponent: (key: string) => {
+  getComponent: (key) => {
     const { components } = get();
     return components[key] || null;
   }
 }));
 
 // Export a global function for registering components from anywhere
-export const registerDynamicComponent = (key: string, component: ComponentType<any>) => {
+export const registerDynamicComponent = (
+  key: string, 
+  component: React.ComponentType<PluginComponentProps>
+) => {
   useDynamicComponentStore.getState().registerComponent(key, component);
 };
 

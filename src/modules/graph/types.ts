@@ -5,6 +5,7 @@ export interface FlowNode extends BaseItem {
   label: string;
   value: number;
   position: Position;
+  pluginKey?: string; // Add this line to store plugin reference
 }
 
 export interface Edge extends BaseItem {
@@ -19,6 +20,7 @@ export interface NodeActions {
   addNode: (payload: NodePayload) => void;
   deleteNode: (nodeId: string) => void;
   updateNodePosition: (nodeId: string, position: Position) => void;
+  setNodePlugin: (nodeId: string, pluginKey: string | null) => void; // Add this line
 }
 
 export interface EdgeActions {
@@ -30,6 +32,7 @@ export interface NodePayload {
   label: string;
   value: string | number;
   position?: Position;
+  pluginKey?: string; // Add this line
 }
 
 export interface EdgePayload {

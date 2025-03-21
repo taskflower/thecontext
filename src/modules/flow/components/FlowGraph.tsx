@@ -84,59 +84,63 @@ const FlowGraph: React.FC = () => {
   const calculateFlowPath = useCallback(() => {
     const scenario = getCurrentScenario();
     if (!scenario) return [];
-
-    const { children: scenarioNodes = [], edges: scenarioEdges = [] } =
-      scenario;
-
+  
+    const { children: scenarioNodes = [], edges: scenarioEdges = [] } = scenario;
+  
     // Mapa zliczająca przychodzące krawędzie dla każdego węzła
     const incomingMap = new Map<string, number>();
     scenarioEdges.forEach((edge) => {
       incomingMap.set(edge.target, (incomingMap.get(edge.target) || 0) + 1);
     });
-
+  
     // Znajdź węzeł startowy (ma krawędzie wychodzące, ale brak przychodzących)
     let startNodeId: string | null = null;
     for (const node of scenarioNodes) {
       const hasOutgoing = scenarioEdges.some((edge) => edge.source === node.id);
       const incomingCount = incomingMap.get(node.id) || 0;
-
+  
       if (hasOutgoing && incomingCount === 0) {
         startNodeId = node.id;
         break;
       }
     }
-
+  
     // Jeśli nie znaleziono, wybierz pierwszy
     if (!startNodeId && scenarioNodes.length > 0) {
       startNodeId = scenarioNodes[0].id;
     }
-
+  
     if (!startNodeId) return [];
-
+  
     // Utwórz mapę grafu (sąsiedztwa)
     const edgesMap = new Map<string, string[]>();
     scenarioEdges.forEach((edge) => {
       if (!edgesMap.has(edge.source)) edgesMap.set(edge.source, []);
       edgesMap.get(edge.source)?.push(edge.target);
     });
-
+  
     // Prześledź ścieżkę metodą DFS
     const path: any[] = [];
     const visited = new Set<string>();
-
+  
     const dfs = (nodeId: string) => {
       if (visited.has(nodeId)) return;
-
+  
+      // Używamy pełnych danych węzła, nie tylko jego ID
       const nodeData = scenarioNodes.find((n) => n.id === nodeId);
       if (nodeData) {
-        path.push(nodeData);
+        // Dodajemy pełne dane węzła, włącznie z pluginKey
+        path.push({
+          ...nodeData,
+          pluginKey: nodeData.pluginKey
+        });
         visited.add(nodeId);
-
+  
         const nextNodes = edgesMap.get(nodeId) || [];
         for (const next of nextNodes) dfs(next);
       }
     };
-
+  
     dfs(startNodeId);
     return path;
   }, [getCurrentScenario]);

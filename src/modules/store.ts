@@ -183,6 +183,16 @@ export const useAppStore = create<AppState>()(
       }
     }),
 
+    setNodePlugin: (nodeId: string, pluginKey: string | null) => set((state) => {
+      const workspace = state.items.find((w) => w.id === state.selected.workspace);
+      const scenario = workspace?.children.find((s) => s.id === state.selected.scenario);
+      const node = scenario?.children.find((n) => n.id === nodeId);
+      if (node) {
+        node.pluginKey = pluginKey;
+        state.stateVersion++;
+      }
+    }),
+
     // Edge actions
     addEdge: (payload: { source: string, target: string, label?: string, type?: string }) => set((state) => {
       const newEdge: Edge = {

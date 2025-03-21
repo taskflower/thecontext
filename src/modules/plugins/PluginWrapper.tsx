@@ -1,8 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// src/modules/plugins/PluginWrapper.tsx
+
 import React, { useState, useEffect } from 'react';
 import { Code, Database, ArrowRightCircle, Info } from 'lucide-react';
 import useDynamicComponentStore from './pluginsStore';
 import { useAppStore } from '../store';
+import { AppContextData, PluginComponentProps } from './types';
 import { cn } from '@/utils/utils';
 
 interface DynamicComponentWrapperProps {
@@ -11,7 +13,7 @@ interface DynamicComponentWrapperProps {
 
 const DynamicComponentWrapper: React.FC<DynamicComponentWrapperProps> = ({ componentKey }) => {
   const [inputData, setInputData] = useState<string>('');
-  const [currentData, setCurrentData] = useState<any>(null);
+  const [currentData, setCurrentData] = useState<unknown>(null);
   const [showConfig, setShowConfig] = useState(false);
   const [showContext, setShowContext] = useState(false);
   
@@ -37,10 +39,10 @@ const DynamicComponentWrapper: React.FC<DynamicComponentWrapperProps> = ({ compo
   }, [componentData]);
 
   // Create the app context data that will be passed to the component
-  const appContextData = {
-    currentWorkspace: workspace,
-    currentScenario: scenario,
-    currentNode: node,
+  const appContextData: AppContextData = {
+    currentWorkspace: workspace || null,
+    currentScenario: scenario || null,
+    currentNode: node || null,
     selection: {
       workspaceId,
       scenarioId,
@@ -57,7 +59,8 @@ const DynamicComponentWrapper: React.FC<DynamicComponentWrapperProps> = ({ compo
     );
   }
   
-  const Component = component;
+  // Forcefully cast the component to the right type
+  const Component = component as React.ComponentType<PluginComponentProps>;
   
   const handleSendData = () => {
     try {

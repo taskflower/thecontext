@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { PlusCircle, MoreHorizontal, X, Box, Square } from "lucide-react";
+import { PlusCircle, MoreHorizontal, X, Box, Square, Puzzle, CheckCircle, Settings } from "lucide-react";
 import { useAppStore } from "../../store";
 import { FlowNode } from "../types";
 import { useDialogState } from "../../common/hooks";
 import { cn } from "@/utils/utils";
+import useDynamicComponentStore from "../../plugins/pluginsStore";
 
 const NodesList: React.FC = () => {
   const selectedWorkspaceId = useAppStore((state) => state.selected.workspace);
@@ -21,6 +22,7 @@ const NodesList: React.FC = () => {
   const deleteNode = useAppStore((state) => state.deleteNode);
   
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
+  const [configurePluginForNodeId, setConfigurePluginForNodeId] = useState<string | null>(null);
   
   const { isOpen, formData, openDialog, handleChange, setIsOpen } = useDialogState<{
     label: string;
@@ -41,6 +43,11 @@ const NodesList: React.FC = () => {
   
   const toggleMenu = (id: string) => {
     setMenuOpen(menuOpen === id ? null : id);
+  };
+  
+  const handleConfigurePlugin = (nodeId: string) => {
+    setConfigurePluginForNodeId(nodeId);
+    setMenuOpen(null);
   };
   
   if (!selectedScenarioId) {
@@ -83,6 +90,7 @@ const NodesList: React.FC = () => {
                 onDelete={deleteNode}
                 menuOpen={menuOpen === node.id}
                 toggleMenu={() => toggleMenu(node.id)}
+                onConfigurePlugin={() => handleConfigurePlugin(node.id)}
               />
             ))}
           </ul>
@@ -154,6 +162,14 @@ const NodesList: React.FC = () => {
           </div>
         </div>
       )}
+      
+      {/* Plugin Configure Dialog */}
+      {configurePluginForNodeId && (
+        <SimplePluginDialog 
+          nodeId={configurePluginForNodeId} 
+          onClose={() => setConfigurePluginForNodeId(null)} 
+        />
+      )}
     </div>
   );
 };
@@ -165,6 +181,7 @@ interface NodeItemProps {
   onDelete: (id: string) => void;
   menuOpen: boolean;
   toggleMenu: () => void;
+  onConfigurePlugin: () => void;
 }
 
 const NodeItem: React.FC<NodeItemProps> = ({
@@ -174,6 +191,7 @@ const NodeItem: React.FC<NodeItemProps> = ({
   onDelete,
   menuOpen,
   toggleMenu,
+  onConfigurePlugin
 }) => {
   return (
     <li
@@ -196,7 +214,15 @@ const NodeItem: React.FC<NodeItemProps> = ({
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <span className="truncate text-sm font-medium">{node.label}</span>
+          <div className="flex items-center">
+            <span className="truncate text-sm font-medium">{node.label}</span>
+            {node.pluginKey && (
+              <span className="ml-2 bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full flex items-center">
+                <Puzzle className="h-3 w-3 mr-1" />
+                {node.pluginKey}
+              </span>
+            )}
+          </div>
           <div className="flex items-center mt-0.5">
             <span className="text-xs bg-muted px-1.5 py-0.5 rounded-full">
               value: {node.value}
@@ -225,7 +251,17 @@ const NodeItem: React.FC<NodeItemProps> = ({
         </button>
         
         {menuOpen && (
-          <div className="absolute right-0 mt-1 w-36 bg-popover border border-border rounded-md shadow-md z-10">
+          <div className="absolute right-0 mt-1 w-48 bg-popover border border-border rounded-md shadow-md z-10">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onConfigurePlugin();
+              }}
+              className="w-full text-left px-3 py-2 text-sm hover:bg-muted flex items-center"
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Configure Plugin
+            </button>
             <button
               onClick={() => onDelete(node.id)}
               className="w-full text-left px-3 py-2 text-sm text-destructive hover:bg-muted flex items-center"
@@ -237,6 +273,77 @@ const NodeItem: React.FC<NodeItemProps> = ({
         )}
       </div>
     </li>
+  );
+};
+
+// Completely decoupled plugin dialog
+const SimplePluginDialog = ({ nodeId, onClose }: { nodeId: string, onClose: () => void }) => {
+  // Get node info before rendering the dialog content
+  // Directly accessing values from state to avoid selector issues
+  const state = useAppStore.getState();
+  const workspace = state.items.find(w => w.id === state.selected.workspace);
+  const scenario = workspace?.children.find(s => s.id === state.selected.scenario);
+  const node = scenario?.children.find(n => n.id === nodeId);
+  
+  if (!node) return null;
+  
+  // Manual snapshot of current values to avoid re-renders
+  const nodeLabel = node.label;
+  const currentPluginKey = node.pluginKey;
+  
+  // Get plugins once, not in a React hook
+  const pluginKeys = useDynamicComponentStore.getState().getComponentKeys();
+  
+  const handleSelect = (pluginKey: string | null) => {
+    useAppStore.getState().setNodePlugin(nodeId, pluginKey);
+    onClose();
+  };
+  
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
+      <div className="bg-background border border-border rounded-lg shadow-lg w-full max-w-md p-4" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-medium">Configure Plugin</h3>
+          <button onClick={onClose}>
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        
+        <p className="mb-4 text-sm">
+          Select a plugin for node: <strong>{nodeLabel}</strong>
+        </p>
+        
+        <div className="space-y-1 max-h-60 overflow-auto">
+          <button
+            onClick={() => handleSelect(null)}
+            className={cn(
+              "w-full flex items-center justify-between p-2 rounded-md hover:bg-muted text-sm",
+              !currentPluginKey && "bg-primary/10 text-primary"
+            )}
+          >
+            <span>No Plugin</span>
+            {!currentPluginKey && <CheckCircle className="h-4 w-4" />}
+          </button>
+          
+          {pluginKeys.map(key => (
+            <button
+              key={key}
+              onClick={() => handleSelect(key)}
+              className={cn(
+                "w-full flex items-center justify-between p-2 rounded-md hover:bg-muted text-sm",
+                currentPluginKey === key && "bg-primary/10 text-primary"
+              )}
+            >
+              <div className="flex items-center">
+                <Puzzle className="h-4 w-4 mr-2" />
+                <span>{key}</span>
+              </div>
+              {currentPluginKey === key && <CheckCircle className="h-4 w-4" />}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
 
