@@ -109,14 +109,14 @@ const App = () => {
           {/* Flow graph area */}
           <div className={cn(
             "flex-1 overflow-hidden",
-            showBottomPanel ? "h-1/2" : "h-full"
+            showBottomPanel ? "h-1/3" : "h-full"
           )}>
             <FlowGraph />
           </div>
 
           {/* Bottom panel */}
           {showBottomPanel && (
-            <div className="border-t border-border bg-background flex flex-col h-1/2">
+            <div className="border-t border-border bg-background flex flex-col h-2/3">
               <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/10">
                 <h3 className="text-sm font-medium">
                   {bottomPanelContent === 'context' && 'Context Manager'}

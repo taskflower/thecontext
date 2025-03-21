@@ -1,4 +1,4 @@
-// src/services/utils.ts
+// src/utils.ts
 import { type ClassValue, clsx } from "clsx";
 import { useLocation } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
