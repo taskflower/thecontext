@@ -1,11 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from 'react';
-import { Puzzle, GitBranch, Layers, Code, AlertCircle, ChevronDown } from 'lucide-react';
-import useDynamicComponentStore from './pluginsStore';
-import DynamicComponentWrapper from './PluginWrapper';
-import PluginManager from './PluginManager';
-import { discoverAndLoadComponents } from './pluginsDiscovery';
-import { cn } from '@/utils/utils';
+import React, { useEffect, useState } from "react";
+import {
+  Puzzle,
+  GitBranch,
+  Layers,
+  Code,
+  AlertCircle,
+  Power,
+  PowerOff
+} from "lucide-react";
+import useDynamicComponentStore from "./pluginsStore";
+import DynamicComponentWrapper from "./PluginWrapper";
+import PluginManager from "./PluginManager";
+import { discoverAndLoadComponents } from "./pluginsDiscovery";
+import { cn } from "@/utils/utils";
 
 // Define a type for the window with our custom properties
 declare global {
@@ -20,12 +28,16 @@ declare global {
 
 // This is our main app that will render dynamic components
 const PluginsApp: React.FC = () => {
-  const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
+  const [selectedComponent, setSelectedComponent] = useState<string | null>(
+    null
+  );
   const [showPluginManager, setShowPluginManager] = useState(false);
-  const getComponentKeys = useDynamicComponentStore(state => state.getComponentKeys);
+  const getComponentKeys = useDynamicComponentStore(
+    (state) => state.getComponentKeys
+  );
   const componentKeys = getComponentKeys();
   const [pluginState, setPluginState] = useState<Record<string, boolean>>({});
-  
+
   // Set first component as selected by default when available
   useEffect(() => {
     if (componentKeys.length > 0 && !selectedComponent) {
@@ -37,7 +49,7 @@ const PluginsApp: React.FC = () => {
   useEffect(() => {
     // Extend the window interface
     const win = window as any;
-    
+
     // Create a global registry if it doesn't exist
     if (!win.__DYNAMIC_COMPONENTS__) {
       win.__DYNAMIC_COMPONENTS__ = {
@@ -47,13 +59,13 @@ const PluginsApp: React.FC = () => {
         },
         unregister: (key: string) => {
           useDynamicComponentStore.getState().unregisterComponent(key);
-        }
+        },
       };
     }
-    
+
     // Add component auto-discovery
     discoverAndLoadComponents();
-    
+
     return () => {
       // Cleanup (optional)
       // delete win.__DYNAMIC_COMPONENTS__;
@@ -62,14 +74,22 @@ const PluginsApp: React.FC = () => {
 
   // Listen for plugin state changes
   useEffect(() => {
-    const handlePluginStateChange = (event: CustomEvent<Record<string, boolean>>) => {
+    const handlePluginStateChange = (
+      event: CustomEvent<Record<string, boolean>>
+    ) => {
       setPluginState(event.detail);
     };
-    
-    window.addEventListener('plugin-state-change' as any, handlePluginStateChange);
-    
+
+    window.addEventListener(
+      "plugin-state-change" as any,
+      handlePluginStateChange
+    );
+
     return () => {
-      window.removeEventListener('plugin-state-change' as any, handlePluginStateChange);
+      window.removeEventListener(
+        "plugin-state-change" as any,
+        handlePluginStateChange
+      );
     };
   }, []);
 
@@ -78,34 +98,41 @@ const PluginsApp: React.FC = () => {
     return pluginState[key] !== false; // Default to true if not specified
   };
 
+  // Toggle plugin enable/disable
+  const togglePlugin = (key: string) => {
+    const newState = { ...pluginState, [key]: !isComponentEnabled(key) };
+    setPluginState(newState);
+    
+    const event = new CustomEvent('plugin-state-change', { 
+      detail: newState 
+    });
+    
+    window.dispatchEvent(event);
+  };
+
   // Get enabled component keys
   const enabledComponentKeys = componentKeys.filter(isComponentEnabled);
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      {/* Plugin Manager section */}
+    <div className="w-full max-w-6xl mx-auto">
+      {/* Plugin Manager toggle */}
       <div className="mb-6">
-        <div 
-          className="flex items-center justify-between cursor-pointer p-2 rounded-lg hover:bg-muted/20"
+        <button
+          className="flex items-center px-4 py-2 text-sm bg-primary/10 text-primary rounded-md"
           onClick={() => setShowPluginManager(!showPluginManager)}
         >
-          <div className="flex items-center">
-            <Puzzle className="h-5 w-5 mr-2 text-primary" />
-            <h2 className="text-lg font-medium">Plugin Manager</h2>
-          </div>
-          <ChevronDown className={cn(
-            "h-5 w-5 transition-transform duration-200",
-            showPluginManager ? "transform rotate-180" : ""
-          )} />
-        </div>
-        
-        {showPluginManager && (
-          <div className="mt-2">
-            <PluginManager />
-          </div>
-        )}
+          <Puzzle className="h-4 w-4 mr-2" />
+          {showPluginManager ? "Hide" : "Show"} Plugin Manager
+        </button>
       </div>
-      
+
+      {showPluginManager && (
+        <div className="mb-6">
+          <PluginManager />
+        </div>
+      )}
+
+      {/* Two column layout for plugins */}
       {componentKeys.length === 0 ? (
         <div className="rounded-lg border border-border p-6 text-center">
           <div className="mb-4 flex justify-center">
@@ -113,7 +140,8 @@ const PluginsApp: React.FC = () => {
           </div>
           <h3 className="text-lg font-medium mb-2">No Plugins Available</h3>
           <p className="text-muted-foreground mb-4">
-            No components have been registered yet. Use the global registry to register components.
+            No components have been registered yet. Use the global registry to
+            register components.
           </p>
           <div className="bg-muted p-4 rounded-md overflow-auto text-left text-sm">
             <pre className="whitespace-pre-wrap">
@@ -130,75 +158,119 @@ registerDynamicComponent('MyComponent', MyComponent);`}
           </div>
         </div>
       ) : (
-        <>
-          <div className="rounded-lg border border-border overflow-hidden">
-            {/* Component selector tabs */}
-            <div className="flex border-b border-border bg-muted/10 p-1">
-              {componentKeys.map(key => (
-                <button 
-                  key={key}
-                  onClick={() => setSelectedComponent(key)}
-                  disabled={!isComponentEnabled(key)}
-                  className={cn(
-                    "flex items-center px-3 py-2 text-sm font-medium rounded-md mr-1",
-                    selectedComponent === key 
-                      ? "bg-background text-primary"
-                      : "text-muted-foreground hover:bg-muted/50",
-                    !isComponentEnabled(key) && "opacity-50 cursor-not-allowed"
+        <div className="flex gap-6">
+          {/* Left column: Plugin cards */}
+          <div className="w-1/3 space-y-3">
+            <h2 className="text-lg font-medium mb-2 px-2">Available Plugins</h2>
+            {componentKeys.map((key) => (
+              <div
+                key={key}
+                className={cn(
+                  "border border-border rounded-lg overflow-hidden cursor-pointer transition-colors",
+                  selectedComponent === key 
+                    ? "border-primary/60 bg-primary/5" 
+                    : "hover:bg-muted/10",
+                  !isComponentEnabled(key) && "opacity-70"
+                )}
+                onClick={() => isComponentEnabled(key) && setSelectedComponent(key)}
+              >
+                <div className="p-3 flex items-center justify-between">
+                  <div className="flex items-center">
+                    <ComponentIcon name={key} className="h-5 w-5 mr-3 text-primary" />
+                    <div>
+                      <h3 className="font-medium">{key}</h3>
+                      <p className="text-xs text-muted-foreground">Component Plugin</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      togglePlugin(key);
+                    }}
+                    className={cn(
+                      "p-1.5 rounded-md",
+                      isComponentEnabled(key)
+                        ? "text-destructive hover:bg-destructive/10"
+                        : "text-primary hover:bg-primary/10"
+                    )}
+                  >
+                    {isComponentEnabled(key) ? (
+                      <PowerOff className="h-4 w-4" />
+                    ) : (
+                      <Power className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+                <div className={cn(
+                  "px-3 py-2 text-xs border-t border-border flex justify-between items-center",
+                  isComponentEnabled(key) 
+                    ? "bg-muted/20" 
+                    : "bg-muted/40"
+                )}>
+                  <span className={cn(
+                    "px-1.5 py-0.5 rounded-full",
+                    isComponentEnabled(key)
+                      ? "bg-primary/10 text-primary"
+                      : "bg-muted text-muted-foreground"
+                  )}>
+                    {isComponentEnabled(key) ? "Enabled" : "Disabled"}
+                  </span>
+                  {selectedComponent === key && (
+                    <span className="text-primary">Active</span>
                   )}
-                >
-                  <ComponentIcon name={key} className="h-4 w-4 mr-2" />
-                  {key}
-                  {!isComponentEnabled(key) && (
-                    <span className="ml-2 text-xs bg-muted px-1.5 py-0.5 rounded-full">
-                      Disabled
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
-            
-            {/* Component display */}
-            <div className="p-4">
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Right column: Plugin preview */}
+          <div className="w-2/3">
+            <h2 className="text-lg font-medium mb-2 px-2">Plugin Preview</h2>
+            <div className="border border-border rounded-lg overflow-hidden">
               {selectedComponent && isComponentEnabled(selectedComponent) ? (
                 <DynamicComponentWrapper componentKey={selectedComponent} />
               ) : selectedComponent ? (
                 <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-md text-center">
                   <AlertCircle className="h-8 w-8 text-destructive mx-auto mb-2" />
                   <p className="text-sm">
-                    The selected component is currently disabled. 
-                    Enable it from the Plugin Manager to use it.
+                    The selected component is currently disabled. Enable it to use it.
                   </p>
                 </div>
               ) : enabledComponentKeys.length > 0 ? (
                 <div className="text-center p-6 text-muted-foreground">
-                  <p>Select a component from the tabs above.</p>
+                  <p>Select a plugin from the left column to preview it here.</p>
                 </div>
               ) : (
                 <div className="text-center p-6 text-muted-foreground">
-                  <p>All components are currently disabled.</p>
+                  <p>All plugins are currently disabled.</p>
                 </div>
               )}
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );
 };
 
 // Helper component to display an icon based on component name
-const ComponentIcon: React.FC<{ name: string; className?: string }> = ({ name, className }) => {
+const ComponentIcon: React.FC<{ name: string; className?: string }> = ({
+  name,
+  className,
+}) => {
   const iconProps = { className: className || "h-5 w-5" };
-  
-  if (name.toLowerCase().includes('scenario')) {
+
+  if (name.toLowerCase().includes("scenario")) {
     return <GitBranch {...iconProps} />;
-  } else if (name.toLowerCase().includes('node')) {
+  } else if (name.toLowerCase().includes("node")) {
     return <Layers {...iconProps} />;
-  } else if (name.toLowerCase().includes('edge') || name.toLowerCase().includes('connection')) {
+  } else if (
+    name.toLowerCase().includes("edge") ||
+    name.toLowerCase().includes("connection")
+  ) {
     return <Code {...iconProps} />;
-  } 
-  
+  }
+
   return <Puzzle {...iconProps} />;
 };
 
