@@ -11,7 +11,7 @@ const PluginManager: React.FC = () => {
   useEffect(() => {
     // Initialize plugins from registered components
     const keys = getComponentKeys();
-    const initialPlugins = keys.map(key => ({ key, enabled: true }));
+    const initialPlugins = keys.map((key: string) => ({ key, enabled: true }));
     setPlugins(initialPlugins);
     
     // Send initial plugin state
@@ -23,7 +23,7 @@ const PluginManager: React.FC = () => {
       setPlugins(prevPlugins => {
         const existingKeys = new Set(prevPlugins.map(p => p.key));
         const updatedPlugins = [...prevPlugins];
-        currentKeys.forEach(key => {
+        currentKeys.forEach((key: string) => {
           if (!existingKeys.has(key)) {
             updatedPlugins.push({ key, enabled: true });
           }
