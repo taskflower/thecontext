@@ -86,54 +86,23 @@ const PluginManager: React.FC = () => {
   };
   
   return (
-    <div className="plugin-manager" style={{ 
-      border: '1px solid #ddd', 
-      borderRadius: '4px', 
-      padding: '15px',
-      marginTop: '20px'
-    }}>
-      <h2 style={{ marginTop: 0, marginBottom: '15px' }}>Plugin Manager</h2>
+    <div className="border border-gray-300 rounded-md p-4 mt-5">
+      <h2 className="mt-0 mb-4 text-xl font-semibold">Plugin Manager</h2>
       
       {plugins.length === 0 ? (
         <p>No plugins available</p>
       ) : (
-        <ul style={{ 
-          listStyle: 'none', 
-          padding: 0, 
-          margin: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px'
-        }}>
+        <ul className="list-none p-0 m-0 flex flex-col gap-2">
           {plugins.map(plugin => (
-            <li key={plugin.key} style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '8px 12px',
-              backgroundColor: plugin.enabled ? '#f0f9ff' : '#f5f5f5',
-              borderRadius: '4px',
-              border: '1px solid #e0e0e0'
-            }}>
-              <span style={{ fontWeight: 500 }}>{plugin.key}</span>
+            <li key={plugin.key} className={`flex justify-between items-center p-2 rounded-md border border-gray-200 ${plugin.enabled ? 'bg-blue-50' : 'bg-gray-100'}`}>
+              <span className="font-medium">{plugin.key}</span>
               <div>
-                <span style={{ 
-                  marginRight: '10px', 
-                  color: plugin.enabled ? '#52c41a' : '#bfbfbf',
-                  fontWeight: 500
-                }}>
+                <span className={`mr-3 font-medium ${plugin.enabled ? 'text-green-500' : 'text-gray-400'}`}>
                   {plugin.enabled ? 'Enabled' : 'Disabled'}
                 </span>
                 <button 
                   onClick={() => togglePlugin(plugin.key)}
-                  style={{
-                    padding: '4px 12px',
-                    backgroundColor: plugin.enabled ? '#ff4d4f' : '#52c41a',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                  }}
+                  className={`px-3 py-1 text-white border-none rounded-md cursor-pointer ${plugin.enabled ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
                 >
                   {plugin.enabled ? 'Disable' : 'Enable'}
                 </button>

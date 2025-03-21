@@ -1,9 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/featuresPlugins/PluginsApp.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, ComponentType } from 'react';
 import useDynamicComponentStore from './dynamicComponentStore';
 import DynamicComponentWrapper from './DynamicComponentWrapper';
 import PluginManager from './PluginManager';
+
+// Define the interface for the module
+interface ComponentModule {
+  default: ComponentType<any>;
+}
 
 // Add this new function at the top of the file (or in a separate file)
 const discoverAndLoadComponents = async () => {
@@ -12,7 +17,7 @@ const discoverAndLoadComponents = async () => {
     const componentModules = import.meta.glob('../dynamicComponents/*.tsx');
     
     for (const path in componentModules) {
-      const module = await componentModules[path]();
+      const module = await componentModules[path]() as ComponentModule;
       const componentName = path.split('/').pop()?.replace('.tsx', '') || '';
       
       if (window.__DYNAMIC_COMPONENTS__ && module.default) {
@@ -85,16 +90,16 @@ const PluginsApp: React.FC = () => {
   };
 
   return (
-    <div className="app-container" style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-      <h1>Dynamic Component Loader</h1>
+    <div className="max-w-4xl mx-auto p-5">
+      <h1 className="text-2xl font-bold mb-6">Dynamic Component Loader</h1>
       
       {/* Plugin Manager */}
       <PluginManager />
       
       {componentKeys.length === 0 ? (
-        <div className="no-components">
+        <div className="mt-6">
           <p>No components registered yet. Use the global registry to register components.</p>
-          <pre style={{ backgroundColor: '#f5f5f5', padding: '10px', borderRadius: '4px', overflow: 'auto' }}>
+          <pre className="bg-gray-100 p-3 rounded-md overflow-auto mt-3 text-sm">
             {`// Register a component dynamically without importing it in App
 const MyComponent = () => <div>My Component Content</div>;
 
@@ -108,13 +113,13 @@ registerDynamicComponent('MyComponent', MyComponent);`}
         </div>
       ) : (
         <>
-          <div className="component-selector" style={{ marginBottom: '20px', marginTop: '20px' }}>
-            <label htmlFor="component-select">Select Component: </label>
+          <div className="mb-5 mt-5">
+            <label htmlFor="component-select" className="mr-2">Select Component: </label>
             <select 
               id="component-select"
               value={selectedComponent || ''}
               onChange={(e) => setSelectedComponent(e.target.value)}
-              style={{ padding: '8px', marginLeft: '10px' }}
+              className="p-2 ml-2 border border-gray-300 rounded-md"
             >
               {componentKeys.map(key => (
                 <option key={key} value={key} disabled={!isComponentEnabled(key)}>
@@ -127,7 +132,7 @@ registerDynamicComponent('MyComponent', MyComponent);`}
           {selectedComponent && isComponentEnabled(selectedComponent) ? (
             <DynamicComponentWrapper componentKey={selectedComponent} />
           ) : selectedComponent ? (
-            <div style={{ padding: '15px', backgroundColor: '#fff2f0', border: '1px solid #ffccc7', borderRadius: '4px' }}>
+            <div className="p-4 bg-red-50 border border-red-200 rounded-md">
               <p>The selected component is currently disabled. Enable it from the Plugin Manager to use it.</p>
             </div>
           ) : null}

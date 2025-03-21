@@ -1,8 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/utils/dynamicComponentLoader.ts
-
+import { ComponentType } from 'react';
 import { registerDynamicComponent } from "./dynamicComponentStore";
 
+// Define the interface for the module
+interface ComponentModule {
+  default: ComponentType<any>;
+}
 
 // Define a type for the window with our custom properties
 declare global {
@@ -25,7 +29,7 @@ export const loadDynamicComponent = async (
 ): Promise<void> => {
   try {
     // Dynamically import the component
-    const module = await import(/* @vite-ignore */ componentPath);
+    const module = await import(/* @vite-ignore */ componentPath) as ComponentModule;
     
     // Get the default export which should be the component
     const Component = module.default;

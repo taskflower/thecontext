@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import useDynamicComponentStore from './dynamicComponentStore';
 
-
 interface DynamicComponentWrapperProps {
   componentKey: string;
 }
@@ -36,34 +35,34 @@ const DynamicComponentWrapper: React.FC<DynamicComponentWrapperProps> = ({ compo
   };
   
   return (
-    <div className="component-wrapper" style={{ border: '1px solid #ccc', padding: '15px', margin: '10px 0', borderRadius: '4px' }}>
-      <h3>Component: {componentKey}</h3>
+    <div className="border border-gray-300 p-4 my-3 rounded-md">
+      <h3 className="text-lg font-medium">Component: {componentKey}</h3>
       
-      <div className="component-container" style={{ margin: '15px 0', padding: '10px', backgroundColor: '#f5f5f5' }}>
+      <div className="my-4 p-3 bg-gray-100">
         <Component data={componentData} />
       </div>
       
-      <div className="component-controls" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div className="flex flex-col gap-3">
         <textarea
           value={inputData}
           onChange={(e) => setInputData(e.target.value)}
           placeholder="Enter JSON data to send to component"
-          style={{ width: '100%', height: '100px', padding: '8px' }}
+          className="w-full h-24 p-2 border border-gray-300 rounded-md"
         />
         
         <button 
           onClick={handleSendData}
-          style={{ padding: '8px 16px', backgroundColor: '#4f8fef', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+          className="px-4 py-2 bg-blue-500 text-white border-none rounded-md cursor-pointer hover:bg-blue-600"
         >
           Send Data to Component
         </button>
         
-        <div className="component-data-display">
-          <h4>Current Component Data:</h4>
+        <div>
+          <h4 className="font-medium mb-2">Current Component Data:</h4>
           <textarea
             value={currentData ? JSON.stringify(currentData, null, 2) : ''}
             readOnly
-            style={{ width: '100%', height: '100px', padding: '8px', backgroundColor: '#f9f9f9' }}
+            className="w-full h-24 p-2 bg-gray-50 border border-gray-300 rounded-md"
           />
         </div>
       </div>
