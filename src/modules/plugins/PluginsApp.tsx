@@ -7,7 +7,8 @@ import {
   Code,
   AlertCircle,
   Power,
-  PowerOff
+  PowerOff,
+  Settings,
 } from "lucide-react";
 import useDynamicComponentStore from "./pluginsStore";
 import DynamicComponentWrapper from "./PluginWrapper";
@@ -26,12 +27,15 @@ declare global {
   }
 }
 
+// Tab type for our tabbed interface
+type TabType = 'plugins' | 'manager';
+
 // This is our main app that will render dynamic components
 const PluginsApp: React.FC = () => {
   const [selectedComponent, setSelectedComponent] = useState<string | null>(
     null
   );
-  const [showPluginManager, setShowPluginManager] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>('plugins');
   const getComponentKeys = useDynamicComponentStore(
     (state) => state.getComponentKeys
   );
@@ -114,38 +118,42 @@ const PluginsApp: React.FC = () => {
   const enabledComponentKeys = componentKeys.filter(isComponentEnabled);
 
   return (
-    <div className="w-full max-w-6xl mx-auto">
-      {/* Plugin Manager toggle */}
-      <div className="mb-6">
-        <button
-          className="flex items-center px-4 py-2 text-sm bg-primary/10 text-primary rounded-md"
-          onClick={() => setShowPluginManager(!showPluginManager)}
-        >
-          <Puzzle className="h-4 w-4 mr-2" />
-          {showPluginManager ? "Hide" : "Show"} Plugin Manager
-        </button>
-      </div>
+    <div className="w-full">
+      {/* Tab navigation */}
+      <nav className="p-1 flex border-b border-border mb-4">
+        <TabButton 
+          icon={<Puzzle className="h-4 w-4" />}
+          label="Plugins"
+          active={activeTab === 'plugins'}
+          onClick={() => setActiveTab('plugins')}
+        />
+        <TabButton 
+          icon={<Settings className="h-4 w-4" />}
+          label="Manager"
+          active={activeTab === 'manager'}
+          onClick={() => setActiveTab('manager')}
+        />
+      </nav>
 
-      {showPluginManager && (
-        <div className="mb-6">
-          <PluginManager />
-        </div>
+      {/* Tab content */}
+      {activeTab === 'manager' && (
+        <PluginManager />
       )}
 
-      {/* Two column layout for plugins */}
-      {componentKeys.length === 0 ? (
-        <div className="rounded-lg border border-border p-6 text-center">
-          <div className="mb-4 flex justify-center">
-            <AlertCircle className="h-12 w-12 text-muted-foreground" />
-          </div>
-          <h3 className="text-lg font-medium mb-2">No Plugins Available</h3>
-          <p className="text-muted-foreground mb-4">
-            No components have been registered yet. Use the global registry to
-            register components.
-          </p>
-          <div className="bg-muted p-4 rounded-md overflow-auto text-left text-sm">
-            <pre className="whitespace-pre-wrap">
-              {`// Register a component dynamically
+      {activeTab === 'plugins' && (
+        componentKeys.length === 0 ? (
+          <div className="rounded-lg border border-border p-6 text-center">
+            <div className="mb-4 flex justify-center">
+              <AlertCircle className="h-12 w-12 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-medium mb-2">No Plugins Available</h3>
+            <p className="text-muted-foreground mb-4">
+              No components have been registered yet. Use the global registry to
+              register components.
+            </p>
+            <div className="bg-muted p-4 rounded-md overflow-auto text-left text-sm">
+              <pre className="whitespace-pre-wrap">
+                {`// Register a component dynamically
 const MyComponent = () => <div>My Component Content</div>;
 
 // Method 1: Using the window object
@@ -154,102 +162,126 @@ window.__DYNAMIC_COMPONENTS__.register('MyComponent', MyComponent);
 // Method 2: Using the exported function
 import { registerDynamicComponent } from './store/dynamicComponentStore';
 registerDynamicComponent('MyComponent', MyComponent);`}
-            </pre>
-          </div>
-        </div>
-      ) : (
-        <div className="flex gap-6">
-          {/* Left column: Plugin cards */}
-          <div className="w-1/3 space-y-3">
-            <h2 className="text-lg font-medium mb-2 px-2">Available Plugins</h2>
-            {componentKeys.map((key) => (
-              <div
-                key={key}
-                className={cn(
-                  "border border-border rounded-lg overflow-hidden cursor-pointer transition-colors",
-                  selectedComponent === key 
-                    ? "border-primary/60 bg-primary/5" 
-                    : "hover:bg-muted/10",
-                  !isComponentEnabled(key) && "opacity-70"
-                )}
-                onClick={() => isComponentEnabled(key) && setSelectedComponent(key)}
-              >
-                <div className="p-3 flex items-center justify-between">
-                  <div className="flex items-center">
-                    <ComponentIcon name={key} className="h-5 w-5 mr-3 text-primary" />
-                    <div>
-                      <h3 className="font-medium">{key}</h3>
-                      <p className="text-xs text-muted-foreground">Component Plugin</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      togglePlugin(key);
-                    }}
-                    className={cn(
-                      "p-1.5 rounded-md",
-                      isComponentEnabled(key)
-                        ? "text-destructive hover:bg-destructive/10"
-                        : "text-primary hover:bg-primary/10"
-                    )}
-                  >
-                    {isComponentEnabled(key) ? (
-                      <PowerOff className="h-4 w-4" />
-                    ) : (
-                      <Power className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-                <div className={cn(
-                  "px-3 py-2 text-xs border-t border-border flex justify-between items-center",
-                  isComponentEnabled(key) 
-                    ? "bg-muted/20" 
-                    : "bg-muted/40"
-                )}>
-                  <span className={cn(
-                    "px-1.5 py-0.5 rounded-full",
-                    isComponentEnabled(key)
-                      ? "bg-primary/10 text-primary"
-                      : "bg-muted text-muted-foreground"
-                  )}>
-                    {isComponentEnabled(key) ? "Enabled" : "Disabled"}
-                  </span>
-                  {selectedComponent === key && (
-                    <span className="text-primary">Active</span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Right column: Plugin preview */}
-          <div className="w-2/3">
-            <h2 className="text-lg font-medium mb-2 px-2">Plugin Preview</h2>
-            <div className="border border-border rounded-lg overflow-hidden">
-              {selectedComponent && isComponentEnabled(selectedComponent) ? (
-                <DynamicComponentWrapper componentKey={selectedComponent} />
-              ) : selectedComponent ? (
-                <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-md text-center">
-                  <AlertCircle className="h-8 w-8 text-destructive mx-auto mb-2" />
-                  <p className="text-sm">
-                    The selected component is currently disabled. Enable it to use it.
-                  </p>
-                </div>
-              ) : enabledComponentKeys.length > 0 ? (
-                <div className="text-center p-6 text-muted-foreground">
-                  <p>Select a plugin from the left column to preview it here.</p>
-                </div>
-              ) : (
-                <div className="text-center p-6 text-muted-foreground">
-                  <p>All plugins are currently disabled.</p>
-                </div>
-              )}
+              </pre>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex gap-6">
+            {/* Left column: Plugin cards */}
+            <div className="w-1/3 space-y-3">
+              <h2 className="text-lg font-medium mb-2 px-2">Available Plugins</h2>
+              {componentKeys.map((key) => (
+                <div
+                  key={key}
+                  className={cn(
+                    "border border-border rounded-lg overflow-hidden cursor-pointer transition-colors",
+                    selectedComponent === key 
+                      ? "border-primary/60 bg-primary/5" 
+                      : "hover:bg-muted/10",
+                    !isComponentEnabled(key) && "opacity-70"
+                  )}
+                  onClick={() => isComponentEnabled(key) && setSelectedComponent(key)}
+                >
+                  <div className="p-3 flex items-center justify-between">
+                    <div className="flex items-center">
+                      <ComponentIcon name={key} className="h-5 w-5 mr-3 text-primary" />
+                      <div>
+                        <h3 className="font-medium">{key}</h3>
+                        <p className="text-xs text-muted-foreground">Component Plugin</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        togglePlugin(key);
+                      }}
+                      className={cn(
+                        "p-1.5 rounded-md",
+                        isComponentEnabled(key)
+                          ? "text-destructive hover:bg-destructive/10"
+                          : "text-primary hover:bg-primary/10"
+                      )}
+                    >
+                      {isComponentEnabled(key) ? (
+                        <PowerOff className="h-4 w-4" />
+                      ) : (
+                        <Power className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                  <div className={cn(
+                    "px-3 py-2 text-xs border-t border-border flex justify-between items-center",
+                    isComponentEnabled(key) 
+                      ? "bg-muted/20" 
+                      : "bg-muted/40"
+                  )}>
+                    <span className={cn(
+                      "px-1.5 py-0.5 rounded-full",
+                      isComponentEnabled(key)
+                        ? "bg-primary/10 text-primary"
+                        : "bg-muted text-muted-foreground"
+                    )}>
+                      {isComponentEnabled(key) ? "Enabled" : "Disabled"}
+                    </span>
+                    {selectedComponent === key && (
+                      <span className="text-primary">Active</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Right column: Plugin preview */}
+            <div className="w-2/3">
+              <h2 className="text-lg font-medium mb-2 px-2">Plugin Preview</h2>
+              <div className="border border-border rounded-lg overflow-hidden">
+                {selectedComponent && isComponentEnabled(selectedComponent) ? (
+                  <DynamicComponentWrapper componentKey={selectedComponent} />
+                ) : selectedComponent ? (
+                  <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-md text-center">
+                    <AlertCircle className="h-8 w-8 text-destructive mx-auto mb-2" />
+                    <p className="text-sm">
+                      The selected component is currently disabled. Enable it to use it.
+                    </p>
+                  </div>
+                ) : enabledComponentKeys.length > 0 ? (
+                  <div className="text-center p-6 text-muted-foreground">
+                    <p>Select a plugin from the left column to preview it here.</p>
+                  </div>
+                ) : (
+                  <div className="text-center p-6 text-muted-foreground">
+                    <p>All plugins are currently disabled.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )
       )}
     </div>
+  );
+};
+
+// Tab button component (similar to App.tsx)
+const TabButton = ({ icon, label, active, onClick }: { 
+  icon: React.ReactNode, 
+  label: string, 
+  active: boolean, 
+  onClick: () => void 
+}) => {
+  return (
+    <button 
+      className={cn(
+        "flex-1 py-2 px-3 text-xs font-medium rounded-md flex flex-col items-center gap-1",
+        active 
+          ? "bg-background text-primary" 
+          : "text-muted-foreground hover:bg-muted/50"
+      )}
+      onClick={onClick}
+    >
+      {icon}
+      <span>{label}</span>
+    </button>
   );
 };
 
