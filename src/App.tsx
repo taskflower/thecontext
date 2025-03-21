@@ -50,24 +50,28 @@ const App = () => {
                 onClick={() => setActiveTab('workspace')}
               >
                 <FolderOpen className="h-4 w-4 mx-auto" />
+                <span className="text-xs mt-1 block">Workspace</span>
               </button>
               <button 
                 className={`flex-1 py-2 ${activeTab === 'scenarios' ? 'border-b-2 border-blue-500' : ''}`}
                 onClick={() => setActiveTab('scenarios')}
               >
                 <GitBranch className="h-4 w-4 mx-auto" />
+                <span className="text-xs mt-1 block">Scenarios</span>
               </button>
               <button 
                 className={`flex-1 py-2 ${activeTab === 'nodes' ? 'border-b-2 border-blue-500' : ''}`}
                 onClick={() => setActiveTab('nodes')}
               >
                 <Layers className="h-4 w-4 mx-auto" />
+                <span className="text-xs mt-1 block">Nodes</span>
               </button>
               <button 
                 className={`flex-1 py-2 ${activeTab === 'edges' ? 'border-b-2 border-blue-500' : ''}`}
                 onClick={() => setActiveTab('edges')}
               >
                 <Code className="h-4 w-4 mx-auto" />
+                <span className="text-xs mt-1 block">Edges</span>
               </button>
             </div>
             
@@ -82,59 +86,63 @@ const App = () => {
 
         {/* Main workspace */}
         <main className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-hidden">
+          {/* Flow graph area - dynamically adjusts height based on bottom panel visibility */}
+          <div className={`${showBottomPanel ? 'h-1/3' : 'flex-1'} overflow-hidden`}>
             <FlowGraph />
           </div>
 
-          {/* Bottom toolbar */}
+          {/* Bottom panel - integrated within the layout */}
+          {showBottomPanel && (
+            <div className="h-2/3 border-t bg-card overflow-hidden flex flex-col">
+              <div className="flex items-center justify-between px-3 py-2 border-b">
+                <h3 className="text-sm font-medium">
+                  {bottomPanelContent === 'context' && 'Context Manager'}
+                  {bottomPanelContent === 'conversation' && 'Conversation History'}
+                  {bottomPanelContent === 'plugins' && 'Plugins'}
+                </h3>
+                <button 
+                  className="p-1 text-sm"
+                  onClick={() => setShowBottomPanel(false)}
+                >
+                  ×
+                </button>
+              </div>
+              <div className="flex-1 bg-white overflow-auto">
+                {bottomPanelContent === 'plugins' && <div className="p-3"><PluginsApp/></div>}
+                {bottomPanelContent === 'context' && <div className="p-3">Context content</div>}
+                {bottomPanelContent === 'conversation' && <div className="p-3">Conversation content</div>}
+              </div>
+            </div>
+          )}
+
+          {/* Bottom toolbar - always at the bottom */}
           <div className="border-t bg-card py-1 px-3 flex items-center">
             <div className="flex items-center gap-2">
               <button 
-                className={`py-1 px-2 rounded ${bottomPanelContent === 'context' && showBottomPanel ? 'bg-gray-200' : ''}`}
+                className={`py-1 px-2 rounded flex items-center gap-1 ${bottomPanelContent === 'context' && showBottomPanel ? 'bg-gray-200' : ''}`}
                 onClick={() => bottomPanelContent === 'context' && showBottomPanel ? setShowBottomPanel(false) : showPanel('context')}
               >
                 <Database className="h-3.5 w-3.5" />
+                <span className="text-xs">Context</span>
               </button>
               <button 
-                className={`py-1 px-2 rounded ${bottomPanelContent === 'conversation' && showBottomPanel ? 'bg-gray-200' : ''}`}
+                className={`py-1 px-2 rounded flex items-center gap-1 ${bottomPanelContent === 'conversation' && showBottomPanel ? 'bg-gray-200' : ''}`}
                 onClick={() => bottomPanelContent === 'conversation' && showBottomPanel ? setShowBottomPanel(false) : showPanel('conversation')}
               >
                 <MessageSquare className="h-3.5 w-3.5" />
+                <span className="text-xs">Conversation</span>
               </button>
               <button 
-                className={`py-1 px-2 rounded ${bottomPanelContent === 'plugins' && showBottomPanel ? 'bg-gray-200' : ''}`}
+                className={`py-1 px-2 rounded flex items-center gap-1 ${bottomPanelContent === 'plugins' && showBottomPanel ? 'bg-gray-200' : ''}`}
                 onClick={() => bottomPanelContent === 'plugins' && showBottomPanel ? setShowBottomPanel(false) : showPanel('plugins')}
               >
                 <Puzzle className="h-3.5 w-3.5" />
+                <span className="text-xs">Plugins</span>
               </button>
             </div>
           </div>
         </main>
       </div>
-      
-      {/* Bottom panel */}
-      {showBottomPanel && (
-        <div className="h-2/3 absolute bottom-0 left-0 right-0 border-t bg-card p-3 overflow-hidden">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium">
-              {bottomPanelContent === 'context' && 'Context Manager'}
-              {bottomPanelContent === 'conversation' && 'Conversation History'}
-              {bottomPanelContent === 'plugins' && 'Plugins'}
-            </h3>
-            <button 
-              className="p-1 text-sm"
-              onClick={() => setShowBottomPanel(false)}
-            >
-              ×
-            </button>
-          </div>
-          <div className="bg-white rounded h-[calc(100%-30px)] overflow-auto">
-            {bottomPanelContent === 'plugins' && <div className="p-3"><PluginsApp/></div>}
-            {bottomPanelContent === 'context' && <div className="p-3">Context content</div>}
-            {bottomPanelContent === 'conversation' && <div className="p-3">Conversation content</div>}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
