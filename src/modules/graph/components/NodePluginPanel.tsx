@@ -1,3 +1,5 @@
+// src/modules/graph/components/NodePluginPanel.tsx
+
 import React from 'react';
 import { Puzzle, AlertCircle } from 'lucide-react';
 import { useAppStore } from '../../store';
@@ -52,7 +54,8 @@ const NodePluginPanel: React.FC = () => {
         </div>
       </div>
       
-      <DynamicComponentWrapper componentKey={node.pluginKey} />
+      {/* Przekazujemy ID węzła, aby wrapper wiedział, że ma pobierać dane z węzła */}
+      <DynamicComponentWrapper componentKey={node.pluginKey} nodeId={selectedNodeId} />
     </div>
   );
 };

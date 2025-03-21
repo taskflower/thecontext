@@ -295,7 +295,13 @@ const SimplePluginDialog = ({ nodeId, onClose }: { nodeId: string, onClose: () =
   const pluginKeys = useDynamicComponentStore.getState().getComponentKeys();
   
   const handleSelect = (pluginKey: string | null) => {
-    useAppStore.getState().setNodePlugin(nodeId, pluginKey);
+    // Jeśli usuwamy plugin, przekazujemy null
+    if (pluginKey === null) {
+      useAppStore.getState().setNodePlugin(nodeId, null);
+    } else {
+      // Przy dodawaniu pluginu możemy zainicjować dane domyślne
+      useAppStore.getState().setNodePlugin(nodeId, pluginKey, {});
+    }
     onClose();
   };
   

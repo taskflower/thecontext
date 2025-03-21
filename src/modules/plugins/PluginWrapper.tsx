@@ -1,4 +1,4 @@
-// src/modules/plugins/PluginWrapper.tsx
+// src/modules/plugins/PluginWrapper.tsx - fragment do modyfikacji
 
 import React, { useState, useEffect } from 'react';
 import { Code, Database, ArrowRightCircle, Info } from 'lucide-react';
@@ -9,9 +9,13 @@ import { cn } from '@/utils/utils';
 
 interface DynamicComponentWrapperProps {
   componentKey: string;
+  nodeId?: string; // Opcjonalny ID węzła, jeśli plugin jest powiązany z węzłem
 }
 
-const DynamicComponentWrapper: React.FC<DynamicComponentWrapperProps> = ({ componentKey }) => {
+const DynamicComponentWrapper: React.FC<DynamicComponentWrapperProps> = ({ 
+  componentKey,
+  nodeId 
+}) => {
   const [inputData, setInputData] = useState<string>('');
   const [currentData, setCurrentData] = useState<unknown>(null);
   const [showConfig, setShowConfig] = useState(false);
@@ -20,23 +24,47 @@ const DynamicComponentWrapper: React.FC<DynamicComponentWrapperProps> = ({ compo
   // Get app state data
   const workspaceId = useAppStore(state => state.selected.workspace);
   const scenarioId = useAppStore(state => state.selected.scenario);
-  const nodeId = useAppStore(state => state.selected.node);
+  const selectedNodeId = useAppStore(state => state.selected.node);
   const stateVersion = useAppStore(state => state.stateVersion);
   
   // Get workspace, scenario, and node details
   const workspace = useAppStore(state => state.items.find(w => w.id === workspaceId));
   const scenario = workspace?.children.find(s => s.id === scenarioId);
-  const node = scenario?.children.find(n => n.id === nodeId);
+  const node = nodeId 
+    ? scenario?.children.find(n => n.id === nodeId) 
+    : scenario?.children.find(n => n.id === selectedNodeId);
   
   // Get component from the dynamic component store
   const component = useDynamicComponentStore(state => state.getComponent(componentKey));
-  const componentData = useDynamicComponentStore(state => state.getComponentData(componentKey));
-  const setComponentData = useDynamicComponentStore(state => state.setComponentData);
+  
+  // Pobieramy dane z różnych źródeł w zależności od kontekstu
+  const getPluginData = () => {
+    // Jeśli mamy nodeId i node ma dane dla tego pluginu
+    if (nodeId && node?.pluginData && componentKey in (node.pluginData || {})) {
+      return node.pluginData[componentKey];
+    }
+    
+    // W przeciwnym razie użyj globalnych danych pluginu
+    return useDynamicComponentStore.getState().getComponentData(componentKey);
+  };
+  
+  const componentData = getPluginData();
+  
+  // Funkcja aktualizująca dane pluginu
+  const setComponentData = (data: unknown) => {
+    if (nodeId && node) {
+      // Jeśli mamy nodeId, aktualizujemy dane pluginu w węźle
+      useAppStore.getState().updateNodePluginData(nodeId, componentKey, data);
+    } else {
+      // W przeciwnym razie aktualizujemy globalne dane pluginu
+      useDynamicComponentStore.getState().setComponentData(componentKey, data);
+    }
+  };
   
   // Update currentData when componentData changes
   useEffect(() => {
     setCurrentData(componentData);
-  }, [componentData]);
+  }, [componentData, stateVersion]);
 
   // Create the app context data that will be passed to the component
   const appContextData: AppContextData = {
@@ -46,7 +74,7 @@ const DynamicComponentWrapper: React.FC<DynamicComponentWrapperProps> = ({ compo
     selection: {
       workspaceId,
       scenarioId,
-      nodeId
+      nodeId: selectedNodeId
     },
     stateVersion
   };
@@ -65,7 +93,7 @@ const DynamicComponentWrapper: React.FC<DynamicComponentWrapperProps> = ({ compo
   const handleSendData = () => {
     try {
       const parsedData = inputData.trim() ? JSON.parse(inputData) : null;
-      setComponentData(componentKey, parsedData);
+      setComponentData(parsedData);
     } catch (e) {
       alert(`Invalid JSON format: ${(e as Error).message}`);
     }
@@ -78,6 +106,9 @@ const DynamicComponentWrapper: React.FC<DynamicComponentWrapperProps> = ({ compo
         <h3 className="text-base font-medium flex items-center">
           <Code className="h-4 w-4 mr-2 text-primary" />
           {componentKey}
+          {nodeId && (
+            <span className="ml-2 text-xs text-muted-foreground">(Node Plugin)</span>
+          )}
         </h3>
         <div className="flex items-center space-x-2">
           <button
@@ -155,6 +186,7 @@ const DynamicComponentWrapper: React.FC<DynamicComponentWrapperProps> = ({ compo
                 <span className="flex items-center text-muted-foreground">
                   <Database className="h-4 w-4 mr-1" />
                   Current Component Data
+                  {nodeId && <span className="ml-1 text-xs">(Node Specific)</span>}
                 </span>
               </div>
               <pre className="bg-muted/10 p-3 rounded-md text-xs overflow-auto max-h-40 whitespace-pre-wrap">

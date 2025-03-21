@@ -1,11 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BaseItem, Position } from "../common/types";
 
+export interface PluginDataMap {
+  [pluginKey: string]: unknown;
+}
+
 export interface FlowNode extends BaseItem {
   label: string;
   value: number;
   position: Position;
-  pluginKey?: string; // Add this line to store plugin reference
+  pluginKey?: string;
+  pluginData?: PluginDataMap; 
 }
 
 export interface Edge extends BaseItem {
@@ -20,7 +25,9 @@ export interface NodeActions {
   addNode: (payload: NodePayload) => void;
   deleteNode: (nodeId: string) => void;
   updateNodePosition: (nodeId: string, position: Position) => void;
-  setNodePlugin: (nodeId: string, pluginKey: string | null) => void; // Add this line
+  setNodePlugin: (nodeId: string, pluginKey: string | null, initialData?: unknown) => void;
+  updateNodePluginData: (nodeId: string, pluginKey: string, data: unknown) => void;
+  getNodePluginData: (nodeId: string, pluginKey: string) => unknown;
 }
 
 export interface EdgeActions {
@@ -32,7 +39,8 @@ export interface NodePayload {
   label: string;
   value: string | number;
   position?: Position;
-  pluginKey?: string; // Add this line
+  pluginKey?: string;
+  pluginData?: PluginDataMap;
 }
 
 export interface EdgePayload {
