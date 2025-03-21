@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { Code, Database, ArrowRightCircle, Info } from 'lucide-react';
 import useDynamicComponentStore from './pluginsStore';
 import { useAppStore } from '../store';
-import { AppContextData, PluginComponentProps } from './types';
+import { AppContextData } from './types';
+import type { PluginComponentProps } from './types';
 import { cn } from '@/utils/utils';
 
 interface DynamicComponentWrapperProps {

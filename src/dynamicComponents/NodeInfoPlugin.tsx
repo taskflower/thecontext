@@ -55,9 +55,9 @@ const NodeInfoPlugin: React.FC<PluginComponentProps<NodeInfoPluginData>> = ({
           <select
             value={priority}
             onChange={(e) => {
-              setPriority(e.target.value);
-              setTimeout(handleSave, 0);
-            }}
+                setPriority(e.target.value as 'low' | 'medium' | 'high');
+                setTimeout(handleSave, 0);
+              }}
             className="w-full px-3 py-2 bg-background border border-border rounded-md"
           >
             <option value="low">Low</option>
