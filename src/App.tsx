@@ -87,10 +87,33 @@ const App = () => {
         {/* Main workspace */}
         <main className="flex-1 flex flex-col overflow-hidden">
           {/* Flow graph area - flex-1 to take remaining space when bottom panel is visible */}
-          <div className="flex-1 overflow-hidden">
+          <div className={`flex-1 overflow-hidden ${showBottomPanel ? 'h-1/3' : 'h-full'}`}>
             <FlowGraph />
           </div>
 
+          {/* Bottom panel - directly below flow graph, above toolbar */}
+          {showBottomPanel && (
+            <div className="border-t bg-card overflow-hidden flex flex-col h-2/3">
+              <div className="flex items-center justify-between px-3 py-2 border-b">
+                <h3 className="text-sm font-medium">
+                  {bottomPanelContent === 'context' && 'Context Manager'}
+                  {bottomPanelContent === 'conversation' && 'Conversation History'}
+                  {bottomPanelContent === 'plugins' && 'Plugins'}
+                </h3>
+                <button 
+                  className="p-1 text-sm"
+                  onClick={() => setShowBottomPanel(false)}
+                >
+                  ×
+                </button>
+              </div>
+              <div className="flex-1 bg-white overflow-auto">
+                {bottomPanelContent === 'plugins' && <div className="p-3"><PluginsApp/></div>}
+                {bottomPanelContent === 'context' && <div className="p-3">Context content</div>}
+                {bottomPanelContent === 'conversation' && <div className="p-3">Conversation content</div>}
+              </div>
+            </div>
+          )}
           
           {/* Bottom toolbar - always at the bottom */}
           <div className="border-t bg-card py-1 px-3 flex items-center">
@@ -118,31 +141,6 @@ const App = () => {
               </button>
             </div>
           </div>
-
-          {/* Bottom panel - directly below flow graph, above toolbar */}
-          {showBottomPanel && (
-            <div className="border-t bg-card overflow-hidden flex flex-col h-64">
-              <div className="flex items-center justify-between px-3 py-2 border-b">
-                <h3 className="text-sm font-medium">
-                  {bottomPanelContent === 'context' && 'Context Manager'}
-                  {bottomPanelContent === 'conversation' && 'Conversation History'}
-                  {bottomPanelContent === 'plugins' && 'Plugins'}
-                </h3>
-                <button 
-                  className="p-1 text-sm"
-                  onClick={() => setShowBottomPanel(false)}
-                >
-                  ×
-                </button>
-              </div>
-              <div className="flex-1 bg-white overflow-auto">
-                {bottomPanelContent === 'plugins' && <div className="p-3"><PluginsApp/></div>}
-                {bottomPanelContent === 'context' && <div className="p-3">Context content</div>}
-                {bottomPanelContent === 'conversation' && <div className="p-3">Conversation content</div>}
-              </div>
-            </div>
-          )}
-
         </main>
       </div>
     </div>

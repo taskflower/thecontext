@@ -1,3 +1,4 @@
+// FlowGraph.jsx - Set graph to use full available height
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback, useEffect } from 'react';
 import ReactFlow, { 
@@ -121,7 +122,7 @@ const FlowGraph = () => {
   }, [calculateFlowPath]);
   
   return (
-    <div className="bg-white rounded-md shadow-sm p-0 h-[400px] relative">
+    <div className="bg-white rounded-md shadow-sm p-0 h-full w-full relative">
       <div className="absolute top-2 right-2 z-10">
         <button 
           onClick={handlePlay}
@@ -159,4 +160,4 @@ const FlowGraph = () => {
   );
 };
 
-export default FlowGraph; 
+export default FlowGraph;
