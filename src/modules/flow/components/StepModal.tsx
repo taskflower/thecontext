@@ -1,7 +1,7 @@
 import React from "react";
 import { X } from "lucide-react";
 import { StepModalProps } from "../../ui/types";
-import DynamicComponentWrapper from "../../plugins/PluginWrapper";
+import FullPluginWrapper from "@/modules/plugins/wrappers/FullPluginWrapper";
 
 export const StepModal: React.FC<StepModalProps> = ({
   steps,
@@ -41,7 +41,7 @@ export const StepModal: React.FC<StepModalProps> = ({
                 <h4 className="font-medium">Node Plugin: {currentNode.pluginKey}</h4>
               </div>
               <div className="p-4">
-                <DynamicComponentWrapper componentKey={currentNode.pluginKey} />
+                <FullPluginWrapper componentKey={currentNode.pluginKey} />
               </div>
             </div>
           )}

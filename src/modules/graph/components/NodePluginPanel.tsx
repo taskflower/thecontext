@@ -3,7 +3,8 @@
 import React from 'react';
 import { Puzzle, AlertCircle } from 'lucide-react';
 import { useAppStore } from '../../store';
-import DynamicComponentWrapper from '../../plugins/PluginWrapper';
+import FullPluginWrapper from '@/modules/plugins/wrappers/FullPluginWrapper';
+
 
 const NodePluginPanel: React.FC = () => {
   const selectedNodeId = useAppStore(state => state.selected.node);
@@ -55,7 +56,7 @@ const NodePluginPanel: React.FC = () => {
       </div>
       
       {/* Przekazujemy ID węzła, aby wrapper wiedział, że ma pobierać dane z węzła */}
-      <DynamicComponentWrapper componentKey={node.pluginKey} nodeId={selectedNodeId} />
+      <FullPluginWrapper componentKey={node.pluginKey} nodeId={selectedNodeId} />
     </div>
   );
 };

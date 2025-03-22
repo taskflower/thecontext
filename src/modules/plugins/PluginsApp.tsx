@@ -1,6 +1,5 @@
 // src/modules/plugins/PluginsApp.tsx
 import React, { useEffect, useState } from "react";
-import DynamicComponentWrapper from "./PluginWrapper";
 import { usePlugins } from "./pluginContext";
 import { 
   PluginCard, 
@@ -9,6 +8,7 @@ import {
   SelectPluginMessageUI, 
   AllPluginsDisabledMessageUI 
 } from "./components";
+import ManagerPluginWrapper from "./wrappers/ManagerPluginWrapper";
 
 const PluginsApp: React.FC = () => {
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
@@ -73,7 +73,7 @@ const PluginsApp: React.FC = () => {
             <h3 className="text-lg font-medium mb-2 px-2">Plugin Preview</h3>
             <div className="border border-border rounded-lg overflow-hidden">
               {selectedComponent && isPluginEnabled(selectedComponent) ? (
-                <DynamicComponentWrapper componentKey={selectedComponent} />
+                <ManagerPluginWrapper componentKey={selectedComponent} />
               ) : selectedComponent ? (
                 <PluginDisabledUI />
               ) : enabledComponentKeys.length > 0 ? (

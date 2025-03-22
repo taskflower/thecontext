@@ -1,18 +1,18 @@
-// src/modules/plugins/PluginWrapper.tsx
+// src/modules/plugins/FullPluginWrapper.tsx
 import React, { useState, useEffect } from 'react';
 import { Code, Database, ArrowRightCircle, Info } from 'lucide-react';
-import { usePlugins } from './pluginContext';
-import { useAppStore } from '../store';
-import { AppContextData } from './types';
-import type { PluginComponentProps } from './types';
-import { cn } from '@/utils/utils';
 
-interface DynamicComponentWrapperProps {
+import { cn } from '@/utils/utils';
+import { usePlugins } from '../pluginContext';
+import { useAppStore } from '@/modules/store';
+import { AppContextData } from '../types';
+
+interface FullPluginWrapperProps {
   componentKey: string;
   nodeId?: string; // Optional node ID, if the plugin is associated with a node
 }
 
-const DynamicComponentWrapper: React.FC<DynamicComponentWrapperProps> = ({ 
+const FullPluginWrapper: React.FC<FullPluginWrapperProps> = ({ 
   componentKey,
   nodeId 
 }) => {
@@ -21,7 +21,7 @@ const DynamicComponentWrapper: React.FC<DynamicComponentWrapperProps> = ({
   const [showConfig, setShowConfig] = useState(false);
   const [showContext, setShowContext] = useState(false);
   
-  // Use our plugin context
+  // Use plugin context
   const { 
     getPluginComponent, 
     getPluginData, 
@@ -94,7 +94,7 @@ const DynamicComponentWrapper: React.FC<DynamicComponentWrapperProps> = ({
     );
   }
   
-  // Forcefully cast the component to the right type
+  // Cast the component to the right type
   const Component = component as React.ComponentType<PluginComponentProps>;
   
   const handleSendData = () => {
@@ -207,4 +207,4 @@ const DynamicComponentWrapper: React.FC<DynamicComponentWrapperProps> = ({
   );
 };
 
-export default DynamicComponentWrapper;
+export default FullPluginWrapper;
