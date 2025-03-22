@@ -1,13 +1,12 @@
-// src/modules/graph/components/NodePluginPanel.tsx
-
-import React from 'react';
-import { Puzzle, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Puzzle, AlertCircle, Sliders } from 'lucide-react';
 import { useAppStore } from '../../store';
 import FullPluginWrapper from '@/modules/plugins/wrappers/FullPluginWrapper';
-
+import PluginOptionsEditor from './PluginOptionsEditor';
 
 const NodePluginPanel: React.FC = () => {
   const selectedNodeId = useAppStore(state => state.selected.node);
+  const [isEditingOptions, setIsEditingOptions] = useState(false);
   
   // Get the selected node
   const node = useAppStore(state => {
@@ -43,6 +42,9 @@ const NodePluginPanel: React.FC = () => {
     );
   }
   
+  // Get plugin data for display
+  const pluginData = node.pluginData?.[node.pluginKey];
+  
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -50,13 +52,49 @@ const NodePluginPanel: React.FC = () => {
           <Puzzle className="h-5 w-5 mr-2 text-primary" />
           <h3 className="text-base font-medium">Node Plugin</h3>
         </div>
-        <div className="text-sm bg-primary/10 text-primary px-2 py-0.5 rounded">
-          {node.pluginKey}
+        <div className="flex items-center space-x-2">
+          <div className="text-sm bg-primary/10 text-primary px-2 py-0.5 rounded">
+            {node.pluginKey}
+          </div>
+          <button
+            onClick={() => setIsEditingOptions(true)}
+            className="flex items-center justify-center p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground"
+            title="Edit Plugin Options"
+          >
+            <Sliders className="h-4 w-4" />
+          </button>
         </div>
       </div>
       
-      {/* Przekazujemy ID węzła, aby wrapper wiedział, że ma pobierać dane z węzła */}
+      {/* Plugin Options Summary */}
+      {pluginData && Object.keys(pluginData).length > 0 && (
+        <div className="p-2 bg-muted/30 rounded-md border border-border">
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="text-xs font-medium text-muted-foreground">Plugin Options</h4>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {Object.entries(pluginData).map(([key, value]) => (
+              <div key={key} className="text-sm">
+                <span className="font-medium">{key}:</span>{' '}
+                <span className="text-muted-foreground">
+                  {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {/* Plugin Instance */}
       <FullPluginWrapper componentKey={node.pluginKey} nodeId={selectedNodeId} />
+      
+      {/* Plugin Options Editor Dialog */}
+      {isEditingOptions && selectedNodeId && (
+        <PluginOptionsEditor
+          nodeId={selectedNodeId}
+          onClose={() => setIsEditingOptions(false)}
+        />
+      )}
     </div>
   );
 };

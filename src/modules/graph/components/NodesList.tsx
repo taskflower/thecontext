@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { PlusCircle, MoreHorizontal, X, Box, Square, Puzzle, CheckCircle, Settings } from "lucide-react";
+import { PlusCircle, MoreHorizontal, X, Box, Square, Puzzle, CheckCircle, Settings, Sliders } from "lucide-react";
 import { useAppStore } from "../../store";
 import { FlowNode } from "../types";
 import { useDialogState } from "../../common/hooks";
 import { cn } from "@/utils/utils";
 import useDynamicComponentStore from "../../plugins/pluginsStore";
+import PluginOptionsEditor from "./PluginOptionsEditor";
+
 
 const NodesList: React.FC = () => {
   const selectedWorkspaceId = useAppStore((state) => state.selected.workspace);
@@ -23,6 +25,7 @@ const NodesList: React.FC = () => {
   
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [configurePluginForNodeId, setConfigurePluginForNodeId] = useState<string | null>(null);
+  const [editPluginOptionsForNodeId, setEditPluginOptionsForNodeId] = useState<string | null>(null);
   
   const { isOpen, formData, openDialog, handleChange, setIsOpen } = useDialogState<{
     label: string;
@@ -47,6 +50,11 @@ const NodesList: React.FC = () => {
   
   const handleConfigurePlugin = (nodeId: string) => {
     setConfigurePluginForNodeId(nodeId);
+    setMenuOpen(null);
+  };
+  
+  const handleEditPluginOptions = (nodeId: string) => {
+    setEditPluginOptionsForNodeId(nodeId);
     setMenuOpen(null);
   };
   
@@ -91,6 +99,7 @@ const NodesList: React.FC = () => {
                 menuOpen={menuOpen === node.id}
                 toggleMenu={() => toggleMenu(node.id)}
                 onConfigurePlugin={() => handleConfigurePlugin(node.id)}
+                onEditPluginOptions={() => handleEditPluginOptions(node.id)}
               />
             ))}
           </ul>
@@ -170,6 +179,14 @@ const NodesList: React.FC = () => {
           onClose={() => setConfigurePluginForNodeId(null)} 
         />
       )}
+
+      {/* Plugin Options Editor Dialog */}
+      {editPluginOptionsForNodeId && (
+        <PluginOptionsEditor
+          nodeId={editPluginOptionsForNodeId}
+          onClose={() => setEditPluginOptionsForNodeId(null)}
+        />
+      )}
     </div>
   );
 };
@@ -182,6 +199,7 @@ interface NodeItemProps {
   menuOpen: boolean;
   toggleMenu: () => void;
   onConfigurePlugin: () => void;
+  onEditPluginOptions: () => void;
 }
 
 const NodeItem: React.FC<NodeItemProps> = ({
@@ -191,7 +209,8 @@ const NodeItem: React.FC<NodeItemProps> = ({
   onDelete,
   menuOpen,
   toggleMenu,
-  onConfigurePlugin
+  onConfigurePlugin,
+  onEditPluginOptions
 }) => {
   return (
     <li
@@ -262,6 +281,20 @@ const NodeItem: React.FC<NodeItemProps> = ({
               <Settings className="h-4 w-4 mr-2" />
               Configure Plugin
             </button>
+            
+            {node.pluginKey && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditPluginOptions();
+                }}
+                className="w-full text-left px-3 py-2 text-sm hover:bg-muted flex items-center"
+              >
+                <Sliders className="h-4 w-4 mr-2" />
+                Edit Plugin Options
+              </button>
+            )}
+            
             <button
               onClick={() => onDelete(node.id)}
               className="w-full text-left px-3 py-2 text-sm text-destructive hover:bg-muted flex items-center"
