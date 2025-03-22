@@ -1,8 +1,7 @@
-// src/modules/plugins/PluginWrapper.tsx - fragment do modyfikacji
-
+// src/modules/plugins/PluginWrapper.tsx
 import React, { useState, useEffect } from 'react';
 import { Code, Database, ArrowRightCircle, Info } from 'lucide-react';
-import useDynamicComponentStore from './pluginsStore';
+import { usePlugins } from './pluginContext';
 import { useAppStore } from '../store';
 import { AppContextData } from './types';
 import type { PluginComponentProps } from './types';
@@ -10,7 +9,7 @@ import { cn } from '@/utils/utils';
 
 interface DynamicComponentWrapperProps {
   componentKey: string;
-  nodeId?: string; // Opcjonalny ID węzła, jeśli plugin jest powiązany z węzłem
+  nodeId?: string; // Optional node ID, if the plugin is associated with a node
 }
 
 const DynamicComponentWrapper: React.FC<DynamicComponentWrapperProps> = ({ 
@@ -21,6 +20,13 @@ const DynamicComponentWrapper: React.FC<DynamicComponentWrapperProps> = ({
   const [currentData, setCurrentData] = useState<unknown>(null);
   const [showConfig, setShowConfig] = useState(false);
   const [showContext, setShowContext] = useState(false);
+  
+  // Use our plugin context
+  const { 
+    getPluginComponent, 
+    getPluginData, 
+    setPluginData 
+  } = usePlugins();
   
   // Get app state data
   const workspaceId = useAppStore(state => state.selected.workspace);
@@ -35,30 +41,30 @@ const DynamicComponentWrapper: React.FC<DynamicComponentWrapperProps> = ({
     ? scenario?.children.find(n => n.id === nodeId) 
     : scenario?.children.find(n => n.id === selectedNodeId);
   
-  // Get component from the dynamic component store
-  const component = useDynamicComponentStore(state => state.getComponent(componentKey));
+  // Get component from the plugin context
+  const component = getPluginComponent(componentKey);
   
-  // Pobieramy dane z różnych źródeł w zależności od kontekstu
-  const getPluginData = () => {
-    // Jeśli mamy nodeId i node ma dane dla tego pluginu
+  // Get plugin data from different sources depending on context
+  const getPluginDataForComponent = () => {
+    // If we have nodeId and node has data for this plugin
     if (nodeId && node?.pluginData && componentKey in (node.pluginData || {})) {
       return node.pluginData[componentKey];
     }
     
-    // W przeciwnym razie użyj globalnych danych pluginu
-    return useDynamicComponentStore.getState().getComponentData(componentKey);
+    // Otherwise use global plugin data
+    return getPluginData(componentKey);
   };
   
-  const componentData = getPluginData();
+  const componentData = getPluginDataForComponent();
   
-  // Funkcja aktualizująca dane pluginu
+  // Function to update plugin data
   const setComponentData = (data: unknown) => {
     if (nodeId && node) {
-      // Jeśli mamy nodeId, aktualizujemy dane pluginu w węźle
+      // If we have nodeId, update plugin data in the node
       useAppStore.getState().updateNodePluginData(nodeId, componentKey, data);
     } else {
-      // W przeciwnym razie aktualizujemy globalne dane pluginu
-      useDynamicComponentStore.getState().setComponentData(componentKey, data);
+      // Otherwise update global plugin data
+      setPluginData(componentKey, data);
     }
   };
   

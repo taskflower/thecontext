@@ -2,17 +2,35 @@
 
 ## Getting Started
 
-This application supports dynamic plugins that can be created and integrated without modifying the core codebase.
+This application supports dynamic plugins that can be created and integrated without modifying the core codebase. The plugin system uses React Context to provide a secure and type-safe way to register and manage plugins.
+
+## Setting Up the Plugin System
+
+1. Wrap your application with the `PluginProvider`:
+
+```tsx
+// In your App.tsx or main layout component
+import { PluginProvider } from './modules/plugins';
+
+function App() {
+  return (
+    <PluginProvider>
+      <YourAppComponents />
+    </PluginProvider>
+  );
+}
+```
 
 ## Creating a Plugin
 
 1. Create a new React component in the `src/dynamicComponents` directory:
 
-```jsx
+```tsx
 // src/dynamicComponents/MyPlugin.tsx
 import React from 'react';
+import { PluginComponentProps } from '../modules/plugins/types';
 
-const MyPlugin = ({ data, appContext }) => {
+const MyPlugin: React.FC<PluginComponentProps> = ({ data, appContext }) => {
   return (
     <div>
       <h2>My Custom Plugin</h2>
@@ -60,46 +78,85 @@ Each plugin receives two props:
 
 If your plugin is not in the `dynamicComponents` directory, register it manually:
 
-```js
-// Method 1: Using the global registry
-window.__DYNAMIC_COMPONENTS__.register('MyCustomPlugin', MyCustomComponent);
+```tsx
+// Method 1: Using the PluginRegistry
+import { PluginRegistry } from './modules/plugins';
 
-// Method 2: Using the imported function
-import { registerDynamicComponent } from './modules/plugins/pluginsStore';
-registerDynamicComponent('MyCustomPlugin', MyCustomComponent);
+// Register a component
+PluginRegistry.register('MyCustomPlugin', MyCustomComponent);
+
+// Method 2: Using the usePlugins hook in a React component
+import { usePlugins } from './modules/plugins';
+
+function MyComponent() {
+  const { registerPlugin } = usePlugins();
+  
+  // Register a plugin in a useEffect
+  useEffect(() => {
+    registerPlugin('MyCustomPlugin', MyCustomComponent);
+    
+    // Cleanup on unmount
+    return () => {
+      unregisterPlugin('MyCustomPlugin');
+    };
+  }, []);
+  
+  // Rest of your component
+}
 ```
 
-## Sending Data to Plugins
+## Accessing Plugins Programmatically
 
-To programmatically send data to a plugin:
+To access the plugin system from anywhere in your application:
 
-```js
-import useDynamicComponentStore from './modules/plugins/pluginsStore';
+```tsx
+import { usePlugins } from './modules/plugins';
 
-// Set data for a specific plugin
-useDynamicComponentStore.getState().setComponentData('MyPlugin', {
-  message: 'Hello from app',
-  timestamp: Date.now()
-});
+function MyComponent() {
+  const { 
+    getPluginKeys,            // Get all registered plugin keys
+    getPluginComponent,       // Get a specific plugin component
+    isPluginEnabled,          // Check if a plugin is enabled
+    togglePlugin,             // Toggle a plugin on/off
+    setPluginData,            // Send data to a plugin
+    getPluginData             // Get data from a plugin
+  } = usePlugins();
+  
+  // Example: Get all plugin keys
+  const pluginKeys = getPluginKeys();
+  
+  // Example: Send data to a plugin
+  const handleSendData = () => {
+    setPluginData('MyPlugin', {
+      message: 'Hello from app',
+      timestamp: Date.now()
+    });
+  };
+  
+  // Rest of your component
+}
 ```
 
-## Reacting to Plugin State Changes
+## Loading Plugins Dynamically at Runtime
 
-To know when plugins are enabled or disabled:
+To load a plugin dynamically after the application has started:
 
-```js
-// Listen for plugin state changes
-window.addEventListener('plugin-state-change', (event) => {
-  const pluginState = event.detail; // Object with plugin keys and enabled state
+```tsx
+import { loadPlugin } from './modules/plugins';
+
+// Load a plugin from a path
+async function loadExternalPlugin(path) {
+  const pluginKey = await loadPlugin(path);
   
-  // Example: { "MyPlugin": true, "AnotherPlugin": false }
-  console.log('Plugin state changed:', pluginState);
-  
-  // Check if a specific plugin is enabled
-  if (pluginState['MyPlugin']) {
-    // Do something when MyPlugin is enabled
+  if (pluginKey) {
+    console.log(`Successfully loaded plugin: ${pluginKey}`);
+  } else {
+    console.error('Failed to load plugin');
   }
-});
+}
+
+// Example usage
+loadExternalPlugin('./path/to/ExternalPlugin.js');
 ```
 
 ## Best Practices
@@ -109,3 +166,30 @@ window.addEventListener('plugin-state-change', (event) => {
 3. Keep plugins focused on a specific task
 4. Use the app context for accessing current workspace/scenario data
 5. Clean up any event listeners or external resources when your plugin component unmounts
+6. Use TypeScript interfaces for plugin props and data for better type safety
+7. Avoid using global state or direct DOM manipulation in plugins
+
+## Type Safety
+
+For better type safety, define interfaces for your plugin data:
+
+```tsx
+// Define your plugin's data interface
+interface MyPluginData {
+  config: {
+    color: string;
+    showDetails: boolean;
+  };
+  values: number[];
+}
+
+// Use it in your plugin
+const MyPlugin: React.FC<PluginComponentProps<MyPluginData>> = ({ data, appContext }) => {
+  // Now 'data' is typed as MyPluginData
+  return (
+    <div style={{ color: data?.config?.color }}>
+      {/* Plugin content */}
+    </div>
+  );
+};
+```
