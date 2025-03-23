@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { StateCreator } from "zustand";
 import { FlowActions } from "../graph/types";
 import { AppState } from "../store";
