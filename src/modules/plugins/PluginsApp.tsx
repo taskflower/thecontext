@@ -1,15 +1,14 @@
 // src/modules/plugins/PluginsApp.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { usePlugins } from "./pluginContext";
 import { 
-  PluginCard, 
   NoPluginsAvailableUI, 
   PluginDisabledUI, 
   SelectPluginMessageUI, 
   AllPluginsDisabledMessageUI 
 } from "./components";
+import PluginCard from "./components/PluginCard";
 import EditorPluginWrapper from "./wrappers/EditorPluginWrapper";
-
 
 const PluginsApp: React.FC = () => {
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
@@ -22,7 +21,8 @@ const PluginsApp: React.FC = () => {
     isLoaded
   } = usePlugins();
   
-  const componentKeys = getPluginKeys();
+  // Get component keys once and memoize
+  const componentKeys = useMemo(() => getPluginKeys(), [getPluginKeys]);
   
   // Set first component as selected by default when available
   useEffect(() => {
@@ -31,8 +31,23 @@ const PluginsApp: React.FC = () => {
     }
   }, [componentKeys, selectedComponent]);
 
-  // Get enabled component keys
-  const enabledComponentKeys = componentKeys.filter(isPluginEnabled);
+  // Memoize enabled component keys
+  const enabledComponentKeys = useMemo(() => 
+    componentKeys.filter(isPluginEnabled), 
+    [componentKeys, isPluginEnabled]
+  );
+
+  // Memoize callback functions
+  const handleTogglePlugin = useCallback((key: string) => (e: React.MouseEvent) => {
+    e.stopPropagation();
+    togglePlugin(key);
+  }, [togglePlugin]);
+
+  const handleSelectPlugin = useCallback((key: string) => () => {
+    if (isPluginEnabled(key)) {
+      setSelectedComponent(key);
+    }
+  }, [isPluginEnabled]);
 
   // Show loading state if plugins aren't loaded yet
   if (!isLoaded) {
@@ -45,8 +60,6 @@ const PluginsApp: React.FC = () => {
 
   return (
     <div className="w-full">
-     
-
       {componentKeys.length === 0 ? (
         <NoPluginsAvailableUI />
       ) : (
@@ -60,11 +73,8 @@ const PluginsApp: React.FC = () => {
                 pluginKey={key}
                 isEnabled={isPluginEnabled(key)}
                 isSelected={selectedComponent === key}
-                onSelect={() => isPluginEnabled(key) && setSelectedComponent(key)}
-                onToggle={(e) => {
-                  e.stopPropagation();
-                  togglePlugin(key);
-                }}
+                onSelect={handleSelectPlugin(key)}
+                onToggle={handleTogglePlugin(key)}
               />
             ))}
           </div>

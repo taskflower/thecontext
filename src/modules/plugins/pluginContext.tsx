@@ -1,7 +1,7 @@
 // src/modules/plugins/pluginContext.tsx
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useMemo, useCallback } from 'react';
 import useDynamicComponentStore from './pluginsStore';
-import { PluginComponentProps, Plugin } from './types';
+import { PluginComponentProps, Plugin, AppContextData } from './types';
 import { discoverAndLoadComponents } from './pluginsDiscovery';
 
 // Define the interface for our plugin context
@@ -58,8 +58,8 @@ export const PluginProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     initPlugins();
   }, [getComponentKeys]);
   
-  // Plugin registration functions
-  const registerPlugin = (key: string, component: React.ComponentType<PluginComponentProps>) => {
+  // Memoize plugin registration functions to prevent re-renders
+  const registerPlugin = useCallback((key: string, component: React.ComponentType<PluginComponentProps>) => {
     store.registerComponent(key, component);
     
     // Update plugin state if this is a new plugin
@@ -67,9 +67,9 @@ export const PluginProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       ...prev,
       [key]: prev[key] !== undefined ? prev[key] : true
     }));
-  };
+  }, [store]);
   
-  const unregisterPlugin = (key: string) => {
+  const unregisterPlugin = useCallback((key: string) => {
     store.unregisterComponent(key);
     
     // Update plugin state
@@ -78,41 +78,65 @@ export const PluginProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       delete newState[key];
       return newState;
     });
-  };
+  }, [store]);
   
-  // Plugin state management
-  const isPluginEnabled = (key: string) => {
+  // Memoize plugin state management
+  const isPluginEnabled = useCallback((key: string) => {
     return pluginState[key] !== false;
-  };
+  }, [pluginState]);
   
-  const togglePlugin = (key: string) => {
+  const togglePlugin = useCallback((key: string) => {
     setPluginState(prev => ({
       ...prev,
-      [key]: !isPluginEnabled(key)
+      [key]: !prev[key]
     }));
-  };
+  }, []);
   
-  // Get all plugins with their enabled state
-  const getAllPlugins = (): Plugin[] => {
+  // Memoize getters to prevent unnecessary re-renders
+  const getPluginComponent = useCallback((key: string) => {
+    return store.getComponent(key);
+  }, [store]);
+  
+  const getPluginData = useCallback((key: string) => {
+    return store.getComponentData(key);
+  }, [store]);
+  
+  const setPluginData = useCallback((key: string, data: unknown) => {
+    store.setComponentData(key, data);
+  }, [store]);
+  
+  // Memoize getAllPlugins to prevent unnecessary re-renders
+  const getAllPlugins = useCallback((): Plugin[] => {
     return getComponentKeys().map(key => ({
       key,
       enabled: isPluginEnabled(key)
     }));
-  };
+  }, [getComponentKeys, isPluginEnabled]);
   
-  // Context value
-  const contextValue: PluginContextType = {
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo<PluginContextType>(() => ({
     registerPlugin,
     unregisterPlugin,
-    getPluginComponent: (key) => store.getComponent(key),
+    getPluginComponent,
     getPluginKeys: getComponentKeys,
     getAllPlugins,
-    setPluginData: store.setComponentData,
-    getPluginData: store.getComponentData,
+    setPluginData,
+    getPluginData,
     isPluginEnabled,
     togglePlugin,
     isLoaded
-  };
+  }), [
+    registerPlugin,
+    unregisterPlugin,
+    getPluginComponent,
+    getComponentKeys,
+    getAllPlugins,
+    setPluginData,
+    getPluginData,
+    isPluginEnabled,
+    togglePlugin,
+    isLoaded
+  ]);
   
   return (
     <PluginContext.Provider value={contextValue}>

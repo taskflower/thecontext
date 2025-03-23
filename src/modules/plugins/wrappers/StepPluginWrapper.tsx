@@ -2,7 +2,7 @@
 import React from 'react';
 import PluginPreviewWrapper from './PluginPreviewWrapper';
 import { useAppStore } from '../../store';
-import { AppContextData, NodeData } from '../types';
+import { AppContextData, AppState, NodeData } from '../types';
 
 interface StepPluginWrapperProps {
   componentKey: string;
@@ -21,9 +21,9 @@ const StepPluginWrapper: React.FC<StepPluginWrapperProps> = ({
   workspaceId = '',
   scenarioId = '',
 }) => {
-  // Get update functions from store
-  const updateNodeUserPrompt = useAppStore(state => state.updateNodeUserPrompt);
-  const updateNodeAssistantMessage = useAppStore(state => state.updateNodeAssistantMessage);
+  // Get update functions from store with explicit typing
+  const updateNodeUserPrompt = useAppStore((state: AppState) => state.updateNodeUserPrompt);
+  const updateNodeAssistantMessage = useAppStore((state: AppState) => state.updateNodeAssistantMessage);
   
   // If no node data, provide empty values
   const node = nodeData || {

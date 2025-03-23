@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/plugins/wrappers/EditorPluginWrapper.tsx
 import React, { useState } from 'react';
 import { usePlugins } from '../pluginContext';
 import PluginPreviewWrapper from './PluginPreviewWrapper';
 import { Settings } from 'lucide-react';
+import { PluginComponentWithSchema, PluginOptionSchema } from '../types';
 
 interface EditorPluginWrapperProps {
   componentKey: string;
@@ -18,15 +18,15 @@ const EditorPluginWrapper: React.FC<EditorPluginWrapperProps> = ({ componentKey 
   const [showSettings, setShowSettings] = useState(false);
   
   // Get the plugin component to access its schema
-  const PluginComponent = getPluginComponent(componentKey);
-  const optionsSchema = (PluginComponent as any)?.optionsSchema;
+  const PluginComponent = getPluginComponent(componentKey) as PluginComponentWithSchema | null;
+  const optionsSchema = PluginComponent?.optionsSchema;
   
   // Get current plugin data
   const currentData = getPluginData(componentKey) || {};
   
   // Handle settings update
-  const handleSettingChange = (key: string, value: any) => {
-    const newData = { ...currentData, [key]: value };
+  const handleSettingChange = (key: string, value: unknown) => {
+    const newData = { ...currentData as Record<string, unknown>, [key]: value };
     setPluginData(componentKey, newData);
   };
   
@@ -61,7 +61,7 @@ const EditorPluginWrapper: React.FC<EditorPluginWrapperProps> = ({ componentKey 
             <h4 className="text-sm font-medium mb-3">Plugin Settings</h4>
             
             <div className="space-y-3">
-              {Object.entries(optionsSchema).map(([key, schema]: [string, any]) => (
+              {Object.entries(optionsSchema).map(([key, schema]) => (
                 <div key={key} className="space-y-1">
                   <label className="text-xs font-medium">
                     {schema.label || key}
@@ -71,13 +71,13 @@ const EditorPluginWrapper: React.FC<EditorPluginWrapperProps> = ({ componentKey 
                     <div className="flex items-center space-x-2">
                       <input 
                         type="color"
-                        value={(currentData as any)[key] || schema.default}
+                        value={(currentData as Record<string, string>)[key] || schema.default as string}
                         onChange={(e) => handleSettingChange(key, e.target.value)}
                         className="h-8 w-8 rounded cursor-pointer"
                       />
                       <input 
                         type="text"
-                        value={(currentData as any)[key] || schema.default}
+                        value={(currentData as Record<string, string>)[key] || schema.default as string}
                         onChange={(e) => handleSettingChange(key, e.target.value)}
                         className="flex-1 px-2 py-1 text-xs rounded border border-border bg-background"
                       />
@@ -87,7 +87,7 @@ const EditorPluginWrapper: React.FC<EditorPluginWrapperProps> = ({ componentKey 
                   {schema.type === 'string' && (
                     <input 
                       type="text"
-                      value={(currentData as any)[key] || schema.default}
+                      value={(currentData as Record<string, string>)[key] || schema.default as string}
                       onChange={(e) => handleSettingChange(key, e.target.value)}
                       className="w-full px-2 py-1 text-xs rounded border border-border bg-background"
                     />
@@ -96,7 +96,7 @@ const EditorPluginWrapper: React.FC<EditorPluginWrapperProps> = ({ componentKey 
                   {schema.type === 'number' && (
                     <input 
                       type="number"
-                      value={(currentData as any)[key] || schema.default}
+                      value={(currentData as Record<string, number>)[key] || schema.default as number}
                       onChange={(e) => handleSettingChange(key, Number(e.target.value))}
                       className="w-full px-2 py-1 text-xs rounded border border-border bg-background"
                     />
@@ -106,7 +106,7 @@ const EditorPluginWrapper: React.FC<EditorPluginWrapperProps> = ({ componentKey 
                     <label className="flex items-center space-x-2 cursor-pointer">
                       <input 
                         type="checkbox"
-                        checked={(currentData as any)[key] ?? schema.default}
+                        checked={(currentData as Record<string, boolean>)[key] ?? schema.default as boolean}
                         onChange={(e) => handleSettingChange(key, e.target.checked)}
                         className="rounded"
                       />

@@ -1,18 +1,25 @@
 // src/modules/plugins/wrappers/PluginPreviewWrapper.tsx
 import React, { useState, useEffect } from "react";
 import { usePlugins } from "../pluginContext";
-import { useAppStore } from "../../store"; // Make sure this import exists
+import { useAppStore } from "../../store";
+import { AppContextData, AppState, PluginPreviewWrapperProps } from "../types";
 
-const PluginPreviewWrapper = ({ componentKey, customData, context = {}, showHeader = true, className = "" }) => {
+const PluginPreviewWrapper: React.FC<PluginPreviewWrapperProps> = ({ 
+  componentKey, 
+  customData, 
+  context = {}, 
+  showHeader = true, 
+  className = "" 
+}) => {
   const { getPluginComponent, getPluginData, isPluginEnabled } = usePlugins();
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   
   // Get the update functions directly from app store
-  const updateNodeUserPrompt = useAppStore(state => state.updateNodeUserPrompt);
-  const updateNodeAssistantMessage = useAppStore(state => state.updateNodeAssistantMessage);
+  const updateNodeUserPrompt = useAppStore((state: AppState) => state.updateNodeUserPrompt);
+  const updateNodeAssistantMessage = useAppStore((state: AppState) => state.updateNodeAssistantMessage);
   
   // Get current selection from store
-  const selectedNodeId = useAppStore(state => state.selected.node);
+  const selectedNodeId = useAppStore((state: AppState) => state.selected.node);
   
   // Get the plugin component
   const PluginComponent = getPluginComponent(componentKey);
@@ -22,14 +29,19 @@ const PluginPreviewWrapper = ({ componentKey, customData, context = {}, showHead
   const mergedData = customData !== undefined ? customData : storedData;
 
   // Create plugin context with necessary data
-  const completeContext = {
-    ...context,
+  const completeContext: AppContextData = {
+    currentWorkspace: null,
+    currentScenario: null,
+    currentNode: null,
     selection: {
-      ...context.selection,
+      workspaceId: context.selection?.workspaceId || '',
+      scenarioId: context.selection?.scenarioId || '',
       nodeId: context.selection?.nodeId || selectedNodeId, // Ensure nodeId is set
     },
+    stateVersion: context.stateVersion || 0,
     updateNodeUserPrompt, // Pass the function
     updateNodeAssistantMessage, // Pass the function
+    ...context, // Include all other context properties
   };
 
   // Reset error when plugin key changes
@@ -82,7 +94,7 @@ const PluginPreviewWrapper = ({ componentKey, customData, context = {}, showHead
             </p>
           </div>
         ) : (
-          <ErrorBoundary onError={(err) => setError(err.message)}>
+          <ErrorBoundary onError={(err: Error) => setError(err.message)}>
             <PluginComponent data={mergedData} appContext={completeContext} />
           </ErrorBoundary>
         )}
@@ -91,22 +103,31 @@ const PluginPreviewWrapper = ({ componentKey, customData, context = {}, showHead
   );
 };
 
-// Error boundary component (keep as is)
-class ErrorBoundary extends React.Component {
-  constructor(props) {
+// Error boundary component with proper typing
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+  onError: (error: Error) => void;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+}
+
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError() {
+  static getDerivedStateFromError(): ErrorBoundaryState {
     return { hasError: true };
   }
 
-  componentDidCatch(error) {
+  componentDidCatch(error: Error): void {
     this.props.onError(error);
   }
 
-  render() {
+  render(): React.ReactNode {
     if (this.state.hasError) {
       return null;
     }
