@@ -8,7 +8,8 @@ import {
   SelectPluginMessageUI, 
   AllPluginsDisabledMessageUI 
 } from "./components";
-import ManagerPluginWrapper from "./wrappers/ManagerPluginWrapper";
+import EditorPluginWrapper from "./wrappers/EditorPluginWrapper";
+
 
 const PluginsApp: React.FC = () => {
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
@@ -73,7 +74,7 @@ const PluginsApp: React.FC = () => {
             <h3 className="text-lg font-medium mb-2 px-2">Plugin Preview</h3>
             <div className="border border-border rounded-lg overflow-hidden">
               {selectedComponent && isPluginEnabled(selectedComponent) ? (
-                <ManagerPluginWrapper componentKey={selectedComponent} />
+                <EditorPluginWrapper componentKey={selectedComponent} />
               ) : selectedComponent ? (
                 <PluginDisabledUI />
               ) : enabledComponentKeys.length > 0 ? (

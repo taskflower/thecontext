@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Puzzle, AlertCircle, Sliders } from 'lucide-react';
 import { useAppStore } from '../../store';
-import FullPluginWrapper from '@/modules/plugins/wrappers/FullPluginWrapper';
+
 import PluginOptionsEditor from './PluginOptionsEditor';
 
 const NodePluginPanel: React.FC = () => {
@@ -86,7 +86,8 @@ const NodePluginPanel: React.FC = () => {
       )}
       
       {/* Plugin Instance */}
-      <FullPluginWrapper componentKey={node.pluginKey} nodeId={selectedNodeId} />
+      {/* <FullPluginWrapper componentKey={node.pluginKey} nodeId={selectedNodeId} /> */}
+      CZY TO WOGULE POWINNO TU BYC????
       
       {/* Plugin Options Editor Dialog */}
       {isEditingOptions && selectedNodeId && (
