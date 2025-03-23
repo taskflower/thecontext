@@ -1,7 +1,7 @@
 // src/modules/plugins/wrappers/PluginPreviewWrapper.tsx
-import React, { useState, useEffect } from 'react';
-import { usePlugins } from '../pluginContext';
-import { PluginComponentProps, AppContextData } from '../types';
+import React, { useState, useEffect } from "react";
+import { usePlugins } from "../pluginContext";
+import { AppContextData } from "../types";
 
 interface PluginPreviewWrapperProps {
   componentKey: string;
@@ -22,30 +22,30 @@ const PluginPreviewWrapper: React.FC<PluginPreviewWrapperProps> = ({
   customData,
   context = {},
   showHeader = true,
-  className = '',
+  className = "",
 }) => {
   const { getPluginComponent, getPluginData, isPluginEnabled } = usePlugins();
   const [error, setError] = useState<string | null>(null);
 
   // Get the plugin component
   const PluginComponent = getPluginComponent(componentKey);
-  
+
   // Combine custom data with stored plugin data
   const storedData = getPluginData(componentKey);
   const mergedData = customData !== undefined ? customData : storedData;
-  
+
   // Default app context if not provided
   const defaultContext: AppContextData = {
     currentWorkspace: null,
     currentScenario: null,
     currentNode: null,
     selection: {
-      workspaceId: '',
-      scenarioId: '',
-      nodeId: ''
+      workspaceId: "",
+      scenarioId: "",
+      nodeId: "",
     },
     stateVersion: 0,
-    ...context
+    ...context,
   };
 
   // Reset error when plugin key changes
@@ -67,7 +67,9 @@ const PluginPreviewWrapper: React.FC<PluginPreviewWrapperProps> = ({
   // Check if plugin exists
   if (!PluginComponent) {
     return (
-      <div className={`p-4 bg-red-100 dark:bg-red-900/20 rounded-md ${className}`}>
+      <div
+        className={`p-4 bg-red-100 dark:bg-red-900/20 rounded-md ${className}`}
+      >
         <p className="text-sm text-red-600 dark:text-red-400">
           Plugin <strong>{componentKey}</strong> not found
         </p>
@@ -86,7 +88,7 @@ const PluginPreviewWrapper: React.FC<PluginPreviewWrapperProps> = ({
           </span>
         </div>
       )}
-      
+
       <div className="plugin-content">
         {error ? (
           <div className="p-4 bg-red-100 dark:bg-red-900/20 rounded-md m-2">
@@ -99,10 +101,7 @@ const PluginPreviewWrapper: React.FC<PluginPreviewWrapperProps> = ({
           </div>
         ) : (
           <ErrorBoundary onError={(err) => setError(err.message)}>
-            <PluginComponent 
-              data={mergedData} 
-              appContext={defaultContext}
-            />
+            <PluginComponent data={mergedData} appContext={defaultContext} />
           </ErrorBoundary>
         )}
       </div>
@@ -115,7 +114,10 @@ class ErrorBoundary extends React.Component<
   { children: React.ReactNode; onError: (error: Error) => void },
   { hasError: boolean }
 > {
-  constructor(props: { children: React.ReactNode; onError: (error: Error) => void }) {
+  constructor(props: {
+    children: React.ReactNode;
+    onError: (error: Error) => void;
+  }) {
     super(props);
     this.state = { hasError: false };
   }

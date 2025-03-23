@@ -10,6 +10,7 @@ import FlowGraph from "./modules/flow/components/FlowGraph";
 import PluginsApp from "./modules/plugins/PluginsApp";
 import { useTheme } from "./components/ThemeProvider";
 import { cn } from "./utils/utils";
+import ConversationHistoryPanel from "./modules/conversation/components/ConversationHistoryPanel";
 
 type PanelContentType = "context" | "conversation" | "plugins" | "";
 
@@ -136,7 +137,9 @@ const App = () => {
               <div className="flex-1 overflow-auto">
                 {bottomPanelContent === 'plugins' && <div className="p-4"><PluginsApp/></div>}
                 {bottomPanelContent === 'context' && <div className="p-4">Context content</div>}
-                {bottomPanelContent === 'conversation' && <div className="p-4">Conversation content</div>}
+                {bottomPanelContent === 'conversation' && <div className="p-4">Conversation content
+                  <ConversationHistoryPanel/>
+                  </div>}
               </div>
             </div>
           )}

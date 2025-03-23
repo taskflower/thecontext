@@ -8,15 +8,16 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   Node,
+  NodeTypes
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { useAppStore } from "../../store";
 import { StepModal } from "./StepModal";
-import CustomNode from "./CustomNode"; // Importujemy komponent z pliku CustomNode.tsx
+import CustomNode from "./CustomNode";
 import "../styles.css";
 
-// Ustawienie custom node o typie "custom"
-const nodeTypes = { custom: CustomNode };
+// Define custom node types
+const nodeTypes: NodeTypes = { custom: CustomNode };
 
 const FlowGraph: React.FC = () => {
   const getActiveScenarioData = useAppStore(
@@ -27,10 +28,11 @@ const FlowGraph: React.FC = () => {
   const getCurrentScenario = useAppStore((state) => state.getCurrentScenario);
   const selectNode = useAppStore((state) => state.selectNode);
   const stateVersion = useAppStore((state) => state.stateVersion);
+  const calculateFlowPath = useAppStore((state) => state.calculateFlowPath);
 
   const { nodes: initialNodes, edges: initialEdges } = getActiveScenarioData();
 
-  // Upewniamy się, że każdy węzeł ma ustawiony typ "custom"
+  // Make sure each node has the "custom" type
   const preparedNodes = initialNodes.map((node: Node) => ({
     ...node,
     type: "custom",
@@ -42,7 +44,7 @@ const FlowGraph: React.FC = () => {
   const [currentNodeIndex, setCurrentNodeIndex] = useState(0);
   const [flowPath, setFlowPath] = useState<any[]>([]);
 
-  // Aktualizacja grafu przy zmianach danych
+  // Update graph on data changes
   useEffect(() => {
     const { nodes: newNodes, edges: newEdges } = getActiveScenarioData();
     const updatedNodes = newNodes.map((node: Node) => ({
@@ -67,85 +69,20 @@ const FlowGraph: React.FC = () => {
   );
 
   const onNodeDragStop = useCallback(
-    (_: any, node: Node) => {
+    (_: React.MouseEvent, node: Node) => {
       updateNodePosition(node.id, node.position);
     },
     [updateNodePosition]
   );
 
   const onNodeClick = useCallback(
-    (_: any, node: Node) => {
+    (_: React.MouseEvent, node: Node) => {
       selectNode(node.id);
     },
     [selectNode]
   );
 
-  // Obliczanie ścieżki przepływu do odtwarzania krok po kroku
-  const calculateFlowPath = useCallback(() => {
-    const scenario = getCurrentScenario();
-    if (!scenario) return [];
-  
-    const { children: scenarioNodes = [], edges: scenarioEdges = [] } = scenario;
-  
-    // Mapa zliczająca przychodzące krawędzie dla każdego węzła
-    const incomingMap = new Map<string, number>();
-    scenarioEdges.forEach((edge) => {
-      incomingMap.set(edge.target, (incomingMap.get(edge.target) || 0) + 1);
-    });
-  
-    // Znajdź węzeł startowy (ma krawędzie wychodzące, ale brak przychodzących)
-    let startNodeId: string | null = null;
-    for (const node of scenarioNodes) {
-      const hasOutgoing = scenarioEdges.some((edge) => edge.source === node.id);
-      const incomingCount = incomingMap.get(node.id) || 0;
-  
-      if (hasOutgoing && incomingCount === 0) {
-        startNodeId = node.id;
-        break;
-      }
-    }
-  
-    // Jeśli nie znaleziono, wybierz pierwszy
-    if (!startNodeId && scenarioNodes.length > 0) {
-      startNodeId = scenarioNodes[0].id;
-    }
-  
-    if (!startNodeId) return [];
-  
-    // Utwórz mapę grafu (sąsiedztwa)
-    const edgesMap = new Map<string, string[]>();
-    scenarioEdges.forEach((edge) => {
-      if (!edgesMap.has(edge.source)) edgesMap.set(edge.source, []);
-      edgesMap.get(edge.source)?.push(edge.target);
-    });
-  
-    // Prześledź ścieżkę metodą DFS
-    const path: any[] = [];
-    const visited = new Set<string>();
-  
-    const dfs = (nodeId: string) => {
-      if (visited.has(nodeId)) return;
-  
-      // Używamy pełnych danych węzła, nie tylko jego ID
-      const nodeData = scenarioNodes.find((n) => n.id === nodeId);
-      if (nodeData) {
-        // Dodajemy pełne dane węzła, włącznie z pluginKey
-        path.push({
-          ...nodeData,
-          pluginKey: nodeData.pluginKey
-        });
-        visited.add(nodeId);
-  
-        const nextNodes = edgesMap.get(nodeId) || [];
-        for (const next of nextNodes) dfs(next);
-      }
-    };
-  
-    dfs(startNodeId);
-    return path;
-  }, [getCurrentScenario]);
-
-  // Rozpoczęcie odtwarzania przepływu
+  // Begin flow playback
   const handlePlay = useCallback(() => {
     const path = calculateFlowPath();
     if (path.length > 0) {
@@ -175,7 +112,7 @@ const FlowGraph: React.FC = () => {
         onNodeDragStop={onNodeDragStop}
         onNodeClick={onNodeClick}
         nodeTypes={nodeTypes}
-        defaultEdgeOptions={{ type: "step" }} // Dodane: ustawienie krawędzi na kwadratowe
+        defaultEdgeOptions={{ type: "step" }}
         fitView
         maxZoom={1.25}
       >

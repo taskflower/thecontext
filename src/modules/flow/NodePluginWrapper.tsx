@@ -1,6 +1,7 @@
 import React from 'react';
-import DynamicComponentWrapper from '../plugins/PluginWrapper';
+
 import { useAppStore } from '../store';
+import PluginPreviewWrapper from '../plugins/wrappers/PluginPreviewWrapper';
 
 /**
  * Component that displays the plugin associated with the currently selected node
@@ -31,7 +32,7 @@ const NodePluginWrapper: React.FC = () => {
     );
   }
   
-  return <DynamicComponentWrapper componentKey={node.pluginKey} />;
+  return <PluginPreviewWrapper componentKey={node.pluginKey} />;
 };
 
 export default NodePluginWrapper;
