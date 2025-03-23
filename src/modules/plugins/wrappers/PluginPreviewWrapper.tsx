@@ -1,32 +1,19 @@
 // src/modules/plugins/wrappers/PluginPreviewWrapper.tsx
 import React, { useState, useEffect } from "react";
 import { usePlugins } from "../pluginContext";
-import { AppContextData } from "../types";
+import { useAppStore } from "../../store"; // Make sure this import exists
 
-interface PluginPreviewWrapperProps {
-  componentKey: string;
-  customData?: unknown;
-  context?: Partial<AppContextData>;
-  showHeader?: boolean;
-  className?: string;
-}
-
-/**
- * A flexible wrapper component for plugins that can be used in different contexts:
- * - Plugin editor
- * - Step-by-step node preview
- * - Any other place where plugins need to be displayed
- */
-const PluginPreviewWrapper: React.FC<PluginPreviewWrapperProps> = ({
-  componentKey,
-  customData,
-  context = {},
-  showHeader = true,
-  className = "",
-}) => {
+const PluginPreviewWrapper = ({ componentKey, customData, context = {}, showHeader = true, className = "" }) => {
   const { getPluginComponent, getPluginData, isPluginEnabled } = usePlugins();
-  const [error, setError] = useState<string | null>(null);
-
+  const [error, setError] = useState(null);
+  
+  // Get the update functions directly from app store
+  const updateNodeUserPrompt = useAppStore(state => state.updateNodeUserPrompt);
+  const updateNodeAssistantMessage = useAppStore(state => state.updateNodeAssistantMessage);
+  
+  // Get current selection from store
+  const selectedNodeId = useAppStore(state => state.selected.node);
+  
   // Get the plugin component
   const PluginComponent = getPluginComponent(componentKey);
 
@@ -34,18 +21,15 @@ const PluginPreviewWrapper: React.FC<PluginPreviewWrapperProps> = ({
   const storedData = getPluginData(componentKey);
   const mergedData = customData !== undefined ? customData : storedData;
 
-  // Default app context if not provided
-  const defaultContext: AppContextData = {
-    currentWorkspace: null,
-    currentScenario: null,
-    currentNode: null,
-    selection: {
-      workspaceId: "",
-      scenarioId: "",
-      nodeId: "",
-    },
-    stateVersion: 0,
+  // Create plugin context with necessary data
+  const completeContext = {
     ...context,
+    selection: {
+      ...context.selection,
+      nodeId: context.selection?.nodeId || selectedNodeId, // Ensure nodeId is set
+    },
+    updateNodeUserPrompt, // Pass the function
+    updateNodeAssistantMessage, // Pass the function
   };
 
   // Reset error when plugin key changes
@@ -67,9 +51,7 @@ const PluginPreviewWrapper: React.FC<PluginPreviewWrapperProps> = ({
   // Check if plugin exists
   if (!PluginComponent) {
     return (
-      <div
-        className={`p-4 bg-red-100 dark:bg-red-900/20 rounded-md ${className}`}
-      >
+      <div className={`p-4 bg-red-100 dark:bg-red-900/20 rounded-md ${className}`}>
         <p className="text-sm text-red-600 dark:text-red-400">
           Plugin <strong>{componentKey}</strong> not found
         </p>
@@ -101,7 +83,7 @@ const PluginPreviewWrapper: React.FC<PluginPreviewWrapperProps> = ({
           </div>
         ) : (
           <ErrorBoundary onError={(err) => setError(err.message)}>
-            <PluginComponent data={mergedData} appContext={defaultContext} />
+            <PluginComponent data={mergedData} appContext={completeContext} />
           </ErrorBoundary>
         )}
       </div>
@@ -109,15 +91,9 @@ const PluginPreviewWrapper: React.FC<PluginPreviewWrapperProps> = ({
   );
 };
 
-// Simple error boundary component to catch plugin errors
-class ErrorBoundary extends React.Component<
-  { children: React.ReactNode; onError: (error: Error) => void },
-  { hasError: boolean }
-> {
-  constructor(props: {
-    children: React.ReactNode;
-    onError: (error: Error) => void;
-  }) {
+// Error boundary component (keep as is)
+class ErrorBoundary extends React.Component {
+  constructor(props) {
     super(props);
     this.state = { hasError: false };
   }
@@ -126,13 +102,13 @@ class ErrorBoundary extends React.Component<
     return { hasError: true };
   }
 
-  componentDidCatch(error: Error) {
+  componentDidCatch(error) {
     this.props.onError(error);
   }
 
   render() {
     if (this.state.hasError) {
-      return null; // Error message is displayed by parent component
+      return null;
     }
     return this.props.children;
   }

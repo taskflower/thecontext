@@ -114,6 +114,34 @@ export const createFlowSlice: StateCreator<
     
     return path;
   },
+
+  updateNodeAssistantMessage: (nodeId: string, assistantMessage: string) => {
+    console.log(`Attempting to update node ${nodeId} with assistantMessage:`, assistantMessage);
+    
+    set((state: any) => {
+      const workspace = state.items.find(
+        (w: any) => w.id === state.selected.workspace
+      );
+      if (!workspace) return state;
+      
+      const scenario = workspace.children.find(
+        (s: any) => s.id === state.selected.scenario
+      );
+      if (!scenario) return state;
+      
+      const nodeIndex = scenario.children.findIndex((n: any) => n.id === nodeId);
+      if (nodeIndex === -1) return state;
+      
+      // Update the assistantMessage on the node
+      scenario.children[nodeIndex].assistantMessage = assistantMessage;
+      
+      // Increment state version to trigger updates
+      state.stateVersion++;
+      
+      console.log(`Updated node ${nodeId} with assistantMessage:`, assistantMessage);
+      return state;
+    });
+  },
   
   // This is a helper function to manually update a node's userPrompt
   // It doesn't have to match the original interface since it's just for our use
