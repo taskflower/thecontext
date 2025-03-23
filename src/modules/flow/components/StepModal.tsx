@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import StepPluginWrapper from "@/modules/plugins/wrappers/StepPluginWrapper";
 import { StepModalProps } from "../types";
 import { cn } from "@/utils/utils";
-import { Bot, Loader2, Puzzle, Send, X } from "lucide-react";
+import { Bot, Puzzle, X } from "lucide-react";
 
 export const StepModal: React.FC<StepModalProps> = ({
   steps,
@@ -12,23 +12,47 @@ export const StepModal: React.FC<StepModalProps> = ({
   onClose,
 }) => {
   const currentNode = steps[currentStep];
-  const [userInput, setUserInput] = useState(currentNode?.userPrompt || "");
+  const [userInputs, setUserInputs] = useState<Record<string, string>>({});
   const [isProcessing, setIsProcessing] = useState(false);
+  const isLastStep = currentStep === steps.length - 1;
 
-  // Action for sending user message
-  const handleSendMessage = () => {
-    if (!userInput.trim()) return;
+  // Reset input when changing steps
+  useEffect(() => {
+    if (currentNode && !userInputs[currentNode.id] && currentNode.userPrompt) {
+      setUserInputs(prev => ({
+        ...prev,
+        [currentNode.id]: currentNode.userPrompt || ""
+      }));
+    }
+  }, [currentNode, userInputs]);
 
-    setIsProcessing(true);
+  const getCurrentInput = () => {
+    return currentNode ? (userInputs[currentNode.id] || "") : "";
+  };
 
-    // Here you could add integration with an API or store to save responses
-    // e.g., updateNodeMessage(currentNode.id, { userPrompt: userInput });
+  const handleInputChange = (value: string) => {
+    if (!currentNode) return;
+    
+    setUserInputs(prev => ({
+      ...prev,
+      [currentNode.id]: value
+    }));
+  };
 
-    // Simulating processing (in a real app this would be an API call)
-    setTimeout(() => {
-      setIsProcessing(false);
-      onNext(); // Move to next step after receiving response
-    }, 1000);
+  // Unified handling of navigation and text processing
+  const handleNavigation = (direction: 'prev' | 'next' | 'finish') => {
+    if (direction === 'prev') {
+      onPrev();
+    } else if (direction === 'next') {
+      setIsProcessing(true);
+      // Simulate processing, in real app would be API call
+      setTimeout(() => {
+        setIsProcessing(false);
+        onNext();
+      }, 300);
+    } else if (direction === 'finish') {
+      onClose();
+    }
   };
 
   if (!currentNode) {
@@ -36,17 +60,17 @@ export const StepModal: React.FC<StepModalProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-card rounded-lg shadow-lg w-full max-w-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="bg-background rounded-lg border border-border shadow-lg w-full max-w-2xl">
         <div className="flex items-center justify-between p-4 border-b border-border">
-          <h3 className="text-lg font-medium text-card-foreground">
-            Step {currentStep + 1} of {steps.length}: {currentNode.label}
+          <h3 className="text-lg font-medium">
+            Krok {currentStep + 1} z {steps.length}: {currentNode.label}
           </h3>
           <button
             onClick={onClose}
-            className="p-1 rounded-full hover:bg-accent/80"
+            className="p-1 rounded-full hover:bg-muted"
           >
-            <X className="h-5 w-5 text-muted-foreground" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -59,25 +83,25 @@ export const StepModal: React.FC<StepModalProps> = ({
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium text-muted-foreground mb-1">
-                  Assistant:
+                  Asystent:
                 </p>
-                <div className="bg-primary/5 border-l-2 border-primary rounded-r-lg py-2 px-3 text-foreground">
+                <div className="bg-muted rounded-lg py-2 px-3">
                   {currentNode.assistantMessage ||
-                    "Waiting for your response..."}
+                    "Czekam na Twoją odpowiedź..."}
                 </div>
               </div>
             </div>
 
             {/* Plugin (if exists) */}
             {currentNode.pluginKey && (
-              <div className="border border-border rounded-lg overflow-hidden">
-                <div className="bg-muted/10 px-4 py-2 border-b border-border flex items-center">
+              <div className="border border-border rounded-lg overflow-hidden mt-4">
+                <div className="bg-muted/30 px-4 py-2 border-b border-border flex items-center">
                   <Puzzle className="h-4 w-4 mr-2 text-primary" />
                   <h4 className="font-medium">
                     Plugin: {currentNode.pluginKey}
                   </h4>
                 </div>
-                <div className="p-4">
+                <div className="p-4 bg-background">
                   <StepPluginWrapper
                     componentKey={currentNode.pluginKey}
                     nodeData={currentNode}
@@ -89,52 +113,44 @@ export const StepModal: React.FC<StepModalProps> = ({
             {/* User input field */}
             <div className="mt-6">
               <p className="text-sm font-medium text-muted-foreground mb-2">
-                Your response:
+                Twoja odpowiedź:
               </p>
-              <div className="flex">
-                <textarea
-                  value={userInput}
-                  onChange={(e) => setUserInput(e.target.value)}
-                  placeholder="Type your message..."
-                  className="flex-1 p-3 border border-border rounded-l-md focus:outline-none focus:ring-1 focus:ring-primary"
-                  rows={3}
-                ></textarea>
-                <button
-                  onClick={handleSendMessage}
-                  disabled={!userInput.trim() || isProcessing}
-                  className="px-4 bg-primary text-primary-foreground rounded-r-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isProcessing ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : (
-                    <Send className="h-5 w-5" />
-                  )}
-                </button>
-              </div>
+              <textarea
+                value={getCurrentInput()}
+                onChange={(e) => handleInputChange(e.target.value)}
+                placeholder="Wpisz swoją wiadomość..."
+                className="w-full p-3 border border-input rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-primary"
+                rows={3}
+              ></textarea>
             </div>
           </div>
 
           {/* Navigation buttons */}
-          <div className="flex justify-between">
+          <div className="flex justify-between mt-4">
             <button
-              onClick={onPrev}
-              disabled={currentStep === 0}
+              onClick={() => handleNavigation('prev')}
+              disabled={currentStep === 0 || isProcessing}
               className={cn(
-                "px-3 py-1.5 rounded-md text-sm",
-                currentStep === 0
+                "px-4 py-2 rounded-md text-sm font-medium transition-colors",
+                currentStep === 0 || isProcessing
                   ? "bg-muted text-muted-foreground cursor-not-allowed"
-                  : "bg-accent text-accent-foreground hover:bg-accent/80"
+                  : "bg-secondary text-secondary-foreground hover:bg-secondary/90"
               )}
             >
-              Previous
+              ← Poprzedni
             </button>
 
             <button
-              onClick={onNext}
-              className="px-3 py-1.5 rounded-md text-sm bg-primary text-primary-foreground hover:bg-primary/90"
+              onClick={() => handleNavigation(isLastStep ? 'finish' : 'next')}
               disabled={isProcessing}
+              className={cn(
+                "px-4 py-2 rounded-md text-sm font-medium transition-colors",
+                isProcessing 
+                  ? "bg-primary/70 text-primary-foreground cursor-wait" 
+                  : "bg-primary text-primary-foreground hover:bg-primary/90"
+              )}
             >
-              {currentStep < steps.length - 1 ? "Next" : "Finish"}
+              {isLastStep ? "Zakończ" : "Następny →"}
             </button>
           </div>
         </div>
