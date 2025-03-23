@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { usePlugins } from '../pluginContext';
 import PluginPreviewWrapper from './PluginPreviewWrapper';
 import { Settings } from 'lucide-react';
-import { PluginComponentWithSchema, PluginOptionSchema } from '../types';
+import { PluginComponentWithSchema } from '../types';
 
 interface EditorPluginWrapperProps {
   componentKey: string;

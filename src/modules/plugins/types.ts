@@ -28,6 +28,7 @@ export interface AppContextData {
   // Add the update functions that are used in wrappers
   updateNodeUserPrompt?: (nodeId: string, prompt: string) => void;
   updateNodeAssistantMessage?: (nodeId: string, message: string) => void;
+  
 }
 
 // Dynamic component store interface

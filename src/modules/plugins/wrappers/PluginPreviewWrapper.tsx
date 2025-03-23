@@ -2,7 +2,10 @@
 import React, { useState, useEffect } from "react";
 import { usePlugins } from "../pluginContext";
 import { useAppStore } from "../../store";
-import { AppContextData, AppState, PluginPreviewWrapperProps } from "../types";
+import { AppContextData, PluginPreviewWrapperProps } from "../types";
+
+// Don't import AppState from a relative path, use the type directly from useAppStore
+// Remove this line: import { AppState as StoreAppState } from "../../store";
 
 const PluginPreviewWrapper: React.FC<PluginPreviewWrapperProps> = ({ 
   componentKey, 
@@ -14,12 +17,12 @@ const PluginPreviewWrapper: React.FC<PluginPreviewWrapperProps> = ({
   const { getPluginComponent, getPluginData, isPluginEnabled } = usePlugins();
   const [error, setError] = useState<string | null>(null);
   
-  // Get the update functions directly from app store
-  const updateNodeUserPrompt = useAppStore((state: AppState) => state.updateNodeUserPrompt);
-  const updateNodeAssistantMessage = useAppStore((state: AppState) => state.updateNodeAssistantMessage);
+  // Get the update functions directly from app store without type casting
+  const updateNodeUserPrompt = useAppStore((state) => state.updateNodeUserPrompt);
+  const updateNodeAssistantMessage = useAppStore((state) => state.updateNodeAssistantMessage);
   
-  // Get current selection from store
-  const selectedNodeId = useAppStore((state: AppState) => state.selected.node);
+  // Get current selection from store without type casting
+  const selectedNodeId = useAppStore((state) => state.selected.node);
   
   // Get the plugin component
   const PluginComponent = getPluginComponent(componentKey);

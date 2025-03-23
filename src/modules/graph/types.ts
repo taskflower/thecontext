@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/graph/types.ts
 import { BaseItem, Position } from "../common/types";
 
@@ -29,6 +30,8 @@ export interface NodeActions {
   setNodePlugin: (nodeId: string, pluginKey: string | null, initialData?: unknown) => void;
   updateNodePluginData: (nodeId: string, pluginKey: string, data: unknown) => void;
   getNodePluginData: (nodeId: string, pluginKey: string) => unknown;
+  updateNodeUserPrompt: (nodeId: string, prompt: string) => void;
+  updateNodeAssistantMessage: (nodeId: string, message: string) => void;
 }
 
 export interface EdgeActions {
