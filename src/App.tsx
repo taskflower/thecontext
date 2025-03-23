@@ -22,6 +22,7 @@ import PluginsApp from "./modules/plugins/PluginsApp";
 import { useTheme } from "./components/ThemeProvider";
 import { cn } from "./utils/utils";
 import ConversationPreview from "./modules/flow/components/ConversationPreview";
+import HistoryView from "./modules/history/components/HistoryView";
 
 type PanelContentType = "context" | "conversation" | "plugins" | "";
 
@@ -177,7 +178,7 @@ const App = () => {
                   </div>
                 )}
                 {bottomPanelContent === "context" && (
-                  <div className="p-4">Context content</div>
+                  <div className="p-4">Context content  <HistoryView /></div>
                 )}
                 {bottomPanelContent === "conversation" && (
                   <div className="p-4">

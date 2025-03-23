@@ -1,6 +1,8 @@
+// src/modules/flow/components/ConversationPreview.tsx
 import React from "react";
 import { useAppStore } from "../../store";
 import { Bot, User } from "lucide-react";
+import ExportConversation from "./ExportConversation";
 
 /**
  * Component that displays a preview of the conversation flow
@@ -12,7 +14,7 @@ const ConversationPreview: React.FC = () => {
   if (flowNodes.length === 0) {
     return (
       <div className="p-6 bg-muted/20 rounded-lg text-center text-muted-foreground">
-        <p>Brak węzłów w przepływie. Dodaj węzły, aby zobaczyć podgląd konwersacji.</p>
+        <p>No nodes in the flow. Add nodes to see the conversation preview.</p>
       </div>
     );
   }
@@ -20,7 +22,7 @@ const ConversationPreview: React.FC = () => {
   return (
     <div className="rounded-lg border border-border bg-background shadow-sm overflow-hidden">
       <div className="p-3 border-b border-border bg-muted/30">
-        <h3 className="text-sm font-medium">Podgląd konwersacji</h3>
+        <h3 className="text-sm font-medium">Conversation Preview</h3>
       </div>
       
       <div className="p-4 max-h-[400px] overflow-y-auto space-y-6">
@@ -80,14 +82,7 @@ const ConversationPreview: React.FC = () => {
       </div>
       
       <div className="p-3 border-t border-border bg-muted/10 flex justify-end">
-        <button 
-          className="px-3 py-1.5 rounded-md text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90"
-          onClick={() => {
-            // Tutaj można dodać funkcję do eksportu konwersacji
-          }}
-        >
-          Eksportuj konwersację
-        </button>
+        <ExportConversation />
       </div>
     </div>
   );
