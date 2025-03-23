@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// src/modules/graph/types.ts
 import { BaseItem, Position } from "../common/types";
 
 export interface PluginDataMap {
@@ -7,7 +7,8 @@ export interface PluginDataMap {
 
 export interface FlowNode extends BaseItem {
   label: string;
-  value: number;
+  assistantMessage: string; // Changed from 'value' to 'assistantMessage'
+  userPrompt?: string;      // Added to store user input prompt
   position: Position;
   pluginKey?: string;
   pluginData?: PluginDataMap; 
@@ -37,7 +38,8 @@ export interface EdgeActions {
 
 export interface NodePayload {
   label: string;
-  value: string | number;
+  assistantMessage: string;     // Changed from 'value' to 'assistantMessage'
+  userPrompt?: string;          // Added to store user input prompt
   position?: Position;
   pluginKey?: string;
   pluginData?: PluginDataMap;

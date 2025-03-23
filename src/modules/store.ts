@@ -30,26 +30,28 @@ export const useAppStore = create<AppState>()(
       {
         id: "workspace1",
         type: TYPES.WORKSPACE,
-        title: "Project Alpha",
+        title: "Chatbot Project",
         children: [
           {
             id: "scenario1",
             type: TYPES.SCENARIO,
-            name: "Main Flow",
-            description: "Primary user journey",
+            name: "Welcome Flow",
+            description: "Initial user greeting and introduction",
             children: [
               {
                 id: "node1",
                 type: TYPES.NODE,
-                label: "Start",
-                value: 100,
+                label: "Welcome",
+                assistantMessage: "Hello! I'm your virtual assistant. How can I help you today?",
+                userPrompt: "",
                 position: { x: 100, y: 100 },
               },
               {
                 id: "node2",
                 type: TYPES.NODE,
-                label: "Process",
-                value: 250,
+                label: "Services",
+                assistantMessage: "I can help you with product information, scheduling appointments, or technical support. What would you like to know?",
+                userPrompt: "I need some help",
                 position: { x: 300, y: 200 },
               },
             ],
@@ -59,7 +61,7 @@ export const useAppStore = create<AppState>()(
                 type: TYPES.EDGE,
                 source: "node1",
                 target: "node2",
-                label: "Flow",
+                label: "Need help",
               },
             ],
           },
@@ -182,7 +184,8 @@ export const useAppStore = create<AppState>()(
 
     addNode: (payload: {
       label: string;
-      value: string | number;
+      assistantMessage: string; // Changed from value to assistantMessage
+      userPrompt?: string;      // Added userPrompt
       position?: { x: number; y: number };
     }) =>
       set((state) => {
@@ -190,7 +193,8 @@ export const useAppStore = create<AppState>()(
           id: `node-${Date.now()}`,
           type: TYPES.NODE,
           label: payload.label,
-          value: Number(payload.value),
+          assistantMessage: payload.assistantMessage,    // Using assistantMessage instead of value
+          userPrompt: payload.userPrompt || "",          // Default to empty string
           position: payload.position || { x: 100, y: 100 },
         };
 
@@ -265,19 +269,19 @@ export const useAppStore = create<AppState>()(
 
         if (node) {
           if (pluginKey === null) {
-            // Usuwamy klucz pluginu i czyścimy jego dane
+            // Remove plugin key and clear its data
             node.pluginKey = undefined;
             node.pluginData = undefined;
           } else {
-            // Ustawiamy klucz pluginu
+            // Set plugin key
             node.pluginKey = pluginKey;
 
-            // Inicjalizujemy dane pluginu
+            // Initialize plugin data
             if (!node.pluginData) {
               node.pluginData = {};
             }
 
-            // Jeśli podano dane początkowe, zapisujemy je
+            // If initial data provided, save it
             if (initialData !== undefined) {
               if (!node.pluginData) node.pluginData = {};
               node.pluginData[pluginKey] = initialData;
@@ -299,12 +303,12 @@ export const useAppStore = create<AppState>()(
         const node = scenario?.children.find((n) => n.id === nodeId);
 
         if (node) {
-          // Inicjalizujemy obiekt danych pluginu, jeśli nie istnieje
+          // Initialize plugin data object if it doesn't exist
           if (!node.pluginData) {
             node.pluginData = {};
           }
 
-          // Aktualizujemy dane pluginu
+          // Update plugin data
           node.pluginData[pluginKey] = data;
           state.stateVersion++;
         }
@@ -388,8 +392,11 @@ export const useAppStore = create<AppState>()(
       const nodes = scenario.children.map((node) => ({
         id: node.id,
         data: {
-          label: `${node.label} (${node.value})`,
+          label: node.label,
           nodeId: node.id,
+          prompt: node.userPrompt,
+          message: node.assistantMessage,
+          pluginKey: node.pluginKey
         },
         position: node.position,
         selected: node.id === state.selected.node,
