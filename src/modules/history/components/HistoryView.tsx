@@ -12,11 +12,11 @@ const HistoryView: React.FC = () => {
   // Filter conversations based on search query
   const filteredConversations = conversations.filter(
     (conv) =>
-      conv.scenarioName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (conv.scenarioName?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
       conv.steps.some(
         (step) =>
-          (step.userMessage && step.userMessage.toLowerCase().includes(searchQuery.toLowerCase())) ||
-          (step.assistantMessage && step.assistantMessage.toLowerCase().includes(searchQuery.toLowerCase()))
+          (step.userMessage?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
+          (step.assistantMessage?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
       )
   );
 
@@ -25,17 +25,37 @@ const HistoryView: React.FC = () => {
     ? conversations.find((conv) => conv.id === selectedConversation)
     : null;
 
+  // Debug log przy renderowaniu komponentu
+  console.log("Dostępne konwersacje:", conversations.map(c => ({
+    id: c.id,
+    name: c.scenarioName,
+    steps: c.steps.length,
+    przykładowa_wiadomość: c.steps[0]?.userMessage || "(brak)"
+  })));
+
+  if (conversationDetails) {
+    console.log("Szczegóły wybranej konwersacji:", {
+      id: conversationDetails.id,
+      name: conversationDetails.scenarioName,
+      kroki: conversationDetails.steps.map(s => ({
+        węzeł: s.nodeLabel,
+        wiadomość_użytkownika: s.userMessage || "(brak)",
+        wiadomość_asystenta: s.assistantMessage ? "(obecna)" : "(brak)"
+      }))
+    });
+  }
+
   return (
     <div className="grid grid-cols-3 gap-4 h-full">
       {/* Left panel with history list */}
       <div className="col-span-1 border-r border-border h-full overflow-hidden flex flex-col">
         <div className="p-4 border-b border-border">
-          <h2 className="text-lg font-medium mb-2">Conversation History</h2>
+          <h2 className="text-lg font-medium mb-2">Historia konwersacji</h2>
           <div className="relative">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search conversations..."
+              placeholder="Szukaj konwersacji..."
               className="w-full pl-8 p-2 bg-background border border-border rounded-md text-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -46,7 +66,7 @@ const HistoryView: React.FC = () => {
         <div className="flex-1 overflow-y-auto p-2 space-y-2">
           {filteredConversations.length === 0 ? (
             <div className="text-center p-6 text-muted-foreground">
-              <p>No conversation history found</p>
+              <p>Brak historii konwersacji</p>
             </div>
           ) : (
             filteredConversations.map((conv) => (
@@ -60,12 +80,12 @@ const HistoryView: React.FC = () => {
                 onClick={() => setSelectedConversation(conv.id)}
               >
                 <div className="flex justify-between items-start">
-                  <h3 className="font-medium text-sm truncate">{conv.scenarioName}</h3>
+                  <h3 className="font-medium text-sm truncate">{conv.scenarioName || "Unnamed Scenario"}</h3>
                   <button
                     className="p-1 text-muted-foreground hover:text-destructive rounded-full hover:bg-muted"
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (confirm("Are you sure you want to delete this conversation?")) {
+                      if (confirm("Czy na pewno chcesz usunąć tę konwersację?")) {
                         deleteConversation(conv.id);
                         if (selectedConversation === conv.id) {
                           setSelectedConversation(null);
@@ -81,7 +101,7 @@ const HistoryView: React.FC = () => {
                   <span>
                     {formatDistanceToNow(new Date(conv.timestamp), { addSuffix: true })}
                   </span>
-                  <span className="ml-2">{conv.steps.length} steps</span>
+                  <span className="ml-2">{conv.steps.length} kroków</span>
                 </div>
               </div>
             ))
@@ -93,13 +113,13 @@ const HistoryView: React.FC = () => {
       <div className="col-span-2 h-full overflow-hidden flex flex-col">
         {!selectedConversation ? (
           <div className="flex items-center justify-center h-full text-muted-foreground">
-            <p>Select a conversation to view details</p>
+            <p>Wybierz konwersację, aby zobaczyć szczegóły</p>
           </div>
         ) : (
           <>
             <div className="p-4 border-b border-border">
               <h2 className="text-lg font-medium">
-                {conversationDetails?.scenarioName}
+                {conversationDetails?.scenarioName || "Unnamed Scenario"}
               </h2>
               <p className="text-sm text-muted-foreground">
                 {new Date(conversationDetails?.timestamp || 0).toLocaleString()}
@@ -114,7 +134,7 @@ const HistoryView: React.FC = () => {
                     <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-medium text-primary mr-2">
                       {index + 1}
                     </div>
-                    <span className="text-sm font-medium">{step.nodeLabel}</span>
+                    <span className="text-sm font-medium">{step.nodeLabel || `Step ${index + 1}`}</span>
                   </div>
 
                   {/* Assistant message */}

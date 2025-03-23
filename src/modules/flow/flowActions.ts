@@ -93,7 +93,9 @@ export const createFlowSlice: StateCreator<
   
       const nodeData = scenarioNodes.find((n) => n.id === nodeId);
       if (nodeData) {
-        path.push(nodeData);
+        // Create a deep copy to avoid reference issues
+        const nodeCopy = JSON.parse(JSON.stringify(nodeData));
+        path.push(nodeCopy);
         visited.add(nodeId);
   
         const nextNodes = edgesMap.get(nodeId) || [];
@@ -102,6 +104,44 @@ export const createFlowSlice: StateCreator<
     };
   
     dfs(startNodeId);
+    
+    // Log the calculated path for debugging purposes
+    console.log("Calculated flow path:", path.map(node => ({
+      id: node.id,
+      label: node.label,
+      userPrompt: node.userPrompt
+    })));
+    
     return path;
   },
+  
+  // This is a helper function to manually update a node's userPrompt
+  // It doesn't have to match the original interface since it's just for our use
+  updateNodeUserPrompt: (nodeId: string, userPrompt: string) => {
+    console.log(`Attempting to update node ${nodeId} with userPrompt:`, userPrompt);
+    
+    set((state: any) => {
+      const workspace = state.items.find(
+        (w: any) => w.id === state.selected.workspace
+      );
+      if (!workspace) return state;
+      
+      const scenario = workspace.children.find(
+        (s: any) => s.id === state.selected.scenario
+      );
+      if (!scenario) return state;
+      
+      const nodeIndex = scenario.children.findIndex((n: any) => n.id === nodeId);
+      if (nodeIndex === -1) return state;
+      
+      // Update the userPrompt on the node
+      scenario.children[nodeIndex].userPrompt = userPrompt;
+      
+      // Increment state version to trigger updates
+      state.stateVersion++;
+      
+      console.log(`Updated node ${nodeId} with userPrompt:`, userPrompt);
+      return state;
+    });
+  }
 });

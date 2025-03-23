@@ -25,7 +25,6 @@ const FlowGraph: React.FC = () => {
   );
   const addEdge = useAppStore((state) => state.addEdge);
   const updateNodePosition = useAppStore((state) => state.updateNodePosition);
-  const getCurrentScenario = useAppStore((state) => state.getCurrentScenario);
   const selectNode = useAppStore((state) => state.selectNode);
   const stateVersion = useAppStore((state) => state.stateVersion);
   const calculateFlowPath = useAppStore((state) => state.calculateFlowPath);
@@ -86,6 +85,7 @@ const FlowGraph: React.FC = () => {
   const handlePlay = useCallback(() => {
     const path = calculateFlowPath();
     if (path.length > 0) {
+      console.log("Starting flow with path:", path);
       setFlowPath(path);
       setCurrentNodeIndex(0);
       setIsPlaying(true);

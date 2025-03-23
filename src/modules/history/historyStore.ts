@@ -39,19 +39,26 @@ const useHistoryStore = create<HistoryState>()(
       saveConversation: (scenarioId, scenarioName, steps) => {
         const historyId = uuidv4();
         
+        const historySteps = steps.map(node => ({
+          nodeId: node.id,
+          nodeLabel: node.label,
+          assistantMessage: node.assistantMessage,
+          userMessage: node.userPrompt,
+          pluginKey: node.pluginKey
+        }));
+        
+        // Debug: Verify each step has userMessage if applicable
+        console.log("Saving conversation steps:", historySteps);
+        
         const historyEntry: ConversationHistoryEntry = {
           id: historyId,
           scenarioId,
           scenarioName,
           timestamp: Date.now(),
-          steps: steps.map(node => ({
-            nodeId: node.id,
-            nodeLabel: node.label,
-            assistantMessage: node.assistantMessage,
-            userMessage: node.userPrompt,
-            pluginKey: node.pluginKey
-          }))
+          steps: historySteps
         };
+        
+        console.log("Full history entry being saved:", historyEntry);
         
         set(state => ({
           conversations: [historyEntry, ...state.conversations]

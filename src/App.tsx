@@ -21,7 +21,7 @@ import FlowGraph from "./modules/flow/components/FlowGraph";
 import PluginsApp from "./modules/plugins/PluginsApp";
 import { useTheme } from "./components/ThemeProvider";
 import { cn } from "./utils/utils";
-import ConversationPreview from "./modules/flow/components/ConversationPreview";
+
 import HistoryView from "./modules/history/components/HistoryView";
 
 type PanelContentType = "context" | "conversation" | "plugins" | "";
@@ -178,11 +178,11 @@ const App = () => {
                   </div>
                 )}
                 {bottomPanelContent === "context" && (
-                  <div className="p-4">Context content  <HistoryView /></div>
+                  <div className="p-4">Context content  </div>
                 )}
                 {bottomPanelContent === "conversation" && (
                   <div className="p-4">
-                    <ConversationPreview />
+                    <HistoryView />
                   </div>
                 )}
               </div>

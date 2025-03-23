@@ -3,6 +3,8 @@ import StepPluginWrapper from "@/modules/plugins/wrappers/StepPluginWrapper";
 import { StepModalProps } from "../types";
 import { cn } from "@/utils/utils";
 import { Bot, Puzzle, X } from "lucide-react";
+import { useAppStore } from "../../store";
+import useHistoryStore from "../../history/historyStore";
 
 export const StepModal: React.FC<StepModalProps> = ({
   steps,
@@ -15,6 +17,10 @@ export const StepModal: React.FC<StepModalProps> = ({
   const [userInputs, setUserInputs] = useState<Record<string, string>>({});
   const [isProcessing, setIsProcessing] = useState(false);
   const isLastStep = currentStep === steps.length - 1;
+  
+  // Pobierz potrzebne funkcje ze store'ów
+  const getCurrentScenario = useAppStore(state => state.getCurrentScenario);
+  const saveConversation = useHistoryStore(state => state.saveConversation);
 
   // Reset input when changing steps
   useEffect(() => {
@@ -39,20 +45,85 @@ export const StepModal: React.FC<StepModalProps> = ({
     }));
   };
 
-  // Unified handling of navigation and text processing
+  // Funkcja zapisująca historię konwersacji
+  const saveHistory = () => {
+    console.log("Zapisywanie historii konwersacji");
+    
+    const scenario = getCurrentScenario();
+    if (!scenario) {
+      console.error("Błąd: Brak aktywnego scenariusza do zapisu historii");
+      return;
+    }
+    
+    // Przygotuj finalną ścieżkę z aktualnymi danymi użytkownika
+    const finalSteps = steps.map(node => {
+      // Aktualizuj każdy węzeł o dane wpisane przez użytkownika
+      if (userInputs[node.id]) {
+        return { ...node, userPrompt: userInputs[node.id] };
+      }
+      return node;
+    });
+    
+    console.log("Zapisywane dane węzłów:", finalSteps.map(node => ({
+      id: node.id,
+      label: node.label,
+      userPrompt: node.userPrompt
+    })));
+    
+    try {
+      const historyId = saveConversation(
+        scenario.id,
+        scenario.label || scenario.name,
+        finalSteps
+      );
+      console.log("SUKCES: Historia zapisana automatycznie z ID:", historyId);
+    } catch (error) {
+      console.error("Błąd podczas zapisywania historii:", error);
+    }
+  };
+
+  // Obsługa nawigacji z zapisem inputów
   const handleNavigation = (direction: 'prev' | 'next' | 'finish') => {
+    // Zapisz aktualny input do lokalnej pamięci
+    if (currentNode) {
+      const userInput = getCurrentInput();
+      console.log(`Zapisuję input dla węzła ${currentNode.id}:`, userInput);
+      
+      // Aktualizuj lokalny stan
+      steps[currentStep] = {
+        ...steps[currentStep],
+        userPrompt: userInput
+      };
+      
+      // Zapisz do stanu komponentu
+      setUserInputs(prev => ({
+        ...prev,
+        [currentNode.id]: userInput
+      }));
+    }
+    
     if (direction === 'prev') {
       onPrev();
     } else if (direction === 'next') {
       setIsProcessing(true);
-      // Simulate processing, in real app would be API call
       setTimeout(() => {
         setIsProcessing(false);
         onNext();
       }, 300);
     } else if (direction === 'finish') {
+      // Zapisz historię przed zamknięciem
+      saveHistory();
+      // Wywołaj standardową funkcję onClose
       onClose();
     }
+  };
+
+  // Obsługa zamknięcia okna z zapisem historii
+  const handleClose = () => {
+    // Zapisz historię przed zamknięciem
+    saveHistory();
+    // Wywołaj standardową funkcję onClose
+    onClose();
   };
 
   if (!currentNode) {
@@ -67,7 +138,7 @@ export const StepModal: React.FC<StepModalProps> = ({
             Krok {currentStep + 1} z {steps.length}: {currentNode.label}
           </h3>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-1 rounded-full hover:bg-muted"
           >
             <X className="h-5 w-5" />
