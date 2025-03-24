@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/plugins/types.ts
-import { ComponentType } from 'react';
+import { ComponentType } from "react";
 
 // Plugin component props
 export interface PluginComponentProps<T = unknown> {
@@ -28,7 +28,6 @@ export interface AppContextData {
   // Add the update functions that are used in wrappers
   updateNodeUserPrompt?: (nodeId: string, prompt: string) => void;
   updateNodeAssistantMessage?: (nodeId: string, message: string) => void;
-  
 }
 
 // Dynamic component store interface
@@ -36,7 +35,10 @@ export interface DynamicComponentStore {
   components: Record<string, ComponentType<PluginComponentProps>>;
   componentData: Record<string, unknown>;
 
-  registerComponent: (key: string, component: ComponentType<PluginComponentProps>) => void;
+  registerComponent: (
+    key: string,
+    component: ComponentType<PluginComponentProps>
+  ) => void;
   unregisterComponent: (key: string) => void;
   setComponentData: (key: string, data: unknown) => void;
   getComponentData: (key: string) => unknown;
@@ -45,13 +47,14 @@ export interface DynamicComponentStore {
 }
 
 // Plugin component with options schema
-export interface PluginComponentWithSchema<T = unknown> extends React.FC<PluginComponentProps<T>> {
+export interface PluginComponentWithSchema<T = unknown>
+  extends React.FC<PluginComponentProps<T>> {
   optionsSchema?: Record<string, PluginOptionSchema>;
 }
 
 // Schema for plugin options
 export interface PluginOptionSchema {
-  type: 'string' | 'number' | 'boolean' | 'color';
+  type: "string" | "number" | "boolean" | "color";
   label?: string;
   description?: string;
   default: unknown;
@@ -98,3 +101,5 @@ export interface PluginPreviewWrapperProps {
   showHeader?: boolean;
   className?: string;
 }
+
+export type PluginDataMap = Record<string, any>;

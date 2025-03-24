@@ -1,11 +1,14 @@
-import { BaseItem } from "../common/types";
+
 import { Scenario } from "../scenarios/types";
 import { ContextItem } from "../context/types"; // Add this import
+import { BaseItem } from "../store";
 
 export interface Workspace extends BaseItem {
   title: string;
   children: Scenario[];
-  contextItems?: ContextItem[]; // Add this property
+  contextItems?: ContextItem[];
+  createdAt: number;
+  updatedAt: number;
 }
 
 export interface WorkspaceActions {

@@ -1,8 +1,7 @@
 import { StateCreator } from "zustand";
 import { Draft } from "immer";
-import { TYPES } from "../common/types";
 import { EdgeActions, Edge } from "../graph/types";
-import { AppState } from "../store";
+import { AppState, TYPES } from "../store";
 
 export const createEdgeSlice: StateCreator<
   AppState,

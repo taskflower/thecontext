@@ -1,8 +1,7 @@
 import { StateCreator } from "zustand";
 import { Draft } from "immer";
-import { TYPES } from "../common/types";
 import { Workspace, WorkspaceActions } from "./types";
-import { AppState } from "../store";
+import { AppState, TYPES } from "../store";
 
 export const createWorkspaceSlice: StateCreator<
   AppState,
@@ -30,6 +29,9 @@ export const createWorkspaceSlice: StateCreator<
         type: TYPES.WORKSPACE,
         title: payload.title,
         children: [],
+        contextItems: [], // Dodaj puste contextItems
+        createdAt: Date.now(), // Dodaj timestamp utworzenia
+        updatedAt: Date.now(), // Dodaj timestamp aktualizacji
       };
       state.items.push(newWorkspace);
       state.selected.workspace = newWorkspace.id;

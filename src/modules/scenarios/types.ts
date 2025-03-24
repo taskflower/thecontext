@@ -1,5 +1,6 @@
-import { BaseItem } from "../common/types";
+
 import { Edge, FlowNode } from "../graph/types";
+import { BaseItem } from "../store";
 
 
 export interface Scenario extends BaseItem {

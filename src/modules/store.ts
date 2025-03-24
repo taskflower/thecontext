@@ -2,12 +2,9 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { TYPES, SelectionState } from "./common/types";
 import { Workspace, WorkspaceActions } from "./workspaces/types";
 import { ScenarioActions } from "./scenarios/types";
 import { NodeActions, EdgeActions } from "./graph/types";
-import { FlowActions } from "./flow/types"; // Zakładam, że powinno być z ./flow/types
-import { ContextItem } from "./context/types";
 import { createContextActions } from "./context/contextActions";
 
 import { createWorkspaceSlice } from "./workspaces/workspaceActions";
@@ -15,28 +12,37 @@ import { createScenarioSlice } from "./scenarios/scenarioActions";
 import { createNodeSlice } from "./graph/nodeActions";
 import { createEdgeSlice } from "./graph/edgeActions";
 import { createFlowSlice } from "./flow/flowActions";
+import { ContextActions } from "./context";
 
-export interface ContextActions {
-  addContextItem: (workspaceId: string, item: ContextItem) => void;
-  updateContextItem: (workspaceId: string, key: string, value: string, valueType: 'text' | 'json') => void;
-  deleteContextItem: (workspaceId: string, key: string) => void;
-  getContextValue: (workspaceId: string, key: string) => (state: AppState) => string | null;
-  getContextItems: (workspaceId: string) => (state: AppState) => ContextItem[];
+export const TYPES = {
+  WORKSPACE: "workspace",
+  SCENARIO: "scenario",
+  NODE: "node",
+  EDGE: "edge",
+};
+
+export interface BaseItem {
+  id: string;
+  type: string;
 }
 
-export interface AppState
-  extends WorkspaceActions,
-    ScenarioActions,
-    NodeActions,
-    EdgeActions,
-    FlowActions,
+export interface SelectionState {
+  workspace: string;
+  scenario: string;
+  node: string;
+}
+
+export interface AppState extends WorkspaceActions, 
+    ScenarioActions, 
+    NodeActions, 
+    EdgeActions, 
     ContextActions {
   items: Workspace[];
   selected: SelectionState;
   stateVersion: number;
+
 }
 
-// Initial state
 const initialState = {
   items: [
     {
@@ -86,8 +92,7 @@ const initialState = {
   selected: { workspace: "workspace1", scenario: "scenario1", node: "" },
   stateVersion: 0,
 };
-
-// Create the store with all slices and persist middleware
+const STORAGE_KEY = "context-app-storage";
 export const useAppStore = create<AppState>()(
   persist(
     immer((...a) => ({
@@ -100,40 +105,22 @@ export const useAppStore = create<AppState>()(
       ...createContextActions(...a),
     })),
     {
-      name: "context-app-storage", // Unique name for localStorage key
+      name: STORAGE_KEY,
       storage: createJSONStorage(() => localStorage),
-      // Optional: specify which parts of the state to persist
       partialize: (state) => ({
         items: state.items,
         selected: state.selected,
-        // We don't need to persist stateVersion
       }),
-      // Optional: custom merge function to handle merging persisted state with initial state
       merge: (persistedState, currentState) => {
-        // Type assertion to handle the fact that persisted state might be partial
         const typedPersistedState = persistedState as Partial<AppState>;
-        
         return {
           ...currentState,
           ...(typedPersistedState as object),
-          // Make sure stateVersion is incremented to trigger re-renders
           stateVersion: currentState.stateVersion + 1,
         };
-      },
-      // Version handling for migrations
-      version: 1,
-      // Optional: migration function if state structure changes
-      migrate: (persistedState, version) => {
-        // This is where you would handle migration if you change state structure
-        // For now, just return the state as is
-        return persistedState as AppState;
       },
     }
   )
 );
 
-// Optional: Add a way to clear persisted state for debugging/testing
-export const clearPersistedState = () => {
-  localStorage.removeItem("context-app-storage");
-  window.location.reload();
-};
+

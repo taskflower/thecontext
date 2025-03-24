@@ -1,25 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/graph/types.ts
-import { BaseItem, Position } from "../common/types";
+import { PluginDataMap } from "../plugins/types";
+import { BaseItem } from "../store";
 
-export interface PluginDataMap {
-  [pluginKey: string]: unknown;
+// Position interface for nodes
+export interface Position {
+  x: number;
+  y: number;
 }
+
 
 export interface FlowNode extends BaseItem {
   label: string;
-  assistantMessage: string; // Changed from 'value' to 'assistantMessage'
-  userPrompt?: string;      // Added to store user input prompt
+  assistantMessage: string;
+  userPrompt?: string;
   position: Position;
   pluginKey?: string;
-  pluginData?: PluginDataMap; 
-}
-
-export interface Edge extends BaseItem {
-  source: string;
-  target: string;
-  label?: string;
-  type: string;
+  pluginData?: PluginDataMap;
 }
 
 export interface NodeActions {
@@ -30,25 +27,31 @@ export interface NodeActions {
   setNodePlugin: (nodeId: string, pluginKey: string | null, initialData?: unknown) => void;
   updateNodePluginData: (nodeId: string, pluginKey: string, data: unknown) => void;
   getNodePluginData: (nodeId: string, pluginKey: string) => unknown;
-  
-  // Add these new methods to the interface
   updateNodeLabel: (nodeId: string, label: string) => void;
   updateNodeUserPrompt: (nodeId: string, prompt: string) => void;
   updateNodeAssistantMessage: (nodeId: string, message: string) => void;
 }
 
-export interface EdgeActions {
-  addEdge: (payload: EdgePayload) => void;
-  deleteEdge: (edgeId: string) => void;
-}
-
 export interface NodePayload {
   label: string;
-  assistantMessage: string;     // Changed from 'value' to 'assistantMessage'
-  userPrompt?: string;          // Added to store user input prompt
+  assistantMessage: string;     
+  userPrompt?: string;          
   position?: Position;
   pluginKey?: string;
   pluginData?: PluginDataMap;
+}
+
+
+export interface Edge extends BaseItem {
+  source: string;
+  target: string;
+  label?: string;
+  type: string;
+}
+
+export interface EdgeActions {
+  addEdge: (payload: EdgePayload) => void;
+  deleteEdge: (edgeId: string) => void;
 }
 
 export interface EdgePayload {
@@ -58,6 +61,3 @@ export interface EdgePayload {
   type?: string;
 }
 
-export interface FlowActions {
-  getActiveScenarioData: () => { nodes: any[]; edges: any[] };
-}

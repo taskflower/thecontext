@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { StateCreator } from "zustand";
 import { Draft } from "immer";
-import { TYPES } from "../common/types";
 import { Scenario, ScenarioActions } from "./types";
-import { AppState } from "../store";
+import { AppState, TYPES } from "../store";
 
 export const createScenarioSlice: StateCreator<
   AppState,
