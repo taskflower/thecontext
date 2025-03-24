@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { PlusCircle, MoreHorizontal, X, Folder, FolderOpen } from "lucide-react";
+import { PlusCircle, MoreHorizontal, X, Folder, FolderOpen, Edit } from "lucide-react";
 import { useAppStore } from "../../store";
 import { Workspace } from "../types";
 import { useDialogState } from "../../common/hooks";
 import { cn } from "@/utils/utils";
+import { ContextEditor } from "../../context";
 
 const WorkspacesList: React.FC = () => {
   const workspaces = useAppStore((state) => state.items);
@@ -13,6 +14,7 @@ const WorkspacesList: React.FC = () => {
   const deleteWorkspace = useAppStore((state) => state.deleteWorkspace);
   
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
+  const [editingContextWorkspaceId, setEditingContextWorkspaceId] = useState<string | null>(null);
   
   const { isOpen, formData, openDialog, handleChange, setIsOpen } = useDialogState<{
     title: string;
@@ -30,8 +32,17 @@ const WorkspacesList: React.FC = () => {
     setMenuOpen(menuOpen === id ? null : id);
   };
   
+  const handleEditContext = (workspaceId: string) => {
+    // Tylko jeśli workspace jest aktywny
+    if (workspaceId === selectedWorkspaceId) {
+      setEditingContextWorkspaceId(workspaceId);
+      setMenuOpen(null);
+    }
+  };
+  
   return (
     <div className="h-full flex flex-col">
+      {/* Workspaces Header */}
       <div className="flex items-center justify-between p-4 border-b border-border">
         <h2 className="text-base font-medium">Workspaces</h2>
         <button
@@ -43,6 +54,7 @@ const WorkspacesList: React.FC = () => {
         </button>
       </div>
       
+      {/* Workspaces List */}
       <div className="flex-1 overflow-auto p-2">
         {workspaces.length > 0 ? (
           <ul className="space-y-0.5">
@@ -53,6 +65,7 @@ const WorkspacesList: React.FC = () => {
                 isSelected={workspace.id === selectedWorkspaceId}
                 onSelect={selectWorkspace}
                 onDelete={deleteWorkspace}
+                onEditContext={handleEditContext}
                 menuOpen={menuOpen === workspace.id}
                 toggleMenu={() => toggleMenu(workspace.id)}
               />
@@ -111,6 +124,13 @@ const WorkspacesList: React.FC = () => {
           </div>
         </div>
       )}
+      
+      {/* Context Editor Dialog */}
+      {editingContextWorkspaceId && (
+        <ContextEditor 
+          onClose={() => setEditingContextWorkspaceId(null)} 
+        />
+      )}
     </div>
   );
 };
@@ -120,6 +140,7 @@ interface WorkspaceItemProps {
   isSelected: boolean;
   onSelect: (id: string) => void;
   onDelete: (id: string) => void;
+  onEditContext: (id: string) => void;
   menuOpen: boolean;
   toggleMenu: () => void;
 }
@@ -129,6 +150,7 @@ const WorkspaceItem: React.FC<WorkspaceItemProps> = ({
   isSelected,
   onSelect,
   onDelete,
+  onEditContext,
   menuOpen,
   toggleMenu,
 }) => {
@@ -177,8 +199,24 @@ const WorkspaceItem: React.FC<WorkspaceItemProps> = ({
         {menuOpen && (
           <div className="absolute right-0 mt-1 w-36 bg-popover border border-border rounded-md shadow-md z-10">
             <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEditContext(workspace.id);
+              }}
+              className={cn(
+                "w-full text-left px-3 py-2 text-sm flex items-center",
+                isSelected
+                  ? "hover:bg-muted"
+                  : "opacity-50 cursor-not-allowed"
+              )}
+              disabled={!isSelected}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Edit Context
+            </button>
+            <button
               onClick={() => onDelete(workspace.id)}
-              className="w-full text-left px-3 py-2 text-sm text-destructive hover:bg-muted flex items-center"
+              className="w-full text-left px-3 py-2 text-sm text-destructive hover:bg-muted flex items-center border-t border-border"
             >
               <X className="h-4 w-4 mr-2" />
               Delete

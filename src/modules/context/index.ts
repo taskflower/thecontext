@@ -2,4 +2,5 @@
 
 export { ContextsList } from "./ContextsList";
 export { ContextEditor } from "./ContextEditor";
-export * from "../types";
+export { useWorkspaceContext } from "./hooks/useContext";
+export * from "./types";  // Poprawiony import z lokalnego katalogu

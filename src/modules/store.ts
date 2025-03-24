@@ -5,6 +5,8 @@ import { TYPES, SelectionState } from "./common/types";
 import { Workspace, WorkspaceActions } from "./workspaces/types";
 import { ScenarioActions } from "./scenarios/types";
 import { NodeActions, EdgeActions, FlowActions } from "./graph/types";
+import { ContextItem } from "./context/types"; // Add this import
+import { createContextActions } from "./context/contextActions"; // Add this import
 
 import { createWorkspaceSlice } from "./workspaces/workspaceActions";
 import { createScenarioSlice } from "./scenarios/scenarioActions";
@@ -12,12 +14,22 @@ import { createNodeSlice } from "./graph/nodeActions";
 import { createEdgeSlice } from "./graph/edgeActions";
 import { createFlowSlice } from "./flow/flowActions";
 
+// Add this interface
+export interface ContextActions {
+  addContextItem: (workspaceId: string, item: ContextItem) => void;
+  updateContextItem: (workspaceId: string, key: string, value: string, valueType: 'text' | 'json') => void;
+  deleteContextItem: (workspaceId: string, key: string) => void;
+  getContextValue: (workspaceId: string, key: string) => (state: any) => string | null;
+  getContextItems: (workspaceId: string) => (state: any) => ContextItem[];
+}
+
 export interface AppState
   extends WorkspaceActions,
     ScenarioActions,
     NodeActions,
     EdgeActions,
-    FlowActions {
+    FlowActions,
+    ContextActions { // Add ContextActions
   items: Workspace[];
   selected: SelectionState;
   stateVersion: number;
@@ -30,6 +42,7 @@ const initialState = {
       id: "workspace1",
       type: TYPES.WORKSPACE,
       title: "Chatbot Project",
+      contextItems: [], // Add contextItems to initial state
       children: [
         {
           id: "scenario1",
@@ -81,6 +94,7 @@ export const useAppStore = create<AppState>()(
       ...createNodeSlice(...a),
       ...createEdgeSlice(...a),
       ...createFlowSlice(...a),
+      ...createContextActions(...a), // Add createContextActions
     })),
     {
       name: "context-app-storage", // Unique name for localStorage key
@@ -103,8 +117,6 @@ export const useAppStore = create<AppState>()(
           stateVersion: currentState.stateVersion + 1,
         };
       },
-      // Only persist after a delay to avoid excessive writes
-      throttle: 1000,
       // Version handling for migrations
       version: 1,
       // Optional: migration function if state structure changes

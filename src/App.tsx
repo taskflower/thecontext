@@ -22,6 +22,10 @@ import PluginsApp from "./modules/plugins/PluginsApp";
 import { useTheme } from "./components/ThemeProvider";
 import { cn } from "./utils/utils";
 
+// Import the context components
+import { ContextsList } from "./modules/context";
+import { useAppStore } from "./modules/store";
+
 import HistoryView from "./modules/history/components/HistoryView";
 
 type PanelContentType = "context" | "conversation" | "plugins" | "";
@@ -33,6 +37,12 @@ const App = () => {
   const [activeTab, setActiveTab] = useState("workspace");
   const [bottomPanelContent, setBottomPanelContent] =
     useState<PanelContentType>("");
+    
+  // Get selected workspace for context
+  const selectedWorkspaceId = useAppStore(state => state.selected.workspace);
+  const selectedWorkspace = useAppStore(state => 
+    state.items.find(w => w.id === selectedWorkspaceId)
+  );
 
   // Toggle panel handlers
   const togglePanel =
@@ -178,7 +188,18 @@ const App = () => {
                   </div>
                 )}
                 {bottomPanelContent === "context" && (
-                  <div className="p-4">Context content  </div>
+                  <div className="h-full">
+                    {selectedWorkspaceId ? (
+                      <ContextsList />
+                    ) : (
+                      <div className="flex items-center justify-center h-full p-4 text-muted-foreground text-center">
+                        <div>
+                          <p>Please select a workspace first</p>
+                          <p className="text-sm mt-1">Context items are associated with workspaces</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
                 {bottomPanelContent === "conversation" && (
                   <div className="p-4">
