@@ -1,7 +1,7 @@
+// EditScenario.tsx update - replace the Save SVG with Lucide Save icon
 import React, { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { X, Save } from "lucide-react"; // Added Save import
 import { useAppStore } from "../../store";
-
 
 interface EditScenarioProps {
   isOpen: boolean;
@@ -114,11 +114,7 @@ const EditScenario: React.FC<EditScenarioProps> = ({
                 className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2"
                 disabled={!formData.name.trim()}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-save h-4 w-4 mr-2">
-                  <path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path>
-                  <path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path>
-                  <path d="M7 3v4a1 1 0 0 0 1 1h7"></path>
-                </svg>
+                <Save className="h-4 w-4 mr-2" />
                 Save Changes
               </button>
             </div>
