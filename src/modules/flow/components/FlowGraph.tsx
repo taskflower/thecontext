@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useEffect } from "react";
 import ReactFlow, {
   MiniMap,
@@ -9,7 +8,7 @@ import ReactFlow, {
   useEdgesState,
   Node,
   NodeTypes,
-  Edge as ReactFlowEdge
+  Edge as ReactFlowEdge,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { useAppStore } from "../../store";
@@ -27,10 +26,10 @@ const adaptNodeToReactFlow = (node: FlowNode, isSelected: boolean): Node => ({
     nodeId: node.id,
     prompt: node.userPrompt,
     message: node.assistantMessage,
-    pluginKey: node.pluginKey
+    pluginKey: node.pluginKey,
   },
   position: node.position,
-  selected: isSelected
+  selected: isSelected,
 });
 
 // Adapter do konwersji Edge na format ReactFlow
@@ -43,30 +42,32 @@ const adaptEdgeToReactFlow = (edge: Edge): ReactFlowEdge => ({
   style: {
     strokeDasharray: 5,
     strokeWidth: 2,
-    animation: 'dashMove 5s linear infinite'
-  }
+    animation: "dashMove 5s linear infinite",
+  },
 });
 
-// Definiowanie typów węzłów
 const nodeTypes: NodeTypes = { custom: CustomNode };
-
-// Konfiguracja siatki do przyciągania (snap)
-const GRID_SIZE = 20; // Rozmiar kropek siatki
+const GRID_SIZE = 20;
 
 const FlowGraph: React.FC = () => {
-  const getActiveScenarioData = useAppStore(state => state.getActiveScenarioData);
-  const addEdge = useAppStore(state => state.addEdge);
-  const updateNodePosition = useAppStore(state => state.updateNodePosition);
-  const selectNode = useAppStore(state => state.selectNode);
-  const stateVersion = useAppStore(state => state.stateVersion);
-  const startFlowSession = useAppStore(state => state.startFlowSession);
-  const stopFlowSession = useAppStore(state => state.stopFlowSession);
-  const isFlowPlaying = useAppStore(state => state.flowSession?.isPlaying || false);
-  const selectedNodeId = useAppStore(state => state.selected.node);
+  const getActiveScenarioData = useAppStore(
+    (state) => state.getActiveScenarioData
+  );
+  const addEdge = useAppStore((state) => state.addEdge);
+  const updateNodePosition = useAppStore((state) => state.updateNodePosition);
+  const selectNode = useAppStore((state) => state.selectNode);
+  const stateVersion = useAppStore((state) => state.stateVersion);
+  const startFlowSession = useAppStore((state) => state.startFlowSession);
+  const stopFlowSession = useAppStore((state) => state.stopFlowSession);
+  const isFlowPlaying = useAppStore(
+    (state) => state.flowSession?.isPlaying || false
+  );
+  const selectedNodeId = useAppStore((state) => state.selected.node);
 
   // Pobierz dane i przekształć je dla ReactFlow
-  const { nodes: originalNodes, edges: originalEdges } = getActiveScenarioData();
-  const reactFlowNodes = originalNodes.map(node => 
+  const { nodes: originalNodes, edges: originalEdges } =
+    getActiveScenarioData();
+  const reactFlowNodes = originalNodes.map((node) =>
     adaptNodeToReactFlow(node, node.id === selectedNodeId)
   );
   const reactFlowEdges = originalEdges.map(adaptEdgeToReactFlow);
@@ -78,11 +79,11 @@ const FlowGraph: React.FC = () => {
   // Aktualizacja grafu na zmiany danych
   useEffect(() => {
     const { nodes: newNodes, edges: newEdges } = getActiveScenarioData();
-    const updatedNodes = newNodes.map(node => 
+    const updatedNodes = newNodes.map((node) =>
       adaptNodeToReactFlow(node, node.id === selectedNodeId)
     );
     const updatedEdges = newEdges.map(adaptEdgeToReactFlow);
-    
+
     setNodes(updatedNodes);
     setEdges(updatedEdges);
   }, [getActiveScenarioData, setNodes, setEdges, stateVersion, selectedNodeId]);
@@ -165,17 +166,10 @@ const FlowGraph: React.FC = () => {
       >
         <Controls />
         <MiniMap />
-        <Background 
-          variant="dots"
-          gap={GRID_SIZE}
-          size={1}
-          color="#888"
-        />
+        <Background gap={GRID_SIZE} size={1} color="#888" />
       </ReactFlow>
 
-      {isFlowPlaying && (
-        <StepModal onClose={handleCloseModal} />
-      )}
+      {isFlowPlaying && <StepModal onClose={handleCloseModal} />}
     </div>
   );
 };

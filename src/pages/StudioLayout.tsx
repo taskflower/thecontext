@@ -1,466 +1,326 @@
-// src/layouts/StudioLayout.tsx
-import React, { useState } from "react";
-import { ThemeProvider } from "../components/ui/theme-provider";
-import { DialogProvider } from "../components/APPUI/DialogProvider";
+import { useState } from "react";
 import {
-  LayoutGrid,
-  Database,
-  Settings,
-  Layers,
-  PanelLeft,
-  PanelRight,
-  MessageSquare,
-  FileCode,
-  Puzzle,
   Focus,
-  Mail,
-  ChevronDown,
-  LogOut,
+  PanelLeft,
+  Puzzle,
+  MessageSquare,
+  Database,
+  Layers,
+  GitBranch,
+  FolderOpen,
+  Code,
+  Sun,
+  Moon,
+
+  Filter
 } from "lucide-react";
 
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../components/ui/tabs";
-import { Separator } from "../components/ui/separator";
-import { Button } from "../components/ui/button";
-import { ThemeToggle } from "../components/APPUI/ThemeToggle";
-import { ScrollArea } from "../components/ui/scroll-area";
+import WorkspacesList from "./modules/workspaces/components/WorkspacesList";
+import ScenariosList from "./modules/scenarios/components/ScenariosList";
+import NodesList from "./modules/graph/components/NodesList";
+import { EdgesList } from "./modules/graph/components";
+import FlowGraph from "./modules/flow/components/FlowGraph";
+import PluginsApp from "./modules/plugins/PluginsApp";
+import { useTheme } from "./components/ThemeProvider";
+import { cn } from "./utils/utils";
 
-import { WorkspacesList } from "../modules/workspaces";
-import { ScenariosList } from "../modules/scenarios";
-import { FlowGraph } from "../modules/flow";
-import { NodesList } from "../modules/nodes";
-import { EdgesList } from "../modules/edges";
-import { ContextsList } from "../modules/context";
-import { ConversationPanel } from "../modules/conversation/ConversationPanel";
+// Import the context components
+import { ContextsList } from "./modules/context";
+import { useAppStore } from "./modules/store";
 
-import { useAppStore } from "../modules/store";
-import { PluginsPanel } from "@/modules/plugin";
-import { DropdownMenu } from "@/components/ui/dropdown-menu";
-import {
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@radix-ui/react-dropdown-menu";
+import HistoryView from "./modules/history/components/HistoryView";
+import { FiltersList } from "./modules/filters";
 
-import { auth, googleProvider } from "@/firebase/config";
+type PanelContentType = "context" | "filters" | "conversation" | "plugins" | "";
 
-import { signInWithPopup } from "firebase/auth";
-import { useAuthState } from "@/hooks";
-import { useNavigate } from "react-router-dom";
-import { ExportImport } from "@/components/ExportImport";
-
-const StudioLayout: React.FC = () => {
+const App = () => {
+  const { darkMode, toggleDarkMode } = useTheme();
   const [showLeftPanel, setShowLeftPanel] = useState(true);
-  const [showRightPanel, setShowRightPanel] = useState(true);
-  const [showContextPanel, setShowContextPanel] = useState(false);
-  const [showConversationPanel, setShowConversationPanel] = useState(false);
-  const [showPluginsPanel, setShowPluginsPanel] = useState(false);
-  const [rightPanelTab, setRightPanelTab] = useState("nodes");
+  const [showBottomPanel, setShowBottomPanel] = useState(false);
+  const [activeTab, setActiveTab] = useState("workspace");
+  const [bottomPanelContent, setBottomPanelContent] =
+    useState<PanelContentType>("");
 
-  // Pobierz aktualny scenariusz oraz informacje o wybranym workspace
-  const getCurrentScenario = useAppStore((state) => state.getCurrentScenario);
-  const selected = useAppStore((state) => state.selected);
-  const stateVersion = useAppStore((state) => state.stateVersion);
-  const scenario = getCurrentScenario();
-  const activeWorkspace = useAppStore((state) =>
-    state.items.find((w) => w.id === selected.workspace)
-  );
-  const activeScenario = scenario;
+  // Get selected workspace for context
+  const selectedWorkspaceId = useAppStore((state) => state.selected.workspace);
+  const selectedScenarioId = useAppStore((state) => state.selected.scenario);
 
-  const activeTab = useAppStore((state) => state.activeTab);
-  const setActiveTab = useAppStore((state) => state.setActiveTab);
-  const navigate = useNavigate();
+  // Toggle panel handlers
+  const togglePanel =
+    (setter: React.Dispatch<React.SetStateAction<boolean>>, state: boolean) =>
+    () =>
+      setter(!state);
 
-  const { user } = useAuthState();
-  const [showExportImport, setShowExportImport] = useState(false);
-
-  const handleLogout = () => {
-    auth.signOut();
-    navigate("/");
-  };
-
-  const handleGoogleLogin = async () => {
-    try {
-      await signInWithPopup(auth, googleProvider);
-      navigate("/studio");
-    } catch (error) {
-      console.error("Login error:", error);
+  // Show bottom panel with specific content
+  const showPanel = (content: PanelContentType) => {
+    if (bottomPanelContent === content && showBottomPanel) {
+      setShowBottomPanel(false);
+    } else {
+      setBottomPanelContent(content);
+      setShowBottomPanel(true);
     }
   };
-
-  // Handle left panel toggling from FlowGraph
-  const handleToggleLeftPanel = (show: boolean) => {
-    setShowLeftPanel(show);
-  };
-
-  // Automatycznie otwieraj panel właściwości, gdy wybrany jest węzeł lub krawędź
-  React.useEffect(() => {
-    if (selected.node) {
-      setShowRightPanel(true);
-      setRightPanelTab("nodes");
-    } else if (selected.edge) {
-      setShowRightPanel(true);
-      setRightPanelTab("edges");
-    }
-  }, [selected.node, selected.edge, stateVersion]);
 
   return (
-    <ThemeProvider defaultTheme="dark">
-      <DialogProvider>
-        <div className="min-h-screen bg-background flex flex-col overflow-hidden">
-          {/* Header */}
-          <header className="border-b py-2 px-4 flex items-center justify-between bg-card">
-            <div className="flex items-center gap-3">
-              <h1 className="text-sm font-bold flex items-center">
-                <Focus className="mr-2 transform rotate-6" />
-                <span>Deep Context Studio</span>
-              </h1>
-              <Separator orientation="vertical" className="h-6" />
-              <div className="text-sm text-muted-foreground">
-                {activeWorkspace?.title} /{" "}
-                {activeScenario?.name || "No scenario selected"}
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {/* User Authentication Section */}
-              {user ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="flex items-center text-sm gap-2 shadow-sm"
-                    >
-                      <Mail className="h-4 w-4" />
-                      <span>{user.email}</span>
-                      <ChevronDown className="h-4 w-4 opacity-50" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-64">
-                    <DropdownMenuItem
-                      className="flex items-center gap-2 cursor-pointer text-red-600"
-                      onClick={handleLogout}
-                    >
-                      <LogOut className="h-4 w-4" />
-                      <span>Wyloguj się</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <Button
-                  size="default"
-                  className="flex items-center gap-2"
-                  onClick={handleGoogleLogin}
-                >
-                  <svg className="h-5 w-5" viewBox="0 0 24 24">
-                    <path
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                      fill="#4285F4"
-                    />
-                    <path
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                      fill="#34A853"
-                    />
-                    <path
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                      fill="#FBBC05"
-                    />
-                    <path
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                      fill="#EA4335"
-                    />
-                    <path d="M1 1h22v22H1z" fill="none" />
-                  </svg>
-                  Continue with Google
-                </Button>
-              )}
-              <Button
-                variant={showLeftPanel ? "secondary" : "ghost"}
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => setShowLeftPanel(!showLeftPanel)}
-              >
-                <PanelLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={showRightPanel ? "secondary" : "ghost"}
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => setShowRightPanel(!showRightPanel)}
-              >
-                <PanelRight className="h-4 w-4" />
-              </Button>
-              <Separator orientation="vertical" className="h-6" />
-              <ThemeToggle />
-            </div>
-          </header>
-
-          {/* Główna zawartość */}
-          <div className="flex-1 flex overflow-hidden">
-            {/* Lewy panel */}
-            {showLeftPanel && (
-              <aside className="w-96 border-r bg-sidebar-background flex flex-col overflow-hidden">
-                <Tabs
-                  value={activeTab}
-                  onValueChange={(value) => setActiveTab(value)}
-                  className="flex-1 flex flex-col"
-                >
-                  <TabsList className="grid grid-cols-3 px-2 py-1 h-auto rounded-none border-b">
-                    <TabsTrigger
-                      value="workspace"
-                      title="Workspaces"
-                      className="rounded-none"
-                    >
-                      <LayoutGrid className="h-4 w-4" />
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="scenarios"
-                      title="Scenarios"
-                      className="rounded-none"
-                    >
-                      <Layers className="h-4 w-4" />
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="settings"
-                      title="Settings"
-                      className="rounded-none"
-                    >
-                      <Settings className="h-4 w-4" />
-                    </TabsTrigger>
-                  </TabsList>
-                  <div className="flex-1 overflow-auto">
-                    <TabsContent value="workspace" className="m-0 p-0 h-full">
-                      <WorkspacesList />
-                    </TabsContent>
-                    <TabsContent value="scenarios" className="m-0 p-0 h-full">
-                      <ScenariosList />
-                    </TabsContent>
-                    <TabsContent value="settings" className="m-0 p-3 h-full">
-                      <div className="text-sm text-muted-foreground">
-                        <Button
-                          variant="outline"
-                          className="w-full"
-                          onClick={() => setShowExportImport(true)}
-                        >
-                          Data Management
-                        </Button>
-                        {showExportImport && (
-                          <ExportImport
-                            open={showExportImport}
-                            onClose={() => setShowExportImport(false)}
-                          />
-                        )}
-                      </div>
-                    </TabsContent>
-                  </div>
-                </Tabs>
-              </aside>
-            )}
-
-            {/* Główna strefa robocza */}
-            <main className="flex-1 flex flex-col overflow-hidden">
-              <div
-                className={`
-                  ${
-                    showContextPanel ||
-                    showConversationPanel ||
-                    showPluginsPanel
-                      ? "h-[45%]"
-                      : "flex-1"
-                  } 
-                  overflow-hidden
-                `}
-              >
-                <FlowGraph onToggleLeftPanel={handleToggleLeftPanel} />
-              </div>
-
-              {/* Dolny pasek narzędzi */}
-              <div className="border-t bg-card py-1 px-3 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant={showContextPanel ? "secondary" : "ghost"}
-                    size="sm"
-                    className="h-8 gap-1.5 text-xs"
-                    onClick={() => setShowContextPanel(!showContextPanel)}
-                  >
-                    <Database className="h-3.5 w-3.5" />
-                    Context
-                  </Button>
-                  <Button
-                    variant={showConversationPanel ? "secondary" : "ghost"}
-                    size="sm"
-                    className="h-8 gap-1.5 text-xs"
-                    onClick={() =>
-                      setShowConversationPanel(!showConversationPanel)
-                    }
-                  >
-                    <MessageSquare className="h-3.5 w-3.5" />
-                    Conversation
-                  </Button>
-                  <Button
-                    variant={showPluginsPanel ? "secondary" : "ghost"}
-                    size="sm"
-                    className="h-8 gap-1.5 text-xs"
-                    onClick={() => setShowPluginsPanel(!showPluginsPanel)}
-                  >
-                    <Puzzle className="h-3.5 w-3.5" />
-                    Plugins
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 gap-1.5 text-xs"
-                  >
-                    <FileCode className="h-3.5 w-3.5" />
-                    Export
-                  </Button>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {activeScenario?.children?.length || 0} nodes ·{" "}
-                  {activeScenario?.edges?.length || 0} edges
-                </div>
-              </div>
-
-              {/* Dolne panele */}
-              <div
-                className={`${
-                  !showContextPanel &&
-                  !showConversationPanel &&
-                  !showPluginsPanel
-                    ? "hidden"
-                    : "flex"
-                } border-t h-[55%]`}
-              >
-                {showContextPanel && (
-                  <div
-                    className={`${
-                      showConversationPanel || showPluginsPanel
-                        ? "border-r"
-                        : ""
-                    } 
-                    ${
-                      showConversationPanel && showPluginsPanel
-                        ? "w-1/3"
-                        : showConversationPanel || showPluginsPanel
-                        ? "w-1/2"
-                        : "w-full"
-                    } 
-                    bg-card`}
-                  >
-                    <div className="flex items-center justify-between px-3 py-2 border-b bg-background">
-                      <h3 className="text-sm font-medium">Context Manager</h3>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setShowContextPanel(false)}
-                        className="h-7 w-7 p-0"
-                      >
-                        ×
-                      </Button>
-                    </div>
-                    <ScrollArea className="h-[calc(100%-40px)]">
-                      <ContextsList />
-                    </ScrollArea>
-                  </div>
-                )}
-
-                {showConversationPanel && (
-                  <div
-                    className={`${showPluginsPanel ? "border-r" : ""} 
-                    ${
-                      showContextPanel && showPluginsPanel
-                        ? "w-1/3"
-                        : showContextPanel || showPluginsPanel
-                        ? "w-1/2"
-                        : "w-full"
-                    } 
-                    bg-card`}
-                  >
-                    <div className="flex items-center justify-between px-3 py-2 border-b bg-background">
-                      <h3 className="text-sm font-medium">
-                        Conversation History
-                      </h3>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setShowConversationPanel(false)}
-                        className="h-7 w-7 p-0"
-                      >
-                        ×
-                      </Button>
-                    </div>
-                    <ScrollArea className="h-[calc(100%-40px)]">
-                      <ConversationPanel />
-                    </ScrollArea>
-                  </div>
-                )}
-
-                {showPluginsPanel && (
-                  <div
-                    className={`
-                    ${
-                      showContextPanel && showConversationPanel
-                        ? "w-1/3"
-                        : showContextPanel || showConversationPanel
-                        ? "w-1/2"
-                        : "w-full"
-                    } 
-                    bg-card`}
-                  >
-                    <div className="flex items-center justify-between px-3 py-2 border-b bg-background">
-                      <h3 className="text-sm font-medium">Plugins</h3>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setShowPluginsPanel(false)}
-                        className="h-7 w-7 p-0"
-                      >
-                        ×
-                      </Button>
-                    </div>
-                    <ScrollArea className="h-[calc(100%-40px)]">
-                      <PluginsPanel />
-                    </ScrollArea>
-                  </div>
-                )}
-              </div>
-            </main>
-
-            {/* Prawy panel właściwości */}
-            {showRightPanel && (
-              <aside className="w-80 border-l bg-sidebar-background flex flex-col overflow-hidden">
-                <Tabs
-                  value={rightPanelTab}
-                  onValueChange={setRightPanelTab}
-                  className="flex-1 flex flex-col"
-                >
-                  <TabsList className="grid grid-cols-2 px-2 py-1 h-auto rounded-none border-b">
-                    <TabsTrigger value="nodes" className="rounded-none">
-                      Nodes
-                    </TabsTrigger>
-                    <TabsTrigger value="edges" className="rounded-none">
-                      Edges
-                    </TabsTrigger>
-                  </TabsList>
-                  <div className="flex-1 overflow-auto">
-                    <TabsContent value="nodes" className="m-0 p-0 h-full">
-                      <NodesList />
-                    </TabsContent>
-                    <TabsContent value="edges" className="m-0 p-0 h-full">
-                      <EdgesList />
-                    </TabsContent>
-                  </div>
-                </Tabs>
-              </aside>
-            )}
-          </div>
+    <div className="h-screen w-screen flex flex-col bg-background text-foreground">
+      {/* Header */}
+      <header className="border-b border-border h-14 px-4 flex items-center justify-between bg-background z-10">
+        <div className="flex items-center gap-3">
+          <h1 className="text-xs font-semibold flex items-center">
+            <Focus className="mr-2 h-4 w-4 text-primary" />
+            <span>Deep Context Studio</span>
+          </h1>
         </div>
-      </DialogProvider>
-    </ThemeProvider>
+        <div className="flex items-center gap-2">
+          <button
+            className="p-2 rounded-md hover:bg-muted text-foreground"
+            onClick={toggleDarkMode}
+            aria-label={
+              darkMode ? "Switch to light mode" : "Switch to dark mode"
+            }
+          >
+            {darkMode ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
+          </button>
+          <button
+            className={cn(
+              "p-2 rounded-md text-foreground",
+              showLeftPanel ? "bg-muted" : "hover:bg-muted/50"
+            )}
+            onClick={togglePanel(setShowLeftPanel, showLeftPanel)}
+          >
+            <PanelLeft className="h-5 w-5" />
+          </button>
+        </div>
+      </header>
+
+      {/* Main content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left panel */}
+        {showLeftPanel && (
+          <aside className="w-80 border-r border-border flex flex-col overflow-hidden bg-muted/20">
+            <nav className="p-1 flex border-b border-border">
+              <TabButton
+                icon={<FolderOpen className="h-4 w-4" />}
+                label="Workspace"
+                active={activeTab === "workspace"}
+                onClick={() => setActiveTab("workspace")}
+              />
+              <TabButton
+                icon={<GitBranch className="h-4 w-4" />}
+                label="Scenarios"
+                active={activeTab === "scenarios"}
+                onClick={() => setActiveTab("scenarios")}
+              />
+              <TabButton
+                icon={<Layers className="h-4 w-4" />}
+                label="Nodes"
+                active={activeTab === "nodes"}
+                onClick={() => setActiveTab("nodes")}
+              />
+              <TabButton
+                icon={<Code className="h-4 w-4" />}
+                label="Edges"
+                active={activeTab === "edges"}
+                onClick={() => setActiveTab("edges")}
+              />
+            </nav>
+
+            <div className="flex-1 overflow-auto">
+              {activeTab === "workspace" && <WorkspacesList />}
+              {activeTab === "scenarios" && <ScenariosList />}
+              {activeTab === "nodes" && <NodesList />}
+              {activeTab === "edges" && <EdgesList />}
+            </div>
+          </aside>
+        )}
+
+        {/* Main workspace */}
+        <main className="flex-1 flex flex-col overflow-hidden">
+          {/* Flow graph area */}
+          <div
+            className={cn(
+              "flex-1 overflow-hidden",
+              showBottomPanel ? "h-1/3" : "h-full"
+            )}
+          >
+            <FlowGraph />
+          </div>
+
+          {/* Bottom panel */}
+          {showBottomPanel && (
+            <div className="border-t border-border bg-background flex flex-col h-2/3">
+              <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/10">
+                <h3 className="text-sm font-medium">
+                  {bottomPanelContent === "context" && "Context Manager"}
+                  {bottomPanelContent === "filters" && "Filters Manager"}
+                  {bottomPanelContent === "conversation" &&
+                    "Conversation History"}
+                  {bottomPanelContent === "plugins" && "Plugins"}
+                </h3>
+                <button
+                  className="p-1 rounded-md hover:bg-muted/50"
+                  onClick={() => setShowBottomPanel(false)}
+                >
+                  <span className="sr-only">Close panel</span>
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 15 15"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                  >
+                    <path
+                      d="M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z"
+                      fill="currentColor"
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+              <div className="flex-1 overflow-auto">
+                {bottomPanelContent === "plugins" && (
+                  <div className="p-4">
+                    <PluginsApp />
+                  </div>
+                )}
+                {bottomPanelContent === "filters" && (
+                  <div className="h-full">
+                    {selectedWorkspaceId && selectedScenarioId ? (
+                      <FiltersList />
+                    ) : (
+                      <div className="flex items-center justify-center h-full p-4 text-muted-foreground text-center">
+                        <div>
+                          <p>Please select a workspace and scenario first</p>
+                          <p className="text-sm mt-1">
+                            Filters are associated with scenarios
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {bottomPanelContent === "context" && (
+                  <div className="h-full">
+                    {selectedWorkspaceId ? (
+                      <ContextsList />
+                    ) : (
+                      <div className="flex items-center justify-center h-full p-4 text-muted-foreground text-center">
+                        <div>
+                          <p>Please select a workspace first</p>
+                          <p className="text-sm mt-1">
+                            Context items are associated with workspaces
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {bottomPanelContent === "conversation" && (
+                  <div className="p-4">
+                    <HistoryView />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Bottom toolbar */}
+          <div className="border-t border-border bg-muted/10 py-2 px-4 flex items-center">
+            <div className="flex items-center gap-2">
+              <ToolbarButton
+                icon={<Database className="h-4 w-4" />}
+                label="Context"
+                active={bottomPanelContent === "context" && showBottomPanel}
+                onClick={() => showPanel("context")}
+              />
+              <ToolbarButton
+                icon={<Filter className="h-4 w-4" />}
+                label="Filters"
+                active={bottomPanelContent === "filters" && showBottomPanel}
+                onClick={() => showPanel("filters")}
+              />
+              <ToolbarButton
+                icon={<MessageSquare className="h-4 w-4" />}
+                label="Conversation"
+                active={
+                  bottomPanelContent === "conversation" && showBottomPanel
+                }
+                onClick={() => showPanel("conversation")}
+              />
+              <ToolbarButton
+                icon={<Puzzle className="h-4 w-4" />}
+                label="Plugins"
+                active={bottomPanelContent === "plugins" && showBottomPanel}
+                onClick={() => showPanel("plugins")}
+              />
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
   );
 };
 
-export default StudioLayout;
+// Tab button component
+const TabButton = ({
+  icon,
+  label,
+  active,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) => {
+  return (
+    <button
+      className={cn(
+        "flex-1 py-2 px-3 text-xs font-medium rounded-md flex flex-col items-center gap-1",
+        active
+          ? "bg-background text-primary"
+          : "text-muted-foreground hover:bg-muted/50"
+      )}
+      onClick={onClick}
+    >
+      {icon}
+      <span>{label}</span>
+    </button>
+  );
+};
+
+// Toolbar button component
+const ToolbarButton = ({
+  icon,
+  label,
+  active,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) => {
+  return (
+    <button
+      className={cn(
+        "py-1.5 px-3 rounded-md flex items-center gap-2 text-sm font-medium",
+        active
+          ? "bg-muted text-primary"
+          : "text-muted-foreground hover:bg-muted/50"
+      )}
+      onClick={onClick}
+    >
+      {icon}
+      <span>{label}</span>
+    </button>
+  );
+};
+
+export default App;
