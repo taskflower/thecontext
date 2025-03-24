@@ -1,7 +1,7 @@
 // src/modules/plugins/pluginContext.tsx
 import React, { createContext, useContext, useEffect, useState, ReactNode, useMemo, useCallback } from 'react';
 import useDynamicComponentStore from './pluginsStore';
-import { PluginComponentProps, Plugin, AppContextData } from './types';
+import { PluginComponentProps, Plugin } from './types';
 import { discoverAndLoadComponents } from './pluginsDiscovery';
 
 // Define the interface for our plugin context
@@ -157,7 +157,6 @@ export const usePlugins = (): PluginContextType => {
 };
 
 // Export direct access to the plugin registry for external usage
-// This replaces the global window.__DYNAMIC_COMPONENTS__ pattern
 export const PluginRegistry = {
   register: (key: string, component: React.ComponentType<PluginComponentProps>) => {
     useDynamicComponentStore.getState().registerComponent(key, component);

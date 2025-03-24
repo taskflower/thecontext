@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/plugins/types.ts
 import { ComponentType } from "react";
 
@@ -89,14 +88,14 @@ export interface WorkspaceData {
   id: string;
   name: string;
   children: ScenarioData[];
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ScenarioData {
   id: string;
   name: string;
   children: NodeData[];
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface NodeData {
@@ -107,7 +106,7 @@ export interface NodeData {
   assistantMessage?: string;
   pluginKey?: string;
   pluginData?: Record<string, unknown>;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // Props interface for PluginPreviewWrapper
@@ -119,4 +118,4 @@ export interface PluginPreviewWrapperProps {
   className?: string;
 }
 
-export type PluginDataMap = Record<string, any>;
+export type PluginDataMap = Record<string, unknown>;

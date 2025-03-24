@@ -17,14 +17,17 @@ export async function discoverAndLoadComponents() {
     const loadedPlugins: string[] = [];
     
     for (const path in componentModules) {
-      const module = await componentModules[path]() as ComponentModule;
-      const componentName = path.split('/').pop()?.replace('.tsx', '') || '';
-      
-      if (module.default) {
-        // Use our PluginRegistry instead of window
-        PluginRegistry.register(componentName, module.default);
-        loadedPlugins.push(componentName);
-        console.log(`Auto-discovered and registered: ${componentName} from ${path}`);
+      try {
+        const module = await componentModules[path]() as ComponentModule;
+        const componentName = path.split('/').pop()?.replace('.tsx', '') || '';
+        
+        if (module.default) {
+          PluginRegistry.register(componentName, module.default);
+          loadedPlugins.push(componentName);
+          console.log(`Auto-discovered and registered: ${componentName} from ${path}`);
+        }
+      } catch (moduleError) {
+        console.error(`Error loading module from ${path}:`, moduleError);
       }
     }
     

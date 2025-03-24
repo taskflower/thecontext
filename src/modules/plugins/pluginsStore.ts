@@ -1,9 +1,8 @@
 // src/modules/plugins/pluginsStore.ts
-
 import { produce } from "immer";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { DynamicComponentStore, PluginComponentProps } from "./types";
+import { DynamicComponentStore } from "./types";
 
 // Create a singleton instance that will be globally accessible
 const useDynamicComponentStore = create<DynamicComponentStore>()(
@@ -71,18 +70,5 @@ const useDynamicComponentStore = create<DynamicComponentStore>()(
     }
   )
 );
-
-// Export a global function for registering components from anywhere
-export const registerDynamicComponent = (
-  key: string,
-  component: React.ComponentType<PluginComponentProps>
-) => {
-  useDynamicComponentStore.getState().registerComponent(key, component);
-};
-
-// Helper for unregistering
-export const unregisterDynamicComponent = (key: string) => {
-  useDynamicComponentStore.getState().unregisterComponent(key);
-};
 
 export default useDynamicComponentStore;
