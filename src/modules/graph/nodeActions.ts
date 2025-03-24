@@ -86,6 +86,54 @@ export const createNodeSlice: StateCreator<
         state.stateVersion++;
       }
     }),
+    
+  // New method to update node label
+  updateNodeLabel: (nodeId: string, label: string) =>
+    set((state: Draft<AppState>) => {
+      const workspace = state.items.find(
+        (w) => w.id === state.selected.workspace
+      );
+      const scenario = workspace?.children.find(
+        (s) => s.id === state.selected.scenario
+      );
+      const node = scenario?.children.find((n) => n.id === nodeId);
+      if (node) {
+        node.label = label;
+        state.stateVersion++;
+      }
+    }),
+
+  // New method to update node user prompt
+  updateNodeUserPrompt: (nodeId: string, prompt: string) =>
+    set((state: Draft<AppState>) => {
+      const workspace = state.items.find(
+        (w) => w.id === state.selected.workspace
+      );
+      const scenario = workspace?.children.find(
+        (s) => s.id === state.selected.scenario
+      );
+      const node = scenario?.children.find((n) => n.id === nodeId);
+      if (node) {
+        node.userPrompt = prompt;
+        state.stateVersion++;
+      }
+    }),
+
+  // New method to update node assistant message
+  updateNodeAssistantMessage: (nodeId: string, message: string) =>
+    set((state: Draft<AppState>) => {
+      const workspace = state.items.find(
+        (w) => w.id === state.selected.workspace
+      );
+      const scenario = workspace?.children.find(
+        (s) => s.id === state.selected.scenario
+      );
+      const node = scenario?.children.find((n) => n.id === nodeId);
+      if (node) {
+        node.assistantMessage = message;
+        state.stateVersion++;
+      }
+    }),
 
   setNodePlugin: (
     nodeId: string,

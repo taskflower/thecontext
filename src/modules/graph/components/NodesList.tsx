@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { PlusCircle, MoreHorizontal, X, Box, Square, Puzzle, CheckCircle, Settings, Sliders } from "lucide-react";
+import { PlusCircle, MoreHorizontal, X, Box, Square, Puzzle, CheckCircle, Settings, Sliders, Edit } from "lucide-react";
 import { useAppStore } from "../../store";
 import { FlowNode } from "../types";
 import { useDialogState } from "../../common/hooks";
 import { cn } from "@/utils/utils";
 import useDynamicComponentStore from "../../plugins/pluginsStore";
 import PluginOptionsEditor from "./PluginOptionsEditor";
+import NodeEditorDialog from "./NodeEditorDialog";
 
 
 const NodesList: React.FC = () => {
@@ -26,6 +27,7 @@ const NodesList: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [configurePluginForNodeId, setConfigurePluginForNodeId] = useState<string | null>(null);
   const [editPluginOptionsForNodeId, setEditPluginOptionsForNodeId] = useState<string | null>(null);
+  const [editNodeId, setEditNodeId] = useState<string | null>(null);
   
   const { isOpen, formData, openDialog, handleChange, setIsOpen } = useDialogState<{
     label: string;
@@ -39,7 +41,8 @@ const NodesList: React.FC = () => {
     if (!formData.label.trim()) return;
     addNode({
       label: formData.label,
-      value: formData.value || "0",
+      assistantMessage: formData.value || "",
+      userPrompt: "",
     });
     setIsOpen(false);
   };
@@ -55,6 +58,11 @@ const NodesList: React.FC = () => {
   
   const handleEditPluginOptions = (nodeId: string) => {
     setEditPluginOptionsForNodeId(nodeId);
+    setMenuOpen(null);
+  };
+  
+  const handleEditNode = (nodeId: string) => {
+    setEditNodeId(nodeId);
     setMenuOpen(null);
   };
   
@@ -100,6 +108,7 @@ const NodesList: React.FC = () => {
                 toggleMenu={() => toggleMenu(node.id)}
                 onConfigurePlugin={() => handleConfigurePlugin(node.id)}
                 onEditPluginOptions={() => handleEditPluginOptions(node.id)}
+                onEditNode={() => handleEditNode(node.id)}
               />
             ))}
           </ul>
@@ -187,6 +196,14 @@ const NodesList: React.FC = () => {
           onClose={() => setEditPluginOptionsForNodeId(null)}
         />
       )}
+      
+      {/* Node Editor Dialog */}
+      {editNodeId && (
+        <NodeEditorDialog
+          nodeId={editNodeId}
+          onClose={() => setEditNodeId(null)}
+        />
+      )}
     </div>
   );
 };
@@ -200,6 +217,7 @@ interface NodeItemProps {
   toggleMenu: () => void;
   onConfigurePlugin: () => void;
   onEditPluginOptions: () => void;
+  onEditNode: () => void;
 }
 
 const NodeItem: React.FC<NodeItemProps> = ({
@@ -210,7 +228,8 @@ const NodeItem: React.FC<NodeItemProps> = ({
   menuOpen,
   toggleMenu,
   onConfigurePlugin,
-  onEditPluginOptions
+  onEditPluginOptions,
+  onEditNode
 }) => {
   return (
     <li
@@ -244,7 +263,7 @@ const NodeItem: React.FC<NodeItemProps> = ({
           </div>
           <div className="flex items-center mt-0.5">
             <span className="text-xs bg-muted px-1.5 py-0.5 rounded-full">
-              value: {node.value}
+              value: {node.assistantMessage?.slice(0, 10)}...
             </span>
             <span className="text-xs text-muted-foreground ml-2">
               x: {Math.round(node.position.x)}, y: {Math.round(node.position.y)}
@@ -271,6 +290,17 @@ const NodeItem: React.FC<NodeItemProps> = ({
         
         {menuOpen && (
           <div className="absolute right-0 mt-1 w-48 bg-popover border border-border rounded-md shadow-md z-10">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEditNode();
+              }}
+              className="w-full text-left px-3 py-2 text-sm hover:bg-muted flex items-center"
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Edit Node Data
+            </button>
+            
             <button
               onClick={(e) => {
                 e.stopPropagation();

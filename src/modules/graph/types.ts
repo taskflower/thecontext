@@ -30,6 +30,9 @@ export interface NodeActions {
   setNodePlugin: (nodeId: string, pluginKey: string | null, initialData?: unknown) => void;
   updateNodePluginData: (nodeId: string, pluginKey: string, data: unknown) => void;
   getNodePluginData: (nodeId: string, pluginKey: string) => unknown;
+  
+  // Add these new methods to the interface
+  updateNodeLabel: (nodeId: string, label: string) => void;
   updateNodeUserPrompt: (nodeId: string, prompt: string) => void;
   updateNodeAssistantMessage: (nodeId: string, message: string) => void;
 }
