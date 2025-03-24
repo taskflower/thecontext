@@ -52,7 +52,7 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose }) => {
       setTimeout(() => {
         setIsProcessing(false);
         nextStep();
-      }, 300);
+      }, 10);
     } else if (direction === 'finish') {
       setShowSavePrompt(true);
     }
