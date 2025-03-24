@@ -14,26 +14,23 @@ import {
 
   Filter
 } from "lucide-react";
+import { useTheme } from "@/components/ThemeProvider";
+import { useAppStore } from "@/modules/store";
+import { cn } from "@/utils/utils";
+import { WorkspacesList } from "@/modules/workspaces";
+import { ScenariosList } from "@/modules/scenarios";
+import { EdgesList, NodesList } from "@/modules/graph/components";
+import FlowGraph from "@/modules/flow/components/FlowGraph";
+import { PluginsApp } from "@/modules/plugins";
+import { FiltersList } from "@/modules/filters";
+import { ContextsList } from "@/modules/context";
+import HistoryView from "@/modules/history/components/HistoryView";
 
-import WorkspacesList from "./modules/workspaces/components/WorkspacesList";
-import ScenariosList from "./modules/scenarios/components/ScenariosList";
-import NodesList from "./modules/graph/components/NodesList";
-import { EdgesList } from "./modules/graph/components";
-import FlowGraph from "./modules/flow/components/FlowGraph";
-import PluginsApp from "./modules/plugins/PluginsApp";
-import { useTheme } from "./components/ThemeProvider";
-import { cn } from "./utils/utils";
 
-// Import the context components
-import { ContextsList } from "./modules/context";
-import { useAppStore } from "./modules/store";
-
-import HistoryView from "./modules/history/components/HistoryView";
-import { FiltersList } from "./modules/filters";
 
 type PanelContentType = "context" | "filters" | "conversation" | "plugins" | "";
 
-const App = () => {
+const Studio = () => {
   const { darkMode, toggleDarkMode } = useTheme();
   const [showLeftPanel, setShowLeftPanel] = useState(true);
   const [showBottomPanel, setShowBottomPanel] = useState(false);
@@ -323,4 +320,4 @@ const ToolbarButton = ({
   );
 };
 
-export default App;
+export default Studio;

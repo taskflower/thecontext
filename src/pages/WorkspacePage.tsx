@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { FlowPlayer } from "@/modules/flowPlayer";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +21,7 @@ import {
   ArrowRight,
   Github,
   Twitter,
-  FilterIcon,
+  Filter as FilterIcon,
   Box,
   FileCode,
   Database,
@@ -40,25 +39,23 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
-import { FilterEditor } from "@/modules/filters/FilterEditor";
-import { FilterStatus } from "@/modules/filters/FilterStatus";
+import { FilterStatus } from "@/modules/filters";
 
 const WorkspacePage = () => {
   const [flowPlayerOpen, setFlowPlayerOpen] = useState(false);
-  const [editingFilters, setEditingFilters] = useState(null);
+  const [editingFilterId, setEditingFilterId] = useState(null);
 
   const { slug } = useParams();
   const {
     items: workspaces,
     selectWorkspace,
+    selectScenario,
+    getCurrentWorkspace,
     getCurrentScenario,
     checkScenarioFilterMatch,
-    getScenariosWithFilterStatus,
+    stateVersion,
   } = useAppStore();
   const navigate = useNavigate();
-
-  // Force component to update when state changes
-  useAppStore((state) => state.stateVersion);
 
   // Find workspace by slug and select it
   useEffect(() => {
@@ -70,53 +67,49 @@ const WorkspacePage = () => {
     }
   }, [slug, workspaces, selectWorkspace]);
 
-  // Get current workspace from slug
-  const currentWorkspace = React.useMemo(() => {
-    return workspaces.find((w) => w.slug === slug);
-  }, [workspaces, slug]);
-
-  // Get current scenario
+  // Get current workspace and scenario
+  const currentWorkspace = getCurrentWorkspace();
   const currentScenario = getCurrentScenario();
 
-  // Get all scenarios with filter match status
+  // Get all scenarios from current workspace with filter status
   const scenariosWithStatus = React.useMemo(() => {
-    return getScenariosWithFilterStatus();
-  }, [
-    getScenariosWithFilterStatus,
-    useAppStore((state) => state.stateVersion),
-  ]);
+    if (!currentWorkspace) return [];
+    
+    return currentWorkspace.children.map(scenario => {
+      const hasFilters = scenario.filters && scenario.filters.length > 0;
+      const activeFilters = hasFilters ? scenario.filters.filter(f => f.enabled) : [];
+      const matchesFilter = checkScenarioFilterMatch();
+      
+      return {
+        ...scenario,
+        hasFilters,
+        activeFiltersCount: activeFilters.length,
+        matchesFilter: hasFilters ? matchesFilter : true
+      };
+    });
+  }, [currentWorkspace, checkScenarioFilterMatch, stateVersion]);
 
   // Get only scenarios that have defined filters
-  const filteredScenarios = React.useMemo(() => {
-    return scenariosWithStatus.filter((scenario) => {
-      // Check if scenario has defined filters
-      return (
-        scenario.hasFilters === true ||
-        (scenario.filters && scenario.filters.length > 0)
-      );
-    });
-  }, [scenariosWithStatus]);
-
-  // Check if scenario active (matches filters)
-  const isScenarioActive = (scenarioId) => {
-    const contextItems = currentWorkspace?.contextItems || [];
-    return checkScenarioFilterMatch(scenarioId, contextItems);
-  };
+  const filteredScenarios = scenariosWithStatus.filter(scenario => 
+    scenario.hasFilters && scenario.filters && scenario.filters.length > 0
+  );
 
   const openFlowPlayer = () => {
     setFlowPlayerOpen(true);
   };
 
-  // Filter management functions
-  const handleFilterClick = (e: React.MouseEvent, scenarioId) => {
+  // Handle filter click to edit filters
+  const handleFilterClick = (e, scenarioId) => {
     e.stopPropagation();
-    setEditingFilters(scenarioId);
+    setEditingFilterId(scenarioId);
   };
 
   // Format time ago function
   const formatTimeAgo = (timestamp) => {
+    if (!timestamp) return "Recently";
+    
     const now = new Date();
-    const date = new Date(timestamp || now);
+    const date = new Date(timestamp);
     const diffInSeconds = Math.floor((now - date) / 1000);
 
     if (diffInSeconds < 60) {
@@ -133,16 +126,20 @@ const WorkspacePage = () => {
     }
   };
 
+  // Start flow session
+  const handleStartFlow = () => {
+    useAppStore.getState().startFlowSession();
+    setFlowPlayerOpen(true);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="border-b bg-white">
+      <header className="border-b bg-background">
         <div className="flex items-center justify-between p-6">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
-              {currentWorkspace?.title === "Wise ads"
-                ? "Wise ads"
-                : currentWorkspace?.title || "Workspace"}
+              {currentWorkspace?.title || "Workspace"}
             </h1>
             <p className="text-muted-foreground mt-1">
               {currentScenario
@@ -160,8 +157,8 @@ const WorkspacePage = () => {
                   id="workspace-selector"
                 >
                   <Box className="h-4 w-4" />
-                  <span>Selected Workspace:</span>
-                  Wise ads
+                  <span>Workspace:</span>
+                  {currentWorkspace?.title || "Select workspace"}
                   <ChevronDown className="h-4 w-4 opacity-50" />
                 </Button>
               </DropdownMenuTrigger>
@@ -174,13 +171,14 @@ const WorkspacePage = () => {
                     }
                     onClick={() => {
                       selectWorkspace(workspace.id);
-                      window.history.pushState({}, "", `/${workspace.slug}`);
+                      // Update URL if workspace has slug
+                      if (workspace.slug) {
+                        navigate(`/${workspace.slug}`);
+                      }
                     }}
                   >
                     <Box className="h-4 w-4 mr-2" />
-                    {workspace.title === "Wise ads"
-                      ? "Wise ads"
-                      : workspace.title}
+                    {workspace.title}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -189,10 +187,8 @@ const WorkspacePage = () => {
             <Button
               variant="secondary"
               className="gap-2"
-              onClick={openFlowPlayer}
-              disabled={
-                !currentScenario || !isScenarioActive(currentScenario.id)
-              }
+              onClick={handleStartFlow}
+              disabled={!currentScenario || !checkScenarioFilterMatch()}
             >
               <Play className="h-4 w-4" />
               Run Flow
@@ -223,6 +219,13 @@ const WorkspacePage = () => {
             <Button
               variant="outline"
               className="gap-2 shadow-sm bg-primary text-primary-foreground hover:bg-primary/90"
+              onClick={() => {
+                // Show modal to add scenario
+                const addScenarioModal = document.getElementById("add-scenario-modal");
+                if (addScenarioModal) {
+                  addScenarioModal.showModal();
+                }
+              }}
             >
               <Plus className="h-4 w-4" />
               New Scenario
@@ -259,8 +262,8 @@ const WorkspacePage = () => {
                         <FilterIcon className="h-3.5 w-3.5" />
                       </Button>
                       <FilterStatus
-                        scenarioId={scenario.id}
-                        onEditClick={(e) => handleFilterClick(e, scenario.id)}
+                        onClick={(e) => handleFilterClick(e, scenario.id)}
+                        className="cursor-pointer"
                       />
                       <Badge variant="secondary" className="text-xs">
                         {scenario.children ? scenario.children.length : 0} nodes
@@ -291,7 +294,7 @@ const WorkspacePage = () => {
                   {isCurrentScenario ? (
                     <Button
                       className="w-full gap-2"
-                      onClick={openFlowPlayer}
+                      onClick={handleStartFlow}
                       disabled={!isActive}
                     >
                       <Play className="h-4 w-4" />
@@ -302,13 +305,7 @@ const WorkspacePage = () => {
                       variant="secondary"
                       className="w-full gap-2"
                       onClick={() => {
-                        selectWorkspace(currentWorkspace?.id || "");
-                        const workspace = useAppStore
-                          .getState()
-                          .items.find((w) => w.id === currentWorkspace?.id);
-                        if (workspace) {
-                          useAppStore.getState().selectScenario(scenario.id);
-                        }
+                        selectScenario(scenario.id);
                       }}
                       disabled={!isActive}
                     >
@@ -328,7 +325,13 @@ const WorkspacePage = () => {
               </div>
               <Button
                 variant="outline"
-                onClick={() => navigate("/scenarios/new")}
+                onClick={() => {
+                  // Show modal to add scenario
+                  const addScenarioModal = document.getElementById("add-scenario-modal");
+                  if (addScenarioModal) {
+                    addScenarioModal.showModal();
+                  }
+                }}
               >
                 Create New Scenario
               </Button>
@@ -338,7 +341,7 @@ const WorkspacePage = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t bg-white">
+      <footer className="border-t bg-background">
         <div className="container mx-auto py-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2">
@@ -383,20 +386,40 @@ const WorkspacePage = () => {
           </DialogHeader>
 
           <div className="h-[calc(100%-4rem)] overflow-hidden p-0">
-            <FlowPlayer />
+            {/* Render the StepModal component here since it's the actual flow player UI */}
+            {flowPlayerOpen && (
+              <div className="w-full h-full flex items-center justify-center">
+                <StepModal onClose={() => setFlowPlayerOpen(false)} />
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Dialog for Filters */}
-      {editingFilters && (
-        <FilterEditor
-          scenarioId={editingFilters}
-          onClose={() => setEditingFilters(null)}
-        />
+      {editingFilterId && (
+        <Dialog open={!!editingFilterId} onOpenChange={() => setEditingFilterId(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit Filters</DialogTitle>
+            </DialogHeader>
+            
+            <div className="py-4">
+              <FiltersList />
+            </div>
+            
+            <div className="flex justify-end">
+              <Button onClick={() => setEditingFilterId(null)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
 };
+
+// Import these components here to avoid circular dependencies
+import { StepModal } from "@/modules/flow/components/StepModal";
+import { FiltersList } from "@/modules/filters";
 
 export default WorkspacePage;
