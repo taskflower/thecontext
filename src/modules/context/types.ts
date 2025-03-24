@@ -1,27 +1,22 @@
 // src/modules/context/types.ts
-
-import { AppState } from "../store";
-
-export type ContextValueType = "text" | "json";
-
 export interface ContextItem {
-  key: string;
-  value: string; 
-  valueType: ContextValueType;
+  id: string;
+  content: string;
+  title: string;
+  createdAt: number;
+  updatedAt: number;
 }
 
 export interface ContextActions {
-  addContextItem: (workspaceId: string, item: ContextItem) => void;
-  updateContextItem: (
-    workspaceId: string,
-    key: string,
-    value: string,
-    valueType: "text" | "json"
-  ) => void;
-  deleteContextItem: (workspaceId: string, key: string) => void;
-  getContextValue: (
-    workspaceId: string,
-    key: string
-  ) => (state: AppState) => string | null;
-  getContextItems: (workspaceId: string) => (state: AppState) => ContextItem[];
+  // Get context items for the current workspace
+  getContextItems: () => ContextItem[];
+  
+  // Add a new context item to the current workspace
+  addContextItem: (payload: { title: string; content: string }) => void;
+  
+  // Update an existing context item
+  updateContextItem: (id: string, payload: { title?: string; content?: string }) => void;
+  
+  // Delete a context item
+  deleteContextItem: (id: string) => void;
 }

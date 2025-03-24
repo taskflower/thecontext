@@ -20,6 +20,7 @@ import { FlowSession } from "./flow/types";
 
 // Import początkowych danych
 import { getInitialData } from "./initialData";
+import { createContextSlice } from "./context";
 
 // Stałe typów
 export const TYPES = {
@@ -65,7 +66,7 @@ const initialData = getInitialData();
 export const useAppStore = create<AppState>()(
   persist(
     immer((...args) => ({
-      // Stan początkowy z demo lub zapisu
+      // Initial state from demo or saved
       items: initialData.items || [],
       selected: initialData.selected || {
         workspace: "",
@@ -75,16 +76,17 @@ export const useAppStore = create<AppState>()(
       stateVersion: initialData.stateVersion || 0,
       flowSession: undefined,
       
-      // Dołączenie wszystkich slices
+      // Attach all slices
       ...createNodeSlice(...args),
       ...createEdgeSlice(...args),
       ...createScenarioSlice(...args),
       ...createWorkspaceSlice(...args),
       ...createFlowSlice(...args),
+      ...createContextSlice(...args), // Add context slice
     })),
     {
       name: 'flowchart-app-state',
-      // Nie zapisuj tymczasowej sesji flow
+      // Don't persist temporary flow session
       partialize: (state: AppState) => ({
         ...state,
         flowSession: undefined

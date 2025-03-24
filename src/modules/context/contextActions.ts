@@ -1,74 +1,79 @@
 // src/modules/context/contextActions.ts
-
 import { StateCreator } from "zustand";
 import { Draft } from "immer";
 import { ContextActions, ContextItem } from "./types";
 import { AppState } from "../store";
 
-export const createContextActions: StateCreator<
+export const createContextSlice: StateCreator<
   AppState,
   [["zustand/immer", never]],
   [],
   ContextActions
-> = (set) => ({
-  addContextItem: (workspaceId: string, item: ContextItem) =>
+> = (set, get) => ({
+  getContextItems: () => {
+    const state = get();
+    const workspace = state.items.find(w => w.id === state.selected.workspace);
+    return workspace?.contextItems || [];
+  },
+
+  addContextItem: (payload: { title: string; content: string }) =>
     set((state: Draft<AppState>) => {
-      const workspace = state.items.find(w => w.id === workspaceId);
-      if (!workspace) return;
+      const workspaceIndex = state.items.findIndex(w => w.id === state.selected.workspace);
       
-      if (!workspace.contextItems) {
-        workspace.contextItems = [];
-      }
-      
-      // Sprawdź, czy klucz już istnieje i zastąp go
-      const existingIndex = workspace.contextItems.findIndex(i => i.key === item.key);
-      if (existingIndex !== -1) {
-        workspace.contextItems[existingIndex] = item;
-      } else {
-        workspace.contextItems.push(item);
-      }
-      
-      workspace.updatedAt = Date.now();
-      state.stateVersion++;
-    }),
-    
-  updateContextItem: (workspaceId: string, key: string, value: string, valueType: 'text' | 'json') =>
-    set((state: Draft<AppState>) => {
-      const workspace = state.items.find(w => w.id === workspaceId);
-      if (!workspace || !workspace.contextItems) return;
-      
-      const item = workspace.contextItems.find(i => i.key === key);
-      if (item) {
-        item.value = value;
-        item.valueType = valueType;
-        workspace.updatedAt = Date.now();
+      if (workspaceIndex !== -1) {
+        if (!state.items[workspaceIndex].contextItems) {
+          state.items[workspaceIndex].contextItems = [];
+        }
+        
+        const newContextItem: ContextItem = {
+          id: `context-${Date.now()}`,
+          title: payload.title,
+          content: payload.content,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        };
+        
+        state.items[workspaceIndex].contextItems.push(newContextItem);
+        state.items[workspaceIndex].updatedAt = Date.now();
         state.stateVersion++;
       }
     }),
-    
-  deleteContextItem: (workspaceId: string, key: string) =>
+
+  updateContextItem: (id: string, payload: { title?: string; content?: string }) =>
     set((state: Draft<AppState>) => {
-      const workspace = state.items.find(w => w.id === workspaceId);
-      if (!workspace || !workspace.contextItems) return;
+      const workspaceIndex = state.items.findIndex(w => w.id === state.selected.workspace);
       
-      const index = workspace.contextItems.findIndex(i => i.key === key);
-      if (index !== -1) {
-        workspace.contextItems.splice(index, 1);
-        workspace.updatedAt = Date.now();
-        state.stateVersion++;
+      if (workspaceIndex !== -1 && state.items[workspaceIndex].contextItems) {
+        const itemIndex = state.items[workspaceIndex].contextItems.findIndex(item => item.id === id);
+        
+        if (itemIndex !== -1) {
+          if (payload.title !== undefined) {
+            state.items[workspaceIndex].contextItems[itemIndex].title = payload.title;
+          }
+          
+          if (payload.content !== undefined) {
+            state.items[workspaceIndex].contextItems[itemIndex].content = payload.content;
+          }
+          
+          state.items[workspaceIndex].contextItems[itemIndex].updatedAt = Date.now();
+          state.items[workspaceIndex].updatedAt = Date.now();
+          state.stateVersion++;
+        }
       }
     }),
-    
-  getContextValue: (workspaceId: string, key: string) => (state: AppState) => {
-    const workspace = state.items.find(w => w.id === workspaceId);
-    if (!workspace || !workspace.contextItems) return null;
-    
-    const item = workspace.contextItems.find(i => i.key === key);
-    return item ? item.value : null;
-  },
-  
-  getContextItems: (workspaceId: string) => (state: AppState) => {
-    const workspace = state.items.find(w => w.id === workspaceId);
-    return workspace && workspace.contextItems ? workspace.contextItems : [];
-  },
+
+  deleteContextItem: (id: string) =>
+    set((state: Draft<AppState>) => {
+      const workspaceIndex = state.items.findIndex(w => w.id === state.selected.workspace);
+      
+      if (workspaceIndex !== -1 && state.items[workspaceIndex].contextItems) {
+        const itemIndex = state.items[workspaceIndex].contextItems.findIndex(item => item.id === id);
+        
+        if (itemIndex !== -1) {
+          state.items[workspaceIndex].contextItems.splice(itemIndex, 1);
+          state.items[workspaceIndex].updatedAt = Date.now();
+          state.stateVersion++;
+        }
+      }
+    }),
 });
