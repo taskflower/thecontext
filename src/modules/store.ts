@@ -2,28 +2,32 @@ import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { persist } from "zustand/middleware";
 
-// Importy modułów akcji
+// Import action slices
 import { createNodeSlice } from "./graph/nodeActions";
 import { createEdgeSlice } from "./graph/edgeActions";
 import { createScenarioSlice } from "./scenarios/scenarioActions";
 import { createWorkspaceSlice } from "./workspaces/workspaceActions";
 import { createFlowSlice } from "./flow/flowActions";
+import { createFilterSlice } from "./filters/filterActions";
+import { createContextSlice } from "./context/contextActions";
 
-// Importy typów
+// Import types
 import { NodeActions } from "./graph/types";
 import { EdgeActions } from "./graph/types";
 import { ScenarioActions } from "./scenarios/types";
 import { WorkspaceActions } from "./workspaces/types";
 import { FlowActions } from "./flow/types";
-import { Workspace } from "./workspaces/types";
-import { FlowSession } from "./flow/types";
+import { FilterActions } from "./filters/types";
 import { ContextActions } from "./context/types";
 
-// Import początkowych danych
-import { getInitialData } from "./initialData";
-import { createContextSlice } from "./context";
+// Import workspace type
+import { Workspace } from "./workspaces/types";
+import { FlowSession } from "./flow/types";
 
-// Stałe typów
+// Import initial data
+import { getInitialData } from "./initialData";
+
+// Type constants
 export const TYPES = {
   WORKSPACE: "workspace",
   SCENARIO: "scenario",
@@ -31,40 +35,43 @@ export const TYPES = {
   EDGE: "edge",
 };
 
-// Bazowy interfejs dla wszystkich elementów
+// Base item interface
 export interface BaseItem {
   id: string;
   type: string;
   label?: string;
+  updatedAt?: number;
+  createdAt?: number;
 }
 
-// Struktura wybranych elementów
+// Selected elements structure
 export interface Selected {
   workspace: string;
   scenario: string;
   node: string;
 }
 
-// Główny stan aplikacji
+// Main app state interface
 export interface AppState extends 
   NodeActions, 
   EdgeActions, 
   ScenarioActions, 
   WorkspaceActions,
   FlowActions,
+  FilterActions,
   ContextActions {
   
-  // Stan
+  // State properties
   items: Workspace[];
   selected: Selected;
   stateVersion: number;
   flowSession?: FlowSession;
 }
 
-// Pobranie początkowych danych
+// Get initial data
 const initialData = getInitialData();
 
-// Utworzenie store'a z wszystkimi slicami i persist middleware
+// Create the store with all slices and persist middleware
 export const useAppStore = create<AppState>()(
   persist(
     immer((...args) => ({
@@ -84,7 +91,8 @@ export const useAppStore = create<AppState>()(
       ...createScenarioSlice(...args),
       ...createWorkspaceSlice(...args),
       ...createFlowSlice(...args),
-      ...createContextSlice(...args), // Add context slice
+      ...createFilterSlice(...args),
+      ...createContextSlice(...args),
     })),
     {
       name: 'flowchart-app-state',

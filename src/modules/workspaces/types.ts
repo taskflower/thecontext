@@ -1,10 +1,11 @@
-
-import { Scenario } from "../scenarios/types";
-import { ContextItem } from "../context/types"; // Add this import
+// src/modules/workspaces/types.ts
 import { BaseItem } from "../store";
+import { Scenario } from "../scenarios/types";
+import { ContextItem } from "../context/types";
 
 export interface Workspace extends BaseItem {
   title: string;
+  description: string;
   children: Scenario[];
   contextItems?: ContextItem[];
   createdAt: number;
@@ -13,10 +14,12 @@ export interface Workspace extends BaseItem {
 
 export interface WorkspaceActions {
   selectWorkspace: (workspaceId: string) => void;
-  addWorkspace: (payload: { title: string }) => void;
+  addWorkspace: (payload: WorkspacePayload) => void;
   deleteWorkspace: (workspaceId: string) => void;
+  getCurrentWorkspace: () => Workspace | null;
 }
 
 export interface WorkspacePayload {
   title: string;
+  description: string;
 }

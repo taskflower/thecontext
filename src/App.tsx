@@ -11,6 +11,8 @@ import {
   Code,
   Sun,
   Moon,
+
+  Filter
 } from "lucide-react";
 
 import WorkspacesList from "./modules/workspaces/components/WorkspacesList";
@@ -27,8 +29,9 @@ import { ContextsList } from "./modules/context";
 import { useAppStore } from "./modules/store";
 
 import HistoryView from "./modules/history/components/HistoryView";
+import { FiltersList } from "./modules/filters";
 
-type PanelContentType = "context" | "conversation" | "plugins" | "";
+type PanelContentType = "context" | "filters" | "conversation" | "plugins" | "";
 
 const App = () => {
   const { darkMode, toggleDarkMode } = useTheme();
@@ -40,6 +43,7 @@ const App = () => {
 
   // Get selected workspace for context
   const selectedWorkspaceId = useAppStore((state) => state.selected.workspace);
+  const selectedScenarioId = useAppStore((state) => state.selected.scenario);
 
   // Toggle panel handlers
   const togglePanel =
@@ -62,8 +66,8 @@ const App = () => {
       {/* Header */}
       <header className="border-b border-border h-14 px-4 flex items-center justify-between bg-background z-10">
         <div className="flex items-center gap-3">
-          <h1 className="text-lg font-semibold flex items-center">
-            <Focus className="mr-2 h-5 w-5 text-primary" />
+          <h1 className="text-xs font-semibold flex items-center">
+            <Focus className="mr-2 h-4 w-4 text-primary" />
             <span>Deep Context Studio</span>
           </h1>
         </div>
@@ -152,6 +156,7 @@ const App = () => {
               <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/10">
                 <h3 className="text-sm font-medium">
                   {bottomPanelContent === "context" && "Context Manager"}
+                  {bottomPanelContent === "filters" && "Filters Manager"}
                   {bottomPanelContent === "conversation" &&
                     "Conversation History"}
                   {bottomPanelContent === "plugins" && "Plugins"}
@@ -182,6 +187,22 @@ const App = () => {
                 {bottomPanelContent === "plugins" && (
                   <div className="p-4">
                     <PluginsApp />
+                  </div>
+                )}
+                {bottomPanelContent === "filters" && (
+                  <div className="h-full">
+                    {selectedWorkspaceId && selectedScenarioId ? (
+                      <FiltersList />
+                    ) : (
+                      <div className="flex items-center justify-center h-full p-4 text-muted-foreground text-center">
+                        <div>
+                          <p>Please select a workspace and scenario first</p>
+                          <p className="text-sm mt-1">
+                            Filters are associated with scenarios
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
                 {bottomPanelContent === "context" && (
@@ -217,6 +238,12 @@ const App = () => {
                 label="Context"
                 active={bottomPanelContent === "context" && showBottomPanel}
                 onClick={() => showPanel("context")}
+              />
+              <ToolbarButton
+                icon={<Filter className="h-4 w-4" />}
+                label="Filters"
+                active={bottomPanelContent === "filters" && showBottomPanel}
+                onClick={() => showPanel("filters")}
               />
               <ToolbarButton
                 icon={<MessageSquare className="h-4 w-4" />}
