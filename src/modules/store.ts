@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
+import { persist, createJSONStorage } from "zustand/middleware";
 import { TYPES, SelectionState } from "./common/types";
 import { Workspace, WorkspaceActions } from "./workspaces/types";
 import { ScenarioActions } from "./scenarios/types";
@@ -70,14 +71,54 @@ const initialState = {
   stateVersion: 0,
 };
 
-// Create the store with all slices
+// Create the store with all slices and persist middleware
 export const useAppStore = create<AppState>()(
-  immer((...a) => ({
-    ...initialState,
-    ...createWorkspaceSlice(...a),
-    ...createScenarioSlice(...a),
-    ...createNodeSlice(...a),
-    ...createEdgeSlice(...a),
-    ...createFlowSlice(...a),
-  }))
+  persist(
+    immer((...a) => ({
+      ...initialState,
+      ...createWorkspaceSlice(...a),
+      ...createScenarioSlice(...a),
+      ...createNodeSlice(...a),
+      ...createEdgeSlice(...a),
+      ...createFlowSlice(...a),
+    })),
+    {
+      name: "context-app-storage", // Unique name for localStorage key
+      storage: createJSONStorage(() => localStorage),
+      // Optional: specify which parts of the state to persist
+      partialize: (state) => ({
+        items: state.items,
+        selected: state.selected,
+        // We don't need to persist stateVersion
+      }),
+      // Optional: custom merge function to handle merging persisted state with initial state
+      merge: (persistedState, currentState) => {
+        // Type assertion to handle the fact that persisted state might be partial
+        const typedPersistedState = persistedState as Partial<AppState>;
+        
+        return {
+          ...currentState,
+          ...(typedPersistedState as object),
+          // Make sure stateVersion is incremented to trigger re-renders
+          stateVersion: currentState.stateVersion + 1,
+        };
+      },
+      // Only persist after a delay to avoid excessive writes
+      throttle: 1000,
+      // Version handling for migrations
+      version: 1,
+      // Optional: migration function if state structure changes
+      migrate: (persistedState, version) => {
+        // This is where you would handle migration if you change state structure
+        // For now, just return the state as is
+        return persistedState as AppState;
+      },
+    }
+  )
 );
+
+// Optional: Add a way to clear persisted state for debugging/testing
+export const clearPersistedState = () => {
+  localStorage.removeItem("context-app-storage");
+  window.location.reload();
+};
