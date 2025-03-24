@@ -1,24 +1,41 @@
-import React from "react";
+import React, { useState } from "react";
 import { X } from "lucide-react";
+import { useAppStore } from "../../store";
 
-interface ScenarioDialogProps {
+interface AddNewScenarioProps {
   isOpen: boolean;
-  formData: {
-    name: string;
-    description: string;
-  };
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   setIsOpen: (isOpen: boolean) => void;
-  handleSubmit: () => void;
 }
 
-const ScenarioDialog: React.FC<ScenarioDialogProps> = ({
+const AddNewScenario: React.FC<AddNewScenarioProps> = ({
   isOpen,
-  formData,
-  handleChange,
   setIsOpen,
-  handleSubmit,
 }) => {
+  const addScenario = useAppStore((state) => state.addScenario);
+  
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+  });
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+  
+  const handleSubmit = () => {
+    if (!formData.name.trim()) return;
+    addScenario({
+      name: formData.name,
+      description: formData.description,
+    });
+    setFormData({ name: "", description: "" });
+    setIsOpen(false);
+  };
+  
   if (!isOpen) return null;
   
   return (
@@ -105,4 +122,4 @@ const ScenarioDialog: React.FC<ScenarioDialogProps> = ({
   );
 };
 
-export default ScenarioDialog;
+export default AddNewScenario;

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { PlusCircle, MoreHorizontal, X, GitBranch, GitMerge } from "lucide-react";
 import { useAppStore } from "../../store";
 import { Scenario } from "../types";
-import { useDialogState } from "../../common/hooks";
 import { cn } from "@/utils/utils";
 import AddNewScenario from "./AddNewScenario";
 
@@ -16,27 +15,10 @@ const ScenariosList: React.FC = () => {
   const scenarios = workspace?.children || [];
   
   const selectScenario = useAppStore((state) => state.selectScenario);
-  const addScenario = useAppStore((state) => state.addScenario);
   const deleteScenario = useAppStore((state) => state.deleteScenario);
   
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
-  
-  const { isOpen, formData, openDialog, handleChange, setIsOpen } = useDialogState<{
-    name: string;
-    description: string;
-  }>({
-    name: "",
-    description: "",
-  });
-  
-  const handleAddScenario = () => {
-    if (!formData.name.trim()) return;
-    addScenario({
-      name: formData.name,
-      description: formData.description,
-    });
-    setIsOpen(false);
-  };
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   const toggleMenu = (id: string) => {
     setMenuOpen(menuOpen === id ? null : id);
@@ -62,7 +44,7 @@ const ScenariosList: React.FC = () => {
           )}
         </div>
         <button
-          onClick={() => openDialog()}
+          onClick={() => setIsDialogOpen(true)}
           className="w-8 h-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
           aria-label="Add scenario"
         >
@@ -93,13 +75,10 @@ const ScenariosList: React.FC = () => {
         )}
       </div>
       
-      {/* Use the separate ScenarioDialog component */}
+      {/* Use the refactored AddNewScenario component */}
       <AddNewScenario
-        isOpen={isOpen}
-        formData={formData}
-        handleChange={handleChange}
-        setIsOpen={setIsOpen}
-        handleSubmit={handleAddScenario}
+        isOpen={isDialogOpen}
+        setIsOpen={setIsDialogOpen}
       />
     </div>
   );
