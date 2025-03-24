@@ -37,12 +37,9 @@ const App = () => {
   const [activeTab, setActiveTab] = useState("workspace");
   const [bottomPanelContent, setBottomPanelContent] =
     useState<PanelContentType>("");
-    
+
   // Get selected workspace for context
-  const selectedWorkspaceId = useAppStore(state => state.selected.workspace);
-  const selectedWorkspace = useAppStore(state => 
-    state.items.find(w => w.id === selectedWorkspaceId)
-  );
+  const selectedWorkspaceId = useAppStore((state) => state.selected.workspace);
 
   // Toggle panel handlers
   const togglePanel =
@@ -195,7 +192,9 @@ const App = () => {
                       <div className="flex items-center justify-center h-full p-4 text-muted-foreground text-center">
                         <div>
                           <p>Please select a workspace first</p>
-                          <p className="text-sm mt-1">Context items are associated with workspaces</p>
+                          <p className="text-sm mt-1">
+                            Context items are associated with workspaces
+                          </p>
                         </div>
                       </div>
                     )}
