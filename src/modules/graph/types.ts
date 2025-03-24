@@ -9,7 +9,6 @@ export interface Position {
   y: number;
 }
 
-
 export interface FlowNode extends BaseItem {
   label: string;
   assistantMessage: string;
@@ -24,8 +23,16 @@ export interface NodeActions {
   addNode: (payload: NodePayload) => void;
   deleteNode: (nodeId: string) => void;
   updateNodePosition: (nodeId: string, position: Position) => void;
-  setNodePlugin: (nodeId: string, pluginKey: string | null, initialData?: unknown) => void;
-  updateNodePluginData: (nodeId: string, pluginKey: string, data: unknown) => void;
+  setNodePlugin: (
+    nodeId: string,
+    pluginKey: string | null,
+    initialData?: unknown
+  ) => void;
+  updateNodePluginData: (
+    nodeId: string,
+    pluginKey: string,
+    data: unknown
+  ) => void;
   getNodePluginData: (nodeId: string, pluginKey: string) => unknown;
   updateNodeLabel: (nodeId: string, label: string) => void;
   updateNodeUserPrompt: (nodeId: string, prompt: string) => void;
@@ -34,13 +41,12 @@ export interface NodeActions {
 
 export interface NodePayload {
   label: string;
-  assistantMessage: string;     
-  userPrompt?: string;          
+  assistantMessage: string;
+  userPrompt?: string;
   position?: Position;
   pluginKey?: string;
   pluginData?: PluginDataMap;
 }
-
 
 export interface Edge extends BaseItem {
   source: string;
@@ -60,4 +66,3 @@ export interface EdgePayload {
   label?: string;
   type?: string;
 }
-

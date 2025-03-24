@@ -2,8 +2,8 @@
 
 import { StateCreator } from "zustand";
 import { Draft } from "immer";
-import { ContextItem } from "./types";
-import { AppState, ContextActions } from "../store";
+import { ContextActions, ContextItem } from "./types";
+import { AppState } from "../store";
 
 export const createContextActions: StateCreator<
   AppState,
