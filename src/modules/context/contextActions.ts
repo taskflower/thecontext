@@ -1,15 +1,18 @@
 // src/modules/context/contextActions.ts
 
-import { ContextItem } from ".";
-import { AppState } from "../store";
+import { StateCreator } from "zustand";
+import { Draft } from "immer";
+import { ContextItem } from "./types";
+import { AppState, ContextActions } from "../store";
 
-
-export const createContextActions = (set: SetFn) => ({
+export const createContextActions: StateCreator<
+  AppState,
+  [["zustand/immer", never]],
+  [],
+  ContextActions
+> = (set) => ({
   addContextItem: (workspaceId: string, item: ContextItem) =>
-    set((state) => {
-      // Guard against undefined state.items
-      if (!state || !state.items) return;
-      
+    set((state: Draft<AppState>) => {
       const workspace = state.items.find(w => w.id === workspaceId);
       if (!workspace) return;
       
@@ -30,10 +33,7 @@ export const createContextActions = (set: SetFn) => ({
     }),
     
   updateContextItem: (workspaceId: string, key: string, value: string, valueType: 'text' | 'json') =>
-    set((state) => {
-      // Guard against undefined state.items
-      if (!state || !state.items) return;
-      
+    set((state: Draft<AppState>) => {
       const workspace = state.items.find(w => w.id === workspaceId);
       if (!workspace || !workspace.contextItems) return;
       
@@ -47,10 +47,7 @@ export const createContextActions = (set: SetFn) => ({
     }),
     
   deleteContextItem: (workspaceId: string, key: string) =>
-    set((state) => {
-      // Guard against undefined state.items
-      if (!state || !state.items) return;
-      
+    set((state: Draft<AppState>) => {
       const workspace = state.items.find(w => w.id === workspaceId);
       if (!workspace || !workspace.contextItems) return;
       
@@ -63,9 +60,6 @@ export const createContextActions = (set: SetFn) => ({
     }),
     
   getContextValue: (workspaceId: string, key: string) => (state: AppState) => {
-    // Guard against undefined state.items
-    if (!state || !state.items) return null;
-    
     const workspace = state.items.find(w => w.id === workspaceId);
     if (!workspace || !workspace.contextItems) return null;
     
@@ -74,9 +68,6 @@ export const createContextActions = (set: SetFn) => ({
   },
   
   getContextItems: (workspaceId: string) => (state: AppState) => {
-    // Guard against undefined state.items
-    if (!state || !state.items) return [];
-    
     const workspace = state.items.find(w => w.id === workspaceId);
     return workspace && workspace.contextItems ? workspace.contextItems : [];
   },

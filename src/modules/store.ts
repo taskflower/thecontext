@@ -5,9 +5,10 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import { TYPES, SelectionState } from "./common/types";
 import { Workspace, WorkspaceActions } from "./workspaces/types";
 import { ScenarioActions } from "./scenarios/types";
-import { NodeActions, EdgeActions, FlowActions } from "./graph/types";
-import { ContextItem } from "./context/types"; // Add this import
-import { createContextActions } from "./context/contextActions"; // Add this import
+import { NodeActions, EdgeActions } from "./graph/types";
+import { FlowActions } from "./flow/types"; // Zakładam, że powinno być z ./flow/types
+import { ContextItem } from "./context/types";
+import { createContextActions } from "./context/contextActions";
 
 import { createWorkspaceSlice } from "./workspaces/workspaceActions";
 import { createScenarioSlice } from "./scenarios/scenarioActions";
@@ -15,13 +16,12 @@ import { createNodeSlice } from "./graph/nodeActions";
 import { createEdgeSlice } from "./graph/edgeActions";
 import { createFlowSlice } from "./flow/flowActions";
 
-// Add this interface
 export interface ContextActions {
   addContextItem: (workspaceId: string, item: ContextItem) => void;
   updateContextItem: (workspaceId: string, key: string, value: string, valueType: 'text' | 'json') => void;
   deleteContextItem: (workspaceId: string, key: string) => void;
-  getContextValue: (workspaceId: string, key: string) => (state: any) => string | null;
-  getContextItems: (workspaceId: string) => (state: any) => ContextItem[];
+  getContextValue: (workspaceId: string, key: string) => (state: AppState) => string | null;
+  getContextItems: (workspaceId: string) => (state: AppState) => ContextItem[];
 }
 
 export interface AppState
@@ -30,7 +30,7 @@ export interface AppState
     NodeActions,
     EdgeActions,
     FlowActions,
-    ContextActions { // Add ContextActions
+    ContextActions {
   items: Workspace[];
   selected: SelectionState;
   stateVersion: number;
@@ -44,6 +44,8 @@ const initialState = {
       type: TYPES.WORKSPACE,
       title: "Chatbot Project",
       contextItems: [], // Add contextItems to initial state
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
       children: [
         {
           id: "scenario1",
@@ -95,7 +97,7 @@ export const useAppStore = create<AppState>()(
       ...createNodeSlice(...a),
       ...createEdgeSlice(...a),
       ...createFlowSlice(...a),
-      ...createContextActions(...a), // Add createContextActions
+      ...createContextActions(...a),
     })),
     {
       name: "context-app-storage", // Unique name for localStorage key
