@@ -7,12 +7,13 @@ export interface Scenario extends BaseItem {
   description: string;
   children: FlowNode[];
   edges: Edge[];
-  filters?: Filter[]; // Add this property
+  filters?: Filter[];
 }
 
 export interface ScenarioActions {
   selectScenario: (scenarioId: string) => void;
   addScenario: (payload: ScenarioPayload) => void;
+  updateScenario: (scenarioId: string, payload: ScenarioPayload) => void;
   deleteScenario: (scenarioId: string) => void;
   getCurrentScenario: () => Scenario | null;
 }

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { PlusCircle, MoreHorizontal, X, GitBranch, GitMerge } from "lucide-react";
+import { PlusCircle, MoreHorizontal, X, GitBranch, GitMerge, Edit } from "lucide-react";
 import { useAppStore } from "../../store";
 import { Scenario } from "../types";
 import { cn } from "@/utils/utils";
 import AddNewScenario from "./AddNewScenario";
-
+import EditScenario from "./EditScenario";
 
 const ScenariosList: React.FC = () => {
   const selectedWorkspaceId = useAppStore((state) => state.selected.workspace);
@@ -18,10 +18,18 @@ const ScenariosList: React.FC = () => {
   const deleteScenario = useAppStore((state) => state.deleteScenario);
   
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [scenarioToEdit, setScenarioToEdit] = useState<string>("");
   
   const toggleMenu = (id: string) => {
     setMenuOpen(menuOpen === id ? null : id);
+  };
+  
+  const handleEditScenario = (id: string) => {
+    setScenarioToEdit(id);
+    setIsEditDialogOpen(true);
+    setMenuOpen(null);
   };
   
   if (!selectedWorkspaceId) {
@@ -44,7 +52,7 @@ const ScenariosList: React.FC = () => {
           )}
         </div>
         <button
-          onClick={() => setIsDialogOpen(true)}
+          onClick={() => setIsAddDialogOpen(true)}
           className="w-8 h-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
           aria-label="Add scenario"
         >
@@ -62,6 +70,7 @@ const ScenariosList: React.FC = () => {
                 isSelected={scenario.id === selectedScenarioId}
                 onSelect={selectScenario}
                 onDelete={deleteScenario}
+                onEdit={handleEditScenario}
                 menuOpen={menuOpen === scenario.id}
                 toggleMenu={() => toggleMenu(scenario.id)}
               />
@@ -75,10 +84,17 @@ const ScenariosList: React.FC = () => {
         )}
       </div>
       
-      {/* Use the refactored AddNewScenario component */}
+      {/* Add new scenario dialog */}
       <AddNewScenario
-        isOpen={isDialogOpen}
-        setIsOpen={setIsDialogOpen}
+        isOpen={isAddDialogOpen}
+        setIsOpen={setIsAddDialogOpen}
+      />
+      
+      {/* Edit scenario dialog */}
+      <EditScenario
+        isOpen={isEditDialogOpen}
+        setIsOpen={setIsEditDialogOpen}
+        scenarioId={scenarioToEdit}
       />
     </div>
   );
@@ -89,6 +105,7 @@ interface ScenarioItemProps {
   isSelected: boolean;
   onSelect: (id: string) => void;
   onDelete: (id: string) => void;
+  onEdit: (id: string) => void;
   menuOpen: boolean;
   toggleMenu: () => void;
 }
@@ -98,6 +115,7 @@ const ScenarioItem: React.FC<ScenarioItemProps> = ({
   isSelected,
   onSelect,
   onDelete,
+  onEdit,
   menuOpen,
   toggleMenu,
 }) => {
@@ -152,6 +170,13 @@ const ScenarioItem: React.FC<ScenarioItemProps> = ({
         
         {menuOpen && (
           <div className="absolute right-0 mt-1 w-36 bg-popover border border-border rounded-md shadow-md z-10">
+            <button
+              onClick={() => onEdit(scenario.id)}
+              className="w-full text-left px-3 py-2 text-sm hover:bg-muted flex items-center"
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
+            </button>
             <button
               onClick={() => onDelete(scenario.id)}
               className="w-full text-left px-3 py-2 text-sm text-destructive hover:bg-muted flex items-center"

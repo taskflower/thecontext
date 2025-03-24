@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { StateCreator } from "zustand";
 import { Draft } from "immer";
-import { Scenario, ScenarioActions } from "./types";
+import { Scenario, ScenarioActions, ScenarioPayload } from "./types";
 import { AppState, TYPES } from "../store";
 
 export const createScenarioSlice: StateCreator<
@@ -17,7 +17,7 @@ export const createScenarioSlice: StateCreator<
       state.stateVersion++;
     }),
 
-  addScenario: (payload: { name: string; description: string }) =>
+  addScenario: (payload: ScenarioPayload) =>
     set((state: Draft<AppState>) => {
       const newScenario: Scenario = {
         id: `scenario-${Date.now()}`,
@@ -37,6 +37,21 @@ export const createScenarioSlice: StateCreator<
         state.selected.node = "";
       }
       state.stateVersion++;
+    }),
+
+  updateScenario: (scenarioId: string, payload: ScenarioPayload) =>
+    set((state: Draft<AppState>) => {
+      const workspace = state.items.find(
+        (w) => w.id === state.selected.workspace
+      );
+      if (workspace) {
+        const scenario = workspace.children.find((s) => s.id === scenarioId);
+        if (scenario) {
+          scenario.name = payload.name;
+          scenario.description = payload.description;
+          state.stateVersion++;
+        }
+      }
     }),
 
   deleteScenario: (scenarioId: string) =>
