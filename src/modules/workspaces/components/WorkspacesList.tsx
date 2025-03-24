@@ -1,10 +1,15 @@
 import React, { useState } from "react";
-import { PlusCircle, MoreHorizontal, X, Folder, FolderOpen, Edit } from "lucide-react";
+import {
+  PlusCircle,
+  MoreHorizontal,
+  X,
+  Folder,
+  FolderOpen,
+} from "lucide-react";
 import { useAppStore } from "../../store";
 import { Workspace } from "../types";
 import { useDialogState } from "../../common/hooks";
 import { cn } from "@/utils/utils";
-import { ContextEditor } from "../../context";
 
 const WorkspacesList: React.FC = () => {
   const workspaces = useAppStore((state) => state.items);
@@ -12,34 +17,26 @@ const WorkspacesList: React.FC = () => {
   const selectWorkspace = useAppStore((state) => state.selectWorkspace);
   const addWorkspace = useAppStore((state) => state.addWorkspace);
   const deleteWorkspace = useAppStore((state) => state.deleteWorkspace);
-  
+
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
-  const [editingContextWorkspaceId, setEditingContextWorkspaceId] = useState<string | null>(null);
-  
-  const { isOpen, formData, openDialog, handleChange, setIsOpen } = useDialogState<{
-    title: string;
-  }>({
-    title: "",
-  });
-  
+
+  const { isOpen, formData, openDialog, handleChange, setIsOpen } =
+    useDialogState<{
+      title: string;
+    }>({
+      title: "",
+    });
+
   const handleAddWorkspace = () => {
     if (!formData.title.trim()) return;
     addWorkspace({ title: formData.title });
     setIsOpen(false);
   };
-  
+
   const toggleMenu = (id: string) => {
     setMenuOpen(menuOpen === id ? null : id);
   };
-  
-  const handleEditContext = (workspaceId: string) => {
-    // Tylko jeśli workspace jest aktywny
-    if (workspaceId === selectedWorkspaceId) {
-      setEditingContextWorkspaceId(workspaceId);
-      setMenuOpen(null);
-    }
-  };
-  
+
   return (
     <div className="h-full flex flex-col">
       {/* Workspaces Header */}
@@ -53,7 +50,7 @@ const WorkspacesList: React.FC = () => {
           <PlusCircle className="h-5 w-5" />
         </button>
       </div>
-      
+
       {/* Workspaces List */}
       <div className="flex-1 overflow-auto p-2">
         {workspaces.length > 0 ? (
@@ -65,7 +62,6 @@ const WorkspacesList: React.FC = () => {
                 isSelected={workspace.id === selectedWorkspaceId}
                 onSelect={selectWorkspace}
                 onDelete={deleteWorkspace}
-                onEditContext={handleEditContext}
                 menuOpen={menuOpen === workspace.id}
                 toggleMenu={() => toggleMenu(workspace.id)}
               />
@@ -74,25 +70,39 @@ const WorkspacesList: React.FC = () => {
         ) : (
           <div className="text-center p-4 text-muted-foreground">
             <p className="text-sm">No workspaces found</p>
-            <p className="text-xs mt-1">Create a new workspace to get started</p>
+            <p className="text-xs mt-1">
+              Create a new workspace to get started
+            </p>
           </div>
         )}
       </div>
-      
+
       {/* Add Workspace Dialog */}
       {isOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setIsOpen(false)}>
-          <div className="bg-background border border-border rounded-lg shadow-lg w-full max-w-md p-4" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={() => setIsOpen(false)}
+        >
+          <div
+            className="bg-background border border-border rounded-lg shadow-lg w-full max-w-md p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium">Add Workspace</h3>
-              <button onClick={() => setIsOpen(false)} className="text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div>
-                <label htmlFor="title" className="block text-sm font-medium mb-1">
+                <label
+                  htmlFor="title"
+                  className="block text-sm font-medium mb-1"
+                >
                   Title
                 </label>
                 <input
@@ -105,7 +115,7 @@ const WorkspacesList: React.FC = () => {
                   className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </div>
-              
+
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => setIsOpen(false)}
@@ -124,13 +134,6 @@ const WorkspacesList: React.FC = () => {
           </div>
         </div>
       )}
-      
-      {/* Context Editor Dialog */}
-      {editingContextWorkspaceId && (
-        <ContextEditor 
-          onClose={() => setEditingContextWorkspaceId(null)} 
-        />
-      )}
     </div>
   );
 };
@@ -140,7 +143,7 @@ interface WorkspaceItemProps {
   isSelected: boolean;
   onSelect: (id: string) => void;
   onDelete: (id: string) => void;
-  onEditContext: (id: string) => void;
+
   menuOpen: boolean;
   toggleMenu: () => void;
 }
@@ -150,7 +153,7 @@ const WorkspaceItem: React.FC<WorkspaceItemProps> = ({
   isSelected,
   onSelect,
   onDelete,
-  onEditContext,
+
   menuOpen,
   toggleMenu,
 }) => {
@@ -158,8 +161,8 @@ const WorkspaceItem: React.FC<WorkspaceItemProps> = ({
     <li
       className={cn(
         "group flex items-center justify-between px-2 py-2 rounded-md",
-        isSelected 
-          ? "bg-primary/10 text-primary" 
+        isSelected
+          ? "bg-primary/10 text-primary"
           : "hover:bg-muted/50 text-foreground"
       )}
     >
@@ -179,7 +182,7 @@ const WorkspaceItem: React.FC<WorkspaceItemProps> = ({
           ({workspace.children?.length || 0})
         </span>
       </button>
-      
+
       <div className="relative">
         <button
           onClick={(e) => {
@@ -188,32 +191,16 @@ const WorkspaceItem: React.FC<WorkspaceItemProps> = ({
           }}
           className={cn(
             "w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground",
-            menuOpen 
-              ? "bg-muted text-foreground" 
+            menuOpen
+              ? "bg-muted text-foreground"
               : "opacity-0 group-hover:opacity-100 hover:text-foreground hover:bg-muted"
           )}
         >
           <MoreHorizontal className="h-4 w-4" />
         </button>
-        
+
         {menuOpen && (
           <div className="absolute right-0 mt-1 w-36 bg-popover border border-border rounded-md shadow-md z-10">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onEditContext(workspace.id);
-              }}
-              className={cn(
-                "w-full text-left px-3 py-2 text-sm flex items-center",
-                isSelected
-                  ? "hover:bg-muted"
-                  : "opacity-50 cursor-not-allowed"
-              )}
-              disabled={!isSelected}
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Edit Context
-            </button>
             <button
               onClick={() => onDelete(workspace.id)}
               className="w-full text-left px-3 py-2 text-sm text-destructive hover:bg-muted flex items-center border-t border-border"

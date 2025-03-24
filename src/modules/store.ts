@@ -17,6 +17,7 @@ import { WorkspaceActions } from "./workspaces/types";
 import { FlowActions } from "./flow/types";
 import { Workspace } from "./workspaces/types";
 import { FlowSession } from "./flow/types";
+import { ContextActions } from "./context/types";
 
 // Import początkowych danych
 import { getInitialData } from "./initialData";
@@ -50,7 +51,8 @@ export interface AppState extends
   EdgeActions, 
   ScenarioActions, 
   WorkspaceActions,
-  FlowActions {
+  FlowActions,
+  ContextActions {
   
   // Stan
   items: Workspace[];
