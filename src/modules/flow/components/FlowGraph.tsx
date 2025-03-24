@@ -39,11 +39,19 @@ const adaptEdgeToReactFlow = (edge: Edge): ReactFlowEdge => ({
   source: edge.source,
   target: edge.target,
   label: edge.label,
-  type: "step"
+  type: "step",
+  style: {
+    strokeDasharray: 5,
+    strokeWidth: 2,
+    animation: 'dashMove 5s linear infinite'
+  }
 });
 
 // Definiowanie typów węzłów
 const nodeTypes: NodeTypes = { custom: CustomNode };
+
+// Konfiguracja siatki do przyciągania (snap)
+const GRID_SIZE = 20; // Rozmiar kropek siatki
 
 const FlowGraph: React.FC = () => {
   const getActiveScenarioData = useAppStore(state => state.getActiveScenarioData);
@@ -121,6 +129,15 @@ const FlowGraph: React.FC = () => {
 
   return (
     <div className="bg-card rounded-md shadow-sm p-0 h-full w-full relative">
+      <style>
+        {`
+          @keyframes dashMove {
+            to {
+              stroke-dashoffset: -20;
+            }
+          }
+        `}
+      </style>
       <div className="absolute top-2 right-2 z-10">
         <button
           onClick={handlePlay}
@@ -141,12 +158,19 @@ const FlowGraph: React.FC = () => {
         onNodeClick={onNodeClick}
         nodeTypes={nodeTypes}
         defaultEdgeOptions={{ type: "step" }}
+        snapToGrid={true}
+        snapGrid={[GRID_SIZE, GRID_SIZE]}
         fitView
         maxZoom={1.25}
       >
         <Controls />
         <MiniMap />
-        <Background color="hsl(var(--muted))" gap={16} />
+        <Background 
+          variant="dots"
+          gap={GRID_SIZE}
+          size={1}
+          color="#888"
+        />
       </ReactFlow>
 
       {isFlowPlaying && (
