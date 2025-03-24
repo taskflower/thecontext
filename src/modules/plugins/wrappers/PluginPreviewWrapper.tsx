@@ -2,30 +2,42 @@
 import React, { useState, useEffect } from "react";
 import { usePlugins } from "../pluginContext";
 import { useAppStore } from "../../store";
-import { AppContextData, PluginPreviewWrapperProps } from "../types";
+import { AppContextData, PluginComponentWithSchema, PluginPreviewWrapperProps } from "../types";
 
-// Don't import AppState from a relative path, use the type directly from useAppStore
-// Remove this line: import { AppState as StoreAppState } from "../../store";
-
-const PluginPreviewWrapper: React.FC<PluginPreviewWrapperProps> = ({ 
-  componentKey, 
-  customData, 
-  context = {}, 
-  showHeader = true, 
-  className = "" 
+const PluginPreviewWrapper: React.FC<PluginPreviewWrapperProps> = ({
+  componentKey,
+  customData,
+  context = {},
+  showHeader = true,
+  className = "",
 }) => {
   const { getPluginComponent, getPluginData, isPluginEnabled } = usePlugins();
   const [error, setError] = useState<string | null>(null);
-  
-  // Get the update functions directly from app store without type casting
-  const updateNodeUserPrompt = useAppStore((state) => state.updateNodeUserPrompt);
-  const updateNodeAssistantMessage = useAppStore((state) => state.updateNodeAssistantMessage);
-  
-  // Get current selection from store without type casting
+
+  // Check if there's an active flow session
+  const isFlowPlaying = useAppStore(
+    (state) => state.flowSession?.isPlaying || false
+  );
+
+  // Get the appropriate update functions based on session state
+  const updateNodeUserPrompt = useAppStore((state) =>
+    isFlowPlaying ? state.updateTempNodeUserPrompt : state.updateNodeUserPrompt
+  );
+
+  const updateNodeAssistantMessage = useAppStore((state) =>
+    isFlowPlaying
+      ? state.updateTempNodeAssistantMessage
+      : state.updateNodeAssistantMessage
+  );
+
+  // Get current selection from store
   const selectedNodeId = useAppStore((state) => state.selected.node);
-  
+
   // Get the plugin component
-  const PluginComponent = getPluginComponent(componentKey);
+  const PluginComponent = getPluginComponent(componentKey) as PluginComponentWithSchema | null;
+
+  // Get plugin settings if available
+  const pluginSettings = PluginComponent?.pluginSettings || {};
 
   // Combine custom data with stored plugin data
   const storedData = getPluginData(componentKey);
@@ -37,13 +49,13 @@ const PluginPreviewWrapper: React.FC<PluginPreviewWrapperProps> = ({
     currentScenario: null,
     currentNode: null,
     selection: {
-      workspaceId: context.selection?.workspaceId || '',
-      scenarioId: context.selection?.scenarioId || '',
-      nodeId: context.selection?.nodeId || selectedNodeId, // Ensure nodeId is set
+      workspaceId: context.selection?.workspaceId || "",
+      scenarioId: context.selection?.scenarioId || "",
+      nodeId: context.selection?.nodeId || selectedNodeId,
     },
     stateVersion: context.stateVersion || 0,
-    updateNodeUserPrompt, // Pass the function
-    updateNodeAssistantMessage, // Pass the function
+    updateNodeUserPrompt, // Pass the appropriate function
+    updateNodeAssistantMessage, // Pass the appropriate function
     ...context, // Include all other context properties
   };
 
@@ -66,7 +78,9 @@ const PluginPreviewWrapper: React.FC<PluginPreviewWrapperProps> = ({
   // Check if plugin exists
   if (!PluginComponent) {
     return (
-      <div className={`p-4 bg-red-100 dark:bg-red-900/20 rounded-md ${className}`}>
+      <div
+        className={`p-4 bg-red-100 dark:bg-red-900/20 rounded-md ${className}`}
+      >
         <p className="text-sm text-red-600 dark:text-red-400">
           Plugin <strong>{componentKey}</strong> not found
         </p>
@@ -77,7 +91,7 @@ const PluginPreviewWrapper: React.FC<PluginPreviewWrapperProps> = ({
   // Render the plugin with error boundary
   return (
     <div className={`plugin-wrapper ${className}`}>
-      {showHeader && (
+      {showHeader && !pluginSettings.replaceHeader && (
         <div className="flex justify-between items-center px-3 py-2 bg-muted/10 border-b border-border text-sm">
           <span className="font-medium">{componentKey}</span>
           <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
@@ -116,7 +130,10 @@ interface ErrorBoundaryState {
   hasError: boolean;
 }
 
-class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };

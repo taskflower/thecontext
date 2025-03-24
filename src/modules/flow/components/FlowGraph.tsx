@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -8,52 +8,78 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   Node,
-  NodeTypes
+  NodeTypes,
+  Edge as ReactFlowEdge
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { useAppStore } from "../../store";
 import { StepModal } from "./StepModal";
 import CustomNode from "./CustomNode";
 import "../styles.css";
+import { FlowNode, Edge } from "../../graph/types";
 
-// Define custom node types
+// Adapter do konwersji FlowNode na format ReactFlow
+const adaptNodeToReactFlow = (node: FlowNode, isSelected: boolean): Node => ({
+  id: node.id,
+  type: "custom",
+  data: {
+    label: node.label,
+    nodeId: node.id,
+    prompt: node.userPrompt,
+    message: node.assistantMessage,
+    pluginKey: node.pluginKey
+  },
+  position: node.position,
+  selected: isSelected
+});
+
+// Adapter do konwersji Edge na format ReactFlow
+const adaptEdgeToReactFlow = (edge: Edge): ReactFlowEdge => ({
+  id: edge.id,
+  source: edge.source,
+  target: edge.target,
+  label: edge.label,
+  type: "step"
+});
+
+// Definiowanie typów węzłów
 const nodeTypes: NodeTypes = { custom: CustomNode };
 
 const FlowGraph: React.FC = () => {
-  const getActiveScenarioData = useAppStore(
-    (state) => state.getActiveScenarioData
+  const getActiveScenarioData = useAppStore(state => state.getActiveScenarioData);
+  const addEdge = useAppStore(state => state.addEdge);
+  const updateNodePosition = useAppStore(state => state.updateNodePosition);
+  const selectNode = useAppStore(state => state.selectNode);
+  const stateVersion = useAppStore(state => state.stateVersion);
+  const startFlowSession = useAppStore(state => state.startFlowSession);
+  const stopFlowSession = useAppStore(state => state.stopFlowSession);
+  const isFlowPlaying = useAppStore(state => state.flowSession?.isPlaying || false);
+  const selectedNodeId = useAppStore(state => state.selected.node);
+
+  // Pobierz dane i przekształć je dla ReactFlow
+  const { nodes: originalNodes, edges: originalEdges } = getActiveScenarioData();
+  const reactFlowNodes = originalNodes.map(node => 
+    adaptNodeToReactFlow(node, node.id === selectedNodeId)
   );
-  const addEdge = useAppStore((state) => state.addEdge);
-  const updateNodePosition = useAppStore((state) => state.updateNodePosition);
-  const selectNode = useAppStore((state) => state.selectNode);
-  const stateVersion = useAppStore((state) => state.stateVersion);
-  const calculateFlowPath = useAppStore((state) => state.calculateFlowPath);
+  const reactFlowEdges = originalEdges.map(adaptEdgeToReactFlow);
 
-  const { nodes: initialNodes, edges: initialEdges } = getActiveScenarioData();
+  // Inicjalizacja stanu ReactFlow
+  const [nodes, setNodes, onNodesChange] = useNodesState(reactFlowNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(reactFlowEdges);
 
-  // Make sure each node has the "custom" type
-  const preparedNodes = initialNodes.map((node: Node) => ({
-    ...node,
-    type: "custom",
-  }));
-
-  const [nodes, setNodes, onNodesChange] = useNodesState(preparedNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentNodeIndex, setCurrentNodeIndex] = useState(0);
-  const [flowPath, setFlowPath] = useState<any[]>([]);
-
-  // Update graph on data changes
+  // Aktualizacja grafu na zmiany danych
   useEffect(() => {
     const { nodes: newNodes, edges: newEdges } = getActiveScenarioData();
-    const updatedNodes = newNodes.map((node: Node) => ({
-      ...node,
-      type: "custom",
-    }));
+    const updatedNodes = newNodes.map(node => 
+      adaptNodeToReactFlow(node, node.id === selectedNodeId)
+    );
+    const updatedEdges = newEdges.map(adaptEdgeToReactFlow);
+    
     setNodes(updatedNodes);
-    setEdges(newEdges);
-  }, [getActiveScenarioData, setNodes, setEdges, stateVersion]);
+    setEdges(updatedEdges);
+  }, [getActiveScenarioData, setNodes, setEdges, stateVersion, selectedNodeId]);
 
+  // Obsługa połączeń
   const onConnect = useCallback(
     (params: Connection) => {
       if (params.source && params.target) {
@@ -67,6 +93,7 @@ const FlowGraph: React.FC = () => {
     [addEdge]
   );
 
+  // Obsługa przeciągania węzłów
   const onNodeDragStop = useCallback(
     (_: React.MouseEvent, node: Node) => {
       updateNodePosition(node.id, node.position);
@@ -74,6 +101,7 @@ const FlowGraph: React.FC = () => {
     [updateNodePosition]
   );
 
+  // Obsługa kliknięcia na węzeł
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
       selectNode(node.id);
@@ -81,16 +109,15 @@ const FlowGraph: React.FC = () => {
     [selectNode]
   );
 
-  // Begin flow playback
+  // Rozpoczęcie sesji flow
   const handlePlay = useCallback(() => {
-    const path = calculateFlowPath();
-    if (path.length > 0) {
-      console.log("Starting flow with path:", path);
-      setFlowPath(path);
-      setCurrentNodeIndex(0);
-      setIsPlaying(true);
-    }
-  }, [calculateFlowPath]);
+    startFlowSession();
+  }, [startFlowSession]);
+
+  // Obsługa zamknięcia okna modal
+  const handleCloseModal = useCallback(() => {
+    stopFlowSession(false);
+  }, [stopFlowSession]);
 
   return (
     <div className="bg-card rounded-md shadow-sm p-0 h-full w-full relative">
@@ -98,8 +125,9 @@ const FlowGraph: React.FC = () => {
         <button
           onClick={handlePlay}
           className="p-2 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90"
+          disabled={isFlowPlaying}
         >
-          Play Flow
+          {isFlowPlaying ? "Flow w trakcie..." : "Uruchom Flow"}
         </button>
       </div>
 
@@ -121,18 +149,8 @@ const FlowGraph: React.FC = () => {
         <Background color="hsl(var(--muted))" gap={16} />
       </ReactFlow>
 
-      {isPlaying && flowPath.length > 0 && (
-        <StepModal
-          steps={flowPath}
-          currentStep={currentNodeIndex}
-          onNext={() =>
-            setCurrentNodeIndex((prev) =>
-              Math.min(prev + 1, flowPath.length - 1)
-            )
-          }
-          onPrev={() => setCurrentNodeIndex((prev) => Math.max(prev - 1, 0))}
-          onClose={() => setIsPlaying(false)}
-        />
+      {isFlowPlaying && (
+        <StepModal onClose={handleCloseModal} />
       )}
     </div>
   );

@@ -6,6 +6,25 @@ import { ComponentType } from "react";
 export interface PluginComponentProps<T = unknown> {
   data: T | null;
   appContext: AppContextData;
+  
+  // Plugin UI replacement capabilities
+  replaceHeader?: boolean;
+  replaceAssistantView?: boolean;
+  replaceUserInput?: boolean;
+}
+
+// Static plugin settings (to be attached to the component)
+export interface PluginSettings {
+  replaceHeader?: boolean;
+  replaceAssistantView?: boolean;
+  replaceUserInput?: boolean;
+}
+
+// Plugin component with options schema and settings
+export interface PluginComponentWithSchema<T = unknown>
+  extends React.FC<PluginComponentProps<T>> {
+  optionsSchema?: Record<string, PluginOptionSchema>;
+  pluginSettings?: PluginSettings;
 }
 
 // Plugin state
@@ -46,12 +65,6 @@ export interface DynamicComponentStore {
   getComponent: (key: string) => ComponentType<PluginComponentProps> | null;
 }
 
-// Plugin component with options schema
-export interface PluginComponentWithSchema<T = unknown>
-  extends React.FC<PluginComponentProps<T>> {
-  optionsSchema?: Record<string, PluginOptionSchema>;
-}
-
 // Schema for plugin options
 export interface PluginOptionSchema {
   type: "string" | "number" | "boolean" | "color";
@@ -88,7 +101,11 @@ export interface ScenarioData {
 
 export interface NodeData {
   id: string;
-  name: string;
+  label?: string;
+  name?: string;
+  userPrompt?: string;
+  assistantMessage?: string;
+  pluginKey?: string;
   pluginData?: Record<string, unknown>;
   [key: string]: any;
 }

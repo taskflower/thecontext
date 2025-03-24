@@ -1,200 +1,164 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import StepPluginWrapper from "@/modules/plugins/wrappers/StepPluginWrapper";
 import { StepModalProps } from "../types";
-import { cn } from "@/utils/utils";
-import { Bot, Puzzle, X } from "lucide-react";
+import { Puzzle} from "lucide-react";
 import { useAppStore } from "../../store";
-import useHistoryStore from "../../history/historyStore";
+import { PluginComponentWithSchema } from "@/modules/plugins/types";
+import { usePlugins } from "@/modules/plugins/pluginContext";
+import {
+  DefaultHeader,
+  DefaultAssistantMessage,
+  DefaultUserInput,
+  NavigationButtons
+} from "./DefaultComponents";
 
-export const StepModal: React.FC<StepModalProps> = ({
-  steps,
-  currentStep,
-  onNext,
-  onPrev,
-  onClose,
-}) => {
-  // Zawsze pobieraj aktualną wersję stanu bezpośrednio ze store
-  const stateVersion = useAppStore(state => state.stateVersion);
-  const selectedNodeId = steps[currentStep]?.id;
+export const StepModal: React.FC<StepModalProps> = ({ onClose }) => {
+  // Get our plugin context to access plugin components
+  const { getPluginComponent } = usePlugins();
   
-  // Pobierz aktualne wartości bezpośrednio ze store dla wybranego węzła
-  const currentNodeData = useAppStore(state => {
-    const workspace = state.items.find(w => w.id === state.selected.workspace);
-    const scenario = workspace?.children.find(s => s.id === state.selected.scenario);
-    return scenario?.children.find(n => n.id === selectedNodeId);
-  });
+  // Pobierz dane z tymczasowej sesji flow
+  const currentStepIndex = useAppStore(state => state.flowSession?.currentStepIndex || 0);
+  const temporarySteps = useAppStore(state => state.flowSession?.temporarySteps || []);
+  const nextStep = useAppStore(state => state.nextStep);
+  const prevStep = useAppStore(state => state.prevStep);
+  const stopFlowSession = useAppStore(state => state.stopFlowSession);
+  const updateTempNodeUserPrompt = useAppStore(state => state.updateTempNodeUserPrompt);
   
-  // Użyj wartości z currentNodeData jeśli są dostępne, w przeciwnym razie z steps
-  const currentNode = currentNodeData || steps[currentStep];
+  const currentNode = temporarySteps[currentStepIndex];
+  const isLastStep = currentStepIndex === temporarySteps.length - 1;
   
   const [isProcessing, setIsProcessing] = useState(false);
-  const isLastStep = currentStep === steps.length - 1;
+  const [showSavePrompt, setShowSavePrompt] = useState(false);
   
-  // Pobierz potrzebne funkcje ze store'ów
-  const getCurrentScenario = useAppStore(state => state.getCurrentScenario);
-  const saveConversation = useHistoryStore(state => state.saveConversation);
-  const updateNodeUserPrompt = useAppStore(state => state.updateNodeUserPrompt);
-
-  // Bezpośrednia aktualizacja wartości w store zamiast lokalnego stanu
+  // Aktualizacja wartości w tymczasowej kopii
   const handleInputChange = (value: string) => {
-    if (!currentNode?.id) return;
-    updateNodeUserPrompt(currentNode.id, value);
+    if (currentNode?.id) {
+      updateTempNodeUserPrompt(currentNode.id, value);
+    }
   };
 
-  // Funkcja zapisująca historię konwersacji
-  const saveHistory = () => {
-    console.log("Zapisywanie historii konwersacji");
-    
-    const scenario = getCurrentScenario();
-    if (!scenario) {
-      console.error("Błąd: Brak aktywnego scenariusza do zapisu historii");
-      return;
-    }
-    
-    // Pobierz aktualne dane bezpośrednio ze scenariusza, a nie z lokalnej kopii
-    const nodes = scenario.children.filter(node => 
-      steps.some(step => step.id === node.id)
-    );
-    
-    console.log("Zapisywane dane węzłów:", nodes.map(node => ({
-      id: node.id,
-      label: node.label,
-      userPrompt: node.userPrompt
-    })));
-    
-    try {
-      const historyId = saveConversation(
-        scenario.id,
-        scenario.label || scenario.name || "Nienazwany scenariusz",
-        nodes
-      );
-      console.log("SUKCES: Historia zapisana automatycznie z ID:", historyId);
-    } catch (error) {
-      console.error("Błąd podczas zapisywania historii:", error);
-    }
+  // Funkcja zamykająca z zapisem lub bez
+  const handleClose = (saveChanges = false) => {
+    stopFlowSession(saveChanges);
+    onClose();
   };
 
   // Obsługa nawigacji
   const handleNavigation = (direction: 'prev' | 'next' | 'finish') => {
     if (direction === 'prev') {
-      onPrev();
+      prevStep();
     } else if (direction === 'next') {
       setIsProcessing(true);
       setTimeout(() => {
         setIsProcessing(false);
-        onNext();
+        nextStep();
       }, 300);
     } else if (direction === 'finish') {
-      saveHistory();
-      onClose();
+      setShowSavePrompt(true);
     }
-  };
-
-  // Obsługa zamknięcia okna
-  const handleClose = () => {
-    saveHistory();
-    onClose();
   };
 
   if (!currentNode) {
     return null;
   }
 
+  // Dialog pytający o zapis zmian
+  if (showSavePrompt) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="bg-background rounded-lg border border-border shadow-lg w-full max-w-md p-6">
+          <h3 className="text-lg font-medium mb-4">Zapisać zmiany?</h3>
+          <p className="mb-6">Czy chcesz zapisać zmiany wprowadzone podczas tej sesji?</p>
+          
+          <div className="flex justify-end space-x-3">
+            <button
+              onClick={() => handleClose(false)}
+              className="px-4 py-2 rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/90"
+            >
+              Anuluj zmiany
+            </button>
+            <button
+              onClick={() => handleClose(true)}
+              className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              Zapisz zmiany
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Get plugin component and settings if a plugin is associated with this node
+  let PluginComponent: PluginComponentWithSchema | null = null;
+  let pluginSettings = { 
+    replaceHeader: false, 
+    replaceAssistantView: false, 
+    replaceUserInput: false 
+  };
+
+  if (currentNode.pluginKey) {
+    PluginComponent = getPluginComponent(currentNode.pluginKey) as PluginComponentWithSchema;
+    if (PluginComponent?.pluginSettings) {
+      pluginSettings = {
+        ...pluginSettings,
+        ...PluginComponent.pluginSettings
+      };
+    }
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-background rounded-lg border border-border shadow-lg w-full max-w-2xl">
-        <div className="flex items-center justify-between p-4 border-b border-border">
-          <h3 className="text-lg font-medium">
-            Krok {currentStep + 1} z {steps.length}: {currentNode.label || `Krok ${currentStep + 1}`}
-          </h3>
-          <button
-            onClick={handleClose}
-            className="p-1 rounded-full hover:bg-muted"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+        {/* Header - conditionally render based on plugin settings */}
+        {!pluginSettings.replaceHeader && (
+          <DefaultHeader
+            currentStepIndex={currentStepIndex}
+            totalSteps={temporarySteps.length}
+            nodeName={currentNode.label}
+            onClose={() => setShowSavePrompt(true)}
+          />
+        )}
 
         <div className="p-6">
-          <div className="mb-6 space-y-4">
-            {/* Wiadomość asystenta */}
-            <div className="flex items-start">
-              <div className="flex-shrink-0 bg-primary/20 w-8 h-8 rounded-full flex items-center justify-center mr-3">
-                <Bot className="h-4 w-4 text-primary" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-muted-foreground mb-1">
-                  Asystent:
-                </p>
-                <div className="bg-muted rounded-lg py-2 px-3">
-                  {currentNode.assistantMessage ||
-                    "Czekam na Twoją odpowiedź..."}
-                </div>
-              </div>
-            </div>
+          {/* Assistant message - conditionally render based on plugin settings */}
+          {!pluginSettings.replaceAssistantView && (
+            <DefaultAssistantMessage message={currentNode.assistantMessage} />
+          )}
 
-            {/* Plugin (jeśli istnieje) */}
-            {currentNode.pluginKey && (
-              <div className="border border-border rounded-lg overflow-hidden mt-4">
-                <div className="bg-muted/30 px-4 py-2 border-b border-border flex items-center">
+          {/* Plugin section - always render if a plugin is associated */}
+          {currentNode.pluginKey && (
+            <div className="my-4">
+              {!pluginSettings.replaceHeader && !pluginSettings.replaceAssistantView && (
+                <div className="flex items-center mb-2">
                   <Puzzle className="h-4 w-4 mr-2 text-primary" />
-                  <h4 className="font-medium">
-                    Plugin: {currentNode.pluginKey}
-                  </h4>
+                  <h4 className="text-sm font-medium">Plugin: {currentNode.pluginKey}</h4>
                 </div>
-                <div className="p-4 bg-background">
-                  <StepPluginWrapper
-                    componentKey={currentNode.pluginKey}
-                    nodeData={currentNode}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Pole wprowadzania użytkownika */}
-            <div className="mt-6">
-              <p className="text-sm font-medium text-muted-foreground mb-2">
-                Twoja odpowiedź:
-              </p>
-              <textarea
-                value={currentNode.userPrompt || ""}
-                onChange={(e) => handleInputChange(e.target.value)}
-                placeholder="Wpisz swoją wiadomość..."
-                className="w-full p-3 border border-input rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-primary"
-                rows={3}
-              ></textarea>
+              )}
+              <StepPluginWrapper
+                componentKey={currentNode.pluginKey}
+                nodeData={currentNode}
+              />
             </div>
-          </div>
+          )}
 
-          {/* Przyciski nawigacji */}
-          <div className="flex justify-between mt-4">
-            <button
-              onClick={() => handleNavigation('prev')}
-              disabled={currentStep === 0 || isProcessing}
-              className={cn(
-                "px-4 py-2 rounded-md text-sm font-medium transition-colors",
-                currentStep === 0 || isProcessing
-                  ? "bg-muted text-muted-foreground cursor-not-allowed"
-                  : "bg-secondary text-secondary-foreground hover:bg-secondary/90"
-              )}
-            >
-              ← Poprzedni
-            </button>
-
-            <button
-              onClick={() => handleNavigation(isLastStep ? 'finish' : 'next')}
-              disabled={isProcessing}
-              className={cn(
-                "px-4 py-2 rounded-md text-sm font-medium transition-colors",
-                isProcessing 
-                  ? "bg-primary/70 text-primary-foreground cursor-wait" 
-                  : "bg-primary text-primary-foreground hover:bg-primary/90"
-              )}
-            >
-              {isLastStep ? "Zakończ" : "Następny →"}
-            </button>
-          </div>
+          {/* User input - conditionally render based on plugin settings */}
+          {!pluginSettings.replaceUserInput && (
+            <DefaultUserInput
+              value={currentNode.userPrompt || ""}
+              onChange={handleInputChange}
+            />
+          )}
         </div>
+
+        {/* Navigation buttons - always present */}
+        <NavigationButtons
+          isFirstStep={currentStepIndex === 0}
+          isLastStep={isLastStep}
+          isProcessing={isProcessing}
+          onPrevious={() => handleNavigation('prev')}
+          onNext={() => handleNavigation(isLastStep ? 'finish' : 'next')}
+        />
       </div>
     </div>
   );

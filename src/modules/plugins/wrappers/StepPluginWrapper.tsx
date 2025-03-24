@@ -4,9 +4,6 @@ import PluginPreviewWrapper from './PluginPreviewWrapper';
 import { useAppStore } from '../../store';
 import { AppContextData, NodeData } from '../types';
 
-// Import the actual AppState from store
-import { AppState as StoreAppState } from "../../store";
-
 interface StepPluginWrapperProps {
   componentKey: string;
   nodeData?: NodeData;
@@ -14,27 +11,30 @@ interface StepPluginWrapperProps {
   scenarioId?: string;
 }
 
-/**
- * A specialized wrapper for displaying plugins in the step modal
- * that provides node context to the plugin
- */
 const StepPluginWrapper: React.FC<StepPluginWrapperProps> = ({
   componentKey,
   nodeData,
   workspaceId = '',
   scenarioId = '',
 }) => {
-  // Get update functions from store with explicit typing from the actual store
-  const updateNodeUserPrompt = useAppStore((state: StoreAppState) => state.updateNodeUserPrompt);
-  const updateNodeAssistantMessage = useAppStore((state: StoreAppState) => state.updateNodeAssistantMessage);
+  // Get the flow session state
+  const isFlowPlaying = useAppStore(state => state.flowSession?.isPlaying || false);
   
-  // If no node data, provide empty values
+  // Get the appropriate update functions based on session state
+  const updateNodeUserPrompt = useAppStore(state => 
+    isFlowPlaying ? state.updateTempNodeUserPrompt : state.updateNodeUserPrompt
+  );
+  
+  const updateNodeAssistantMessage = useAppStore(state => 
+    isFlowPlaying ? state.updateTempNodeAssistantMessage : state.updateNodeAssistantMessage
+  );
+  
+  // Node data
   const node = nodeData || {
     id: '',
     name: 'Unknown Node',
   };
   
-  // Create context with current node data and update functions
   const context: Partial<AppContextData> = {
     currentNode: node,
     selection: {
@@ -42,12 +42,11 @@ const StepPluginWrapper: React.FC<StepPluginWrapperProps> = ({
       scenarioId,
       nodeId: node.id,
     },
-    // Add update functions to context
+    // Use the appropriate update functions
     updateNodeUserPrompt,
     updateNodeAssistantMessage
   };
   
-  // Pass the node's plugin data if available
   const customData = node.pluginData?.[componentKey];
   
   return (

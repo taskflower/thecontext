@@ -1,19 +1,27 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import { persist, createJSONStorage } from "zustand/middleware";
-import { Workspace, WorkspaceActions } from "./workspaces/types";
-import { ScenarioActions } from "./scenarios/types";
-import { NodeActions, EdgeActions } from "./graph/types";
-import { createContextActions } from "./context/contextActions";
+import { persist } from "zustand/middleware";
 
-import { createWorkspaceSlice } from "./workspaces/workspaceActions";
-import { createScenarioSlice } from "./scenarios/scenarioActions";
+// Importy modułów akcji
 import { createNodeSlice } from "./graph/nodeActions";
 import { createEdgeSlice } from "./graph/edgeActions";
+import { createScenarioSlice } from "./scenarios/scenarioActions";
+import { createWorkspaceSlice } from "./workspaces/workspaceActions";
 import { createFlowSlice } from "./flow/flowActions";
-import { ContextActions } from "./context";
 
+// Importy typów
+import { NodeActions } from "./graph/types";
+import { EdgeActions } from "./graph/types";
+import { ScenarioActions } from "./scenarios/types";
+import { WorkspaceActions } from "./workspaces/types";
+import { FlowActions } from "./flow/types";
+import { Workspace } from "./workspaces/types";
+import { FlowSession } from "./flow/types";
+
+// Import początkowych danych
+import { getInitialData } from "./initialData";
+
+// Stałe typów
 export const TYPES = {
   WORKSPACE: "workspace",
   SCENARIO: "scenario",
@@ -21,106 +29,66 @@ export const TYPES = {
   EDGE: "edge",
 };
 
+// Bazowy interfejs dla wszystkich elementów
 export interface BaseItem {
   id: string;
   type: string;
+  label?: string;
 }
 
-export interface SelectionState {
+// Struktura wybranych elementów
+export interface Selected {
   workspace: string;
   scenario: string;
   node: string;
 }
 
-export interface AppState extends WorkspaceActions, 
-    ScenarioActions, 
-    NodeActions, 
-    EdgeActions, 
-    ContextActions {
+// Główny stan aplikacji
+export interface AppState extends 
+  NodeActions, 
+  EdgeActions, 
+  ScenarioActions, 
+  WorkspaceActions,
+  FlowActions {
+  
+  // Stan
   items: Workspace[];
-  selected: SelectionState;
+  selected: Selected;
   stateVersion: number;
-
+  flowSession?: FlowSession;
 }
 
-const initialState = {
-  items: [
-    {
-      id: "workspace1",
-      type: TYPES.WORKSPACE,
-      title: "Chatbot Project",
-      contextItems: [], // Add contextItems to initial state
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      children: [
-        {
-          id: "scenario1",
-          type: TYPES.SCENARIO,
-          name: "Welcome Flow",
-          description: "Initial user greeting and introduction",
-          children: [
-            {
-              id: "node1",
-              type: TYPES.NODE,
-              label: "Welcome",
-              assistantMessage: "Hello! I'm your virtual assistant. How can I help you today?",
-              userPrompt: "",
-              position: { x: 100, y: 100 },
-            },
-            {
-              id: "node2",
-              type: TYPES.NODE,
-              label: "Services",
-              assistantMessage: "I can help you with product information, scheduling appointments, or technical support. What would you like to know?",
-              userPrompt: "I need some help",
-              position: { x: 300, y: 200 },
-            },
-          ],
-          edges: [
-            {
-              id: "edge1",
-              type: TYPES.EDGE,
-              source: "node1",
-              target: "node2",
-              label: "Need help",
-            },
-          ],
-        },
-      ],
-    },
-  ],
-  selected: { workspace: "workspace1", scenario: "scenario1", node: "" },
-  stateVersion: 0,
-};
-const STORAGE_KEY = "context-app-storage";
+// Pobranie początkowych danych
+const initialData = getInitialData();
+
+// Utworzenie store'a z wszystkimi slicami i persist middleware
 export const useAppStore = create<AppState>()(
   persist(
-    immer((...a) => ({
-      ...initialState,
-      ...createWorkspaceSlice(...a),
-      ...createScenarioSlice(...a),
-      ...createNodeSlice(...a),
-      ...createEdgeSlice(...a),
-      ...createFlowSlice(...a),
-      ...createContextActions(...a),
+    immer((...args) => ({
+      // Stan początkowy z demo lub zapisu
+      items: initialData.items || [],
+      selected: initialData.selected || {
+        workspace: "",
+        scenario: "",
+        node: "",
+      },
+      stateVersion: initialData.stateVersion || 0,
+      flowSession: undefined,
+      
+      // Dołączenie wszystkich slices
+      ...createNodeSlice(...args),
+      ...createEdgeSlice(...args),
+      ...createScenarioSlice(...args),
+      ...createWorkspaceSlice(...args),
+      ...createFlowSlice(...args),
     })),
     {
-      name: STORAGE_KEY,
-      storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({
-        items: state.items,
-        selected: state.selected,
-      }),
-      merge: (persistedState, currentState) => {
-        const typedPersistedState = persistedState as Partial<AppState>;
-        return {
-          ...currentState,
-          ...(typedPersistedState as object),
-          stateVersion: currentState.stateVersion + 1,
-        };
-      },
+      name: 'flowchart-app-state',
+      // Nie zapisuj tymczasowej sesji flow
+      partialize: (state: AppState) => ({
+        ...state,
+        flowSession: undefined
+      })
     }
   )
 );
-
-

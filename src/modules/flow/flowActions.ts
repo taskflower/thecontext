@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { StateCreator } from "zustand";
+import { Draft } from "immer";
 import { AppState } from "../store";
 import { FlowActions } from "./types";
+import useHistoryStore from "../history/historyStore";
 
 export const createFlowSlice: StateCreator<
   AppState,
@@ -21,28 +23,11 @@ export const createFlowSlice: StateCreator<
     );
     if (!scenario) return { nodes: [], edges: [] };
 
-    const nodes = scenario.children.map((node) => ({
-      id: node.id,
-      data: {
-        label: node.label,
-        nodeId: node.id,
-        prompt: node.userPrompt,
-        message: node.assistantMessage,
-        pluginKey: node.pluginKey
-      },
-      position: node.position,
-      selected: node.id === state.selected.node,
-    }));
-
-    const edges =
-      scenario.edges?.map((edge) => ({
-        id: edge.id,
-        source: edge.source,
-        target: edge.target,
-        label: edge.label,
-      })) || [];
-
-    return { nodes, edges };
+    // Zwracamy oryginalne dane bez konwersji
+    return {
+      nodes: scenario.children,
+      edges: scenario.edges || []
+    };
   },
   
   calculateFlowPath: () => {
@@ -93,7 +78,7 @@ export const createFlowSlice: StateCreator<
   
       const nodeData = scenarioNodes.find((n) => n.id === nodeId);
       if (nodeData) {
-        // Create a deep copy to avoid reference issues
+        // Utwórz głęboką kopię, żeby uniknąć modyfikacji oryginału
         const nodeCopy = JSON.parse(JSON.stringify(nodeData));
         path.push(nodeCopy);
         visited.add(nodeId);
@@ -104,19 +89,105 @@ export const createFlowSlice: StateCreator<
     };
   
     dfs(startNodeId);
-    
-    // Log the calculated path for debugging purposes
-    console.log("Calculated flow path:", path.map(node => ({
-      id: node.id,
-      label: node.label,
-      userPrompt: node.userPrompt
-    })));
-    
     return path;
   },
 
+  // Nowe metody do zarządzania sesją flow
+  startFlowSession: () => 
+    set((state: Draft<AppState>) => {
+      const path = state.calculateFlowPath();
+      if (path.length > 0) {
+        // Inicjalizacja stanu sesji flow
+        if (!state.flowSession) {
+          state.flowSession = {
+            isPlaying: false,
+            currentStepIndex: 0,
+            temporarySteps: []
+          };
+        }
+        
+        // Głęboka kopia kroków do tymczasowego stanu
+        state.flowSession.temporarySteps = JSON.parse(JSON.stringify(path));
+        state.flowSession.currentStepIndex = 0;
+        state.flowSession.isPlaying = true;
+      }
+    }),
+  
+  stopFlowSession: (saveChanges = false) => 
+    set((state: Draft<AppState>) => {
+      if (!state.flowSession?.isPlaying) return;
+      
+      if (saveChanges) {
+        // Zapisz zmiany wprowadzone w tymczasowych krokach
+        const workspace = state.items.find(w => w.id === state.selected.workspace);
+        const scenario = workspace?.children.find(s => s.id === state.selected.scenario);
+        
+        if (scenario) {
+          // Aktualizacja oryginalnych węzłów
+          state.flowSession.temporarySteps.forEach(tempNode => {
+            const originalNode = scenario.children.find(n => n.id === tempNode.id);
+            if (originalNode) {
+              originalNode.userPrompt = tempNode.userPrompt;
+              originalNode.assistantMessage = tempNode.assistantMessage;
+            }
+          });
+          
+          // Zapis do historii
+          const { saveConversation } = useHistoryStore.getState();
+          saveConversation(
+            scenario.id,
+            scenario.label || scenario.name,
+            state.flowSession.temporarySteps
+          );
+        }
+      }
+      
+      // Reset stanu sesji
+      state.flowSession.isPlaying = false;
+      state.flowSession.temporarySteps = [];
+      state.flowSession.currentStepIndex = 0;
+      state.stateVersion++;
+    }),
+  
+  nextStep: () => 
+    set((state: Draft<AppState>) => {
+      if (state.flowSession?.isPlaying && 
+          state.flowSession.currentStepIndex < state.flowSession.temporarySteps.length - 1) {
+        state.flowSession.currentStepIndex++;
+      }
+    }),
+  
+  prevStep: () => 
+    set((state: Draft<AppState>) => {
+      if (state.flowSession?.isPlaying && state.flowSession.currentStepIndex > 0) {
+        state.flowSession.currentStepIndex--;
+      }
+    }),
+  
+  // Modyfikacja tymczasowych węzłów
+  updateTempNodeUserPrompt: (nodeId: string, prompt: string) => 
+    set((state: Draft<AppState>) => {
+      if (!state.flowSession?.isPlaying) return;
+      
+      const nodeIndex = state.flowSession.temporarySteps.findIndex(node => node.id === nodeId);
+      if (nodeIndex !== -1) {
+        state.flowSession.temporarySteps[nodeIndex].userPrompt = prompt;
+      }
+    }),
+  
+  updateTempNodeAssistantMessage: (nodeId: string, message: string) => 
+    set((state: Draft<AppState>) => {
+      if (!state.flowSession?.isPlaying) return;
+      
+      const nodeIndex = state.flowSession.temporarySteps.findIndex(node => node.id === nodeId);
+      if (nodeIndex !== -1) {
+        state.flowSession.temporarySteps[nodeIndex].assistantMessage = message;
+      }
+    }),
+  
+  // Stare metody - tylko dla zachowania zgodności
   updateNodeAssistantMessage: (nodeId: string, assistantMessage: string) => {
-    console.log(`Attempting to update node ${nodeId} with assistantMessage:`, assistantMessage);
+    console.log(`Updating node ${nodeId} with assistantMessage:`, assistantMessage);
     
     set((state: any) => {
       const workspace = state.items.find(
@@ -132,21 +203,14 @@ export const createFlowSlice: StateCreator<
       const nodeIndex = scenario.children.findIndex((n: any) => n.id === nodeId);
       if (nodeIndex === -1) return state;
       
-      // Update the assistantMessage on the node
       scenario.children[nodeIndex].assistantMessage = assistantMessage;
-      
-      // Increment state version to trigger updates
       state.stateVersion++;
-      
-      console.log(`Updated node ${nodeId} with assistantMessage:`, assistantMessage);
       return state;
     });
   },
   
-  // This is a helper function to manually update a node's userPrompt
-  // It doesn't have to match the original interface since it's just for our use
   updateNodeUserPrompt: (nodeId: string, userPrompt: string) => {
-    console.log(`Attempting to update node ${nodeId} with userPrompt:`, userPrompt);
+    console.log(`Updating node ${nodeId} with userPrompt:`, userPrompt);
     
     set((state: any) => {
       const workspace = state.items.find(
@@ -162,13 +226,8 @@ export const createFlowSlice: StateCreator<
       const nodeIndex = scenario.children.findIndex((n: any) => n.id === nodeId);
       if (nodeIndex === -1) return state;
       
-      // Update the userPrompt on the node
       scenario.children[nodeIndex].userPrompt = userPrompt;
-      
-      // Increment state version to trigger updates
       state.stateVersion++;
-      
-      console.log(`Updated node ${nodeId} with userPrompt:`, userPrompt);
       return state;
     });
   }
