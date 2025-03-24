@@ -1,5 +1,5 @@
 // EditScenario.tsx update - replace the Save SVG with Lucide Save icon
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { X, Save } from "lucide-react"; // Added Save import
 import { useAppStore } from "../../store";
 
@@ -16,12 +16,12 @@ const EditScenario: React.FC<EditScenarioProps> = ({
 }) => {
   const updateScenario = useAppStore((state) => state.updateScenario);
   const getCurrentScenario = useAppStore((state) => state.getCurrentScenario);
-  
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
   });
-  
+
   // Load scenario data when component mounts or scenarioId changes
   useEffect(() => {
     if (isOpen && scenarioId) {
@@ -34,15 +34,17 @@ const EditScenario: React.FC<EditScenarioProps> = ({
       }
     }
   }, [isOpen, scenarioId, getCurrentScenario]);
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
-  
+
   const handleSubmit = () => {
     if (!formData.name.trim()) return;
     updateScenario(scenarioId, {
@@ -51,12 +53,15 @@ const EditScenario: React.FC<EditScenarioProps> = ({
     });
     setIsOpen(false);
   };
-  
+
   if (!isOpen) return null;
-  
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setIsOpen(false)}>
-      <div 
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      onClick={() => setIsOpen(false)}
+    >
+      <div
         role="dialog"
         aria-describedby="dialog-description"
         aria-labelledby="dialog-title"
@@ -65,14 +70,27 @@ const EditScenario: React.FC<EditScenarioProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex flex-col space-y-1.5 p-6">
-          <div id="dialog-title" className="font-semibold leading-none tracking-tight">Edit Scenario</div>
-          <div id="dialog-description" className="text-sm text-muted-foreground">Update scenario details</div>
+          <div
+            id="dialog-title"
+            className="font-semibold leading-none tracking-tight"
+          >
+            Edit Scenario
+          </div>
+          <div
+            id="dialog-description"
+            className="text-sm text-muted-foreground"
+          >
+            Update scenario details
+          </div>
         </div>
-        
+
         <div className="p-6 pt-0">
           <div dir="ltr" data-orientation="horizontal" className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="name">
+              <label
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                htmlFor="name"
+              >
                 Name
               </label>
               <input
@@ -84,9 +102,12 @@ const EditScenario: React.FC<EditScenarioProps> = ({
                 onChange={handleChange}
               />
             </div>
-            
+
             <div className="space-y-2">
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="description">
+              <label
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                htmlFor="description"
+              >
                 Description
               </label>
               <textarea
@@ -99,7 +120,7 @@ const EditScenario: React.FC<EditScenarioProps> = ({
                 onChange={handleChange}
               />
             </div>
-            
+
             <div className="flex justify-end gap-2 pt-4">
               <button
                 onClick={() => setIsOpen(false)}
@@ -108,7 +129,7 @@ const EditScenario: React.FC<EditScenarioProps> = ({
                 <X className="h-4 w-4 mr-2" />
                 Cancel
               </button>
-              
+
               <button
                 onClick={handleSubmit}
                 className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2"
@@ -120,7 +141,7 @@ const EditScenario: React.FC<EditScenarioProps> = ({
             </div>
           </div>
         </div>
-        
+
         <button
           type="button"
           onClick={() => setIsOpen(false)}
