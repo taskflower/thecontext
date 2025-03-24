@@ -4,6 +4,8 @@ import { useAppStore } from "../../store";
 import { Scenario } from "../types";
 import { useDialogState } from "../../common/hooks";
 import { cn } from "@/utils/utils";
+import AddNewScenario from "./AddNewScenario";
+
 
 const ScenariosList: React.FC = () => {
   const selectedWorkspaceId = useAppStore((state) => state.selected.workspace);
@@ -91,66 +93,14 @@ const ScenariosList: React.FC = () => {
         )}
       </div>
       
-      {/* Add Scenario Dialog */}
-      {isOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setIsOpen(false)}>
-          <div className="bg-background border border-border rounded-lg shadow-lg w-full max-w-md p-4" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium">Add Scenario</h3>
-              <button onClick={() => setIsOpen(false)} className="text-muted-foreground hover:text-foreground">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium mb-1">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Enter scenario name"
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium mb-1">
-                  Description
-                </label>
-                <input
-                  type="text"
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  placeholder="Enter scenario description"
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
-              </div>
-              
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="px-4 py-2 text-sm border border-border rounded-md hover:bg-muted"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleAddScenario}
-                  className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-                >
-                  Add Scenario
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Use the separate ScenarioDialog component */}
+      <AddNewScenario
+        isOpen={isOpen}
+        formData={formData}
+        handleChange={handleChange}
+        setIsOpen={setIsOpen}
+        handleSubmit={handleAddScenario}
+      />
     </div>
   );
 };
