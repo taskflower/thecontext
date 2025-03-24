@@ -1,6 +1,8 @@
 // src/modules/context/contextActions.ts
-import { ContextItem, AppState } from "../types";
-import { SetFn } from "../typesActioss";
+
+import { ContextItem } from ".";
+import { AppState } from "../store";
+
 
 export const createContextActions = (set: SetFn) => ({
   addContextItem: (workspaceId: string, item: ContextItem) =>
