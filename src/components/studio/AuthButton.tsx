@@ -1,51 +1,27 @@
 // src/components/studio/AuthButton.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { LogIn, LogOut, User, Loader2 } from "lucide-react";
-import { auth } from "@/firebase/config";
-import { authService } from "@/services/authService";
-import { onAuthStateChanged } from "firebase/auth";
 import { cn } from "@/utils/utils";
+import { useAuth } from "@/context/AuthContext";
 
 export const AuthButton: React.FC = () => {
-  const [user, setUser] = useState<{ email: string; photoURL?: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const { currentUser, isLoading, signIn, signOut } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        setUser({
-          email: firebaseUser.email || "User",
-          photoURL: firebaseUser.photoURL || undefined
-        });
-      } else {
-        setUser(null);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
 
   const handleLogin = async () => {
     try {
-      setIsLoading(true);
-      await authService.signInWithGoogle();
+      await signIn();
     } catch (error) {
       console.error("Login failed:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleLogout = async () => {
     try {
-      setIsLoading(true);
-      await authService.signOut();
+      await signOut();
       setIsDropdownOpen(false);
     } catch (error) {
       console.error("Logout failed:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -58,7 +34,7 @@ export const AuthButton: React.FC = () => {
     );
   }
 
-  if (!user) {
+  if (!currentUser) {
     return (
       <button
         className="p-2 rounded-md hover:bg-muted/50 text-foreground flex items-center gap-2"
@@ -79,22 +55,14 @@ export const AuthButton: React.FC = () => {
         )}
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
       >
-        {user.photoURL ? (
-          <img 
-            src={user.photoURL} 
-            alt="Profile" 
-            className="h-5 w-5 rounded-full"
-          />
-        ) : (
-          <User className="h-4 w-4" />
-        )}
-        <span className="text-xs max-w-[100px] truncate">{user.email}</span>
+        <User className="h-4 w-4" />
+        <span className="text-xs max-w-[100px] truncate">{currentUser.email}</span>
       </button>
       
       {isDropdownOpen && (
         <div className="absolute right-0 mt-1 w-48 bg-background border border-border rounded-md shadow-md z-50">
           <div className="p-2 text-xs border-b border-border">
-            <div className="font-medium">{user.email}</div>
+            <div className="font-medium">{currentUser.email}</div>
           </div>
           <button
             className="w-full text-left p-2 text-xs flex items-center gap-2 hover:bg-muted/50"

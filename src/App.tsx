@@ -3,20 +3,23 @@
 import { BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import Studio from "./pages/StudioLayout";
 import WorkspacePage from "./pages/WorkspacePage";
+import { AuthProvider } from "./context/AuthContext";
 
 function App() {
   return (
-    <Router>
-      <div className="app">
-        <div className="content">
-          <Routes>
-            <Route path="/" element={<WorkspacePage />} />
-            <Route path="/:slug" element={<WorkspacePage />} />
-            <Route path="/studio" element={<Studio />} />
-          </Routes>
+    <AuthProvider>
+      <Router>
+        <div className="app">
+          <div className="content">
+            <Routes>
+              <Route path="/" element={<WorkspacePage />} />
+              <Route path="/:slug" element={<WorkspacePage />} />
+              <Route path="/studio" element={<Studio />} />
+            </Routes>
+          </div>
         </div>
-      </div>
-    </Router>
+      </Router>
+    </AuthProvider>
   );
 }
 
