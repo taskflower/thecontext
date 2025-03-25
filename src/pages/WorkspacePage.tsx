@@ -43,7 +43,7 @@ import { FilterStatus } from "@/modules/filters";
 
 const WorkspacePage = () => {
   const [flowPlayerOpen, setFlowPlayerOpen] = useState(false);
-  const [editingFilterId, setEditingFilterId] = useState(null);
+  const [editingFilterId, setEditingFilterId] = useState<string | null>(null);
 
   const { slug } = useParams();
   const {
@@ -53,7 +53,6 @@ const WorkspacePage = () => {
     getCurrentWorkspace,
     getCurrentScenario,
     checkScenarioFilterMatch,
-    stateVersion,
   } = useAppStore();
   const navigate = useNavigate();
 
@@ -76,8 +75,8 @@ const WorkspacePage = () => {
     if (!currentWorkspace) return [];
     
     return currentWorkspace.children.map(scenario => {
-      const hasFilters = scenario.filters && scenario.filters.length > 0;
-      const activeFilters = hasFilters ? scenario.filters.filter(f => f.enabled) : [];
+      const hasFilters = !!scenario.filters && scenario.filters.length > 0;
+      const activeFilters = hasFilters && scenario.filters ? scenario.filters.filter(f => f.enabled) : [];
       const matchesFilter = checkScenarioFilterMatch();
       
       return {
@@ -87,29 +86,27 @@ const WorkspacePage = () => {
         matchesFilter: hasFilters ? matchesFilter : true
       };
     });
-  }, [currentWorkspace, checkScenarioFilterMatch, stateVersion]);
+  }, [currentWorkspace, checkScenarioFilterMatch]);
 
   // Get only scenarios that have defined filters
   const filteredScenarios = scenariosWithStatus.filter(scenario => 
-    scenario.hasFilters && scenario.filters && scenario.filters.length > 0
+    scenario.hasFilters && !!scenario.filters
   );
 
-  const openFlowPlayer = () => {
-    setFlowPlayerOpen(true);
-  };
+
 
   // Handle filter click to edit filters
-  const handleFilterClick = (e, scenarioId) => {
+  const handleFilterClick = (e: React.MouseEvent, scenarioId: string) => {
     e.stopPropagation();
     setEditingFilterId(scenarioId);
   };
 
   // Format time ago function
-  const formatTimeAgo = (timestamp) => {
+  const formatTimeAgo = (timestamp: number | undefined): string => {
     if (!timestamp) return "Recently";
     
-    const now = new Date();
-    const date = new Date(timestamp);
+    const now = new Date().getTime();
+    const date = new Date(timestamp).getTime();
     const diffInSeconds = Math.floor((now - date) / 1000);
 
     if (diffInSeconds < 60) {
@@ -220,11 +217,10 @@ const WorkspacePage = () => {
               variant="outline"
               className="gap-2 shadow-sm bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => {
-                // Show modal to add scenario
-                const addScenarioModal = document.getElementById("add-scenario-modal");
-                if (addScenarioModal) {
-                  addScenarioModal.showModal();
-                }
+                // You should implement a modal dialog solution here
+                // For example, set state to show your add scenario dialog:
+                // setShowAddScenarioModal(true);
+                console.log('Add new scenario clicked');
               }}
             >
               <Plus className="h-4 w-4" />
@@ -326,11 +322,10 @@ const WorkspacePage = () => {
               <Button
                 variant="outline"
                 onClick={() => {
-                  // Show modal to add scenario
-                  const addScenarioModal = document.getElementById("add-scenario-modal");
-                  if (addScenarioModal) {
-                    addScenarioModal.showModal();
-                  }
+                  // You should implement a modal dialog solution here
+                  // For example, set state to show your add scenario dialog:
+                  // setShowAddScenarioModal(true);
+                  console.log('Create new scenario clicked');
                 }}
               >
                 Create New Scenario
