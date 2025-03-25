@@ -4,6 +4,7 @@ import { Scenario } from "../scenarios/types";
 export interface Workspace extends BaseItem {
   title: string;
   description: string;
+  slug:string;
   children: Scenario[];
 }
 
@@ -18,4 +19,5 @@ export interface WorkspaceActions {
 export interface WorkspacePayload {
   title: string;
   description: string;
+  slug:string;
 }

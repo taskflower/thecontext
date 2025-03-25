@@ -1,3 +1,4 @@
+// Updated AddNewWorkspace.tsx
 import { useState } from "react";
 import { X, Save } from "lucide-react";
 import { useAppStore } from "../../store";
@@ -16,6 +17,7 @@ const AddNewWorkspace: React.FC<AddNewWorkspaceProps> = ({
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    slug: "",
   });
 
   const handleChange = (
@@ -33,8 +35,9 @@ const AddNewWorkspace: React.FC<AddNewWorkspaceProps> = ({
     addWorkspace({
       title: formData.title,
       description: formData.description,
+      slug: formData.slug,
     });
-    setFormData({ title: "", description: "" });
+    setFormData({ title: "", description: "", slug: "" });
     setIsOpen(false);
   };
 
@@ -83,6 +86,23 @@ const AddNewWorkspace: React.FC<AddNewWorkspaceProps> = ({
                 id="title"
                 name="title"
                 value={formData.title}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                htmlFor="slug"
+              >
+                Slug (Optional)
+              </label>
+              <input
+                placeholder="workspace-slug"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                id="slug"
+                name="slug"
+                value={formData.slug}
                 onChange={handleChange}
               />
             </div>

@@ -5,7 +5,6 @@ import { cn } from "@/utils/utils";
 import { AddNewWorkspace, EditWorkspace, WorkspaceContextMenu } from "..";
 import { Workspace } from "../types";
 
-
 const WorkspacesList: React.FC = () => {
   const items = useAppStore((state) => state.items);
   const selectedWorkspaceId = useAppStore((state) => state.selected.workspace);
@@ -125,6 +124,11 @@ const WorkspaceItem: React.FC<WorkspaceItemProps> = ({
           {workspace.description && (
             <p className="text-xs text-muted-foreground truncate mt-0.5">
               {workspace.description}
+            </p>
+          )}
+          {workspace.slug && (
+            <p className="text-xs text-muted-foreground truncate mt-0.5">
+              <span className="opacity-70">slug:</span> {workspace.slug}
             </p>
           )}
         </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -366,6 +366,9 @@ const WorkspacePage = () => {
               <Button variant="ghost" size="sm" className="text-xs">
                 Privacy
               </Button>
+              
+                  <Link to="/studio">Studio</Link>
+              
             </div>
           </div>
         </div>

@@ -35,6 +35,7 @@ export const createWorkspaceSlice: StateCreator<
         type: TYPES.WORKSPACE,
         title: payload.title,
         description: payload.description,
+        slug: payload.slug || "",
         children: [],
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -53,6 +54,7 @@ export const createWorkspaceSlice: StateCreator<
       if (workspace) {
         workspace.title = payload.title;
         workspace.description = payload.description;
+        workspace.slug = payload.slug || "";
         workspace.updatedAt = Date.now();
         state.stateVersion++;
       }
