@@ -18,7 +18,7 @@ export const Header: React.FC<HeaderProps> = ({ showLeftPanel, toggleLeftPanel }
       <div className="flex items-center gap-3">
         <h1 className="text-xs font-semibold flex items-center">
           <Focus className="mr-2 h-4 w-4 text-primary" />
-          <Link to="/">Deep Context Studio</Link>
+          <Link to="/">RevertContext.com</Link>
         </h1>
       </div>
       <div className="flex items-center gap-3">
