@@ -17,25 +17,31 @@ export function useWorkspaceContext() {
   const updateContextItem = useAppStore(state => state.updateContextItem);
   const deleteContextItem = useAppStore(state => state.deleteContextItem);
   
+  // Define the getItemByTitle function to avoid using 'this'
+  const getItemByTitle = (title: string): ContextItem | undefined => {
+    const items = getContextItems();
+    return items.find(item => item.title === title);
+  };
+  
+  // Define the getContentValue function to avoid using 'this'
+  const getContentValue = (title: string): string | null => {
+    const item = getItemByTitle(title);
+    return item ? item.content : null;
+  };
+  
   return {
     // Get all context items
     getAllItems: () => getContextItems(),
     
-    // Get item by title
-    getItemByTitle: (title: string): ContextItem | undefined => {
-      const items = getContextItems();
-      return items.find(item => item.title === title);
-    },
+    // Get item by title - exposing the internal function
+    getItemByTitle,
     
-    // Get content value by title
-    getContentValue: (title: string): string | null => {
-      const item = this.getItemByTitle(title);
-      return item ? item.content : null;
-    },
+    // Get content value by title - exposing the internal function
+    getContentValue,
     
     // Get JSON content by title (if the content is JSON)
     getJsonValue: (title: string) => {
-      const value = this.getContentValue(title);
+      const value = getContentValue(title);
       if (!value) return null;
       
       try {
