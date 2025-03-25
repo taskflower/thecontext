@@ -117,3 +117,28 @@ export const NavigationButtons: React.FC<NavigationButtonsProps> = ({
     </button>
   </div>
 );
+
+export interface ContextUpdateInfoProps {
+  contextKey: string | undefined;
+  isVisible: boolean;
+}
+
+export const ContextUpdateInfo: React.FC<ContextUpdateInfoProps> = ({ 
+  contextKey, 
+  isVisible 
+}) => {
+  if (!isVisible || !contextKey) return null;
+  
+  return (
+    <div className="mt-2 py-1.5 px-2 bg-primary/10 text-primary text-xs rounded-md flex items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5">
+        <path d="M12 2L2 7l10 5 10-5-10-5z" />
+        <path d="M2 17l10 5 10-5" />
+        <path d="M2 12l10 5 10-5" />
+      </svg>
+      <span>
+        Twoja odpowiedź zostanie zapisana w kontekście <strong>{contextKey}</strong>
+      </span>
+    </div>
+  );
+};

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import StepPluginWrapper from "@/modules/plugins/wrappers/StepPluginWrapper";
 import { StepModalProps } from "../types";
-import { Puzzle} from "lucide-react";
+import { Puzzle } from "lucide-react";
 import { useAppStore } from "../../store";
 import { PluginComponentWithSchema } from "@/modules/plugins/types";
 import { usePlugins } from "@/modules/plugins/pluginContext";
@@ -9,9 +9,11 @@ import {
   DefaultHeader,
   DefaultAssistantMessage,
   DefaultUserInput,
-  NavigationButtons
+  NavigationButtons,
+  ContextUpdateInfo // Nowy import
 } from "./DefaultComponents";
 import { processTemplateWithItems } from "@/modules/context/utils";
+import { updateContextFromNodeInput } from "../contextHandler"; // Nowy import
 
 export const StepModal: React.FC<StepModalProps> = ({ onClose }) => {
   // Get our plugin context to access plugin components
@@ -70,17 +72,28 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose }) => {
     }
   };
 
-  // Obsługa nawigacji
+  // Obsługa nawigacji - ZAKTUALIZOWANA
   const handleNavigation = (direction: 'prev' | 'next' | 'finish') => {
     if (direction === 'prev') {
       prevStep();
     } else if (direction === 'next') {
       setIsProcessing(true);
+      
+      // Aktualizuj kontekst przed przejściem do następnego kroku
+      if (currentNode?.id) {
+        updateContextFromNodeInput(currentNode.id);
+      }
+      
       setTimeout(() => {
         setIsProcessing(false);
         nextStep();
       }, 10);
     } else if (direction === 'finish') {
+      // Aktualizuj kontekst na ostatnim kroku przed zakończeniem
+      if (currentNode?.id) {
+        updateContextFromNodeInput(currentNode.id);
+      }
+      
       setShowSavePrompt(true);
     }
   };
@@ -177,10 +190,17 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose }) => {
 
           {/* User input - conditionally render based on plugin settings */}
           {!pluginSettings.replaceUserInput && (
-            <DefaultUserInput
-              value={currentNode.userPrompt || ""}
-              onChange={handleInputChange}
-            />
+            <>
+              {/* Nowy komponent informacyjny o kontekście */}
+              <ContextUpdateInfo 
+                contextKey={currentNode.contextKey} 
+                isVisible={Boolean(currentNode.contextKey)}
+              />
+              <DefaultUserInput
+                value={currentNode.userPrompt || ""}
+                onChange={handleInputChange}
+              />
+            </>
           )}
         </div>
 
