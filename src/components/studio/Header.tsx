@@ -2,6 +2,7 @@
 import { Focus, PanelLeft, Sun, Moon } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/utils/utils";
+import { AuthButton } from "./AuthButton";
 
 interface HeaderProps {
   showLeftPanel: boolean;
@@ -19,7 +20,10 @@ export const Header: React.FC<HeaderProps> = ({ showLeftPanel, toggleLeftPanel }
           <span>Deep Context Studio</span>
         </h1>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
+        {/* Google Authentication Button */}
+        <AuthButton />
+
         <button
           className="p-2 rounded-md hover:bg-muted text-foreground"
           onClick={toggleDarkMode}
