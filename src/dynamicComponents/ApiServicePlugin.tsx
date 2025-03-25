@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// src/components/plugins/ApiServicePlugin.tsx
 import { useState, useEffect } from "react";
-import {  PluginComponentWithSchema } from "../modules/plugins/types";
+import { PluginComponentWithSchema } from "../modules/plugins/types";
 import { Send, Loader2 } from "lucide-react";
 
 import { PluginAuthAdapter } from "../services/PluginAuthAdapter";
 import { LlmService } from "../services/LlmService";
 import { AuthUser } from "../services/authService";
+import { useAuth } from "../context/AuthContext";
 
 // Define the structure of our plugin data
 interface ApiServiceData {
@@ -19,7 +21,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
   data,
   appContext,
 }) => {
-  // Define default values inside the component to avoid ambient context issues
+  // Define default values inside the component
   const defaultOptions = {
     buttonText: "Send Request",
     assistantMessage: "This is the message that will be sent to the API.",
@@ -33,10 +35,13 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
     ...(data as ApiServiceData),
   };
 
-  // Initialize services - użyj zmiennych środowiskowych do konfiguracji
-  const [authAdapter] = useState(() => new PluginAuthAdapter(appContext));
+  // Get auth context from the app if available
+  const auth = useAuth();
+  const enhancedAppContext = { ...appContext, authContext: auth };
+
+  // Initialize services with improved auth handling
+  const [authAdapter] = useState(() => new PluginAuthAdapter(enhancedAppContext));
   const [llmService] = useState(() => {
-    // Priorytetowo używaj VITE_API_URL z zmiennych środowiskowych
     const apiBaseUrl = import.meta.env.VITE_API_URL;
     return new LlmService(authAdapter, {
       apiUrl: options.apiUrl,
@@ -49,7 +54,6 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
   const [apiResponse, setApiResponse] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
-  const [, setAuthToken] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [authAttempts, setAuthAttempts] = useState(
     authAdapter.getAuthAttempts()
@@ -60,20 +64,23 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
   const assistantMessage =
     appContext?.currentNode?.assistantMessage || options.assistantMessage;
 
-  // Rzutowanie metod z appContext (które nie są zdefiniowane w typie)
+  // Casting methods from appContext
   const { addNodeMessage, moveToNextNode } = (appContext || {}) as any;
 
-  // Load user and token when component mounts
+  // Load user data when component mounts
   useEffect(() => {
     const loadAuth = async () => {
       setAuthLoading(true);
       try {
-        const user = await authAdapter.getCurrentUser();
-        setCurrentUser(user);
-
-        const token = await authAdapter.getCurrentUserToken();
-        setAuthToken(token);
-
+        // First try getting user from auth context
+        if (auth?.currentUser) {
+          setCurrentUser(auth.currentUser);
+        } else {
+          // Fallback to adapter
+          const user = await authAdapter.getCurrentUser();
+          setCurrentUser(user);
+        }
+        
         setAuthAttempts(authAdapter.getAuthAttempts());
       } catch (error) {
         console.error("Error loading auth:", error);
@@ -83,7 +90,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
     };
 
     loadAuth();
-  }, [authAdapter]);
+  }, [auth, authAdapter]);
 
   // Function to call the API
   const callApi = async () => {
@@ -94,7 +101,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
     setHasError(false);
 
     try {
-      // Get current user ID from the loaded user
+      // Get current user ID or use anonymous
       const userId = currentUser?.uid || "anonymous";
 
       // Send request using LlmService
@@ -174,6 +181,11 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
 
       {/* Auth Debug Information */}
       <div className="text-xs bg-gray-50 dark:bg-gray-900/30 p-3 rounded-md border border-gray-200 dark:border-gray-800">
+        {/* User Info */}
+        <div className="mb-2">
+          <strong>User:</strong> {currentUser ? currentUser.email : "Not logged in"}
+        </div>
+        
         {/* Auth Attempts */}
         <strong>Authentication Attempts:</strong>
         {authAttempts.length === 0 ? (

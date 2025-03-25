@@ -1,6 +1,6 @@
 // src/components/studio/AuthButton.tsx
 import React, { useState } from "react";
-import { LogIn, LogOut, User, Loader2 } from "lucide-react";
+import { LogIn, LogOut, User, Loader2, Coins } from "lucide-react";
 import { cn } from "@/utils/utils";
 import { useAuth } from "@/context/AuthContext";
 
@@ -63,6 +63,19 @@ export const AuthButton: React.FC = () => {
         <div className="absolute right-0 mt-1 w-48 bg-background border border-border rounded-md shadow-md z-50">
           <div className="p-2 text-xs border-b border-border">
             <div className="font-medium">{currentUser.email}</div>
+            
+            {/* Token display */}
+            <div className="mt-1 flex items-center gap-1 text-muted-foreground">
+              <Coins className="h-3 w-3" />
+              <span>Tokens: {currentUser.availableTokens}</span>
+            </div>
+            
+            {/* Display user role if available */}
+            {currentUser.role && (
+              <div className="mt-1 text-muted-foreground">
+                Role: {currentUser.role}
+              </div>
+            )}
           </div>
           <button
             className="w-full text-left p-2 text-xs flex items-center gap-2 hover:bg-muted/50"

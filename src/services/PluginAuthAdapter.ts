@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { authService, AuthUser } from './authService';
-import { auth } from '@/firebase/config';
+// src/services/PluginAuthAdapter.ts
+import { AuthUser } from './authService';
 
 export interface AuthAttempt {
   method: string;
@@ -9,152 +9,89 @@ export interface AuthAttempt {
 }
 
 /**
- * Adapter dla istniejącego authService, który dostarcza funkcjonalności
- * wymagane przez plugin API Service
+ * Simplified adapter for auth functionality for plugins
  */
 export class PluginAuthAdapter {
   private attempts: AuthAttempt[] = [];
-  private currentUser: AuthUser | null = null;
-  private loading = true;
+  private authContext: any;
 
   constructor(private appContext?: any) {
-    this.initialize();
-  }
-
-  private async initialize() {
-    this.loading = true;
-    try {
-      await this.fetchCurrentUser();
-    } catch (error) {
-      console.error("Error initializing PluginAuthAdapter:", error);
-    } finally {
-      this.loading = false;
-    }
+    this.authContext = appContext?.authContext;
   }
 
   /**
-   * Próbuje pobrać aktualnego użytkownika z różnych źródeł
+   * Gets the current user from the auth context or app context
    */
-  private async fetchCurrentUser() {
+  async getCurrentUser(): Promise<AuthUser | null> {
     try {
-      // Najpierw próbujemy użyć istniejącego authService
-      this.currentUser = await authService.checkAuthStatus();
-      if (this.currentUser) {
-        this.attempts.push({ method: 'authService.checkAuthStatus', success: true });
-        return;
+      // First try from authContext if available
+      if (this.authContext?.currentUser) {
+        this.attempts.push({ method: 'authContext.currentUser', success: true });
+        return this.authContext.currentUser;
       }
       
-      // Alternatywnie próbujemy z appContext, jeśli dostępny
+      // Then try from appContext
       if (this.appContext?.user) {
-        this.currentUser = {
-          uid: this.appContext.user.uid || this.appContext.user.id,
-          email: this.appContext.user.email || '',
-          availableTokens: this.appContext.user.availableTokens || this.appContext.user.tokens || 0,
-          createdAt: this.appContext.user.createdAt || new Date(),
-          lastLoginAt: this.appContext.user.lastLoginAt || new Date()
-        };
+        const user = this.appContext.user;
         this.attempts.push({ method: 'appContext.user', success: true });
-        return;
+        
+        return {
+          uid: user.uid || user.id,
+          email: user.email || '',
+          availableTokens: user.availableTokens || user.tokens || 0,
+          createdAt: user.createdAt || new Date(),
+          lastLoginAt: user.lastLoginAt || new Date()
+        };
       }
       
       this.attempts.push({ 
-        method: 'fetchCurrentUser', 
+        method: 'getCurrentUser', 
         success: false, 
-        error: 'No authentication source available' 
+        error: 'No user found in contexts' 
       });
+      
+      return null;
     } catch (error) {
       this.attempts.push({ 
-        method: 'fetchCurrentUser', 
+        method: 'getCurrentUser', 
         success: false, 
         error: error instanceof Error ? error.message : String(error) 
       });
+      return null;
     }
   }
 
   /**
-   * Sprawdza, czy adapter jest w trakcie ładowania
-   */
-  isLoading(): boolean {
-    return this.loading;
-  }
-
-  /**
-   * Zwraca listę prób autentykacji
-   */
-  getAuthAttempts(): AuthAttempt[] {
-    return this.attempts;
-  }
-
-  /**
-   * Pobiera aktualnego zalogowanego użytkownika
-   */
-  async getCurrentUser(): Promise<AuthUser | null> {
-    if (this.currentUser) {
-      return this.currentUser;
-    }
-    
-    await this.fetchCurrentUser();
-    return this.currentUser;
-  }
-
-  /**
-   * Pobiera token użytkownika, korzystając z istniejącego authService
-   * lub bezpośrednio z Firebase, jeśli to możliwe
+   * Gets the current user token from the auth context or app context
    */
   async getCurrentUserToken(): Promise<string | null> {
     this.attempts = [];
     
     try {
-      // Najpierw próbujemy użyć istniejącego authService
-      const token = await authService.getCurrentUserToken();
-      
-      if (token) {
-        this.attempts.push({ method: 'authService.getCurrentUserToken', success: true });
-        return token;
-      } else {
-        this.attempts.push({ 
-          method: 'authService.getCurrentUserToken', 
-          success: false, 
-          error: 'Token was null' 
-        });
-      }
-
-      // Próbujemy użyć bezpośrednio Firebase Auth
-      if (auth.currentUser) {
+      // First try from authContext
+      if (this.authContext?.getToken) {
         try {
-          const firebaseToken = await auth.currentUser.getIdToken();
-          if (firebaseToken) {
-            this.attempts.push({ method: 'Firebase Auth', success: true });
-            return firebaseToken;
-          } else {
-            this.attempts.push({ 
-              method: 'Firebase Auth', 
-              success: false, 
-              error: 'Token was null' 
-            });
+          const token = await this.authContext.getToken();
+          if (token) {
+            this.attempts.push({ method: 'authContext.getToken', success: true });
+            return token;
           }
         } catch (error) {
           this.attempts.push({ 
-            method: 'Firebase Auth', 
+            method: 'authContext.getToken', 
             success: false, 
             error: error instanceof Error ? error.message : String(error) 
           });
         }
       }
-
-      // Próbujemy z appContext, jeśli dostępny
+      
+      // Then try from appContext.auth
       if (this.appContext?.authService?.getCurrentUserToken) {
         try {
-          const contextToken = await this.appContext.authService.getCurrentUserToken();
-          if (contextToken) {
+          const token = await this.appContext.authService.getCurrentUserToken();
+          if (token) {
             this.attempts.push({ method: 'appContext.authService', success: true });
-            return contextToken;
-          } else {
-            this.attempts.push({ 
-              method: 'appContext.authService', 
-              success: false, 
-              error: 'Token was null' 
-            });
+            return token;
           }
         } catch (error) {
           this.attempts.push({ 
@@ -165,19 +102,13 @@ export class PluginAuthAdapter {
         }
       }
       
-      // Próbujemy z appContext.user.getIdToken, jeśli dostępny
+      // Try from appContext.user
       if (this.appContext?.user?.getIdToken) {
         try {
-          const userToken = await this.appContext.user.getIdToken();
-          if (userToken) {
+          const token = await this.appContext.user.getIdToken();
+          if (token) {
             this.attempts.push({ method: 'appContext.user.getIdToken', success: true });
-            return userToken;
-          } else {
-            this.attempts.push({ 
-              method: 'appContext.user.getIdToken', 
-              success: false, 
-              error: 'Token was null' 
-            });
+            return token;
           }
         } catch (error) {
           this.attempts.push({ 
@@ -188,7 +119,11 @@ export class PluginAuthAdapter {
         }
       }
       
-      console.error("All authentication methods failed:", this.attempts);
+      this.attempts.push({ 
+        method: 'getCurrentUserToken', 
+        success: false, 
+        error: 'No valid token source found' 
+      });
       return null;
     } catch (error) {
       console.error("Error getting auth token:", error);
@@ -199,5 +134,19 @@ export class PluginAuthAdapter {
       });
       return null;
     }
+  }
+
+  /**
+   * Get authentication attempts history
+   */
+  getAuthAttempts(): AuthAttempt[] {
+    return this.attempts;
+  }
+
+  /**
+   * Check if the adapter is loading (always returns false in simplified version)
+   */
+  isLoading(): boolean {
+    return false;
   }
 }

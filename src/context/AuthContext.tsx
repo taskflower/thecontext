@@ -1,14 +1,18 @@
 // src/context/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { auth } from '@/firebase/config';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/firebase/config';
 import { AuthUser, authService } from '@/services/authService';
 
+// Centralized interface for auth-related data and functionality
 interface AuthContextType {
   currentUser: AuthUser | null;
   isLoading: boolean;
   signIn: () => Promise<void>;
   signOut: () => Promise<void>;
+  getToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -16,6 +20,7 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   signIn: async () => {},
   signOut: async () => {},
+  getToken: async () => null,
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -28,22 +33,50 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Fetch Firestore user data (with better error handling)
+  const fetchUserData = async (firebaseUser: FirebaseUser): Promise<AuthUser> => {
+    try {
+      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+      const userData = userDoc.exists() ? userDoc.data() : {};
+      
+      return {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email || '',
+        availableTokens: userData?.availableTokens || 0,
+        createdAt: userData?.createdAt?.toDate() || new Date(firebaseUser.metadata.creationTime || Date.now()),
+        lastLoginAt: userData?.lastLoginAt?.toDate() || new Date(firebaseUser.metadata.lastSignInTime || Date.now()),
+        name: userData?.name || '',
+        role: userData?.role || 'user'
+      };
+    } catch (error) {
+      console.error('Error fetching user data from Firestore:', error);
+      // Return basic user data if Firestore fails
+      return {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email || '',
+        availableTokens: 0,
+        createdAt: new Date(firebaseUser.metadata.creationTime || Date.now()),
+        lastLoginAt: new Date(firebaseUser.metadata.lastSignInTime || Date.now())
+      };
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setIsLoading(true);
-      if (firebaseUser) {
-        try {
-          // Get the complete user data from our backend/service
-          const userData = await authService.checkAuthStatus();
+      try {
+        if (firebaseUser) {
+          const userData = await fetchUserData(firebaseUser);
           setCurrentUser(userData);
-        } catch (error) {
-          console.error('Error fetching user data:', error);
+        } else {
           setCurrentUser(null);
         }
-      } else {
+      } catch (error) {
+        console.error('Auth state change error:', error);
         setCurrentUser(null);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     });
 
     return () => unsubscribe();
@@ -75,11 +108,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Simplified token retrieval method
+  const getToken = async (): Promise<string | null> => {
+    if (!auth.currentUser) return null;
+    
+    try {
+      return await auth.currentUser.getIdToken(true);
+    } catch (error) {
+      console.error('Error getting token:', error);
+      return null;
+    }
+  };
+
   const value = {
     currentUser,
     isLoading,
     signIn,
     signOut,
+    getToken
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

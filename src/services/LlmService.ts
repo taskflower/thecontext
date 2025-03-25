@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// src/services/LlmService.ts
 import { PluginAuthAdapter } from "./PluginAuthAdapter";
 
 export interface LlmServiceOptions {
@@ -25,39 +26,41 @@ export class LlmService {
     private authAdapter: PluginAuthAdapter, 
     private options: LlmServiceOptions = {}
   ) {
-    // Pobierz domyślny URL API z zmiennych środowiskowych - priorytetowo użyj VITE_API_URL
+    // Get default API URL from environment variables - prioritize VITE_API_URL
     this.defaultApiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
     console.log('LlmService initialized with API base URL:', this.defaultApiBaseUrl);
   }
 
   async sendRequest(params: LlmRequestParams): Promise<LlmResponse> {
     try {
-      // Pobierz token autoryzacyjny
+      // Get authorization token
       const token = await this.authAdapter.getCurrentUserToken();
       
-      // Określ URL API - zapewnij prawidłowe połączenie bazowego URL i ścieżki endpointu
+      // Determine API URL - ensure proper joining of base URL and endpoint path
       const apiBaseUrl = this.options.apiBaseUrl || this.defaultApiBaseUrl;
       const apiPath = this.options.apiUrl || this.defaultApiUrl;
       
-      // Usuń końcowy slash z baseUrl i początkowy slash z apiPath (jeśli istnieją)
+      // Normalize URL components
       const baseUrlNormalized = apiBaseUrl.endsWith('/') ? apiBaseUrl.slice(0, -1) : apiBaseUrl;
       const apiPathNormalized = apiPath.startsWith('/') ? apiPath.slice(1) : apiPath;
       
-      // Połącz części URL
+      // Join URL parts
       const apiUrl = `${baseUrlNormalized}/${apiPathNormalized}`;
       
-      console.log('Making API request to:', apiUrl, '(Base URL from env:', import.meta.env.VITE_API_URL, ')');
+      console.log('Making API request to:', apiUrl);
       
-      // Utwórz nagłówki z tokenem autoryzacyjnym, jeśli dostępny
+      // Create headers with authorization token if available
       const headers: Record<string, string> = {
         'Content-Type': 'application/json'
       };
       
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
+      } else {
+        console.warn('No auth token available for API request');
       }
       
-      // Wyślij żądanie do API
+      // Send request to API
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers,
@@ -70,7 +73,8 @@ export class LlmService {
       });
       
       if (!response.ok) {
-        throw new Error(`Server responded with status: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`Server responded with status: ${response.status}, message: ${errorText}`);
       }
       
       const data = await response.json();
