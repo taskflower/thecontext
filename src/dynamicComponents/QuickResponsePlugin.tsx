@@ -1,5 +1,4 @@
 // src/dynamicComponents/QuickResponsePlugin.tsx
-import React from "react";
 import { PluginComponentWithSchema, PluginComponentProps } from "../modules/plugins/types";
 
 interface QuickResponseData {

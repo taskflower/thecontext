@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import { PluginComponentProps } from "../modules/plugins/types";
 import { Send, Loader2 } from "lucide-react";
@@ -59,6 +60,9 @@ const ApiServicePlugin: React.FC<PluginComponentProps> = ({
   const assistantMessage =
     appContext?.currentNode?.assistantMessage || options.assistantMessage;
 
+  // Rzutowanie metod z appContext (które nie są zdefiniowane w typie)
+  const { addNodeMessage, moveToNextNode } = (appContext || {}) as any;
+
   // Load user and token when component mounts
   useEffect(() => {
     const loadAuth = async () => {
@@ -115,23 +119,23 @@ const ApiServicePlugin: React.FC<PluginComponentProps> = ({
         }
 
         // Add the API response to the conversation
-        if (appContext?.addNodeMessage) {
-          appContext.addNodeMessage(
+        if (addNodeMessage) {
+          addNodeMessage(
             currentNodeId,
             `API Response:\n\`\`\`json\n${formattedResponse}\n\`\`\``
           );
         }
 
         // Move to next node if not filling user input
-        if (!options.fillUserInput && appContext?.moveToNextNode) {
-          appContext.moveToNextNode(currentNodeId);
+        if (!options.fillUserInput && moveToNextNode) {
+          moveToNextNode(currentNodeId);
         }
       } else {
         setHasError(true);
 
         // Add warning to conversation
-        if (appContext?.addNodeMessage) {
-          appContext.addNodeMessage(
+        if (addNodeMessage) {
+          addNodeMessage(
             currentNodeId,
             "Warning: Could not extract content from API response."
           );
@@ -145,8 +149,8 @@ const ApiServicePlugin: React.FC<PluginComponentProps> = ({
       setHasError(true);
 
       // Add error to conversation
-      if (appContext?.addNodeMessage) {
-        appContext.addNodeMessage(
+      if (addNodeMessage) {
+        addNodeMessage(
           currentNodeId,
           `API Error: ${error instanceof Error ? error.message : String(error)}`
         );
@@ -171,7 +175,6 @@ const ApiServicePlugin: React.FC<PluginComponentProps> = ({
       {/* Auth Debug Information */}
       <div className="text-xs bg-gray-50 dark:bg-gray-900/30 p-3 rounded-md border border-gray-200 dark:border-gray-800">
         {/* Auth Attempts */}
-
         <strong>Authentication Attempts:</strong>
         {authAttempts.length === 0 ? (
           <div className="italic mt-1">No authentication attempts made yet</div>
