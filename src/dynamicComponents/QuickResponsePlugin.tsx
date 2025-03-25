@@ -1,8 +1,7 @@
 // src/dynamicComponents/QuickResponsePlugin.tsx
 import React from "react";
-import { PluginComponentProps } from "../modules/plugins/types";
+import { PluginComponentWithSchema, PluginComponentProps } from "../modules/plugins/types";
 
-// Define the structure of our plugin data
 interface QuickResponseData {
   responses: Array<{
     text: string;
@@ -11,7 +10,6 @@ interface QuickResponseData {
   headerText?: string;
 }
 
-// Define default values
 const defaultData: QuickResponseData = {
   responses: [
     { text: "Yes, I understand.", color: "#4ade80" },
@@ -21,11 +19,10 @@ const defaultData: QuickResponseData = {
   headerText: "Quick Responses:",
 };
 
-const QuickResponsePlugin: React.FC<PluginComponentProps> = ({
+const QuickResponsePlugin: PluginComponentWithSchema<QuickResponseData> = ({
   data,
   appContext,
-}) => {
-  // Merge provided data with defaults
+}: PluginComponentProps<QuickResponseData>) => {
   const options: QuickResponseData = {
     ...defaultData,
     ...(data as QuickResponseData),
@@ -56,12 +53,10 @@ const QuickResponsePlugin: React.FC<PluginComponentProps> = ({
   );
 };
 
-// Specify that this plugin should replace the user input section
 QuickResponsePlugin.pluginSettings = {
   replaceUserInput: true,
 };
 
-// Add options schema for the plugin editor
 QuickResponsePlugin.optionsSchema = {
   responses: {
     type: "string",

@@ -1,8 +1,7 @@
 // src/dynamicComponents/CompleteCustomUIPlugin.tsx
 import React from "react";
-import { PluginComponentProps } from "../modules/plugins/types";
+import { PluginComponentWithSchema, PluginComponentProps } from "../modules/plugins/types";
 
-// Define the structure of our plugin data
 interface CompleteCustomUIData {
   title?: string;
   steps: Array<{
@@ -11,7 +10,6 @@ interface CompleteCustomUIData {
   }>;
 }
 
-// Define default values
 const defaultData: CompleteCustomUIData = {
   title: "Complete Custom UI",
   steps: [
@@ -26,41 +24,32 @@ const defaultData: CompleteCustomUIData = {
   ],
 };
 
-const CompleteCustomUIPlugin: React.FC<PluginComponentProps> = ({
+const CompleteCustomUIPlugin: PluginComponentWithSchema<CompleteCustomUIData> = ({
   data,
   appContext,
-}) => {
-  // Merge provided data with defaults
+}: PluginComponentProps<CompleteCustomUIData>) => {
   const options: CompleteCustomUIData = {
     ...defaultData,
     ...(data as CompleteCustomUIData),
   };
 
-  // Local state for the current active step
   const [activeStep, setActiveStep] = React.useState(0);
-  
-  // Get the current node data
   const nodeId = appContext?.currentNode?.id;
   const currentUserPrompt = appContext?.currentNode?.userPrompt || "";
-  
-  // Handler for moving to the next step
+
   const handleNext = () => {
     if (activeStep < options.steps.length - 1) {
       setActiveStep(activeStep + 1);
-      
-      // Save the active step in user prompt (for demonstration)
       if (nodeId && appContext?.updateNodeUserPrompt) {
         appContext.updateNodeUserPrompt(nodeId, `Completed step ${activeStep + 1}`);
       }
     } else {
-      // Handle completing all steps
       if (nodeId && appContext?.updateNodeUserPrompt) {
         appContext.updateNodeUserPrompt(nodeId, "All steps completed");
       }
     }
   };
-  
-  // Handler for moving to the previous step
+
   const handleBack = () => {
     if (activeStep > 0) {
       setActiveStep(activeStep - 1);
@@ -69,22 +58,19 @@ const CompleteCustomUIPlugin: React.FC<PluginComponentProps> = ({
 
   return (
     <div className="space-y-4 p-2">
-      {/* Custom header */}
+      {/* Nagłówek */}
       <div className="flex items-center justify-between border-b pb-3 mb-4">
         <h2 className="text-xl font-bold">{options.title}</h2>
         <div className="text-sm text-muted-foreground">
           Step {activeStep + 1} of {options.steps.length}
         </div>
       </div>
-      
-      {/* Steps progress */}
+
+      {/* Pasek postępu */}
       <div className="flex mb-6">
         {options.steps.map((step, index) => (
-          <div 
-            key={index} 
-            className="flex-1"
-          >
-            <div 
+          <div key={index} className="flex-1">
+            <div
               className={`h-2 ${
                 index <= activeStep ? "bg-primary" : "bg-muted"
               } ${index === 0 ? "rounded-l-full" : ""} ${
@@ -95,14 +81,14 @@ const CompleteCustomUIPlugin: React.FC<PluginComponentProps> = ({
           </div>
         ))}
       </div>
-      
-      {/* Current step content */}
+
+      {/* Treść kroku */}
       <div className="bg-muted/20 p-4 rounded-lg">
         <h3 className="font-medium mb-2">{options.steps[activeStep].title}</h3>
         <p>{options.steps[activeStep].content}</p>
       </div>
-      
-      {/* Navigation */}
+
+      {/* Nawigacja */}
       <div className="flex justify-between pt-4">
         <button
           onClick={handleBack}
@@ -118,8 +104,8 @@ const CompleteCustomUIPlugin: React.FC<PluginComponentProps> = ({
           {activeStep === options.steps.length - 1 ? "Finish" : "Next"}
         </button>
       </div>
-      
-      {/* Debug information */}
+
+      {/* Informacje debug */}
       <div className="mt-6 text-xs text-muted-foreground">
         <div>Current user prompt: {currentUserPrompt}</div>
         <div>Node ID: {nodeId || "None"}</div>
@@ -128,14 +114,13 @@ const CompleteCustomUIPlugin: React.FC<PluginComponentProps> = ({
   );
 };
 
-// Specify that this plugin replaces all UI sections
+// Dodajemy statyczne właściwości do pluginu
 CompleteCustomUIPlugin.pluginSettings = {
   replaceHeader: true,
   replaceAssistantView: true,
   replaceUserInput: true,
 };
 
-// Add options schema for the plugin editor
 CompleteCustomUIPlugin.optionsSchema = {
   title: {
     type: "string",

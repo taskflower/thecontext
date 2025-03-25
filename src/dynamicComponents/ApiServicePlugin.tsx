@@ -48,7 +48,7 @@ const ApiServicePlugin: React.FC<PluginComponentProps> = ({
   const [apiResponse, setApiResponse] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
-  const [authToken, setAuthToken] = useState<string | null>(null);
+  const [, setAuthToken] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [authAttempts, setAuthAttempts] = useState(
     authAdapter.getAuthAttempts()

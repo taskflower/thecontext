@@ -1,38 +1,45 @@
 // src/modules/plugins/types.ts
 import { ComponentType } from "react";
 
-// Plugin component props
+// Props przekazywane do każdego pluginu
 export interface PluginComponentProps<T = unknown> {
   data: T | null;
   appContext: AppContextData;
   
-  // Plugin UI replacement capabilities
+  // Opcjonalne zastąpienie UI
   replaceHeader?: boolean;
   replaceAssistantView?: boolean;
   replaceUserInput?: boolean;
 }
 
-// Static plugin settings (to be attached to the component)
+// Statyczne ustawienia pluginu
 export interface PluginSettings {
   replaceHeader?: boolean;
   replaceAssistantView?: boolean;
   replaceUserInput?: boolean;
 }
 
-// Plugin component with options schema and settings
-export interface PluginComponentWithSchema<T = unknown>
-  extends React.FC<PluginComponentProps<T>> {
+// Schemat opcji pluginu
+export interface PluginOptionSchema {
+  type: "string" | "number" | "boolean" | "color";
+  label?: string;
+  description?: string;
+  default: unknown;
+}
+
+// Rozszerzony typ komponentu dla pluginu, który zawiera dodatkowe statyczne właściwości
+export interface PluginComponentWithSchema<T = unknown> extends React.FC<PluginComponentProps<T>> {
   optionsSchema?: Record<string, PluginOptionSchema>;
   pluginSettings?: PluginSettings;
 }
 
-// Plugin state
+// Definicja stanu pluginu (np. czy jest włączony)
 export interface Plugin {
   key: string;
   enabled: boolean;
 }
 
-// Application context data passed to plugins
+// Dane kontekstu aplikacji przekazywane do pluginów
 export interface AppContextData {
   currentWorkspace: WorkspaceData | null;
   currentScenario: ScenarioData | null;
@@ -43,12 +50,13 @@ export interface AppContextData {
     nodeId: string;
   };
   stateVersion: number;
-  // Add the update functions that are used in wrappers
+  
+  // Funkcje aktualizujące komunikaty węzłów (opcjonalnie)
   updateNodeUserPrompt?: (nodeId: string, prompt: string) => void;
   updateNodeAssistantMessage?: (nodeId: string, message: string) => void;
 }
 
-// Dynamic component store interface
+// Interfejs dla dynamicznego store'u komponentów
 export interface DynamicComponentStore {
   components: Record<string, ComponentType<PluginComponentProps>>;
   componentData: Record<string, unknown>;
@@ -64,15 +72,7 @@ export interface DynamicComponentStore {
   getComponent: (key: string) => ComponentType<PluginComponentProps> | null;
 }
 
-// Schema for plugin options
-export interface PluginOptionSchema {
-  type: "string" | "number" | "boolean" | "color";
-  label?: string;
-  description?: string;
-  default: unknown;
-}
-
-// App store augmentation for wrapper components
+// Rozszerzenie stanu aplikacji, który może być używany w wrapperach
 export interface AppState {
   selected: {
     node: string;
@@ -83,7 +83,7 @@ export interface AppState {
   updateNodeAssistantMessage: (nodeId: string, message: string) => void;
 }
 
-// These types should match your app's data structures
+// Typy odpowiadające strukturom danych aplikacji
 export interface WorkspaceData {
   id: string;
   name: string;
@@ -109,7 +109,7 @@ export interface NodeData {
   [key: string]: unknown;
 }
 
-// Props interface for PluginPreviewWrapper
+// Props dla komponentu PluginPreviewWrapper
 export interface PluginPreviewWrapperProps {
   componentKey: string;
   customData?: unknown;
@@ -118,4 +118,5 @@ export interface PluginPreviewWrapperProps {
   className?: string;
 }
 
+// Mapowanie danych pluginów
 export type PluginDataMap = Record<string, unknown>;

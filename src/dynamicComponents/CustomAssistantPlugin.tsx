@@ -1,55 +1,53 @@
 // src/dynamicComponents/CustomAssistantPlugin.tsx
-import React from "react";
-import { PluginComponentProps } from "../modules/plugins/types";
+import { PluginComponentWithSchema, PluginComponentProps } from "../modules/plugins/types";
 
-// Define the structure of our plugin data
 interface CustomAssistantData {
   backgroundColor: string;
   borderColor: string;
   headerText?: string;
 }
 
-// Define default values
 const defaultData: CustomAssistantData = {
   backgroundColor: "#f3f4f6",
   borderColor: "#4ade80",
   headerText: "Custom Assistant Output",
 };
 
-const CustomAssistantPlugin: React.FC<PluginComponentProps> = ({
+const CustomAssistantPlugin: PluginComponentWithSchema<CustomAssistantData> = ({
   data,
   appContext,
-}) => {
-  // Merge provided data with defaults
+}: PluginComponentProps<CustomAssistantData>) => {
   const options: CustomAssistantData = {
     ...defaultData,
     ...(data as CustomAssistantData),
   };
 
-  const messageContent = appContext?.currentNode?.assistantMessage || "No message available";
+  const messageContent =
+    appContext?.currentNode?.assistantMessage || "No message available";
 
   return (
     <div className="mb-6">
-      <div 
+      <div
         className="rounded-lg p-4"
         style={{
           backgroundColor: options.backgroundColor,
-          borderLeft: `4px solid ${options.borderColor}`
+          borderLeft: `4px solid ${options.borderColor}`,
         }}
       >
         <h3 className="text-sm font-medium mb-2">{options.headerText}</h3>
-        <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: messageContent }} />
+        <div
+          className="prose prose-sm max-w-none"
+          dangerouslySetInnerHTML={{ __html: messageContent }}
+        />
       </div>
     </div>
   );
 };
 
-// Specify that this plugin should replace the assistant view
 CustomAssistantPlugin.pluginSettings = {
   replaceAssistantView: true,
 };
 
-// Add options schema for the plugin editor
 CustomAssistantPlugin.optionsSchema = {
   backgroundColor: {
     type: "color",
