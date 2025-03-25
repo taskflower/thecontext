@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useEffect } from "react";
-import { PluginComponentProps } from "../modules/plugins/types";
+import { useState, useEffect } from "react";
+import {  PluginComponentWithSchema } from "../modules/plugins/types";
 import { Send, Loader2 } from "lucide-react";
 
 import { PluginAuthAdapter } from "../services/PluginAuthAdapter";
@@ -15,7 +15,7 @@ interface ApiServiceData {
   apiUrl?: string;
 }
 
-const ApiServicePlugin: React.FC<PluginComponentProps> = ({
+const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
   data,
   appContext,
 }) => {
