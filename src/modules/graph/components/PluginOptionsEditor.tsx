@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
 import { X, Save, RotateCcw } from 'lucide-react';
 import { useAppStore } from '../../store';

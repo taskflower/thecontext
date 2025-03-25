@@ -58,6 +58,7 @@ export interface Edge extends BaseItem {
 export interface EdgeActions {
   addEdge: (payload: EdgePayload) => void;
   deleteEdge: (edgeId: string) => void;
+  updateEdgeLabel: (edgeId: string, label: string) => void;
 }
 
 export interface EdgePayload {

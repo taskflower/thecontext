@@ -53,4 +53,21 @@ export const createEdgeSlice: StateCreator<
         }
       }
     }),
+    
+  updateEdgeLabel: (edgeId: string, label: string) =>
+    set((state: Draft<AppState>) => {
+      const workspace = state.items.find(
+        (w) => w.id === state.selected.workspace
+      );
+      const scenario = workspace?.children.find(
+        (s) => s.id === state.selected.scenario
+      );
+      if (scenario?.edges) {
+        const edge = scenario.edges.find((e) => e.id === edgeId);
+        if (edge) {
+          edge.label = label;
+          state.stateVersion++;
+        }
+      }
+    }),
 });

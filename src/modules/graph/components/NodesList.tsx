@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { PlusCircle, MoreHorizontal, X, Box, Square, Puzzle, CheckCircle, Settings, Sliders, Edit } from "lucide-react";
 import { useAppStore } from "../../store";
 import { FlowNode } from "../types";
-import { useDialogState } from "../../common/hooks";
 import { cn } from "@/utils/utils";
 import useDynamicComponentStore from "../../plugins/pluginsStore";
 import PluginOptionsEditor from "./PluginOptionsEditor";
-import NodeEditorDialog from "./NodeEditorDialog";
+import AddNewNode from "./AddNewNode";
+import EditNode from "./EditNode";
 
 
 const NodesList: React.FC = () => {
@@ -21,34 +21,23 @@ const NodesList: React.FC = () => {
   const nodes = scenario?.children || [];
   
   const selectNode = useAppStore((state) => state.selectNode);
-  const addNode = useAppStore((state) => state.addNode);
   const deleteNode = useAppStore((state) => state.deleteNode);
   
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [nodeToEdit, setNodeToEdit] = useState<string>("");
   const [configurePluginForNodeId, setConfigurePluginForNodeId] = useState<string | null>(null);
   const [editPluginOptionsForNodeId, setEditPluginOptionsForNodeId] = useState<string | null>(null);
-  const [editNodeId, setEditNodeId] = useState<string | null>(null);
-  
-  const { isOpen, formData, openDialog, handleChange, setIsOpen } = useDialogState<{
-    label: string;
-    value: string;
-  }>({
-    label: "",
-    value: "",
-  });
-  
-  const handleAddNode = () => {
-    if (!formData.label.trim()) return;
-    addNode({
-      label: formData.label,
-      assistantMessage: formData.value || "",
-      userPrompt: "",
-    });
-    setIsOpen(false);
-  };
   
   const toggleMenu = (id: string) => {
     setMenuOpen(menuOpen === id ? null : id);
+  };
+  
+  const handleEditNode = (id: string) => {
+    setNodeToEdit(id);
+    setIsEditDialogOpen(true);
+    setMenuOpen(null);
   };
   
   const handleConfigurePlugin = (nodeId: string) => {
@@ -58,11 +47,6 @@ const NodesList: React.FC = () => {
   
   const handleEditPluginOptions = (nodeId: string) => {
     setEditPluginOptionsForNodeId(nodeId);
-    setMenuOpen(null);
-  };
-  
-  const handleEditNode = (nodeId: string) => {
-    setEditNodeId(nodeId);
     setMenuOpen(null);
   };
   
@@ -86,7 +70,7 @@ const NodesList: React.FC = () => {
           )}
         </div>
         <button
-          onClick={() => openDialog()}
+          onClick={() => setIsAddDialogOpen(true)}
           className="w-8 h-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
           aria-label="Add node"
         >
@@ -120,66 +104,15 @@ const NodesList: React.FC = () => {
         )}
       </div>
       
-      {/* Add Node Dialog */}
-      {isOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setIsOpen(false)}>
-          <div className="bg-background border border-border rounded-lg shadow-lg w-full max-w-md p-4" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium">Add Node</h3>
-              <button onClick={() => setIsOpen(false)} className="text-muted-foreground hover:text-foreground">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="label" className="block text-sm font-medium mb-1">
-                  Label
-                </label>
-                <input
-                  type="text"
-                  id="label"
-                  name="label"
-                  value={formData.label}
-                  onChange={handleChange}
-                  placeholder="Enter node label"
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="value" className="block text-sm font-medium mb-1">
-                  Value
-                </label>
-                <input
-                  type="number"
-                  id="value"
-                  name="value"
-                  value={formData.value}
-                  onChange={handleChange}
-                  placeholder="Enter node value"
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
-              </div>
-              
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="px-4 py-2 text-sm border border-border rounded-md hover:bg-muted"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleAddNode}
-                  className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-                >
-                  Add Node
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Add New Node Dialog */}
+      <AddNewNode isOpen={isAddDialogOpen} setIsOpen={setIsAddDialogOpen} />
+      
+      {/* Edit Node Dialog */}
+      <EditNode
+        isOpen={isEditDialogOpen}
+        setIsOpen={setIsEditDialogOpen}
+        nodeId={nodeToEdit}
+      />
       
       {/* Plugin Configure Dialog */}
       {configurePluginForNodeId && (
@@ -194,14 +127,6 @@ const NodesList: React.FC = () => {
         <PluginOptionsEditor
           nodeId={editPluginOptionsForNodeId}
           onClose={() => setEditPluginOptionsForNodeId(null)}
-        />
-      )}
-      
-      {/* Node Editor Dialog */}
-      {editNodeId && (
-        <NodeEditorDialog
-          nodeId={editNodeId}
-          onClose={() => setEditNodeId(null)}
         />
       )}
     </div>
@@ -358,11 +283,11 @@ const SimplePluginDialog = ({ nodeId, onClose }: { nodeId: string, onClose: () =
   const pluginKeys = useDynamicComponentStore.getState().getComponentKeys();
   
   const handleSelect = (pluginKey: string | null) => {
-    // Jeśli usuwamy plugin, przekazujemy null
+    // If removing plugin, pass null
     if (pluginKey === null) {
       useAppStore.getState().setNodePlugin(nodeId, null);
     } else {
-      // Przy dodawaniu pluginu możemy zainicjować dane domyślne
+      // When adding plugin we can initialize default data
       useAppStore.getState().setNodePlugin(nodeId, pluginKey, {});
     }
     onClose();
