@@ -20,6 +20,7 @@ export const createNodeSlice: StateCreator<
     assistantMessage: string;
     userPrompt?: string;
     position?: { x: number; y: number };
+    contextKey?: string;
   }) =>
     set((state: Draft<AppState>) => {
       const newNode: FlowNode = {
@@ -29,6 +30,7 @@ export const createNodeSlice: StateCreator<
         assistantMessage: payload.assistantMessage,
         userPrompt: payload.userPrompt || "",
         position: payload.position || { x: 100, y: 100 },
+        contextKey: payload.contextKey,
       };
 
       const workspace = state.items.find(
@@ -86,7 +88,7 @@ export const createNodeSlice: StateCreator<
       }
     }),
     
-  // New method to update node label
+  // Method to update node label
   updateNodeLabel: (nodeId: string, label: string) =>
     set((state: Draft<AppState>) => {
       const workspace = state.items.find(
@@ -102,7 +104,7 @@ export const createNodeSlice: StateCreator<
       }
     }),
 
-  // New method to update node user prompt
+  // Method to update node user prompt
   updateNodeUserPrompt: (nodeId: string, prompt: string) =>
     set((state: Draft<AppState>) => {
       const workspace = state.items.find(
@@ -118,7 +120,7 @@ export const createNodeSlice: StateCreator<
       }
     }),
 
-  // New method to update node assistant message
+  // Method to update node assistant message
   updateNodeAssistantMessage: (nodeId: string, message: string) =>
     set((state: Draft<AppState>) => {
       const workspace = state.items.find(
@@ -130,6 +132,27 @@ export const createNodeSlice: StateCreator<
       const node = scenario?.children.find((n) => n.id === nodeId);
       if (node) {
         node.assistantMessage = message;
+        state.stateVersion++;
+      }
+    }),
+
+  // Method to update node context key
+  updateNodeContextKey: (nodeId: string, contextKey: string) =>
+    set((state: Draft<AppState>) => {
+      const workspace = state.items.find(
+        (w) => w.id === state.selected.workspace
+      );
+      const scenario = workspace?.children.find(
+        (s) => s.id === state.selected.scenario
+      );
+      const node = scenario?.children.find((n) => n.id === nodeId);
+      if (node) {
+        if (contextKey === "") {
+          // If empty string, remove the property
+          delete node.contextKey;
+        } else {
+          node.contextKey = contextKey;
+        }
         state.stateVersion++;
       }
     }),

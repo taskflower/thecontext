@@ -24,10 +24,13 @@ const EditNode: React.FC<EditNodeProps> = ({
     label: "",
     userPrompt: "",
     assistantMessage: "",
+    contextKey: "", // Add contextKey to formData
   });
 
   // Get necessary state and actions
   const state = useAppStore();
+  const getContextItems = useAppStore((state) => state.getContextItems);
+  const contextItems = getContextItems();
   const workspace = state.items.find(w => w.id === state.selected.workspace);
   const scenario = workspace?.children.find(s => s.id === state.selected.scenario);
   const node = scenario?.children.find(n => n.id === nodeId);
@@ -39,12 +42,13 @@ const EditNode: React.FC<EditNodeProps> = ({
         label: node.label || "",
         userPrompt: node.userPrompt || "",
         assistantMessage: node.assistantMessage || "",
+        contextKey: node.contextKey || "", // Load contextKey from node
       });
     }
   }, [isOpen, nodeId, node]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -61,6 +65,7 @@ const EditNode: React.FC<EditNodeProps> = ({
     updateNode.updateNodeLabel(nodeId, formData.label);
     updateNode.updateNodeUserPrompt(nodeId, formData.userPrompt);
     updateNode.updateNodeAssistantMessage(nodeId, formData.assistantMessage);
+    updateNode.updateNodeContextKey(nodeId, formData.contextKey); // Update contextKey
     
     setIsOpen(false);
   };
@@ -90,6 +95,29 @@ const EditNode: React.FC<EditNodeProps> = ({
         onChange={handleChange}
         placeholder="Node label"
       />
+
+      <div className="mb-4">
+        <label htmlFor="contextKey" className="block text-sm font-medium mb-1">
+          Context Key
+        </label>
+        <select
+          id="contextKey"
+          name="contextKey"
+          value={formData.contextKey}
+          onChange={handleChange}
+          className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+        >
+          <option value="">No context</option>
+          {contextItems.map((item) => (
+            <option key={item.id} value={item.title}>
+              {item.title}
+            </option>
+          ))}
+        </select>
+        <p className="text-xs text-muted-foreground mt-1">
+          Associate this node with a context item
+        </p>
+      </div>
 
       <TextAreaField
         id="userPrompt"

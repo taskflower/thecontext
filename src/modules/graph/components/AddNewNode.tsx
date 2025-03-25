@@ -19,15 +19,18 @@ const AddNewNode: React.FC<AddNewNodeProps> = ({
   setIsOpen,
 }) => {
   const addNode = useAppStore((state) => state.addNode);
+  const getContextItems = useAppStore((state) => state.getContextItems);
+  const contextItems = getContextItems();
 
   const [formData, setFormData] = useState({
     label: "",
     assistantMessage: "",
     userPrompt: "",
+    contextKey: "", // Add contextKey to formData
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -42,8 +45,9 @@ const AddNewNode: React.FC<AddNewNodeProps> = ({
       label: formData.label,
       assistantMessage: formData.assistantMessage,
       userPrompt: formData.userPrompt,
+      contextKey: formData.contextKey || undefined, // Add contextKey to node data
     });
-    setFormData({ label: "", assistantMessage: "", userPrompt: "" });
+    setFormData({ label: "", assistantMessage: "", userPrompt: "", contextKey: "" });
     setIsOpen(false);
   };
 
@@ -72,6 +76,29 @@ const AddNewNode: React.FC<AddNewNodeProps> = ({
         onChange={handleChange}
         placeholder="Node label"
       />
+
+      <div className="mb-4">
+        <label htmlFor="contextKey" className="block text-sm font-medium mb-1">
+          Context Key
+        </label>
+        <select
+          id="contextKey"
+          name="contextKey"
+          value={formData.contextKey}
+          onChange={handleChange}
+          className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+        >
+          <option value="">No context</option>
+          {contextItems.map((item) => (
+            <option key={item.id} value={item.title}>
+              {item.title}
+            </option>
+          ))}
+        </select>
+        <p className="text-xs text-muted-foreground mt-1">
+          Associate this node with a context item
+        </p>
+      </div>
 
       <TextAreaField
         id="userPrompt"
