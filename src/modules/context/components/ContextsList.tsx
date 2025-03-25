@@ -120,14 +120,17 @@ const ContextItemComponent: React.FC<ContextItemProps> = ({
 }) => {
   return (
     <li className="group flex items-center justify-between px-2 py-2 rounded-md hover:bg-muted/50">
-      <button className="flex items-center flex-1 min-w-0 text-left">
+      <div className="flex items-center min-w-0 flex-1">
         <div className="mr-2">
           <FileText className="h-4 w-4" />
         </div>
-        <span className="truncate text-sm font-medium">{item.title}</span>
-      </button>
+        <div className="flex items-center min-w-0 flex-1">
+          <span className="font-medium text-sm mr-2">{item.title}:</span>
+          <span className="text-sm text-muted-foreground truncate">{item.content || "(No content)"}</span>
+        </div>
+      </div>
 
-      <div className="relative">
+      <div className="relative flex-shrink-0 ml-2">
         <button
           onClick={(e) => {
             e.stopPropagation();
