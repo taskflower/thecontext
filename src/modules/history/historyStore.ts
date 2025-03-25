@@ -2,7 +2,15 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { v4 as uuidv4 } from "uuid";
-import { BaseNode } from "../flow/types";
+
+// Create a local interface instead of importing BaseNode
+interface FlowNode {
+  id: string;
+  label: string;
+  assistantMessage?: string;
+  userPrompt?: string;
+  pluginKey?: string | null;
+}
 
 export interface ConversationHistoryEntry {
   id: string;
@@ -24,7 +32,7 @@ export interface HistoryState {
   conversations: ConversationHistoryEntry[];
   
   // Actions
-  saveConversation: (scenarioId: string, scenarioName: string, steps: BaseNode[]) => string;
+  saveConversation: (scenarioId: string, scenarioName: string, steps: FlowNode[]) => string;
   getConversation: (historyId: string) => ConversationHistoryEntry | undefined;
   deleteConversation: (historyId: string) => void;
   clearHistory: () => void;
