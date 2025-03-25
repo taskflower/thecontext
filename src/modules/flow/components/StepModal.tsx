@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import StepPluginWrapper from "@/modules/plugins/wrappers/StepPluginWrapper";
 import { StepModalProps } from "../types";
 import { Puzzle} from "lucide-react";
@@ -11,10 +11,14 @@ import {
   DefaultUserInput,
   NavigationButtons
 } from "./DefaultComponents";
+import { processTemplateWithItems } from "@/modules/context/utils";
 
 export const StepModal: React.FC<StepModalProps> = ({ onClose }) => {
   // Get our plugin context to access plugin components
   const { getPluginComponent } = usePlugins();
+  
+  // Pobierz konteksty bezpośrednio ze store
+  const contextItems = useAppStore(state => state.getContextItems());
   
   // Pobierz dane z tymczasowej sesji flow
   const currentStepIndex = useAppStore(state => state.flowSession?.currentStepIndex || 0);
@@ -23,12 +27,19 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose }) => {
   const prevStep = useAppStore(state => state.prevStep);
   const stopFlowSession = useAppStore(state => state.stopFlowSession);
   const updateTempNodeUserPrompt = useAppStore(state => state.updateTempNodeUserPrompt);
+  const updateTempNodeAssistantMessage = useAppStore(state => state.updateTempNodeAssistantMessage);
   
   const currentNode = temporarySteps[currentStepIndex];
   const isLastStep = currentStepIndex === temporarySteps.length - 1;
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSavePrompt, setShowSavePrompt] = useState(false);
+  
+  // Przetwarzanie wiadomości asystenta z tokenami
+  const processedMessage = useMemo(() => {
+    if (!currentNode?.assistantMessage) return '';
+    return processTemplateWithItems(currentNode.assistantMessage, contextItems);
+  }, [currentNode?.assistantMessage, contextItems]);
   
   // Aktualizacja wartości w tymczasowej kopii
   const handleInputChange = (value: string) => {
@@ -39,8 +50,24 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose }) => {
 
   // Funkcja zamykająca z zapisem lub bez
   const handleClose = (saveChanges = false) => {
-    stopFlowSession(saveChanges);
-    onClose();
+    if (saveChanges) {
+      // Przed zapisem, zastąp wszystkie tokeny ich wartościami w każdym węźle
+      temporarySteps.forEach(node => {
+        if (node.id && node.assistantMessage) {
+          const processed = processTemplateWithItems(node.assistantMessage, contextItems);
+          updateTempNodeAssistantMessage(node.id, processed);
+        }
+      });
+      
+      // Krótkie opóźnienie, aby zmiany zostały zastosowane przed zapisem
+      setTimeout(() => {
+        stopFlowSession(true);
+        onClose();
+      }, 50);
+    } else {
+      stopFlowSession(false);
+      onClose();
+    }
   };
 
   // Obsługa nawigacji
@@ -121,9 +148,11 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose }) => {
         )}
 
         <div className="p-6">
-          {/* Assistant message - conditionally render based on plugin settings */}
+          {/* Użyj przetworzonej wiadomości asystenta */}
           {!pluginSettings.replaceAssistantView && (
-            <DefaultAssistantMessage message={currentNode.assistantMessage} />
+            <DefaultAssistantMessage 
+              message={processedMessage} 
+            />
           )}
 
           {/* Plugin section - always render if a plugin is associated */}
@@ -137,7 +166,11 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose }) => {
               )}
               <StepPluginWrapper
                 componentKey={currentNode.pluginKey}
-                nodeData={currentNode}
+                nodeData={{
+                  ...currentNode,
+                  // Przekaż przetworzoną wiadomość do pluginu
+                  assistantMessage: processedMessage
+                }}
               />
             </div>
           )}

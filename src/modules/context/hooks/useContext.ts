@@ -1,6 +1,7 @@
 // src/modules/context/hooks/useContext.ts
 import { useAppStore } from "@/modules/store";
 import { ContextItem } from "../types";
+import { processTemplateWithItems } from "../utils";
 
 // Define proper dialog state typing
 export interface DialogState<T> {
@@ -64,18 +65,10 @@ export function useWorkspaceContext() {
     deleteItem: (id: string) => deleteContextItem(id),
     
     // Process templates by replacing {{title}} tokens with content values
+    // Teraz wykorzystuje wspólną funkcję z utils.ts
     processTemplate: (template: string): string => {
-      if (!template) return '';
-      
       const items = getContextItems();
-      let result = template;
-      
-      items.forEach(item => {
-        const tokenPattern = new RegExp(`{{${item.title}}}`, 'g');
-        result = result.replace(tokenPattern, item.content);
-      });
-      
-      return result;
+      return processTemplateWithItems(template, items);
     }
   };
 }
