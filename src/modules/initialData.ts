@@ -77,7 +77,9 @@ export const getInitialData = (): Partial<AppState> => {
               }
             ]
           }
-        ]
+        ],
+        description: "",
+        slug: ""
       }
     ],
     selected: {
