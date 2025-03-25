@@ -3,6 +3,7 @@ import { Focus, PanelLeft, Sun, Moon } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/utils/utils";
 import { AuthButton } from "./AuthButton";
+import { Link } from "react-router-dom";
 
 interface HeaderProps {
   showLeftPanel: boolean;
@@ -17,7 +18,7 @@ export const Header: React.FC<HeaderProps> = ({ showLeftPanel, toggleLeftPanel }
       <div className="flex items-center gap-3">
         <h1 className="text-xs font-semibold flex items-center">
           <Focus className="mr-2 h-4 w-4 text-primary" />
-          <span>Deep Context Studio</span>
+          <Link to="/">Deep Context Studio</Link>
         </h1>
       </div>
       <div className="flex items-center gap-3">
