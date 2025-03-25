@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { PlusCircle, MoreHorizontal, X, Box, Square, Puzzle, CheckCircle, Settings, Sliders, Edit } from "lucide-react";
+import { PlusCircle, MoreHorizontal, X, Box, Square, Puzzle, CheckCircle,  Sliders, Edit } from "lucide-react";
 import { useAppStore } from "../../store";
 import { FlowNode } from "../types";
 import { cn } from "@/utils/utils";
@@ -233,8 +233,8 @@ const NodeItem: React.FC<NodeItemProps> = ({
               }}
               className="w-full text-left px-3 py-2 text-sm hover:bg-muted flex items-center"
             >
-              <Settings className="h-4 w-4 mr-2" />
-              Configure Plugin
+              <Puzzle className="h-4 w-4 mr-2" />
+              Set Plugin
             </button>
             
             {node.pluginKey && (
