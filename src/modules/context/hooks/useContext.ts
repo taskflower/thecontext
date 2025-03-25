@@ -1,79 +1,72 @@
 // src/modules/context/hooks/useContext.ts
-
 import { useAppStore } from "@/modules/store";
+import { ContextItem } from "../types";
+
+// Define proper dialog state typing
+export interface DialogState<T> {
+  isOpen: boolean;
+  formData: T;
+  openDialog: () => void;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  setIsOpen: (isOpen: boolean) => void;
+}
 
 export function useWorkspaceContext() {
-  const selected = useAppStore(state => state.selected);
-  const getContextValue = useAppStore(state => state.getContextValue);
   const getContextItems = useAppStore(state => state.getContextItems);
   const addContextItem = useAppStore(state => state.addContextItem);
   const updateContextItem = useAppStore(state => state.updateContextItem);
   const deleteContextItem = useAppStore(state => state.deleteContextItem);
   
-  const workspaceId = selected.workspace;
-  
   return {
-    getValue: (key: string) => getContextValue(workspaceId, key)(useAppStore.getState()),
+    // Get all context items
+    getAllItems: () => getContextItems(),
     
-    getJsonValue: (key: string) => {
-      const value = getContextValue(workspaceId, key)(useAppStore.getState());
+    // Get item by title
+    getItemByTitle: (title: string): ContextItem | undefined => {
+      const items = getContextItems();
+      return items.find(item => item.title === title);
+    },
+    
+    // Get content value by title
+    getContentValue: (title: string): string | null => {
+      const item = this.getItemByTitle(title);
+      return item ? item.content : null;
+    },
+    
+    // Get JSON content by title (if the content is JSON)
+    getJsonValue: (title: string) => {
+      const value = this.getContentValue(title);
       if (!value) return null;
       
       try {
         return JSON.parse(value);
       } catch (e) {
-        console.error(`Error parsing JSON for key ${key}:`, e);
+        console.error(`Error parsing JSON for title ${title}:`, e);
         return null;
       }
     },
+    
+    // Add a new context item
+    addItem: (title: string, content: string) => 
+      addContextItem({ title, content }),
+    
+    // Update an existing context item
+    updateItem: (id: string, data: { title?: string; content?: string }) => 
+      updateContextItem(id, data),
 
-    getAllItems: () => getContextItems(workspaceId)(useAppStore.getState()),
+    // Delete a context item
+    deleteItem: (id: string) => deleteContextItem(id),
     
-    addItem: (key: string, value: string, valueType: 'text' | 'json' = 'text') => 
-      addContextItem(workspaceId, { key, value, valueType }),
-    
-    updateItem: (key: string, value: string, valueType?: 'text' | 'json') => {
-      const items = getContextItems(workspaceId)(useAppStore.getState());
-      const item = items.find(i => i.key === key);
-      
-      if (item) {
-        updateContextItem(
-          workspaceId, 
-          key, 
-          value, 
-          valueType || item.valueType
-        );
-        return true;
-      }
-      return false;
-    },
-
-    deleteItem: (key: string) => deleteContextItem(workspaceId, key),
-    
+    // Process templates by replacing {{title}} tokens with content values
     processTemplate: (template: string): string => {
       if (!template) return '';
       
-      const items = getContextItems(workspaceId)(useAppStore.getState());
-      
+      const items = getContextItems();
       let result = template;
+      
       items.forEach(item => {
-        const tokenPattern = new RegExp(`{{${item.key}}}`, 'g');
-        
-        if (item.valueType === 'text') {
-          result = result.replace(tokenPattern, item.value);
-        } else if (item.valueType === 'json') {
-          try {
-            const parsedValue = JSON.parse(item.value);
-            result = result.replace(
-              tokenPattern, 
-              typeof parsedValue === 'object' 
-                ? JSON.stringify(parsedValue) 
-                : String(parsedValue)
-            );
-          } catch (e) {
-            console.error(`Error parsing JSON for key ${item.key}:`, e);
-          }
-        }
+        const tokenPattern = new RegExp(`{{${item.title}}}`, 'g');
+        result = result.replace(tokenPattern, item.content);
       });
       
       return result;
