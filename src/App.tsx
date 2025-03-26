@@ -4,7 +4,8 @@ import { BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import Studio from "./pages/StudioLayout";
 import WorkspacePage from "./pages/WorkspacePage";
 import { AuthProvider } from "./context/AuthContext";
-import PaymentSuccessPage from "./components/studio/PaymentSuccessPage";
+import PaymentSuccessPage from "./pages/PaymentSuccessPage";
+
 
 
 function App() {

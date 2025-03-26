@@ -1,9 +1,9 @@
 // components/BottomToolbar.tsx
-import { Database, Filter, MessageSquare, Puzzle } from "lucide-react";
+import { Database, Filter, MessageSquare, Puzzle, FileJson } from "lucide-react";
 import { ToolbarButton } from "./ToolbarButton";
 import React from "react";
 
-type PanelContentType = "context" | "filters" | "conversation" | "plugins" | "";
+type PanelContentType = "context" | "filters" | "conversation" | "plugins" | "exportimport" | "";
 
 interface BottomToolbarProps {
   activeContent: PanelContentType;
@@ -37,6 +37,12 @@ export const BottomToolbar: React.FC<BottomToolbarProps> = ({ activeContent, onS
           label="Plugins"
           active={activeContent === "plugins"}
           onClick={() => onSelectContent("plugins")}
+        />
+        <ToolbarButton
+          icon={<FileJson className="h-4 w-4" />}
+          label="Export/Import"
+          active={activeContent === "exportimport"}
+          onClick={() => onSelectContent("exportimport")}
         />
       </div>
     </div>

@@ -3,22 +3,11 @@
 import React, { useState } from "react";
 
 import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogFooter,
-  DialogDescription 
-} from "@/components/ui/dialog";
-import { 
   Button,
-
 } from "@/components/ui/button";
 import { 
   Card, 
-
   CardHeader, 
-
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -34,10 +23,7 @@ interface StoreItem {
   storageKey: string;
 }
 
-export const ExportImport: React.FC<{
-  open: boolean;
-  onClose: () => void;
-}> = ({ open, onClose }) => {
+export const ExportImport: React.FC = () => {
   // Available stores for export/import
   const storeItems: StoreItem[] = [
     {
@@ -183,17 +169,15 @@ export const ExportImport: React.FC<{
   };
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-xl max-h-[80vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileJson className="h-5 w-5" />
-            Data Export & Import
-          </DialogTitle>
-          <DialogDescription>
-            Export your flow builder data to a JSON file or import from a previously exported file.
-          </DialogDescription>
-        </DialogHeader>
+    <div className="container mx-auto py-6 max-w-xl">
+      <div className="flex flex-col space-y-4">
+        <div className="flex items-center gap-2">
+          <FileJson className="h-6 w-6" />
+          <h1 className="text-2xl font-bold">Data Export & Import</h1>
+        </div>
+        <p className="text-muted-foreground">
+          Export your flow builder data to a JSON file or import from a previously exported file.
+        </p>
         
         <div className="flex-1 overflow-auto py-2">
           <Tabs defaultValue="export" className="w-full">
@@ -397,57 +381,51 @@ export const ExportImport: React.FC<{
             </TabsContent>
           </Tabs>
         </div>
-        
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Close
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      </div>
       
-      {/* Confirmation Dialog for Clear Data */}
+      {/* Confirmation Modal for Clear Data */}
       {showClearConfirm && (
-        <Dialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle className="flex items-center text-destructive gap-2">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background rounded-lg shadow-lg max-w-md w-full p-6">
+            <div className="flex flex-col space-y-4">
+              <div className="flex items-center text-destructive gap-2">
                 <AlertCircle className="h-5 w-5" />
-                Confirm Data Deletion
-              </DialogTitle>
-            </DialogHeader>
-            
-            <div className="py-4">
-              <p className="mb-4">Are you sure you want to delete the following data?</p>
-              <ul className="list-disc pl-5 space-y-1">
-                {selectedStores.map(storeId => {
-                  const store = storeItems.find(item => item.id === storeId);
-                  return store ? (
-                    <li key={storeId} className="text-sm">
-                      <span className="font-medium">{store.name}</span> - {store.description}
-                    </li>
-                  ) : null;
-                })}
-              </ul>
+                <h3 className="text-lg font-bold">Confirm Data Deletion</h3>
+              </div>
               
-              <Alert variant="destructive" className="mt-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  This action cannot be undone. All selected data will be permanently deleted.
-                </AlertDescription>
-              </Alert>
+              <div className="py-4">
+                <p className="mb-4">Are you sure you want to delete the following data?</p>
+                <ul className="list-disc pl-5 space-y-1">
+                  {selectedStores.map(storeId => {
+                    const store = storeItems.find(item => item.id === storeId);
+                    return store ? (
+                      <li key={storeId} className="text-sm">
+                        <span className="font-medium">{store.name}</span> - {store.description}
+                      </li>
+                    ) : null;
+                  })}
+                </ul>
+                
+                <Alert variant="destructive" className="mt-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    This action cannot be undone. All selected data will be permanently deleted.
+                  </AlertDescription>
+                </Alert>
+              </div>
+              
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowClearConfirm(false)}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={handleClearStorage}>
+                  Yes, Delete Data
+                </Button>
+              </div>
             </div>
-            
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button variant="outline" onClick={() => setShowClearConfirm(false)}>
-                Cancel
-              </Button>
-              <Button variant="destructive" onClick={handleClearStorage}>
-                Yes, Delete Data
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          </div>
+        </div>
       )}
-    </Dialog>
+    </div>
   );
 };

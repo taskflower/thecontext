@@ -5,8 +5,10 @@ import { ContextsList } from "@/modules/context";
 import HistoryView from "@/modules/history/components/HistoryView";
 import { useAppStore } from "@/modules/store";
 import React from "react";
+import { ExportImport } from "./ExportImport";
 
-type PanelContentType = "context" | "filters" | "conversation" | "plugins" | "";
+
+type PanelContentType = "context" | "filters" | "conversation" | "plugins" | "exportimport" | "";
 
 interface BottomPanelProps {
   content: PanelContentType;
@@ -26,6 +28,7 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({ content, onClose }) =>
           {content === "filters" && "Filters Manager"}
           {content === "conversation" && "Conversation History"}
           {content === "plugins" && "Plugins"}
+          {content === "exportimport" && "Export/Import"}
         </h3>
         <button
           className="p-1 rounded-md hover:bg-muted/50"
@@ -90,6 +93,11 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({ content, onClose }) =>
         {content === "conversation" && (
           <div className="p-4">
             <HistoryView />
+          </div>
+        )}
+        {content === "exportimport" && (
+          <div className="p-4">
+            <ExportImport />
           </div>
         )}
       </div>
