@@ -4,6 +4,13 @@ import React from "react";
 interface AnalysisSettingsProps {
   selectedHour: number;
   setSelectedHour: (hour: number) => void;
+  selectedDate: string | null;
+  setSelectedDate: (date: string | null) => void;
+  availableDates: string[];
+  dataDateRange: {
+    startDate: string;
+    endDate: string;
+  };
   selectedFactors: {
     windProduction: boolean;
     solarProduction: boolean;
@@ -17,6 +24,10 @@ interface AnalysisSettingsProps {
 const AnalysisSettings: React.FC<AnalysisSettingsProps> = ({
   selectedHour,
   setSelectedHour,
+  selectedDate,
+  setSelectedDate,
+  availableDates,
+  dataDateRange,
   selectedFactors,
   setSelectedFactors,
   hourlyStats,
@@ -24,6 +35,29 @@ const AnalysisSettings: React.FC<AnalysisSettingsProps> = ({
   return (
     <div className="bg-white p-4 rounded shadow mb-4 sticky top-4">
       <h2 className="text-lg font-semibold mb-3">Ustawienia analizy</h2>
+
+      {/* Data range indicator */}
+      <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+        <h3 className="text-sm font-medium text-blue-800">Zakres danych:</h3>
+        <p className="text-sm">
+          Od {dataDateRange.startDate} do {dataDateRange.endDate}
+        </p>
+      </div>
+
+      {/* Date selector */}
+      <div className="mb-4">
+        <label className="block font-medium mb-2">Wybierz dzień do analizy:</label>
+        <select
+          className="border rounded p-2 w-full"
+          value={selectedDate || ''}
+          onChange={(e) => setSelectedDate(e.target.value || null)}
+        >
+          <option value="">Cały zakres danych</option>
+          {availableDates.map((date) => (
+            <option key={date} value={date}>Dane do {date}</option>
+          ))}
+        </select>
+      </div>
 
       {/* Timeline for hour selection */}
       <div className="mb-4">
@@ -41,17 +75,17 @@ const AnalysisSettings: React.FC<AnalysisSettingsProps> = ({
         </div>
 
         {/* Simplified timeline with direct button elements */}
-        <div className="  bg-gray-100 rounded-lg overflow-hidden text-xs">
+        <div className="grid grid-cols-2 bg-gray-200 rounded-lg overflow-hidden text-xs gap-px">  
           {Array.from({ length: 24 }, (_, i) => (
             <button
               key={i}
               type="button"
               onClick={() => setSelectedHour(i)}
-              className={`w-full p-2 items-center justify-center border-r border-gray-300 last:border-r-0 
+              className={` p-2 items-center justify-center  last:border-r-0 
                 ${
                   selectedHour === i
-                    ? "bg-blue-500 text-white"
-                    : "hover:bg-blue-100 text-gray-700"
+                    ? "bg-blue-500 text-white bg-gray-400"
+                    : "hover:bg-blue-100 text-gray-700  bg-gray-100"
                 }`}
             >
               {i}:00

@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { generateSampleData } from "./generateSampleData";
 import { fetchAllPSEData, processRawPSEData } from "./dataUtils";
 import { analyzeHourData } from "./analyzeHourData";
 import AnalysisSettings from "./AnalysisSettings";
 import ChartsSection from "./ChartsSection";
 import TrainingModule from "./TrainingModule";
-import EnergyFactorsDisplay from "./EnergyFactorsDisplay"; // Import new component
+import EnergyFactorsDisplay from "./EnergyFactorsDisplay";
+import DailyPriceView from "./DailyPriceView";
 
 interface PredictionResult {
   isCorrect: boolean;
@@ -25,6 +26,7 @@ interface PredictionResult {
 const EnergyTraderTraining: React.FC = () => {
   const [historicalData, setHistoricalData] = useState<any[]>([]);
   const [selectedHour, setSelectedHour] = useState<number>(12);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [userPrediction, setUserPrediction] = useState<string | null>(null);
   const [predictionResult, setPredictionResult] =
     useState<PredictionResult | null>(null);
@@ -119,11 +121,37 @@ const EnergyTraderTraining: React.FC = () => {
   const resetToSampleData = () => {
     setDataSource("sample");
     setHistoricalData(generateSampleData());
+    setSelectedDate(null);
     setError(null);
   };
 
-  // Filtrowanie danych dla wybranej godziny
-  const hourData = historicalData.filter((d) => d.hour === selectedHour);
+  // Oblicz zakres dat z danych historycznych
+  const dataDateRange = useMemo(() => {
+    if (!historicalData || historicalData.length === 0) 
+      return { startDate: '-', endDate: '-' };
+    
+    const dates = historicalData.map(d => d.date);
+    return {
+      startDate: dates.reduce((a, b) => a < b ? a : b),
+      endDate: dates.reduce((a, b) => a > b ? a : b)
+    };
+  }, [historicalData]);
+
+  // Pobierz dostępne daty z danych
+  const availableDates = useMemo(() => 
+    [...new Set(historicalData.map(d => d.date))].sort(),
+    [historicalData]
+  );
+
+  // Filtrowanie danych dla wybranej godziny i opcjonalnej daty
+  const hourData = useMemo(() => 
+    historicalData.filter(d => 
+      d.hour === selectedHour && 
+      (selectedDate === null || d.date === selectedDate)
+    ),
+    [historicalData, selectedHour, selectedDate]
+  );
+  
   const hourlyStats = analyzeHourData(hourData);
 
   // Tworzenie scenariusza predykcji
@@ -196,6 +224,10 @@ const EnergyTraderTraining: React.FC = () => {
             <AnalysisSettings
               selectedHour={selectedHour}
               setSelectedHour={setSelectedHour}
+              selectedDate={selectedDate}
+              setSelectedDate={setSelectedDate}
+              availableDates={availableDates}
+              dataDateRange={dataDateRange}
               selectedFactors={selectedFactors}
               setSelectedFactors={setSelectedFactors}
               hourlyStats={hourlyStats}
@@ -295,9 +327,19 @@ const EnergyTraderTraining: React.FC = () => {
               selectedFactors={selectedFactors}
             />
 
+            {selectedDate && hourData.length === 1 && (
+              <DailyPriceView
+                hourData={hourData[0]}
+                selectedHour={selectedHour}
+                selectedDate={selectedDate}
+              />
+            )}
+            
             <ChartsSection
               hourData={hourData}
               selectedHour={selectedHour}
+              selectedDate={selectedDate}
+              historicalData={historicalData}
               showDataPoints={showDataPoints}
               setShowDataPoints={setShowDataPoints}
               hourlyStats={hourlyStats}
