@@ -40,7 +40,9 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
   const enhancedAppContext = { ...appContext, authContext: auth };
 
   // Initialize services with improved auth handling
-  const [authAdapter] = useState(() => new PluginAuthAdapter(enhancedAppContext));
+  const [authAdapter] = useState(
+    () => new PluginAuthAdapter(enhancedAppContext)
+  );
   const [llmService] = useState(() => {
     const apiBaseUrl = import.meta.env.VITE_API_URL;
     return new LlmService(authAdapter, {
@@ -55,7 +57,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
   const [hasError, setHasError] = useState(false);
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [authAttempts, setAuthAttempts] = useState(
+  const [, setAuthAttempts] = useState(
     authAdapter.getAuthAttempts()
   );
 
@@ -80,7 +82,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
           const user = await authAdapter.getCurrentUser();
           setCurrentUser(user);
         }
-        
+
         setAuthAttempts(authAdapter.getAuthAttempts());
       } catch (error) {
         console.error("Error loading auth:", error);
@@ -169,40 +171,15 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
 
   return (
     <div className="space-y-4 p-2">
-      {/* Header with labels */}
-      <div className="flex gap-2">
-        <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-1 rounded-full">
-          Assistant
-        </span>
-        <span className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-2 py-1 rounded-full">
-          API Service
-        </span>
+      <div className="flex items-center justify-between  border-b border-border">
+        <h3 className="text-lg font-medium">krok z</h3>
       </div>
 
       {/* Auth Debug Information */}
-      <div className="text-xs bg-gray-50 dark:bg-gray-900/30 p-3 rounded-md border border-gray-200 dark:border-gray-800">
+      <div className="text-right text-xs bg-gray-50 dark:bg-gray-900/30 p-4 rounded-md border border-gray-200 dark:border-gray-800">
         {/* User Info */}
-        <div className="mb-2">
-          <strong>User:</strong> {currentUser ? currentUser.email : "Not logged in"}
-        </div>
-        
-        {/* Auth Attempts */}
-        <strong>Authentication Attempts:</strong>
-        {authAttempts.length === 0 ? (
-          <div className="italic mt-1">No authentication attempts made yet</div>
-        ) : (
-          <ul className="list-disc pl-4 mt-1">
-            {authAttempts.map((attempt, index) => (
-              <li
-                key={index}
-                className={attempt.success ? "text-green-600" : "text-red-600"}
-              >
-                {attempt.method}:{" "}
-                {attempt.success ? "Success" : `Failed - ${attempt.error}`}
-              </li>
-            ))}
-          </ul>
-        )}
+        <strong>User:</strong>{" "}
+        {currentUser ? currentUser.email : "Not logged in"}
       </div>
 
       {/* Assistant message display */}
@@ -267,6 +244,7 @@ const schemaDefaults = {
 
 // Specify that this plugin should replace the assistant view
 ApiServicePlugin.pluginSettings = {
+  replaceHeader: true,
   replaceAssistantView: true,
 };
 

@@ -11,7 +11,7 @@ export const LeftPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState("workspace");
 
   return (
-    <aside className="w-80 border-r border-border flex flex-col overflow-hidden bg-muted/20">
+    <aside className="min-w-[400px] border-r border-border flex flex-col overflow-hidden bg-muted/20">
       <nav className="p-1 flex border-b border-border">
         <TabButton
           icon={<FolderOpen className="h-4 w-4" />}

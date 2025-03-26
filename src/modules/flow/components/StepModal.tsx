@@ -192,15 +192,16 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose }) => {
           {/* User input - conditionally render based on plugin settings */}
           {!pluginSettings.replaceUserInput && (
             <>
+             <DefaultUserInput
+                value={currentNode.userPrompt || ""}
+                onChange={handleInputChange}
+              />
               {/* Komponent informacyjny o kontekście */}
               <ContextUpdateInfo 
                 contextKey={currentNode.contextKey} 
                 isVisible={Boolean(currentNode.contextKey)}
               />
-              <DefaultUserInput
-                value={currentNode.userPrompt || ""}
-                onChange={handleInputChange}
-              />
+             
             </>
           )}
         </div>

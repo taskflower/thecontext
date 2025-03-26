@@ -5,6 +5,7 @@ import Studio from "./pages/StudioLayout";
 import WorkspacePage from "./pages/WorkspacePage";
 import { AuthProvider } from "./context/AuthContext";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
+import EnergyTraderTraining from "./components/RD/EnergyTraderTraining";
 
 
 
@@ -16,6 +17,7 @@ function App() {
           <div className="content">
             <Routes>
               <Route path="/" element={<WorkspacePage />} />
+              <Route path="/rd" element={<EnergyTraderTraining/>} />
               <Route path="/:slug" element={<WorkspacePage />} />
               <Route path="/studio" element={<Studio />} />
               <Route path="/payment/success" element={<PaymentSuccessPage />} />

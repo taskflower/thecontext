@@ -50,14 +50,14 @@ const StepPluginWrapper: React.FC<StepPluginWrapperProps> = ({
   const customData = node.pluginData?.[componentKey];
   
   return (
-    <div className="border border-border rounded-md overflow-hidden">
+    
       <PluginPreviewWrapper
         componentKey={componentKey}
         customData={customData}
         context={context}
         className="border-0"
       />
-    </div>
+   
   );
 };
 
