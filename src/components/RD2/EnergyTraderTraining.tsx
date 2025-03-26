@@ -6,6 +6,7 @@ import { analyzeHourData } from "./analyzeHourData";
 import AnalysisSettings from "./AnalysisSettings";
 import ChartsSection from "./ChartsSection";
 import TrainingModule from "./TrainingModule";
+import EnergyFactorsDisplay from "./EnergyFactorsDisplay"; // Import new component
 
 interface PredictionResult {
   isCorrect: boolean;
@@ -189,7 +190,7 @@ const EnergyTraderTraining: React.FC = () => {
             Rynkiem Dnia Następnego (RDN) na polskim rynku energii
           </p>
         </header>
-        <div className="grid grid-cols-12 gap-3    ">
+        <div className="grid grid-cols-12 gap-3">
           <div className="col-span-3">
             {" "}
             <AnalysisSettings
@@ -201,7 +202,7 @@ const EnergyTraderTraining: React.FC = () => {
             />
           </div>
 
-          <div className="w-full col-span-9  ">
+          <div className="w-full col-span-9">
             {/* Kontrola źródła danych */}
             <div className="bg-white p-4 rounded-lg shadow mb-6">
               <h2 className="text-lg font-semibold mb-3">Źródło danych</h2>
@@ -286,6 +287,13 @@ const EnergyTraderTraining: React.FC = () => {
                   </div>
                 )}
             </div>
+
+            {/* Nowy komponent wyświetlający czynniki energetyczne */}
+            <EnergyFactorsDisplay
+              historicalData={historicalData}
+              selectedHour={selectedHour}
+              selectedFactors={selectedFactors}
+            />
 
             <ChartsSection
               hourData={hourData}

@@ -22,7 +22,7 @@ const AnalysisSettings: React.FC<AnalysisSettingsProps> = ({
   hourlyStats,
 }) => {
   return (
-    <div className="bg-white p-4 rounded shadow mb-4">
+    <div className="bg-white p-4 rounded shadow mb-4 sticky top-4">
       <h2 className="text-lg font-semibold mb-3">Ustawienia analizy</h2>
 
       {/* Timeline for hour selection */}
