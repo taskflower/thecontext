@@ -155,57 +155,100 @@ const EnergyTraderTraining: React.FC = () => {
   const hourlyStats = analyzeHourData(hourData);
 
   // Tworzenie scenariusza predykcji
-  const makePrediction = (prediction: string) => {
-    setUserPrediction(prediction);
-
-    // Losowy scenariusz
-    const windProduction = Math.round(Math.random() * 2500);
-    const solarProduction =
-      selectedHour >= 8 && selectedHour <= 17
-        ? Math.round(
-            Math.random() * 2000 * (1 - Math.abs(selectedHour - 12.5) / 10)
-          )
-        : 0;
-    const demandForecast = Math.round(
-      18000 +
-        (selectedHour >= 8 && selectedHour <= 20 ? 4000 : 0) *
-          (0.8 + Math.random() * 0.4)
+// Updated makePrediction function to use real data when available
+const makePrediction = (prediction: string) => {
+  setUserPrediction(prediction);
+  
+  // Check if we have a selected date and it's not the last date
+  const selectedDateIndex = availableDates.indexOf(selectedDate || '');
+  const isRealDataAvailable = selectedDate && 
+    selectedDateIndex >= 0 && 
+    selectedDateIndex < availableDates.length - 1;
+  
+  let predictionScenario;
+  
+  if (isRealDataAvailable) {
+    // Use actual data from the next day
+    const nextDate = availableDates[selectedDateIndex + 1];
+    const nextDayData = historicalData.filter(d => 
+      d.hour === selectedHour && d.date === nextDate
     );
-    const isWorkday = Math.random() > 0.3;
-
-    // Określ, czy cena RB będzie wyższa niż RDN
-    const rbHigher = Math.random() > 0.5;
-
-    // Oblicz ostateczne ceny
-    const rdnPrice = Math.round(
-      280 +
-        (selectedHour >= 8 && selectedHour <= 20 && isWorkday ? 100 : 0) -
-        solarProduction / 20 -
-        windProduction / 50
-    );
-    const rbPrice = rbHigher
-      ? Math.round(rdnPrice * (1 + 0.05 + Math.random() * 0.15))
-      : Math.round(rdnPrice * (0.85 + Math.random() * 0.1));
-
-    const isCorrect =
-      (prediction === "higher" && rbPrice > rdnPrice) ||
-      (prediction === "lower" && rbPrice <= rdnPrice);
-
-    setPredictionResult({
-      isCorrect,
-      scenario: {
+    
+    if (nextDayData.length > 0) {
+      const realData = nextDayData[0];
+      
+      predictionScenario = {
         hour: selectedHour,
-        windProduction,
-        solarProduction,
-        demandForecast,
-        isWorkday,
-        rdnPrice,
-        rbPrice,
-        priceDiff: rbPrice - rdnPrice,
-      },
-    });
-  };
+        windProduction: realData.windProduction,
+        solarProduction: realData.solarProduction,
+        demandForecast: realData.demandForecast,
+        isWorkday: realData.isWorkday,
+        rdnPrice: realData.rdnPrice,
+        rbPrice: realData.rbPrice,
+        priceDiff: realData.priceDiff
+      };
+      
+      const isCorrect =
+        (prediction === "higher" && realData.rbPrice > realData.rdnPrice) ||
+        (prediction === "lower" && realData.rbPrice <= realData.rdnPrice);
+      
+      setPredictionResult({
+        isCorrect,
+        scenario: predictionScenario
+      });
+      
+      return;
+    }
+  }
+  
+  // Fallback to random scenario if real data is not available
+  // (Keep the existing random generation logic for cases where we don't have real data)
+  const windProduction = Math.round(Math.random() * 2500);
+  const solarProduction =
+    selectedHour >= 8 && selectedHour <= 17
+      ? Math.round(
+          Math.random() * 2000 * (1 - Math.abs(selectedHour - 12.5) / 10)
+        )
+      : 0;
+  const demandForecast = Math.round(
+    18000 +
+      (selectedHour >= 8 && selectedHour <= 20 ? 4000 : 0) *
+        (0.8 + Math.random() * 0.4)
+  );
+  const isWorkday = Math.random() > 0.3;
 
+  // Determine if RB price will be higher than RDN
+  const rbHigher = Math.random() > 0.5;
+
+  // Calculate final prices
+  const rdnPrice = Math.round(
+    280 +
+      (selectedHour >= 8 && selectedHour <= 20 && isWorkday ? 100 : 0) -
+      solarProduction / 20 -
+      windProduction / 50
+  );
+  const rbPrice = rbHigher
+    ? Math.round(rdnPrice * (1 + 0.05 + Math.random() * 0.15))
+    : Math.round(rdnPrice * (0.85 + Math.random() * 0.1));
+
+  const isCorrect =
+    (prediction === "higher" && rbPrice > rdnPrice) ||
+    (prediction === "lower" && rbPrice <= rdnPrice);
+
+  setPredictionResult({
+    isCorrect,
+    scenario: {
+      hour: selectedHour,
+      windProduction,
+      solarProduction,
+      demandForecast,
+      isWorkday,
+      rdnPrice,
+      rbPrice,
+      priceDiff: rbPrice - rdnPrice,
+    },
+  });
+};
   return (
     <div className="p-4 max-w-full bg-gray-50 min-h-screen">
       <div className="container mx-auto">
@@ -345,15 +388,18 @@ const EnergyTraderTraining: React.FC = () => {
               hourlyStats={hourlyStats}
             />
 
-            <TrainingModule
-              selectedHour={selectedHour}
-              selectedFactors={selectedFactors}
-              userPrediction={userPrediction}
-              predictionResult={predictionResult}
-              makePrediction={makePrediction}
-              setPredictionResult={setPredictionResult}
-              setUserPrediction={setUserPrediction}
-            />
+<TrainingModule
+  selectedHour={selectedHour}
+  selectedDate={selectedDate}
+  availableDates={availableDates}
+  historicalData={historicalData}
+  selectedFactors={selectedFactors}
+  userPrediction={userPrediction}
+  predictionResult={predictionResult}
+  makePrediction={makePrediction}
+  setPredictionResult={setPredictionResult}
+  setUserPrediction={setUserPrediction}
+/>
           </div>
         </div>
         <footer className="text-center text-gray-500 text-sm mt-8 pb-8">
