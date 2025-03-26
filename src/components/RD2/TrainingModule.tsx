@@ -40,78 +40,80 @@ const TrainingModule: React.FC<TrainingModuleProps> = ({
 }) => {
   return (
     <div className="bg-white p-4 rounded shadow mb-6">
-      <h2 className="text-lg font-semibold mb-2">Training Module - Price Prediction</h2>
+      <h2 className="text-lg font-semibold mb-2">Moduł szkoleniowy - Prognoza cen</h2>
       
       <div className="mb-4">
-        <h3 className="font-medium">Scenario for hour {selectedHour}:00 tomorrow:</h3>
+        <h3 className="font-medium">Scenariusz na godzinę {selectedHour}:00 jutro:</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-2">
           {selectedFactors.windProduction && (
             <div className="p-3 bg-blue-50 rounded">
-              <h4 className="font-medium text-blue-800">Wind Production Forecast</h4>
+              <h4 className="font-medium text-blue-800">Prognoza produkcji energii wiatrowej</h4>
               <p className="text-xl font-bold">{predictionResult ? predictionResult.scenario.windProduction : "???"} MW</p>
             </div>
           )}
           
           {selectedFactors.solarProduction && (
             <div className="p-3 bg-yellow-50 rounded">
-              <h4 className="font-medium text-yellow-800">Solar Production Forecast</h4>
+              <h4 className="font-medium text-yellow-800">Prognoza produkcji energii słonecznej</h4>
               <p className="text-xl font-bold">{predictionResult ? predictionResult.scenario.solarProduction : "???"} MW</p>
             </div>
           )}
           
           {selectedFactors.demandForecast && (
             <div className="p-3 bg-purple-50 rounded">
-              <h4 className="font-medium text-purple-800">Demand Forecast</h4>
+              <h4 className="font-medium text-purple-800">Prognoza zapotrzebowania</h4>
               <p className="text-xl font-bold">{predictionResult ? predictionResult.scenario.demandForecast : "???"} MW</p>
             </div>
           )}
           
           {selectedFactors.isWorkday && (
             <div className="p-3 bg-gray-50 rounded">
-              <h4 className="font-medium text-gray-800">Day Type</h4>
-              <p className="text-xl font-bold">{predictionResult ? (predictionResult.scenario.isWorkday ? "Workday" : "Weekend") : "???"}</p>
+              <h4 className="font-medium text-gray-800">Typ dnia</h4>
+              <p className="text-xl font-bold">
+                {predictionResult ? (predictionResult.scenario.isWorkday ? "Dzień roboczy" : "Weekend") : "???"}
+              </p>
             </div>
           )}
         </div>
         
         <div className="mt-4">
-          <p className="font-medium">RDN Price: {predictionResult ? `${predictionResult.scenario.rdnPrice} PLN/MWh` : "???"}</p>
+          <p className="font-medium">Cena RDN: {predictionResult ? `${predictionResult.scenario.rdnPrice} PLN/MWh` : "???"}</p>
           
-          <p className="mt-4">You predict that the RB price will be:</p>
+          <p className="mt-4">Przewidujesz, że cena RB będzie:</p>
           <div className="mt-2">
             <button 
               className={`mr-4 py-2 px-4 rounded ${userPrediction === 'higher' ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}
               onClick={() => makePrediction('higher')}
               disabled={predictionResult !== null}
             >
-              Higher than RDN
+              Wyższa niż RDN
             </button>
             <button 
               className={`py-2 px-4 rounded ${userPrediction === 'lower' ? 'bg-green-500 text-white' : 'bg-gray-200'}`}
               onClick={() => makePrediction('lower')}
               disabled={predictionResult !== null}
             >
-              Lower than RDN
+              Niższa niż RDN
             </button>
           </div>
         </div>
         
         {predictionResult && (
           <div className="mt-4 p-4 rounded bg-gray-50">
-            <h3 className="font-semibold">Result:</h3>
+            <h3 className="font-semibold">Wynik:</h3>
             <p className="mt-2">
-              RB Price: <span className="font-bold">{predictionResult.scenario.rbPrice} PLN/MWh</span>
+              Cena RB: <span className="font-bold">{predictionResult.scenario.rbPrice} PLN/MWh</span>
             </p>
             <p className="mt-1">
-              RB-RDN Difference: <span className={`font-bold ${predictionResult.scenario.priceDiff > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+              Różnica RB-RDN: <span className={`font-bold ${predictionResult.scenario.priceDiff > 0 ? 'text-orange-600' : 'text-green-600'}`}>
                 {predictionResult.scenario.priceDiff} PLN/MWh
               </span>
             </p>
             <p className="mt-4">
-              Your prediction was: 
+              Twoja prognoza była: 
               <span className={`font-bold ml-2 ${predictionResult.isCorrect ? 'text-green-600' : 'text-red-600'}`}>
-                {predictionResult.isCorrect ? 'CORRECT' : 'INCORRECT'}
+                {predictionResult.isCorrect ? 'POPRAWNA' : 'NIEPOPRAWNA'}
               </span>
             </p>
             
@@ -122,7 +124,7 @@ const TrainingModule: React.FC<TrainingModuleProps> = ({
                 setPredictionResult(null);
               }}
             >
-              Try again
+              Spróbuj ponownie
             </button>
           </div>
         )}

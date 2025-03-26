@@ -5,7 +5,7 @@ import Studio from "./pages/StudioLayout";
 import WorkspacePage from "./pages/WorkspacePage";
 import { AuthProvider } from "./context/AuthContext";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
-import EnergyTraderTraining from "./components/RD/EnergyTraderTraining";
+import EnergyTraderTraining from "./components/RD2/EnergyTraderTraining";
 
 
 

@@ -26,25 +26,43 @@ interface HourData {
   
   // Analyze hourly data
   export const analyzeHourData = (hourData: HourData[]): HourlyStats | null => {
-    if (!hourData || !hourData.length) return null;
+    if (!hourData || hourData.length === 0) return null;
     
-    const totalEntries = hourData.length;
-    const rbHigherCount = hourData.filter(d => d.rbPrice > d.rdnPrice).length;
+    console.log(`Analyzing ${hourData.length} data points for hour ${hourData[0]?.hour}`);
+    
+    // Filter out any invalid data points
+    const validData = hourData.filter(d => 
+      typeof d.priceDiff === 'number' && 
+      typeof d.imbalance === 'number' && 
+      !isNaN(d.priceDiff) && 
+      !isNaN(d.imbalance)
+    );
+    
+    if (validData.length === 0) {
+      console.error('No valid data points found after filtering');
+      return null;
+    }
+    
+    const totalEntries = validData.length;
+    const rbHigherCount = validData.filter(d => d.rbPrice > d.rdnPrice).length;
     const rbHigherPercent = Math.round((rbHigherCount / totalEntries) * 100);
     
     // Calculate average price difference
-    const sum = hourData.reduce((acc, item) => acc + item.priceDiff, 0);
+    const sum = validData.reduce((acc, item) => acc + item.priceDiff, 0);
     const avgPriceDiff = Math.round(sum / totalEntries);
     
     // Calculate average absolute price difference
-    const absSum = hourData.reduce((acc, item) => acc + Math.abs(item.priceDiff), 0);
+    const absSum = validData.reduce((acc, item) => acc + Math.abs(item.priceDiff), 0);
     const avgAbsPriceDiff = Math.round(absSum / totalEntries);
     
     // Create data for correlation chart
-    const imbalanceVsPriceDiff = hourData.map(d => ({
+    const imbalanceVsPriceDiff = validData.map(d => ({
       imbalance: d.imbalance,
       priceDiff: d.priceDiff
     }));
+    
+    console.log(`Analysis complete - ${rbHigherCount} out of ${totalEntries} days had RB > RDN (${rbHigherPercent}%)`);
+    console.log(`Created ${imbalanceVsPriceDiff.length} points for scatter chart`);
     
     return {
       totalEntries,
