@@ -143,11 +143,11 @@ const EnergyTraderTraining: React.FC = () => {
     [historicalData]
   );
 
-  // Filtrowanie danych dla wybranej godziny i opcjonalnej daty
+  // Filtrowanie danych dla wybranej godziny i opcjonalnej daty (do wybranej daty włącznie)
   const hourData = useMemo(() => 
     historicalData.filter(d => 
       d.hour === selectedHour && 
-      (selectedDate === null || d.date === selectedDate)
+      (selectedDate === null || d.date <= selectedDate)
     ),
     [historicalData, selectedHour, selectedDate]
   );

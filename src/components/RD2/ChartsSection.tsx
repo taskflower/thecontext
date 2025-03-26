@@ -22,10 +22,10 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
   setShowDataPoints, 
   hourlyStats 
 }) => {
-  // Filter data for historical chart (from beginning to selected date)
+  // Filter data for historical chart (specific to selected hour and date)
   const chartData = useMemo(() => {
     if (!selectedDate) {
-      // Sort data chronologically when viewing the entire range
+      // Wyświetl wszystkie daty dla wybranej godziny
       console.log(`Filtrowanie danych dla godziny ${selectedHour} - cały zakres`);
       
       // Filter historical data for the selected hour and sort chronologically
@@ -36,9 +36,9 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
       console.log(`Znaleziono ${filteredData.length} rekordów`);
       return filteredData;
     } else {
-      console.log(`Filtrowanie danych dla godziny ${selectedHour} do dnia ${selectedDate}`);
+      console.log(`Filtrowanie danych dla godziny ${selectedHour} do dnia ${selectedDate} włącznie`);
       
-      // Filter historical data for the selected hour and up to selected date
+      // Filter historical data for the selected hour and all dates UP TO the selected date
       const filteredData = historicalData.filter(d => 
         d.hour === selectedHour && 
         d.date <= selectedDate
@@ -47,7 +47,7 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
       console.log(`Znaleziono ${filteredData.length} rekordów`);
       return filteredData;
     }
-  }, [historicalData, selectedHour, selectedDate, hourData]);
+  }, [historicalData, selectedHour, selectedDate]);
    
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
