@@ -6,11 +6,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Download, Upload, Trash2, AlertCircle, FileJson } from "lucide-react";
+import { Download, Upload, Trash2, AlertCircle } from "lucide-react";
 import { StorageService, storeItems } from "@/services/StorageService";
 import { FileService } from "@/services/FileService";
 import { ExportImportConfirmationModal } from "./ExportImportConfirmationModal";
-
 
 export const ExportImport: React.FC = () => {
   const [selectedStores, setSelectedStores] = useState<string[]>(storeItems.map(item => item.id));
@@ -80,7 +79,7 @@ export const ExportImport: React.FC = () => {
     <div className="grid gap-2">
       {storeItems.map((store) => (
         <Card key={store.id} className={selectedStores.includes(store.id) ? "border-primary/50" : ""}>
-          <CardHeader className="py-2">
+          <CardHeader className="py-2 px-3">
             <div className="flex items-center space-x-2">
               <Checkbox 
                 id={`${prefix}-${store.id}`}
@@ -99,109 +98,112 @@ export const ExportImport: React.FC = () => {
   );
 
   return (
-    <div className="container mx-auto py-6 max-w-xl">
-      <div className="flex items-center gap-2 mb-4">
-        <FileJson className="h-6 w-6" />
-        <h1 className="text-2xl font-bold">Data Export & Import</h1>
-      </div>
-      
-      <Tabs defaultValue="export" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="export">Export</TabsTrigger>
-          <TabsTrigger value="import">Import</TabsTrigger>
-          <TabsTrigger value="clear">Clear Data</TabsTrigger>
-        </TabsList>
-        
-        {/* EXPORT TAB */}
-        <TabsContent value="export" className="space-y-4 mt-4">
-          <h3 className="text-sm font-medium">Select data to export:</h3>
-          {renderStoreItems('export')}
-          <Button 
-            onClick={handleExport}
-            disabled={selectedStores.length === 0}
-            className="w-full sm:w-auto mt-4"
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Export Selected Data
-          </Button>
-        </TabsContent>
-        
-        {/* IMPORT TAB */}
-        <TabsContent value="import" className="space-y-4 mt-4">
-          <h3 className="text-sm font-medium">Select which data to import:</h3>
-          {renderStoreItems('import')}
+    <div className="h-full overflow-auto">
+      <div className="p-4 space-y-4">
+        <Tabs defaultValue="export" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-4">
+            <TabsTrigger value="export">Export</TabsTrigger>
+            <TabsTrigger value="import">Import</TabsTrigger>
+            <TabsTrigger value="clear">Clear Data</TabsTrigger>
+          </TabsList>
           
-          <div className="w-full mt-4">
-            <Label htmlFor="import-file" className="text-sm font-medium">Select JSON file:</Label>
-            <input
-              id="import-file"
-              type="file"
-              accept=".json"
-              onChange={handleFileSelect}
-              className="block w-full text-sm file:mr-4 file:py-2 file:px-4
-                file:rounded-md file:border-0 file:font-medium
-                file:bg-primary file:text-primary-foreground"
-            />
-          </div>
-          
-          {importError && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{importError}</AlertDescription>
-            </Alert>
-          )}
-          
-          {importSuccess && (
-            <Alert className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
-              <AlertTitle>Success</AlertTitle>
-              <AlertDescription>
-                Data imported successfully. Please refresh the page to see changes.
-              </AlertDescription>
-            </Alert>
-          )}
-          
-          <div className="flex gap-2 mt-4">
+          {/* EXPORT TAB */}
+          <TabsContent value="export" className="space-y-4">
+            <h3 className="text-sm font-medium text-foreground/80">Select data to export:</h3>
+            {renderStoreItems('export')}
             <Button 
-              onClick={handleImport}
-              disabled={!importFile || selectedStores.length === 0}
+              onClick={handleExport}
+              disabled={selectedStores.length === 0}
+              size="sm"
+              className="mt-4"
             >
-              <Upload className="h-4 w-4 mr-2" />
-              Import Data
+              <Download className="h-4 w-4 mr-2" />
+              Export Selected Data
             </Button>
+          </TabsContent>
+          
+          {/* IMPORT TAB */}
+          <TabsContent value="import" className="space-y-4">
+            <h3 className="text-sm font-medium text-foreground/80">Select which data to import:</h3>
+            {renderStoreItems('import')}
+            
+            <div className="mt-4">
+              <Label htmlFor="import-file" className="text-sm font-medium">Select JSON file:</Label>
+              <div className="mt-1">
+                <input
+                  id="import-file"
+                  type="file"
+                  accept=".json"
+                  onChange={handleFileSelect}
+                  className="block w-full text-sm file:mr-4 file:py-1 file:px-3
+                    file:rounded-md file:border-0 file:text-sm file:font-medium
+                    file:bg-primary file:text-primary-foreground
+                    hover:file:bg-primary/90"
+                />
+              </div>
+            </div>
+            
+            {importError && (
+              <Alert variant="destructive" className="mt-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{importError}</AlertDescription>
+              </Alert>
+            )}
             
             {importSuccess && (
-              <Button variant="outline" onClick={() => window.location.reload()}>
-                Refresh Page
-              </Button>
+              <Alert className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-100 mt-4">
+                <AlertTitle>Success</AlertTitle>
+                <AlertDescription>
+                  Data imported successfully. Please refresh the page to see changes.
+                </AlertDescription>
+              </Alert>
             )}
-          </div>
-        </TabsContent>
-        
-        {/* CLEAR DATA TAB */}
-        <TabsContent value="clear" className="space-y-4 mt-4">
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Warning</AlertTitle>
-            <AlertDescription>
-              Clearing data will remove all selected data from local storage. This action cannot be undone.
-            </AlertDescription>
-          </Alert>
+            
+            <div className="flex gap-2 mt-4">
+              <Button 
+                onClick={handleImport}
+                disabled={!importFile || selectedStores.length === 0}
+                size="sm"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Import Data
+              </Button>
+              
+              {importSuccess && (
+                <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                  Refresh Page
+                </Button>
+              )}
+            </div>
+          </TabsContent>
           
-          <h3 className="text-sm font-medium">Select data to clear:</h3>
-          {renderStoreItems('clear')}
-          
-          <Button 
-            variant="destructive"
-            onClick={() => setShowClearConfirm(true)}
-            disabled={selectedStores.length === 0}
-            className="mt-4"
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Clear Selected Data
-          </Button>
-        </TabsContent>
-      </Tabs>
+          {/* CLEAR DATA TAB */}
+          <TabsContent value="clear" className="space-y-4">
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Warning</AlertTitle>
+              <AlertDescription>
+                Clearing data will remove all selected data from local storage. This action cannot be undone.
+              </AlertDescription>
+            </Alert>
+            
+            <h3 className="text-sm font-medium text-foreground/80">Select data to clear:</h3>
+            {renderStoreItems('clear')}
+            
+            <Button 
+              variant="destructive"
+              onClick={() => setShowClearConfirm(true)}
+              disabled={selectedStores.length === 0}
+              size="sm"
+              className="mt-4"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Clear Selected Data
+            </Button>
+          </TabsContent>
+        </Tabs>
+      </div>
       
       {showClearConfirm && (
         <ExportImportConfirmationModal

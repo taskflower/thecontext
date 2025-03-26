@@ -33,7 +33,7 @@ export const adaptEdgeToReactFlow = (edge: Edge): ReactFlowEdge => ({
   type: "step",
   style: {
     strokeDasharray: 5,
-    strokeWidth: 2,
-    animation: "dashMove 5s linear infinite",
+    strokeWidth: 1,
+    animation: "dashMove 4s linear infinite",
   },
 });

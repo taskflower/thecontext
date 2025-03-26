@@ -22,8 +22,9 @@
   
   /* Edge path styling */
   .react-flow__edge-path {
-    stroke: hsl(var(--border));
-    stroke-width: 1.5;
+    stroke: hsl(var(--ring));
+    stroke-width: 0.5;
+    stroke-opacity: 0.5;
   }
   
   /* Selected edge styling */
