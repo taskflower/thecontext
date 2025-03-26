@@ -1,13 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect, useMemo } from "react";
 import { generateSampleData } from "./generateSampleData";
-import { fetchAllPSEData, processRawPSEData } from "./dataUtils";
+import { fetchAllPSEData, processRawPSEData } from "./utils/dataUtils";
 import { analyzeHourData } from "./analyzeHourData";
 import AnalysisSettings from "./AnalysisSettings";
 import ChartsSection from "./ChartsSection";
 import TrainingModule from "./TrainingModule";
 import EnergyFactorsDisplay from "./EnergyFactorsDisplay";
 import DailyPriceView from "./DailyPriceView";
+import ChartDataExtractor from "./dataExtractors/ChartDataExtractor";
+import LLMChecklist from "./dataExtractors/LLMChecklist";
+
 
 interface PredictionResult {
   isCorrect: boolean;
@@ -40,6 +43,7 @@ const EnergyTraderTraining: React.FC = () => {
   const [dataSource, setDataSource] = useState<"sample" | "api">("sample");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [showDataExtractor, setShowDataExtractor] = useState<boolean>(false);
   const [apiDateRange, setApiDateRange] = useState({
     startDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
       .toISOString()
@@ -154,113 +158,136 @@ const EnergyTraderTraining: React.FC = () => {
   
   const hourlyStats = analyzeHourData(hourData);
 
-  // Tworzenie scenariusza predykcji
-// Updated makePrediction function to use real data when available
-const makePrediction = (prediction: string) => {
-  setUserPrediction(prediction);
-  
-  // Check if we have a selected date and it's not the last date
-  const selectedDateIndex = availableDates.indexOf(selectedDate || '');
-  const isRealDataAvailable = selectedDate && 
-    selectedDateIndex >= 0 && 
-    selectedDateIndex < availableDates.length - 1;
-  
-  let predictionScenario;
-  
-  if (isRealDataAvailable) {
-    // Use actual data from the next day
-    const nextDate = availableDates[selectedDateIndex + 1];
-    const nextDayData = historicalData.filter(d => 
-      d.hour === selectedHour && d.date === nextDate
-    );
+  // Updated makePrediction function to use real data when available
+  const makePrediction = (prediction: string) => {
+    setUserPrediction(prediction);
     
-    if (nextDayData.length > 0) {
-      const realData = nextDayData[0];
+    // Check if we have a selected date and it's not the last date
+    const selectedDateIndex = availableDates.indexOf(selectedDate || '');
+    const isRealDataAvailable = selectedDate && 
+      selectedDateIndex >= 0 && 
+      selectedDateIndex < availableDates.length - 1;
+    
+    let predictionScenario;
+    
+    if (isRealDataAvailable) {
+      // Use actual data from the next day
+      const nextDate = availableDates[selectedDateIndex + 1];
+      const nextDayData = historicalData.filter(d => 
+        d.hour === selectedHour && d.date === nextDate
+      );
       
-      predictionScenario = {
-        hour: selectedHour,
-        windProduction: realData.windProduction,
-        solarProduction: realData.solarProduction,
-        demandForecast: realData.demandForecast,
-        isWorkday: realData.isWorkday,
-        rdnPrice: realData.rdnPrice,
-        rbPrice: realData.rbPrice,
-        priceDiff: realData.priceDiff
-      };
-      
-      const isCorrect =
-        (prediction === "higher" && realData.rbPrice > realData.rdnPrice) ||
-        (prediction === "lower" && realData.rbPrice <= realData.rdnPrice);
-      
-      setPredictionResult({
-        isCorrect,
-        scenario: predictionScenario
-      });
-      
-      return;
+      if (nextDayData.length > 0) {
+        const realData = nextDayData[0];
+        
+        predictionScenario = {
+          hour: selectedHour,
+          windProduction: realData.windProduction,
+          solarProduction: realData.solarProduction,
+          demandForecast: realData.demandForecast,
+          isWorkday: realData.isWorkday,
+          rdnPrice: realData.rdnPrice,
+          rbPrice: realData.rbPrice,
+          priceDiff: realData.priceDiff
+        };
+        
+        const isCorrect =
+          (prediction === "higher" && realData.rbPrice > realData.rdnPrice) ||
+          (prediction === "lower" && realData.rbPrice <= realData.rdnPrice);
+        
+        setPredictionResult({
+          isCorrect,
+          scenario: predictionScenario
+        });
+        
+        return;
+      }
     }
-  }
-  
-  // Fallback to random scenario if real data is not available
-  // (Keep the existing random generation logic for cases where we don't have real data)
-  const windProduction = Math.round(Math.random() * 2500);
-  const solarProduction =
-    selectedHour >= 8 && selectedHour <= 17
-      ? Math.round(
-          Math.random() * 2000 * (1 - Math.abs(selectedHour - 12.5) / 10)
-        )
-      : 0;
-  const demandForecast = Math.round(
-    18000 +
-      (selectedHour >= 8 && selectedHour <= 20 ? 4000 : 0) *
-        (0.8 + Math.random() * 0.4)
-  );
-  const isWorkday = Math.random() > 0.3;
+    
+    // Fallback to random scenario if real data is not available
+    // (Keep the existing random generation logic for cases where we don't have real data)
+    const windProduction = Math.round(Math.random() * 2500);
+    const solarProduction =
+      selectedHour >= 8 && selectedHour <= 17
+        ? Math.round(
+            Math.random() * 2000 * (1 - Math.abs(selectedHour - 12.5) / 10)
+          )
+        : 0;
+    const demandForecast = Math.round(
+      18000 +
+        (selectedHour >= 8 && selectedHour <= 20 ? 4000 : 0) *
+          (0.8 + Math.random() * 0.4)
+    );
+    const isWorkday = Math.random() > 0.3;
 
-  // Determine if RB price will be higher than RDN
-  const rbHigher = Math.random() > 0.5;
+    // Determine if RB price will be higher than RDN
+    const rbHigher = Math.random() > 0.5;
 
-  // Calculate final prices
-  const rdnPrice = Math.round(
-    280 +
-      (selectedHour >= 8 && selectedHour <= 20 && isWorkday ? 100 : 0) -
-      solarProduction / 20 -
-      windProduction / 50
-  );
-  const rbPrice = rbHigher
-    ? Math.round(rdnPrice * (1 + 0.05 + Math.random() * 0.15))
-    : Math.round(rdnPrice * (0.85 + Math.random() * 0.1));
+    // Calculate final prices
+    const rdnPrice = Math.round(
+      280 +
+        (selectedHour >= 8 && selectedHour <= 20 && isWorkday ? 100 : 0) -
+        solarProduction / 20 -
+        windProduction / 50
+    );
+    const rbPrice = rbHigher
+      ? Math.round(rdnPrice * (1 + 0.05 + Math.random() * 0.15))
+      : Math.round(rdnPrice * (0.85 + Math.random() * 0.1));
 
-  const isCorrect =
-    (prediction === "higher" && rbPrice > rdnPrice) ||
-    (prediction === "lower" && rbPrice <= rdnPrice);
+    const isCorrect =
+      (prediction === "higher" && rbPrice > rdnPrice) ||
+      (prediction === "lower" && rbPrice <= rdnPrice);
 
-  setPredictionResult({
-    isCorrect,
-    scenario: {
-      hour: selectedHour,
-      windProduction,
-      solarProduction,
-      demandForecast,
-      isWorkday,
-      rdnPrice,
-      rbPrice,
-      priceDiff: rbPrice - rdnPrice,
-    },
-  });
-};
+    setPredictionResult({
+      isCorrect,
+      scenario: {
+        hour: selectedHour,
+        windProduction,
+        solarProduction,
+        demandForecast,
+        isWorkday,
+        rdnPrice,
+        rbPrice,
+        priceDiff: rbPrice - rdnPrice,
+      },
+    });
+  };
+
   return (
     <div className="p-4 max-w-full bg-gray-50 min-h-screen">
       <div className="container mx-auto">
         <header className="bg-blue-700 text-white p-6 rounded-lg shadow-lg mb-6">
-          <h1 className="text-3xl font-bold">
-            Narzędzie szkoleniowe dla traderów energii
-          </h1>
-          <p className="mt-2 text-blue-100">
-            Ćwicz przewidywanie różnic cen między Rynkiem Bilansującym (RB) a
-            Rynkiem Dnia Następnego (RDN) na polskim rynku energii
-          </p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold">
+                Narzędzie szkoleniowe dla traderów energii
+              </h1>
+              <p className="mt-2 text-blue-100">
+                Ćwicz przewidywanie różnic cen między Rynkiem Bilansującym (RB) a
+                Rynkiem Dnia Następnego (RDN) na polskim rynku energii
+              </p>
+            </div>
+            <button
+              onClick={() => setShowDataExtractor(!showDataExtractor)}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            >
+              {showDataExtractor ? "Ukryj ekstraktor danych" : "Pokaż ekstraktor danych"}
+            </button>
+          </div>
         </header>
+
+        {showDataExtractor && (
+          <div className="mb-6">
+            <ChartDataExtractor
+              historicalData={historicalData}
+              selectedHour={selectedHour}
+              selectedDate={selectedDate}
+              hourlyStats={hourlyStats}
+              selectedFactors={selectedFactors}
+            />
+          </div>
+        )}
+
         <div className="grid grid-cols-12 gap-3">
           <div className="col-span-3">
             {" "}
@@ -387,6 +414,13 @@ const makePrediction = (prediction: string) => {
               setShowDataPoints={setShowDataPoints}
               hourlyStats={hourlyStats}
             />
+
+<LLMChecklist
+  selectedHour={selectedHour}
+  selectedFactors={selectedFactors}
+  predictionScenario={predictionResult ? predictionResult.scenario : null}
+  historicalData={historicalData}
+/>
 
 <TrainingModule
   selectedHour={selectedHour}

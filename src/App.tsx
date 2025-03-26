@@ -18,6 +18,7 @@ function App() {
             <Routes>
               <Route path="/" element={<WorkspacePage />} />
               <Route path="/rd" element={<EnergyTraderTraining/>} />
+  
               <Route path="/:slug" element={<WorkspacePage />} />
               <Route path="/studio" element={<Studio />} />
               <Route path="/payment/success" element={<PaymentSuccessPage />} />

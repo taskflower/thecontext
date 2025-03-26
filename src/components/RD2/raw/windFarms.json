@@ -1,0 +1,866 @@
+[
+    {
+      "name": "Farma Wiatrowa Baczyna",
+      "location": "Lubuskie (gm. Lubiszyn, Lubno/Baczyna)",
+      "capacity_MW": 14.1,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Banie",
+      "location": "Zachodniopomorskie (gm. Banie)",
+      "capacity_MW": 106.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Baranów-Rychtal",
+      "location": "Wielkopolskie (powiat kępiński)",
+      "capacity_MW": 42.6,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Bardy",
+      "location": "Zachodniopomorskie (gm. Płoty, Bardy)",
+      "capacity_MW": 50.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Barwice",
+      "location": "Zachodniopomorskie (gm. Barwice)",
+      "capacity_MW": 42.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Barzowice",
+      "location": "Zachodniopomorskie (gm. Darłowo, Barzowice)",
+      "capacity_MW": 20.7,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Bielice",
+      "location": "Wielkopolskie (gm. Krotoszyn, Bielice)",
+      "capacity_MW": 5.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Boryszewo",
+      "location": "Pomorskie (gm. Gniewino, Boryszewo)",
+      "capacity_MW": 32.5,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Budzyń",
+      "location": "Wielkopolskie (gm. Budzyń)",
+      "capacity_MW": 50.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Bukowsko",
+      "location": "Podkarpackie (gm. Bukowsko)",
+      "capacity_MW": 18.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Bystra",
+      "location": "Zachodniopomorskie (gm. Gryfice, Bystra)",
+      "capacity_MW": 24.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Cisowo",
+      "location": "Zachodniopomorskie (gm. Darłowo, Cisowo)",
+      "capacity_MW": 20.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Czyżewo",
+      "location": "Mazowieckie (gm. Czyżew)",
+      "capacity_MW": 6.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Dąbrowice",
+      "location": "Łódzkie (gm. Dąbrowice)",
+      "capacity_MW": 35.8,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Darżyno",
+      "location": "Pomorskie (gm. Łęczyce, Darżyno)",
+      "capacity_MW": 6.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Dębsk",
+      "location": "Mazowieckie (powiat żuromiński, Dębsk)",
+      "capacity_MW": 121.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Dobrzyca",
+      "location": "Wielkopolskie (gm. Koźmin Wielkopolski, Dobrzyca)",
+      "capacity_MW": 49.9,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Dobrzyń",
+      "location": "Kujawsko-Pomorskie (gm. Dobrzyń nad Wisłą)",
+      "capacity_MW": 34.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Dominowo",
+      "location": "Wielkopolskie (gm. Dominowo)",
+      "capacity_MW": 62.4,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Dunowo",
+      "location": "Zachodniopomorskie (gm. Manowo, Dunowo)",
+      "capacity_MW": 43.8,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Gołdap",
+      "location": "Warmińsko-Mazurskie (gm. Gołdap)",
+      "capacity_MW": 48.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Gamów",
+      "location": "Śląskie (gm. Rudnik, Gamów)",
+      "capacity_MW": 33.8,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Gawłowice",
+      "location": "Kujawsko-Pomorskie (gm. Grudziądz, Gawłowice)",
+      "capacity_MW": 48.3,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Gizałki",
+      "location": "Wielkopolskie (gm. Gizałki)",
+      "capacity_MW": 36.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Gniew",
+      "location": "Pomorskie (gm. Gniew)",
+      "capacity_MW": 22.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Gorzyca",
+      "location": "Lubuskie (gm. Górzyca)",
+      "capacity_MW": 37.5,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Grabowo",
+      "location": "Podlaskie (gm. Dąbrowa Białostocka, Grabowo)",
+      "capacity_MW": 44.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Grzmiąca",
+      "location": "Zachodniopomorskie (gm. Grzmiąca)",
+      "capacity_MW": 6.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Iława",
+      "location": "Warmińsko-Mazurskie (gm. Iława)",
+      "capacity_MW": 13.2,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Iłża",
+      "location": "Mazowieckie (gm. Iłża)",
+      "capacity_MW": 54.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Inowrocław",
+      "location": "Kujawsko-Pomorskie (gm. Inowrocław)",
+      "capacity_MW": 32.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Jasna",
+      "location": "Pomorskie (gm. Kobylnica)",
+      "capacity_MW": 132.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Jarocin-Koźmin",
+      "location": "Wielkopolskie (gm. Koźmin Wlkp.)",
+      "capacity_MW": 42.5,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Jarocin-Wschód",
+      "location": "Wielkopolskie (gm. Jarocin)",
+      "capacity_MW": 5.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Jagniątkowo (Jezioro Ostrowo)",
+      "location": "Zachodniopomorskie (gm. Dygowo)",
+      "capacity_MW": 34.2,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Jeżyce",
+      "location": "Zachodniopomorskie (gm. Postomino, Jeżyce)",
+      "capacity_MW": 27.5,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Jóźwin",
+      "location": "Wielkopolskie (gm. Kleczew, Jóźwin)",
+      "capacity_MW": 25.3,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Kamieńsk",
+      "location": "Łódzkie (gm. Kamieńsk)",
+      "capacity_MW": 31.2,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Kanin",
+      "location": "Zachodniopomorskie (gm. Biesiekierz, Kanin)",
+      "capacity_MW": 20.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Karnice I",
+      "location": "Zachodniopomorskie (gm. Karnice)",
+      "capacity_MW": 31.2,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Karnice II",
+      "location": "Zachodniopomorskie (gm. Karnice)",
+      "capacity_MW": 22.6,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Karcino",
+      "location": "Zachodniopomorskie (gm. Kołobrzeg, Karcino)",
+      "capacity_MW": 51.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Karwice",
+      "location": "Zachodniopomorskie (gm. Malechowo, Karwice)",
+      "capacity_MW": 46.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Kisielice",
+      "location": "Warmińsko-Mazurskie (gm. Kisielice)",
+      "capacity_MW": 53.6,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Kisielice (Green Investment)",
+      "location": "Warmińsko-Mazurskie (gm. Kisielice)",
+      "capacity_MW": 42.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Kobylnica",
+      "location": "Pomorskie (gm. Kobylnica)",
+      "capacity_MW": 41.4,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Korytnica",
+      "location": "Mazowieckie (gm. Wierzbno, Korytnica)",
+      "capacity_MW": 82.5,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Korsze",
+      "location": "Warmińsko-Mazurskie (gm. Korsze)",
+      "capacity_MW": 70.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Koźmin",
+      "location": "Wielkopolskie (gm. Koźmin Wlkp.)",
+      "capacity_MW": 4.8,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Krupy",
+      "location": "Zachodniopomorskie (gm. Darłowo, Krupy)",
+      "capacity_MW": 17.5,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Krzęcin (Choszczno)",
+      "location": "Zachodniopomorskie (gm. Krzęcin)",
+      "capacity_MW": 19.2,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Linowo",
+      "location": "Warmińsko-Mazurskie (gm. Lidzbark Warmiński, Linowo)",
+      "capacity_MW": 48.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Lębork",
+      "location": "Pomorskie (gm. Nowa Wieś Lęborska)",
+      "capacity_MW": 44.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Lichnowy",
+      "location": "Pomorskie (gm. Lichnowy)",
+      "capacity_MW": 20.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Lipniki",
+      "location": "Lubelskie (gm. Żółkiewka, Lipniki)",
+      "capacity_MW": 30.8,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Lubartów",
+      "location": "Lubelskie (gm. Serniki, Lubartów)",
+      "capacity_MW": 51.2,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Margonin",
+      "location": "Wielkopolskie (gm. Margonin)",
+      "capacity_MW": 120.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Marszewo",
+      "location": "Zachodniopomorskie (gm. Wolin, Marszewo)",
+      "capacity_MW": 100.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Maszewo",
+      "location": "Zachodniopomorskie (gm. Maszewo)", 
+      "capacity_MW": 100.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Modlikowice",
+      "location": "Dolnośląskie (gm. Zagrodno, Modlikowice)",
+      "capacity_MW": 24.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Mogilno",
+      "location": "Kujawsko-Pomorskie (gm. Mogilno)",
+      "capacity_MW": 34.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Mycielin",
+      "location": "Lubuskie (gm. Niegosławice, Mycielin)",
+      "capacity_MW": 46.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Myślino",
+      "location": "Zachodniopomorskie (gm. Gościno, Myślino)",
+      "capacity_MW": 20.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Nawrocko",
+      "location": "Zachodniopomorskie (gm. Świeszyno, Nawrocko)",
+      "capacity_MW": 7.2,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Nowotna",
+      "location": "Pomorskie (gm. Stegna, Nowotna)",
+      "capacity_MW": 40.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Nowy Jarosław",
+      "location": "Zachodniopomorskie (gm. Darłowo, Nowy Jarosław)",
+      "capacity_MW": 25.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Nowy Staw",
+      "location": "Pomorskie (gm. Nowy Staw)",
+      "capacity_MW": 73.1,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Nowa Brzeźnica",
+      "location": "Łódzkie (gm. Nowa Brzeźnica)",
+      "capacity_MW": 20.0,
+      "status": "w budowie"
+    },
+    {
+      "name": "Farma Wiatrowa Opalenica",
+      "location": "Wielkopolskie (gm. Opalenica)",
+      "capacity_MW": 16.8,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Orla",
+      "location": "Podlaskie (gm. Orla)",
+      "capacity_MW": 37.5,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Parnowo",
+      "location": "Zachodniopomorskie (gm. Biesiekierz, Parnowo)",
+      "capacity_MW": 15.4,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Parsówek",
+      "location": "Zachodniopomorskie (gm. Pyrzyce, Parsówek)",
+      "capacity_MW": 26.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Pawłowo",
+      "location": "Wielkopolskie (gm. Gołańcz, Pawłowo)",
+      "capacity_MW": 79.5,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Pelplin",
+      "location": "Pomorskie (gm. Pelplin)",
+      "capacity_MW": 49.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Piecki",
+      "location": "Warmińsko-Mazurskie (gm. Kurzętnik, Piecki)",
+      "capacity_MW": 32.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Pomerania",
+      "location": "Pomorskie (powiat sztumski)",
+      "capacity_MW": 94.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Porzecze",
+      "location": "Zachodniopomorskie (gm. Płoty, Porzecze)",
+      "capacity_MW": 24.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Potęgowo",
+      "location": "Pomorskie (powiat słupski i sławieński)",
+      "capacity_MW": 219.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Przykona",
+      "location": "Wielkopolskie (gm. Przykona)",
+      "capacity_MW": 33.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Puck",
+      "location": "Pomorskie (gm. Puck)",
+      "capacity_MW": 22.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Rajgród",
+      "location": "Podlaskie (gm. Rajgród)",
+      "capacity_MW": 25.3,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Radziejów",
+      "location": "Kujawsko-Pomorskie (gm. Radziejów)",
+      "capacity_MW": 18.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Resko I",
+      "location": "Zachodniopomorskie (gm. Resko)",
+      "capacity_MW": 14.3,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Resko II",
+      "location": "Zachodniopomorskie (gm. Płoty)",
+      "capacity_MW": 76.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Rymanów",
+      "location": "Podkarpackie (gm. Rymanów)",
+      "capacity_MW": 26.7,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Rzepin",
+      "location": "Lubuskie (gm. Rzepin)",
+      "capacity_MW": 58.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Rozdrażew",
+      "location": "Wielkopolskie (gm. Rozdrażew)",
+      "capacity_MW": 16.8,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Skoczykłody",
+      "location": "Łódzkie (gm. Żelechlinek)",
+      "capacity_MW": 41.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Skurpie",
+      "location": "Warmińsko-Mazurskie (gm. Działdowo, Skurpie)",
+      "capacity_MW": 43.7,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Starza/Rybice",
+      "location": "Zachodniopomorskie (gm. Kamień Pomorski)",
+      "capacity_MW": 74.6,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Stary Jarosław",
+      "location": "Zachodniopomorskie (gm. Darłowo, Stary Jarosław)",
+      "capacity_MW": 22.5,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Stawiszyn",
+      "location": "Wielkopolskie (gm. Stawiszyn)",
+      "capacity_MW": 4.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Suwałki",
+      "location": "Podlaskie (gm. Suwałki)",
+      "capacity_MW": 41.4,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Szymankowo",
+      "location": "Pomorskie (gm. Miłoradz, Szymankowo)",
+      "capacity_MW": 38.1,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Słupcza-Kołaczkowo",
+      "location": "Mazowieckie (gm. Sadowne)",
+      "capacity_MW": 45.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Ścieki",
+      "location": "Mazowieckie (gm. Siedlec, Ścieki)",
+      "capacity_MW": 22.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Śniatowo",
+      "location": "Zachodniopomorskie (gm. Kamień Pomorski, Śniatowo)",
+      "capacity_MW": 32.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Tarnowiec (Zajączkowo/Kobylnica)",
+      "location": "Pomorskie (gm. Słupsk, Zajączkowo/Kobylnica)",
+      "capacity_MW": 48.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Taciewo",
+      "location": "Podlaskie (gm. Suwałki, Taciewo)",
+      "capacity_MW": 30.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Tymień",
+      "location": "Zachodniopomorskie (gm. Będzino, Tymień)",
+      "capacity_MW": 48.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Tychowo",
+      "location": "Zachodniopomorskie (gm. Tychowo)",
+      "capacity_MW": 34.5,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Tyszowce",
+      "location": "Lubelskie (gm. Tyszowce)",
+      "capacity_MW": 30.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Udanin",
+      "location": "Dolnośląskie (gm. Udanin)",
+      "capacity_MW": 50.8,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Ujazd",
+      "location": "Łódzkie (gm. Ujazd)",
+      "capacity_MW": 30.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Ustka",
+      "location": "Pomorskie (gm. Ustka)",
+      "capacity_MW": 28.6,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Warblewo",
+      "location": "Pomorskie (gm. Kobylnica, Warblewo)",
+      "capacity_MW": 30.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Wartkowo",
+      "location": "Zachodniopomorskie (gm. Gościno, Wartkowo)",
+      "capacity_MW": 30.8,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Wielowieś",
+      "location": "Śląskie (gm. Wielowieś)",
+      "capacity_MW": 66.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Wielkopolska (Nekla)",
+      "location": "Wielkopolskie (gm. Nekla)",
+      "capacity_MW": 52.5,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Widuchowa",
+      "location": "Zachodniopomorskie (gm. Widuchowa)",
+      "capacity_MW": 6.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Wiekowice",
+      "location": "Zachodniopomorskie (gm. Darłowo, Wiekowice)",
+      "capacity_MW": 25.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Wróblew",
+      "location": "Łódzkie (gm. Wróblew)",
+      "capacity_MW": 38.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Wysoka I",
+      "location": "Wielkopolskie (gm. Wysoka)",
+      "capacity_MW": 7.5,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Wysoka II",
+      "location": "Wielkopolskie (gm. Wysoka)",
+      "capacity_MW": 47.5,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Zajączkowo",
+      "location": "Pomorskie (gm. Słupsk, Zajączkowo)",
+      "capacity_MW": 48.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Zagórze",
+      "location": "Zachodniopomorskie (gm. Wolin, Zagórze)",
+      "capacity_MW": 30.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Zopowy",
+      "location": "Opolskie (gm. Głubczyce, Zopowy)",
+      "capacity_MW": 30.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Żuromin",
+      "location": "Mazowieckie (gm. Kuczbork-Osada)",
+      "capacity_MW": 61.2,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Żary",
+      "location": "Lubuskie (gm. Żary)",
+      "capacity_MW": 21.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Morska Farma Wiatrowa Bałtyk I",
+      "location": "Morze Bałtyckie (Polska EEZ)",
+      "capacity_MW": 1560.0,
+      "status": "planowana"
+    },
+    {
+      "name": "Morska Farma Wiatrowa Bałtyk II",
+      "location": "Morze Bałtyckie (Polska EEZ)",
+      "capacity_MW": 720.0,
+      "status": "planowana"
+    },
+    {
+      "name": "Morska Farma Wiatrowa Bałtyk III",
+      "location": "Morze Bałtyckie (Polska EEZ)",
+      "capacity_MW": 720.0,
+      "status": "planowana"
+    },
+    {
+      "name": "Morska Farma Wiatrowa Baltica 1",
+      "location": "Morze Bałtyckie (Polska EEZ)",
+      "capacity_MW": 900.0,
+      "status": "planowana"
+    },
+    {
+      "name": "Morska Farma Wiatrowa Baltica 1+",
+      "location": "Morze Bałtyckie (Polska EEZ)",
+      "capacity_MW": 1185.0,
+      "status": "planowana"
+    },
+    {
+      "name": "Morska Farma Wiatrowa Baltica 2",
+      "location": "Morze Bałtyckie (Polska EEZ)",
+      "capacity_MW": 1498.0,
+      "status": "planowana"
+    },
+    {
+      "name": "Morska Farma Wiatrowa Baltica 2+",
+      "location": "Morze Bałtyckie (Polska EEZ)",
+      "capacity_MW": 210.0,
+      "status": "planowana"
+    },
+    {
+      "name": "Morska Farma Wiatrowa Baltica 3",
+      "location": "Morze Bałtyckie (Polska EEZ)",
+      "capacity_MW": 1045.5,
+      "status": "planowana"
+    },
+    {
+      "name": "Morska Farma Wiatrowa Baltica 5",
+      "location": "Morze Bałtyckie (Polska EEZ)",
+      "capacity_MW": 555.0,
+      "status": "planowana"
+    },
+    {
+      "name": "Morska Farma Wiatrowa Baltica 7",
+      "location": "Morze Bałtyckie (Polska EEZ)",
+      "capacity_MW": 990.0,
+      "status": "planowana"
+    },
+    {
+      "name": "Morska Farma Wiatrowa Baltica 9",
+      "location": "Morze Bałtyckie (Polska EEZ)",
+      "capacity_MW": 975.0,
+      "status": "planowana"
+    },
+    {
+      "name": "Morska Farma Wiatrowa Baltic Power",
+      "location": "Morze Bałtyckie (Polska EEZ)",
+      "capacity_MW": 1197.0,
+      "status": "planowana"
+    },
+    {
+      "name": "Morska Farma Wiatrowa BC-Wind",
+      "location": "Morze Bałtyckie (Polska EEZ)",
+      "capacity_MW": 369.5,
+      "status": "planowana"
+    },
+    {
+      "name": "Morska Farma Wiatrowa Energa MFW 1",
+      "location": "Morze Bałtyckie (Polska EEZ)",
+      "capacity_MW": 812.0,
+      "status": "planowana"
+    },
+    {
+      "name": "Morska Farma Wiatrowa Energa MFW 2",
+      "location": "Morze Bałtyckie (Polska EEZ)",
+      "capacity_MW": 896.0,
+      "status": "planowana"
+    },
+    {
+      "name": "Morska Farma Wiatrowa FEW Baltic II",
+      "location": "Morze Bałtyckie (Polska EEZ)",
+      "capacity_MW": 350.0,
+      "status": "planowana"
+    },
+    {
+      "name": "Morska Farma Wiatrowa Orlen Neptun 14.E.3",
+      "location": "Morze Bałtyckie (Polska EEZ)",
+      "capacity_MW": 1204.0,
+      "status": "planowana"
+    },
+    {
+      "name": "Morska Farma Wiatrowa Orlen Neptun 14.E.4",
+      "location": "Morze Bałtyckie (Polska EEZ)",
+      "capacity_MW": 1204.0,
+      "status": "planowana"
+    },
+    {
+      "name": "Morska Farma Wiatrowa Orlen Neptun 46.E.1",
+      "location": "Morze Bałtyckie (Polska EEZ)",
+      "capacity_MW": 966.0,
+      "status": "planowana"
+    },
+    {
+      "name": "Morska Farma Wiatrowa Silesia II (Grodków)",
+      "location": "Opolskie (gm. Grodków)",
+      "capacity_MW": 137.0,
+      "status": "w budowie"
+    },
+    {
+      "name": "Farma Wiatrowa Sieradz",
+      "location": "Łódzkie (gm. Wróblew)",
+      "capacity_MW": 24.0,
+      "status": "w budowie"
+    },
+    {
+      "name": "Farma Wiatrowa Tarnowiec (Zajączkowo/Kobylnica)",
+      "location": "Pomorskie (gm. Słupsk, Zajączkowo/Kobylnica)",
+      "capacity_MW": 48.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Farma Wiatrowa Ujazd",
+      "location": "Łódzkie (gm. Ujazd)",
+      "capacity_MW": 30.0,
+      "status": "działająca"
+    },
+    {
+      "name": "Morska Farma Wiatrowa Silesia II (Grodków)",
+      "location": "Opolskie (gm. Grodków)",
+      "capacity_MW": 137.0,
+      "status": "w budowie"
+    },
+    {
+      "name": "Morska Farma Wiatrowa Orlen Neptun 46.E.1",
+      "location": "Morze Bałtyckie (Polska EEZ)",
+      "capacity_MW": 966.0,
+      "status": "planowana"
+    }
+  ]
