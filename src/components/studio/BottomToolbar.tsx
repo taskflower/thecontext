@@ -28,7 +28,7 @@ export const BottomToolbar: React.FC<BottomToolbarProps> = ({ activeContent, onS
         />
         <ToolbarButton
           icon={<MessageSquare className="h-4 w-4" />}
-          label="Conversation"
+          label="Conversations History"
           active={activeContent === "conversation"}
           onClick={() => onSelectContent("conversation")}
         />

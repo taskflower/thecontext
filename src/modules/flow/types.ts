@@ -31,7 +31,6 @@ export interface FlowActions {
   nextStep: () => void;
   prevStep: () => void;
   
-  
   // Modyfikacja tymczasowych danych
   updateTempNodeUserPrompt: (nodeId: string, prompt: string) => void;
   updateTempNodeAssistantMessage: (nodeId: string, message: string) => void;

@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { cn } from "@/utils/utils";
-import FlowGraph from "@/modules/flow/components/FlowGraph";
+
 import { Header } from "@/components/studio/Header";
 import { LeftPanel } from "@/components/studio/LeftPanel";
 import { BottomPanel } from "@/components/studio/BottomPanel";
 import { BottomToolbar } from "@/components/studio/BottomToolbar";
+import FlowGraph from "@/components/studio/FlowGraph";
+
 
 // Typ dla zawartości dolnego panelu
 type PanelContentType = "context" | "filters" | "conversation" | "plugins" | "";

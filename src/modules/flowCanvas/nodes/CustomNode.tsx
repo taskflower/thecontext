@@ -1,8 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from 'react';
+
 import { Handle, Position } from 'reactflow';
 
-const CustomNode: React.FC<{ data: any }> = ({ data }) => {
+// Interfejs dla typów danych przekazywanych do węzła
+interface NodeData {
+  label?: string;
+  nodeType?: string;
+  value?: string | number;
+  prompt?: string;
+  message?: string;
+  pluginKey?: string;
+}
+
+const CustomNode: React.FC<{ data: NodeData }> = ({ data }) => {
   return (
     <div className="relative group">
       {/* Main node container */}
