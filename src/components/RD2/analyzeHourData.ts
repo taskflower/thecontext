@@ -57,8 +57,8 @@ interface HourData {
     
     // Create data for correlation chart
     const imbalanceVsPriceDiff = validData.map(d => ({
-      imbalance: d.imbalance,
-      priceDiff: d.priceDiff
+      imbalance: parseFloat(d.imbalance.toFixed(2)),
+      priceDiff: parseFloat(d.priceDiff.toFixed(2))
     }));
     
     console.log(`Analysis complete - ${rbHigherCount} out of ${totalEntries} days had RB > RDN (${rbHigherPercent}%)`);

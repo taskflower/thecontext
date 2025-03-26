@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Fixed version of ChartsSection.tsx
 import React, { useMemo } from 'react';
-import { BarChart, Bar, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer, Cell, Legend } from 'recharts';
+import { BarChart, Bar, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer, Cell, Legend, LabelList } from 'recharts';
 
 interface ChartsSectionProps {
   hourData: any[];
@@ -14,7 +14,7 @@ interface ChartsSectionProps {
 }
 
 const ChartsSection: React.FC<ChartsSectionProps> = ({ 
-  hourData, 
+
   selectedHour,
   selectedDate,
   historicalData,
@@ -135,7 +135,16 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
               />
               <Tooltip 
                 cursor={{ strokeDasharray: '3 3' }} 
-                formatter={(value: any) => [`${value}`, '']}
+                formatter={(value: any, name: string) => {
+                  if (name === 'imbalance') return [`${value.toFixed(2)} MW`, 'Niezbilansowanie'];
+                  if (name === 'priceDiff') return [`${value.toFixed(2)} PLN/MWh`, 'Różnica RB-RDN'];
+                  return [value.toFixed(2), name];
+                }}
+                separator=": "
+                itemSorter={(item) => {
+                  // Sortuj elementy, aby Niezbilansowanie było zawsze pierwsze
+                  return item.dataKey === 'imbalance' ? -1 : 1;
+                }}
               />
               <Legend />
               <ReferenceLine y={0} stroke="#000" />
@@ -143,9 +152,13 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
               <Scatter 
                 name="RB-RDN vs Niezbilansowanie" 
                 data={hourlyStats.imbalanceVsPriceDiff} 
-                fill="#8884d8" 
+                fill="#8884d8"
                 isAnimationActive={false}
-              />
+                shape="circle" 
+                r={10}
+              >
+                <LabelList dataKey="imbalance" position="top" />
+              </Scatter>
             </ScatterChart>
           </ResponsiveContainer>
         ) : !showDataPoints ? (
