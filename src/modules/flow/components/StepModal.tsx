@@ -10,10 +10,10 @@ import {
   DefaultAssistantMessage,
   DefaultUserInput,
   NavigationButtons,
-  ContextUpdateInfo // Nowy import
+  ContextUpdateInfo
 } from "./DefaultComponents";
 import { processTemplateWithItems } from "@/modules/context/utils";
-import { updateContextFromNodeInput } from "../contextHandler"; // Nowy import
+import { updateContextFromNodeInput } from "../contextHandler";
 
 export const StepModal: React.FC<StepModalProps> = ({ onClose }) => {
   // Get our plugin context to access plugin components
@@ -61,18 +61,19 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose }) => {
         }
       });
       
-      // Krótkie opóźnienie, aby zmiany zostały zastosowane przed zapisem
+      // Zapisujemy zmiany do historii i kończymy sesję
       setTimeout(() => {
         stopFlowSession(true);
         onClose();
       }, 50);
     } else {
+      // Nie zapisujemy zmian, ale zachowujemy sesję do kontynuacji
       stopFlowSession(false);
       onClose();
     }
   };
 
-  // Obsługa nawigacji - ZAKTUALIZOWANA
+  // Obsługa nawigacji
   const handleNavigation = (direction: 'prev' | 'next' | 'finish') => {
     if (direction === 'prev') {
       prevStep();
@@ -191,7 +192,7 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose }) => {
           {/* User input - conditionally render based on plugin settings */}
           {!pluginSettings.replaceUserInput && (
             <>
-              {/* Nowy komponent informacyjny o kontekście */}
+              {/* Komponent informacyjny o kontekście */}
               <ContextUpdateInfo 
                 contextKey={currentNode.contextKey} 
                 isVisible={Boolean(currentNode.contextKey)}

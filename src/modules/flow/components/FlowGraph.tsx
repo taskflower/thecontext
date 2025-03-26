@@ -125,9 +125,37 @@ const FlowGraph: React.FC = () => {
 
   // Obsługa zamknięcia okna modal
   const handleCloseModal = useCallback(() => {
+    // Wywołanie bez argumentu zachowa tymczasową sesję do późniejszej kontynuacji
     stopFlowSession(false);
   }, [stopFlowSession]);
 
+  // Sprawdź, czy istnieje wcześniejsza, niezakończona sesja
+  const hasExistingSession = useAppStore(
+    (state) => !state.flowSession?.isPlaying && state.flowSession?.temporarySteps && state.flowSession.temporarySteps.length > 0
+  );
+
+  // Aktualny indeks kroku w tymczasowej sesji
+  const currentSessionStep = useAppStore(
+    (state) => state.flowSession?.currentStepIndex || 0
+  );
+
+  // Obsługa rozpoczęcia nowej sesji
+  const handleNewSession = useCallback(() => {
+    // Jeśli istnieje niezakończona sesja, wyczyść ją przed rozpoczęciem nowej
+    if (hasExistingSession) {
+      // Zamiast używać set, użyjemy bezpośrednio stanu z useAppStore
+      const appStore = useAppStore.getState();
+      if (appStore.flowSession) {
+        // Tworzymy nowy obiekt z pustymi krokami
+        appStore.flowSession = {
+          ...appStore.flowSession,
+          temporarySteps: [],
+          currentStepIndex: 0
+        };
+      }
+    }
+    startFlowSession();
+  }, [hasExistingSession, startFlowSession]);
   return (
     <div className="bg-card rounded-md shadow-sm p-0 h-full w-full relative">
       <style>
@@ -139,15 +167,23 @@ const FlowGraph: React.FC = () => {
           }
         `}
       </style>
-      <div className="absolute top-2 right-2 z-10">
-        <button
-          onClick={handlePlay}
-          className="p-2 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90"
-          disabled={isFlowPlaying}
-        >
-          {isFlowPlaying ? "Flow w trakcie..." : "Uruchom Flow"}
-        </button>
-      </div>
+      <div className="absolute top-2 right-2 z-10 flex space-x-2">
+  {hasExistingSession && (
+    <button
+      onClick={handlePlay}
+      className="p-2 rounded-md bg-secondary text-secondary-foreground text-xs font-medium hover:bg-secondary/90"
+    >
+      Kontynuuj sesję (krok {currentSessionStep + 1})
+    </button>
+  )}
+  <button
+    onClick={handleNewSession}
+    className="p-2 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90"
+    disabled={isFlowPlaying}
+  >
+    {isFlowPlaying ? "Flow w trakcie..." : "Nowa sesja Flow"}
+  </button>
+</div>
 
       <ReactFlow
         nodes={nodes}

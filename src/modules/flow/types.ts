@@ -1,3 +1,4 @@
+// src/modules/flow/types.ts
 import { Edge, FlowNode } from "../graph/types";
 
 // Stan tymczasowego flow
@@ -23,9 +24,13 @@ export interface FlowActions {
   
   // Zarządzanie sesją flow
   startFlowSession: () => void;
+  // saveChanges=true - zapisz do historii i wyczyść sesję
+  // saveChanges=false - zachowaj sesję do kontynuacji
   stopFlowSession: (saveChanges?: boolean) => void;
+  resetFlowSession: () => void;
   nextStep: () => void;
   prevStep: () => void;
+  
   
   // Modyfikacja tymczasowych danych
   updateTempNodeUserPrompt: (nodeId: string, prompt: string) => void;
