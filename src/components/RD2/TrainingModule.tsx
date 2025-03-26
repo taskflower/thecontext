@@ -44,9 +44,10 @@ const TrainingModule: React.FC<TrainingModuleProps> = ({
   setPredictionResult,
   setUserPrediction
 }) => {
-  // Check if selectedDate is the last day in the data range
-  const isLastDate = selectedDate && availableDates.length > 0 && 
-    selectedDate === availableDates[availableDates.length - 1];
+  // Check if prediction is not possible (last day or full range selected)
+  const isPredictionNotPossible = (selectedDate && availableDates.length > 0 && 
+    selectedDate === availableDates[availableDates.length - 1]) || 
+    selectedDate === null;
   
   // Get next day data when possible
   const getNextDayData = () => {
@@ -69,15 +70,20 @@ const TrainingModule: React.FC<TrainingModuleProps> = ({
     <div className="bg-white p-4 rounded shadow mb-6">
       <h2 className="text-lg font-semibold mb-2">Moduł szkoleniowy - Prognoza cen</h2>
       
-      {isLastDate ? (
+      {isPredictionNotPossible ? (
         <div className="p-4 bg-yellow-50 border border-yellow-200 rounded">
           <h3 className="font-medium text-yellow-800">Uwaga:</h3>
           <p className="mt-2">
-            Wybrany dzień jest ostatnim dniem w zakresie danych. Nie możemy przeprowadzić
-            treningu predykcji, ponieważ brakuje danych z następnego dnia do weryfikacji.
+            {selectedDate === null 
+              ? "Wybrano pełny zakres danych." 
+              : "Wybrany dzień jest ostatnim dniem w zakresie danych."} 
+            Nie możemy przeprowadzić treningu predykcji, ponieważ brakuje danych z następnego 
+            dnia do weryfikacji.
           </p>
           <p className="mt-2">
-            Wybierz wcześniejszy dzień, aby skorzystać z modułu predykcji.
+            {selectedDate === null 
+              ? "Wybierz konkretny dzień (inny niż ostatni), aby skorzystać z modułu predykcji."
+              : "Wybierz wcześniejszy dzień, aby skorzystać z modułu predykcji."}
           </p>
         </div>
       ) : (
