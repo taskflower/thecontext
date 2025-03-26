@@ -198,24 +198,44 @@ export const createFlowSlice: StateCreator<
       }
     }),
   
-  // Stare metody - tylko dla zachowania zgodności, ale nie zmieniają oryginalnych danych
+  // POPRAWIONE METODY - inteligentnie wybierają między sesją a oryginalnymi danymi
   updateNodeAssistantMessage: (nodeId: string, assistantMessage: string) => {
-    console.log(`DEPRECATED: updateNodeAssistantMessage called, use updateTempNodeAssistantMessage instead`);
-    
-    // Zamiast aktualizować oryginalne dane, aktualizujemy tymczasowe dane w sesji flow
     const state = get();
-    if (state.flowSession) {
+    
+    // Jeśli sesja jest aktywna, aktualizuj tymczasowe dane
+    if (state.flowSession?.isPlaying) {
       get().updateTempNodeAssistantMessage(nodeId, assistantMessage);
+    } else {
+      // W przeciwnym razie aktualizuj oryginalne dane
+      set((state: Draft<AppState>) => {
+        const workspace = state.items.find(w => w.id === state.selected.workspace);
+        const scenario = workspace?.children.find(s => s.id === state.selected.scenario);
+        const node = scenario?.children.find(n => n.id === nodeId);
+        if (node) {
+          node.assistantMessage = assistantMessage;
+          state.stateVersion++;
+        }
+      });
     }
   },
   
   updateNodeUserPrompt: (nodeId: string, userPrompt: string) => {
-    console.log(`DEPRECATED: updateNodeUserPrompt called, use updateTempNodeUserPrompt instead`);
-    
-    // Zamiast aktualizować oryginalne dane, aktualizujemy tymczasowe dane w sesji flow
     const state = get();
-    if (state.flowSession) {
+    
+    // Jeśli sesja jest aktywna, aktualizuj tymczasowe dane
+    if (state.flowSession?.isPlaying) {
       get().updateTempNodeUserPrompt(nodeId, userPrompt);
+    } else {
+      // W przeciwnym razie aktualizuj oryginalne dane
+      set((state: Draft<AppState>) => {
+        const workspace = state.items.find(w => w.id === state.selected.workspace);
+        const scenario = workspace?.children.find(s => s.id === state.selected.scenario);
+        const node = scenario?.children.find(n => n.id === nodeId);
+        if (node) {
+          node.userPrompt = userPrompt;
+          state.stateVersion++;
+        }
+      });
     }
   }
 });
