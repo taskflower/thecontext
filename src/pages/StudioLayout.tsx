@@ -9,7 +9,7 @@ import FlowGraph from "@/components/studio/FlowGraph";
 
 
 // Typ dla zawartości dolnego panelu
-type PanelContentType = "context" | "filters" | "conversation" | "plugins" | "";
+type PanelContentType = "context" | "filters" | "conversation" | "plugins" |  "exportimport" | "";
 
 const Studio: React.FC = () => {
   const [showLeftPanel, setShowLeftPanel] = useState(true);
