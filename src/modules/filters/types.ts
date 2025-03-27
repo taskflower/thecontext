@@ -41,3 +41,9 @@ export interface FilterActions {
   // Check if context matches filter conditions
   checkScenarioFilterMatch: () => boolean;
 }
+
+// Add to your main types file or export from here
+export interface FilterStatusProps {
+  onClick?: (e: React.MouseEvent) => void;
+  className?: string;
+}
