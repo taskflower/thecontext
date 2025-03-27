@@ -22,7 +22,7 @@ const CustomNode: React.FC<{ data: NodeData }> = ({ data }) => {
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 rounded-full bg-primary"></div>
             <h3 className="text-sm font-medium truncate">
-              {data.nodeType || 'Input'}
+              {data.label || data.nodeType || 'Input'}
             </h3>
           </div>
           {data.value && (
