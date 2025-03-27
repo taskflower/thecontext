@@ -5,18 +5,16 @@ import ReactFlow, {
   Background,
   useNodesState,
   useEdgesState,
+  Node
 } from "reactflow";
 import "reactflow/dist/style.css";
 
-
-// Importujemy z nowego modułu flowCanvas
-
-
-// Importujemy style
+// Import styles
 import "./styles.css";
 import { useAppStore } from "@/modules/store";
 import { StepModal } from "@/modules/flow/components/StepModal";
 import { useFlowHandlers, adaptNodeToReactFlow, adaptEdgeToReactFlow, nodeTypes, GRID_SIZE, DEFAULT_MAX_ZOOM } from "@/modules/flowCanvas";
+import { usePanelStore } from "@/modules/PanelStore";
 
 const FlowGraph: React.FC = () => {
   const getActiveScenarioData = useAppStore(
@@ -30,10 +28,27 @@ const FlowGraph: React.FC = () => {
   );
   const selectedNodeId = useAppStore((state) => state.selected.node);
 
-  // Używamy handlera z nowego modułu
-  const { onConnect, onNodeDragStop, onNodeClick } = useFlowHandlers();
+  // Get panel store actions
+  const setLeftPanelTab = usePanelStore((state) => state.setLeftPanelTab);
+  const setShowLeftPanel = usePanelStore((state) => state.setShowLeftPanel);
 
-  // Pobierz dane i przekształć je dla ReactFlow
+  // Get original flow handlers
+  const { onConnect, onNodeDragStop, onNodeClick: originalOnNodeClick } = useFlowHandlers();
+
+  // Enhanced node click handler that also manages panel state
+  const onNodeClick = useCallback(
+    (event: React.MouseEvent, node: Node) => {
+      // First call original handler
+      originalOnNodeClick(event, node);
+      
+      // Then set panel state
+      setShowLeftPanel(true);
+      setLeftPanelTab("nodes");
+    },
+    [originalOnNodeClick, setShowLeftPanel, setLeftPanelTab]
+  );
+
+  // Get data and transform for ReactFlow
   const { nodes: originalNodes, edges: originalEdges } =
     getActiveScenarioData();
   const reactFlowNodes = originalNodes.map((node) =>
@@ -41,11 +56,11 @@ const FlowGraph: React.FC = () => {
   );
   const reactFlowEdges = originalEdges.map(adaptEdgeToReactFlow);
 
-  // Inicjalizacja stanu ReactFlow
+  // Initialize ReactFlow state
   const [nodes, setNodes, onNodesChange] = useNodesState(reactFlowNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(reactFlowEdges);
 
-  // Aktualizacja grafu na zmiany danych
+  // Update graph on data changes
   useEffect(() => {
     const { nodes: newNodes, edges: newEdges } = getActiveScenarioData();
     const updatedNodes = newNodes.map((node) =>
@@ -57,35 +72,34 @@ const FlowGraph: React.FC = () => {
     setEdges(updatedEdges);
   }, [getActiveScenarioData, setNodes, setEdges, stateVersion, selectedNodeId]);
 
-  // Rozpoczęcie sesji flow
+  // Start flow session
   const handlePlay = useCallback(() => {
     startFlowSession();
   }, [startFlowSession]);
 
-  // Obsługa zamknięcia okna modal
+  // Handle modal close
   const handleCloseModal = useCallback(() => {
-    // Wywołanie bez argumentu zachowa tymczasową sesję do późniejszej kontynuacji
+    // Calling without argument will keep the temporary session for later continuation
     stopFlowSession(false);
   }, [stopFlowSession]);
 
-  // Sprawdź, czy istnieje wcześniejsza, niezakończona sesja
+  // Check if there's a previous, unfinished session
   const hasExistingSession = useAppStore(
     (state) => !state.flowSession?.isPlaying && state.flowSession?.temporarySteps && state.flowSession.temporarySteps.length > 0
   );
 
-  // Aktualny indeks kroku w tymczasowej sesji
+  // Current step index in the temporary session
   const currentSessionStep = useAppStore(
     (state) => state.flowSession?.currentStepIndex || 0
   );
 
-  // Obsługa rozpoczęcia nowej sesji
+  // Handle starting a new session
   const handleNewSession = useCallback(() => {
-    // Jeśli istnieje niezakończona sesja, wyczyść ją przed rozpoczęciem nowej
+    // If there's an unfinished session, clear it before starting a new one
     if (hasExistingSession) {
-      // Zamiast używać set, użyjemy bezpośrednio stanu z useAppStore
       const appStore = useAppStore.getState();
       if (appStore.flowSession) {
-        // Tworzymy nowy obiekt z pustymi krokami
+        // Create a new object with empty steps
         appStore.flowSession = {
           ...appStore.flowSession,
           temporarySteps: [],

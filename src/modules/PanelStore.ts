@@ -17,6 +17,7 @@ interface PanelState {
   // Actions
   toggleLeftPanel: () => void
   setLeftPanelTab: (tab: LeftPanelTab) => void
+  setShowLeftPanel: (show: boolean) => void
   
   toggleBottomPanel: (tab?: BottomPanelTab) => void
   setBottomPanelTab: (tab: BottomPanelTab) => void
@@ -35,6 +36,7 @@ export const usePanelStore = create<PanelState>()(
       // Left panel actions
       toggleLeftPanel: () => set((state) => ({ showLeftPanel: !state.showLeftPanel })),
       setLeftPanelTab: (tab) => set({ leftPanelTab: tab }),
+      setShowLeftPanel: (show) => set({ showLeftPanel: show }),
       
       // Bottom panel actions
       toggleBottomPanel: (tab) => set((state) => {
