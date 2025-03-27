@@ -10,7 +10,7 @@ import EnergyFactorsDisplay from "./EnergyFactorsDisplay";
 import DailyPriceView from "./DailyPriceView";
 import ChartDataExtractor from "./dataExtractors/ChartDataExtractor";
 import LLMChecklist from "./dataExtractors/LLMChecklist";
-
+import SolarProductionDisplay from "./SolarProductionDisplay"; // Import the new solar component
 
 interface PredictionResult {
   isCorrect: boolean;
@@ -44,6 +44,7 @@ const EnergyTraderTraining: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [showDataExtractor, setShowDataExtractor] = useState<boolean>(false);
+  const [showSolarData, setShowSolarData] = useState<boolean>(true); // New state for showing solar data
   const [apiDateRange, setApiDateRange] = useState({
     startDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
       .toISOString()
@@ -128,7 +129,6 @@ const EnergyTraderTraining: React.FC = () => {
     setSelectedDate(null);
     setError(null);
   };
-
   // Oblicz zakres dat z danych historycznych
   const dataDateRange = useMemo(() => {
     if (!historicalData || historicalData.length === 0) 
@@ -158,7 +158,7 @@ const EnergyTraderTraining: React.FC = () => {
   
   const hourlyStats = analyzeHourData(hourData);
 
-  // Updated makePrediction function to use real data when available
+  // Prognozowanie cen
   const makePrediction = (prediction: string) => {
     setUserPrediction(prediction);
     
@@ -167,8 +167,6 @@ const EnergyTraderTraining: React.FC = () => {
     const isRealDataAvailable = selectedDate && 
       selectedDateIndex >= 0 && 
       selectedDateIndex < availableDates.length - 1;
-    
-    let predictionScenario;
     
     if (isRealDataAvailable) {
       // Use actual data from the next day
@@ -180,7 +178,7 @@ const EnergyTraderTraining: React.FC = () => {
       if (nextDayData.length > 0) {
         const realData = nextDayData[0];
         
-        predictionScenario = {
+        const predictionScenario = {
           hour: selectedHour,
           windProduction: realData.windProduction,
           solarProduction: realData.solarProduction,
@@ -205,7 +203,6 @@ const EnergyTraderTraining: React.FC = () => {
     }
     
     // Fallback to random scenario if real data is not available
-    // (Keep the existing random generation logic for cases where we don't have real data)
     const windProduction = Math.round(Math.random() * 2500);
     const solarProduction =
       selectedHour >= 8 && selectedHour <= 17
@@ -267,12 +264,20 @@ const EnergyTraderTraining: React.FC = () => {
                 Rynkiem Dnia Następnego (RDN) na polskim rynku energii
               </p>
             </div>
-            <button
-              onClick={() => setShowDataExtractor(!showDataExtractor)}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-            >
-              {showDataExtractor ? "Ukryj ekstraktor danych" : "Pokaż ekstraktor danych"}
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDataExtractor(!showDataExtractor)}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              >
+                {showDataExtractor ? "Ukryj ekstraktor danych" : "Pokaż ekstraktor danych"}
+              </button>
+              <button
+                onClick={() => setShowSolarData(!showSolarData)}
+                className={`px-4 py-2 ${showSolarData ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-lg transition-colors`}
+              >
+                {showSolarData ? "Ukryj dane PV" : "Pokaż dane PV"}
+              </button>
+            </div>
           </div>
         </header>
 
@@ -290,7 +295,6 @@ const EnergyTraderTraining: React.FC = () => {
 
         <div className="grid grid-cols-12 gap-3">
           <div className="col-span-3">
-            {" "}
             <AnalysisSettings
               selectedHour={selectedHour}
               setSelectedHour={setSelectedHour}
@@ -390,11 +394,30 @@ const EnergyTraderTraining: React.FC = () => {
                 )}
             </div>
 
+            {/* Solar Production Component - New */}
+            {showSolarData ? (
+              selectedDate ? (
+                <SolarProductionDisplay
+                  selectedDate={selectedDate}
+                  selectedHour={selectedHour}
+                  dataDateRange={dataDateRange}
+                />
+              ) : (
+                <div className="bg-white p-4 rounded shadow mb-6">
+                  <h2 className="text-lg font-semibold mb-3">Produkcja fotowoltaiczna</h2>
+                  <div className="p-4 text-center text-gray-600">
+                    Wybierz konkretną datę, aby zobaczyć dane produkcji PV
+                  </div>
+                </div>
+              )
+            ) : null}
+
             {/* Nowy komponent wyświetlający czynniki energetyczne */}
             <EnergyFactorsDisplay
               historicalData={historicalData}
               selectedHour={selectedHour}
               selectedFactors={selectedFactors}
+              selectedDate={selectedDate} 
             />
 
             {selectedDate && hourData.length === 1 && (
@@ -415,25 +438,25 @@ const EnergyTraderTraining: React.FC = () => {
               hourlyStats={hourlyStats}
             />
 
-<LLMChecklist
-  selectedHour={selectedHour}
-  selectedFactors={selectedFactors}
-  predictionScenario={predictionResult ? predictionResult.scenario : null}
-  historicalData={historicalData}
-/>
+            <LLMChecklist
+              selectedHour={selectedHour}
+              selectedFactors={selectedFactors}
+              predictionScenario={predictionResult ? predictionResult.scenario : null}
+              historicalData={historicalData}
+            />
 
-<TrainingModule
-  selectedHour={selectedHour}
-  selectedDate={selectedDate}
-  availableDates={availableDates}
-  historicalData={historicalData}
-  selectedFactors={selectedFactors}
-  userPrediction={userPrediction}
-  predictionResult={predictionResult}
-  makePrediction={makePrediction}
-  setPredictionResult={setPredictionResult}
-  setUserPrediction={setUserPrediction}
-/>
+            <TrainingModule
+              selectedHour={selectedHour}
+              selectedDate={selectedDate}
+              availableDates={availableDates}
+              historicalData={historicalData}
+              selectedFactors={selectedFactors}
+              userPrediction={userPrediction}
+              predictionResult={predictionResult}
+              makePrediction={makePrediction}
+              setPredictionResult={setPredictionResult}
+              setUserPrediction={setUserPrediction}
+            />
           </div>
         </div>
         <footer className="text-center text-gray-500 text-sm mt-8 pb-8">
