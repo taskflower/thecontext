@@ -12,12 +12,12 @@ import { FilterDialogProps } from "./types";
 const FilterDialog: React.FC<FilterDialogProps> = ({ isOpen, onClose, scenarioId }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-[90vw] sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Edycja filtrów</DialogTitle>
         </DialogHeader>
 
-        <div className="py-4">
+        <div className="py-4 max-h-[60vh] overflow-y-auto">
           <FiltersList scenarioId={scenarioId} />
         </div>
 

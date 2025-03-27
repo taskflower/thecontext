@@ -2,7 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useAppStore } from "@/modules/store";
 import { StepModal } from "@/modules/flow/components/StepModal";
-import { AppFooter, EmptyScenarios, FilterDialog, ScenarioCard, WorkspaceHeader } from "@/components/frontApp";
+import {
+  AppFooter,
+  EmptyScenarios,
+  FilterDialog,
+  ScenarioCard,
+  WorkspaceHeader,
+} from "@/components/frontApp";
 
 const WorkspacePage = () => {
   const [showFlowPlayer, setShowFlowPlayer] = useState<boolean>(false);
@@ -76,9 +82,9 @@ const WorkspacePage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col max-w-4xl mx-auto">
+    <div className="min-h-screen flex flex-col  mx-auto max-w-4xl ">
       {/* Header */}
-      <WorkspaceHeader 
+      <WorkspaceHeader
         currentWorkspace={currentWorkspace}
         currentScenario={currentScenario}
         workspaces={workspaces}
@@ -86,7 +92,7 @@ const WorkspacePage = () => {
       />
 
       {/* Main content */}
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-4 sm:p-6">
         {showFlowPlayer ? (
           <div className="w-full h-full">
             <StepModal
@@ -96,7 +102,7 @@ const WorkspacePage = () => {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 max-w-4xl mx-auto">
               {filteredScenarios.map((scenario) => (
                 <ScenarioCard
                   key={scenario.id}

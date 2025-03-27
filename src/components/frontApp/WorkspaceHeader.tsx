@@ -8,10 +8,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Box, ChevronDown, Database } from "lucide-react";
+import { Box, ChevronDown, Database, Menu } from "lucide-react";
 import { WorkspaceHeaderProps } from "./types";
 import { AuthButton } from "../AuthButton";
-
 
 const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({ 
   currentWorkspace, 
@@ -20,34 +19,47 @@ const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
   selectWorkspace 
 }) => {
   const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   return (
     <header className="border-b bg-background">
-      <div className="flex items-center justify-between p-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            {currentWorkspace?.title || "Workspace"}
-          </h1>
-          <p className="text-xs text-muted-foreground mt-1">
-            {currentScenario
-              ? `Scenariusz: ${currentScenario.name}`
-              : "Jeszcze nie wybrano scenariusza"}
-          </p>
+      <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-6">
+        <div className="flex w-full sm:w-auto justify-between items-center">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
+              {currentWorkspace?.title || "Workspace"}
+            </h1>
+            <p className="text-xs text-muted-foreground mt-1">
+              {currentScenario
+                ? `Scenariusz: ${currentScenario.name}`
+                : "Jeszcze nie wybrano scenariusza"}
+            </p>
+          </div>
+          
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="sm:hidden" 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
         </div>
-        <div className="flex items-center gap-3">
-         
+        
+        <div className={`${mobileMenuOpen ? 'flex' : 'hidden'} sm:flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-3 mt-4 sm:mt-0`}>
           {/* Workspace Selection Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="gap-2 border shadow-sm"
+                className="gap-2 border shadow-sm w-full sm:w-auto justify-between"
                 id="workspace-selector"
               >
                 <Box className="h-4 w-4" />
-               
-                {currentWorkspace?.title || "Select workspace"}
-                <ChevronDown className="h-4 w-4 opacity-50" />
+                <span className="truncate max-w-[150px]">
+                  {currentWorkspace?.title || "Select workspace"}
+                </span>
+                <ChevronDown className="h-4 w-4 opacity-50 flex-shrink-0" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[220px]">
@@ -63,6 +75,7 @@ const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
                     if (workspace.slug) {
                       navigate(`/${workspace.slug}`);
                     }
+                    setMobileMenuOpen(false);
                   }}
                 >
                   <Box className="h-4 w-4 mr-2" />
@@ -72,17 +85,17 @@ const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mt-2 sm:mt-0">
             <Button
               variant="outline"
-              className="gap-2 shadow-sm"
+              className="gap-2 shadow-sm w-full sm:w-auto"
               title="Open Workspace Context"
             >
               <Database className="h-4 w-4" />
             </Button>
           </div>
 
-          <AuthButton/>
+          <AuthButton />
         </div>
       </div>
     </header>

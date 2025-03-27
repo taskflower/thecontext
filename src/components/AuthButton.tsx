@@ -47,7 +47,7 @@ export const AuthButton: React.FC = () => {
   }
 
   return (
-    <div className="relative">
+    <div className="relative mt-2 sm:mt-0 w-full sm:w-auto">
       <button
         className={cn(
           "p-2 rounded-md hover:bg-muted/50 text-foreground flex items-center gap-2",

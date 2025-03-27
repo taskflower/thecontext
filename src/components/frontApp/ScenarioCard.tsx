@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/card";
 import { CheckCircle, Clock, ArrowRight, Play } from "lucide-react";
 import { ScenarioCardProps } from "./types";
-// import ScenarioMeta from "./ScenarioMeta";
 
 const formatTimeAgo = (timestamp?: string | number): string => {
   if (!timestamp) return "Recently";
@@ -37,7 +36,6 @@ const formatTimeAgo = (timestamp?: string | number): string => {
 const ScenarioCard: React.FC<ScenarioCardProps> = ({ 
   scenario, 
   isCurrentScenario, 
-  // onFilterClick, 
   onSelectScenario, 
   onStartFlow 
 }) => {
@@ -51,19 +49,15 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
     >
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start">
-          <CardTitle className="text-lg">{scenario.name}</CardTitle>
-          {/* <ScenarioMeta 
-            scenarioId={scenario.id}
-            childrenCount={scenario.children ? scenario.children.length : 0}
-            onFilterClick={onFilterClick}
-          /> */}
+          <CardTitle className="text-base sm:text-lg break-words">{scenario.name}</CardTitle>
+         
         </div>
-        <CardDescription>
+        <CardDescription className="text-xs sm:text-sm line-clamp-2">
           {scenario.description || "No description available"}
         </CardDescription>
       </CardHeader>
       <CardContent className="pb-2">
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
             {isActive ? (
               <CheckCircle className="h-3.5 w-3.5 text-green-600" />
@@ -74,28 +68,28 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
           </div>
           <div className="flex items-center gap-1">
             <Clock className="h-3.5 w-3.5" />
-            <span>Updated {formatTimeAgo(scenario.updatedAt)}</span>
+            <span className="truncate max-w-[150px]">Updated {formatTimeAgo(scenario.updatedAt)}</span>
           </div>
         </div>
       </CardContent>
       <CardFooter className="pt-3">
         {isCurrentScenario ? (
           <Button
-            className="w-full gap-2"
+            className="w-full gap-2 text-xs sm:text-sm py-1 sm:py-2"
             onClick={onStartFlow}
             disabled={!isActive}
           >
-            <Play className="h-4 w-4" />
+            <Play className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             Start Flow
           </Button>
         ) : (
           <Button
             variant="secondary"
-            className="w-full gap-2"
+            className="w-full gap-2 text-xs sm:text-sm py-1 sm:py-2"
             onClick={() => onSelectScenario(scenario.id)}
             disabled={!isActive}
           >
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             Select
           </Button>
         )}
