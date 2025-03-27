@@ -1,13 +1,21 @@
 // App.js
 
-import { BrowserRouter as Router, Route, Routes} from "react-router-dom";
-import Studio from "./pages/StudioLayout";
-import WorkspacePage from "./pages/WorkspacePage";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import React, { Suspense, lazy } from "react";
 import { AuthProvider } from "./context/AuthContext";
-import PaymentSuccessPage from "./pages/PaymentSuccessPage";
-import EnergyTraderTraining from "./components/RD2/EnergyTraderTraining";
+import { Loader2 } from "lucide-react";
 
+// Dynamic imports
+const Studio = lazy(() => import("./pages/StudioLayout"));
+const WorkspacePage = lazy(() => import("./pages/WorkspacePage"));
+const PaymentSuccessPage = lazy(() => import("./pages/PaymentSuccessPage"));
 
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="loading-spinner absolute w-full h-full flex items-center justify-center">
+    <p><Loader2 className="h-5 w-5 animate-spin" /></p>
+  </div>
+);
 
 function App() {
   return (
@@ -15,14 +23,14 @@ function App() {
       <Router>
         <div className="app">
           <div className="content">
-            <Routes>
-              <Route path="/" element={<WorkspacePage />} />
-              <Route path="/rd" element={<EnergyTraderTraining/>} />
-  
-              <Route path="/:slug" element={<WorkspacePage />} />
-              <Route path="/studio" element={<Studio />} />
-              <Route path="/payment/success" element={<PaymentSuccessPage />} />
-            </Routes>
+            <Suspense fallback={<LoadingFallback />}>
+              <Routes>
+                <Route path="/" element={<WorkspacePage />} />
+                <Route path="/:slug" element={<WorkspacePage />} />
+                <Route path="/studio" element={<Studio />} />
+                <Route path="/payment/success" element={<PaymentSuccessPage />} />
+              </Routes>
+            </Suspense>
           </div>
         </div>
       </Router>
