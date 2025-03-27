@@ -417,7 +417,7 @@ const EnergyTraderTraining: React.FC = () => {
               historicalData={historicalData}
               selectedHour={selectedHour}
               selectedFactors={selectedFactors}
-              selectedDate={selectedDate} 
+              // selectedDate={selectedDate} 
             />
 
             {selectedDate && hourData.length === 1 && (
