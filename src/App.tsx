@@ -1,7 +1,7 @@
 // App.js
 
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import React, { Suspense, lazy } from "react";
+import { Suspense, lazy } from "react";
 import { AuthProvider } from "./context/AuthContext";
 import { Loader2 } from "lucide-react";
 
