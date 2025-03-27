@@ -130,6 +130,7 @@ const InputFieldPlugin: PluginComponentWithSchema<InputFieldData> = ({
 
 InputFieldPlugin.pluginSettings = {
   replaceUserInput: true,
+  hideNavigationButtons: true // Wyłącz przyciski nawigacyjne
 };
 
 InputFieldPlugin.optionsSchema = {

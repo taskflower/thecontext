@@ -17,6 +17,7 @@ export interface PluginSettings {
   replaceHeader?: boolean;
   replaceAssistantView?: boolean;
   replaceUserInput?: boolean;
+  hideNavigationButtons?: boolean; // Nowa opcja do ukrywania przycisków nawigacyjnych
 }
 
 // Schemat opcji pluginu

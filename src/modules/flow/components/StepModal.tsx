@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from "react";
 import StepPluginWrapper from "@/modules/plugins/wrappers/StepPluginWrapper";
 import { StepModalProps } from "../types";
-import { Puzzle } from "lucide-react";
 import { useAppStore } from "../../store";
 import { PluginComponentWithSchema } from "@/modules/plugins/types";
 import { usePlugins } from "@/modules/plugins/pluginContext";
@@ -135,7 +134,8 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose }) => {
   let pluginSettings = { 
     replaceHeader: false, 
     replaceAssistantView: false, 
-    replaceUserInput: false 
+    replaceUserInput: false,
+    hideNavigationButtons: false // Dodaj nową opcję
   };
 
   if (currentNode.pluginKey) {
@@ -172,12 +172,6 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose }) => {
           {/* Plugin section - always render if a plugin is associated */}
           {currentNode.pluginKey && (
             <div className="my-4">
-              {!pluginSettings.replaceHeader && !pluginSettings.replaceAssistantView && (
-                <div className="flex items-center mb-2">
-                  <Puzzle className="h-4 w-4 mr-2 text-primary" />
-                  <h4 className="text-sm font-medium">Plugin: {currentNode.pluginKey}</h4>
-                </div>
-              )}
               <StepPluginWrapper
                 componentKey={currentNode.pluginKey}
                 nodeData={{
@@ -206,14 +200,16 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose }) => {
           )}
         </div>
 
-        {/* Navigation buttons - always present */}
-        <NavigationButtons
-          isFirstStep={currentStepIndex === 0}
-          isLastStep={isLastStep}
-          isProcessing={isProcessing}
-          onPrevious={() => handleNavigation('prev')}
-          onNext={() => handleNavigation(isLastStep ? 'finish' : 'next')}
-        />
+        {/* Navigation buttons - conditionally render based on plugin settings */}
+        {!pluginSettings.hideNavigationButtons && (
+          <NavigationButtons
+            isFirstStep={currentStepIndex === 0}
+            isLastStep={isLastStep}
+            isProcessing={isProcessing}
+            onPrevious={() => handleNavigation('prev')}
+            onNext={() => handleNavigation(isLastStep ? 'finish' : 'next')}
+          />
+        )}
       </div>
     </div>
   );

@@ -8,7 +8,6 @@ const PluginPreviewWrapper: React.FC<PluginPreviewWrapperProps> = ({
   componentKey,
   customData,
   context = {},
-  showHeader = true,
   className = "",
 }) => {
   const { getPluginComponent, getPluginData, isPluginEnabled } = usePlugins();
@@ -35,9 +34,6 @@ const PluginPreviewWrapper: React.FC<PluginPreviewWrapperProps> = ({
 
   // Get the plugin component
   const PluginComponent = getPluginComponent(componentKey) as PluginComponentWithSchema | null;
-
-  // Get plugin settings if available
-  const pluginSettings = PluginComponent?.pluginSettings || {};
 
   // Combine custom data with stored plugin data
   const storedData = getPluginData(componentKey);
@@ -91,14 +87,7 @@ const PluginPreviewWrapper: React.FC<PluginPreviewWrapperProps> = ({
   // Render the plugin with error boundary
   return (
     <div className={`plugin-wrapper ${className}`}>
-      {showHeader && !pluginSettings.replaceHeader && (
-        <div className="flex justify-between items-center px-3 py-2 bg-muted/10 border-b border-border text-sm">
-          <span className="font-medium">{componentKey}</span>
-          <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-            Plugin Preview
-          </span>
-        </div>
-      )}
+     
 
       <div className="plugin-content">
         {error ? (
