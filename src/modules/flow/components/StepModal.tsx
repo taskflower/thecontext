@@ -150,8 +150,8 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-background rounded-lg border border-border shadow-lg w-full max-w-2xl">
-        {/* Header - conditionally render based on plugin settings */}
+      <div className="flex flex-col bg-background rounded-lg border border-border shadow-lg w-full max-w-2xl min-h-[80vh] max-h-[80vh]">
+       {/* Header - conditionally render based on plugin settings */}
         {!pluginSettings.replaceHeader && (
           <DefaultHeader
             currentStepIndex={currentStepIndex}
@@ -160,7 +160,7 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose }) => {
             onClose={() => setShowSavePrompt(true)}
           />
         )}
-
+<div className="flex-1"></div>
         <div className="p-6">
           {/* Użyj przetworzonej wiadomości asystenta */}
           {!pluginSettings.replaceAssistantView && (

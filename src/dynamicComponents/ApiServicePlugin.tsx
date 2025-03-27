@@ -2,7 +2,7 @@
 // src/components/plugins/ApiServicePlugin.tsx
 import { useState, useEffect } from "react";
 import { PluginComponentWithSchema } from "../modules/plugins/types";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2,  Bot } from "lucide-react";
 
 import { PluginAuthAdapter } from "../services/PluginAuthAdapter";
 import { LlmService } from "../services/LlmService";
@@ -43,7 +43,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
   const [authAdapter] = useState(
     () => new PluginAuthAdapter(enhancedAppContext)
   );
-  
+
   // Usunięcie stanu dla LlmService - zamiast tego tworzymy funkcję do pozyskiwania świeżej instancji
   const getLlmService = () => {
     const apiBaseUrl = import.meta.env.VITE_API_URL;
@@ -59,9 +59,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
   const [hasError, setHasError] = useState(false);
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [, setAuthAttempts] = useState(
-    authAdapter.getAuthAttempts()
-  );
+  const [, setAuthAttempts] = useState(authAdapter.getAuthAttempts());
 
   // Get values from app context
   const currentNodeId = appContext?.currentNode?.id;
@@ -110,7 +108,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
 
       // Utworzenie nowej instancji LlmService za każdym razem, aby użyć aktualnego URL
       const llmService = getLlmService();
-      
+
       // Dodanie logowania aby sprawdzić używany URL (opcjonalnie)
       console.log(`Sending request to: ${options.apiUrl}`);
 
@@ -178,20 +176,14 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
   };
 
   return (
-    <div className="space-y-4 p-2">
-      <div className="flex items-center justify-between  border-b border-border">
+    <div className="space-y-4">
+      {/* <div className="flex items-center justify-between  border-b border-border">
         <h3 className="text-lg font-medium">krok z</h3>
-      </div>
-
-      {/* Auth Debug Information */}
-      <div className="text-right text-xs bg-gray-50 dark:bg-gray-900/30 p-4 rounded-md border border-gray-200 dark:border-gray-800">
-        {/* User Info */}
-        <strong>User:</strong>{" "}
-        {currentUser ? currentUser.email : "Not logged in"}
-      </div>
+      </div> */}
 
       {/* Assistant message display */}
-      <div className="p-4 rounded-md border min-h-[100px] bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+      <div className="p-4 rounded-md border bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+        <Bot className="h-4 w-4 text-blue-500" />
         {assistantMessage ? (
           <p className="whitespace-pre-wrap text-sm">{assistantMessage}</p>
         ) : (
@@ -214,12 +206,21 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
         </div>
       )}
 
+      <div className="flex justify-between gap-4">
+
+      {/* Auth Debug Information */}
+      <div className="text-right text-xs bg-gray-50 dark:bg-gray-900/30 p-4 rounded-md border border-gray-200 dark:border-gray-800">
+        {/* User Info */}
+        <strong>User:</strong>{" "}
+        {currentUser ? currentUser.email : "Not logged in"}
+      </div>
+
       {/* API call button */}
-      <div className="flex justify-end">
+     
         <button
           onClick={callApi}
           disabled={isLoading || authLoading}
-          className={`px-4 py-2 rounded flex items-center text-white bg-blue-500 transition-colors ${
+          className={`flex-1 w-full px-4 py-2 rounded flex items-center text-white bg-blue-500 transition-colors ${
             isLoading || authLoading
               ? "opacity-70 cursor-not-allowed"
               : "hover:bg-blue-600"
@@ -238,6 +239,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
           )}
         </button>
       </div>
+     
     </div>
   );
 };
