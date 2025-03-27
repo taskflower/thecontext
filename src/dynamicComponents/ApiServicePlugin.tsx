@@ -39,17 +39,19 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
   const auth = useAuth();
   const enhancedAppContext = { ...appContext, authContext: auth };
 
-  // Initialize services with improved auth handling
+  // Initialize auth adapter (tylko raz)
   const [authAdapter] = useState(
     () => new PluginAuthAdapter(enhancedAppContext)
   );
-  const [llmService] = useState(() => {
+  
+  // Usunięcie stanu dla LlmService - zamiast tego tworzymy funkcję do pozyskiwania świeżej instancji
+  const getLlmService = () => {
     const apiBaseUrl = import.meta.env.VITE_API_URL;
     return new LlmService(authAdapter, {
       apiUrl: options.apiUrl,
       apiBaseUrl: apiBaseUrl,
     });
-  });
+  };
 
   // State for handling API request
   const [isLoading, setIsLoading] = useState(false);
@@ -105,6 +107,12 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
     try {
       // Get current user ID or use anonymous
       const userId = currentUser?.uid || "anonymous";
+
+      // Utworzenie nowej instancji LlmService za każdym razem, aby użyć aktualnego URL
+      const llmService = getLlmService();
+      
+      // Dodanie logowania aby sprawdzić używany URL (opcjonalnie)
+      console.log(`Sending request to: ${options.apiUrl}`);
 
       // Send request using LlmService
       const response = await llmService.sendRequest({
