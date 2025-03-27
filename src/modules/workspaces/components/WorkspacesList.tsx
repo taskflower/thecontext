@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { PlusCircle, MoreHorizontal, Folder, FolderOpen } from "lucide-react";
+import { PlusCircle, MoreHorizontal, Folder, FolderOpen, ExternalLink } from "lucide-react";
 import { useAppStore } from "../../store";
 import { cn } from "@/utils/utils";
 import { AddNewWorkspace, EditWorkspace, WorkspaceContextMenu } from "..";
 import { Workspace } from "../types";
+import { Link } from "react-router-dom";
 
 const WorkspacesList: React.FC = () => {
   const items = useAppStore((state) => state.items);
@@ -127,9 +128,20 @@ const WorkspaceItem: React.FC<WorkspaceItemProps> = ({
             </p>
           )}
           {workspace.slug && (
-            <p className="text-xs text-muted-foreground truncate mt-0.5">
-              <span className="opacity-70">slug:</span> {workspace.slug}
-            </p>
+            <div className="flex items-center mt-0.5">
+              <p className="text-xs text-muted-foreground truncate">
+                <span className="opacity-70">slug:</span> {workspace.slug}
+              </p>
+              {/* External link to slug URL */}
+              <Link 
+                to={`/${workspace.slug}`}
+                className="ml-1 text-xs text-primary hover:text-primary/80 flex items-center"
+                onClick={(e) => e.stopPropagation()}
+                title={`Open ${workspace.slug} page`}
+              >
+                <ExternalLink className="h-3 w-3" />
+              </Link>
+            </div>
           )}
         </div>
       </button>

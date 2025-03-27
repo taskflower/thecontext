@@ -2,6 +2,7 @@
 import React from 'react';
 import { Bot, X } from 'lucide-react';
 import { cn } from '@/utils/utils';
+import { useAppStore } from '@/modules/store';
 
 export interface AlternativeHeaderProps {
   currentStepIndex: number;
@@ -15,19 +16,42 @@ export const AlternativeHeader: React.FC<AlternativeHeaderProps> = ({
   totalSteps, 
   nodeName, 
   onClose 
-}) => (
-  <div className="flex items-center justify-between p-4 bg-primary/10 border-b border-primary/30">
-    <h3 className="text-lg font-bold text-primary">
-      Step {currentStepIndex + 1} of {totalSteps}: {nodeName || `Step ${currentStepIndex + 1}`}
-    </h3>
-    <button
-      onClick={onClose}
-      className="p-1 rounded-full hover:bg-primary/20"
-    >
-      <X className="h-5 w-5 text-primary" />
-    </button>
-  </div>
-);
+}) => {
+  // Get current workspace information from store
+  const getCurrentWorkspace = useAppStore((state) => state.getCurrentWorkspace);
+  const currentWorkspace = getCurrentWorkspace();
+  
+  return (
+    <div className="flex flex-col p-4 bg-primary/10 border-b border-primary/30">
+      {/* Workspace info section */}
+      {currentWorkspace && (
+        <div className="mb-2">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-medium text-primary/80">
+              {currentWorkspace.title}
+            </h2>
+            <button
+              onClick={onClose}
+              className="p-1 rounded-full hover:bg-primary/20"
+            >
+              <X className="h-5 w-5 text-primary" />
+            </button>
+          </div>
+          {currentWorkspace.description && (
+            <p className="text-xs text-primary/60 truncate">
+              {currentWorkspace.description}
+            </p>
+          )}
+        </div>
+      )}
+      
+      {/* Step info section */}
+      <h3 className="text-lg font-bold text-primary">
+        Step {currentStepIndex + 1} of {totalSteps}: {nodeName || `Step ${currentStepIndex + 1}`}
+      </h3>
+    </div>
+  );
+};
 
 export interface AlternativeAssistantMessageProps {
   message?: string;
