@@ -11,5 +11,16 @@ export {
 // Export form field components
 export {
   InputField,
-  TextAreaField
+  TextAreaField,
+  ColorField,
+  CheckboxField
 } from './CommonFormField';
+
+// Export panel and toolbar components
+export { Header } from './Header';
+export { LeftPanel } from './LeftPanel';
+export { BottomPanel } from './BottomPanel';
+export { BottomToolbar } from './BottomToolbar';
+export { default as FlowGraph } from './FlowGraph';
+export { TabButton } from './TabButton';
+export { ToolbarButton } from './ToolbarButton';

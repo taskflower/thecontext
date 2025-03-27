@@ -1,14 +1,14 @@
-// components/LeftPanel.tsx
-import { useState } from "react";
 import { FolderOpen, GitBranch, Layers, Code } from "lucide-react";
 import { TabButton } from "./TabButton";
 import { WorkspacesList } from "@/modules/workspaces";
 import { ScenariosList } from "@/modules/scenarios";
 import { EdgesList, NodesList } from "@/modules/graph/components";
 import React from "react";
+import { usePanelStore } from "@/modules/PanelStore";
+
 
 export const LeftPanel: React.FC = () => {
-  const [activeTab, setActiveTab] = useState("workspace");
+  const { leftPanelTab, setLeftPanelTab } = usePanelStore();
 
   return (
     <aside className="min-w-[400px] border-r border-border flex flex-col overflow-hidden bg-muted/20">
@@ -16,34 +16,34 @@ export const LeftPanel: React.FC = () => {
         <TabButton
           icon={<FolderOpen className="h-4 w-4" />}
           label="Workspace"
-          active={activeTab === "workspace"}
-          onClick={() => setActiveTab("workspace")}
+          active={leftPanelTab === "workspace"}
+          onClick={() => setLeftPanelTab("workspace")}
         />
         <TabButton
           icon={<GitBranch className="h-4 w-4" />}
           label="Scenarios"
-          active={activeTab === "scenarios"}
-          onClick={() => setActiveTab("scenarios")}
+          active={leftPanelTab === "scenarios"}
+          onClick={() => setLeftPanelTab("scenarios")}
         />
         <TabButton
           icon={<Layers className="h-4 w-4" />}
           label="Nodes"
-          active={activeTab === "nodes"}
-          onClick={() => setActiveTab("nodes")}
+          active={leftPanelTab === "nodes"}
+          onClick={() => setLeftPanelTab("nodes")}
         />
         <TabButton
           icon={<Code className="h-4 w-4" />}
           label="Edges"
-          active={activeTab === "edges"}
-          onClick={() => setActiveTab("edges")}
+          active={leftPanelTab === "edges"}
+          onClick={() => setLeftPanelTab("edges")}
         />
       </nav>
 
       <div className="flex-1 overflow-auto">
-        {activeTab === "workspace" && <WorkspacesList />}
-        {activeTab === "scenarios" && <ScenariosList />}
-        {activeTab === "nodes" && <NodesList />}
-        {activeTab === "edges" && <EdgesList />}
+        {leftPanelTab === "workspace" && <WorkspacesList />}
+        {leftPanelTab === "scenarios" && <ScenariosList />}
+        {leftPanelTab === "nodes" && <NodesList />}
+        {leftPanelTab === "edges" && <EdgesList />}
       </div>
     </aside>
   );

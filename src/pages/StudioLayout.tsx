@@ -1,39 +1,32 @@
-import { useState } from "react";
 import { cn } from "@/utils/utils";
 
-import { Header } from "@/components/studio/Header";
-import { LeftPanel } from "@/components/studio/LeftPanel";
-import { BottomPanel } from "@/components/studio/BottomPanel";
-import { BottomToolbar } from "@/components/studio/BottomToolbar";
-import FlowGraph from "@/components/studio/FlowGraph";
+// Import components from barrel file
+import { 
+  Header,
+  LeftPanel,
+  BottomPanel,
+  BottomToolbar,
+  FlowGraph
+} from "@/components/studio";
+import { usePanelStore } from "@/modules/PanelStore";
 
+// Import store
 
-// Typ dla zawartości dolnego panelu
-type PanelContentType = "context" | "filters" | "conversation" | "plugins" |  "exportimport" | "";
 
 const Studio: React.FC = () => {
-  const [showLeftPanel, setShowLeftPanel] = useState(true);
-  const [showBottomPanel, setShowBottomPanel] = useState(false);
-  const [bottomPanelContent, setBottomPanelContent] =
-    useState<PanelContentType>("");
+  // Get state and actions from the store
+  const {
+    showLeftPanel,
 
-  // Toggle panel handler
-  const toggleLeftPanel = (): void => setShowLeftPanel(!showLeftPanel);
-
-  // Show bottom panel with specific content
-  const showPanel = (content: PanelContentType): void => {
-    if (bottomPanelContent === content && showBottomPanel) {
-      setShowBottomPanel(false);
-    } else {
-      setBottomPanelContent(content);
-      setShowBottomPanel(true);
-    }
-  };
+    showBottomPanel,
+    bottomPanelTab,
+    toggleBottomPanel
+  } = usePanelStore();
 
   return (
     <div className="h-screen w-screen flex flex-col bg-background text-foreground">
       {/* Header */}
-      <Header showLeftPanel={showLeftPanel} toggleLeftPanel={toggleLeftPanel} />
+      <Header />
 
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
@@ -55,15 +48,14 @@ const Studio: React.FC = () => {
           {/* Bottom panel */}
           {showBottomPanel && (
             <BottomPanel
-              content={bottomPanelContent}
-              onClose={() => setShowBottomPanel(false)}
+              content={bottomPanelTab}
+              onClose={() => toggleBottomPanel()}
             />
           )}
 
           {/* Bottom toolbar */}
           <BottomToolbar
-            activeContent={showBottomPanel ? bottomPanelContent : ""}
-            onSelectContent={showPanel}
+            
           />
         </main>
       </div>

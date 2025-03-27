@@ -1,17 +1,14 @@
-// components/Header.tsx
 import { Focus, PanelLeft, Sun, Moon } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/utils/utils";
 import { AuthButton } from "../AuthButton";
 import { Link } from "react-router-dom";
+import { usePanelStore } from "@/modules/PanelStore";
 
-interface HeaderProps {
-  showLeftPanel: boolean;
-  toggleLeftPanel: () => void;
-}
 
-export const Header: React.FC<HeaderProps> = ({ showLeftPanel, toggleLeftPanel }) => {
+export const Header: React.FC = () => {
   const { darkMode, toggleDarkMode } = useTheme();
+  const { showLeftPanel, toggleLeftPanel } = usePanelStore();
   
   return (
     <header className="border-b border-border h-14 px-4 flex items-center justify-between bg-background z-10">
