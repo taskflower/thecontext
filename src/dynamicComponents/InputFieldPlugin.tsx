@@ -1,5 +1,6 @@
 import { PluginComponentWithSchema, PluginComponentProps } from "../modules/plugins/types";
 import { useState } from "react";
+import { updateContextFromNodeInput } from "../modules/flow/contextHandler";
 
 interface InputFieldData {
   fieldType: "input" | "checkbox" | "url";
@@ -59,6 +60,12 @@ const InputFieldPlugin: PluginComponentWithSchema<InputFieldData> = ({
       console.log("Updating user prompt with:", inputValue);
       appContext.updateNodeUserPrompt(appContext.currentNode.id, inputValue);
       
+      // NOWE: Aktualizacja kontekstu przed przejściem do następnego kroku
+      if (appContext.currentNode.contextKey) {
+        console.log("Aktualizuję kontekst dla klucza:", appContext.currentNode.contextKey);
+        updateContextFromNodeInput(appContext.currentNode.id);
+      }
+      
       // Go to next step if function is available
       if (appContext.nextStep) {
         console.log("Moving to next step");
@@ -81,6 +88,12 @@ const InputFieldPlugin: PluginComponentWithSchema<InputFieldData> = ({
       console.log("Updating user prompt with:", processedUrl);
       appContext.updateNodeUserPrompt(appContext.currentNode.id, processedUrl);
       
+      // NOWE: Aktualizacja kontekstu przed przejściem do następnego kroku
+      if (appContext.currentNode.contextKey) {
+        console.log("Aktualizuję kontekst dla klucza:", appContext.currentNode.contextKey);
+        updateContextFromNodeInput(appContext.currentNode.id);
+      }
+      
       // Go to next step if function is available
       if (appContext.nextStep) {
         console.log("Moving to next step");
@@ -95,6 +108,12 @@ const InputFieldPlugin: PluginComponentWithSchema<InputFieldData> = ({
     if (appContext?.currentNode?.id && appContext.updateNodeUserPrompt) {
       console.log("Updating user prompt with:", valueToSend);
       appContext.updateNodeUserPrompt(appContext.currentNode.id, valueToSend);
+      
+      // NOWE: Aktualizacja kontekstu przed przejściem do następnego kroku
+      if (appContext.currentNode.contextKey) {
+        console.log("Aktualizuję kontekst dla klucza:", appContext.currentNode.contextKey);
+        updateContextFromNodeInput(appContext.currentNode.id);
+      }
       
       // Go to next step if function is available
       if (appContext.nextStep) {
