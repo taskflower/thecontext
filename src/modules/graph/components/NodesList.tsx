@@ -1,13 +1,12 @@
 import React, { useState } from "react";
-import { PlusCircle, MoreHorizontal, X, Box, Square, Puzzle, CheckCircle,  Sliders, Edit } from "lucide-react";
+import { PlusCircle, MoreHorizontal, X, Box, Square, Puzzle, Sliders, Edit } from "lucide-react";
 import { useAppStore } from "../../store";
 import { FlowNode } from "../types";
 import { cn } from "@/utils/utils";
-import useDynamicComponentStore from "../../plugins/pluginsStore";
-import PluginOptionsEditor from "./PluginOptionsEditor";
 import AddNewNode from "./AddNewNode";
 import EditNode from "./EditNode";
-
+import PluginOptionsEditor from "./PluginOptionsEditor";
+import PluginDialog from "@/components/studio/PluginDialog";
 
 const NodesList: React.FC = () => {
   const selectedWorkspaceId = useAppStore((state) => state.selected.workspace);
@@ -116,9 +115,12 @@ const NodesList: React.FC = () => {
       
       {/* Plugin Configure Dialog */}
       {configurePluginForNodeId && (
-        <SimplePluginDialog 
-          nodeId={configurePluginForNodeId} 
-          onClose={() => setConfigurePluginForNodeId(null)} 
+        <PluginDialog
+          isOpen={!!configurePluginForNodeId}
+          setIsOpen={(isOpen) => {
+            if (!isOpen) setConfigurePluginForNodeId(null);
+          }}
+          nodeId={configurePluginForNodeId}
         />
       )}
 
@@ -261,83 +263,6 @@ const NodeItem: React.FC<NodeItemProps> = ({
         )}
       </div>
     </li>
-  );
-};
-
-// Completely decoupled plugin dialog
-const SimplePluginDialog = ({ nodeId, onClose }: { nodeId: string, onClose: () => void }) => {
-  // Get node info before rendering the dialog content
-  // Directly accessing values from state to avoid selector issues
-  const state = useAppStore.getState();
-  const workspace = state.items.find(w => w.id === state.selected.workspace);
-  const scenario = workspace?.children.find(s => s.id === state.selected.scenario);
-  const node = scenario?.children.find(n => n.id === nodeId);
-  
-  if (!node) return null;
-  
-  // Manual snapshot of current values to avoid re-renders
-  const nodeLabel = node.label;
-  const currentPluginKey = node.pluginKey;
-  
-  // Get plugins once, not in a React hook
-  const pluginKeys = useDynamicComponentStore.getState().getComponentKeys();
-  
-  const handleSelect = (pluginKey: string | null) => {
-    // If removing plugin, pass null
-    if (pluginKey === null) {
-      useAppStore.getState().setNodePlugin(nodeId, null);
-    } else {
-      // When adding plugin we can initialize default data
-      useAppStore.getState().setNodePlugin(nodeId, pluginKey, {});
-    }
-    onClose();
-  };
-  
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
-      <div className="bg-background border border-border rounded-lg shadow-lg w-full max-w-md p-4" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium">Configure Plugin</h3>
-          <button onClick={onClose}>
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-        
-        <p className="mb-4 text-sm">
-          Select a plugin for node: <strong>{nodeLabel}</strong>
-        </p>
-        
-        <div className="space-y-1 max-h-60 overflow-auto">
-          <button
-            onClick={() => handleSelect(null)}
-            className={cn(
-              "w-full flex items-center justify-between p-2 rounded-md hover:bg-muted text-sm",
-              !currentPluginKey && "bg-primary/10 text-primary"
-            )}
-          >
-            <span>No Plugin</span>
-            {!currentPluginKey && <CheckCircle className="h-4 w-4" />}
-          </button>
-          
-          {pluginKeys.map(key => (
-            <button
-              key={key}
-              onClick={() => handleSelect(key)}
-              className={cn(
-                "w-full flex items-center justify-between p-2 rounded-md hover:bg-muted text-sm",
-                currentPluginKey === key && "bg-primary/10 text-primary"
-              )}
-            >
-              <div className="flex items-center">
-                <Puzzle className="h-4 w-4 mr-2" />
-                <span>{key}</span>
-              </div>
-              {currentPluginKey === key && <CheckCircle className="h-4 w-4" />}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
   );
 };
 

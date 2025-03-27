@@ -1,9 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// src/modules/graph/components/PluginOptionsEditor.tsx
 import React, { useState, useEffect } from 'react';
-import { X, Save, RotateCcw } from 'lucide-react';
 import { useAppStore } from '../../store';
-import { cn } from '@/utils/utils';
 import useDynamicComponentStore from '../../plugins/pluginsStore';
+import {
+  CancelButton,
+  DialogModal,
+  InputField,
+  SaveButton,
+} from '@/components/studio';
+import { CheckboxField, ColorField } from '@/components/studio/CommonFormField';
+import { X } from 'lucide-react';
 
 interface PluginOptionsEditorProps {
   nodeId: string;
@@ -65,68 +72,54 @@ const PluginOptionsEditor: React.FC<PluginOptionsEditorProps> = ({ nodeId, onClo
   const pluginComponent = useDynamicComponentStore.getState().getComponent(pluginKey);
   const hasOptionsSchema = pluginComponent && 'optionsSchema' in pluginComponent;
   
+  // Render footer actions
+  const renderFooter = () => (
+    <>
+      <CancelButton onClick={onClose} />
+      <SaveButton onClick={handleSave} disabled={!isDirty} />
+    </>
+  );
+  
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
-      <div 
-        className="bg-background border border-border rounded-lg shadow-lg w-full max-w-md p-4 max-h-[80vh] flex flex-col" 
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium flex items-center">
-            Plugin Options: {pluginKey}
-          </h3>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
-            <X className="h-5 w-5" />
-          </button>
+    <DialogModal
+      isOpen={true}
+      onClose={onClose}
+      title={`Plugin Options: ${pluginKey}`}
+      description="Configure plugin options for this node"
+      footer={renderFooter()}
+    >
+      {loading ? (
+        <div className="p-4 text-center">
+          <p>Loading plugin options...</p>
         </div>
-        
-        {loading ? (
-          <div className="p-4 text-center">
-            <p>Loading plugin options...</p>
-          </div>
-        ) : (
-          <div className="flex-1 overflow-y-auto">
-            {hasOptionsSchema ? (
-              <DynamicOptionsForm 
-                schema={(pluginComponent as any).optionsSchema}
-                data={pluginData}
-                onChange={handleInputChange}
-              />
-            ) : (
-              <GenericOptionsForm 
-                data={pluginData}
-                onChange={handleInputChange}
-              />
-            )}
-          </div>
-        )}
-        
-        <div className="flex justify-end gap-2 mt-4 pt-2 border-t border-border">
-          <button
-            onClick={handleReset}
-            disabled={!isDirty}
-            className={cn(
-              "px-3 py-1.5 text-sm border border-border rounded-md flex items-center",
-              isDirty ? "hover:bg-muted" : "opacity-50 cursor-not-allowed"
-            )}
-          >
-            <RotateCcw className="h-4 w-4 mr-1.5" />
-            Reset
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={!isDirty}
-            className={cn(
-              "px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-md flex items-center",
-              isDirty ? "hover:bg-primary/90" : "opacity-50 cursor-not-allowed"
-            )}
-          >
-            <Save className="h-4 w-4 mr-1.5" />
-            Save Changes
-          </button>
-        </div>
-      </div>
-    </div>
+      ) : (
+        <>
+          {hasOptionsSchema ? (
+            <DynamicOptionsForm 
+              schema={(pluginComponent as any).optionsSchema}
+              data={pluginData}
+              onChange={handleInputChange}
+            />
+          ) : (
+            <GenericOptionsForm 
+              data={pluginData}
+              onChange={handleInputChange}
+            />
+          )}
+          
+          {isDirty && (
+            <div className="mt-4 p-3 bg-muted/30 rounded-md">
+              <button
+                onClick={handleReset}
+                className="text-sm text-primary hover:underline"
+              >
+                Reset to defaults
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </DialogModal>
   );
 };
 
@@ -138,85 +131,74 @@ interface DynamicOptionsFormProps {
 }
 
 const DynamicOptionsForm: React.FC<DynamicOptionsFormProps> = ({ schema, data, onChange }) => {
-  // This would ideally use schema defined by the plugin to generate appropriate fields
   return (
     <div className="space-y-4">
-      {Object.entries(schema).map(([key, fieldSchema]: [string, any]) => (
-        <div key={key}>
-          <label htmlFor={key} className="block text-sm font-medium mb-1">
-            {fieldSchema.label || key}
-          </label>
-          
-          {fieldSchema.type === 'number' ? (
-            <input
-              type="number"
-              id={key}
-              value={data[key] ?? fieldSchema.default ?? ''}
-              onChange={(e) => onChange(key, parseFloat(e.target.value))}
-              placeholder={fieldSchema.placeholder || ''}
-              className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+      {Object.entries(schema).map(([key, fieldSchema]: [string, any]) => {
+        const label = fieldSchema.label || key;
+        const description = fieldSchema.description || '';
+        
+        if (fieldSchema.type === 'number') {
+          return (
+            <div key={key}>
+              <InputField
+                id={`option-${key}`}
+                name={key}
+                label={label}
+                value={data[key]?.toString() ?? fieldSchema.default?.toString() ?? ''}
+                onChange={(e) => onChange(key, parseFloat(e.target.value))}
+                placeholder={fieldSchema.placeholder || ''}
+              />
+              {description && (
+                <p className="text-xs text-muted-foreground mt-1">{description}</p>
+              )}
+            </div>
+          );
+        }
+        
+        if (fieldSchema.type === 'boolean') {
+          return (
+            <CheckboxField
+              key={key}
+              id={`option-${key}`}
+              name={key}
+              label={label}
+              checked={data[key] ?? fieldSchema.default ?? false}
+              onChange={(e) => onChange(key, e.target.checked)}
+              description={description}
             />
-          ) : fieldSchema.type === 'boolean' ? (
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id={key}
-                checked={data[key] ?? fieldSchema.default ?? false}
-                onChange={(e) => onChange(key, e.target.checked)}
-                className="h-4 w-4 rounded border-border text-primary focus:ring-primary/30"
-              />
-              <label htmlFor={key} className="ml-2 text-sm">
-                {fieldSchema.description || ''}
-              </label>
-            </div>
-          ) : fieldSchema.type === 'color' ? (
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                id={key}
-                value={data[key] ?? fieldSchema.default ?? '#000000'}
-                onChange={(e) => onChange(key, e.target.value)}
-                className="h-8 w-10 border border-border rounded cursor-pointer"
-              />
-              <input
-                type="text"
-                value={data[key] ?? fieldSchema.default ?? ''}
-                onChange={(e) => onChange(key, e.target.value)}
-                placeholder="#RRGGBB"
-                className="flex-1 px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-              />
-            </div>
-          ) : fieldSchema.type === 'select' ? (
-            <select
-              id={key}
-              value={data[key] ?? fieldSchema.default ?? ''}
+          );
+        }
+        
+        if (fieldSchema.type === 'color') {
+          return (
+            <ColorField
+              key={key}
+              id={`option-${key}`}
+              name={key}
+              label={label}
+              value={data[key] ?? fieldSchema.default ?? '#000000'}
               onChange={(e) => onChange(key, e.target.value)}
-              className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-            >
-              {fieldSchema.options.map((option: any) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <input
-              type="text"
-              id={key}
-              value={data[key] ?? fieldSchema.default ?? ''}
+            />
+          );
+        }
+        
+        // Default to text input
+        return (
+          <div key={key}>
+            <InputField
+              id={`option-${key}`}
+              name={key}
+              label={label}
+              value={data[key]?.toString() ?? fieldSchema.default?.toString() ?? ''}
               onChange={(e) => onChange(key, e.target.value)}
               placeholder={fieldSchema.placeholder || ''}
-              className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
-          )}
-          
-          {fieldSchema.description && (
-            <p className="text-xs text-muted-foreground mt-1">
-              {fieldSchema.description}
-            </p>
-          )}
-        </div>
-      ))}
+            {description && (
+              <p className="text-xs text-muted-foreground mt-1">{description}</p>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };
@@ -248,18 +230,13 @@ const GenericOptionsForm: React.FC<GenericOptionsFormProps> = ({ data, onChange 
         <div className="space-y-3">
           {Object.entries(data).map(([key, value]) => (
             <div key={key} className="flex items-center gap-2">
-              <div className="flex-1">
-                <label htmlFor={`option-${key}`} className="block text-xs font-medium text-muted-foreground">
-                  {key}
-                </label>
-                <input
-                  type="text"
-                  id={`option-${key}`}
-                  value={value?.toString() || ''}
-                  onChange={(e) => onChange(key, e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
-              </div>
+              <InputField
+                id={`option-${key}`}
+                name={key}
+                label={key}
+                value={value?.toString() || ''}
+                onChange={(e) => onChange(key, e.target.value)}
+              />
               <button
                 onClick={() => {
                   const newData = { ...data };
@@ -268,7 +245,7 @@ const GenericOptionsForm: React.FC<GenericOptionsFormProps> = ({ data, onChange 
                     onChange(k, v);
                   });
                 }}
-                className="h-9 w-9 flex items-center justify-center text-muted-foreground hover:text-destructive"
+                className="h-9 w-9 mt-7 flex items-center justify-center text-muted-foreground hover:text-destructive"
                 aria-label="Remove option"
               >
                 <X className="h-4 w-4" />
@@ -278,34 +255,31 @@ const GenericOptionsForm: React.FC<GenericOptionsFormProps> = ({ data, onChange 
         </div>
       )}
       
-      <div className="pt-2 border-t border-border">
-        <h4 className="text-sm font-medium mb-2">Add New Option</h4>
+      <div className="pt-4 border-t border-border">
+        <h4 className="text-sm font-medium mb-3">Add New Option</h4>
         <div className="flex gap-2">
-          <input
-            type="text"
+          <InputField
+            id="new-option-key"
+            name="newKey"
+            label="Option name"
             value={newKey}
             onChange={(e) => setNewKey(e.target.value)}
-            placeholder="Option name"
-            className="flex-1 px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
-          <input
-            type="text"
+          <InputField
+            id="new-option-value"
+            name="newValue"
+            label="Value"
             value={newValue}
             onChange={(e) => setNewValue(e.target.value)}
-            placeholder="Value"
-            className="flex-1 px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
-          <button
-            onClick={handleAddOption}
-            disabled={!newKey.trim()}
-            className={cn(
-              "px-3 py-2 text-sm border border-border rounded-md",
-              newKey.trim() ? "hover:bg-muted" : "opacity-50 cursor-not-allowed"
-            )}
-          >
-            Add
-          </button>
         </div>
+        <button
+          onClick={handleAddOption}
+          disabled={!newKey.trim()}
+          className="mt-3 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground px-4 py-2 disabled:opacity-50"
+        >
+          Add Option
+        </button>
       </div>
     </div>
   );
