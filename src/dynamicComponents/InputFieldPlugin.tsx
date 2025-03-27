@@ -3,10 +3,11 @@ import { useState } from "react";
 import { updateContextFromNodeInput } from "../modules/flow/contextHandler";
 
 interface InputFieldData {
-  fieldType: "input" | "checkbox" | "url";
+  fieldType: "input" | "checkbox" | "url" | "textarea";
   labelText: string;
   placeholderText?: string;
   defaultChecked?: boolean;
+  rows?: number;
 }
 
 const defaultData: InputFieldData = {
@@ -14,6 +15,7 @@ const defaultData: InputFieldData = {
   labelText: "Enter your response:",
   placeholderText: "Type here...",
   defaultChecked: false,
+  rows: 3
 };
 
 const InputFieldPlugin: PluginComponentWithSchema<InputFieldData> = ({
@@ -35,8 +37,9 @@ const InputFieldPlugin: PluginComponentWithSchema<InputFieldData> = ({
   const inputSubmitEnabled = inputValue.trim().length > 0;
   const checkboxSubmitEnabled = isChecked !== initialCheckedState;
   const urlSubmitEnabled = inputValue.trim().length > 0 && isValidUrl;
+  const textareaSubmitEnabled = inputValue.trim().length > 0;
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setInputValue(e.target.value);
   };
 
@@ -55,20 +58,16 @@ const InputFieldPlugin: PluginComponentWithSchema<InputFieldData> = ({
   };
   
   const handleInputSubmit = () => {
-    console.log("Input Submit pressed", { inputValue, appContext });
     if (appContext?.currentNode?.id && appContext.updateNodeUserPrompt) {
-      console.log("Updating user prompt with:", inputValue);
       appContext.updateNodeUserPrompt(appContext.currentNode.id, inputValue);
       
-      // NOWE: Aktualizacja kontekstu przed przejściem do następnego kroku
+      // Update context before moving to the next step
       if (appContext.currentNode.contextKey) {
-        console.log("Aktualizuję kontekst dla klucza:", appContext.currentNode.contextKey);
         updateContextFromNodeInput(appContext.currentNode.id);
       }
       
       // Go to next step if function is available
       if (appContext.nextStep) {
-        console.log("Moving to next step");
         appContext.nextStep();
       }
     }
@@ -82,21 +81,16 @@ const InputFieldPlugin: PluginComponentWithSchema<InputFieldData> = ({
       processedUrl = "https://" + processedUrl;
     }
     
-    console.log("URL Submit pressed", { originalUrl: inputValue, processedUrl, appContext });
-    
     if (appContext?.currentNode?.id && appContext.updateNodeUserPrompt) {
-      console.log("Updating user prompt with:", processedUrl);
       appContext.updateNodeUserPrompt(appContext.currentNode.id, processedUrl);
       
-      // NOWE: Aktualizacja kontekstu przed przejściem do następnego kroku
+      // Update context before moving to the next step
       if (appContext.currentNode.contextKey) {
-        console.log("Aktualizuję kontekst dla klucza:", appContext.currentNode.contextKey);
         updateContextFromNodeInput(appContext.currentNode.id);
       }
       
       // Go to next step if function is available
       if (appContext.nextStep) {
-        console.log("Moving to next step");
         appContext.nextStep();
       }
     }
@@ -104,45 +98,86 @@ const InputFieldPlugin: PluginComponentWithSchema<InputFieldData> = ({
   
   const handleCheckboxSubmit = () => {
     const valueToSend = isChecked ? "true" : "";
-    console.log("Checkbox Submit pressed", { isChecked, valueToSend, appContext });
+    
     if (appContext?.currentNode?.id && appContext.updateNodeUserPrompt) {
-      console.log("Updating user prompt with:", valueToSend);
       appContext.updateNodeUserPrompt(appContext.currentNode.id, valueToSend);
       
-      // NOWE: Aktualizacja kontekstu przed przejściem do następnego kroku
+      // Update context before moving to the next step
       if (appContext.currentNode.contextKey) {
-        console.log("Aktualizuję kontekst dla klucza:", appContext.currentNode.contextKey);
         updateContextFromNodeInput(appContext.currentNode.id);
       }
       
       // Go to next step if function is available
       if (appContext.nextStep) {
-        console.log("Moving to next step");
+        appContext.nextStep();
+      }
+    }
+  };
+  
+  const handleTextareaSubmit = () => {
+    if (appContext?.currentNode?.id && appContext.updateNodeUserPrompt) {
+      appContext.updateNodeUserPrompt(appContext.currentNode.id, inputValue);
+      
+      // Update context before moving to the next step
+      if (appContext.currentNode.contextKey) {
+        updateContextFromNodeInput(appContext.currentNode.id);
+      }
+      
+      // Go to next step if function is available
+      if (appContext.nextStep) {
         appContext.nextStep();
       }
     }
   };
 
   return (
-    <div className="mt-4">
+    <div className="mt-4 space-y-4">
       {options.fieldType === "input" ? (
-        <div className="flex flex-col">
-          <label className="text-sm font-medium mb-2">{options.labelText}</label>
+        <div className="space-y-2">
+          <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            {options.labelText}
+          </label>
           <div className="flex">
             <input
               type="text"
               value={inputValue}
               onChange={handleInputChange}
               placeholder={options.placeholderText}
-              className="px-4 py-2 rounded-l-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow"
+              className="flex h-9 w-full rounded-l-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 flex-grow"
             />
             <button
               onClick={handleInputSubmit}
               disabled={!inputSubmitEnabled}
-              className={`px-4 py-2 rounded-r-md transition-colors ${
+              className={`h-9 px-4 rounded-r-md transition-colors text-sm font-medium ${
                 inputSubmitEnabled 
-                  ? "bg-blue-500 text-white hover:bg-blue-600" 
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                  : "bg-muted text-muted-foreground cursor-not-allowed"
+              }`}
+            >
+              Submit  
+            </button>
+          </div>
+        </div>
+      ) : options.fieldType === "textarea" ? (
+        <div className="space-y-2">
+          <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            {options.labelText}
+          </label>
+          <div className="space-y-2">
+            <textarea
+              value={inputValue}
+              onChange={handleInputChange}
+              placeholder={options.placeholderText}
+              rows={options.rows || 3}
+              className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            />
+            <button
+              onClick={handleTextareaSubmit}
+              disabled={!textareaSubmitEnabled}
+              className={`px-4 py-2 rounded-md transition-colors text-sm font-medium w-full ${
+                textareaSubmitEnabled 
+                  ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                  : "bg-muted text-muted-foreground cursor-not-allowed"
               }`}
             >
               Submit  
@@ -150,35 +185,37 @@ const InputFieldPlugin: PluginComponentWithSchema<InputFieldData> = ({
           </div>
         </div>
       ) : options.fieldType === "url" ? (
-        <div className="flex flex-col">
-          <label className="text-sm font-medium mb-2">{options.labelText}</label>
-          <div className="flex flex-col">
+        <div className="space-y-2">
+          <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            {options.labelText}
+          </label>
+          <div className="space-y-1">
             <div className="flex">
               <input
                 type="text"
                 value={inputValue}
                 onChange={handleUrlChange}
                 placeholder={options.placeholderText || "Enter URL..."}
-                className={`px-4 py-2 rounded-l-md border ${
+                className={`flex h-9 w-full rounded-l-md border bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50 flex-grow ${
                   !isValidUrl && inputValue.trim().length > 0 
-                    ? "border-red-500 focus:ring-red-500" 
-                    : "border-gray-300 focus:ring-blue-500"
-                } focus:outline-none focus:ring-2 flex-grow`}
+                    ? "border-destructive focus-visible:ring-destructive" 
+                    : "border-input focus-visible:ring-ring"
+                }`}
               />
               <button
                 onClick={handleUrlSubmit}
                 disabled={!urlSubmitEnabled}
-                className={`px-4 py-2 rounded-r-md transition-colors ${
+                className={`h-9 px-4 rounded-r-md transition-colors text-sm font-medium ${
                   urlSubmitEnabled 
-                    ? "bg-blue-500 text-white hover:bg-blue-600" 
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                    : "bg-muted text-muted-foreground cursor-not-allowed"
                 }`}
               >
                 Submit  
               </button>
             </div>
             {!isValidUrl && inputValue.trim().length > 0 && (
-              <p className="text-red-500 text-xs mt-1">
+              <p className="text-destructive text-xs">
                 Please enter a valid URL with a domain extension (e.g. .com)
               </p>
             )}
@@ -186,25 +223,25 @@ const InputFieldPlugin: PluginComponentWithSchema<InputFieldData> = ({
         </div>
       ) : (
         <div className="flex items-center justify-between">
-          <div className="flex items-center">
+          <div className="flex items-center space-x-2">
             <input
               id="checkbox-input"
               type="checkbox"
               checked={isChecked}
               onChange={handleCheckboxChange}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 rounded border-primary text-primary focus:ring-1 focus:ring-ring focus:ring-offset-1"
             />
-            <label htmlFor="checkbox-input" className="ml-2 text-sm font-medium">
+            <label htmlFor="checkbox-input" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
               {options.labelText}
             </label>
           </div>
           <button
             onClick={handleCheckboxSubmit}
             disabled={!checkboxSubmitEnabled}
-            className={`px-4 py-2 rounded-md transition-colors text-sm ${
+            className={`h-9 px-4 rounded-md transition-colors text-sm font-medium ${
               checkboxSubmitEnabled 
-                ? "bg-blue-500 text-white hover:bg-blue-600" 
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                : "bg-muted text-muted-foreground cursor-not-allowed"
             }`}
           >
             Submit
@@ -217,7 +254,7 @@ const InputFieldPlugin: PluginComponentWithSchema<InputFieldData> = ({
 
 InputFieldPlugin.pluginSettings = {
   replaceUserInput: true,
-  hideNavigationButtons: true // Disable navigation buttons
+  hideNavigationButtons: true
 };
 
 InputFieldPlugin.optionsSchema = {
@@ -225,9 +262,7 @@ InputFieldPlugin.optionsSchema = {
     type: "string",
     label: "Field Type",
     default: defaultData.fieldType,
-    description: "Type of input field to display (input, checkbox, or url)",
-    enum: ["input", "checkbox", "url"],
-    enumLabels: ["Text Input", "Checkbox", "URL Input"]
+    description: "Type of input field to display",
   },
   labelText: {
     type: "string",
@@ -239,13 +274,19 @@ InputFieldPlugin.optionsSchema = {
     type: "string",
     label: "Placeholder Text",
     default: defaultData.placeholderText,
-    description: "Placeholder text for the input field (only applies when Field Type is 'input' or 'url')",
+    description: "Placeholder text for the input field (only applies when Field Type is 'input', 'textarea' or 'url')",
   },
   defaultChecked: {
     type: "boolean",
     label: "Default Checked State",
     default: defaultData.defaultChecked,
     description: "Default checked state for the checkbox (only applies when Field Type is 'checkbox')",
+  },
+  rows: {
+    type: "number",
+    label: "Textarea Rows",
+    default: defaultData.rows,
+    description: "Number of rows for textarea (only applies when Field Type is 'textarea')",
   },
 };
 
