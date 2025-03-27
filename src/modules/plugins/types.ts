@@ -54,6 +54,10 @@ export interface AppContextData {
   // Funkcje aktualizujące komunikaty węzłów (opcjonalnie)
   updateNodeUserPrompt?: (nodeId: string, prompt: string) => void;
   updateNodeAssistantMessage?: (nodeId: string, message: string) => void;
+  
+  // Funkcje nawigacyjne dla flow
+  nextStep?: () => void;
+  prevStep?: () => void;
 }
 
 // Interfejs dla dynamicznego store'u komponentów

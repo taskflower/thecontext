@@ -29,6 +29,10 @@ const StepPluginWrapper: React.FC<StepPluginWrapperProps> = ({
     isFlowPlaying ? state.updateTempNodeAssistantMessage : state.updateNodeAssistantMessage
   );
   
+  // Pobierz funkcje nawigacyjne
+  const nextStep = useAppStore(state => state.nextStep);
+  const prevStep = useAppStore(state => state.prevStep);
+  
   // Node data
   const node = nodeData || {
     id: '',
@@ -44,20 +48,21 @@ const StepPluginWrapper: React.FC<StepPluginWrapperProps> = ({
     },
     // Use the appropriate update functions
     updateNodeUserPrompt,
-    updateNodeAssistantMessage
+    updateNodeAssistantMessage,
+    // Dodaj funkcje nawigacyjne
+    nextStep,
+    prevStep
   };
   
   const customData = node.pluginData?.[componentKey];
   
   return (
-    
-      <PluginPreviewWrapper
-        componentKey={componentKey}
-        customData={customData}
-        context={context}
-        className="border-0"
-      />
-   
+    <PluginPreviewWrapper
+      componentKey={componentKey}
+      customData={customData}
+      context={context}
+      className="border-0"
+    />
   );
 };
 

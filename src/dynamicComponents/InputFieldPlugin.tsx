@@ -48,9 +48,11 @@ const InputFieldPlugin: PluginComponentWithSchema<InputFieldData> = ({
       console.log("Updating user prompt with:", inputValue);
       appContext.updateNodeUserPrompt(appContext.currentNode.id, inputValue);
       
-      // Log available functions on appContext
-      console.log("Available appContext methods:", 
-        Object.keys(appContext).filter(key => typeof appContext[key] === 'function'));
+      // Przejdź do następnego kroku jeśli funkcja jest dostępna
+      if (appContext.nextStep) {
+        console.log("Przechodzę do następnego kroku");
+        appContext.nextStep();
+      }
     }
   };
   
@@ -61,9 +63,11 @@ const InputFieldPlugin: PluginComponentWithSchema<InputFieldData> = ({
       console.log("Updating user prompt with:", valueToSend);
       appContext.updateNodeUserPrompt(appContext.currentNode.id, valueToSend);
       
-      // Log available functions on appContext
-      console.log("Available appContext methods:", 
-        Object.keys(appContext).filter(key => typeof appContext[key] === 'function'));
+      // Przejdź do następnego kroku jeśli funkcja jest dostępna
+      if (appContext.nextStep) {
+        console.log("Przechodzę do następnego kroku");
+        appContext.nextStep();
+      }
     }
   };
 
@@ -80,17 +84,17 @@ const InputFieldPlugin: PluginComponentWithSchema<InputFieldData> = ({
               placeholder={options.placeholderText}
               className="px-4 py-2 rounded-l-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow"
             />
-                          <button
-                onClick={handleInputSubmit}
-                disabled={!inputSubmitEnabled}
-                className={`px-4 py-2 rounded-r-md transition-colors ${
-                  inputSubmitEnabled 
-                    ? "bg-blue-500 text-white hover:bg-blue-600" 
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}
-              >
-                Submit
-              </button>
+            <button
+              onClick={handleInputSubmit}
+              disabled={!inputSubmitEnabled}
+              className={`px-4 py-2 rounded-r-md transition-colors ${
+                inputSubmitEnabled 
+                  ? "bg-blue-500 text-white hover:bg-blue-600" 
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
+            >
+              Submit
+            </button>
           </div>
         </div>
       ) : (
@@ -107,17 +111,17 @@ const InputFieldPlugin: PluginComponentWithSchema<InputFieldData> = ({
               {options.labelText}
             </label>
           </div>
-                      <button
-              onClick={handleCheckboxSubmit}
-              disabled={!checkboxSubmitEnabled}
-              className={`px-4 py-2 rounded-md transition-colors text-sm ${
-                checkboxSubmitEnabled 
-                  ? "bg-blue-500 text-white hover:bg-blue-600" 
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
-            >
-              Submit
-            </button>
+          <button
+            onClick={handleCheckboxSubmit}
+            disabled={!checkboxSubmitEnabled}
+            className={`px-4 py-2 rounded-md transition-colors text-sm ${
+              checkboxSubmitEnabled 
+                ? "bg-blue-500 text-white hover:bg-blue-600" 
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }`}
+          >
+            Submit
+          </button>
         </div>
       )}
     </div>
