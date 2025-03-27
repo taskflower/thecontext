@@ -164,8 +164,8 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose, componentSet = 'd
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="flex flex-col bg-background rounded-lg border border-border shadow-lg w-full max-w-2xl min-h-[80vh] max-h-[80vh]">
-       {/* Header - conditionally render based on plugin settings */}
+      <div className="flex flex-col bg-background rounded-lg border border-border shadow-lg w-full max-w-4xl min-h-[95vh] max-h-[95vh]">
+      {/* Header - conditionally render based on plugin settings */}
         {!pluginSettings.replaceHeader && (
           <Header
             currentStepIndex={currentStepIndex}
