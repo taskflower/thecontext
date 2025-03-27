@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Box, ChevronDown, Database } from "lucide-react";
 import { WorkspaceHeaderProps } from "./types";
+import { AuthButton } from "../AuthButton";
 
 
 const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({ 
@@ -34,6 +35,7 @@ const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
           </p>
         </div>
         <div className="flex items-center gap-3">
+         
           {/* Workspace Selection Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -43,7 +45,7 @@ const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
                 id="workspace-selector"
               >
                 <Box className="h-4 w-4" />
-                <span>Workspace:</span>
+               
                 {currentWorkspace?.title || "Select workspace"}
                 <ChevronDown className="h-4 w-4 opacity-50" />
               </Button>
@@ -79,6 +81,8 @@ const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
               <Database className="h-4 w-4" />
             </Button>
           </div>
+
+          <AuthButton/>
         </div>
       </div>
     </header>

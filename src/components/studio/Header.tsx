@@ -2,7 +2,7 @@
 import { Focus, PanelLeft, Sun, Moon } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/utils/utils";
-import { AuthButton } from "./AuthButton";
+import { AuthButton } from "../AuthButton";
 import { Link } from "react-router-dom";
 
 interface HeaderProps {
@@ -21,7 +21,7 @@ export const Header: React.FC<HeaderProps> = ({ showLeftPanel, toggleLeftPanel }
           <Link to="/">RevertContext.com</Link>
         </h1>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 z-30">
         {/* Google Authentication Button */}
         <AuthButton />
 

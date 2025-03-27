@@ -9,11 +9,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Clock, ArrowRight, Play, Filter as FilterIcon } from "lucide-react";
-import { FilterStatus } from "@/modules/filters";
+import { CheckCircle, Clock, ArrowRight, Play } from "lucide-react";
 import { ScenarioCardProps } from "./types";
-
+// import ScenarioMeta from "./ScenarioMeta";
 
 const formatTimeAgo = (timestamp?: string | number): string => {
   if (!timestamp) return "Recently";
@@ -39,7 +37,7 @@ const formatTimeAgo = (timestamp?: string | number): string => {
 const ScenarioCard: React.FC<ScenarioCardProps> = ({ 
   scenario, 
   isCurrentScenario, 
-  onFilterClick, 
+  // onFilterClick, 
   onSelectScenario, 
   onStartFlow 
 }) => {
@@ -54,24 +52,11 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start">
           <CardTitle className="text-lg">{scenario.name}</CardTitle>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              title="Manage Filters"
-              onClick={(e) => onFilterClick(e, scenario.id)}
-            >
-              <FilterIcon className="h-3.5 w-3.5" />
-            </Button>
-            <FilterStatus
-              onClick={(e) => onFilterClick(e, scenario.id)}
-              className="cursor-pointer"
-            />
-            <Badge variant="secondary" className="text-xs">
-              {scenario.children ? scenario.children.length : 0} nodes
-            </Badge>
-          </div>
+          {/* <ScenarioMeta 
+            scenarioId={scenario.id}
+            childrenCount={scenario.children ? scenario.children.length : 0}
+            onFilterClick={onFilterClick}
+          /> */}
         </div>
         <CardDescription>
           {scenario.description || "No description available"}
