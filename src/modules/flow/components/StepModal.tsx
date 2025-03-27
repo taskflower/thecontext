@@ -8,13 +8,20 @@ import {
   DefaultHeader,
   DefaultAssistantMessage,
   DefaultUserInput,
-  NavigationButtons,
-  ContextUpdateInfo
+  NavigationButtons as DefaultNavigationButtons,
+  ContextUpdateInfo as DefaultContextUpdateInfo
 } from "./DefaultComponents";
+import {
+  AlternativeHeader,
+  AlternativeAssistantMessage,
+  AlternativeUserInput,
+  AlternativeNavigationButtons as AltNavigationButtons,
+  AlternativeContextUpdateInfo as AltContextUpdateInfo
+} from "./AlternativeComponents";
 import { processTemplateWithItems } from "@/modules/context/utils";
 import { updateContextFromNodeInput } from "../contextHandler";
 
-export const StepModal: React.FC<StepModalProps> = ({ onClose }) => {
+export const StepModal: React.FC<StepModalProps> = ({ onClose, componentSet = 'default' }) => {
   // Get our plugin context to access plugin components
   const { getPluginComponent } = usePlugins();
   
@@ -35,6 +42,13 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose }) => {
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSavePrompt, setShowSavePrompt] = useState(false);
+  
+  // Select the appropriate components based on componentSet prop
+  const Header = componentSet === 'default' ? DefaultHeader : AlternativeHeader;
+  const AssistantMessage = componentSet === 'default' ? DefaultAssistantMessage : AlternativeAssistantMessage;
+  const UserInput = componentSet === 'default' ? DefaultUserInput : AlternativeUserInput;
+  const NavButtons = componentSet === 'default' ? DefaultNavigationButtons : AltNavigationButtons;
+  const ContextInfo = componentSet === 'default' ? DefaultContextUpdateInfo : AltContextUpdateInfo;
   
   // Przetwarzanie wiadomości asystenta z tokenami
   const processedMessage = useMemo(() => {
@@ -153,56 +167,56 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose }) => {
       <div className="flex flex-col bg-background rounded-lg border border-border shadow-lg w-full max-w-2xl min-h-[80vh] max-h-[80vh]">
        {/* Header - conditionally render based on plugin settings */}
         {!pluginSettings.replaceHeader && (
-          <DefaultHeader
+          <Header
             currentStepIndex={currentStepIndex}
             totalSteps={temporarySteps.length}
             nodeName={currentNode.label}
             onClose={() => setShowSavePrompt(true)}
           />
         )}
-<div className="flex-1"></div>
-        <div className="p-6">
-          {/* Użyj przetworzonej wiadomości asystenta */}
-          {!pluginSettings.replaceAssistantView && (
-            <DefaultAssistantMessage 
-              message={processedMessage} 
-            />
-          )}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-6">
+            {/* Użyj przetworzonej wiadomości asystenta */}
+            {!pluginSettings.replaceAssistantView && (
+              <AssistantMessage 
+                message={processedMessage} 
+              />
+            )}
 
-          {/* Plugin section - always render if a plugin is associated */}
-          {currentNode.pluginKey && (
-            <div className="my-4">
-              <StepPluginWrapper
-                componentKey={currentNode.pluginKey}
-                nodeData={{
-                  ...currentNode,
-                  // Przekaż przetworzoną wiadomość do pluginu
-                  assistantMessage: processedMessage
-                }}
-              />
-            </div>
-          )}
+            {/* Plugin section - always render if a plugin is associated */}
+            {currentNode.pluginKey && (
+              <div className="my-4">
+                <StepPluginWrapper
+                  componentKey={currentNode.pluginKey}
+                  nodeData={{
+                    ...currentNode,
+                    // Przekaż przetworzoną wiadomość do pluginu
+                    assistantMessage: processedMessage
+                  }}
+                />
+              </div>
+            )}
 
-          {/* User input - conditionally render based on plugin settings */}
-          {!pluginSettings.replaceUserInput && (
-            <>
-             <DefaultUserInput
-                value={currentNode.userPrompt || ""}
-                onChange={handleInputChange}
-              />
-              {/* Komponent informacyjny o kontekście */}
-              <ContextUpdateInfo 
-                contextKey={currentNode.contextKey} 
-                isVisible={Boolean(currentNode.contextKey)}
-              />
-             
-            </>
-          )}
+            {/* User input - conditionally render based on plugin settings */}
+            {!pluginSettings.replaceUserInput && (
+              <>
+                <UserInput
+                  value={currentNode.userPrompt || ""}
+                  onChange={handleInputChange}
+                />
+                {/* Komponent informacyjny o kontekście */}
+                <ContextInfo 
+                  contextKey={currentNode.contextKey} 
+                  isVisible={Boolean(currentNode.contextKey)}
+                />
+              </>
+            )}
+          </div>
         </div>
 
         {/* Navigation buttons - conditionally render based on plugin settings */}
         {!pluginSettings.hideNavigationButtons && (
-          <NavigationButtons
+          <NavButtons
             isFirstStep={currentStepIndex === 0}
             isLastStep={isLastStep}
             isProcessing={isProcessing}

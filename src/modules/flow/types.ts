@@ -10,6 +10,7 @@ export interface FlowSession {
 
 export interface StepModalProps {
   onClose: () => void;
+  componentSet?: 'default' | 'alternative'; // New optional prop to select component set
 }
 
 export interface FlowActions {

@@ -387,7 +387,7 @@ const WorkspacePage = () => {
             {/* Render the StepModal component here since it's the actual flow player UI */}
             {flowPlayerOpen && (
               <div className="w-full h-full flex items-center justify-center">
-                <StepModal onClose={() => setFlowPlayerOpen(false)} />
+                <StepModal onClose={() => setFlowPlayerOpen(false)} componentSet="alternative" />
               </div>
             )}
           </div>
