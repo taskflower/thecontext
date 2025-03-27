@@ -2,7 +2,7 @@
 // src/components/plugins/ApiServicePlugin.tsx
 import { useState, useEffect } from "react";
 import { PluginComponentWithSchema } from "../modules/plugins/types";
-import { Send, Loader2,  Bot } from "lucide-react";
+import { Send, Loader2 } from "lucide-react";
 
 import { PluginAuthAdapter } from "../services/PluginAuthAdapter";
 import { LlmService } from "../services/LlmService";
@@ -177,22 +177,6 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
 
   return (
     <div className="space-y-4">
-      {/* <div className="flex items-center justify-between  border-b border-border">
-        <h3 className="text-lg font-medium">krok z</h3>
-      </div> */}
-
-      {/* Assistant message display */}
-      <div className="p-4 rounded-md border bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-        <Bot className="h-4 w-4 text-blue-500" />
-        {assistantMessage ? (
-          <p className="whitespace-pre-wrap text-sm">{assistantMessage}</p>
-        ) : (
-          <p className="text-muted-foreground italic text-sm">
-            This node has no assistant message.
-          </p>
-        )}
-      </div>
-
       {/* API response (if any) */}
       {apiResponse && (
         <div
@@ -207,16 +191,10 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
       )}
 
       <div className="flex justify-between gap-4">
+        {/* Auth Debug Information */}
 
-      {/* Auth Debug Information */}
-      <div className="text-right text-xs bg-gray-50 dark:bg-gray-900/30 p-4 rounded-md border border-gray-200 dark:border-gray-800">
-        {/* User Info */}
-        <strong>User:</strong>{" "}
-        {currentUser ? currentUser.email : "Not logged in"}
-      </div>
+        {/* API call button */}
 
-      {/* API call button */}
-     
         <button
           onClick={callApi}
           disabled={isLoading || authLoading}
@@ -227,19 +205,27 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
           }`}
         >
           {isLoading ? (
-            <>
+            <div className="py-3 flex items-center">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Loading...
-            </>
+            </div>
           ) : (
             <>
-              {options.buttonText}
-              <Send className="ml-2 h-4 w-4" />
+              <div className="text-xs flex justify-between py-2 w-full items-center">
+                {/* User Info */}
+                <div className="text-left">
+                  <strong>User:</strong>{" "}
+                  <div>{currentUser ? currentUser.email : "Not logged in"}</div>
+                </div>
+                <div className="flex text-lg items-center">
+                  {options.buttonText}
+                  <Send className="ml-2 h-4 w-4" />
+                </div>
+              </div>
             </>
           )}
         </button>
       </div>
-     
     </div>
   );
 };
@@ -255,7 +241,7 @@ const schemaDefaults = {
 // Specify that this plugin should replace the assistant view
 ApiServicePlugin.pluginSettings = {
   replaceHeader: true,
-  replaceAssistantView: true,
+  // replaceAssistantView: true,
 };
 
 // Add options schema for the plugin editor
