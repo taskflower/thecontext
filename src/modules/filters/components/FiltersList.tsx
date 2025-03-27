@@ -6,7 +6,12 @@ import { Filter as FilterType, FilterOperator } from "../types";
 import { useDialogState } from "../../common/hooks";
 import { cn } from "@/utils/utils";
 
-const FiltersList: React.FC = () => {
+// Dodanie interfejsu dla props
+interface FiltersListProps {
+  scenarioId?: string; // Opcjonalne ID scenariusza
+}
+
+const FiltersList: React.FC<FiltersListProps> = ({ scenarioId }) => {
   const getScenarioFilters = useAppStore((state) => state.getScenarioFilters);
   const getContextItems = useAppStore((state) => state.getContextItems);
   const addScenarioFilter = useAppStore((state) => state.addScenarioFilter);
@@ -14,10 +19,14 @@ const FiltersList: React.FC = () => {
   const toggleScenarioFilter = useAppStore((state) => state.toggleScenarioFilter);
   const checkScenarioFilterMatch = useAppStore((state) => state.checkScenarioFilterMatch);
   
-  // Force component to update when state changes
+  // Wymuszenie aktualizacji komponentu przy zmianie stanu
   useAppStore((state) => state.stateVersion);
   
-  const filters = getScenarioFilters();
+  // Pobieranie filtrów z określonego scenariusza, jeśli ID zostało podane
+  const filters = scenarioId 
+    ? getScenarioFilters(scenarioId) 
+    : getScenarioFilters();
+    
   const contextItems = getContextItems();
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [editingFilter, setEditingFilter] = useState<FilterType | null>(null);
@@ -43,7 +52,7 @@ const FiltersList: React.FC = () => {
       contextKey: formData.contextKey,
       operator: formData.operator,
       value: formData.value,
-    });
+    }, scenarioId); // Przekazanie scenarioId do funkcji addScenarioFilter
     
     setIsOpen(false);
   };
@@ -58,23 +67,23 @@ const FiltersList: React.FC = () => {
   };
   
   const hasActiveFilters = filters.some(f => f.enabled);
-  const filtersMatch = checkScenarioFilterMatch();
+  const filtersMatch = checkScenarioFilterMatch(scenarioId);
   
   return (
     <div className="h-full flex flex-col">
-      {/* Filters Header */}
+      {/* Nagłówek filtrów */}
       <div className="flex items-center justify-between p-4 border-b border-border">
-        <h2 className="text-base font-medium">Filters</h2>
+        <h2 className="text-base font-medium">Filtry</h2>
         <button
           onClick={() => openDialog()}
           className="w-8 h-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
-          aria-label="Add filter"
+          aria-label="Dodaj filtr"
         >
           <PlusCircle className="h-5 w-5" />
         </button>
       </div>
       
-      {/* Filters Status */}
+      {/* Status filtrów */}
       {hasActiveFilters && (
         <div className="px-4 py-2 border-b border-border bg-muted/10">
           <div className="flex items-center">
@@ -86,14 +95,14 @@ const FiltersList: React.FC = () => {
             />
             <span className="text-xs text-muted-foreground">
               {filtersMatch 
-                ? `${filters.filter(f => f.enabled).length} active filter${filters.filter(f => f.enabled).length !== 1 ? 's' : ''} - All conditions met` 
-                : `${filters.filter(f => f.enabled).length} active filter${filters.filter(f => f.enabled).length !== 1 ? 's' : ''} - Some conditions not met`}
+                ? `${filters.filter(f => f.enabled).length} aktywny filtr${filters.filter(f => f.enabled).length !== 1 ? 'y' : ''} - Wszystkie warunki spełnione` 
+                : `${filters.filter(f => f.enabled).length} aktywny filtr${filters.filter(f => f.enabled).length !== 1 ? 'y' : ''} - Niektóre warunki nie spełnione`}
             </span>
           </div>
         </div>
       )}
       
-      {/* Filters List */}
+      {/* Lista filtrów */}
       <div className="flex-1 overflow-auto p-2">
         {filters.length > 0 ? (
           <ul className="space-y-0.5">
@@ -102,8 +111,8 @@ const FiltersList: React.FC = () => {
                 key={filter.id}
                 filter={filter}
                 onEdit={handleEditFilter}
-                onDelete={deleteScenarioFilter}
-                onToggle={toggleScenarioFilter}
+                onDelete={(id) => deleteScenarioFilter(id, scenarioId)}
+                onToggle={(id) => toggleScenarioFilter(id, scenarioId)}
                 menuOpen={menuOpen === filter.id}
                 toggleMenu={() => toggleMenu(filter.id)}
               />
@@ -111,18 +120,18 @@ const FiltersList: React.FC = () => {
           </ul>
         ) : (
           <div className="text-center p-4 text-muted-foreground">
-            <p className="text-sm">No filters defined</p>
+            <p className="text-sm">Brak zdefiniowanych filtrów</p>
             <p className="text-xs mt-1">
-              Add filters to control workflow based on context
+              Dodaj filtry, aby kontrolować przepływ pracy na podstawie kontekstu
             </p>
           </div>
         )}
       </div>
       
-      {/* Add Filter Dialog */}
+      {/* Dialog dodawania filtra */}
       {isOpen && (
         <FilterDialog
-          title="Add Filter"
+          title="Dodaj filtr"
           formData={formData}
           handleChange={handleChange}
           handleSubmit={handleAddFilter}
@@ -131,12 +140,13 @@ const FiltersList: React.FC = () => {
         />
       )}
       
-      {/* Edit Filter Dialog */}
+      {/* Dialog edycji filtra */}
       {editingFilter && (
         <EditFilterDialog
           filter={editingFilter}
           handleClose={() => setEditingFilter(null)}
           contextItems={contextItems}
+          scenarioId={scenarioId}
         />
       )}
     </div>
@@ -160,23 +170,23 @@ const FilterItemComponent: React.FC<FilterItemProps> = ({
   menuOpen,
   toggleMenu,
 }) => {
-  // Get operator display name
+  // Pobieranie etykiety operatora
   const getOperatorLabel = (operator: FilterOperator): string => {
     switch (operator) {
-      case FilterOperator.EQUALS: return "equals";
-      case FilterOperator.NOT_EQUALS: return "not equals";
-      case FilterOperator.CONTAINS: return "contains";
-      case FilterOperator.NOT_CONTAINS: return "not contains";
-      case FilterOperator.EMPTY: return "is empty";
-      case FilterOperator.NOT_EMPTY: return "is not empty";
-      case FilterOperator.GREATER_THAN: return "greater than";
-      case FilterOperator.LESS_THAN: return "less than";
-      case FilterOperator.JSON_PATH: return "JSON path";
+      case FilterOperator.EQUALS: return "równa się";
+      case FilterOperator.NOT_EQUALS: return "nie równa się";
+      case FilterOperator.CONTAINS: return "zawiera";
+      case FilterOperator.NOT_CONTAINS: return "nie zawiera";
+      case FilterOperator.EMPTY: return "jest puste";
+      case FilterOperator.NOT_EMPTY: return "nie jest puste";
+      case FilterOperator.GREATER_THAN: return "większe niż";
+      case FilterOperator.LESS_THAN: return "mniejsze niż";
+      case FilterOperator.JSON_PATH: return "ścieżka JSON";
       default: return operator;
     }
   };
   
-  // Check if operator needs a value
+  // Sprawdzenie, czy operator wymaga wartości
   const operatorNeedsValue = (operator: FilterOperator): boolean => {
     return ![FilterOperator.EMPTY, FilterOperator.NOT_EMPTY].includes(operator);
   };
@@ -237,14 +247,14 @@ const FilterItemComponent: React.FC<FilterItemProps> = ({
               className="w-full text-left px-3 py-2 text-sm flex items-center hover:bg-muted"
             >
               <Edit className="h-4 w-4 mr-2" />
-              Edit
+              Edytuj
             </button>
             <button
               onClick={() => onDelete(filter.id)}
               className="w-full text-left px-3 py-2 text-sm text-destructive hover:bg-muted flex items-center border-t border-border"
             >
               <X className="h-4 w-4 mr-2" />
-              Delete
+              Usuń
             </button>
           </div>
         )}
@@ -283,7 +293,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
   handleClose,
   contextItems,
 }) => {
-  // Helper for select value change
+  // Pomocnik dla zmiany wartości select
   const handleSelectChange = (name: string, value: string) => {
     const event = {
       target: { name, value },
@@ -291,7 +301,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
     handleChange(event);
   };
   
-  // Check if operator needs a value
+  // Sprawdzenie, czy operator wymaga wartości
   const operatorNeedsValue = (operator: FilterOperator): boolean => {
     return ![FilterOperator.EMPTY, FilterOperator.NOT_EMPTY].includes(operator);
   };
@@ -318,7 +328,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
         <div className="space-y-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium mb-1">
-              Filter Name
+              Nazwa filtra
             </label>
             <input
               type="text"
@@ -326,14 +336,14 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Enter filter name"
+              placeholder="Wprowadź nazwę filtra"
               className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
           
           <div>
             <label htmlFor="contextKey" className="block text-sm font-medium mb-1">
-              Context Item
+              Element kontekstu
             </label>
             <select
               id="contextKey"
@@ -342,7 +352,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
-              <option value="">Select a context item</option>
+              <option value="">Wybierz element kontekstu</option>
               {contextItems.map((item) => (
                 <option key={item.id} value={item.title}>
                   {item.title}
@@ -361,7 +371,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
               value={formData.operator}
               onChange={(e) => {
                 handleChange(e);
-                // Clear value if operator doesn't need one
+                // Wyczyść wartość, jeśli operator jej nie wymaga
                 if (!operatorNeedsValue(e.target.value as FilterOperator)) {
                   handleSelectChange("value", "");
                 }
@@ -379,7 +389,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
           {operatorNeedsValue(formData.operator) && (
             <div>
               <label htmlFor="value" className="block text-sm font-medium mb-1">
-                Value
+                Wartość
               </label>
               <input
                 type="text"
@@ -387,7 +397,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
                 name="value"
                 value={formData.value}
                 onChange={handleChange}
-                placeholder="Enter value"
+                placeholder="Wprowadź wartość"
                 className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
@@ -398,14 +408,14 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
               onClick={handleClose}
               className="px-4 py-2 text-sm border border-border rounded-md hover:bg-muted"
             >
-              Cancel
+              Anuluj
             </button>
             <button
               onClick={handleSubmit}
               className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
               disabled={!formData.name.trim() || !formData.contextKey}
             >
-              Add
+              Dodaj
             </button>
           </div>
         </div>
@@ -414,6 +424,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
   );
 };
 
+// Rozszerzenie interfejsu EditFilterDialogProps, aby zawierał scenarioId
 interface EditFilterDialogProps {
   filter: FilterType;
   handleClose: () => void;
@@ -422,12 +433,14 @@ interface EditFilterDialogProps {
     title: string;
     content: string;
   }[];
+  scenarioId?: string;
 }
 
 const EditFilterDialog: React.FC<EditFilterDialogProps> = ({
   filter,
   handleClose,
   contextItems,
+  scenarioId
 }) => {
   const updateScenarioFilter = useAppStore((state) => state.updateScenarioFilter);
   const [formData, setFormData] = useState({
@@ -446,7 +459,7 @@ const EditFilterDialog: React.FC<EditFilterDialogProps> = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
   
-  // Helper for select value change
+  // Pomocnik dla zmiany wartości select
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -459,12 +472,12 @@ const EditFilterDialog: React.FC<EditFilterDialogProps> = ({
       contextKey: formData.contextKey,
       operator: formData.operator as FilterOperator,
       value: formData.value,
-    });
+    }, scenarioId);
     
     handleClose();
   };
   
-  // Check if operator needs a value
+  // Sprawdzenie, czy operator wymaga wartości
   const operatorNeedsValue = (operator: FilterOperator): boolean => {
     return ![FilterOperator.EMPTY, FilterOperator.NOT_EMPTY].includes(operator);
   };
@@ -479,7 +492,7 @@ const EditFilterDialog: React.FC<EditFilterDialogProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium">Edit Filter</h3>
+          <h3 className="text-lg font-medium">Edytuj filtr</h3>
           <button
             onClick={handleClose}
             className="text-muted-foreground hover:text-foreground"
@@ -491,7 +504,7 @@ const EditFilterDialog: React.FC<EditFilterDialogProps> = ({
         <div className="space-y-4">
           <div>
             <label htmlFor="edit-name" className="block text-sm font-medium mb-1">
-              Filter Name
+              Nazwa filtra
             </label>
             <input
               type="text"
@@ -499,14 +512,14 @@ const EditFilterDialog: React.FC<EditFilterDialogProps> = ({
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Enter filter name"
+              placeholder="Wprowadź nazwę filtra"
               className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
           
           <div>
             <label htmlFor="edit-contextKey" className="block text-sm font-medium mb-1">
-              Context Item
+              Element kontekstu
             </label>
             <select
               id="edit-contextKey"
@@ -515,7 +528,7 @@ const EditFilterDialog: React.FC<EditFilterDialogProps> = ({
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
-              <option value="">Select a context item</option>
+              <option value="">Wybierz element kontekstu</option>
               {contextItems.map((item) => (
                 <option key={item.id} value={item.title}>
                   {item.title}
@@ -534,7 +547,7 @@ const EditFilterDialog: React.FC<EditFilterDialogProps> = ({
               value={formData.operator}
               onChange={(e) => {
                 handleChange(e);
-                // Clear value if operator doesn't need one
+                // Wyczyść wartość, jeśli operator jej nie wymaga
                 if (!operatorNeedsValue(e.target.value as FilterOperator)) {
                   handleSelectChange("value", "");
                 }
@@ -552,7 +565,7 @@ const EditFilterDialog: React.FC<EditFilterDialogProps> = ({
           {operatorNeedsValue(formData.operator as FilterOperator) && (
             <div>
               <label htmlFor="edit-value" className="block text-sm font-medium mb-1">
-                Value
+                Wartość
               </label>
               <input
                 type="text"
@@ -560,7 +573,7 @@ const EditFilterDialog: React.FC<EditFilterDialogProps> = ({
                 name="value"
                 value={formData.value}
                 onChange={handleChange}
-                placeholder="Enter value"
+                placeholder="Wprowadź wartość"
                 className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
@@ -571,14 +584,14 @@ const EditFilterDialog: React.FC<EditFilterDialogProps> = ({
               onClick={handleClose}
               className="px-4 py-2 text-sm border border-border rounded-md hover:bg-muted"
             >
-              Cancel
+              Anuluj
             </button>
             <button
               onClick={handleSubmit}
               className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
               disabled={!formData.name.trim() || !formData.contextKey}
             >
-              Update
+              Aktualizuj
             </button>
           </div>
         </div>

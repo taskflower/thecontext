@@ -1,5 +1,4 @@
 // src/components/frontApp/FilterDialog.tsx
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,14 +9,12 @@ import {
 import { FiltersList } from "@/modules/filters";
 import { FilterDialogProps } from "./types";
 
-
-
 const FilterDialog: React.FC<FilterDialogProps> = ({ isOpen, onClose, scenarioId }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Filters</DialogTitle>
+          <DialogTitle>Edycja filtrów</DialogTitle>
         </DialogHeader>
 
         <div className="py-4">
@@ -25,11 +22,11 @@ const FilterDialog: React.FC<FilterDialogProps> = ({ isOpen, onClose, scenarioId
         </div>
 
         <div className="flex justify-end">
-          <Button onClick={onClose}>Close</Button>
+          <Button onClick={onClose}>Zamknij</Button>
         </div>
       </DialogContent>
     </Dialog>
   );
 };
 
-export default FilterDialog;    
+export default FilterDialog;
