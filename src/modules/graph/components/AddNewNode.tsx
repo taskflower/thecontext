@@ -14,10 +14,7 @@ interface AddNewNodeProps {
   setIsOpen: (isOpen: boolean) => void;
 }
 
-const AddNewNode: React.FC<AddNewNodeProps> = ({
-  isOpen,
-  setIsOpen,
-}) => {
+const AddNewNode: React.FC<AddNewNodeProps> = ({ isOpen, setIsOpen }) => {
   const addNode = useAppStore((state) => state.addNode);
   const getContextItems = useAppStore((state) => state.getContextItems);
   const contextItems = getContextItems();
@@ -30,7 +27,9 @@ const AddNewNode: React.FC<AddNewNodeProps> = ({
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -47,7 +46,12 @@ const AddNewNode: React.FC<AddNewNodeProps> = ({
       userPrompt: formData.userPrompt,
       contextKey: formData.contextKey || undefined, // Add contextKey to node data
     });
-    setFormData({ label: "", assistantMessage: "", userPrompt: "", contextKey: "" });
+    setFormData({
+      label: "",
+      assistantMessage: "",
+      userPrompt: "",
+      contextKey: "",
+    });
     setIsOpen(false);
   };
 
@@ -101,16 +105,6 @@ const AddNewNode: React.FC<AddNewNodeProps> = ({
       </div>
 
       <TextAreaField
-        id="userPrompt"
-        name="userPrompt"
-        label="User Prompt"
-        value={formData.userPrompt}
-        onChange={handleChange}
-        placeholder="User prompt for this node..."
-        rows={3}
-      />
-
-      <TextAreaField
         id="assistantMessage"
         name="assistantMessage"
         label="Assistant Message"
@@ -118,6 +112,16 @@ const AddNewNode: React.FC<AddNewNodeProps> = ({
         onChange={handleChange}
         placeholder="Assistant message for this node..."
         rows={4}
+      />
+
+      <TextAreaField
+        id="userPrompt"
+        name="userPrompt"
+        label="User Prompt"
+        value={formData.userPrompt}
+        onChange={handleChange}
+        placeholder="User prompt for this node..."
+        rows={3}
       />
     </DialogModal>
   );

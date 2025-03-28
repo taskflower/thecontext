@@ -15,11 +15,7 @@ interface EditNodeProps {
   nodeId: string;
 }
 
-const EditNode: React.FC<EditNodeProps> = ({
-  isOpen,
-  setIsOpen,
-  nodeId,
-}) => {
+const EditNode: React.FC<EditNodeProps> = ({ isOpen, setIsOpen, nodeId }) => {
   const [formData, setFormData] = useState({
     label: "",
     userPrompt: "",
@@ -31,9 +27,11 @@ const EditNode: React.FC<EditNodeProps> = ({
   const state = useAppStore();
   const getContextItems = useAppStore((state) => state.getContextItems);
   const contextItems = getContextItems();
-  const workspace = state.items.find(w => w.id === state.selected.workspace);
-  const scenario = workspace?.children.find(s => s.id === state.selected.scenario);
-  const node = scenario?.children.find(n => n.id === nodeId);
+  const workspace = state.items.find((w) => w.id === state.selected.workspace);
+  const scenario = workspace?.children.find(
+    (s) => s.id === state.selected.scenario
+  );
+  const node = scenario?.children.find((n) => n.id === nodeId);
 
   // Load node data when component mounts or nodeId changes
   useEffect(() => {
@@ -48,7 +46,9 @@ const EditNode: React.FC<EditNodeProps> = ({
   }, [isOpen, nodeId, node]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -59,14 +59,14 @@ const EditNode: React.FC<EditNodeProps> = ({
 
   const handleSubmit = () => {
     if (!formData.label.trim()) return;
-    
+
     // Update the node
     const updateNode = useAppStore.getState();
     updateNode.updateNodeLabel(nodeId, formData.label);
     updateNode.updateNodeUserPrompt(nodeId, formData.userPrompt);
     updateNode.updateNodeAssistantMessage(nodeId, formData.assistantMessage);
     updateNode.updateNodeContextKey(nodeId, formData.contextKey); // Update contextKey
-    
+
     setIsOpen(false);
   };
 
@@ -120,16 +120,6 @@ const EditNode: React.FC<EditNodeProps> = ({
       </div>
 
       <TextAreaField
-        id="userPrompt"
-        name="userPrompt"
-        label="User Prompt"
-        value={formData.userPrompt}
-        onChange={handleChange}
-        placeholder="User prompt for this node..."
-        rows={3}
-      />
-
-      <TextAreaField
         id="assistantMessage"
         name="assistantMessage"
         label="Assistant Message"
@@ -137,6 +127,16 @@ const EditNode: React.FC<EditNodeProps> = ({
         onChange={handleChange}
         placeholder="Assistant message for this node..."
         rows={4}
+      />
+
+      <TextAreaField
+        id="userPrompt"
+        name="userPrompt"
+        label="User Prompt"
+        value={formData.userPrompt}
+        onChange={handleChange}
+        placeholder="User prompt for this node..."
+        rows={3}
       />
     </DialogModal>
   );
