@@ -75,6 +75,24 @@ const FlowGraph: React.FC = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(reactFlowNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(reactFlowEdges);
 
+  // Automatyczne uruchamianie sesji przy ładowaniu
+useEffect(() => {
+  // Sprawdź, czy istnieje zapisana sesja flow, która nie jest aktywna
+  const savedSession = useAppStore.getState().flowSession;
+  
+  // Sprawdzamy, czy mamy sesję, która zawiera kroki, ale nie jest aktualnie aktywna
+  if (savedSession && 
+      !savedSession.isPlaying && 
+      savedSession.temporarySteps && 
+      savedSession.temporarySteps.length > 0) {
+    
+    // Uruchom sesję automatycznie - używamy setTimeout, aby dać czas na inicjalizację innych komponentów
+    setTimeout(() => {
+      startFlowSession();
+    }, 500);
+  }
+}, []); // Uruchamiane tylko przy pierwszym renderowaniu
+
   // Update graph on data changes
   useEffect(() => {
     const { nodes: newNodes, edges: newEdges } = getActiveScenarioData();

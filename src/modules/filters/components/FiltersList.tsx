@@ -363,7 +363,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
           
           <div>
             <label htmlFor="operator" className="block text-sm font-medium mb-1">
-              Operator
+              Operator (prawda jeśli)
             </label>
             <select
               id="operator"
@@ -539,7 +539,7 @@ const EditFilterDialog: React.FC<EditFilterDialogProps> = ({
           
           <div>
             <label htmlFor="edit-operator" className="block text-sm font-medium mb-1">
-              Operator
+              Operator (Prawda jeśli)
             </label>
             <select
               id="edit-operator"
