@@ -8,9 +8,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Box, ChevronDown, Database, Menu } from "lucide-react";
+import { Box, ChevronDown, Menu } from "lucide-react";
 import { WorkspaceHeaderProps } from "./types";
 import { AuthButton } from "../AuthButton";
+import { WorkspaceContext } from "./";
 
 const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({ 
   currentWorkspace, 
@@ -86,13 +87,8 @@ const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
           </DropdownMenu>
 
           <div className="flex items-center gap-2 mt-2 sm:mt-0">
-            <Button
-              variant="outline"
-              className="gap-2 shadow-sm w-full sm:w-auto"
-              title="Open Workspace Context"
-            >
-              <Database className="h-4 w-4" />
-            </Button>
+            {/* Replacing the Button with our WorkspaceContext component */}
+            <WorkspaceContext workspace={currentWorkspace} />
           </div>
 
           <AuthButton />
