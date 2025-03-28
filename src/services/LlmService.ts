@@ -63,6 +63,73 @@ export class LlmService {
     return null;
   }
   
+  /**
+   * Czyści tekst z formatowania markdown i innych elementów, które mogą przeszkadzać w parsowaniu JSON
+   * @param text Tekst do wyczyszczenia
+   * @returns Wyczyszczony tekst zawierający tylko JSON
+   */
+  private cleanJsonContent(text: string): string {
+    if (!text) return '';
+    
+    // Usuń bloki kodu markdown ```json i ```
+    let cleaned = text.replace(/```json\s*|\s*```/g, '');
+    
+    // Usuń inne potencjalne oznaczenia markdown, które mogą wystąpić
+    cleaned = cleaned.replace(/`/g, '');
+    
+    // Usuń ewentualne komentarze w stylu JSON
+    cleaned = cleaned.replace(/\/\/.*$/gm, '');
+    
+    // Usuń białe znaki na początku i końcu
+    cleaned = cleaned.trim();
+    
+    // Sprawdź, czy tekst zaczyna się od { lub [ i kończy się na } lub ]
+    // Jeśli nie, spróbuj znaleźć JSON w tekście
+    if (!(cleaned.startsWith('{') && cleaned.endsWith('}')) && 
+        !(cleaned.startsWith('[') && cleaned.endsWith(']'))) {
+      
+      // Szukaj pierwszego wystąpienia { lub [
+      const startBrace = cleaned.indexOf('{');
+      const startBracket = cleaned.indexOf('[');
+      
+      let startPos = -1;
+      if (startBrace >= 0 && startBracket >= 0) {
+        // Wybierz ten, który występuje wcześniej
+        startPos = Math.min(startBrace, startBracket);
+      } else if (startBrace >= 0) {
+        startPos = startBrace;
+      } else if (startBracket >= 0) {
+        startPos = startBracket;
+      }
+      
+      if (startPos >= 0) {
+        // Znajdź odpowiadający nawias zamykający
+        const isObject = cleaned.charAt(startPos) === '{';
+        let depth = 1;
+        let endPos = -1;
+        
+        for (let i = startPos + 1; i < cleaned.length; i++) {
+          const char = cleaned.charAt(i);
+          if ((isObject && char === '{') || (!isObject && char === '[')) {
+            depth++;
+          } else if ((isObject && char === '}') || (!isObject && char === ']')) {
+            depth--;
+            if (depth === 0) {
+              endPos = i;
+              break;
+            }
+          }
+        }
+        
+        if (endPos > startPos) {
+          cleaned = cleaned.substring(startPos, endPos + 1);
+        }
+      }
+    }
+    
+    return cleaned;
+  }
+  
   // Poprawiona metoda do pobierania formatu JSON ze stringowego klucza kontekstowego
   private getJsonFormatFromContext(): ResponseFormatOptions | undefined {
     if (!this.options.contextJsonKey) {
@@ -281,8 +348,29 @@ export class LlmService {
         try {
           const content = data.data.message.content;
           if (typeof content === 'string') {
-            data.data.message.parsedJson = JSON.parse(content);
-            console.log('Successfully parsed JSON response');
+            // Wyczyść zawartość z formatowania markdown i innych potencjalnych problemów
+            const cleanedContent = this.cleanJsonContent(content);
+            console.log('Cleaned JSON content:', cleanedContent);
+            
+            try {
+              data.data.message.parsedJson = JSON.parse(cleanedContent);
+              console.log('Successfully parsed cleaned JSON response');
+            } catch (innerError) {
+              console.warn('Failed to parse cleaned JSON, trying additional methods:', innerError);
+              
+              // Jeśli nadal się nie udało, możemy spróbować wydobyć JSON używając regex
+              const jsonRegex = /{[\s\S]*}/; // Prosty regex dla obiektu JSON
+              const match = content.match(jsonRegex);
+              
+              if (match && match[0]) {
+                try {
+                  data.data.message.parsedJson = JSON.parse(match[0]);
+                  console.log('Successfully parsed JSON using regex extraction');
+                } catch (regexError) {
+                  console.error('All JSON parsing methods failed:', regexError);
+                }
+              }
+            }
           } else if (typeof content === 'object') {
             data.data.message.parsedJson = content;
             console.log('Response content is already an object');
