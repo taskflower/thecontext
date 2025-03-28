@@ -1,7 +1,9 @@
 // src/modules/flow/components/templates/alternative/NavigationButtons.tsx
 import React from "react";
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2 } from "lucide-react";
 import { NavigationButtonsProps } from "../../interfaces";
 import { cn } from "@/utils/utils";
+import { Button } from "@/components/ui/button";
 
 const NavigationButtons: React.FC<NavigationButtonsProps> = ({
   isFirstStep,
@@ -10,32 +12,47 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
   onPrevious,
   onNext,
 }) => (
-  <div className="flex justify-between p-4 border-t border-border">
-    <button
+  <div className="flex justify-between items-center p-6 border-t border-border bg-card/50">
+    {/* Left side - Previous button */}
+    <Button
       onClick={onPrevious}
       disabled={isFirstStep || isProcessing}
+      variant="outline"
       className={cn(
-        "px-4 py-2 rounded-md text-sm font-medium transition-colors",
+        "gap-2 font-medium border-border",
         isFirstStep || isProcessing
-          ? "bg-muted text-muted-foreground cursor-not-allowed"
-          : "bg-secondary text-secondary-foreground hover:bg-secondary/90"
+          ? "opacity-50 cursor-not-allowed text-muted-foreground"
+          : "text-foreground hover:bg-accent hover:text-accent-foreground"
       )}
     >
-      ← Poprzedni
-    </button>
+      <ArrowLeft className="h-4 w-4" /> Previous
+    </Button>
 
-    <button
+    {/* Right side - Next/Submit button */}
+    <Button
+      id="next-button"
       onClick={onNext}
       disabled={isProcessing}
+      variant="default"
       className={cn(
-        "px-4 py-2 rounded-md text-sm font-medium transition-colors",
-        isProcessing
-          ? "bg-primary/70 text-primary-foreground cursor-wait"
-          : "bg-primary text-primary-foreground hover:bg-primary/90"
+        "gap-2 font-medium bg-primary text-primary-foreground hover:bg-primary/90",
+        isProcessing && "opacity-80 cursor-wait"
       )}
     >
-      {isLastStep ? "Zakończ" : "Następny →"}
-    </button>
+      {isProcessing ? (
+        <>
+          <Loader2 className="h-4 w-4 animate-spin" /> Processing...
+        </>
+      ) : isLastStep ? (
+        <>
+          <CheckCircle className="h-4 w-4" /> Complete
+        </>
+      ) : (
+        <>
+          Continue <ArrowRight className="h-4 w-4" />
+        </>
+      )}
+    </Button>
   </div>
 );
 

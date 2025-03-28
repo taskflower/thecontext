@@ -3,50 +3,39 @@ import React, { useState } from "react";
 import { PlusCircle } from "lucide-react";
 import { useAppStore } from "../../store";
 import { ContextItem } from "../types";
-import { useDialogState } from "../../common/hooks";
 import ContextItemComponent from "./ContextItemComponent";
-import { ContextDialog, EditContextDialog, ViewContextDialog } from "./ContextDialogs";
+import { AddNewContext } from "./AddNewContext";
+import { EditContext } from "./EditContext";
+import { ViewContext } from "./ViewContext";
+
 
 const ContextsList: React.FC = () => {
   const getContextItems = useAppStore((state) => state.getContextItems);
-  const addContextItem = useAppStore((state) => state.addContextItem);
   const deleteContextItem = useAppStore((state) => state.deleteContextItem);
   const updateContextItem = useAppStore((state) => state.updateContextItem);
 
   const contextItems = getContextItems();
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
-  const [editingItem, setEditingItem] = useState<ContextItem | null>(null);
-  const [viewingItem, setViewingItem] = useState<ContextItem | null>(null);
-
-  const { isOpen, formData, openDialog, handleChange, setIsOpen } =
-    useDialogState<{
-      title: string;
-      content: string;
-    }>({
-      title: "",
-      content: "",
-    });
-
-  const handleAddContextItem = () => {
-    if (!formData.title.trim()) return;
-    addContextItem({
-      title: formData.title,
-      content: formData.content || "",
-    });
-    setIsOpen(false);
-  };
+  
+  // Modal states
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [selectedItemId, setSelectedItemId] = useState<string>("");
 
   const toggleMenu = (id: string) => {
     setMenuOpen(menuOpen === id ? null : id);
   };
 
   const handleEditItem = (item: ContextItem) => {
-    setEditingItem(item);
+    setSelectedItemId(item.id);
+    setIsEditDialogOpen(true);
     setMenuOpen(null);
   };
 
   const handleViewItem = (item: ContextItem) => {
-    setViewingItem(item);
+    setSelectedItemId(item.id);
+    setIsViewDialogOpen(true);
     setMenuOpen(null);
   };
 
@@ -55,7 +44,7 @@ const ContextsList: React.FC = () => {
     setMenuOpen(null);
   };
 
-  // Nowa funkcja do czyszczenia wartości kontekstu
+  // Function to clear context value
   const handleClearValue = (id: string) => {
     updateContextItem(id, { content: "" });
     setMenuOpen(null);
@@ -67,7 +56,7 @@ const ContextsList: React.FC = () => {
       <div className="flex items-center justify-between p-4 border-b border-border">
         <h2 className="text-base font-medium">Context</h2>
         <button
-          onClick={() => openDialog()}
+          onClick={() => setIsAddDialogOpen(true)}
           className="w-8 h-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
           aria-label="Add context item"
         >
@@ -85,7 +74,7 @@ const ContextsList: React.FC = () => {
                 item={item}
                 onEdit={handleEditItem}
                 onDelete={handleDeleteItem}
-                onClearValue={handleClearValue} // Dodany nowy handler
+                onClearValue={handleClearValue}
                 menuOpen={menuOpen === item.id}
                 toggleMenu={() => toggleMenu(item.id)}
                 onClick={handleViewItem}
@@ -103,31 +92,24 @@ const ContextsList: React.FC = () => {
       </div>
 
       {/* Add Context Item Dialog */}
-      {isOpen && (
-        <ContextDialog
-          title="Add Context Item"
-          formData={formData}
-          handleChange={handleChange}
-          handleSubmit={handleAddContextItem}
-          handleClose={() => setIsOpen(false)}
-        />
-      )}
+      <AddNewContext 
+        isOpen={isAddDialogOpen} 
+        setIsOpen={setIsAddDialogOpen} 
+      />
 
       {/* Edit Context Item Dialog */}
-      {editingItem && (
-        <EditContextDialog
-          item={editingItem}
-          handleClose={() => setEditingItem(null)}
-        />
-      )}
+      <EditContext
+        isOpen={isEditDialogOpen}
+        setIsOpen={setIsEditDialogOpen}
+        contextItemId={selectedItemId}
+      />
 
       {/* View Context Item Dialog */}
-      {viewingItem && (
-        <ViewContextDialog
-          item={viewingItem}
-          handleClose={() => setViewingItem(null)}
-        />
-      )}
+      <ViewContext
+        isOpen={isViewDialogOpen}
+        setIsOpen={setIsViewDialogOpen}
+        contextItemId={selectedItemId}
+      />
     </div>
   );
 };

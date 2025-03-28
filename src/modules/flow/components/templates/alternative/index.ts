@@ -13,7 +13,7 @@ export {
   ContextUpdateInfo
 };
 
-// Dla wygody eksportu jako obiekt
+// For convenience export as object
 export const components = {
   Header,
   AssistantMessage,

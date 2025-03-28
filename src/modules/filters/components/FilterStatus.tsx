@@ -1,17 +1,19 @@
 // src/modules/filters/components/FilterStatus.tsx
 import React from "react";
 import { useAppStore } from "../../store";
-import {  CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle } from "lucide-react";
 import { cn } from "@/utils/utils";
 
 interface FilterStatusProps {
   onClick?: (e: React.MouseEvent) => void;
   className?: string;
+  scenarioId?: string;
 }
 
 export const FilterStatus: React.FC<FilterStatusProps> = ({ 
   onClick, 
-  className 
+  className,
+  scenarioId
 }) => {
   const getScenarioFilters = useAppStore(state => state.getScenarioFilters);
   const checkScenarioFilterMatch = useAppStore(state => state.checkScenarioFilterMatch);
@@ -20,14 +22,14 @@ export const FilterStatus: React.FC<FilterStatusProps> = ({
   useAppStore(state => state.stateVersion);
   
   // Get filters and check match status
-  const filters = getScenarioFilters();
+  const filters = getScenarioFilters(scenarioId);
   const activeFilters = filters.filter(f => f.enabled);
   
   if (!activeFilters.length) {
     return null;
   }
   
-  const matchesFilter = checkScenarioFilterMatch();
+  const matchesFilter = checkScenarioFilterMatch(scenarioId);
   
   return (
     <div 

@@ -7,7 +7,7 @@ import { DialogTemplate } from './components/interfaces';
 /**
  * Hook do łatwego zarządzania dialogami flow
  */
-export const useDialog = (defaultTemplate: DialogTemplate = 'default') => {
+export const useFlowDialog = (defaultTemplate: DialogTemplate = 'default') => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [template, setTemplate] = useState<DialogTemplate>(defaultTemplate);
   
