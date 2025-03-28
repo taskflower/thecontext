@@ -1,3 +1,4 @@
+// src/modules/flow/components/StepModal.tsx
 import React, { useState, useMemo } from "react";
 import StepPluginWrapper from "@/modules/plugins/wrappers/StepPluginWrapper";
 import { StepModalProps } from "../types";
@@ -7,14 +8,15 @@ import { usePlugins } from "@/modules/plugins/pluginContext";
 
 import { processTemplateWithItems } from "@/modules/context/utils";
 import { updateContextFromNodeInput } from "../contextHandler";
-import { DefaultAssistantMessage, DefaultContextUpdateInfo, DefaultHeader, DefaultNavigationButtons, DefaultUserInput } from "./DefaultComponents";
-import { AlternativeAssistantMessage, AlternativeHeader, AlternativeUserInput, ContextUpdateInfo, NavigationButtons } from "./AlternativeComponents";
+import { getTemplateComponents } from "./templateFactory";
 
-export const StepModal: React.FC<StepModalProps> = ({ onClose, componentSet = 'default' }) => {
-  // Get our plugin context to access plugin components
+export const StepModal: React.FC<StepModalProps> = ({ 
+  onClose, 
+  template = 'default'
+}) => {
   const { getPluginComponent } = usePlugins();
   
-  // Pobierz konteksty bezpośrednio ze store
+  // Pobierz konteksty ze store
   const contextItems = useAppStore(state => state.getContextItems());
   
   // Pobierz dane z tymczasowej sesji flow
@@ -32,12 +34,14 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose, componentSet = 'd
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSavePrompt, setShowSavePrompt] = useState(false);
   
-  // Select the appropriate components based on componentSet prop
-  const Header = componentSet === 'default' ? DefaultHeader : AlternativeHeader;
-  const AssistantMessage = componentSet === 'default' ? DefaultAssistantMessage : AlternativeAssistantMessage;
-  const UserInput = componentSet === 'default' ? DefaultUserInput : AlternativeUserInput;
-  const NavButtons = componentSet === 'default' ? DefaultNavigationButtons : NavigationButtons;
-  const ContextInfo = componentSet === 'default' ? DefaultContextUpdateInfo : ContextUpdateInfo;
+  // Pobierz komponenty dialogowe na podstawie szablonu
+  const { 
+    Header, 
+    AssistantMessage, 
+    UserInput, 
+    NavigationButtons, 
+    ContextUpdateInfo 
+  } = getTemplateComponents(template);
   
   // Przetwarzanie wiadomości asystenta z tokenami
   const processedMessage = useMemo(() => {
@@ -69,13 +73,11 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose, componentSet = 'd
         }
       });
       
-      // Zapisujemy zmiany do historii i kończymy sesję
       setTimeout(() => {
         stopFlowSession(true);
         onClose();
       }, 50);
     } else {
-      // Nie zapisujemy zmian, ale zachowujemy sesję do kontynuacji
       stopFlowSession(false);
       onClose();
     }
@@ -88,7 +90,6 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose, componentSet = 'd
     } else if (direction === 'next') {
       setIsProcessing(true);
       
-      // Aktualizuj kontekst przed przejściem do następnego kroku
       if (currentNode?.id) {
         updateContextFromNodeInput(currentNode.id);
       }
@@ -98,11 +99,9 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose, componentSet = 'd
         nextStep();
       }, 10);
     } else if (direction === 'finish') {
-      // Aktualizuj kontekst na ostatnim kroku przed zakończeniem
       if (currentNode?.id) {
         updateContextFromNodeInput(currentNode.id);
       }
-      
       setShowSavePrompt(true);
     }
   };
@@ -114,31 +113,30 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose, componentSet = 'd
   const nodeDataForPlugin = {
     ...currentNode,
     assistantMessage: processedMessage,
-    // Konwersja znaczników czasu na obiekty Date
     createdAt: currentNode.createdAt ? new Date(currentNode.createdAt) : undefined,
     updatedAt: currentNode.updatedAt ? new Date(currentNode.updatedAt) : undefined
   };
 
-  // Dialog pytający o zapis zmian
+  // Dialog zapisywania zmian
   if (showSavePrompt) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
         <div className="bg-background rounded-lg border border-border shadow-lg w-full max-w-md p-6">
-          <h3 className="text-lg font-medium mb-4">Zapisać zmiany?</h3>
-          <p className="mb-6">Czy chcesz zapisać zmiany wprowadzone podczas tej sesji?</p>
+          <h3 className="text-lg font-medium mb-4">Save changes?</h3>
+          <p className="mb-6">Do you want to save changes made during this session?</p>
           
           <div className="flex justify-end space-x-3">
             <button
               onClick={() => handleClose(false)}
               className="px-4 py-2 rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/90"
             >
-              Anuluj zmiany
+              Cancel changes
             </button>
             <button
               onClick={() => handleClose(true)}
               className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              Zapisz zmiany
+              Save changes
             </button>
           </div>
         </div>
@@ -146,13 +144,13 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose, componentSet = 'd
     );
   }
 
-  // Get plugin component and settings if a plugin is associated with this node
+  // Ustawienia pluginu
   let PluginComponent: PluginComponentWithSchema | null = null;
   let pluginSettings = { 
     replaceHeader: false, 
     replaceAssistantView: false, 
     replaceUserInput: false,
-    hideNavigationButtons: false // Dodaj nową opcję
+    hideNavigationButtons: false
   };
 
   if (currentNode.pluginKey) {
@@ -168,25 +166,24 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose, componentSet = 'd
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="flex flex-col bg-background rounded-lg border border-border shadow-lg w-full max-w-4xl min-h-[95vh] max-h-[95vh]">
-      {/* Header - conditionally render based on plugin settings */}
-        {!pluginSettings.replaceHeader ? (
+        {/* Header */}
+        {!pluginSettings.replaceHeader && (
           <Header
             currentStepIndex={currentStepIndex}
             totalSteps={temporarySteps.length}
             nodeName={currentNode.label}
             onClose={() => setShowSavePrompt(true)}
           />
-        ):<div className="flex-1"></div>}
+        )}
+        
         <div className="overflow-y-auto">
           <div className="p-6">
-            {/* Użyj przetworzonej wiadomości asystenta */}
+            {/* Wiadomość asystenta */}
             {!pluginSettings.replaceAssistantView && (
-              <AssistantMessage 
-                message={processedMessage} 
-              />
+              <AssistantMessage message={processedMessage} />
             )}
 
-            {/* Plugin section - always render if a plugin is associated */}
+            {/* Plugin */}
             {currentNode.pluginKey && (
               <div className="my-4">
                 <StepPluginWrapper
@@ -196,15 +193,14 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose, componentSet = 'd
               </div>
             )}
 
-            {/* User input - conditionally render based on plugin settings */}
+            {/* Wprowadzanie danych użytkownika */}
             {!pluginSettings.replaceUserInput && (
               <>
                 <UserInput
                   value={processedUserPrompt}
                   onChange={handleInputChange}
                 />
-                {/* Komponent informacyjny o kontekście */}
-                <ContextInfo 
+                <ContextUpdateInfo 
                   contextKey={currentNode.contextKey} 
                   isVisible={Boolean(currentNode.contextKey)}
                 />
@@ -213,9 +209,9 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose, componentSet = 'd
           </div>
         </div>
 
-        {/* Navigation buttons - conditionally render based on plugin settings */}
+        {/* Przyciski nawigacji */}
         {!pluginSettings.hideNavigationButtons && (
-          <NavButtons
+          <NavigationButtons
             isFirstStep={currentStepIndex === 0}
             isLastStep={isLastStep}
             isProcessing={isProcessing}
@@ -227,3 +223,5 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose, componentSet = 'd
     </div>
   );
 };
+
+export default StepModal;

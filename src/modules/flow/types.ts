@@ -1,5 +1,6 @@
 // src/modules/flow/types.ts
 import { Edge, FlowNode } from "../graph/types";
+import { DialogTemplate } from "./components/interfaces";
 
 // Stan tymczasowego flow
 export interface FlowSession {
@@ -10,7 +11,7 @@ export interface FlowSession {
 
 export interface StepModalProps {
   onClose: () => void;
-  componentSet?: 'default' | 'alternative'; // New optional prop to select component set
+  template?: DialogTemplate; // Wskazuje, który szablon interfejsu zastosować
 }
 
 export interface FlowActions {
@@ -25,8 +26,6 @@ export interface FlowActions {
   
   // Zarządzanie sesją flow
   startFlowSession: () => void;
-  // saveChanges=true - zapisz do historii i wyczyść sesję
-  // saveChanges=false - zachowaj sesję do kontynuacji
   stopFlowSession: (saveChanges?: boolean) => void;
   resetFlowSession: () => void;
   nextStep: () => void;
@@ -36,7 +35,7 @@ export interface FlowActions {
   updateTempNodeUserPrompt: (nodeId: string, prompt: string) => void;
   updateTempNodeAssistantMessage: (nodeId: string, message: string) => void;
   
-  // Tylko dla zapewnienia zgodności wstecznej
+  // Aktualizacja oryginalnych lub tymczasowych danych (zależnie od stanu sesji)
   updateNodeAssistantMessage: (nodeId: string, assistantMessage: string) => void;
   updateNodeUserPrompt: (nodeId: string, userPrompt: string) => void;
 }
