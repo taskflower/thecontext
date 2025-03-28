@@ -1,11 +1,11 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import ReactFlow, {
   MiniMap,
   Controls,
   Background,
   useNodesState,
   useEdgesState,
-  Node
+  Node,
 } from "reactflow";
 import "reactflow/dist/style.css";
 
@@ -13,8 +13,20 @@ import "reactflow/dist/style.css";
 import "./styles.css";
 import { useAppStore } from "@/modules/store";
 import { StepModal } from "@/modules/flow/components/StepModal";
-import { useFlowHandlers, adaptNodeToReactFlow, adaptEdgeToReactFlow, nodeTypes, GRID_SIZE, DEFAULT_MAX_ZOOM } from "@/modules/flowCanvas";
+import {
+  useFlowHandlers,
+  adaptNodeToReactFlow,
+  adaptEdgeToReactFlow,
+  nodeTypes,
+  GRID_SIZE,
+  DEFAULT_MAX_ZOOM,
+} from "@/modules/flowCanvas";
 import { usePanelStore } from "@/modules/PanelStore";
+// Import icons
+import { Edit, Puzzle, Sliders } from "lucide-react";
+// Import components
+import { EditNode, PluginOptionsEditor } from "@/modules/graph/components";
+import PluginDialog from "@/components/studio/PluginDialog";
 
 const FlowGraph: React.FC = () => {
   const getActiveScenarioData = useAppStore(
@@ -28,19 +40,26 @@ const FlowGraph: React.FC = () => {
   );
   const selectedNodeId = useAppStore((state) => state.selected.node);
 
+  // State for EditNode dialog
+  const [isEditNodeDialogOpen, setIsEditNodeDialogOpen] = useState(false);
+
   // Get panel store actions
   const setLeftPanelTab = usePanelStore((state) => state.setLeftPanelTab);
   const setShowLeftPanel = usePanelStore((state) => state.setShowLeftPanel);
 
   // Get original flow handlers
-  const { onConnect, onNodeDragStop, onNodeClick: originalOnNodeClick } = useFlowHandlers();
+  const {
+    onConnect,
+    onNodeDragStop,
+    onNodeClick: originalOnNodeClick,
+  } = useFlowHandlers();
 
   // Enhanced node click handler that also manages panel state
   const onNodeClick = useCallback(
     (event: React.MouseEvent, node: Node) => {
       // First call original handler
       originalOnNodeClick(event, node);
-      
+
       // Then set panel state
       setShowLeftPanel(true);
       setLeftPanelTab("nodes");
@@ -85,7 +104,10 @@ const FlowGraph: React.FC = () => {
 
   // Check if there's a previous, unfinished session
   const hasExistingSession = useAppStore(
-    (state) => !state.flowSession?.isPlaying && state.flowSession?.temporarySteps && state.flowSession.temporarySteps.length > 0
+    (state) =>
+      !state.flowSession?.isPlaying &&
+      state.flowSession?.temporarySteps &&
+      state.flowSession.temporarySteps.length > 0
   );
 
   // Current step index in the temporary session
@@ -103,15 +125,40 @@ const FlowGraph: React.FC = () => {
         appStore.flowSession = {
           ...appStore.flowSession,
           temporarySteps: [],
-          currentStepIndex: 0
+          currentStepIndex: 0,
         };
       }
     }
     startFlowSession();
   }, [hasExistingSession, startFlowSession]);
-  
+
+  // Handle edit button click
+  const handleEditSelectedNode = useCallback(() => {
+    if (selectedNodeId) {
+      setIsEditNodeDialogOpen(true);
+    }
+  }, [selectedNodeId]);
+
+  // Get selected node data for plugins
+  const state = useAppStore.getState();
+  const workspace = state.items.find((w) => w.id === state.selected.workspace);
+  const scenario = workspace?.children.find(
+    (s) => s.id === state.selected.scenario
+  );
+  const selectedNode = scenario?.children.find((n) => n.id === selectedNodeId);
+
+  // States for plugin dialogs
+  const [isConfigurePluginDialogOpen, setIsConfigurePluginDialogOpen] =
+    useState(false);
+  const [isEditPluginOptionsDialogOpen, setIsEditPluginOptionsDialogOpen] =
+    useState(false);
+
+  // Check if selected node has a plugin
+  const hasPlugin = selectedNode?.pluginKey !== undefined;
+
   return (
     <div className="bg-card rounded-md shadow-sm p-0 h-full w-full relative">
+      {/* Right side buttons */}
       <div className="absolute top-2 right-2 z-10 flex space-x-2">
         {hasExistingSession && (
           <button
@@ -129,6 +176,40 @@ const FlowGraph: React.FC = () => {
           {isFlowPlaying ? "Flow w trakcie..." : "Nowa sesja Flow"}
         </button>
       </div>
+
+      {/* Left side plugin buttons */}
+      {selectedNodeId && (
+        <div className="absolute top-2 left-2 z-10 flex space-x-2">
+          <button
+            onClick={handleEditSelectedNode}
+            className="p-2 rounded-md bg-muted text-muted-foreground text-xs font-medium hover:bg-muted/90 flex items-center gap-1"
+            title="Edytuj zaznaczony węzeł"
+          >
+            <Edit className="h-4 w-4" />
+            <span>Edytuj węzeł</span>
+          </button>
+
+          <button
+            onClick={() => setIsConfigurePluginDialogOpen(true)}
+            className="p-2 rounded-md bg-muted text-muted-foreground text-xs font-medium hover:bg-muted/90 flex items-center gap-1"
+            title="Konfiguruj plugin dla węzła"
+          >
+            <Puzzle className="h-4 w-4" />
+            <span>{hasPlugin ? "Zmień plugin" : "Dodaj plugin"}</span>
+          </button>
+
+          {hasPlugin && (
+            <button
+              onClick={() => setIsEditPluginOptionsDialogOpen(true)}
+              className="p-2 rounded-md bg-muted text-muted-foreground text-xs font-medium hover:bg-muted/90 flex items-center gap-1"
+              title="Konfiguruj opcje pluginu"
+            >
+              <Sliders className="h-4 w-4" />
+              <span>Opcje pluginu</span>
+            </button>
+          )}
+        </div>
+      )}
 
       <ReactFlow
         nodes={nodes}
@@ -151,6 +232,35 @@ const FlowGraph: React.FC = () => {
       </ReactFlow>
 
       {isFlowPlaying && <StepModal onClose={handleCloseModal} />}
+
+      {/* Edit Node Dialog */}
+      {selectedNodeId && (
+        <EditNode
+          isOpen={isEditNodeDialogOpen}
+          setIsOpen={setIsEditNodeDialogOpen}
+          nodeId={selectedNodeId}
+        />
+      )}
+
+      {/* Plugin Dialogs */}
+      {selectedNodeId && (
+        <>
+          {/* Plugin Configuration Dialog */}
+          <PluginDialog
+            isOpen={isConfigurePluginDialogOpen}
+            setIsOpen={setIsConfigurePluginDialogOpen}
+            nodeId={selectedNodeId}
+          />
+
+          {/* Plugin Options Editor Dialog */}
+          {selectedNode?.pluginKey && isEditPluginOptionsDialogOpen && (
+            <PluginOptionsEditor
+              nodeId={selectedNodeId}
+              onClose={() => setIsEditPluginOptionsDialogOpen(false)}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 };
