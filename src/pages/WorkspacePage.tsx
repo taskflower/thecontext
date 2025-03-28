@@ -18,9 +18,7 @@ const WorkspacePage = () => {
   const {
     items: workspaces,
     selectWorkspace,
-    selectScenario,
     getCurrentWorkspace,
-    getCurrentScenario,
     checkScenarioFilterMatch,
   } = useAppStore();
 
@@ -36,7 +34,6 @@ const WorkspacePage = () => {
 
   // Get current workspace and scenario
   const currentWorkspace = getCurrentWorkspace();
-  const currentScenario = getCurrentScenario();
 
   // Get all scenarios from current workspace with filter status
   const scenariosWithStatus = React.useMemo(() => {
@@ -84,12 +81,7 @@ const WorkspacePage = () => {
   return (
     <div className="min-h-screen flex flex-col  mx-auto max-w-4xl ">
       {/* Header */}
-      <WorkspaceHeader
-        currentWorkspace={currentWorkspace}
-        currentScenario={currentScenario}
-        workspaces={workspaces}
-        selectWorkspace={selectWorkspace}
-      />
+      <WorkspaceHeader />
 
       {/* Main content */}
       <main className="flex-1 p-4 sm:p-6">
@@ -97,7 +89,7 @@ const WorkspacePage = () => {
           <div className="w-full h-full">
             <StepModal
               onClose={() => setShowFlowPlayer(false)}
-              componentSet="alternative"
+              template="alternative"
             />
           </div>
         ) : (
@@ -107,9 +99,7 @@ const WorkspacePage = () => {
                 <ScenarioCard
                   key={scenario.id}
                   scenario={scenario}
-                  isCurrentScenario={currentScenario?.id === scenario.id}
                   onFilterClick={handleFilterClick}
-                  onSelectScenario={selectScenario}
                   onStartFlow={handleStartFlow}
                 />
               ))}

@@ -10,7 +10,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { CheckCircle, Clock, ArrowRight, Play } from "lucide-react";
-import { ScenarioCardProps } from "./types";
+import { useAppStore } from "@/modules/store";
+import { Scenario } from "./types";
 
 const formatTimeAgo = (timestamp?: string | number): string => {
   if (!timestamp) return "Recently";
@@ -33,12 +34,21 @@ const formatTimeAgo = (timestamp?: string | number): string => {
   }
 };
 
+interface ScenarioCardProps {
+  scenario: Scenario;
+  onFilterClick: (e: React.MouseEvent, scenarioId: string) => void;
+  onStartFlow: () => void;
+}
+
 const ScenarioCard: React.FC<ScenarioCardProps> = ({ 
   scenario, 
-  isCurrentScenario, 
-  onSelectScenario, 
   onStartFlow 
 }) => {
+  // Get actions and state from store
+  const selectScenario = useAppStore((state) => state.selectScenario);
+  const currentScenarioId = useAppStore((state) => state.selected.scenario);
+  
+  const isCurrentScenario = scenario.id === currentScenarioId;
   const isActive = scenario.matchesFilter;
 
   return (
@@ -86,7 +96,7 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
           <Button
             variant="secondary"
             className="w-full gap-2 text-xs sm:text-sm py-1 sm:py-2"
-            onClick={() => onSelectScenario(scenario.id)}
+            onClick={() => selectScenario(scenario.id)}
             disabled={!isActive}
           >
             <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />

@@ -3,15 +3,11 @@ import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Database, FileText, FileJson, Copy, X, ArrowLeft } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet";
+import { useAppStore } from "@/modules/store";
 
 // Import the correct type definitions
-import { Workspace } from "@/modules/workspaces/types";
 import { ContextItem } from "@/modules/context/types";
 import { detectContentType } from "@/modules/context/utils";
-
-interface WorkspaceContextProps {
-  workspace: Workspace | null;
-}
 
 // Custom Context Viewer Dialog Component
 const ContextViewerDialog: React.FC<{
@@ -116,7 +112,7 @@ const ContextViewerDialog: React.FC<{
   );
 };
 
-const WorkspaceContext: React.FC<WorkspaceContextProps> = ({ workspace }) => {
+const WorkspaceContext: React.FC = () => {
   // State for the currently selected context item to view
   const [viewingItem, setViewingItem] = useState<ContextItem | null>(null);
   
@@ -125,6 +121,9 @@ const WorkspaceContext: React.FC<WorkspaceContextProps> = ({ workspace }) => {
   
   // Reference to the sheet trigger button
   const sheetTriggerRef = useRef<HTMLButtonElement>(null);
+  
+  // Get current workspace from store
+  const workspace = useAppStore(state => state.getCurrentWorkspace());
   
   // Function to handle clicking on a context item
   const handleViewItem = (item: ContextItem) => {

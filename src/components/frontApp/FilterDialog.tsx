@@ -7,9 +7,23 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { FiltersList } from "@/modules/filters";
-import { FilterDialogProps } from "./types";
+import { useAppStore } from "@/modules/store";
 
-const FilterDialog: React.FC<FilterDialogProps> = ({ isOpen, onClose, scenarioId }) => {
+interface FilterDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  scenarioId?: string; // Make this optional since we can get it from the store
+}
+
+const FilterDialog: React.FC<FilterDialogProps> = ({ 
+  isOpen, 
+  onClose, 
+  scenarioId 
+}) => {
+  // Get current scenario ID from store if not provided via props
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const currentScenarioId = scenarioId || useAppStore(state => state.selected.scenario);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[90vw] sm:max-w-md">
@@ -18,7 +32,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({ isOpen, onClose, scenarioId
         </DialogHeader>
 
         <div className="py-4 max-h-[60vh] overflow-y-auto">
-          <FiltersList scenarioId={scenarioId} />
+          <FiltersList scenarioId={currentScenarioId} />
         </div>
 
         <div className="flex justify-end">

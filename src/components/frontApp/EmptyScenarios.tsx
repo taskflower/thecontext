@@ -1,7 +1,11 @@
 // src/components/frontApp/EmptyScenarios.tsx
 import React from "react";
-import { EmptyScenariosProps } from "./types";
 import { Button } from "../ui/button";
+
+// Props can be reduced since we're only using onCreateNew
+interface EmptyScenariosProps {
+  onCreateNew: () => void;
+}
 
 const EmptyScenarios: React.FC<EmptyScenariosProps> = ({ onCreateNew }) => {
   return (
