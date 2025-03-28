@@ -224,59 +224,69 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
   };
 
   return (
-    <div className="space-y-4">
-      {/* Odpowiedź API (jeśli istnieje) */}
-       {/* TODO - nie usuwaj tego - apiResponse przenosi sie pomiedzy krokami - to jest bład */}
-      {}
-      {/* {apiResponse && (
-        <div
-          className={`bg-gray-50 dark:bg-gray-900/20 p-4 rounded-md border ${
-            hasError
-              ? "border-red-300 dark:border-red-800"
-              : "border-gray-200 dark:border-gray-800"
-          } overflow-auto max-h-60`}
-        >
-          <pre className="text-xs whitespace-pre-wrap">{apiResponse}</pre>
-        </div>
-      )} */}
-
-      <div className="flex justify-between gap-4">
-        {/* Przycisk wywołania API */}
-        <button
-          onClick={callApi}
-          disabled={isLoading || authLoading}
-          className={`flex-1 w-full px-4 py-2 rounded flex items-center text-white bg-blue-500 transition-colors ${
-            isLoading || authLoading
-              ? "opacity-70 cursor-not-allowed"
-              : "hover:bg-blue-600"
-          }`}
-        >
-          {isLoading ? (
-            <div className="py-3 flex items-center">
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Loading...
-            </div>
-          ) : (
-            <>
-              <div className="text-xs flex justify-center py-2 w-full items-center">
-                {/* Informacje o użytkowniku */}
-               
-                <div className="flex text-lg items-center">
-                  {options.buttonText}
-                  <Send className="ml-2 h-4 w-4" />
-                </div>
-              </div>
-            </>
-          )}
-        </button>
-      </div>
-      
-      {/* Dodatkowe informacje o użytym kontekście */}
+    <div className="mt-6 space-y-5">
+      {/* Informacja o używanym kluczu kontekstu w stylizowanym elemencie */}
       {options.useJsonResponse && options.contextJsonKey && (
-        <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-md">
-          <p className="text-xs text-blue-700 dark:text-blue-300">
-            <strong>Użyty klucz kontekstu:</strong> {options.contextJsonKey}
-          </p>
+        <div className="space-y-3">
+          <label className="text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Używany klucz kontekstu
+          </label>
+          <div className="w-full border-2 border-input rounded-md bg-primary/5 px-4 py-3 text-sm">
+            <span className="font-medium">{options.contextJsonKey}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Odpowiedź API (jeśli istnieje) - zakomentowana tak jak w oryginalnym kodzie */}
+      {/* TODO - nie usuwaj tego - apiResponse przenosi sie pomiedzy krokami - to jest bład */}
+      {}
+
+      {/* Przycisk wywołania API */}
+      <div className="space-y-3">
+        <label className="text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          Wywołanie API
+        </label>
+        <div className="space-y-3">
+          <button
+            onClick={callApi}
+            disabled={isLoading || authLoading}
+            className={`px-5 py-4 rounded-md transition-colors text-base font-medium w-full flex items-center justify-center ${
+              isLoading || authLoading
+                ? "bg-muted text-muted-foreground cursor-not-allowed"
+                : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md"
+            }`}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Ładowanie...
+              </>
+            ) : (
+              <>
+                {options.buttonText}
+                <Send className="ml-2 h-5 w-5" />
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Informacja o użytkowniku */}
+      {!authLoading && currentUser && (
+        <div className="text-sm text-muted-foreground text-center">
+          Zalogowany jako: {currentUser.email ||  currentUser.uid}
+        </div>
+      )}
+      
+      {/* Informacja o błędzie - jeśli wystąpił */}
+      {hasError && apiResponse && (
+        <div className="space-y-3">
+          <label className="text-base font-medium leading-none text-destructive">
+            Błąd odpowiedzi API
+          </label>
+          <div className="w-full border-2 border-destructive rounded-md bg-destructive/5 px-4 py-3">
+            <pre className="text-sm whitespace-pre-wrap text-destructive">{apiResponse}</pre>
+          </div>
         </div>
       )}
     </div>
