@@ -1,7 +1,7 @@
 // src/modules/context/hooks/useContext.ts
 import { useAppStore } from "@/modules/store";
 import { ContextItem } from "../types";
-import { processTemplateWithItems } from "../utils";
+import { processTemplateWithItems, detectContentType } from "../utils";
 
 // Define proper dialog state typing
 export interface DialogState<T> {
@@ -40,6 +40,14 @@ export function useWorkspaceContext() {
     // Get content value by title - exposing the internal function
     getContentValue,
     
+    // Detect content type and return appropriate value
+    getContentWithType: (title: string) => {
+      const value = getContentValue(title);
+      if (!value) return { type: 'text', value: null };
+      
+      return detectContentType(value);
+    },
+    
     // Get JSON content by title (if the content is JSON)
     getJsonValue: (title: string) => {
       const value = getContentValue(title);
@@ -65,7 +73,6 @@ export function useWorkspaceContext() {
     deleteItem: (id: string) => deleteContextItem(id),
     
     // Process templates by replacing {{title}} tokens with content values
-    // Teraz wykorzystuje wspólną funkcję z utils.ts
     processTemplate: (template: string): string => {
       const items = getContextItems();
       return processTemplateWithItems(template, items);

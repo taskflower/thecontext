@@ -28,6 +28,7 @@ const FlowGraph: React.FC = () => {
   const stateVersion = useAppStore((state) => state.stateVersion);
   const startFlowSession = useAppStore((state) => state.startFlowSession);
   const stopFlowSession = useAppStore((state) => state.stopFlowSession);
+  const resetFlowSession = useAppStore((state) => state.resetFlowSession);
   const isFlowPlaying = useAppStore(
     (state) => state.flowSession?.isPlaying || false
   );
@@ -109,20 +110,12 @@ const FlowGraph: React.FC = () => {
 
   // Handle starting a new session
   const handleNewSession = useCallback(() => {
-    // If there's an unfinished session, clear it before starting a new one
+    // If there's an unfinished session, reset it before starting a new one
     if (hasExistingSession) {
-      const appStore = useAppStore.getState();
-      if (appStore.flowSession) {
-        // Create a new object with empty steps
-        appStore.flowSession = {
-          ...appStore.flowSession,
-          temporarySteps: [],
-          currentStepIndex: 0
-        };
-      }
+      resetFlowSession();
     }
     startFlowSession();
-  }, [hasExistingSession, startFlowSession]);
+  }, [hasExistingSession, resetFlowSession, startFlowSession]);
 
   // Handle edit button click
   const handleEditSelectedNode = useCallback(() => {

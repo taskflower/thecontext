@@ -1,19 +1,22 @@
 // src/modules/context/components/ContextsList.tsx
 import React, { useState } from "react";
-import { Edit, PlusCircle, MoreHorizontal, X, FileText } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { useAppStore } from "../../store";
 import { ContextItem } from "../types";
 import { useDialogState } from "../../common/hooks";
-import { cn } from "@/utils/utils";
+import ContextItemComponent from "./ContextItemComponent";
+import { ContextDialog, EditContextDialog, ViewContextDialog } from "./ContextDialogs";
 
 const ContextsList: React.FC = () => {
   const getContextItems = useAppStore((state) => state.getContextItems);
   const addContextItem = useAppStore((state) => state.addContextItem);
   const deleteContextItem = useAppStore((state) => state.deleteContextItem);
+  const updateContextItem = useAppStore((state) => state.updateContextItem);
 
   const contextItems = getContextItems();
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [editingItem, setEditingItem] = useState<ContextItem | null>(null);
+  const [viewingItem, setViewingItem] = useState<ContextItem | null>(null);
 
   const { isOpen, formData, openDialog, handleChange, setIsOpen } =
     useDialogState<{
@@ -42,6 +45,22 @@ const ContextsList: React.FC = () => {
     setMenuOpen(null);
   };
 
+  const handleViewItem = (item: ContextItem) => {
+    setViewingItem(item);
+    setMenuOpen(null);
+  };
+
+  const handleDeleteItem = (id: string) => {
+    deleteContextItem(id);
+    setMenuOpen(null);
+  };
+
+  // Nowa funkcja do czyszczenia wartości kontekstu
+  const handleClearValue = (id: string) => {
+    updateContextItem(id, { content: "" });
+    setMenuOpen(null);
+  };
+
   return (
     <div className="h-full flex flex-col">
       {/* Context Items Header */}
@@ -65,9 +84,11 @@ const ContextsList: React.FC = () => {
                 key={item.id}
                 item={item}
                 onEdit={handleEditItem}
-                onDelete={deleteContextItem}
+                onDelete={handleDeleteItem}
+                onClearValue={handleClearValue} // Dodany nowy handler
                 menuOpen={menuOpen === item.id}
                 toggleMenu={() => toggleMenu(item.id)}
+                onClick={handleViewItem}
               />
             ))}
           </ul>
@@ -99,270 +120,14 @@ const ContextsList: React.FC = () => {
           handleClose={() => setEditingItem(null)}
         />
       )}
-    </div>
-  );
-};
 
-interface ContextItemProps {
-  item: ContextItem;
-  onEdit: (item: ContextItem) => void;
-  onDelete: (id: string) => void;
-  menuOpen: boolean;
-  toggleMenu: () => void;
-}
-
-const ContextItemComponent: React.FC<ContextItemProps> = ({
-  item,
-  onEdit,
-  onDelete,
-  menuOpen,
-  toggleMenu,
-}) => {
-  return (
-    <li className="group flex items-center justify-between px-2 py-2 rounded-md hover:bg-muted/50">
-      <div className="flex items-center min-w-0 flex-1">
-        <div className="mr-2">
-          <FileText className="h-4 w-4" />
-        </div>
-        <div className="flex items-center min-w-0 flex-1">
-          <span className="font-medium text-sm mr-2">{item.title}:</span>
-          <span className="text-sm text-muted-foreground truncate">{item.content || "(No content)"}</span>
-        </div>
-      </div>
-
-      <div className="relative flex-shrink-0 ml-2">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleMenu();
-          }}
-          className={cn(
-            "w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground",
-            menuOpen
-              ? "bg-muted text-foreground"
-              : "opacity-0 group-hover:opacity-100 hover:text-foreground hover:bg-muted"
-          )}
-        >
-          <MoreHorizontal className="h-4 w-4" />
-        </button>
-
-        {menuOpen && (
-          <div className="absolute right-0 mt-1 w-36 bg-popover border border-border rounded-md shadow-md z-10">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit(item);
-              }}
-              className="w-full text-left px-3 py-2 text-sm flex items-center hover:bg-muted"
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Edit
-            </button>
-            <button
-              onClick={() => onDelete(item.id)}
-              className="w-full text-left px-3 py-2 text-sm text-destructive hover:bg-muted flex items-center border-t border-border"
-            >
-              <X className="h-4 w-4 mr-2" />
-              Delete
-            </button>
-          </div>
-        )}
-      </div>
-    </li>
-  );
-};
-
-interface ContextDialogProps {
-  title: string;
-  formData: {
-    title: string;
-    content: string;
-  };
-  handleChange: (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => void;
-  handleSubmit: () => void;
-  handleClose: () => void;
-}
-
-const ContextDialog: React.FC<ContextDialogProps> = ({
-  title,
-  formData,
-  handleChange,
-  handleSubmit,
-  handleClose,
-}) => {
-  return (
-    <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-      onClick={handleClose}
-    >
-      <div
-        className="bg-background border border-border rounded-lg shadow-lg w-full max-w-md p-4"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium">{title}</h3>
-          <button
-            onClick={handleClose}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="title" className="block text-sm font-medium mb-1">
-              Title
-            </label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder="Enter context title"
-              className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="content" className="block text-sm font-medium mb-1">
-              Content
-            </label>
-            <textarea
-              id="content"
-              name="content"
-              value={formData.content}
-              onChange={handleChange}
-              placeholder="Enter context content"
-              rows={5}
-              className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-            />
-          </div>
-
-          <div className="flex justify-end gap-2">
-            <button
-              onClick={handleClose}
-              className="px-4 py-2 text-sm border border-border rounded-md hover:bg-muted"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSubmit}
-              className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-            >
-              Add
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-interface EditContextDialogProps {
-  item: ContextItem;
-  handleClose: () => void;
-}
-
-const EditContextDialog: React.FC<EditContextDialogProps> = ({
-  item,
-  handleClose,
-}) => {
-  const updateContextItem = useAppStore((state) => state.updateContextItem);
-  const [formData, setFormData] = useState({
-    title: item.title,
-    content: item.content,
-  });
-
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = () => {
-    if (!formData.title.trim()) return;
-    updateContextItem(item.id, {
-      title: formData.title,
-      content: formData.content,
-    });
-    handleClose();
-  };
-
-  return (
-    <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-      onClick={handleClose}
-    >
-      <div
-        className="bg-background border border-border rounded-lg shadow-lg w-full max-w-md p-4"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium">Edit Context Item</h3>
-          <button
-            onClick={handleClose}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="title" className="block text-sm font-medium mb-1">
-              Title
-            </label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder="Enter context title"
-              className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="content" className="block text-sm font-medium mb-1">
-              Content
-            </label>
-            <textarea
-              id="content"
-              name="content"
-              value={formData.content}
-              onChange={handleChange}
-              placeholder="Enter context content"
-              rows={5}
-              className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-            />
-          </div>
-
-          <div className="flex justify-end gap-2">
-            <button
-              onClick={handleClose}
-              className="px-4 py-2 text-sm border border-border rounded-md hover:bg-muted"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSubmit}
-              className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-            >
-              Update
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* View Context Item Dialog */}
+      {viewingItem && (
+        <ViewContextDialog
+          item={viewingItem}
+          handleClose={() => setViewingItem(null)}
+        />
+      )}
     </div>
   );
 };

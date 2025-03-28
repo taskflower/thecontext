@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/context/utils.ts
 import { ContextItem } from "./types";
 
@@ -23,4 +24,38 @@ export const processTemplateWithItems = (
   });
   
   return result;
+};
+
+/**
+ * Determines if a string contains valid JSON
+ * 
+ * @param str The string to check
+ * @returns An object with type ('json' or 'text') and the parsed value if JSON
+ */
+export const detectContentType = (
+  str: string
+): { type: 'json' | 'text'; value: any } => {
+  if (!str || typeof str !== 'string') {
+    return { type: 'text', value: str };
+  }
+
+  // Trim the string to handle whitespace
+  const trimmed = str.trim();
+  
+  // Check if it starts with typical JSON identifiers
+  const startsWithJsonIdentifier = 
+    (trimmed.startsWith('{') && trimmed.endsWith('}')) || 
+    (trimmed.startsWith('[') && trimmed.endsWith(']'));
+
+  if (startsWithJsonIdentifier) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      return { type: 'json', value: parsed };
+    } catch  {
+      // If parsing fails, it's not valid JSON
+      return { type: 'text', value: str };
+    }
+  }
+
+  return { type: 'text', value: str };
 };
