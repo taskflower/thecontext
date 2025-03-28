@@ -5,7 +5,7 @@ import { PluginComponentWithSchema } from "../modules/plugins/types";
 import { Send, Loader2 } from "lucide-react";
 
 import { PluginAuthAdapter } from "../services/PluginAuthAdapter";
-import { LlmService, ResponseFormatOptions } from "../services/LlmService";
+import { LlmService } from "../services/LlmService";
 import { AuthUser } from "../services/authService";
 import { useAuth } from "../context/AuthContext";
 import { useAppStore } from "../modules/store";

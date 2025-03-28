@@ -84,13 +84,39 @@ export class LlmService {
         const contextItems = getContextItems();
         
         // Szukaj elementu kontekstowego o tytule odpowiadającym kluczowi kontekstu
-        const contextItem = contextItems.find(item => item.title === this.options.contextJsonKey);
+        const contextItem = contextItems.find((item: { title: string | undefined; }) => item.title === this.options.contextJsonKey);
         if (contextItem && contextItem.content) {
           console.log(`Znaleziono element kontekstowy o tytule "${this.options.contextJsonKey}"`);
+          console.log('Zawartość elementu kontekstowego:', contextItem.content.substring(0, 100) + '...');
           
+          // Spróbuj naprawić i przeanalizować zawartość jako JSON
           try {
-            // Spróbuj przeanalizować zawartość jako JSON
-            const parsedContent = JSON.parse(contextItem.content);
+            // Napraw potencjalne problemy z JSON - zamień pojedyncze cudzysłowy na podwójne
+            const fixedContent = contextItem.content
+              .replace(/(\w+):/g, '"$1":') // Naprawia nazwy kluczy bez cudzysłowów
+              .replace(/'/g, '"');         // Zamienia pojedyncze cudzysłowy na podwójne
+            
+            // Wyświetl naprawioną zawartość do debugowania
+            console.log('Naprawiona zawartość JSON:', fixedContent.substring(0, 100) + '...');
+            
+            // Spróbuj przeanalizować naprawioną zawartość
+            let parsedContent;
+            try {
+              parsedContent = JSON.parse(fixedContent);
+            } catch (fixError) {
+              console.warn('Próba naprawy JSON nie powiodła się, próbuję alternatywną metodę:', fixError);
+              
+              // Spróbuj zbudować obiekt formatu "ręcznie" z tekstu
+              // Zakładamy, że to obiekt o strukturze schema JSON
+              return {
+                type: 'json',
+                schema: {
+                  type: 'object',
+                  description: 'Schema extracted from context item: ' + this.options.contextJsonKey,
+                  properties: {}
+                }
+              };
+            }
             
             // Sprawdź czy zawartość ma właściwy format (lub dostosuj ją)
             if (parsedContent) {
@@ -99,12 +125,21 @@ export class LlmService {
                   type: 'json',
                   schema: parsedContent
                 };
-                console.log('Pomyślnie utworzono format JSON z zawartości kontekstu:', responseFormat);
+                console.log('Pomyślnie utworzono format JSON z zawartości kontekstu');
                 return responseFormat;
               }
             }
           } catch (parseError) {
             console.error(`Błąd podczas analizy JSON z elementu kontekstowego "${this.options.contextJsonKey}":`, parseError);
+            
+            // Zwróć prosty format JSON jako fallback
+            return {
+              type: 'json',
+              schema: {
+                type: 'object',
+                description: 'Fallback schema since parsing failed'
+              }
+            };
           }
         } else {
           console.warn(`Nie znaleziono elementu kontekstowego o tytule "${this.options.contextJsonKey}"`);
@@ -130,7 +165,7 @@ export class LlmService {
               value = value[key];
             } else {
               console.warn(`Ścieżka klucza kontekstu ${this.options.contextJsonKey} nie znaleziona w węźle`);
-              return undefined;
+              break;
             }
           }
           
@@ -141,11 +176,26 @@ export class LlmService {
         }
       }
       
-      console.warn('Nie udało się pobrać formatu JSON z kontekstu');
-      return undefined;
+      // Jako ostatnią deskę ratunku, zwróć prosty format JSON
+      console.warn('Nie udało się pobrać formatu JSON z kontekstu, używam domyślnego formatu');
+      return {
+        type: 'json',
+        schema: {
+          type: 'object',
+          description: 'Default JSON response format'
+        }
+      };
     } catch (error) {
       console.error('Błąd podczas pobierania formatu JSON z kontekstu:', error);
-      return undefined;
+      
+      // Nawet w przypadku błędu, zwróć prosty format JSON
+      return {
+        type: 'json',
+        schema: {
+          type: 'object',
+          description: 'Error fallback JSON schema'
+        }
+      };
     }
   }
 
