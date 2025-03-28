@@ -1,152 +1,122 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/services/PluginAuthAdapter.ts
-import { AuthUser } from './authService';
-
-export interface AuthAttempt {
-  method: string;
-  success: boolean;
-  error?: string;
-}
+import { AuthUser } from "./authService";
 
 /**
- * Simplified adapter for auth functionality for plugins
+ * Adapter autoryzacji dla pluginów
+ * Zapewnia interfejs do interakcji z systemem autoryzacji
  */
 export class PluginAuthAdapter {
-  private attempts: AuthAttempt[] = [];
-  private authContext: any;
-
-  constructor(private appContext?: any) {
-    this.authContext = appContext?.authContext;
+  private authAttempts = 0;
+  
+  constructor(public appContext: any) {
+    console.log("PluginAuthAdapter initialized with appContext:", !!appContext);
   }
-
+  
   /**
-   * Gets the current user from the auth context or app context
+   * Pobiera dane bieżącego użytkownika z kontekstu aplikacji
    */
   async getCurrentUser(): Promise<AuthUser | null> {
     try {
-      // First try from authContext if available
-      if (this.authContext?.currentUser) {
-        this.attempts.push({ method: 'authContext.currentUser', success: true });
-        return this.authContext.currentUser;
+      this.authAttempts++;
+      
+      // Sprawdź, czy mamy bezpośredni dostęp do kontekstu autoryzacji
+      if (this.appContext?.authContext?.currentUser) {
+        console.log("Retrieved user from auth context");
+        return this.appContext.authContext.currentUser;
       }
       
-      // Then try from appContext
-      if (this.appContext?.user) {
-        const user = this.appContext.user;
-        this.attempts.push({ method: 'appContext.user', success: true });
-        
+      // Jeśli jesteśmy w trybie deweloperskim, zwróć fałszywego użytkownika
+      if (import.meta.env.DEV) {
+        console.log("Dev mode - returning mock user");
         return {
-          uid: user.uid || user.id,
-          email: user.email || '',
-          availableTokens: user.availableTokens || user.tokens || 0,
-          createdAt: user.createdAt || new Date(),
-          lastLoginAt: user.lastLoginAt || new Date()
+          uid: "dev-user",
+          email: "dev@example.com",
+          availableTokens: 1000,
+          createdAt: new Date(),
+          lastLoginAt: new Date()
         };
       }
       
-      this.attempts.push({ 
-        method: 'getCurrentUser', 
-        success: false, 
-        error: 'No user found in contexts' 
-      });
-      
+      console.warn("No auth context available");
       return null;
     } catch (error) {
-      this.attempts.push({ 
-        method: 'getCurrentUser', 
-        success: false, 
-        error: error instanceof Error ? error.message : String(error) 
-      });
+      console.error("Error getting current user:", error);
       return null;
     }
   }
-
+  
   /**
-   * Gets the current user token from the auth context or app context
+   * Pobiera token użytkownika z kontekstu autoryzacji
    */
   async getCurrentUserToken(): Promise<string | null> {
-    this.attempts = [];
-    
     try {
-      // First try from authContext
-      if (this.authContext?.getToken) {
-        try {
-          const token = await this.authContext.getToken();
-          if (token) {
-            this.attempts.push({ method: 'authContext.getToken', success: true });
-            return token;
-          }
-        } catch (error) {
-          this.attempts.push({ 
-            method: 'authContext.getToken', 
-            success: false, 
-            error: error instanceof Error ? error.message : String(error) 
-          });
-        }
+      // Sprawdź, czy mamy dostęp do metody getToken w kontekście autoryzacji
+      if (this.appContext?.authContext?.getToken) {
+        const token = await this.appContext.authContext.getToken();
+        return token;
       }
       
-      // Then try from appContext.auth
-      if (this.appContext?.authService?.getCurrentUserToken) {
-        try {
-          const token = await this.appContext.authService.getCurrentUserToken();
-          if (token) {
-            this.attempts.push({ method: 'appContext.authService', success: true });
-            return token;
-          }
-        } catch (error) {
-          this.attempts.push({ 
-            method: 'appContext.authService', 
-            success: false, 
-            error: error instanceof Error ? error.message : String(error) 
-          });
-        }
+      // W trybie deweloperskim zwróć fałszywy token
+      if (import.meta.env.DEV) {
+        return "dev-token-123456";
       }
       
-      // Try from appContext.user
-      if (this.appContext?.user?.getIdToken) {
-        try {
-          const token = await this.appContext.user.getIdToken();
-          if (token) {
-            this.attempts.push({ method: 'appContext.user.getIdToken', success: true });
-            return token;
-          }
-        } catch (error) {
-          this.attempts.push({ 
-            method: 'appContext.user.getIdToken', 
-            success: false, 
-            error: error instanceof Error ? error.message : String(error) 
-          });
-        }
-      }
-      
-      this.attempts.push({ 
-        method: 'getCurrentUserToken', 
-        success: false, 
-        error: 'No valid token source found' 
-      });
+      console.warn("No getToken method available in auth context");
       return null;
     } catch (error) {
-      console.error("Error getting auth token:", error);
-      this.attempts.push({ 
-        method: 'getCurrentUserToken', 
-        success: false, 
-        error: error instanceof Error ? error.message : String(error) 
-      });
+      console.error("Error getting user token:", error);
       return null;
+    }
+  }
+  
+  /**
+   * Pobiera liczbę prób autoryzacji
+   */
+  getAuthAttempts(): number {
+    return this.authAttempts;
+  }
+  
+  /**
+   * Odświeża dane użytkownika
+   */
+  async refreshUserData(): Promise<void> {
+    try {
+      if (this.appContext?.authContext?.refreshUserData) {
+        await this.appContext.authContext.refreshUserData();
+      }
+    } catch (error) {
+      console.error("Error refreshing user data:", error);
     }
   }
 
   /**
-   * Get authentication attempts history
+   * Zmniejsza liczbę dostępnych tokenów
    */
-  getAuthAttempts(): AuthAttempt[] {
-    return this.attempts;
+  decreaseTokens(amount: number): void {
+    try {
+      if (this.appContext?.authContext?.decreaseTokens) {
+        this.appContext.authContext.decreaseTokens(amount);
+      }
+    } catch (error) {
+      console.error("Error decreasing tokens:", error);
+    }
   }
-
+  
   /**
-   * Check if the adapter is loading (always returns false in simplified version)
+   * Pobiera element kontekstowy na podstawie tytułu
+   * Ta metoda została dodana, aby ułatwić dostęp do systemu kontekstowego
    */
-  isLoading(): boolean {
-    return false;
+  getContextItemByTitle(title: string): any {
+    try {
+      if (this.appContext?.getContextItems) {
+        const contextItems = this.appContext.getContextItems();
+        return contextItems.find((item: any) => item.title === title);
+      }
+      return null;
+    } catch (error) {
+      console.error("Error getting context item:", error);
+      return null;
+    }
   }
 }

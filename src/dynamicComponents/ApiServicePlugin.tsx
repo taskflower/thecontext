@@ -5,41 +5,56 @@ import { PluginComponentWithSchema } from "../modules/plugins/types";
 import { Send, Loader2 } from "lucide-react";
 
 import { PluginAuthAdapter } from "../services/PluginAuthAdapter";
-import { LlmService } from "../services/LlmService";
+import { LlmService, ResponseFormatOptions } from "../services/LlmService";
 import { AuthUser } from "../services/authService";
 import { useAuth } from "../context/AuthContext";
+import { useAppStore } from "../modules/store";
 
-// Define the structure of our plugin data
+// Definiuje strukturę danych pluginu
 interface ApiServiceData {
   buttonText?: string;
   assistantMessage?: string;
   fillUserInput?: boolean;
   apiUrl?: string;
+  // JSON response options
+  useJsonResponse?: boolean;
+  contextJsonKey?: string; // Klucz w kontekście do znalezienia schematu JSON
 }
 
 const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
   data,
   appContext,
 }) => {
-  // Define default values inside the component
+  // Definicja wartości domyślnych wewnątrz komponentu
   const defaultOptions = {
     buttonText: "Send Request",
     assistantMessage: "This is the message that will be sent to the API.",
     fillUserInput: false,
     apiUrl: "api/v1/services/chat/completion",
+    useJsonResponse: false,
+    contextJsonKey: "",
   };
 
-  // Merge provided data with defaults
+  // Połączenie dostarczonych danych z domyślnymi
   const options: ApiServiceData = {
     ...defaultOptions,
     ...(data as ApiServiceData),
   };
 
-  // Get auth context from the app if available
+  // Pobranie kontekstu autoryzacji z aplikacji, jeśli dostępny
   const auth = useAuth();
-  const enhancedAppContext = { ...appContext, authContext: auth };
+  
+  // Pobierz funkcję getContextItems z useAppStore, aby udostępnić ją dla LlmService
+  const getContextItems = useAppStore(state => state.getContextItems);
+  
+  // Rozszerzony kontekst aplikacji z dodatkową funkcją getContextItems
+  const enhancedAppContext = { 
+    ...appContext, 
+    authContext: auth,
+    getContextItems: getContextItems 
+  };
 
-  // Initialize auth adapter (tylko raz)
+  // Inicjalizacja adaptera autoryzacji (tylko raz)
   const [authAdapter] = useState(
     () => new PluginAuthAdapter(enhancedAppContext)
   );
@@ -47,13 +62,32 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
   // Usunięcie stanu dla LlmService - zamiast tego tworzymy funkcję do pozyskiwania świeżej instancji
   const getLlmService = () => {
     const apiBaseUrl = import.meta.env.VITE_API_URL;
-    return new LlmService(authAdapter, {
+    
+    // Konfiguracja LlmService
+    const serviceOptions: any = {
       apiUrl: options.apiUrl,
       apiBaseUrl: apiBaseUrl,
-    });
+    };
+    
+    // Dodanie kontekstowego klucza JSON, jeśli używany
+    if (options.useJsonResponse && options.contextJsonKey) {
+      serviceOptions.contextJsonKey = options.contextJsonKey;
+      console.log(`Using JSON response format with context key: ${options.contextJsonKey}`);
+      
+      // Debug: Sprawdź, czy element kontekstowy istnieje
+      const contextItems = getContextItems();
+      const contextItem = contextItems.find(item => item.title === options.contextJsonKey);
+      if (contextItem) {
+        console.log(`Found context item with title "${options.contextJsonKey}":`, contextItem);
+      } else {
+        console.warn(`Context item with title "${options.contextJsonKey}" not found!`);
+      }
+    }
+    
+    return new LlmService(authAdapter, serviceOptions);
   };
 
-  // State for handling API request
+  // Stan do obsługi żądania API
   const [isLoading, setIsLoading] = useState(false);
   const [apiResponse, setApiResponse] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
@@ -61,24 +95,24 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
   const [authLoading, setAuthLoading] = useState(true);
   const [, setAuthAttempts] = useState(authAdapter.getAuthAttempts());
 
-  // Get values from app context
+  // Pobranie wartości z kontekstu aplikacji
   const currentNodeId = appContext?.currentNode?.id;
   const assistantMessage =
     appContext?.currentNode?.assistantMessage || options.assistantMessage;
 
-  // Casting methods from appContext
+  // Rzutowanie metod z appContext
   const { addNodeMessage, moveToNextNode } = (appContext || {}) as any;
 
-  // Load user data when component mounts
+  // Załadowanie danych użytkownika po zamontowaniu komponentu
   useEffect(() => {
     const loadAuth = async () => {
       setAuthLoading(true);
       try {
-        // First try getting user from auth context
+        // Najpierw próba pobrania użytkownika z kontekstu autoryzacji
         if (auth?.currentUser) {
           setCurrentUser(auth.currentUser);
         } else {
-          // Fallback to adapter
+          // Alternatywnie z adaptera
           const user = await authAdapter.getCurrentUser();
           setCurrentUser(user);
         }
@@ -94,7 +128,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
     loadAuth();
   }, [auth, authAdapter]);
 
-  // Function to call the API
+  // Funkcja wywołania API
   const callApi = async () => {
     if (!currentNodeId) return;
 
@@ -103,20 +137,23 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
     setHasError(false);
 
     try {
-      // Get current user ID or use anonymous
+      // Pobranie bieżącego ID użytkownika lub użycie anonimowego
       const userId = currentUser?.uid || "anonymous";
 
-      // Utworzenie nowej instancji LlmService za każdym razem, aby użyć aktualnego URL
+      // Utworzenie nowej instancji LlmService
       const llmService = getLlmService();
 
-      // Dodanie logowania aby sprawdzić używany URL (opcjonalnie)
+      // Logging requested URL
       console.log(`Sending request to: ${options.apiUrl}`);
-
-      // Send request using LlmService
-      const response = await llmService.sendRequest({
+      
+      // Przygotowanie parametrów zapytania
+      const requestParams: any = {
         message: assistantMessage || "",
         userId,
-      });
+      };
+
+      // Wysłanie żądania za pomocą LlmService
+      const response = await llmService.sendRequest(requestParams);
 
       const formattedResponse = JSON.stringify(response.data, null, 2);
       setApiResponse(formattedResponse);
@@ -124,31 +161,42 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
       if (
         response.success &&
         response.data?.success &&
-        response.data?.data?.message?.content
+        response.data?.data?.message
       ) {
-        const assistantContent = response.data.data.message.content;
+        // Wyodrębnienie zawartości - może być zarówno przeanalizowany obiekt JSON, jak i zawartość tekstowa
+        let assistantContent = response.data.data.message.content;
+        
+        // Sprawdzenie przeanalizowanego JSON, jeśli używamy formatu odpowiedzi JSON
+        if (options.useJsonResponse && response.data.data.message.parsedJson) {
+          assistantContent = JSON.stringify(
+            response.data.data.message.parsedJson,
+            null,
+            2
+          );
+        }
 
-        // Update user message with content from API if enabled
+        // Aktualizacja wiadomości użytkownika o zawartość z API, jeśli włączone
         if (options.fillUserInput && appContext?.updateNodeUserPrompt) {
           appContext.updateNodeUserPrompt(currentNodeId, assistantContent);
         }
 
-        // Add the API response to the conversation
+        // Dodanie odpowiedzi API do konwersacji
         if (addNodeMessage) {
+          const messageType = options.useJsonResponse ? "json" : "text";
           addNodeMessage(
             currentNodeId,
-            `API Response:\n\`\`\`json\n${formattedResponse}\n\`\`\``
+            `API Response (${messageType}):\n\`\`\`json\n${formattedResponse}\n\`\`\``
           );
         }
 
-        // Move to next node if not filling user input
+        // Przejście do następnego węzła, jeśli nie wypełniamy wpisu użytkownika
         if (!options.fillUserInput && moveToNextNode) {
           moveToNextNode(currentNodeId);
         }
       } else {
         setHasError(true);
 
-        // Add warning to conversation
+        // Dodanie ostrzeżenia do konwersacji
         if (addNodeMessage) {
           addNodeMessage(
             currentNodeId,
@@ -163,7 +211,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
       );
       setHasError(true);
 
-      // Add error to conversation
+      // Dodanie błędu do konwersacji
       if (addNodeMessage) {
         addNodeMessage(
           currentNodeId,
@@ -177,7 +225,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
 
   return (
     <div className="space-y-4">
-      {/* API response (if any) */}
+      {/* Odpowiedź API (jeśli istnieje) */}
       {apiResponse && (
         <div
           className={`bg-gray-50 dark:bg-gray-900/20 p-4 rounded-md border ${
@@ -191,10 +239,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
       )}
 
       <div className="flex justify-between gap-4">
-        {/* Auth Debug Information */}
-
-        {/* API call button */}
-
+        {/* Przycisk wywołania API */}
         <button
           onClick={callApi}
           disabled={isLoading || authLoading}
@@ -212,7 +257,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
           ) : (
             <>
               <div className="text-xs flex justify-between py-2 w-full items-center">
-                {/* User Info */}
+                {/* Informacje o użytkowniku */}
                 <div className="text-left">
                   <strong>User:</strong>{" "}
                   <div>{currentUser ? currentUser.email : "Not logged in"}</div>
@@ -226,25 +271,36 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
           )}
         </button>
       </div>
+      
+      {/* Dodatkowe informacje o użytym kontekście */}
+      {options.useJsonResponse && options.contextJsonKey && (
+        <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-md">
+          <p className="text-xs text-blue-700 dark:text-blue-300">
+            <strong>Użyty klucz kontekstu:</strong> {options.contextJsonKey}
+          </p>
+        </div>
+      )}
     </div>
   );
 };
 
-// Create a stable reference for default options for the schema
+// Tworzenie stabilnej referencji dla domyślnych opcji schematu
 const schemaDefaults = {
   buttonText: "Send Request",
   assistantMessage: "This is the message that will be sent to the API.",
   fillUserInput: false,
   apiUrl: "api/v1/services/chat/completion",
+  useJsonResponse: false,
+  contextJsonKey: "",
 };
 
-// Specify that this plugin should replace the assistant view
+// Określenie, że ten plugin powinien zastąpić widok asystenta
 ApiServicePlugin.pluginSettings = {
   replaceHeader: true,
   // replaceAssistantView: true,
 };
 
-// Add options schema for the plugin editor
+// Dodanie schematu opcji dla edytora pluginu
 ApiServicePlugin.optionsSchema = {
   buttonText: {
     type: "string",
@@ -269,6 +325,22 @@ ApiServicePlugin.optionsSchema = {
     label: "API Endpoint Path",
     default: schemaDefaults.apiUrl,
     description: "Path to the API endpoint (appended to API base URL)",
+  },
+  useJsonResponse: {
+    type: "boolean",
+    label: "Force JSON Response",
+    default: schemaDefaults.useJsonResponse,
+    description: "Request response in JSON format",
+  },
+  contextJsonKey: {
+    type: "string",
+    label: "Context JSON Key",
+    default: schemaDefaults.contextJsonKey,
+    description: "Tytuł elementu kontekstowego zawierającego schemat JSON",
+    conditional: {
+      field: "useJsonResponse",
+      value: true,
+    },
   },
 };
 
