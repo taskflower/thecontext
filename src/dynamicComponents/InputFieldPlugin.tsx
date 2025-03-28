@@ -12,8 +12,8 @@ interface InputFieldData {
 
 const defaultData: InputFieldData = {
   fieldType: "input",
-  labelText: "Enter your response:",
-  placeholderText: "Type here...",
+  labelText: "Podaj swoją odpowiedź:",
+  placeholderText: "Wpisz ją tutaj...",
   defaultChecked: false,
   rows: 3
 };

@@ -174,7 +174,7 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose, componentSet = 'd
             onClose={() => setShowSavePrompt(true)}
           />
         )}
-        <div className="flex-1 overflow-y-auto">
+        <div className="overflow-y-auto">
           <div className="p-6">
             {/* Użyj przetworzonej wiadomości asystenta */}
             {!pluginSettings.replaceAssistantView && (

@@ -16,6 +16,7 @@ export const DefaultHeader: React.FC<DefaultHeaderProps> = ({
   nodeName, 
   onClose 
 }) => (
+  <>
   <div className="flex items-center justify-between p-4 border-b border-border">
     <h3 className="text-lg font-medium">
       Krok {currentStepIndex + 1} z {totalSteps}: {nodeName || `Krok ${currentStepIndex + 1}`}
@@ -27,6 +28,8 @@ export const DefaultHeader: React.FC<DefaultHeaderProps> = ({
       <X className="h-5 w-5" />
     </button>
   </div>
+  <div className='flex-1'></div>
+  </>
 );
 
 export interface DefaultAssistantMessageProps {
