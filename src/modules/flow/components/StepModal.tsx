@@ -5,7 +5,6 @@ import { useAppStore } from "../../store";
 import { PluginComponentWithSchema } from "@/modules/plugins/types";
 import { usePlugins } from "@/modules/plugins/pluginContext";
 
-
 import { processTemplateWithItems } from "@/modules/context/utils";
 import { updateContextFromNodeInput } from "../contextHandler";
 import { DefaultAssistantMessage, DefaultContextUpdateInfo, DefaultHeader, DefaultNavigationButtons, DefaultUserInput } from "./DefaultComponents";
@@ -45,6 +44,12 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose, componentSet = 'd
     if (!currentNode?.assistantMessage) return '';
     return processTemplateWithItems(currentNode.assistantMessage, contextItems);
   }, [currentNode?.assistantMessage, contextItems]);
+  
+  // Przetwarzanie domyślnej wartości dla userPrompt z tokenami
+  const processedUserPrompt = useMemo(() => {
+    if (!currentNode?.userPrompt) return '';
+    return processTemplateWithItems(currentNode.userPrompt, contextItems);
+  }, [currentNode?.userPrompt, contextItems]);
   
   // Aktualizacja wartości w tymczasowej kopii
   const handleInputChange = (value: string) => {
@@ -181,8 +186,6 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose, componentSet = 'd
               />
             )}
 
-            
-
             {/* Plugin section - always render if a plugin is associated */}
             {currentNode.pluginKey && (
               <div className="my-4">
@@ -197,7 +200,7 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose, componentSet = 'd
             {!pluginSettings.replaceUserInput && (
               <>
                 <UserInput
-                  value={currentNode.userPrompt || ""}
+                  value={processedUserPrompt}
                   onChange={handleInputChange}
                 />
                 {/* Komponent informacyjny o kontekście */}
