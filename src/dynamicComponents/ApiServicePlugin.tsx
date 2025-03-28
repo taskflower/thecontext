@@ -27,7 +27,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
 }) => {
   // Definicja wartości domyślnych wewnątrz komponentu
   const defaultOptions = {
-    buttonText: "Send Request",
+    buttonText: "Analizuj odpowiedz",
     assistantMessage: "This is the message that will be sent to the API.",
     fillUserInput: false,
     apiUrl: "api/v1/services/chat/completion",
@@ -226,7 +226,9 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
   return (
     <div className="space-y-4">
       {/* Odpowiedź API (jeśli istnieje) */}
-      {apiResponse && (
+       {/* TODO - nie usuwaj tego - apiResponse przenosi sie pomiedzy krokami - to jest bład */}
+      {}
+      {/* {apiResponse && (
         <div
           className={`bg-gray-50 dark:bg-gray-900/20 p-4 rounded-md border ${
             hasError
@@ -236,7 +238,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
         >
           <pre className="text-xs whitespace-pre-wrap">{apiResponse}</pre>
         </div>
-      )}
+      )} */}
 
       <div className="flex justify-between gap-4">
         {/* Przycisk wywołania API */}
@@ -256,12 +258,9 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
             </div>
           ) : (
             <>
-              <div className="text-xs flex justify-between py-2 w-full items-center">
+              <div className="text-xs flex justify-center py-2 w-full items-center">
                 {/* Informacje o użytkowniku */}
-                <div className="text-left">
-                  <strong>User:</strong>{" "}
-                  <div>{currentUser ? currentUser.email : "Not logged in"}</div>
-                </div>
+               
                 <div className="flex text-lg items-center">
                   {options.buttonText}
                   <Send className="ml-2 h-4 w-4" />
@@ -296,7 +295,7 @@ const schemaDefaults = {
 
 // Określenie, że ten plugin powinien zastąpić widok asystenta
 ApiServicePlugin.pluginSettings = {
-  replaceHeader: true,
+  // replaceHeader: true,
   // replaceAssistantView: true,
 };
 

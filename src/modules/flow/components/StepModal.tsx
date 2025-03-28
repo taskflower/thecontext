@@ -166,14 +166,14 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose, componentSet = 'd
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="flex flex-col bg-background rounded-lg border border-border shadow-lg w-full max-w-4xl min-h-[95vh] max-h-[95vh]">
       {/* Header - conditionally render based on plugin settings */}
-        {!pluginSettings.replaceHeader && (
+        {!pluginSettings.replaceHeader ? (
           <Header
             currentStepIndex={currentStepIndex}
             totalSteps={temporarySteps.length}
             nodeName={currentNode.label}
             onClose={() => setShowSavePrompt(true)}
           />
-        )}
+        ):<div className="flex-1"></div>}
         <div className="overflow-y-auto">
           <div className="p-6">
             {/* Użyj przetworzonej wiadomości asystenta */}
