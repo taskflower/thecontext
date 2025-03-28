@@ -4,7 +4,6 @@ import { Layers, Info } from "lucide-react";
 import { ContextUpdateInfoProps } from "../../interfaces";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-
 const ContextUpdateInfo: React.FC<ContextUpdateInfoProps> = ({
   contextKey,
   isVisible,
@@ -20,18 +19,15 @@ const ContextUpdateInfo: React.FC<ContextUpdateInfoProps> = ({
           <span className="font-semibold text-foreground bg-secondary/40 px-1.5 py-0.5 rounded">
             {contextKey}
           </span>
-          
-          
-                <button className="ml-1 text-muted-foreground hover:text-foreground">
-                  <Info className="h-3 w-3" />
-                </button>
-             
-                <p className="text-xs">
-                  Your response will be stored in the workspace context and can be 
-                  accessed by other scenarios in this workspace.
-                </p>
-              
-         
+
+          <button className="ml-1 text-muted-foreground hover:text-foreground">
+            <Info className="h-3 w-3" />
+          </button>
+
+          <p className="text-xs">
+            Your response will be stored in the workspace context and can be
+            accessed by other scenarios in this workspace.
+          </p>
         </AlertDescription>
       </div>
     </Alert>
