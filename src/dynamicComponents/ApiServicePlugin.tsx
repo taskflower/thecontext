@@ -2,13 +2,14 @@
 // src/components/plugins/ApiServicePlugin.tsx
 import { useState, useEffect } from "react";
 import { PluginComponentWithSchema } from "../modules/plugins/types";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, User, Layers } from "lucide-react";
 
 import { PluginAuthAdapter } from "../services/PluginAuthAdapter";
 import { LlmService } from "../services/LlmService";
 import { AuthUser } from "../services/authService";
 import { useAuth } from "../context/AuthContext";
 import { useAppStore } from "../modules/store";
+
 
 // Definiuje strukturę danych pluginu
 interface ApiServiceData {
@@ -43,15 +44,15 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
 
   // Pobranie kontekstu autoryzacji z aplikacji, jeśli dostępny
   const auth = useAuth();
-  
+
   // Pobierz funkcję getContextItems z useAppStore, aby udostępnić ją dla LlmService
-  const getContextItems = useAppStore(state => state.getContextItems);
-  
+  const getContextItems = useAppStore((state) => state.getContextItems);
+
   // Rozszerzony kontekst aplikacji z dodatkową funkcją getContextItems
-  const enhancedAppContext = { 
-    ...appContext, 
+  const enhancedAppContext = {
+    ...appContext,
     authContext: auth,
-    getContextItems: getContextItems 
+    getContextItems: getContextItems,
   };
 
   // Inicjalizacja adaptera autoryzacji (tylko raz)
@@ -62,28 +63,37 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
   // Usunięcie stanu dla LlmService - zamiast tego tworzymy funkcję do pozyskiwania świeżej instancji
   const getLlmService = () => {
     const apiBaseUrl = import.meta.env.VITE_API_URL;
-    
+
     // Konfiguracja LlmService
     const serviceOptions: any = {
       apiUrl: options.apiUrl,
       apiBaseUrl: apiBaseUrl,
     };
-    
+
     // Dodanie kontekstowego klucza JSON, jeśli używany
     if (options.useJsonResponse && options.contextJsonKey) {
       serviceOptions.contextJsonKey = options.contextJsonKey;
-      console.log(`Using JSON response format with context key: ${options.contextJsonKey}`);
-      
+      console.log(
+        `Using JSON response format with context key: ${options.contextJsonKey}`
+      );
+
       // Debug: Sprawdź, czy element kontekstowy istnieje
       const contextItems = getContextItems();
-      const contextItem = contextItems.find(item => item.title === options.contextJsonKey);
+      const contextItem = contextItems.find(
+        (item) => item.title === options.contextJsonKey
+      );
       if (contextItem) {
-        console.log(`Found context item with title "${options.contextJsonKey}":`, contextItem);
+        console.log(
+          `Found context item with title "${options.contextJsonKey}":`,
+          contextItem
+        );
       } else {
-        console.warn(`Context item with title "${options.contextJsonKey}" not found!`);
+        console.warn(
+          `Context item with title "${options.contextJsonKey}" not found!`
+        );
       }
     }
-    
+
     return new LlmService(authAdapter, serviceOptions);
   };
 
@@ -145,7 +155,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
 
       // Logging requested URL
       console.log(`Sending request to: ${options.apiUrl}`);
-      
+
       // Przygotowanie parametrów zapytania
       const requestParams: any = {
         message: assistantMessage || "",
@@ -165,7 +175,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
       ) {
         // Wyodrębnienie zawartości - może być zarówno przeanalizowany obiekt JSON, jak i zawartość tekstowa
         let assistantContent = response.data.data.message.content;
-        
+
         // Sprawdzenie przeanalizowanego JSON, jeśli używamy formatu odpowiedzi JSON
         if (options.useJsonResponse && response.data.data.message.parsedJson) {
           assistantContent = JSON.stringify(
@@ -226,16 +236,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
   return (
     <div className="mt-6 space-y-5">
       {/* Informacja o używanym kluczu kontekstu w stylizowanym elemencie */}
-      {options.useJsonResponse && options.contextJsonKey && (
-        <div className="space-y-3">
-          <label className="text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            Używany klucz kontekstu
-          </label>
-          <div className="w-full border-2 border-input rounded-md bg-primary/5 px-4 py-3 text-sm">
-            <span className="font-medium">{options.contextJsonKey}</span>
-          </div>
-        </div>
-      )}
+     
 
       {/* Odpowiedź API (jeśli istnieje) - zakomentowana tak jak w oryginalnym kodzie */}
       {/* TODO - nie usuwaj tego - apiResponse przenosi sie pomiedzy krokami - to jest bład */}
@@ -243,14 +244,11 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
 
       {/* Przycisk wywołania API */}
       <div className="space-y-3">
-        <label className="text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-          Wywołanie API
-        </label>
-        <div className="space-y-3">
+        <div className="space-y-3 relative">
           <button
             onClick={callApi}
             disabled={isLoading || authLoading}
-            className={`px-5 py-4 rounded-md transition-colors text-base font-medium w-full flex items-center justify-center ${
+            className={`p-6 rounded-md transition-colors text-base font-medium w-full flex items-center justify-center ${
               isLoading || authLoading
                 ? "bg-muted text-muted-foreground cursor-not-allowed"
                 : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md"
@@ -268,16 +266,19 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
               </>
             )}
           </button>
+          <div className="absolute -bottom-2 -right-2 flex gap-1">
+          {options.useJsonResponse && options.contextJsonKey && (
+        <div className="w-6 h-6 rounded-full bg-white  p-1"><Layers className="w-4 h-4 text-black"/></div>
+      )}
+          {/* Informacja o użytkowniku */}
+          {!authLoading && currentUser && (
+            <div className="w-6 h-6 rounded-full bg-white  p-1"><User className="w-4 h-4 text-black"/></div>
+          )}
+          </div>
+         
         </div>
       </div>
 
-      {/* Informacja o użytkowniku */}
-      {!authLoading && currentUser && (
-        <div className="text-sm text-muted-foreground text-center">
-          Zalogowany jako: {currentUser.email ||  currentUser.uid}
-        </div>
-      )}
-      
       {/* Informacja o błędzie - jeśli wystąpił */}
       {hasError && apiResponse && (
         <div className="space-y-3">
@@ -285,7 +286,9 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
             Błąd odpowiedzi API
           </label>
           <div className="w-full border-2 border-destructive rounded-md bg-destructive/5 px-4 py-3">
-            <pre className="text-sm whitespace-pre-wrap text-destructive">{apiResponse}</pre>
+            <pre className="text-sm whitespace-pre-wrap text-destructive">
+              {apiResponse}
+            </pre>
           </div>
         </div>
       )}

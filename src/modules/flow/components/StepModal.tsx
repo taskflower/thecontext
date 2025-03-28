@@ -4,22 +4,12 @@ import { StepModalProps } from "../types";
 import { useAppStore } from "../../store";
 import { PluginComponentWithSchema } from "@/modules/plugins/types";
 import { usePlugins } from "@/modules/plugins/pluginContext";
-import {
-  DefaultHeader,
-  DefaultAssistantMessage,
-  DefaultUserInput,
-  NavigationButtons as DefaultNavigationButtons,
-  ContextUpdateInfo as DefaultContextUpdateInfo
-} from "./DefaultComponents";
-import {
-  AlternativeHeader,
-  AlternativeAssistantMessage,
-  AlternativeUserInput,
-  AlternativeNavigationButtons as AltNavigationButtons,
-  AlternativeContextUpdateInfo as AltContextUpdateInfo
-} from "./AlternativeComponents";
+
+
 import { processTemplateWithItems } from "@/modules/context/utils";
 import { updateContextFromNodeInput } from "../contextHandler";
+import { DefaultAssistantMessage, DefaultContextUpdateInfo, DefaultHeader, DefaultNavigationButtons, DefaultUserInput } from "./DefaultComponents";
+import { AlternativeAssistantMessage, AlternativeHeader, AlternativeUserInput, ContextUpdateInfo, NavigationButtons } from "./AlternativeComponents";
 
 export const StepModal: React.FC<StepModalProps> = ({ onClose, componentSet = 'default' }) => {
   // Get our plugin context to access plugin components
@@ -47,8 +37,8 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose, componentSet = 'd
   const Header = componentSet === 'default' ? DefaultHeader : AlternativeHeader;
   const AssistantMessage = componentSet === 'default' ? DefaultAssistantMessage : AlternativeAssistantMessage;
   const UserInput = componentSet === 'default' ? DefaultUserInput : AlternativeUserInput;
-  const NavButtons = componentSet === 'default' ? DefaultNavigationButtons : AltNavigationButtons;
-  const ContextInfo = componentSet === 'default' ? DefaultContextUpdateInfo : AltContextUpdateInfo;
+  const NavButtons = componentSet === 'default' ? DefaultNavigationButtons : NavigationButtons;
+  const ContextInfo = componentSet === 'default' ? DefaultContextUpdateInfo : ContextUpdateInfo;
   
   // Przetwarzanie wiadomości asystenta z tokenami
   const processedMessage = useMemo(() => {
@@ -115,6 +105,14 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose, componentSet = 'd
   if (!currentNode) {
     return null;
   }
+
+  const nodeDataForPlugin = {
+    ...currentNode,
+    assistantMessage: processedMessage,
+    // Konwersja znaczników czasu na obiekty Date
+    createdAt: currentNode.createdAt ? new Date(currentNode.createdAt) : undefined,
+    updatedAt: currentNode.updatedAt ? new Date(currentNode.updatedAt) : undefined
+  };
 
   // Dialog pytający o zapis zmian
   if (showSavePrompt) {
@@ -183,16 +181,14 @@ export const StepModal: React.FC<StepModalProps> = ({ onClose, componentSet = 'd
               />
             )}
 
+            
+
             {/* Plugin section - always render if a plugin is associated */}
             {currentNode.pluginKey && (
               <div className="my-4">
                 <StepPluginWrapper
                   componentKey={currentNode.pluginKey}
-                  nodeData={{
-                    ...currentNode,
-                    // Przekaż przetworzoną wiadomość do pluginu
-                    assistantMessage: processedMessage
-                  }}
+                  nodeData={nodeDataForPlugin}
                 />
               </div>
             )}

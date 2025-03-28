@@ -1,8 +1,8 @@
 // src/modules/flow/components/AlternativeComponents.tsx
-import React from 'react';
-import { Bot, X } from 'lucide-react';
-import { cn } from '@/utils/utils';
-import { useAppStore } from '@/modules/store';
+import React from "react";
+import { Bot, Layers } from "lucide-react";
+import { cn } from "@/utils/utils";
+import { useAppStore } from "@/modules/store";
 
 export interface AlternativeHeaderProps {
   currentStepIndex: number;
@@ -11,45 +11,27 @@ export interface AlternativeHeaderProps {
   onClose: () => void;
 }
 
-export const AlternativeHeader: React.FC<AlternativeHeaderProps> = ({ 
-  currentStepIndex, 
-  totalSteps, 
-  nodeName, 
-  onClose 
-}) => {
+export const AlternativeHeader: React.FC<AlternativeHeaderProps> = () => {
   // Get current workspace information from store
   const getCurrentWorkspace = useAppStore((state) => state.getCurrentWorkspace);
   const currentWorkspace = getCurrentWorkspace();
-  
   return (
-    <div className="flex flex-col p-4 bg-primary/10 border-b border-primary/30">
-      {/* Workspace info section */}
-      {currentWorkspace && (
-        <div className="mb-2">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-medium text-primary/80">
-              {currentWorkspace.title}
-            </h2>
-            <button
-              onClick={onClose}
-              className="p-1 rounded-full hover:bg-primary/20"
-            >
-              <X className="h-5 w-5 text-primary" />
-            </button>
-          </div>
-          {currentWorkspace.description && (
-            <p className="text-xs text-primary/60 truncate">
+    <>
+   
+      <h1 className="p-8 mt-12 text-6xl font-bold">
+        {" "}
+        {currentWorkspace && (
+          <>
+            {" "}
+            {currentWorkspace.title}{" "}
+            <p className="mt-16 text-4xl  ">
               {currentWorkspace.description}
             </p>
-          )}
-        </div>
-      )}
-      
-      {/* Step info section */}
-      <h3 className="text-lg font-bold text-primary">
-        Step {currentStepIndex + 1} of {totalSteps}: {nodeName || `Step ${currentStepIndex + 1}`}
-      </h3>
-    </div>
+          </>
+        )}
+      </h1>
+      <div className="flex-1"></div>
+    </>
   );
 };
 
@@ -57,17 +39,19 @@ export interface AlternativeAssistantMessageProps {
   message?: string;
 }
 
-export const AlternativeAssistantMessage: React.FC<AlternativeAssistantMessageProps> = ({ message }) => (
+export const AlternativeAssistantMessage: React.FC<
+  AlternativeAssistantMessageProps
+> = ({ message }) => (
   <div className="flex items-start mb-6">
-    <div className="flex-shrink-0 bg-secondary w-10 h-10 rounded-lg flex items-center justify-center mr-3">
-      <Bot className="h-5 w-5 text-secondary-foreground" />
+    <div className="flex-shrink-0 bg-primary/20 w-8 h-8 rounded-full flex items-center justify-center mr-3">
+      <Bot className="h-4 w-4 text-primary" />
     </div>
     <div className="flex-1">
-      <p className="text-sm font-semibold text-secondary mb-1">
-        Assistant:
+      <p className="text-sm font-medium text-muted-foreground mb-1">
+        Asystent:
       </p>
-      <div className="bg-secondary/10 border border-secondary/20 rounded-lg py-3 px-4 text-secondary-foreground">
-        {message || "Waiting for your response..."}
+      <div className="bg-muted rounded-lg py-2 px-3">
+        {message || "Czekam na Twoją odpowiedź..."}
       </div>
     </div>
   </div>
@@ -79,26 +63,26 @@ export interface AlternativeUserInputProps {
   placeholder?: string;
 }
 
-export const AlternativeUserInput: React.FC<AlternativeUserInputProps> = ({ 
-  value, 
+export const AlternativeUserInput: React.FC<AlternativeUserInputProps> = ({
+  value,
   onChange,
-  placeholder = "Type your message..." 
+  placeholder = "Wpisz swoją wiadomość...",
 }) => (
   <div className="mt-6">
-    <p className="text-sm font-semibold text-secondary mb-2">
-      Your response:
+    <p className="text-sm font-medium text-muted-foreground mb-2">
+      Twoja odpowiedź:
     </p>
     <textarea
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full p-4 border-2 border-secondary/30 rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent"
-      rows={4}
+      className="w-full p-3 border border-input rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-primary"
+      rows={3}
     ></textarea>
   </div>
 );
 
-export interface AlternativeNavigationButtonsProps {
+export interface NavigationButtonsProps {
   isFirstStep: boolean;
   isLastStep: boolean;
   isProcessing: boolean;
@@ -106,62 +90,59 @@ export interface AlternativeNavigationButtonsProps {
   onNext: () => void;
 }
 
-export const AlternativeNavigationButtons: React.FC<AlternativeNavigationButtonsProps> = ({
+export const NavigationButtons: React.FC<NavigationButtonsProps> = ({
   isFirstStep,
   isLastStep,
   isProcessing,
   onPrevious,
-  onNext
+  onNext,
 }) => (
-  <div className="flex justify-between p-4 bg-muted/30">
+  <div className="flex justify-between p-4 border-t border-border">
     <button
       onClick={onPrevious}
       disabled={isFirstStep || isProcessing}
       className={cn(
-        "px-6 py-2 rounded-lg text-sm font-bold transition-colors",
+        "px-4 py-2 rounded-md text-sm font-medium transition-colors",
         isFirstStep || isProcessing
           ? "bg-muted text-muted-foreground cursor-not-allowed"
-          : "bg-secondary/20 text-secondary hover:bg-secondary/30"
+          : "bg-secondary text-secondary-foreground hover:bg-secondary/90"
       )}
     >
-      ← Previous
+      ← Poprzedni
     </button>
 
     <button
       onClick={onNext}
       disabled={isProcessing}
       className={cn(
-        "px-6 py-2 rounded-lg text-sm font-bold transition-colors",
-        isProcessing 
-          ? "bg-secondary/70 text-secondary-foreground cursor-wait" 
-          : "bg-secondary text-secondary-foreground hover:bg-secondary/90"
+        "px-4 py-2 rounded-md text-sm font-medium transition-colors",
+        isProcessing
+          ? "bg-primary/70 text-primary-foreground cursor-wait"
+          : "bg-primary text-primary-foreground hover:bg-primary/90"
       )}
     >
-      {isLastStep ? "Finish" : "Next →"}
+      {isLastStep ? "Zakończ" : "Następny →"}
     </button>
   </div>
 );
 
-export interface AlternativeContextUpdateInfoProps {
+export interface ContextUpdateInfoProps {
   contextKey: string | undefined;
   isVisible: boolean;
 }
 
-export const AlternativeContextUpdateInfo: React.FC<AlternativeContextUpdateInfoProps> = ({ 
-  contextKey, 
-  isVisible 
+export const ContextUpdateInfo: React.FC<ContextUpdateInfoProps> = ({
+  contextKey,
+  isVisible,
 }) => {
   if (!isVisible || !contextKey) return null;
-  
+
   return (
-    <div className="mt-3 py-2 px-3 bg-secondary/10 text-secondary text-xs rounded-lg flex items-center">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-        <path d="M12 2L2 7l10 5 10-5-10-5z" />
-        <path d="M2 17l10 5 10-5" />
-        <path d="M2 12l10 5 10-5" />
-      </svg>
+    <div className="mt-2 py-1.5 px-2 bg-primary/10 text-primary text-xs rounded-md flex items-center">
+     <Layers className="mr-2 h-4 w-4" />
       <span>
-        Your response will be saved in context <strong>{contextKey}</strong>
+        Twoja odpowiedź zostanie zapisana w kontekście{" "}
+        <strong>{contextKey}</strong>
       </span>
     </div>
   );

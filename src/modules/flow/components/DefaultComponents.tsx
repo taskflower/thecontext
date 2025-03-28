@@ -1,7 +1,19 @@
 // src/modules/flow/components/DefaultComponents.tsx
-import React from 'react';
-import { Bot, X } from 'lucide-react';
-import { cn } from '@/utils/utils';
+import React from "react";
+import { Bot, X, ArrowLeft, ArrowRight,  Layers } from "lucide-react";
+import { cn } from "@/utils/utils";
+import { useAppStore } from "@/modules/store";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 
 export interface DefaultHeaderProps {
   currentStepIndex: number;
@@ -10,44 +22,82 @@ export interface DefaultHeaderProps {
   onClose: () => void;
 }
 
-export const DefaultHeader: React.FC<DefaultHeaderProps> = ({ 
-  currentStepIndex, 
-  totalSteps, 
-  nodeName, 
-  onClose 
-}) => (
-  <>
-  <div className="flex items-center justify-between p-4 border-b border-border">
-    <h3 className="text-lg font-medium">
-      Krok {currentStepIndex + 1} z {totalSteps}: {nodeName || `Krok ${currentStepIndex + 1}`}
-    </h3>
-    <button
-      onClick={onClose}
-      className="p-1 rounded-full hover:bg-muted"
-    >
-      <X className="h-5 w-5" />
-    </button>
-  </div>
-  <div className='flex-1'></div>
-  </>
-);
+export const DefaultHeader: React.FC<DefaultHeaderProps> = ({
+  currentStepIndex,
+  totalSteps,
+  nodeName,
+  onClose,
+}) => {
+  // Get current workspace information from store
+  const getCurrentWorkspace = useAppStore((state) => state.getCurrentWorkspace);
+  const currentWorkspace = getCurrentWorkspace();
+
+  return (<>
+    <CardHeader className="bg-card text-card-foreground border-b border-border pb-6">
+      {/* Workspace info section */}
+      {currentWorkspace && (
+        <div className="mb-2 flex items-center justify-between">
+          <div>
+            <Badge
+              variant="outline"
+              className="text-xs font-semibold border-border bg-accent text-accent-foreground mb-2"
+            >
+              {currentWorkspace.title}
+            </Badge>
+            {currentWorkspace.description && (
+              <CardDescription className="text-muted-foreground text-xs max-w-md">
+                {currentWorkspace.description}
+              </CardDescription>
+            )}
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-accent"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
+      {/* Step info section */}
+      <div className="flex items-center space-x-2 mt-2">
+        <Badge
+          variant="secondary"
+          className="bg-secondary text-secondary-foreground hover:bg-secondary"
+        >
+          {currentStepIndex + 1}/{totalSteps}
+        </Badge>
+        <CardTitle className="text-xl font-bold text-primary tracking-tight">
+          {nodeName || `Step ${currentStepIndex + 1}`}
+        </CardTitle>
+      </div>
+    </CardHeader>
+    <div className="flex-1"></div></>
+  );
+};
 
 export interface DefaultAssistantMessageProps {
   message?: string;
 }
 
-export const DefaultAssistantMessage: React.FC<DefaultAssistantMessageProps> = ({ message }) => (
-  <div className="flex items-start mb-6">
-    <div className="flex-shrink-0 bg-primary/20 w-8 h-8 rounded-full flex items-center justify-center mr-3">
-      <Bot className="h-4 w-4 text-primary" />
+export const DefaultAssistantMessage: React.FC<
+  DefaultAssistantMessageProps
+> = ({ message }) => (
+  <div className="flex items-start gap-4 mb-6">
+    <div className="h-10 w-10 rounded-full flex items-center justify-center border border-border bg-secondary text-secondary-foreground flex-shrink-0 shadow-sm">
+      <Bot className="h-5 w-5" />
     </div>
-    <div className="flex-1">
-      <p className="text-sm font-medium text-muted-foreground mb-1">
-        Asystent:
-      </p>
-      <div className="bg-muted rounded-lg py-2 px-3">
-        {message || "Czekam na Twoją odpowiedź..."}
+    <div className="flex-1 space-y-2">
+      <div className="flex items-center">
+        <span className="text-sm font-semibold text-primary">Assistant</span>
       </div>
+      <Card className="bg-card/50 border-border text-card-foreground shadow-md">
+        <CardContent className="p-4">
+          {message || "Waiting for your response..."}
+        </CardContent>
+      </Card>
     </div>
   </div>
 );
@@ -58,26 +108,26 @@ export interface DefaultUserInputProps {
   placeholder?: string;
 }
 
-export const DefaultUserInput: React.FC<DefaultUserInputProps> = ({ 
-  value, 
+export const DefaultUserInput: React.FC<DefaultUserInputProps> = ({
+  value,
   onChange,
-  placeholder = "Wpisz swoją wiadomość..." 
+  placeholder = "Type your message...",
 }) => (
-  <div className="mt-6">
-    <p className="text-sm font-medium text-muted-foreground mb-2">
-      Twoja odpowiedź:
-    </p>
-    <textarea
+  <div className="mt-6 space-y-2">
+    <div className="flex justify-between items-center">
+      <span className="text-sm font-medium text-primary">Your response:</span>
+    </div>
+    <Textarea
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full p-3 border border-input rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-primary"
-      rows={3}
-    ></textarea>
+      className="w-full p-4 bg-background border-input rounded-lg text-foreground focus-visible:ring-ring focus-visible:ring-offset-card resize-none"
+      rows={4}
+    />
   </div>
 );
 
-export interface NavigationButtonsProps {
+export interface DefaultNavigationButtonsProps {
   isFirstStep: boolean;
   isLastStep: boolean;
   isProcessing: boolean;
@@ -85,63 +135,57 @@ export interface NavigationButtonsProps {
   onNext: () => void;
 }
 
-export const NavigationButtons: React.FC<NavigationButtonsProps> = ({
-  isFirstStep,
-  isLastStep,
-  isProcessing,
-  onPrevious,
-  onNext
-}) => (
-  <div className="flex justify-between p-4 border-t border-border">
-    <button
+export const DefaultNavigationButtons: React.FC<
+  DefaultNavigationButtonsProps
+> = ({ isFirstStep, isLastStep, isProcessing, onPrevious, onNext }) => (
+  <div className="flex justify-between p-4 border-t border-border bg-muted/20">
+    <Button
       onClick={onPrevious}
       disabled={isFirstStep || isProcessing}
+      variant="outline"
       className={cn(
-        "px-4 py-2 rounded-md text-sm font-medium transition-colors",
+        "gap-2 font-medium",
         isFirstStep || isProcessing
-          ? "bg-muted text-muted-foreground cursor-not-allowed"
-          : "bg-secondary text-secondary-foreground hover:bg-secondary/90"
+          ? "opacity-50 cursor-not-allowed border-border text-muted-foreground"
+          : "border-border text-primary hover:bg-accent hover:text-accent-foreground hover:border-input"
       )}
     >
-      ← Poprzedni
-    </button>
+      <ArrowLeft className="h-4 w-4" /> Previous
+    </Button>
 
-    <button
+    <Button
       onClick={onNext}
       disabled={isProcessing}
+      variant="default"
       className={cn(
-        "px-4 py-2 rounded-md text-sm font-medium transition-colors",
-        isProcessing 
-          ? "bg-primary/70 text-primary-foreground cursor-wait" 
-          : "bg-primary text-primary-foreground hover:bg-primary/90"
+        "gap-2 font-medium bg-primary text-primary-foreground hover:bg-primary/90",
+        isProcessing && "opacity-70 cursor-wait"
       )}
     >
-      {isLastStep ? "Zakończ" : "Następny →"}
-    </button>
+      {isLastStep ? "Finish" : "Next"}{" "}
+      {!isLastStep && <ArrowRight className="h-4 w-4" />}
+    </Button>
   </div>
 );
 
-export interface ContextUpdateInfoProps {
+export interface DefaultContextUpdateInfoProps {
   contextKey: string | undefined;
   isVisible: boolean;
 }
 
-export const ContextUpdateInfo: React.FC<ContextUpdateInfoProps> = ({ 
-  contextKey, 
-  isVisible 
-}) => {
+export const DefaultContextUpdateInfo: React.FC<
+  DefaultContextUpdateInfoProps
+> = ({ contextKey, isVisible }) => {
   if (!isVisible || !contextKey) return null;
-  
+
   return (
-    <div className="mt-2 py-1.5 px-2 bg-primary/10 text-primary text-xs rounded-md flex items-center">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5">
-        <path d="M12 2L2 7l10 5 10-5-10-5z" />
-        <path d="M2 17l10 5 10-5" />
-        <path d="M2 12l10 5 10-5" />
-      </svg>
-      <span>
-        Twoja odpowiedź zostanie zapisana w kontekście <strong>{contextKey}</strong>
-      </span>
-    </div>
+    <Alert className="mt-3 bg-accent/30 border-border text-accent-foreground ">
+      
+      <AlertDescription className="text-xs flex items-center gap-1">
+      <Layers className="h-4 w-4 text-muted-foreground mr-1" />
+       <span>Your response will be saved in context</span> 
+        <span className="font-semibold text-foreground">{contextKey}</span>
+      </AlertDescription>
+    </Alert>
   );
 };
