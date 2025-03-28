@@ -3,11 +3,13 @@ import { PlusCircle, MoreHorizontal, X, ArrowRight, ArrowRightCircle, Edit } fro
 import { useAppStore } from "../../store";
 import { Edge } from "../types";
 import { cn } from "@/utils/utils";
-import AddNewEdge from "./AddNewEdge";
-import EditEdge from "./EditEdge";
 
+interface EdgesListProps {
+  onEditEdge: (edgeId: string) => void;
+  onAddEdge: () => void;
+}
 
-const EdgesList: React.FC = () => {
+const EdgesList: React.FC<EdgesListProps> = ({ onEditEdge, onAddEdge }) => {
   const selectedWorkspaceId = useAppStore((state) => state.selected.workspace);
   const selectedScenarioId = useAppStore((state) => state.selected.scenario);
   
@@ -21,17 +23,13 @@ const EdgesList: React.FC = () => {
   const deleteEdge = useAppStore((state) => state.deleteEdge);
   
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [edgeToEdit, setEdgeToEdit] = useState<string>("");
   
   const toggleMenu = (id: string) => {
     setMenuOpen(menuOpen === id ? null : id);
   };
   
   const handleEditEdge = (id: string) => {
-    setEdgeToEdit(id);
-    setIsEditDialogOpen(true);
+    onEditEdge(id);
     setMenuOpen(null);
   };
   
@@ -61,7 +59,7 @@ const EdgesList: React.FC = () => {
           )}
         </div>
         <button
-          onClick={() => setIsAddDialogOpen(true)}
+          onClick={onAddEdge}
           className="w-8 h-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
           aria-label="Add edge"
           disabled={nodes.length < 2}
@@ -93,16 +91,6 @@ const EdgesList: React.FC = () => {
           </div>
         )}
       </div>
-      
-      {/* Add New Edge Dialog */}
-      <AddNewEdge isOpen={isAddDialogOpen} setIsOpen={setIsAddDialogOpen} />
-      
-      {/* Edit Edge Dialog */}
-      <EditEdge
-        isOpen={isEditDialogOpen}
-        setIsOpen={setIsEditDialogOpen}
-        edgeId={edgeToEdit}
-      />
     </div>
   );
 };

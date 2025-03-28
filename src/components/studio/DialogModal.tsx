@@ -51,11 +51,9 @@ const DialogModal: React.FC<DialogModalProps> = ({
         <div className="p-6 pt-0">
           <div dir="ltr" data-orientation="horizontal" className="space-y-4">
             {children}
-            
+
             {footer && (
-              <div className="flex justify-end gap-2 pt-4">
-                {footer}
-              </div>
+              <div className="flex justify-end gap-2 pt-4">{footer}</div>
             )}
           </div>
         </div>

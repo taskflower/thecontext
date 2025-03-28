@@ -12,7 +12,9 @@ import { FileService } from "@/services/FileService";
 import { ExportImportConfirmationModal } from "./ExportImportConfirmationModal";
 
 export const ExportImport: React.FC = () => {
-  const [selectedStores, setSelectedStores] = useState<string[]>(storeItems.map(item => item.id));
+  const [selectedStores, setSelectedStores] = useState<string[]>(
+    storeItems.map((item) => item.id)
+  );
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [importSuccess, setImportSuccess] = useState<boolean>(false);
@@ -20,8 +22,10 @@ export const ExportImport: React.FC = () => {
 
   // Toggle selection of a store
   const toggleStoreSelection = (storeId: string) => {
-    setSelectedStores(prev => 
-      prev.includes(storeId) ? prev.filter(id => id !== storeId) : [...prev, storeId]
+    setSelectedStores((prev) =>
+      prev.includes(storeId)
+        ? prev.filter((id) => id !== storeId)
+        : [...prev, storeId]
     );
   };
 
@@ -47,23 +51,28 @@ export const ExportImport: React.FC = () => {
     try {
       setImportError(null);
       setImportSuccess(false);
-      
+
       if (!importFile) {
         setImportError("Please select a file to import");
         return;
       }
-      
+
       const importData = await FileService.readDataFromFile(importFile);
       StorageService.setDataToStores(importData, selectedStores);
-      
+
       setImportSuccess(true);
       setImportFile(null);
-      
+
       // Reset file input
-      const fileInput = document.getElementById('import-file') as HTMLInputElement;
-      if (fileInput) fileInput.value = '';
+      const fileInput = document.getElementById(
+        "import-file"
+      ) as HTMLInputElement;
+      if (fileInput) fileInput.value = "";
     } catch (error) {
-      setImportError("Failed to import: " + (error instanceof Error ? error.message : "Unknown error"));
+      setImportError(
+        "Failed to import: " +
+          (error instanceof Error ? error.message : "Unknown error")
+      );
     }
   };
 
@@ -78,17 +87,27 @@ export const ExportImport: React.FC = () => {
   const renderStoreItems = (prefix: string) => (
     <div className="grid gap-2">
       {storeItems.map((store) => (
-        <Card key={store.id} className={selectedStores.includes(store.id) ? "border-primary/50" : ""}>
+        <Card
+          key={store.id}
+          className={
+            selectedStores.includes(store.id) ? "border-primary/50" : ""
+          }
+        >
           <CardHeader className="py-2 px-3">
             <div className="flex items-center space-x-2">
-              <Checkbox 
+              <Checkbox
                 id={`${prefix}-${store.id}`}
                 checked={selectedStores.includes(store.id)}
                 onCheckedChange={() => toggleStoreSelection(store.id)}
               />
-              <Label htmlFor={`${prefix}-${store.id}`} className="text-sm font-medium cursor-pointer">
+              <Label
+                htmlFor={`${prefix}-${store.id}`}
+                className="text-sm font-medium cursor-pointer"
+              >
                 {store.name}
-                <p className="text-xs text-muted-foreground">{store.description}</p>
+                <p className="text-xs text-muted-foreground">
+                  {store.description}
+                </p>
               </Label>
             </div>
           </CardHeader>
@@ -106,12 +125,14 @@ export const ExportImport: React.FC = () => {
             <TabsTrigger value="import">Import</TabsTrigger>
             <TabsTrigger value="clear">Clear Data</TabsTrigger>
           </TabsList>
-          
+
           {/* EXPORT TAB */}
           <TabsContent value="export" className="space-y-4">
-            <h3 className="text-sm font-medium text-foreground/80">Select data to export:</h3>
-            {renderStoreItems('export')}
-            <Button 
+            <h3 className="text-sm font-medium text-foreground/80">
+              Select data to export:
+            </h3>
+            {renderStoreItems("export")}
+            <Button
               onClick={handleExport}
               disabled={selectedStores.length === 0}
               size="sm"
@@ -121,14 +142,18 @@ export const ExportImport: React.FC = () => {
               Export Selected Data
             </Button>
           </TabsContent>
-          
+
           {/* IMPORT TAB */}
           <TabsContent value="import" className="space-y-4">
-            <h3 className="text-sm font-medium text-foreground/80">Select which data to import:</h3>
-            {renderStoreItems('import')}
-            
+            <h3 className="text-sm font-medium text-foreground/80">
+              Select which data to import:
+            </h3>
+            {renderStoreItems("import")}
+
             <div className="mt-4">
-              <Label htmlFor="import-file" className="text-sm font-medium">Select JSON file:</Label>
+              <Label htmlFor="import-file" className="text-sm font-medium">
+                Select JSON file:
+              </Label>
               <div className="mt-1">
                 <input
                   id="import-file"
@@ -142,7 +167,7 @@ export const ExportImport: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             {importError && (
               <Alert variant="destructive" className="mt-4">
                 <AlertCircle className="h-4 w-4" />
@@ -150,18 +175,19 @@ export const ExportImport: React.FC = () => {
                 <AlertDescription>{importError}</AlertDescription>
               </Alert>
             )}
-            
+
             {importSuccess && (
               <Alert className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-100 mt-4">
                 <AlertTitle>Success</AlertTitle>
                 <AlertDescription>
-                  Data imported successfully. Please refresh the page to see changes.
+                  Data imported successfully. Please refresh the page to see
+                  changes.
                 </AlertDescription>
               </Alert>
             )}
-            
+
             <div className="flex gap-2 mt-4">
-              <Button 
+              <Button
                 onClick={handleImport}
                 disabled={!importFile || selectedStores.length === 0}
                 size="sm"
@@ -169,29 +195,36 @@ export const ExportImport: React.FC = () => {
                 <Upload className="h-4 w-4 mr-2" />
                 Import Data
               </Button>
-              
+
               {importSuccess && (
-                <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.location.reload()}
+                >
                   Refresh Page
                 </Button>
               )}
             </div>
           </TabsContent>
-          
+
           {/* CLEAR DATA TAB */}
           <TabsContent value="clear" className="space-y-4">
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Warning</AlertTitle>
               <AlertDescription>
-                Clearing data will remove all selected data from local storage. This action cannot be undone.
+                Clearing data will remove all selected data from local storage.
+                This action cannot be undone.
               </AlertDescription>
             </Alert>
-            
-            <h3 className="text-sm font-medium text-foreground/80">Select data to clear:</h3>
-            {renderStoreItems('clear')}
-            
-            <Button 
+
+            <h3 className="text-sm font-medium text-foreground/80">
+              Select data to clear:
+            </h3>
+            {renderStoreItems("clear")}
+
+            <Button
               variant="destructive"
               onClick={() => setShowClearConfirm(true)}
               disabled={selectedStores.length === 0}
@@ -204,7 +237,7 @@ export const ExportImport: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
-      
+
       {showClearConfirm && (
         <ExportImportConfirmationModal
           selectedStores={selectedStores}

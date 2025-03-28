@@ -3,12 +3,20 @@ import { PlusCircle, MoreHorizontal, X, Box, Square, Puzzle, Sliders, Edit } fro
 import { useAppStore } from "../../store";
 import { FlowNode } from "../types";
 import { cn } from "@/utils/utils";
-import AddNewNode from "./AddNewNode";
-import EditNode from "./EditNode";
-import PluginOptionsEditor from "./PluginOptionsEditor";
-import PluginDialog from "@/components/studio/PluginDialog";
 
-const NodesList: React.FC = () => {
+interface NodesListProps {
+  onEditNode: () => void;
+  onConfigurePlugin: () => void;
+  onEditPluginOptions: () => void;
+  onAddNode: () => void;
+}
+
+const NodesList: React.FC<NodesListProps> = ({
+  onEditNode,
+  onConfigurePlugin,
+  onEditPluginOptions,
+  onAddNode
+}) => {
   const selectedWorkspaceId = useAppStore((state) => state.selected.workspace);
   const selectedScenarioId = useAppStore((state) => state.selected.scenario);
   const selectedNodeId = useAppStore((state) => state.selected.node);
@@ -23,29 +31,27 @@ const NodesList: React.FC = () => {
   const deleteNode = useAppStore((state) => state.deleteNode);
   
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [nodeToEdit, setNodeToEdit] = useState<string>("");
-  const [configurePluginForNodeId, setConfigurePluginForNodeId] = useState<string | null>(null);
-  const [editPluginOptionsForNodeId, setEditPluginOptionsForNodeId] = useState<string | null>(null);
   
   const toggleMenu = (id: string) => {
     setMenuOpen(menuOpen === id ? null : id);
   };
   
-  const handleEditNode = (id: string) => {
-    setNodeToEdit(id);
-    setIsEditDialogOpen(true);
+  const handleSelectAndEdit = (id: string) => {
+    // Najpierw wybierz węzeł, a następnie wywołaj akcję edycji
+    selectNode(id);
+    onEditNode();
     setMenuOpen(null);
   };
   
-  const handleConfigurePlugin = (nodeId: string) => {
-    setConfigurePluginForNodeId(nodeId);
+  const handleSelectAndConfigurePlugin = (id: string) => {
+    selectNode(id);
+    onConfigurePlugin();
     setMenuOpen(null);
   };
   
-  const handleEditPluginOptions = (nodeId: string) => {
-    setEditPluginOptionsForNodeId(nodeId);
+  const handleSelectAndEditPluginOptions = (id: string) => {
+    selectNode(id);
+    onEditPluginOptions();
     setMenuOpen(null);
   };
   
@@ -69,7 +75,7 @@ const NodesList: React.FC = () => {
           )}
         </div>
         <button
-          onClick={() => setIsAddDialogOpen(true)}
+          onClick={onAddNode}
           className="w-8 h-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
           aria-label="Add node"
         >
@@ -89,9 +95,9 @@ const NodesList: React.FC = () => {
                 onDelete={deleteNode}
                 menuOpen={menuOpen === node.id}
                 toggleMenu={() => toggleMenu(node.id)}
-                onConfigurePlugin={() => handleConfigurePlugin(node.id)}
-                onEditPluginOptions={() => handleEditPluginOptions(node.id)}
-                onEditNode={() => handleEditNode(node.id)}
+                onEditNode={() => handleSelectAndEdit(node.id)}
+                onConfigurePlugin={() => handleSelectAndConfigurePlugin(node.id)}
+                onEditPluginOptions={() => handleSelectAndEditPluginOptions(node.id)}
               />
             ))}
           </ul>
@@ -102,35 +108,6 @@ const NodesList: React.FC = () => {
           </div>
         )}
       </div>
-      
-      {/* Add New Node Dialog */}
-      <AddNewNode isOpen={isAddDialogOpen} setIsOpen={setIsAddDialogOpen} />
-      
-      {/* Edit Node Dialog */}
-      <EditNode
-        isOpen={isEditDialogOpen}
-        setIsOpen={setIsEditDialogOpen}
-        nodeId={nodeToEdit}
-      />
-      
-      {/* Plugin Configure Dialog */}
-      {configurePluginForNodeId && (
-        <PluginDialog
-          isOpen={!!configurePluginForNodeId}
-          setIsOpen={(isOpen) => {
-            if (!isOpen) setConfigurePluginForNodeId(null);
-          }}
-          nodeId={configurePluginForNodeId}
-        />
-      )}
-
-      {/* Plugin Options Editor Dialog */}
-      {editPluginOptionsForNodeId && (
-        <PluginOptionsEditor
-          nodeId={editPluginOptionsForNodeId}
-          onClose={() => setEditPluginOptionsForNodeId(null)}
-        />
-      )}
     </div>
   );
 };
@@ -142,9 +119,9 @@ interface NodeItemProps {
   onDelete: (id: string) => void;
   menuOpen: boolean;
   toggleMenu: () => void;
+  onEditNode: () => void;
   onConfigurePlugin: () => void;
   onEditPluginOptions: () => void;
-  onEditNode: () => void;
 }
 
 const NodeItem: React.FC<NodeItemProps> = ({
@@ -154,9 +131,9 @@ const NodeItem: React.FC<NodeItemProps> = ({
   onDelete,
   menuOpen,
   toggleMenu,
+  onEditNode,
   onConfigurePlugin,
-  onEditPluginOptions,
-  onEditNode
+  onEditPluginOptions
 }) => {
   return (
     <li
@@ -189,9 +166,11 @@ const NodeItem: React.FC<NodeItemProps> = ({
             )}
           </div>
           <div className="flex items-center mt-0.5">
-            <span className="text-xs bg-muted px-1.5 py-0.5 rounded-full">
-              value: {node.assistantMessage?.slice(0, 10)}...
-            </span>
+            {node.assistantMessage && (
+              <span className="text-xs bg-muted px-1.5 py-0.5 rounded-full">
+                value: {node.assistantMessage.slice(0, 10)}...
+              </span>
+            )}
             <span className="text-xs text-muted-foreground ml-2">
               x: {Math.round(node.position.x)}, y: {Math.round(node.position.y)}
             </span>

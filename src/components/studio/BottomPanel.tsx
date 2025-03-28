@@ -5,17 +5,25 @@ import { ContextsList } from "@/modules/context";
 import HistoryView from "@/modules/history/components/HistoryView";
 import { useAppStore } from "@/modules/store";
 import React from "react";
-import { ExportImport } from "./ExportImport";
+import { ExportImport } from "./exportImport/ExportImport";
 
-
-type PanelContentType = "context" | "filters" | "conversation" | "plugins" | "exportimport" | "";
+type PanelContentType =
+  | "context"
+  | "filters"
+  | "conversation"
+  | "plugins"
+  | "exportimport"
+  | "";
 
 interface BottomPanelProps {
   content: PanelContentType;
   onClose: () => void;
 }
 
-export const BottomPanel: React.FC<BottomPanelProps> = ({ content, onClose }) => {
+export const BottomPanel: React.FC<BottomPanelProps> = ({
+  content,
+  onClose,
+}) => {
   // Get selected workspace for context
   const selectedWorkspaceId = useAppStore((state) => state.selected.workspace);
   const selectedScenarioId = useAppStore((state) => state.selected.scenario);
@@ -30,10 +38,7 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({ content, onClose }) =>
           {content === "plugins" && "Plugins"}
           {content === "exportimport" && "Export/Import"}
         </h3>
-        <button
-          className="p-1 rounded-md hover:bg-muted/50"
-          onClick={onClose}
-        >
+        <button className="p-1 rounded-md hover:bg-muted/50" onClick={onClose}>
           <span className="sr-only">Close panel</span>
           <svg
             width="15"

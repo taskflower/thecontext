@@ -5,6 +5,9 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 export type LeftPanelTab = 'workspace' | 'scenarios' | 'nodes' | 'edges'
 export type BottomPanelTab = 'context' | 'filters' | 'conversation' | 'plugins' | 'exportimport' | ''
 
+// Dialog types
+export type DialogType = 'editNode' | 'editEdge' | 'configurePlugin' | 'editPluginOptions' | 'addNode' | 'addEdge'
+
 interface PanelState {
   // Left panel state
   showLeftPanel: boolean
@@ -14,13 +17,25 @@ interface PanelState {
   showBottomPanel: boolean
   bottomPanelTab: BottomPanelTab
   
-  // Actions
+  // Dialog state
+  activeDialog: DialogType | null
+  dialogProps: {
+    nodeId?: string
+    edgeId?: string
+  }
+  
+  // Left panel actions
   toggleLeftPanel: () => void
   setLeftPanelTab: (tab: LeftPanelTab) => void
   setShowLeftPanel: (show: boolean) => void
   
+  // Bottom panel actions
   toggleBottomPanel: (tab?: BottomPanelTab) => void
   setBottomPanelTab: (tab: BottomPanelTab) => void
+  
+  // Dialog actions
+  openDialog: (dialog: DialogType, props?: { nodeId?: string, edgeId?: string }) => void
+  closeDialog: () => void
 }
 
 export const usePanelStore = create<PanelState>()(
@@ -32,6 +47,10 @@ export const usePanelStore = create<PanelState>()(
       
       showBottomPanel: false,
       bottomPanelTab: '',
+      
+      // Dialog state - not persisted to localStorage
+      activeDialog: null,
+      dialogProps: {},
       
       // Left panel actions
       toggleLeftPanel: () => set((state) => ({ showLeftPanel: !state.showLeftPanel })),
@@ -59,10 +78,28 @@ export const usePanelStore = create<PanelState>()(
         bottomPanelTab: tab,
         showBottomPanel: true
       }),
+      
+      // Dialog actions
+      openDialog: (dialog, props = {}) => set({
+        activeDialog: dialog,
+        dialogProps: props
+      }),
+      
+      closeDialog: () => set({
+        activeDialog: null,
+        dialogProps: {}
+      })
     }),
     {
       name: 'panel-settings',
       storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        // Only persist panel state, not dialog state
+        showLeftPanel: state.showLeftPanel,
+        leftPanelTab: state.leftPanelTab,
+        showBottomPanel: state.showBottomPanel,
+        bottomPanelTab: state.bottomPanelTab
+      })
     }
   )
 )

@@ -1,27 +1,39 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect } from "react";
 import ReactFlow, {
   MiniMap,
   Controls,
   Background,
   useNodesState,
   useEdgesState,
-  Node
+  NodeChange, 
 } from "reactflow";
 import "reactflow/dist/style.css";
-
-// Import styles
 import "./styles.css";
 import { useAppStore } from "@/modules/store";
 import { StepModal } from "@/modules/flow/components/StepModal";
-import { useFlowHandlers, adaptNodeToReactFlow, adaptEdgeToReactFlow, nodeTypes, GRID_SIZE, DEFAULT_MAX_ZOOM } from "@/modules/flowCanvas";
-import { usePanelStore } from "@/modules/PanelStore";
-// Import icons
-import { Edit, Puzzle, Sliders } from "lucide-react";
-// Import components
-import { EditNode, PluginOptionsEditor } from "@/modules/graph/components";
-import PluginDialog from "@/components/studio/PluginDialog";
+import {
+  useFlowHandlers,
+  adaptNodeToReactFlow,
+  adaptEdgeToReactFlow,
+  nodeTypes,
+  GRID_SIZE,
+  DEFAULT_MAX_ZOOM,
+} from "@/modules/flowCanvas";
 
-const FlowGraph: React.FC = () => {
+import { Edit, Puzzle, Sliders } from "lucide-react";
+
+// Interfejs dla props
+interface FlowGraphProps {
+  onEditNode: () => void;
+  onConfigurePlugin: () => void;
+  onEditPluginOptions: () => void;
+}
+
+const FlowGraph: React.FC<FlowGraphProps> = ({
+  onEditNode,
+  onConfigurePlugin,
+  onEditPluginOptions
+}) => {
   const getActiveScenarioData = useAppStore(
     (state) => state.getActiveScenarioData
   );
@@ -34,64 +46,49 @@ const FlowGraph: React.FC = () => {
   );
   const selectedNodeId = useAppStore((state) => state.selected.node);
 
-  // State for EditNode dialog
-  const [isEditNodeDialogOpen, setIsEditNodeDialogOpen] = useState(false);
+  // Get original flow handlers, including the new onNodesChange
+  const {
+    onConnect,
+    onNodeDragStop,
+    onNodesChange: handlersOnNodesChange,
+  } = useFlowHandlers();
 
-  // Get panel store actions
-  const setLeftPanelTab = usePanelStore((state) => state.setLeftPanelTab);
-  const setShowLeftPanel = usePanelStore((state) => state.setShowLeftPanel);
-
-  // Get original flow handlers
-  const { onConnect, onNodeDragStop, onNodeClick: originalOnNodeClick } = useFlowHandlers();
-
-  // Enhanced node click handler that also manages panel state
-  const onNodeClick = useCallback(
-    (event: React.MouseEvent, node: Node) => {
-      // First call original handler
-      originalOnNodeClick(event, node);
-      
-      // Then set panel state
-      setShowLeftPanel(true);
-      setLeftPanelTab("nodes");
-    },
-    [originalOnNodeClick, setShowLeftPanel, setLeftPanelTab]
-  );
-  
-  // Add handler for background clicks to deselect node
   const onPaneClick = useCallback(() => {
-    // Deselect node by setting selected.node to an empty string
     useAppStore.getState().selectNode("");
   }, []);
 
-  // Get data and transform for ReactFlow
   const { nodes: originalNodes, edges: originalEdges } =
     getActiveScenarioData();
   const reactFlowNodes = originalNodes.map((node) =>
     adaptNodeToReactFlow(node, node.id === selectedNodeId)
   );
   const reactFlowEdges = originalEdges.map(adaptEdgeToReactFlow);
-
-  // Initialize ReactFlow state
   const [nodes, setNodes, onNodesChange] = useNodesState(reactFlowNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(reactFlowEdges);
 
+  const handleNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      handlersOnNodesChange(changes);
+      onNodesChange(changes);
+    },
+    [onNodesChange, handlersOnNodesChange]
+  );
+
   // Automatyczne uruchamianie sesji przy ładowaniu
-useEffect(() => {
-  // Sprawdź, czy istnieje zapisana sesja flow, która nie jest aktywna
-  const savedSession = useAppStore.getState().flowSession;
-  
-  // Sprawdzamy, czy mamy sesję, która zawiera kroki, ale nie jest aktualnie aktywna
-  if (savedSession && 
-      !savedSession.isPlaying && 
-      savedSession.temporarySteps && 
-      savedSession.temporarySteps.length > 0) {
-    
-    // Uruchom sesję automatycznie - używamy setTimeout, aby dać czas na inicjalizację innych komponentów
-    setTimeout(() => {
-      startFlowSession();
-    }, 500);
-  }
-}, []); // Uruchamiane tylko przy pierwszym renderowaniu
+  useEffect(() => {
+    const savedSession = useAppStore.getState().flowSession;
+    if (
+      savedSession &&
+      !savedSession.isPlaying &&
+      savedSession.temporarySteps &&
+      savedSession.temporarySteps.length > 0
+    ) {
+      // Uruchom sesję automatycznie - używamy setTimeout, aby dać czas na inicjalizację innych komponentów
+      setTimeout(() => {
+        startFlowSession();
+      }, 500);
+    }
+  }, []); 
 
   // Update graph on data changes
   useEffect(() => {
@@ -112,21 +109,21 @@ useEffect(() => {
 
   // Handle modal close
   const handleCloseModal = useCallback(() => {
-    // Calling without argument will keep the temporary session for later continuation
     stopFlowSession(false);
   }, [stopFlowSession]);
 
   // Check if there's a previous, unfinished session
   const hasExistingSession = useAppStore(
-    (state) => !state.flowSession?.isPlaying && state.flowSession?.temporarySteps && state.flowSession.temporarySteps.length > 0
+    (state) =>
+      !state.flowSession?.isPlaying &&
+      state.flowSession?.temporarySteps &&
+      state.flowSession.temporarySteps.length > 0
   );
 
-  // Current step index in the temporary session
   const currentSessionStep = useAppStore(
     (state) => state.flowSession?.currentStepIndex || 0
   );
 
-  // Handle starting a new session
   const handleNewSession = useCallback(() => {
     // If there's an unfinished session, reset it before starting a new one
     if (hasExistingSession) {
@@ -135,24 +132,13 @@ useEffect(() => {
     startFlowSession();
   }, [hasExistingSession, resetFlowSession, startFlowSession]);
 
-  // Handle edit button click
-  const handleEditSelectedNode = useCallback(() => {
-    if (selectedNodeId) {
-      setIsEditNodeDialogOpen(true);
-    }
-  }, [selectedNodeId]);
-  
-  // Get selected node data for plugins
   const state = useAppStore.getState();
-  const workspace = state.items.find(w => w.id === state.selected.workspace);
-  const scenario = workspace?.children.find(s => s.id === state.selected.scenario);
-  const selectedNode = scenario?.children.find(n => n.id === selectedNodeId);
-  
-  // States for plugin dialogs
-  const [isConfigurePluginDialogOpen, setIsConfigurePluginDialogOpen] = useState(false);
-  const [isEditPluginOptionsDialogOpen, setIsEditPluginOptionsDialogOpen] = useState(false);
-  
-  // Check if selected node has a plugin
+  const workspace = state.items.find((w) => w.id === state.selected.workspace);
+  const scenario = workspace?.children.find(
+    (s) => s.id === state.selected.scenario
+  );
+  const selectedNode = scenario?.children.find((n) => n.id === selectedNodeId);
+
   const hasPlugin = selectedNode?.pluginKey !== undefined;
 
   return (
@@ -174,14 +160,13 @@ useEffect(() => {
         >
           {isFlowPlaying ? "Flow w trakcie..." : "Nowa sesja Flow"}
         </button>
-       
       </div>
-      
+
       {/* Left side plugin buttons */}
       {selectedNodeId && (
         <div className="absolute top-2 left-2 z-10 flex space-x-2">
-           <button
-            onClick={handleEditSelectedNode}
+          <button
+            onClick={onEditNode}
             className="p-2 rounded-md bg-muted text-muted-foreground text-xs font-medium hover:bg-muted/90 flex items-center gap-1"
             title="Edytuj zaznaczony węzeł"
           >
@@ -189,17 +174,17 @@ useEffect(() => {
             <span>Edytuj węzeł</span>
           </button>
           <button
-            onClick={() => setIsConfigurePluginDialogOpen(true)}
+            onClick={onConfigurePlugin}
             className="p-2 rounded-md bg-muted text-muted-foreground text-xs font-medium hover:bg-muted/90 flex items-center gap-1"
             title="Konfiguruj plugin dla węzła"
           >
             <Puzzle className="h-4 w-4" />
-            <span>{hasPlugin ? 'Zmień plugin' : 'Dodaj plugin'}</span>
+            <span>{hasPlugin ? "Zmień plugin" : "Dodaj plugin"}</span>
           </button>
-          
+
           {hasPlugin && (
             <button
-              onClick={() => setIsEditPluginOptionsDialogOpen(true)}
+              onClick={onEditPluginOptions}
               className="p-2 rounded-md bg-muted text-muted-foreground text-xs font-medium hover:bg-muted/90 flex items-center gap-1"
               title="Konfiguruj opcje pluginu"
             >
@@ -213,11 +198,10 @@ useEffect(() => {
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        onNodesChange={onNodesChange}
+        onNodesChange={handleNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onNodeDragStop={onNodeDragStop}
-        onNodeClick={onNodeClick}
         onPaneClick={onPaneClick}
         nodeTypes={nodeTypes}
         defaultEdgeOptions={{ type: "step" }}
@@ -232,35 +216,6 @@ useEffect(() => {
       </ReactFlow>
 
       {isFlowPlaying && <StepModal onClose={handleCloseModal} />}
-      
-      {/* Edit Node Dialog */}
-      {selectedNodeId && (
-        <EditNode
-          isOpen={isEditNodeDialogOpen}
-          setIsOpen={setIsEditNodeDialogOpen}
-          nodeId={selectedNodeId}
-        />
-      )}
-      
-      {/* Plugin Dialogs */}
-      {selectedNodeId && (
-        <>
-          {/* Plugin Configuration Dialog */}
-          <PluginDialog
-            isOpen={isConfigurePluginDialogOpen}
-            setIsOpen={setIsConfigurePluginDialogOpen}
-            nodeId={selectedNodeId}
-          />
-          
-          {/* Plugin Options Editor Dialog */}
-          {selectedNode?.pluginKey && isEditPluginOptionsDialogOpen && (
-            <PluginOptionsEditor
-              nodeId={selectedNodeId}
-              onClose={() => setIsEditPluginOptionsDialogOpen(false)}
-            />
-          )}
-        </>
-      )}
     </div>
   );
 };

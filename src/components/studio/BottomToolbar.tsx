@@ -1,8 +1,13 @@
-import { Database, Filter, MessageSquare, Puzzle, FileJson } from "lucide-react";
+import {
+  Database,
+  Filter,
+  MessageSquare,
+  Puzzle,
+  FileJson,
+} from "lucide-react";
 import { ToolbarButton } from "./ToolbarButton";
 import React from "react";
 import { usePanelStore } from "@/modules/PanelStore";
-
 
 export const BottomToolbar: React.FC = () => {
   const { bottomPanelTab, toggleBottomPanel } = usePanelStore();

@@ -1,6 +1,7 @@
-import React, { useCallback } from "react";
-import { Node, Connection } from "reactflow";
+import { useCallback } from "react";
+import { Connection, Node, NodeChange } from "reactflow";
 import { useAppStore } from "../store";
+import { usePanelStore } from "../PanelStore";
 
 /**
  * Hook zwracający handlery dla operacji ReactFlow
@@ -10,6 +11,10 @@ export const useFlowHandlers = () => {
   const addEdge = useAppStore((state) => state.addEdge);
   const updateNodePosition = useAppStore((state) => state.updateNodePosition);
   const selectNode = useAppStore((state) => state.selectNode);
+
+  // Pobieramy metody z PanelStore
+  const setShowLeftPanel = usePanelStore((state) => state.setShowLeftPanel);
+  const setLeftPanelTab = usePanelStore((state) => state.setLeftPanelTab);
 
   // Obsługa połączeń między węzłami
   const onConnect = useCallback(
@@ -33,17 +38,42 @@ export const useFlowHandlers = () => {
     [updateNodePosition]
   );
 
-  // Obsługa kliknięcia na węzeł
-  const onNodeClick = useCallback(
-    (_: React.MouseEvent, node: Node) => {
-      selectNode(node.id);
+  // Obsługa zmian węzłów, w tym zaznaczania
+  const onNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      // Filtrujemy zmiany, aby znaleźć nowo zaznaczone węzły
+      // Bezpieczne sprawdzenie typu zmiany
+      const selectedNodes = [];
+
+      for (const change of changes) {
+        if (
+          change.type === "select" &&
+          "selected" in change &&
+          change.selected === true &&
+          "id" in change
+        ) {
+          selectedNodes.push(change.id);
+        }
+      }
+
+      // Jeśli mamy nowo zaznaczony węzeł, aktualizujemy stan
+      if (selectedNodes.length > 0) {
+        const newSelectedNodeId = selectedNodes[0]; // Bierzemy pierwszy, jeśli jest wiele
+
+        // Aktualizujemy zaznaczenie w store
+        selectNode(newSelectedNodeId);
+
+        // Aktualizujemy stan panelu
+        setShowLeftPanel(true);
+        setLeftPanelTab("nodes");
+      }
     },
-    [selectNode]
+    [selectNode, setShowLeftPanel, setLeftPanelTab]
   );
 
   return {
     onConnect,
     onNodeDragStop,
-    onNodeClick
+    onNodesChange,
   };
 };
