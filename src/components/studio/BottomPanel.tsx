@@ -2,7 +2,6 @@
 import { PluginsApp } from "@/modules/plugins";
 import { FiltersList } from "@/modules/filters";
 import { ContextsList } from "@/modules/context";
-import HistoryView from "@/modules/history/components/HistoryView";
 import { useAppStore } from "@/modules/store";
 import React from "react";
 import ExportImport from "./exportImport/ExportImport";
