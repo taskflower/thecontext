@@ -26,7 +26,11 @@ const ContextDBViewer: React.FC<ContextDBViewerProps> = ({ contextTitle }) => {
       return;
     }
     
-    if (!contextItem.content) {
+    // Sprawdź, czy nazwa kolekcji jest w content lub w metadata.collection
+    const collectionName = 
+      (contextItem.metadata && contextItem.metadata.collection) || contextItem.content;
+      
+    if (!collectionName) {
       setError(`Context item "${contextTitle}" does not specify a collection name`);
       return;
     }

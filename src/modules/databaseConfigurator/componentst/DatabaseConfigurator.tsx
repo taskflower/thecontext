@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/components/DatabaseConfigurator.tsx
+// src/modules/databaseConfigurator/componentst/DatabaseConfigurator.tsx
 import React, { useState, useEffect } from "react";
 
 import {

@@ -1,26 +1,32 @@
 // src/modules/context/components/ContextsList.tsx
 import React, { useState } from "react";
-import { PlusCircle, FilterIcon } from "lucide-react";
+import { PlusCircle, FilterIcon, Database } from "lucide-react";
 import { useAppStore } from "../../store";
 import { ContextItem, ContextType } from "../types";
 import ContextItemComponent from "./ContextItemComponent";
 import { AddNewContext } from "./AddNewContext";
 import { EditContext } from "./EditContext";
 import { ViewContext } from "./ViewContext";
+import FilterStatusBanner from "../../filters/components/FilterStatusBanner";
+import DatabaseConfiguratorTab from "./DatabaseConfiguratorTab";
 
 // Interfejs dla komponentu listy kontekstów
 interface ContextsListProps {
   scenarioId?: string; // Opcjonalne ID scenariusza, aby filtrować konteksty
   showScoped?: boolean; // Czy pokazywać konteksty powiązane ze scenariuszami
+  onOpenDatabaseConfigurator?: () => void; // Funkcja do otwierania konfiguratora baz danych
 }
 
-const ContextsList: React.FC<ContextsListProps> = () => {
+const ContextsList: React.FC<ContextsListProps> = ({ 
+  scenarioId,
+  onOpenDatabaseConfigurator
+}) => {
   const getContextItems = useAppStore((state) => state.getContextItems);
   const deleteContextItem = useAppStore((state) => state.deleteContextItem);
   const updateContextItem = useAppStore((state) => state.updateContextItem);
 
   const currentScenario = useAppStore(state => state.getCurrentScenario());
-const scenarioId = currentScenario?.id;
+  const currentScenarioId = currentScenario?.id;
 
   // Wymuszenie aktualizacji przy zmianie stanu
   useAppStore(state => state.stateVersion);
@@ -42,6 +48,7 @@ const scenarioId = currentScenario?.id;
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isDbConfigOpen, setIsDbConfigOpen] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string>("");
   
   // Stany filtrów
@@ -94,20 +101,54 @@ const scenarioId = currentScenario?.id;
     return true;
   });
 
+  // Sprawdź czy są aktywne filtry
+  const hasActiveFilters = useAppStore(state => {
+    const filters = state.getScenarioFilters(currentScenarioId);
+    return filters.some(f => f.enabled);
+  });
+  
+  // Sprawdź czy filtry pasują
+  const filtersMatch = useAppStore(state => 
+    state.checkScenarioFilterMatch(currentScenarioId)
+  );
+
   return (
     <div className="h-full flex flex-col">
       {/* Nagłówek elementów kontekstu */}
       <div className="flex items-center justify-between p-4 border-b border-border">
         <h2 className="text-base font-medium">Kontekst</h2>
-        <button
-          onClick={() => setIsAddDialogOpen(true)}
-          className="w-8 h-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
-          aria-label="Dodaj element kontekstu"
-        >
-          <PlusCircle className="h-5 w-5" />
-        </button>
+        <div className="flex gap-1">
+          <button
+            onClick={() => setIsDbConfigOpen(true)}
+            className="w-8 h-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
+            aria-label="Konfigurator bazy danych"
+            title="Otwórz konfigurator bazy danych"
+          >
+            <Database className="h-5 w-5" />
+          </button>
+          <button
+            onClick={() => setIsAddDialogOpen(true)}
+            className="w-8 h-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
+            aria-label="Dodaj element kontekstu"
+            title="Dodaj element kontekstu"
+          >
+            <PlusCircle className="h-5 w-5" />
+          </button>
+        </div>
       </div>
-
+      
+      {/* Status filtrów */}
+      {hasActiveFilters && (
+        <FilterStatusBanner
+          filtersMatch={filtersMatch}
+          activeFiltersCount={
+            useAppStore(state => 
+              state.getScenarioFilters(currentScenarioId).filter(f => f.enabled).length
+            )
+          }
+        />
+      )}
+      
       {/* Pasek filtrów */}
       <div className="px-4 py-2 border-b border-border bg-muted/10 flex flex-col space-y-2">
         {/* Wyszukiwarka */}
@@ -191,6 +232,7 @@ const scenarioId = currentScenario?.id;
         isOpen={isAddDialogOpen} 
         setIsOpen={setIsAddDialogOpen} 
         scenarioId={scenarioId}
+        onOpenDatabaseConfigurator={() => setIsDbConfigOpen(true)}
       />
 
       {/* Dialog edycji elementu kontekstu */}
@@ -198,6 +240,7 @@ const scenarioId = currentScenario?.id;
         isOpen={isEditDialogOpen}
         setIsOpen={setIsEditDialogOpen}
         contextItemId={selectedItemId}
+        onOpenDatabaseConfigurator={() => setIsDbConfigOpen(true)}
       />
 
       {/* Dialog podglądu elementu kontekstu */}
@@ -205,6 +248,18 @@ const scenarioId = currentScenario?.id;
         isOpen={isViewDialogOpen}
         setIsOpen={setIsViewDialogOpen}
         contextItemId={selectedItemId}
+      />
+      
+      {/* Dialog konfiguratora bazy danych */}
+      <DatabaseConfiguratorTab 
+        isOpen={isDbConfigOpen}
+        onClose={() => {
+          setIsDbConfigOpen(false);
+          // Odświeżenie listy kolekcji po zamknięciu konfiguratora
+          if (onOpenDatabaseConfigurator) {
+            onOpenDatabaseConfigurator();
+          }
+        }}
       />
     </div>
   );

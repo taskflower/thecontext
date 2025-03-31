@@ -71,6 +71,17 @@ export const IndexedDBService = {
       // Fallback implementation if resetDatabase is not available on the manager
       throw new Error('Reset database function is not implemented');
     }
+  },
+  
+  /**
+   * Get a list of all collections in the database
+   */
+  getCollections: async (): Promise<string[]> => {
+    if (typeof dbManager.getCollections === 'function') {
+      return dbManager.getCollections();
+    } else {
+      throw new Error('Get collections function is not implemented');
+    }
   }
 };
 

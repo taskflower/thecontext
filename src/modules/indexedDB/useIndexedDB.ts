@@ -41,7 +41,10 @@ export function useIndexedDB<T>(
     if (isContextTitle) {
       const contextItem = getContextItemByTitle(collectionNameOrContextTitle);
       if (contextItem && contextItem.type === ContextType.INDEXED_DB) {
-        setCollectionName(contextItem.content);
+        // Sprawdź czy nazwa kolekcji jest w metadanych (zgodnie z nowymi zmianami)
+        const collectionNameFromContext = 
+          (contextItem.metadata && contextItem.metadata.collection) || contextItem.content;
+        setCollectionName(collectionNameFromContext);
       } else {
         setError(new Error(
           `Context item "${collectionNameOrContextTitle}" is not an IndexedDB context or doesn't exist.`

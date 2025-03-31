@@ -84,17 +84,25 @@ const IndexedDBViewer: React.FC<IndexedDBViewerProps> = ({
   };
 
   if (error) {
+    // Importuj komponent obsługi błędów
+    const ErrorRecovery = React.lazy(() => import('./ErrorRecovery'));
+    
     return (
-      <div className="p-4 border border-red-300 bg-red-50 rounded-md text-red-500">
-        <h3 className="font-bold mb-2">Error</h3>
-        <p>{error.message}</p>
-        <button 
-          onClick={handleRefresh}
-          className="mt-2 flex items-center px-2 py-1 bg-red-100 hover:bg-red-200 rounded text-sm"
-        >
-          <RefreshCw className="h-4 w-4 mr-1" /> Retry
-        </button>
-      </div>
+      <React.Suspense fallback={
+        <div className="p-4 border border-red-300 bg-red-50 rounded-md text-red-500">
+          <h3 className="font-bold mb-2">Error</h3>
+          <p>{error.message}</p>
+          <div className="mt-2 flex items-center">
+            <Loader className="h-4 w-4 mr-1 animate-spin" /> Loading error recovery...
+          </div>
+        </div>
+      }>
+        <ErrorRecovery 
+          error={error} 
+          collectionName={collectionName}
+          onRetry={handleRefresh}
+        />
+      </React.Suspense>
     );
   }
 

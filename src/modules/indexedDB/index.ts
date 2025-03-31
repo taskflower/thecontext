@@ -22,6 +22,7 @@ class IndexedDBManager {
   private dbPromise: Promise<IDBPDatabase> | null = null;
   private openCollections: Set<string> = new Set();
   private currentVersion: number = 0;
+  private collectionsCache: string[] = [];
 
   private constructor() {
     // Private constructor to prevent direct instantiation
@@ -158,6 +159,24 @@ class IndexedDBManager {
     // Reset tracking variables
     this.openCollections.clear();
     this.currentVersion = 0;
+    this.collectionsCache = [];
+  }
+  
+  /**
+   * Get a list of all collections (object stores) in the database
+   */
+  public async getCollections(): Promise<string[]> {
+    try {
+      const db = await this.initDB();
+      // Convert DOMStringList to array
+      const collections = Array.from(db.objectStoreNames);
+      this.collectionsCache = collections;
+      return collections;
+    } catch (err) {
+      console.error("Error getting collections:", err);
+      // Return cached collections if available, otherwise empty array
+      return this.collectionsCache.length > 0 ? this.collectionsCache : [];
+    }
   }
 }
 
