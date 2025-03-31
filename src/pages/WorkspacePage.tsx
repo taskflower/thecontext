@@ -1,3 +1,4 @@
+// src/pages/WorkspacePage.tsx
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useAppStore } from "@/modules/store";
@@ -9,10 +10,15 @@ import {
   ScenarioCard,
   WorkspaceHeader,
 } from "@/components/frontApp";
+import { Button } from "@/components/ui/button";
+import { PlusCircle } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 const WorkspacePage = () => {
+  // Fixed state initialization - useState returns [value, setter function]
   const [showFlowPlayer, setShowFlowPlayer] = useState<boolean>(false);
   const [editingFilterId, setEditingFilterId] = useState<string | null>(null);
+  const [, setIsAddingScenario] = useState<boolean>(false);
 
   const { slug } = useParams();
   const {
@@ -32,7 +38,7 @@ const WorkspacePage = () => {
     }
   }, [slug, workspaces, selectWorkspace]);
 
-  // Get current workspace and scenario
+  // Get current workspace
   const currentWorkspace = getCurrentWorkspace();
 
   // Get all scenarios from current workspace with filter status
@@ -56,12 +62,12 @@ const WorkspacePage = () => {
     });
   }, [currentWorkspace, checkScenarioFilterMatch]);
 
-  // Get only scenarios that have defined filters
-  const filteredScenarios = scenariosWithStatus.filter(
-    (scenario) => scenario.hasFilters && !!scenario.filters
+  // Get matching scenarios
+  const matchingScenarios = scenariosWithStatus.filter(
+    (scenario) => scenario.matchesFilter
   );
 
-  // Handle filter click to edit filters
+  // Handle filter click
   const handleFilterClick = (e: React.MouseEvent, scenarioId: string) => {
     e.stopPropagation();
     setEditingFilterId(scenarioId);
@@ -75,16 +81,17 @@ const WorkspacePage = () => {
 
   // Create new scenario
   const handleCreateNewScenario = () => {
-    console.log("Create new scenario clicked");
+    // Fixed - now using the setter function correctly
+    setIsAddingScenario(true);
   };
 
   return (
-    <div className="min-h-screen flex flex-col  mx-auto max-w-4xl ">
+    <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
       <WorkspaceHeader />
 
       {/* Main content */}
-      <main className="flex-1 p-4 sm:p-6">
+      <main className="flex-1 px-4 py-6 md:px-6 md:py-8 max-w-5xl mx-auto w-full">
         {showFlowPlayer ? (
           <div className="w-full h-full">
             <StepModal
@@ -94,20 +101,40 @@ const WorkspacePage = () => {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 max-w-4xl mx-auto">
-              {filteredScenarios.map((scenario) => (
-                <ScenarioCard
-                  key={scenario.id}
-                  scenario={scenario}
-                  onFilterClick={handleFilterClick}
-                  onStartFlow={handleStartFlow}
-                />
-              ))}
-
-              {filteredScenarios.length === 0 && (
-                <EmptyScenarios onCreateNew={handleCreateNewScenario} />
-              )}
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                  {currentWorkspace?.title || "Workspace"}
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {currentWorkspace?.description || "Manage your scenarios"}
+                </p>
+              </div>
+              <Button 
+                onClick={handleCreateNewScenario}
+                className="gap-2"
+              >
+                <PlusCircle className="h-4 w-4" />
+                Add Scenario
+              </Button>
             </div>
+
+            <Separator className="my-6" />
+
+            {matchingScenarios.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {matchingScenarios.map((scenario) => (
+                  <ScenarioCard
+                    key={scenario.id}
+                    scenario={scenario}
+                    onFilterClick={handleFilterClick}
+                    onStartFlow={handleStartFlow}
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyScenarios onCreateNew={handleCreateNewScenario} />
+            )}
           </>
         )}
       </main>
@@ -123,6 +150,14 @@ const WorkspacePage = () => {
           scenarioId={editingFilterId}
         />
       )}
+
+      {/* Add Scenario Dialog - Replace with your actual component */}
+      {/* {isAddingScenario && (
+        <AddNewScenario
+          isOpen={isAddingScenario}
+          onOpenChange={(open) => setIsAddingScenario(open)}
+        />
+      )} */}
     </div>
   );
 };

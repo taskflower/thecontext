@@ -6,12 +6,15 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Box, ChevronDown, Menu } from "lucide-react";
+import { Box, ChevronDown, Menu, Plus, Home, Settings } from "lucide-react";
 import { AuthButton } from "../AuthButton";
 import { WorkspaceContext } from "./";
 import { useAppStore } from "@/modules/store";
+import { Avatar, AvatarFallback } from "./Avatr";
+
 
 const WorkspaceHeader: React.FC = () => {
   const navigate = useNavigate();
@@ -29,19 +32,34 @@ const WorkspaceHeader: React.FC = () => {
   const currentScenario =
     currentWorkspace?.children.find((s) => s.id === currentScenarioId) || null;
 
+  // Get first letter of workspace name for avatar
+  const getWorkspaceInitial = (name: string) => {
+    return name?.charAt(0).toUpperCase() || "W";
+  };
+
   return (
-    <header className="border-b bg-background">
-      <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-6">
+    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur-sm">
+      <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-6">
         <div className="flex w-full sm:w-auto justify-between items-center">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
-              {currentWorkspace?.title || "Workspace"}
-            </h1>
-            <p className="text-xs text-muted-foreground mt-1">
-              {currentScenario
-                ? `Scenariusz: ${currentScenario.name}`
-                : "Jeszcze nie wybrano scenariusza"}
-            </p>
+          <div className="flex items-center gap-3">
+            {currentWorkspace && (
+              <Avatar className="h-8 w-8 bg-primary/10 text-primary">
+                <AvatarFallback className="text-sm font-medium">
+                  {getWorkspaceInitial(currentWorkspace.title)}
+                </AvatarFallback>
+              </Avatar>
+            )}
+            
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+                {currentWorkspace?.title || "Workspace"}
+              </h1>
+              <p className="text-xs text-muted-foreground mt-1">
+                {currentScenario
+                  ? `Scenario: ${currentScenario.name}`
+                  : "No scenario selected"}
+              </p>
+            </div>
           </div>
 
           <Button
@@ -78,9 +96,9 @@ const WorkspaceHeader: React.FC = () => {
               {workspaces.map((workspace) => (
                 <DropdownMenuItem
                   key={workspace.id}
-                  className={
+                  className={`${
                     currentWorkspaceId === workspace.id ? "bg-accent" : ""
-                  }
+                  } cursor-pointer`}
                   onClick={() => {
                     selectWorkspace(workspace.id);
                     // Update URL if workspace has slug
@@ -90,10 +108,31 @@ const WorkspaceHeader: React.FC = () => {
                     setMobileMenuOpen(false);
                   }}
                 >
-                  <Box className="h-4 w-4 mr-2" />
-                  {workspace.title}
+                  <Avatar className="h-5 w-5 mr-2">
+                    <AvatarFallback className="text-xs">
+                      {getWorkspaceInitial(workspace.title)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="truncate">{workspace.title}</span>
                 </DropdownMenuItem>
               ))}
+              
+              <DropdownMenuSeparator />
+              
+              <DropdownMenuItem onClick={() => navigate("/")}>
+                <Home className="h-4 w-4 mr-2" />
+                Home
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem onClick={() => navigate("/settings")}>
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem onClick={() => console.log("Create workspace")}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create New Workspace
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
