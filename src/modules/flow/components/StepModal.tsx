@@ -1,25 +1,28 @@
 // src/modules/flow/components/StepModal.tsx
 import React, { useState, useMemo } from "react";
-import StepPluginWrapper from "@/modules/plugins/wrappers/StepPluginWrapper";
 import { StepModalProps } from "../types";
 import { useAppStore } from "../../store";
-import { PluginComponentWithSchema } from "@/modules/plugins/types";
 import { usePlugins } from "@/modules/plugins/pluginContext";
-
+import StepPluginWrapper from "@/modules/plugins/wrappers/StepPluginWrapper";
+import { PluginComponentWithSchema } from "@/modules/plugins/types";
 import { processTemplateWithItems } from "@/modules/context/utils";
 import { updateContextFromNodeInput } from "../contextHandler";
 import { getTemplateComponents } from "./templateFactory";
 
+/**
+ * Modal dialog for flow steps that displays a step in the flow 
+ * and provides navigation between steps
+ */
 export const StepModal: React.FC<StepModalProps> = ({ 
   onClose, 
   template = 'default'
 }) => {
   const { getPluginComponent } = usePlugins();
   
-  // Pobierz konteksty ze store
+  // Get context items from store
   const contextItems = useAppStore(state => state.getContextItems());
   
-  // Pobierz dane z tymczasowej sesji flow
+  // Get flow session data
   const currentStepIndex = useAppStore(state => state.flowSession?.currentStepIndex || 0);
   const temporarySteps = useAppStore(state => state.flowSession?.temporarySteps || []);
   const nextStep = useAppStore(state => state.nextStep);
@@ -28,12 +31,14 @@ export const StepModal: React.FC<StepModalProps> = ({
   const updateTempNodeUserPrompt = useAppStore(state => state.updateTempNodeUserPrompt);
   const updateTempNodeAssistantMessage = useAppStore(state => state.updateTempNodeAssistantMessage);
   
+  // Current node data
   const currentNode = temporarySteps[currentStepIndex];
   const isLastStep = currentStepIndex === temporarySteps.length - 1;
   
+  // UI state
   const [isProcessing, setIsProcessing] = useState(false);
   
-  // Pobierz komponenty dialogowe na podstawie szablonu
+  // Get template components based on template name
   const { 
     Header, 
     AssistantMessage, 
@@ -42,29 +47,33 @@ export const StepModal: React.FC<StepModalProps> = ({
     ContextUpdateInfo 
   } = getTemplateComponents(template);
   
-  // Przetwarzanie wiadomości asystenta z tokenami
+  // Process assistant message tokens with context values
   const processedMessage = useMemo(() => {
     if (!currentNode?.assistantMessage) return '';
     return processTemplateWithItems(currentNode.assistantMessage, contextItems);
   }, [currentNode?.assistantMessage, contextItems]);
   
-  // Przetwarzanie domyślnej wartości dla userPrompt z tokenami
+  // Process user prompt tokens with context values
   const processedUserPrompt = useMemo(() => {
     if (!currentNode?.userPrompt) return '';
     return processTemplateWithItems(currentNode.userPrompt, contextItems);
   }, [currentNode?.userPrompt, contextItems]);
   
-  // Aktualizacja wartości w tymczasowej kopii
+  /**
+   * Update user input in the temporary node
+   */
   const handleInputChange = (value: string) => {
     if (currentNode?.id) {
       updateTempNodeUserPrompt(currentNode.id, value);
     }
   };
 
-  // Funkcja zamykająca z zapisem lub bez
-  const handleClose = (saveChanges = false) => {
+  /**
+   * Close modal with or without saving changes
+   */
+  const handleClose = (saveChanges = true) => {
     if (saveChanges) {
-      // Przed zapisem, zastąp wszystkie tokeny ich wartościami w każdym węźle
+      // Before saving, process all tokens to their values in each node
       temporarySteps.forEach(node => {
         if (node.id && node.assistantMessage) {
           const processed = processTemplateWithItems(node.assistantMessage, contextItems);
@@ -72,6 +81,7 @@ export const StepModal: React.FC<StepModalProps> = ({
         }
       });
       
+      // Add small delay to ensure updates are processed
       setTimeout(() => {
         stopFlowSession(true);
         onClose();
@@ -82,13 +92,16 @@ export const StepModal: React.FC<StepModalProps> = ({
     }
   };
 
-  // Obsługa nawigacji
+  /**
+   * Handle navigation between steps
+   */
   const handleNavigation = (direction: 'prev' | 'next' | 'finish') => {
     if (direction === 'prev') {
       prevStep();
     } else if (direction === 'next') {
       setIsProcessing(true);
       
+      // Update context from current input if any
       if (currentNode?.id) {
         updateContextFromNodeInput(currentNode.id);
       }
@@ -102,10 +115,10 @@ export const StepModal: React.FC<StepModalProps> = ({
         updateContextFromNodeInput(currentNode.id);
       }
       
-      // Automatycznie zapisz sesję zamiast pokazywać dialog
+      // Automatically save session instead of showing a dialog
       setIsProcessing(true);
       
-      // Przed zapisem, zastąp wszystkie tokeny ich wartościami w każdym węźle
+      // Process tokens in all nodes
       temporarySteps.forEach(node => {
         if (node.id && node.assistantMessage) {
           const processed = processTemplateWithItems(node.assistantMessage, contextItems);
@@ -114,17 +127,19 @@ export const StepModal: React.FC<StepModalProps> = ({
       });
       
       setTimeout(() => {
-        stopFlowSession(true); // Automatycznie zapisz zmiany
+        stopFlowSession(true); // Automatically save changes
         onClose();
         setIsProcessing(false);
       }, 50);
     }
   };
 
+  // Return null if no current node exists
   if (!currentNode) {
     return null;
   }
 
+  // Prepare node data for plugin with proper date objects
   const nodeDataForPlugin = {
     ...currentNode,
     assistantMessage: processedMessage,
@@ -132,9 +147,7 @@ export const StepModal: React.FC<StepModalProps> = ({
     updatedAt: currentNode.updatedAt ? new Date(currentNode.updatedAt) : undefined
   };
 
-  // Usunięto dialog zapisywania zmian, teraz dzieje się to automatycznie
-
-  // Ustawienia pluginu
+  // Get plugin component and settings if available
   let PluginComponent: PluginComponentWithSchema | null = null;
   let pluginSettings = { 
     replaceHeader: false, 
@@ -162,18 +175,18 @@ export const StepModal: React.FC<StepModalProps> = ({
             currentStepIndex={currentStepIndex}
             totalSteps={temporarySteps.length}
             nodeName={currentNode.label}
-            onClose={() => handleClose(true)} // Automatycznie zapisz przy zamknięciu z nagłówka
+            onClose={() => handleClose(true)}
           />
         )}
         
         <div className="overflow-y-auto">
           <div className="p-6">
-            {/* Wiadomość asystenta */}
+            {/* Assistant message */}
             {!pluginSettings.replaceAssistantView && (
               <AssistantMessage message={processedMessage} />
             )}
 
-            {/* Plugin */}
+            {/* Plugin component if specified */}
             {currentNode.pluginKey && (
               <div className="my-4">
                 <StepPluginWrapper
@@ -183,7 +196,7 @@ export const StepModal: React.FC<StepModalProps> = ({
               </div>
             )}
 
-            {/* Wprowadzanie danych użytkownika */}
+            {/* User input */}
             {!pluginSettings.replaceUserInput && (
               <>
                 <UserInput
@@ -199,7 +212,7 @@ export const StepModal: React.FC<StepModalProps> = ({
           </div>
         </div>
 
-        {/* Przyciski nawigacji */}
+        {/* Navigation buttons */}
         {!pluginSettings.hideNavigationButtons && (
           <NavigationButtons
             isFirstStep={currentStepIndex === 0}

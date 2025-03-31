@@ -1,100 +1,212 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/services/LlmService.ts
+/**
+ * LLM (Language Learning Model) Service for handling communication with LLM APIs
+ */
 import { PluginAuthAdapter } from "./PluginAuthAdapter";
 
+/**
+ * Configuration options for the LLM service
+ */
 export interface LlmServiceOptions {
+  /** API endpoint path (e.g., "api/v1/services/chat/completion") */
   apiUrl?: string;
+  /** API base URL (e.g., "https://api.example.com") */
   apiBaseUrl?: string;
+  /** Default response format options */
   responseFormat?: ResponseFormatOptions;
-  contextJsonKey?: string; // Klucz kontekstu, który zawiera JSON jako string
+  /** Context item key containing JSON schema as string */
+  contextJsonKey?: string;
 }
 
+/**
+ * Response format options for the LLM API
+ */
 export interface ResponseFormatOptions {
+  /** Response format type */
   type: "json" | "text";
-  schema?: Record<string, any>;
+  /** Schema definition for JSON responses */
+  schema?: Record<string, unknown>;
 }
 
+/**
+ * Parameters for an LLM API request
+ */
 export interface LlmRequestParams {
+  /** User message to send to the LLM */
   message: string;
+  /** User ID for tracking and billing */
   userId: string;
+  /** Estimated token cost for the request (optional) */
   estimatedTokenCost?: number;
+  /** Override response format (takes precedence over other formats) */
   overrideResponseFormat?: ResponseFormatOptions;
 }
 
+/**
+ * Token usage statistics from an LLM response
+ */
 export interface TokenUsage {
+  /** Prompt tokens used */
   prompt: number;
+  /** Completion tokens used */
   completion: number;
+  /** Total tokens used */
   total: number;
 }
 
+/**
+ * Message structure in LLM request/response
+ */
+export interface LlmMessage {
+  /** The role of the message sender (system, user, assistant) */
+  role: "system" | "user" | "assistant";
+  /** The message content */
+  content: string;
+}
+
+/**
+ * Request payload for LLM API
+ */
+export interface LlmRequestPayload {
+  /** Array of messages in the conversation */
+  messages: LlmMessage[];
+  /** User ID for tracking */
+  userId: string;
+  /** Response format specification (for OpenAI-compatible APIs) */
+  response_format?: { type: string };
+}
+
+/**
+ * Message in LLM response
+ */
+export interface LlmResponseMessage {
+  /** Text content of the message */
+  content?: string;
+  /** Parsed JSON from the message content (when using JSON response format) */
+  parsedJson?: Record<string, unknown>;
+}
+
+/**
+ * Response data from an LLM API
+ */
+export interface LlmResponseData {
+  /** Response message */
+  message?: LlmResponseMessage;
+  /** Token usage statistics */
+  tokenUsage?: TokenUsage;
+  /** Success flag */
+  success?: boolean;
+  /** Additional fields */
+  [key: string]: unknown;
+}
+
+/**
+ * Response from an LLM API request
+ */
 export interface LlmResponse {
+  /** Whether the request was successful */
   success: boolean;
-  data?: {
-    message?: any;
-    tokenUsage?: TokenUsage;
-    [key: string]: any;
-  };
+  /** Response data */
+  data?: LlmResponseData;
+  /** Error message if unsuccessful */
   error?: string;
 }
 
-export class LlmService {
-  private defaultApiUrl = "api/v1/services/chat/completion";
-  private defaultApiBaseUrl: string;
-  private authContextRef: any | null;
+/**
+ * Context item structure
+ */
+export interface ContextItem {
+  /** Item ID */
+  id: string;
+  /** Item title */
+  title: string;
+  /** Item content */
+  content: string;
+  /** Additional fields */
+  [key: string]: unknown;
+}
 
+/**
+ * Service for handling communication with LLM APIs
+ */
+export class LlmService {
+  private readonly defaultApiUrl = "api/v1/services/chat/completion";
+  private readonly defaultApiBaseUrl: string;
+  private readonly authContextRef: Record<string, unknown> | null;
+
+  /**
+   * Creates a new instance of the LlmService
+   * @param authAdapter Authentication adapter for user management
+   * @param options Service configuration options
+   */
   constructor(
-    private authAdapter: PluginAuthAdapter, 
-    private options: LlmServiceOptions = {}
+    private readonly authAdapter: PluginAuthAdapter, 
+    private readonly options: LlmServiceOptions = {}
   ) {
     this.defaultApiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-    this.authContextRef = (authAdapter as any).appContext?.authContext || null;
+    this.authContextRef = this.authAdapter.appContext?.authContext || null;
     
     console.log('LlmService initialized with options:', JSON.stringify(options));
   }
 
+  /**
+   * Estimates token cost of a message
+   * @param message The message to estimate cost for
+   * @returns Estimated token count
+   */
   private estimateTokenCost(message: string): number {
+    // Simple estimation: ~4 characters per token
     return Math.ceil(message.length / 4);
   }
 
-  private safelyCallAuthMethod(methodName: string, ...args: any[]): any {
-    if (this.authContextRef && this.authContextRef[methodName] && typeof this.authContextRef[methodName] === 'function') {
-      return this.authContextRef[methodName](...args);
+  /**
+   * Safely calls a method on the auth context if available
+   * @param methodName Name of the method to call
+   * @param args Arguments to pass to the method
+   * @returns Method result or null if method not available
+   */
+  private safelyCallAuthMethod(methodName: string, ...args: unknown[]): unknown {
+    if (
+      this.authContextRef && 
+      methodName in this.authContextRef && 
+      typeof this.authContextRef[methodName] === 'function'
+    ) {
+      return (this.authContextRef[methodName] as Function)(...args);
     }
     return null;
   }
   
   /**
-   * Czyści tekst z formatowania markdown i innych elementów, które mogą przeszkadzać w parsowaniu JSON
-   * @param text Tekst do wyczyszczenia
-   * @returns Wyczyszczony tekst zawierający tylko JSON
+   * Cleans text from markdown formatting and other elements that might interfere with JSON parsing
+   * @param text Text to clean
+   * @returns Cleaned text containing only JSON
    */
   private cleanJsonContent(text: string): string {
     if (!text) return '';
     
-    // Usuń bloki kodu markdown ```json i ```
+    // Remove markdown code blocks
     let cleaned = text.replace(/```json\s*|\s*```/g, '');
     
-    // Usuń inne potencjalne oznaczenia markdown, które mogą wystąpić
+    // Remove other potential markdown marks
     cleaned = cleaned.replace(/`/g, '');
     
-    // Usuń ewentualne komentarze w stylu JSON
+    // Remove JSON-style comments
     cleaned = cleaned.replace(/\/\/.*$/gm, '');
     
-    // Usuń białe znaki na początku i końcu
+    // Remove whitespace at the beginning and end
     cleaned = cleaned.trim();
     
-    // Sprawdź, czy tekst zaczyna się od { lub [ i kończy się na } lub ]
-    // Jeśli nie, spróbuj znaleźć JSON w tekście
+    // Check if the text starts with { or [ and ends with } or ]
+    // If not, try to find JSON in the text
     if (!(cleaned.startsWith('{') && cleaned.endsWith('}')) && 
         !(cleaned.startsWith('[') && cleaned.endsWith(']'))) {
       
-      // Szukaj pierwszego wystąpienia { lub [
+      // Look for the first occurrence of { or [
       const startBrace = cleaned.indexOf('{');
       const startBracket = cleaned.indexOf('[');
       
       let startPos = -1;
       if (startBrace >= 0 && startBracket >= 0) {
-        // Wybierz ten, który występuje wcześniej
+        // Choose the one that appears earlier
         startPos = Math.min(startBrace, startBracket);
       } else if (startBrace >= 0) {
         startPos = startBrace;
@@ -103,7 +215,7 @@ export class LlmService {
       }
       
       if (startPos >= 0) {
-        // Znajdź odpowiadający nawias zamykający
+        // Find the matching closing bracket
         const isObject = cleaned.charAt(startPos) === '{';
         let depth = 1;
         let endPos = -1;
@@ -130,51 +242,53 @@ export class LlmService {
     return cleaned;
   }
   
-  // Poprawiona metoda do pobierania formatu JSON ze stringowego klucza kontekstowego
+  /**
+   * Gets JSON format from context using the specified context key
+   * @returns Response format options or undefined if not found
+   */
   private getJsonFormatFromContext(): ResponseFormatOptions | undefined {
     if (!this.options.contextJsonKey) {
       return undefined;
     }
     
     try {
-      // Pobranie obiektu kontekstu
-      const appContext = (this.authAdapter as any).appContext;
+      // Get the application context
+      const appContext = this.authAdapter.appContext;
       if (!appContext) {
-        console.error('Brak kontekstu aplikacji');
+        console.error('No application context available');
         return undefined;
       }
       
-      // Sprawdź, czy klucz kontekstu wskazuje na element w systemie kontekstowym
-      // Pobierz elementy kontekstowe z bieżącego workspace
-      const getContextItems = appContext.getContextItems;
-      if (typeof getContextItems === 'function') {
-        const contextItems = getContextItems();
+      // Check if the context key points to an element in the context system
+      // Get context items from the current workspace
+      if (typeof appContext.getContextItems === 'function') {
+        const contextItems = appContext.getContextItems() as ContextItem[];
         
-        // Szukaj elementu kontekstowego o tytule odpowiadającym kluczowi kontekstu
-        const contextItem = contextItems.find((item: { title: string | undefined; }) => item.title === this.options.contextJsonKey);
+        // Look for a context item with a title matching the context key
+        const contextItem = contextItems.find(item => item.title === this.options.contextJsonKey);
         if (contextItem && contextItem.content) {
-          console.log(`Znaleziono element kontekstowy o tytule "${this.options.contextJsonKey}"`);
-          console.log('Zawartość elementu kontekstowego:', contextItem.content.substring(0, 100) + '...');
+          console.log(`Found context item with title "${this.options.contextJsonKey}"`);
+          console.log('Context item content:', contextItem.content.substring(0, 100) + '...');
           
-          // Spróbuj naprawić i przeanalizować zawartość jako JSON
+          // Try to repair and parse the content as JSON
           try {
-            // Napraw potencjalne problemy z JSON - zamień pojedyncze cudzysłowy na podwójne
+            // Fix potential JSON issues - convert single quotes to double quotes
             const fixedContent = contextItem.content
-              .replace(/(\w+):/g, '"$1":') // Naprawia nazwy kluczy bez cudzysłowów
-              .replace(/'/g, '"');         // Zamienia pojedyncze cudzysłowy na podwójne
+              .replace(/(\w+):/g, '"$1":') // Fix key names without quotes
+              .replace(/'/g, '"');         // Convert single quotes to double quotes
             
-            // Wyświetl naprawioną zawartość do debugowania
-            console.log('Naprawiona zawartość JSON:', fixedContent.substring(0, 100) + '...');
+            // Display fixed content for debugging
+            console.log('Fixed JSON content:', fixedContent.substring(0, 100) + '...');
             
-            // Spróbuj przeanalizować naprawioną zawartość
+            // Try to parse the fixed content
             let parsedContent;
             try {
               parsedContent = JSON.parse(fixedContent);
             } catch (fixError) {
-              console.warn('Próba naprawy JSON nie powiodła się, próbuję alternatywną metodę:', fixError);
+              console.warn('JSON repair attempt failed, trying alternative method:', fixError);
               
-              // Spróbuj zbudować obiekt formatu "ręcznie" z tekstu
-              // Zakładamy, że to obiekt o strukturze schema JSON
+              // Try to build a format object "manually" from text
+              // Assume it's an object with JSON schema structure
               return {
                 type: 'json',
                 schema: {
@@ -185,21 +299,19 @@ export class LlmService {
               };
             }
             
-            // Sprawdź czy zawartość ma właściwy format (lub dostosuj ją)
-            if (parsedContent) {
-              if (typeof parsedContent === 'object') {
-                const responseFormat: ResponseFormatOptions = {
-                  type: 'json',
-                  schema: parsedContent
-                };
-                console.log('Pomyślnie utworzono format JSON z zawartości kontekstu');
-                return responseFormat;
-              }
+            // Check if the content has the correct format (or adjust it)
+            if (parsedContent && typeof parsedContent === 'object') {
+              const responseFormat: ResponseFormatOptions = {
+                type: 'json',
+                schema: parsedContent
+              };
+              console.log('Successfully created JSON format from context content');
+              return responseFormat;
             }
           } catch (parseError) {
-            console.error(`Błąd podczas analizy JSON z elementu kontekstowego "${this.options.contextJsonKey}":`, parseError);
+            console.error(`Error parsing JSON from context item "${this.options.contextJsonKey}":`, parseError);
             
-            // Zwróć prosty format JSON jako fallback
+            // Return a simple JSON format as fallback
             return {
               type: 'json',
               schema: {
@@ -209,42 +321,48 @@ export class LlmService {
             };
           }
         } else {
-          console.warn(`Nie znaleziono elementu kontekstowego o tytule "${this.options.contextJsonKey}"`);
+          console.warn(`No context item found with title "${this.options.contextJsonKey}"`);
         }
       } else {
-        // Alternatywna metoda - szukaj w danych węzła, jeśli appContext zawiera informacje o węźle
+        // Alternative method - look in node data if appContext contains node information
         const currentNode = appContext.currentNode;
         if (currentNode) {
-          console.log('Próba pobrania danych z węzła:', currentNode);
+          console.log('Attempting to get data from node:', currentNode);
           
-          // Sprawdź, czy węzeł zawiera bezpośrednio dane formatu JSON
-          if (currentNode.data && currentNode.data.jsonFormat) {
-            console.log('Znaleziono format JSON w danych węzła:', currentNode.data.jsonFormat);
+          // Check if the node directly contains JSON format data
+          if (currentNode.data?.jsonFormat) {
+            console.log('Found JSON format in node data:', currentNode.data.jsonFormat);
             return currentNode.data.jsonFormat as ResponseFormatOptions;
           }
           
-          // Sprawdź, czy klucz kontekstu wskazuje na ścieżkę w danych węzła
+          // Check if the context key points to a path in node data
           const keyPath = this.options.contextJsonKey.split('.');
-          let value = currentNode;
+          let value: Record<string, unknown> | null = currentNode;
           
           for (const key of keyPath) {
             if (value && typeof value === 'object' && key in value) {
-              value = value[key];
+              value = value[key] as Record<string, unknown>;
             } else {
-              console.warn(`Ścieżka klucza kontekstu ${this.options.contextJsonKey} nie znaleziona w węźle`);
+              console.warn(`Context key path ${this.options.contextJsonKey} not found in node`);
+              value = null;
               break;
             }
           }
           
-          if (value && typeof value === 'object' && 'type' in value && value.type === 'json') {
-            console.log('Znaleziono format JSON poprzez ścieżkę w węźle:', value);
+          if (
+            value && 
+            typeof value === 'object' && 
+            'type' in value && 
+            value.type === 'json'
+          ) {
+            console.log('Found JSON format via path in node:', value);
             return value as ResponseFormatOptions;
           }
         }
       }
       
-      // Jako ostatnią deskę ratunku, zwróć prosty format JSON
-      console.warn('Nie udało się pobrać formatu JSON z kontekstu, używam domyślnego formatu');
+      // As a last resort, return a simple JSON format
+      console.warn('Failed to get JSON format from context, using default format');
       return {
         type: 'json',
         schema: {
@@ -253,9 +371,9 @@ export class LlmService {
         }
       };
     } catch (error) {
-      console.error('Błąd podczas pobierania formatu JSON z kontekstu:', error);
+      console.error('Error getting JSON format from context:', error);
       
-      // Nawet w przypadku błędu, zwróć prosty format JSON
+      // Even in case of error, return a simple JSON format
       return {
         type: 'json',
         schema: {
@@ -266,14 +384,22 @@ export class LlmService {
     }
   }
 
+  /**
+   * Sends a request to the LLM API
+   * @param params Request parameters
+   * @returns Promise resolving to the LLM response
+   */
   async sendRequest(params: LlmRequestParams): Promise<LlmResponse> {
     const estimatedCost = params.estimatedTokenCost || this.estimateTokenCost(params.message);
     
     try {
+      // Decrease token count before request
       this.safelyCallAuthMethod('decreaseTokens', estimatedCost);
       
+      // Get user authentication token
       const token = await this.authAdapter.getCurrentUserToken();
       
+      // Build API URL
       const apiBaseUrl = this.options.apiBaseUrl || this.defaultApiBaseUrl;
       const apiPath = this.options.apiUrl || this.defaultApiUrl;
       const baseUrlNormalized = apiBaseUrl.endsWith('/') ? apiBaseUrl.slice(0, -1) : apiBaseUrl;
@@ -282,6 +408,7 @@ export class LlmService {
       
       console.log('Making API request to:', apiUrl);
       
+      // Prepare request headers
       const headers: Record<string, string> = {
         'Content-Type': 'application/json'
       };
@@ -292,30 +419,30 @@ export class LlmService {
         console.warn('No auth token available for API request');
       }
       
-      // Pobierz format JSON z kontekstu (jeśli skonfigurowany)
+      // Get JSON format from context (if configured)
       const contextFormat = this.getJsonFormatFromContext();
       const responseFormat = params.overrideResponseFormat || contextFormat || this.options.responseFormat;
       
-      // Debug: Pokaż wybrane formaty
-      console.log('Format kontekstowy:', contextFormat);
-      console.log('Format nadpisany:', params.overrideResponseFormat);
-      console.log('Format opcji:', this.options.responseFormat);
-      console.log('Wybrany format odpowiedzi:', responseFormat);
+      // Debug: Show selected formats
+      console.log('Context format:', contextFormat);
+      console.log('Override format:', params.overrideResponseFormat);
+      console.log('Options format:', this.options.responseFormat);
+      console.log('Selected response format:', responseFormat);
       
-      // Przygotuj podstawowy payload
-      const requestPayload: any = {
+      // Prepare basic payload
+      const requestPayload: LlmRequestPayload = {
         messages: [
           { role: "user", content: params.message }
         ],
         userId: params.userId
       };
       
-      // Dodaj format odpowiedzi, jeśli określony
-      if (responseFormat && responseFormat.type === "json") {
+      // Add response format if specified
+      if (responseFormat?.type === "json") {
         // OpenAI-compatible format
         requestPayload.response_format = { type: "json_object" };
         
-        // Dodaj instrukcję o schemacie w treści wiadomości systemu, jeśli określono schemat
+        // Add schema instruction in system message content if schema is specified
         if (responseFormat.schema) {
           requestPayload.messages.unshift({
             role: "system",
@@ -330,25 +457,28 @@ export class LlmService {
       
       console.log('Final request payload:', JSON.stringify(requestPayload));
       
+      // Send the request
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers,
         body: JSON.stringify(requestPayload),
       });
       
+      // Handle non-OK responses
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Server responded with status: ${response.status}, message: ${errorText}`);
       }
       
+      // Parse response data
       const data = await response.json();
       
-      // Próba analizy treści JSON, jeśli format odpowiedzi to JSON
+      // Try to parse JSON content if response format is JSON
       if (responseFormat?.type === 'json' && data?.data?.message?.content) {
         try {
           const content = data.data.message.content;
           if (typeof content === 'string') {
-            // Wyczyść zawartość z formatowania markdown i innych potencjalnych problemów
+            // Clean content from markdown formatting and other potential issues
             const cleanedContent = this.cleanJsonContent(content);
             console.log('Cleaned JSON content:', cleanedContent);
             
@@ -358,8 +488,8 @@ export class LlmService {
             } catch (innerError) {
               console.warn('Failed to parse cleaned JSON, trying additional methods:', innerError);
               
-              // Jeśli nadal się nie udało, możemy spróbować wydobyć JSON używając regex
-              const jsonRegex = /{[\s\S]*}/; // Prosty regex dla obiektu JSON
+              // If it still fails, try to extract JSON using regex
+              const jsonRegex = /{[\s\S]*}/; // Simple regex for JSON object
               const match = content.match(jsonRegex);
               
               if (match && match[0]) {
@@ -380,6 +510,7 @@ export class LlmService {
         }
       }
       
+      // Refresh user data to update token count
       this.safelyCallAuthMethod('refreshUserData');
       
       return {
@@ -389,6 +520,7 @@ export class LlmService {
     } catch (error) {
       console.error("LLM API error:", error);
       
+      // Refresh user data even in case of error
       this.safelyCallAuthMethod('refreshUserData');
       
       return {

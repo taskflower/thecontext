@@ -1,32 +1,76 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/services/PluginAuthAdapter.ts
+/**
+ * Authentication adapter for plugins
+ * Provides an interface for interacting with the authorization system
+ */
 import { AuthUser } from "./authService";
 
 /**
- * Adapter autoryzacji dla pluginów
- * Zapewnia interfejs do interakcji z systemem autoryzacji
+ * Context item structure
+ */
+export interface ContextItem {
+  /** The unique identifier of the context item */
+  id: string;
+  /** The title of the context item */
+  title: string;
+  /** The content of the context item */
+  content: string;
+  /** Additional properties */
+  [key: string]: unknown;
+}
+
+/**
+ * Application context interface
+ */
+export interface ApplicationContext {
+  /** Authentication context */
+  authContext?: {
+    /** Current authenticated user */
+    currentUser?: AuthUser;
+    /** Get authentication token */
+    getToken?: () => Promise<string | null>;
+    /** Refresh user data */
+    refreshUserData?: () => Promise<void>;
+    /** Decrease available tokens */
+    decreaseTokens?: (amount: number) => void;
+  };
+  /** Get context items */
+  getContextItems?: () => ContextItem[];
+  /** Current node data */
+  currentNode?: Record<string, unknown>;
+  /** Additional properties */
+  [key: string]: unknown;
+}
+
+/**
+ * Authentication adapter for plugins
+ * Provides a consistent interface for plugins to interact with the authentication system
  */
 export class PluginAuthAdapter {
   private authAttempts = 0;
   
-  constructor(public appContext: any) {
+  /**
+   * Creates a new instance of the PluginAuthAdapter
+   * @param appContext The application context containing auth information
+   */
+  constructor(public readonly appContext: ApplicationContext) {
     console.log("PluginAuthAdapter initialized with appContext:", !!appContext);
   }
   
   /**
-   * Pobiera dane bieżącego użytkownika z kontekstu aplikacji
+   * Gets the current user data from the application context
+   * @returns Promise resolving to the current user or null if not available
    */
   async getCurrentUser(): Promise<AuthUser | null> {
     try {
       this.authAttempts++;
       
-      // Sprawdź, czy mamy bezpośredni dostęp do kontekstu autoryzacji
+      // Check if we have direct access to the authentication context
       if (this.appContext?.authContext?.currentUser) {
         console.log("Retrieved user from auth context");
         return this.appContext.authContext.currentUser;
       }
       
-      // Jeśli jesteśmy w trybie deweloperskim, zwróć fałszywego użytkownika
+      // If we're in development mode, return a mock user
       if (import.meta.env.DEV) {
         console.log("Dev mode - returning mock user");
         return {
@@ -47,17 +91,18 @@ export class PluginAuthAdapter {
   }
   
   /**
-   * Pobiera token użytkownika z kontekstu autoryzacji
+   * Gets the user's authentication token from the auth context
+   * @returns Promise resolving to the token string or null if not available
    */
   async getCurrentUserToken(): Promise<string | null> {
     try {
-      // Sprawdź, czy mamy dostęp do metody getToken w kontekście autoryzacji
+      // Check if we have access to the getToken method in the auth context
       if (this.appContext?.authContext?.getToken) {
         const token = await this.appContext.authContext.getToken();
         return token;
       }
       
-      // W trybie deweloperskim zwróć fałszywy token
+      // In development mode, return a mock token
       if (import.meta.env.DEV) {
         return "dev-token-123456";
       }
@@ -71,14 +116,16 @@ export class PluginAuthAdapter {
   }
   
   /**
-   * Pobiera liczbę prób autoryzacji
+   * Gets the number of authentication attempts
+   * @returns The number of authentication attempts
    */
   getAuthAttempts(): number {
     return this.authAttempts;
   }
   
   /**
-   * Odświeża dane użytkownika
+   * Refreshes the user data through the auth context
+   * @returns Promise that resolves when the refresh is complete
    */
   async refreshUserData(): Promise<void> {
     try {
@@ -91,7 +138,8 @@ export class PluginAuthAdapter {
   }
 
   /**
-   * Zmniejsza liczbę dostępnych tokenów
+   * Decreases the number of available tokens
+   * @param amount The number of tokens to decrease
    */
   decreaseTokens(amount: number): void {
     try {
@@ -104,19 +152,37 @@ export class PluginAuthAdapter {
   }
   
   /**
-   * Pobiera element kontekstowy na podstawie tytułu
-   * Ta metoda została dodana, aby ułatwić dostęp do systemu kontekstowego
+   * Gets a context item by title
+   * This method was added to facilitate access to the context system
+   * @param title The title of the context item to find
+   * @returns The found context item or null if not found
    */
-  getContextItemByTitle(title: string): any {
+  getContextItemByTitle(title: string): ContextItem | null {
     try {
-      if (this.appContext?.getContextItems) {
+      if (typeof this.appContext?.getContextItems === 'function') {
         const contextItems = this.appContext.getContextItems();
-        return contextItems.find((item: any) => item.title === title);
+        return contextItems.find((item: ContextItem) => item.title === title) || null;
       }
       return null;
     } catch (error) {
       console.error("Error getting context item:", error);
       return null;
+    }
+  }
+  
+  /**
+   * Gets all context items from the application context
+   * @returns Array of context items or empty array if not available
+   */
+  getContextItems(): ContextItem[] {
+    try {
+      if (typeof this.appContext?.getContextItems === 'function') {
+        return this.appContext.getContextItems();
+      }
+      return [];
+    } catch (error) {
+      console.error("Error getting context items:", error);
+      return [];
     }
   }
 }

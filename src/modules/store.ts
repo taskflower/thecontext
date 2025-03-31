@@ -1,3 +1,4 @@
+// src/modules/store.ts
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { persist } from "zustand/middleware";
@@ -12,46 +13,55 @@ import { createFilterSlice } from "./filters/filterActions";
 import { createContextSlice } from "./context/contextActions";
 
 // Import types
-import { NodeActions } from "./graph/types";
-import { EdgeActions } from "./graph/types";
-import { ScenarioActions } from "./scenarios/types";
-import { WorkspaceActions } from "./workspaces/types";
-import { FlowActions } from "./flow/types";
-import { FilterActions } from "./filters/types";
-import { ContextActions } from "./context/types";
-
-// Import workspace type
-import { Workspace } from "./workspaces/types";
-import { FlowSession } from "./flow/types";
+import type { NodeActions } from "./graph/types";
+import type { EdgeActions } from "./graph/types";
+import type { ScenarioActions } from "./scenarios/types";
+import type { WorkspaceActions } from "./workspaces/types";
+import type { FlowActions, FlowSession } from "./flow/types";
+import type { FilterActions } from "./filters/types";
+import type { ContextActions } from "./context/types";
+import type { Workspace } from "./workspaces/types";
 
 // Import initial data
 import { getInitialData } from "./initialData";
 
-// Type constants
+/**
+ * Type constants for different node types in the application
+ */
 export const TYPES = {
   WORKSPACE: "workspace",
   SCENARIO: "scenario",
   NODE: "node",
   EDGE: "edge",
-};
+} as const;
 
-// Base item interface
+export type ItemType = typeof TYPES[keyof typeof TYPES];
+
+/**
+ * Base interface for all items in the application
+ */
 export interface BaseItem {
   id: string;
-  type: string;
+  type: ItemType;
   label?: string;
+  name?: string;
   updatedAt?: number;
   createdAt?: number;
 }
 
-// Selected elements structure
+/**
+ * Interface for tracking selected elements
+ */
 export interface Selected {
   workspace: string;
   scenario: string;
   node: string;
 }
 
-// Main app state interface
+/**
+ * Main application state interface
+ * Combines all action types and state properties
+ */
 export interface AppState extends 
   NodeActions, 
   EdgeActions, 
@@ -61,21 +71,24 @@ export interface AppState extends
   FilterActions,
   ContextActions {
   
-  // State properties
+  // Core state properties
   items: Workspace[];
   selected: Selected;
   stateVersion: number;
   flowSession?: FlowSession;
 }
 
-// Get initial data
+// Get initial app data
 const initialData = getInitialData();
 
-// Create the store with all slices and persist middleware
+/**
+ * Main application store that combines all feature slices
+ * Uses immer for immutable updates and persist for local storage persistence
+ */
 export const useAppStore = create<AppState>()(
   persist(
     immer((...args) => ({
-      // Initial state from demo or saved
+      // Initial state
       items: initialData.items || [],
       selected: initialData.selected || {
         workspace: "",
@@ -85,7 +98,7 @@ export const useAppStore = create<AppState>()(
       stateVersion: initialData.stateVersion || 0,
       flowSession: undefined,
       
-      // Attach all slices
+      // Attach all feature slices
       ...createNodeSlice(...args),
       ...createEdgeSlice(...args),
       ...createScenarioSlice(...args),
@@ -96,12 +109,6 @@ export const useAppStore = create<AppState>()(
     })),
     {
       name: 'flowchart-app-state',
-      // Zmiana: teraz zachowujemy również flowSession
-      partialize: (state: AppState) => ({
-        ...state,
-        // Nie wykluczamy żadnego pola - wszystko będzie persystowane
-      }),
-      // Możesz też określić wersję schematu, co ułatwi migracje w przyszłości
       version: 1,
     }
   )
