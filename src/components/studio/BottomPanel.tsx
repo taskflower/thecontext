@@ -5,7 +5,8 @@ import { ContextsList } from "@/modules/context";
 import HistoryView from "@/modules/history/components/HistoryView";
 import { useAppStore } from "@/modules/store";
 import React from "react";
-import { ExportImport } from "./exportImport/ExportImport";
+import ExportImport from "./exportImport/ExportImport";
+
 
 type PanelContentType =
   | "context"

@@ -14,13 +14,13 @@ interface ContextsListProps {
   showScoped?: boolean; // Czy pokazywać konteksty powiązane ze scenariuszami
 }
 
-const ContextsList: React.FC<ContextsListProps> = ({ 
-  scenarioId,
-  showScoped = true 
-}) => {
+const ContextsList: React.FC<ContextsListProps> = () => {
   const getContextItems = useAppStore((state) => state.getContextItems);
   const deleteContextItem = useAppStore((state) => state.deleteContextItem);
   const updateContextItem = useAppStore((state) => state.updateContextItem);
+
+  const currentScenario = useAppStore(state => state.getCurrentScenario());
+const scenarioId = currentScenario?.id;
 
   // Wymuszenie aktualizacji przy zmianie stanu
   useAppStore(state => state.stateVersion);
@@ -30,17 +30,9 @@ const ContextsList: React.FC<ContextsListProps> = ({
   
   // Filtruj konteksty w zależności od ustawień
   const contextItems = allContextItems.filter(item => {
-    // Jeśli podano scenarioId, pokaż tylko konteksty powiązane z tym scenariuszem
-    // lub globalne (bez scenarioId)
     if (scenarioId) {
       return !item.scenarioId || item.scenarioId === scenarioId;
     }
-    
-    // Jeśli nie pokazujemy powiązanych, ukryj konteksty z powiązaniem
-    if (!showScoped && item.scenarioId) {
-      return false;
-    }
-    
     return true;
   });
   
