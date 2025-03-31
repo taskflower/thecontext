@@ -2,55 +2,69 @@
 import { TYPES } from "./store";
 import { AppState } from "./store";
 
-// Początkowe dane demonstracyjne
+// Początkowe dane dla lekcji Duolingo z zapisem odpowiedzi do kontekstu
 export const getInitialData = (): Partial<AppState> => {
   return {
     items: [
       {
-        id: 'workspace-demo',
+        id: 'workspace-duolingo',
         type: TYPES.WORKSPACE,
-        title: 'Demo Workspace',
+        title: 'Lekcje Duolingo',
         createdAt: Date.now(),
         updatedAt: Date.now(),
+        description: 'Przestrzeń z lekcjami językowymi w stylu Duolingo.',
+        slug: 'lekcje-duolingo',
+        contextItems: [
+          {
+            id: 'context-translateAnswer',
+            title: 'translateAnswer',
+            type: 'text', // lub np. ContextType.TEXT
+            content: '',
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+          }
+        ],
         children: [
           {
-            id: 'scenario-demo',
+            id: 'scenario-lesson1',
             type: TYPES.SCENARIO,
-            name: 'Przykładowy Scenariusz',
-            description: 'Przykładowa konwersacja z kilkoma krokami.',
-            label: 'Demo',
+            name: 'Lekcja: Podstawowe Zwroty',
+            description: 'Prosta lekcja ucząca podstawowych zwrotów w języku angielskim.',
+            label: 'Lekcja 1',
             children: [
               {
                 id: 'node-start',
                 type: TYPES.NODE,
                 label: 'Start',
-                assistantMessage: 'Witaj! Jak mogę Ci dzisiaj pomóc?',
+                assistantMessage: 'Witaj! Zaczniemy naukę podstawowych zwrotów. Gotowy?',
                 userPrompt: '',
                 position: { x: 100, y: 100 }
               },
               {
-                id: 'node-select',
+                id: 'node-translate',
                 type: TYPES.NODE,
-                label: 'Wybór tematu',
-                assistantMessage: 'Mamy kilka dostępnych tematów: AI, Programowanie, Design. Jaki temat Cię interesuje?',
-                userPrompt: 'Chciałbym dowiedzieć się więcej o dostępnych tematach.',
+                label: 'Przetłumacz zdanie',
+                assistantMessage: 'Przetłumacz na angielski: "Dzień dobry".',
+                userPrompt: '',
+                contextKey: 'translateAnswer',
+                persistent: true, // <-- Klucz zapisujący wartość do kontekstu
                 position: { x: 400, y: 100 }
               },
               {
-                id: 'node-ai',
+                id: 'node-feedback',
                 type: TYPES.NODE,
-                label: 'AI',
-                assistantMessage: 'Sztuczna inteligencja to fascynujący temat! Obejmuje uczenie maszynowe, przetwarzanie języka naturalnego, wizję komputerową i wiele innych dziedzin.',
-                userPrompt: 'Interesuje mnie temat AI.',
-                position: { x: 700, y: 0 }
+                label: 'Sprawdzenie tłumaczenia',
+                assistantMessage: 'Twoje tłumaczenie: "{{translateAnswer}}". Poprawne tłumaczenie to: "Good morning".',
+                userPrompt: '',
+                position: { x: 700, y: 100 }
               },
               {
-                id: 'node-programming',
+                id: 'node-congrats',
                 type: TYPES.NODE,
-                label: 'Programowanie',
-                assistantMessage: 'Programowanie to sztuka tworzenia instrukcji dla komputerów. Popularne języki to JavaScript, Python, Java i wiele innych.',
-                userPrompt: 'Chciałbym porozmawiać o programowaniu.',
-                position: { x: 700, y: 200 }
+                label: 'Gratulacje',
+                assistantMessage: 'Gratulacje! Udało Ci się poprawnie przetłumaczyć zdanie.',
+                userPrompt: '',
+                position: { x: 1000, y: 100 }
               }
             ],
             edges: [
@@ -58,33 +72,31 @@ export const getInitialData = (): Partial<AppState> => {
                 id: 'edge-1',
                 type: TYPES.EDGE,
                 source: 'node-start',
-                target: 'node-select',
-                label: 'start → wybór'
+                target: 'node-translate',
+                label: 'start → tłumaczenie'
               },
               {
                 id: 'edge-2',
                 type: TYPES.EDGE,
-                source: 'node-select',
-                target: 'node-ai',
-                label: 'wybór AI'
+                source: 'node-translate',
+                target: 'node-feedback',
+                label: 'tłumaczenie → sprawdzenie'
               },
               {
                 id: 'edge-3',
                 type: TYPES.EDGE,
-                source: 'node-select',
-                target: 'node-programming',
-                label: 'wybór Programowanie'
+                source: 'node-feedback',
+                target: 'node-congrats',
+                label: 'sprawdzenie → gratulacje'
               }
             ]
           }
-        ],
-        description: "",
-        slug: ""
+        ]
       }
     ],
     selected: {
-      workspace: 'workspace-demo',
-      scenario: 'scenario-demo',
+      workspace: 'workspace-duolingo',
+      scenario: 'scenario-lesson1',
       node: ''
     },
     stateVersion: 0
