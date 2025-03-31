@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Copy } from "lucide-react";
-import { ContextItem } from "../types";
+import { Copy, Tag, Database } from "lucide-react";
+import { ContextItem, ContextType } from "../types";
 import { useAppStore } from "../../store";
-import { detectContentType } from "../utils";
+import { renderContextContent } from "../utils";
 import {
   CancelButton,
   DialogModal,
@@ -43,10 +43,6 @@ export const ViewContext: React.FC<ViewContextProps> = ({
     setTimeout(() => setCopySuccess(false), 2000);
   };
 
-  // Check if content is JSON
-  const { type } = detectContentType(contextItem?.content || "");
-  const isJson = type === "json";
-
   const renderFooter = () => (
     <div className="flex justify-between w-full">
       <button
@@ -54,7 +50,7 @@ export const ViewContext: React.FC<ViewContextProps> = ({
         className="text-sm text-muted-foreground hover:text-foreground flex items-center"
       >
         <Copy className="h-4 w-4 mr-1" />
-        {copySuccess ? "Copied!" : "Copy content"}
+        {copySuccess ? "Skopiowano!" : "Kopiuj zawartość"}
       </button>
       <CancelButton onClick={handleClose} />
     </div>
@@ -62,34 +58,89 @@ export const ViewContext: React.FC<ViewContextProps> = ({
 
   if (!contextItem) return null;
 
+  // Pobierz nazwę scenariusza, jeśli kontekst jest do niego przypisany
+  const getScenarioName = () => {
+    if (!contextItem.scenarioId) return null;
+    
+    const state = useAppStore.getState();
+    const workspace = state.items.find(w => w.id === state.selected.workspace);
+    if (!workspace) return "Nieznany scenariusz";
+    
+    const scenario = workspace.children.find(s => s.id === contextItem.scenarioId);
+    return scenario ? scenario.name : "Nieznany scenariusz";
+  };
+
   return (
     <DialogModal
       isOpen={isOpen}
       onClose={handleClose}
-      title="View Context Item"
-      description="View context item details"
+      title="Podgląd elementu kontekstu"
+      description="Szczegóły elementu kontekstu"
       footer={renderFooter()}
     >
       <div className="space-y-4">
         <div>
-          <h3 className="text-sm font-medium mb-1">Title</h3>
+          <h3 className="text-sm font-medium mb-1">Nazwa (klucz)</h3>
           <p className="text-xl font-black">{contextItem.title}</p>
         </div>
 
+        {/* Właściwości kontekstu */}
+        <div className="flex flex-wrap gap-2">
+          <div className="px-2 py-1 bg-muted rounded-md text-xs flex items-center">
+            <span className="font-medium mr-1">Typ:</span> 
+            <span>{contextItem.type}</span>
+          </div>
+          
+          {contextItem.scenarioId && (
+            <div className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 rounded-md text-xs flex items-center">
+              <Tag className="h-3 w-3 mr-1" />
+              <span>Scenariusz: {getScenarioName()}</span>
+            </div>
+          )}
+          
+          {contextItem.persistent && (
+            <div className="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 rounded-md text-xs">
+              Trwały
+            </div>
+          )}
+          
+          {contextItem.type === ContextType.INDEXED_DB && (
+            <div className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-md text-xs flex items-center">
+              <Database className="h-3 w-3 mr-1" />
+              <span>Kolekcja IndexedDB</span>
+            </div>
+          )}
+        </div>
+
+        {/* Zawartość kontekstu */}
         <div>
-          <div className="flex items-center">
-            <h3 className="text-sm font-medium mb-1">Content</h3>
-            {isJson && (
-              <span className="text-xs text-blue-500 ml-2">(JSON)</span>
+          <h3 className="text-sm font-medium mb-2">Zawartość</h3>
+          
+          <div className="px-3 py-2 border border-border rounded-md bg-muted/30 max-h-96 overflow-y-auto">
+            {contextItem.content ? (
+              renderContextContent(contextItem.type, contextItem.content)
+            ) : (
+              <span className="text-muted-foreground italic">(Brak zawartości)</span>
             )}
           </div>
-          <div
-            className={`px-3 py-2 border border-border rounded-md bg-muted/30 whitespace-pre-wrap max-h-96 overflow-y-auto ${
-              isJson ? "font-mono text-sm" : ""
-            }`}
-          >
-            {contextItem.content || "(No content)"}
+        </div>
+
+        {/* Metadane kontekstu (jeśli istnieją) */}
+        {contextItem.metadata && Object.keys(contextItem.metadata).length > 0 && (
+          <div>
+            <h3 className="text-sm font-medium mb-2">Metadane</h3>
+            <div className="px-3 py-2 border border-border rounded-md bg-muted/30">
+              <pre className="text-xs font-mono overflow-auto max-h-40">
+                {JSON.stringify(contextItem.metadata, null, 2)}
+              </pre>
+            </div>
           </div>
+        )}
+
+        {/* Informacje o czasie utworzenia/modyfikacji */}
+        <div className="text-xs text-muted-foreground">
+          <p>Utworzono: {new Date(contextItem.createdAt).toLocaleString()}</p>
+          <p>Ostatnia modyfikacja: {new Date(contextItem.updatedAt).toLocaleString()}</p>
         </div>
       </div>
     </DialogModal>

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/context/utils.ts
-import { ContextItem } from "./types";
+import { ContextItem, ContextType } from "./types";
 
 /**
  * Funkcja pomocnicza do pobierania wartości ze ścieżki w obiekcie JSON
@@ -83,27 +83,19 @@ export const processTemplateWithItems = (
     if (contextItem) {
       let replacementValue: any = contextItem.content || '';
       
-      // Jeśli jest ścieżka, spróbuj ją przetworzyć
-      if (path !== null) {
+      // Jeśli jest ścieżka i typ to JSON, spróbuj pobrać wartość z ścieżki
+      if (path !== null && contextItem.type === ContextType.JSON) {
         try {
-          // Sprawdź czy zawartość to JSON
-          const { type, value } = detectContentType(replacementValue);
+          const parsedJson = JSON.parse(replacementValue);
+          const pathValue = getValueFromPath(parsedJson, path);
           
-          if (type === 'json') {
-            // Pobierz wartość ze ścieżki
-            const pathValue = getValueFromPath(value, path);
-            
-            // Zamień wartość na string
-            if (pathValue !== undefined) {
-              replacementValue = typeof pathValue === 'object' 
-                ? JSON.stringify(pathValue) 
-                : String(pathValue);
-            } else {
-              // Jeśli ścieżka nie istnieje, użyj pustego stringa
-              replacementValue = '';
-            }
+          // Zamień wartość na string
+          if (pathValue !== undefined) {
+            replacementValue = typeof pathValue === 'object' 
+              ? JSON.stringify(pathValue) 
+              : String(pathValue);
           } else {
-            // Jeśli to nie JSON, a podano ścieżkę, zwróć pusty string
+            // Jeśli ścieżka nie istnieje, użyj pustego stringa
             replacementValue = '';
           }
         } catch (error) {
@@ -152,4 +144,43 @@ export const detectContentType = (
   }
 
   return { type: 'text', value: str };
+};
+
+/**
+ * Pobiera odpowiednie renderowanie dla danego typu kontekstu
+ * 
+ * @param type Typ kontekstu
+ * @param content Zawartość kontekstu
+ * @returns Komponent lub element HTML do renderowania
+ */
+export const renderContextContent = (type: ContextType, content: string): JSX.Element => {
+  switch (type) {
+    case ContextType.JSON:
+      try {
+        const jsonObj = JSON.parse(content);
+        return (
+          <pre className="bg-muted/30 p-2 rounded-md font-mono text-xs overflow-auto">
+            {JSON.stringify(jsonObj, null, 2)}
+          </pre>
+        );
+      } catch  {
+        return <span className="text-destructive">{content} (Invalid JSON)</span>;
+      }
+    
+    case ContextType.MARKDOWN:
+      // Tu można dodać renderowanie Markdown po dodaniu biblioteki
+      return <div className="whitespace-pre-wrap">{content}</div>;
+    
+    case ContextType.INDEXED_DB:
+      return (
+        <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 p-2 rounded-md">
+          <p className="text-xs">IndexedDB Collection</p>
+          <p className="font-medium">{content}</p>
+        </div>
+      );
+    
+    case ContextType.TEXT:
+    default:
+      return <div className="whitespace-pre-wrap break-words">{content}</div>;
+  }
 };

@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/context/hooks/useContext.ts
 import { useAppStore } from "@/modules/store";
-import { ContextItem } from "../types";
+import { ContextType, ContextPayload } from "../types";
 import { processTemplateWithItems, detectContentType } from "../utils";
 
 // Define proper dialog state typing
@@ -18,47 +19,52 @@ export interface DialogState<T> {
 
 export function useWorkspaceContext() {
   const getContextItems = useAppStore((state) => state.getContextItems);
+  const getContextItemByTitle = useAppStore((state) => state.getContextItemByTitle);
   const addContextItem = useAppStore((state) => state.addContextItem);
   const updateContextItem = useAppStore((state) => state.updateContextItem);
   const deleteContextItem = useAppStore((state) => state.deleteContextItem);
 
-  // Define the getItemByTitle function to avoid using 'this'
-  const getItemByTitle = (title: string): ContextItem | undefined => {
-    const items = getContextItems();
-    return items.find((item) => item.title === title);
-  };
-
-  // Define the getContentValue function to avoid using 'this'
+  // Get content value by title
   const getContentValue = (title: string): string | null => {
-    const item = getItemByTitle(title);
+    const item = getContextItemByTitle(title);
     return item ? item.content : null;
   };
 
   return {
-    // Get all context items
-    getAllItems: () => getContextItems(),
+    // Get all context items, optionally filtered by scenario
+    getAllItems: (scenarioId?: string) => getContextItems(scenarioId),
 
-    // Get item by title - exposing the internal function
-    getItemByTitle,
+    // Get item by title
+    getItemByTitle: getContextItemByTitle,
 
-    // Get content value by title - exposing the internal function
+    // Get content value by title
     getContentValue,
 
-    // Detect content type and return appropriate value
+    // Get content with its type information
     getContentWithType: (title: string) => {
-      const value = getContentValue(title);
-      if (!value) return { type: "text", value: null };
+      const item = getContextItemByTitle(title);
+      if (!item) return { type: ContextType.TEXT, value: null };
 
-      return detectContentType(value);
+      // Dla JSON zwróć sparsowaną wartość
+      if (item.type === ContextType.JSON) {
+        try {
+          return { type: item.type, value: JSON.parse(item.content) };
+        } catch (e) {
+          console.error(`Error parsing JSON for title ${title}:`, e);
+          return { type: item.type, value: item.content };
+        }
+      }
+
+      return { type: item.type, value: item.content };
     },
 
     // Get JSON content by title (if the content is JSON)
     getJsonValue: (title: string) => {
-      const value = getContentValue(title);
-      if (!value) return null;
+      const item = getContextItemByTitle(title);
+      if (!item || item.type !== ContextType.JSON) return null;
 
       try {
-        return JSON.parse(value);
+        return JSON.parse(item.content);
       } catch (e) {
         console.error(`Error parsing JSON for title ${title}:`, e);
         return null;
@@ -66,12 +72,25 @@ export function useWorkspaceContext() {
     },
 
     // Add a new context item
-    addItem: (title: string, content: string) =>
-      addContextItem({ title, content }),
+    addItem: (title: string, content: string, type?: ContextType, scenarioId?: string, metadata?: any) => {
+      // Wykryj typ automatycznie jeśli nie podano
+      if (!type) {
+        const detected = detectContentType(content);
+        type = detected.type === 'json' ? ContextType.JSON : ContextType.TEXT;
+      }
+
+      addContextItem({ 
+        title, 
+        content, 
+        type, 
+        scenarioId,
+        metadata
+      });
+    },
 
     // Update an existing context item
-    updateItem: (id: string, data: { title?: string; content?: string }) =>
-      updateContextItem(id, data),
+    updateItem: (id: string, payload: Partial<ContextPayload>) =>
+      updateContextItem(id, payload),
 
     // Delete a context item
     deleteItem: (id: string) => deleteContextItem(id),

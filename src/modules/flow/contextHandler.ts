@@ -25,12 +25,11 @@ export const updateContextFromNodeInput = (nodeId: string): boolean => {
   
   if (contextItem) {
     // Aktualizuj element kontekstu z danymi wprowadzonymi przez użytkownika
-    // Sprawdź w konsoli, co dokładnie zawiera element kontekstu
     console.log('Aktualizuję kontekst:', contextItem);
     
-    // Aktualizacja zawartości kontekstu - zmień 'value' na 'content' jeśli tak jest w twoim systemie
+    // Aktualizacja zawartości kontekstu - teraz przekazujemy tylko nową wartość content
+    // bez próby przekazywania całego obiektu contextItem
     state.updateContextItem(contextItem.id, {
-      ...contextItem,
       content: node.userPrompt
     });
     return true;

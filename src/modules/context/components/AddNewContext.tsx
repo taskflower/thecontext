@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAppStore } from "../../store";
 import { detectContentType } from "../utils";
+import { ContextType } from "../types";
 import {
   CancelButton,
   DialogModal,
@@ -12,36 +13,85 @@ import {
 interface AddNewContextProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  scenarioId?: string; // Opcjonalne ID scenariusza
 }
 
 export const AddNewContext: React.FC<AddNewContextProps> = ({
   isOpen,
   setIsOpen,
+  scenarioId,
 }) => {
   const addContextItem = useAppStore((state) => state.addContextItem);
+  const getCurrentScenario = useAppStore((state) => state.getCurrentScenario);
 
   const [formData, setFormData] = useState({
     title: "",
     content: "",
+    type: ContextType.TEXT,
+    scenarioId: "",
+    persistent: false,
   });
 
+  // Inicjalizacja scenarioId, jeśli podano
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(prev => ({
+        ...prev,
+        scenarioId: scenarioId || "",
+      }));
+    }
+  }, [isOpen, scenarioId]);
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    const { name, value, type: inputType } = e.target as HTMLInputElement;
+    
+    if (inputType === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData((prev) => ({
+        ...prev,
+        [name]: checked,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+
+      // Automatyczne wykrywanie typu na podstawie zawartości
+      if (name === 'content') {
+        const { type } = detectContentType(value);
+        if (type === 'json') {
+          setFormData((prev) => ({
+            ...prev,
+            type: ContextType.JSON,
+          }));
+        }
+      }
+    }
   };
 
   const handleSubmit = () => {
     if (!formData.title.trim()) return;
+    
     addContextItem({
       title: formData.title,
       content: formData.content,
+      type: formData.type,
+      scenarioId: formData.scenarioId || undefined,
+      persistent: formData.persistent,
     });
-    setFormData({ title: "", content: "" });
+    
+    // Resetowanie formularza
+    setFormData({ 
+      title: "", 
+      content: "", 
+      type: ContextType.TEXT,
+      scenarioId: "",
+      persistent: false,
+    });
+    
     setIsOpen(false);
   };
 
@@ -54,42 +104,105 @@ export const AddNewContext: React.FC<AddNewContextProps> = ({
     </>
   );
 
-  // Detect if content is JSON
-  const { type } = detectContentType(formData.content);
-  const isJson = type === "json";
+  // Pobierz aktualny scenariusz
+  const currentScenario = getCurrentScenario();
 
   return (
     <DialogModal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Add Context Item"
-      description="Create a new context item for your workspace"
+      title="Dodaj element kontekstu"
+      description="Utwórz nowy element kontekstu dla przestrzeni roboczej"
       footer={renderFooter()}
     >
       <InputField
         id="title"
         name="title"
-        label="Title"
+        label="Nazwa (klucz)"
         value={formData.title}
         onChange={handleChange}
-        placeholder="Context item title"
+        placeholder="Nazwa elementu kontekstu"
       />
 
-      <div className="space-y-1">
-        {isJson && (
-          <div className="text-xs text-blue-500 mb-1">
-            Content detected as JSON
-          </div>
-        )}
+      <div className="space-y-1 mt-4">
+        <label htmlFor="type" className="block text-sm font-medium">
+          Typ zawartości
+        </label>
+        <select
+          id="type"
+          name="type"
+          value={formData.type}
+          onChange={handleChange}
+          className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+        >
+          <option value={ContextType.TEXT}>Tekst</option>
+          <option value={ContextType.JSON}>JSON</option>
+          <option value={ContextType.MARKDOWN}>Markdown</option>
+          <option value={ContextType.INDEXED_DB}>IndexedDB</option>
+        </select>
+      </div>
+
+      <div className="space-y-1 mt-4">
+        <div className="flex items-center justify-between">
+          <label htmlFor="content" className="block text-sm font-medium">
+            Zawartość
+          </label>
+          {formData.type === ContextType.JSON && (
+            <div className="text-xs text-blue-500 mb-1">
+              Zawartość wykryta jako JSON
+            </div>
+          )}
+        </div>
         <TextAreaField
           id="content"
           name="content"
-          label="Content"
           value={formData.content}
           onChange={handleChange}
-          placeholder="Enter context content"
-          rows={8}
-        />
+          placeholder={formData.type === ContextType.JSON
+            ? '{ "klucz": "wartość" }'
+            : formData.type === ContextType.INDEXED_DB
+              ? "Nazwa kolekcji"
+              : "Wprowadź zawartość kontekstu"}
+          rows={8} label={""}        />
+      </div>
+
+      {currentScenario && (
+        <div className="space-y-1 mt-4">
+          <div className="flex items-center">
+            <input
+              id="scoped"
+              name="scenarioId"
+              type="checkbox"
+              className="h-4 w-4 border-border rounded text-primary focus:ring-primary/30"
+              checked={!!formData.scenarioId}
+              onChange={(e) => {
+                setFormData((prev) => ({
+                  ...prev,
+                  scenarioId: e.target.checked ? currentScenario.id : "",
+                }));
+              }}
+            />
+            <label htmlFor="scoped" className="ml-2 block text-sm">
+              Ogranicz do bieżącego scenariusza ({currentScenario.name})
+            </label>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-1 mt-4">
+        <div className="flex items-center">
+          <input
+            id="persistent"
+            name="persistent"
+            type="checkbox"
+            className="h-4 w-4 border-border rounded text-primary focus:ring-primary/30"
+            checked={formData.persistent}
+            onChange={handleChange}
+          />
+          <label htmlFor="persistent" className="ml-2 block text-sm">
+            Trwały (zachowaj między sesjami)
+          </label>
+        </div>
       </div>
     </DialogModal>
   );
