@@ -1,8 +1,10 @@
+// src/modules/context/components/ViewContext.tsx (aktualizacja)
 import React, { useState, useEffect } from "react";
 import { Copy, Tag, Database } from "lucide-react";
 import { ContextItem, ContextType } from "../types";
 import { useAppStore } from "../../store";
 import { renderContextContent } from "../utils";
+import { IndexedDBViewer } from "../../indexedDB"; // Zaimportuj IndexedDBViewer
 import {
   CancelButton,
   DialogModal,
@@ -77,6 +79,7 @@ export const ViewContext: React.FC<ViewContextProps> = ({
       title="Podgląd elementu kontekstu"
       description="Szczegóły elementu kontekstu"
       footer={renderFooter()}
+      size={contextItem.type === ContextType.INDEXED_DB ? "lg" : "md"}
     >
       <div className="space-y-4">
         <div>
@@ -116,13 +119,24 @@ export const ViewContext: React.FC<ViewContextProps> = ({
         <div>
           <h3 className="text-sm font-medium mb-2">Zawartość</h3>
           
-          <div className="px-3 py-2 border border-border rounded-md bg-muted/30 max-h-96 overflow-y-auto">
-            {contextItem.content ? (
-              renderContextContent(contextItem.type, contextItem.content)
-            ) : (
-              <span className="text-muted-foreground italic">(Brak zawartości)</span>
-            )}
-          </div>
+          {contextItem.type === ContextType.INDEXED_DB ? (
+            // Dla kontekstu typu IndexedDB wyświetl IndexedDBViewer
+            <div className="max-h-96 overflow-y-auto">
+              <IndexedDBViewer 
+                collectionName={contextItem.content} 
+                isContextTitle={false} 
+              />
+            </div>
+          ) : (
+            // Dla innych typów kontekstu użyj standardowego renderowania
+            <div className="px-3 py-2 border border-border rounded-md bg-muted/30 max-h-96 overflow-y-auto">
+              {contextItem.content ? (
+                renderContextContent(contextItem.type, contextItem.content)
+              ) : (
+                <span className="text-muted-foreground italic">(Brak zawartości)</span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Metadane kontekstu (jeśli istnieją) */}

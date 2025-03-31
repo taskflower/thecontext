@@ -153,6 +153,8 @@ export const detectContentType = (
  * @param content Zawartość kontekstu
  * @returns Komponent lub element HTML do renderowania
  */
+// Updated renderContextContent function for src/modules/context/utils.tsx
+
 export const renderContextContent = (type: ContextType, content: string): JSX.Element => {
   switch (type) {
     case ContextType.JSON:
@@ -173,9 +175,32 @@ export const renderContextContent = (type: ContextType, content: string): JSX.El
     
     case ContextType.INDEXED_DB:
       return (
-        <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 p-2 rounded-md">
-          <p className="text-xs">IndexedDB Collection</p>
-          <p className="font-medium">{content}</p>
+        <div 
+          className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 p-2 rounded-md cursor-pointer hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
+          onClick={() => {
+            // Dispatch custom event that can be caught to open the viewer
+            const event = new CustomEvent('openIndexedDBViewer', { 
+              detail: { collectionName: content, contextTitle: '' } 
+            });
+            document.dispatchEvent(event);
+          }}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs">IndexedDB Collection Name:</p>
+              <p className="font-medium">{content}</p>
+            </div>
+            <div className="text-purple-800 dark:text-purple-300 p-1 rounded-full hover:bg-purple-300 dark:hover:bg-purple-800">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+              </svg>
+            </div>
+          </div>
+          <div className="mt-2 text-xs">
+            <p><strong>Click to open IndexedDB viewer</strong></p>
+            <p className="mt-1 italic">Note: Collection will be created when first accessed.</p>
+          </div>
         </div>
       );
     

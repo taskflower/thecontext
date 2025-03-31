@@ -1,7 +1,9 @@
+// src/modules/context/components/AddNewContext.tsx (aktualizacja)
 import React, { useState, useEffect } from "react";
 import { useAppStore } from "../../store";
 import { detectContentType } from "../utils";
 import { ContextType } from "../types";
+import { Database } from "lucide-react";
 import {
   CancelButton,
   DialogModal,
@@ -60,7 +62,7 @@ export const AddNewContext: React.FC<AddNewContextProps> = ({
       }));
 
       // Automatyczne wykrywanie typu na podstawie zawartości
-      if (name === 'content') {
+      if (name === 'content' && formData.type === ContextType.TEXT) {
         const { type } = detectContentType(value);
         if (type === 'json') {
           setFormData((prev) => ({
@@ -74,6 +76,12 @@ export const AddNewContext: React.FC<AddNewContextProps> = ({
 
   const handleSubmit = () => {
     if (!formData.title.trim()) return;
+    
+    // W przypadku IndexedDB sprawdź, czy podano nazwę kolekcji
+    if (formData.type === ContextType.INDEXED_DB && !formData.content.trim()) {
+      alert("Podaj nazwę kolekcji IndexedDB");
+      return;
+    }
     
     addContextItem({
       title: formData.title,
@@ -106,6 +114,20 @@ export const AddNewContext: React.FC<AddNewContextProps> = ({
 
   // Pobierz aktualny scenariusz
   const currentScenario = getCurrentScenario();
+
+  // Podpowiedź dla różnych typów kontekstu
+  const getContentPlaceholder = () => {
+    switch (formData.type) {
+      case ContextType.JSON:
+        return '{ "klucz": "wartość" }';
+      case ContextType.INDEXED_DB:
+        return "Nazwa kolekcji";
+      case ContextType.MARKDOWN:
+        return "# Nagłówek\nTwój tekst Markdown";
+      default:
+        return "Wprowadź zawartość kontekstu";
+    }
+  };
 
   return (
     <DialogModal
@@ -145,25 +167,48 @@ export const AddNewContext: React.FC<AddNewContextProps> = ({
       <div className="space-y-1 mt-4">
         <div className="flex items-center justify-between">
           <label htmlFor="content" className="block text-sm font-medium">
-            Zawartość
+            {formData.type === ContextType.INDEXED_DB ? "Nazwa kolekcji" : "Zawartość"}
           </label>
           {formData.type === ContextType.JSON && (
             <div className="text-xs text-blue-500 mb-1">
               Zawartość wykryta jako JSON
             </div>
           )}
+          {formData.type === ContextType.INDEXED_DB && (
+            <div className="text-xs text-purple-500 mb-1 flex items-center">
+              <Database className="h-3 w-3 mr-1" />
+              Kolekcja IndexedDB
+            </div>
+          )}
         </div>
-        <TextAreaField
-          id="content"
-          name="content"
-          value={formData.content}
-          onChange={handleChange}
-          placeholder={formData.type === ContextType.JSON
-            ? '{ "klucz": "wartość" }'
-            : formData.type === ContextType.INDEXED_DB
-              ? "Nazwa kolekcji"
-              : "Wprowadź zawartość kontekstu"}
-          rows={8} label={""}        />
+        
+        {formData.type === ContextType.INDEXED_DB ? (
+          <input
+            id="content"
+            name="content"
+            value={formData.content}
+            onChange={handleChange}
+            placeholder="Wprowadź nazwę kolekcji (np. users, products, settings)"
+            className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
+        ) : (
+          <TextAreaField
+            id="content"
+            name="content"
+            value={formData.content}
+            onChange={handleChange}
+            placeholder={getContentPlaceholder()}
+            rows={8} 
+            label={""}
+          />
+        )}
+        
+        {formData.type === ContextType.INDEXED_DB && (
+          <div className="mt-2 text-xs text-muted-foreground">
+            <p>Kolekcja zostanie utworzona automatycznie przy pierwszym dostępie.</p>
+            <p>Podgląd i zarządzanie danymi będzie dostępne po zapisaniu kontekstu.</p>
+          </div>
+        )}
       </div>
 
       {currentScenario && (

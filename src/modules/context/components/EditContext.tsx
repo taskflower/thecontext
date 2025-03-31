@@ -1,7 +1,9 @@
+// src/modules/context/components/EditContext.tsx (aktualizacja)
 import React, { useState, useEffect } from "react";
 import { useAppStore } from "../../store";
 import { detectContentType } from "../utils";
 import { ContextType } from "../types";
+import { IndexedDBViewer } from "../../indexedDB"; // Zaimportuj IndexedDBViewer
 import {
   CancelButton,
   DialogModal,
@@ -111,6 +113,7 @@ export const EditContext: React.FC<EditContextProps> = ({
       title="Edytuj element kontekstu"
       description="Zaktualizuj szczegóły elementu kontekstu"
       footer={renderFooter()}
+      size={formData.type === ContextType.INDEXED_DB ? "lg" : "md"}
     >
       <InputField
         id="title"
@@ -139,29 +142,59 @@ export const EditContext: React.FC<EditContextProps> = ({
         </select>
       </div>
 
-      <div className="space-y-1 mt-4">
-        <div className="flex items-center justify-between">
+      {formData.type === ContextType.INDEXED_DB ? (
+        // Dla IndexedDB wyświetl pole na nazwę kolekcji i viewer jeśli nazwa istnieje
+        <div className="space-y-1 mt-4">
           <label htmlFor="content" className="block text-sm font-medium">
-            Zawartość
+            Nazwa kolekcji IndexedDB
           </label>
-          {formData.type === ContextType.JSON && (
-            <div className="text-xs text-blue-500 mb-1">
-              Zawartość typu JSON
+          <input
+            id="content"
+            name="content"
+            value={formData.content}
+            onChange={handleChange}
+            placeholder="Wprowadź nazwę kolekcji"
+            className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
+          
+          {formData.content && (
+            <div className="mt-4">
+              <h4 className="text-sm font-medium mb-2">Podgląd danych:</h4>
+              <div className="max-h-96 overflow-y-auto mt-2">
+                <IndexedDBViewer 
+                  collectionName={formData.content} 
+                  isContextTitle={false}
+                />
+              </div>
             </div>
           )}
         </div>
-        <TextAreaField
-          id="content"
-          name="content"
-          value={formData.content}
-          onChange={handleChange}
-          placeholder={formData.type === ContextType.JSON
-            ? '{ "klucz": "wartość" }'
-            : formData.type === ContextType.INDEXED_DB
-              ? "Nazwa kolekcji"
+      ) : (
+        // Dla innych typów wyświetl standardowe pole na zawartość
+        <div className="space-y-1 mt-4">
+          <div className="flex items-center justify-between">
+            <label htmlFor="content" className="block text-sm font-medium">
+              Zawartość
+            </label>
+            {formData.type === ContextType.JSON && (
+              <div className="text-xs text-blue-500 mb-1">
+                Zawartość typu JSON
+              </div>
+            )}
+          </div>
+          <TextAreaField
+            id="content"
+            name="content"
+            value={formData.content}
+            onChange={handleChange}
+            placeholder={formData.type === ContextType.JSON
+              ? '{ "klucz": "wartość" }'
               : "Wprowadź zawartość kontekstu"}
-          rows={8} label={""}        />
-      </div>
+            rows={8} 
+            label={""}        
+          />
+        </div>
+      )}
 
       {currentScenario && (
         <div className="space-y-1 mt-4">
