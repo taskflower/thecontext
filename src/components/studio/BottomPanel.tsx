@@ -6,6 +6,7 @@ import HistoryView from "@/modules/history/components/HistoryView";
 import { useAppStore } from "@/modules/store";
 import React from "react";
 import ExportImport from "./exportImport/ExportImport";
+import DatabaseConfigurator from "@/modules/databaseConfigurator/componentst/DatabaseConfigurator";
 
 
 type PanelContentType =
@@ -98,7 +99,8 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({
         )}
         {content === "conversation" && (
           <div className="p-4">
-            <HistoryView />
+            {/* <HistoryView /> */}
+            <DatabaseConfigurator/>
           </div>
         )}
         {content === "exportimport" && (
