@@ -32,7 +32,6 @@ export const StepModal: React.FC<StepModalProps> = ({
   const isLastStep = currentStepIndex === temporarySteps.length - 1;
   
   const [isProcessing, setIsProcessing] = useState(false);
-  const [showSavePrompt, setShowSavePrompt] = useState(false);
   
   // Pobierz komponenty dialogowe na podstawie szablonu
   const { 
@@ -102,7 +101,23 @@ export const StepModal: React.FC<StepModalProps> = ({
       if (currentNode?.id) {
         updateContextFromNodeInput(currentNode.id);
       }
-      setShowSavePrompt(true);
+      
+      // Automatycznie zapisz sesję zamiast pokazywać dialog
+      setIsProcessing(true);
+      
+      // Przed zapisem, zastąp wszystkie tokeny ich wartościami w każdym węźle
+      temporarySteps.forEach(node => {
+        if (node.id && node.assistantMessage) {
+          const processed = processTemplateWithItems(node.assistantMessage, contextItems);
+          updateTempNodeAssistantMessage(node.id, processed);
+        }
+      });
+      
+      setTimeout(() => {
+        stopFlowSession(true); // Automatycznie zapisz zmiany
+        onClose();
+        setIsProcessing(false);
+      }, 50);
     }
   };
 
@@ -117,32 +132,7 @@ export const StepModal: React.FC<StepModalProps> = ({
     updatedAt: currentNode.updatedAt ? new Date(currentNode.updatedAt) : undefined
   };
 
-  // Dialog zapisywania zmian
-  if (showSavePrompt) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div className="bg-background rounded-lg border border-border shadow-lg w-full max-w-md p-6">
-          <h3 className="text-lg font-medium mb-4">Save changes?</h3>
-          <p className="mb-6">Do you want to save changes made during this session?</p>
-          
-          <div className="flex justify-end space-x-3">
-            <button
-              onClick={() => handleClose(false)}
-              className="px-4 py-2 rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/90"
-            >
-              Cancel changes
-            </button>
-            <button
-              onClick={() => handleClose(true)}
-              className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              Save changes
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Usunięto dialog zapisywania zmian, teraz dzieje się to automatycznie
 
   // Ustawienia pluginu
   let PluginComponent: PluginComponentWithSchema | null = null;
@@ -172,7 +162,7 @@ export const StepModal: React.FC<StepModalProps> = ({
             currentStepIndex={currentStepIndex}
             totalSteps={temporarySteps.length}
             nodeName={currentNode.label}
-            onClose={() => setShowSavePrompt(true)}
+            onClose={() => handleClose(true)} // Automatycznie zapisz przy zamknięciu z nagłówka
           />
         )}
         

@@ -122,12 +122,12 @@ export const createFlowSlice: StateCreator<
       }
     }),
   
-    stopFlowSession: (saveChanges = false) => 
+    stopFlowSession: (saveChanges = true) => 
       set((state: Draft<AppState>) => {
         if (!state.flowSession?.isPlaying) return;
         
         if (saveChanges) {
-          // ZMIANA: Nie modyfikujemy oryginalnych węzłów, tylko zapisujemy do historii
+          // Zapisujemy do historii
           const workspace = state.items.find(w => w.id === state.selected.workspace);
           const scenario = workspace?.children.find(s => s.id === state.selected.scenario);
           
@@ -139,18 +139,15 @@ export const createFlowSlice: StateCreator<
               scenario.label || scenario.name,
               state.flowSession.temporarySteps
             );
+            
+            console.log("Session successfully saved to history");
           }
-          
-          // Reset stanu sesji
-          state.flowSession.isPlaying = false;
-          // Czyścimy tymczasowe kroki po zapisaniu
-          state.flowSession.temporarySteps = [];
-          state.flowSession.currentStepIndex = 0;
-        } else {
-          // Tylko zatrzymujemy sesję bez czyszczenia danych tymczasowych
-          state.flowSession.isPlaying = false;
-          // currentStepIndex pozostaje bez zmian
         }
+        
+        // Zawsze resetujemy stan sesji po zakończeniu
+        state.flowSession.isPlaying = false;
+        state.flowSession.temporarySteps = [];
+        state.flowSession.currentStepIndex = 0;
         state.stateVersion++;
       }),
   
