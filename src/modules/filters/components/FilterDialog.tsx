@@ -1,14 +1,15 @@
 // src/modules/filters/components/FilterDialog.tsx
-import React from "react";
+import React, { useState } from "react";
 import { X } from "lucide-react";
 import {
   CancelButton,
   InputField,
   SaveButton,
 } from "@/components/studio";
-import { FilterOperator } from "../types";
+import { FilterOperator, FilterActionParams } from "../types";
+import { ContextItem } from "../../context/types";
 
-// Poprawiony interfejs dla formData z właściwym typem operatora
+// Interfejs dla formData z właściwym typem operatora
 interface FilterFormData {
   name: string;
   contextKey: string;
@@ -19,46 +20,75 @@ interface FilterFormData {
 interface FilterDialogProps {
   isOpen: boolean;
   title: string;
-  formData: FilterFormData;
-  handleChange: (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => void;
-  handleSubmit: () => void;
-  handleClose: () => void;
-  contextItems: {
-    id: string;
-    title: string;
-    content: string;
-  }[];
+  contextItems: ContextItem[];
+  onSubmit: (data: FilterActionParams) => void;
+  onClose: () => void;
+  initialData?: Partial<FilterFormData>;
 }
 
 const FilterDialog: React.FC<FilterDialogProps> = ({
   isOpen,
   title,
-  formData,
-  handleChange,
-  handleSubmit,
-  handleClose,
   contextItems,
+  onSubmit,
+  onClose,
+  initialData = {}
 }) => {
+  // Inicjalizacja formData z dostarczonymi danymi lub wartościami domyślnymi
+  const [formData, setFormData] = useState<FilterFormData>({
+    name: initialData.name || "",
+    contextKey: initialData.contextKey || "",
+    operator: initialData.operator || FilterOperator.EQUALS,
+    value: initialData.value || "",
+  });
+  
   // Sprawdzenie, czy operator wymaga wartości
   const operatorNeedsValue = (operator: FilterOperator): boolean => {
     return ![FilterOperator.EMPTY, FilterOperator.NOT_EMPTY].includes(operator);
   };
 
   // Pomocnik do bezpiecznego rzutowania stringa na FilterOperator
-  const getFilterOperator = (value: string): FilterOperator => {
-    if (Object.values(FilterOperator).includes(value as FilterOperator)) {
-      return value as FilterOperator;
+  // const getFilterOperator = (value: string): FilterOperator => {
+  //   if (Object.values(FilterOperator).includes(value as FilterOperator)) {
+  //     return value as FilterOperator;
+  //   }
+  //   return FilterOperator.EQUALS; // Domyślna wartość
+  // };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    
+    if (name === 'operator') {
+      // Bezpieczne rzutowanie dla operatora
+      if (Object.values(FilterOperator).includes(value as FilterOperator)) {
+        setFormData((prev) => ({ ...prev, [name]: value as FilterOperator }));
+        
+        // Jeśli nowy operator nie wymaga wartości, wyczyść pole wartości
+        if (!operatorNeedsValue(value as FilterOperator)) {
+          setFormData(prev => ({ ...prev, value: "" }));
+        }
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
-    return FilterOperator.EQUALS; // Domyślna wartość
+  };
+  
+  const handleSubmit = () => {
+    if (!formData.name.trim() || !formData.contextKey) return;
+    
+    onSubmit({
+      name: formData.name,
+      contextKey: formData.contextKey,
+      operator: formData.operator,
+      value: formData.value,
+    });
   };
 
   const renderFooter = () => (
     <>
-      <CancelButton onClick={handleClose} />
+      <CancelButton onClick={onClose} />
       <SaveButton 
         onClick={handleSubmit} 
         disabled={!formData.name.trim() || !formData.contextKey} 
@@ -71,7 +101,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
   return (
     <div
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-      onClick={handleClose}
+      onClick={onClose}
     >
       <div
         className="bg-background border border-border rounded-lg shadow-lg w-full max-w-md p-4"
@@ -85,7 +115,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
             </p>
           </div>
           <button
-            onClick={handleClose}
+            onClick={onClose}
             className="text-muted-foreground hover:text-foreground"
           >
             <X className="h-5 w-5" />
@@ -130,15 +160,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
               id="operator"
               name="operator"
               value={formData.operator}
-              onChange={(e) => {
-                handleChange(e);
-                // Jeśli operator nie wymaga wartości, wyczyść pole wartości
-                if (!operatorNeedsValue(getFilterOperator(e.target.value))) {
-                  handleChange({
-                    target: { name: "value", value: "" }
-                  } as React.ChangeEvent<HTMLInputElement>);
-                }
-              }}
+              onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
               {Object.entries(FilterOperator).map(([key, value]) => (

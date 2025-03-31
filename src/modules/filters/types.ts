@@ -1,4 +1,6 @@
 // src/modules/filters/types.ts
+import { ContextItem } from "../context/types";
+
 export enum FilterOperator {
   EQUALS = "equals",
   NOT_EQUALS = "notEquals",
@@ -16,59 +18,80 @@ export interface Filter {
   name: string;
   contextKey: string;
   operator: FilterOperator;
-  value?: string; // Opcjonalne dla EMPTY/NOT_EMPTY
+  value?: string;
   enabled: boolean;
   createdAt: number;
   updatedAt: number;
 }
 
+// Struktura danych dla akcji filtrów
+export interface FilterActionParams {
+  name: string;
+  contextKey: string;
+  operator: FilterOperator;
+  value?: string;
+}
+
+// Interfejs dla akcji filtrów w Zustand
 export interface FilterActions {
-  // Pobierz filtry dla bieżącego scenariusza lub określonego przez ID
+  // Pobieranie filtrów
   getScenarioFilters: (scenarioId?: string) => Filter[];
   
-  // Dodaj nowy filtr
+  // Zarządzanie filtrami
   addScenarioFilter: (
-    payload: { 
-      name: string; 
-      contextKey: string; 
-      operator: FilterOperator; 
-      value?: string 
-    }, 
+    payload: FilterActionParams, 
     scenarioId?: string
   ) => void;
   
-  // Aktualizuj istniejący filtr
   updateScenarioFilter: (
     id: string, 
-    payload: { 
-      name?: string; 
-      contextKey?: string; 
-      operator?: FilterOperator; 
-      value?: string 
-    }, 
+    payload: Partial<FilterActionParams>, 
     scenarioId?: string
   ) => void;
   
-  // Usuń filtr
   deleteScenarioFilter: (
     id: string, 
     scenarioId?: string
   ) => void;
   
-  // Przełącz stan włączenia filtra
   toggleScenarioFilter: (
     id: string, 
     scenarioId?: string
   ) => void;
   
-  // Sprawdź, czy kontekst spełnia warunki filtrów
+  // Ewaluacja filtrów
   checkScenarioFilterMatch: (
     scenarioId?: string
   ) => boolean;
+  
+  // Funkcja pomocnicza dla ewaluacji pojedynczego filtra
+  evaluateFilter: (filter: Filter, contextItems: ContextItem[]) => boolean;
 }
 
-// Dodaj do głównego pliku typów lub eksportuj stąd
+// Interfejs dla komponentu FilterStatus
 export interface FilterStatusProps {
   onClick?: (e: React.MouseEvent) => void;
   className?: string;
+  scenarioId?: string;
+}
+
+// Interfejs dla komponentu FilterStatusBanner
+export interface FilterStatusBannerProps {
+  filtersMatch: boolean;
+  activeFiltersCount: number;
+}
+
+// Interfejs dla komponentu FilterItem
+export interface FilterItemProps {
+  filter: Filter;
+  onEdit: (filter: Filter) => void;
+  onDelete: (id: string) => void;
+  onToggle: (id: string) => void;
+  menuOpen: boolean;
+  toggleMenu: () => void;
+}
+
+// Interfejs dla komponentu FiltersList
+export interface FiltersListProps {
+  scenarioId?: string;
 }

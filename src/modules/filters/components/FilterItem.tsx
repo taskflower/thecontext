@@ -1,17 +1,8 @@
 // src/modules/filters/components/FilterItem.tsx
 import React from "react";
 import { Edit, MoreHorizontal, X, Filter, ToggleLeft, ToggleRight } from "lucide-react";
-import { Filter as FilterType, FilterOperator } from "../types";
+import { FilterItemProps, FilterOperator } from "../types";
 import { cn } from "@/utils/utils";
-
-interface FilterItemProps {
-  filter: FilterType;
-  onEdit: (filter: FilterType) => void;
-  onDelete: (id: string) => void;
-  onToggle: (id: string) => void;
-  menuOpen: boolean;
-  toggleMenu: () => void;
-}
 
 const FilterItem: React.FC<FilterItemProps> = ({
   filter,

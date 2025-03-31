@@ -1,9 +1,10 @@
 // src/modules/filters/filterActions.ts
 import { StateCreator } from "zustand";
 import { Draft } from "immer";
-import { Filter, FilterActions, FilterOperator } from "./types";
+import { Filter, FilterActions, FilterOperator, FilterActionParams } from "./types";
 import { AppState } from "../store";
 import { Scenario } from "../scenarios/types";
+import { ContextItem } from "../context/types";
 
 export const createFilterSlice: StateCreator<
   AppState,
@@ -11,22 +12,25 @@ export const createFilterSlice: StateCreator<
   [],
   FilterActions
 > = (set, get) => ({
-  getScenarioFilters: () => {
+  getScenarioFilters: (scenarioId) => {
     const state = get();
     const workspace = state.items.find(w => w.id === state.selected.workspace);
     if (!workspace) return [];
     
-    const scenario = workspace.children.find(s => s.id === state.selected.scenario);
+    const scenario = scenarioId 
+      ? workspace.children.find(s => s.id === scenarioId)
+      : workspace.children.find(s => s.id === state.selected.scenario);
+      
     return scenario?.filters || [];
   },
   
-  addScenarioFilter: (payload) => 
+  addScenarioFilter: (payload: FilterActionParams, scenarioId?) => 
     set((state: Draft<AppState>) => {
       const workspaceIndex = state.items.findIndex(w => w.id === state.selected.workspace);
       if (workspaceIndex === -1) return;
       
       const scenarioIndex = state.items[workspaceIndex].children.findIndex(
-        s => s.id === state.selected.scenario
+        s => s.id === (scenarioId || state.selected.scenario)
       );
       if (scenarioIndex === -1) return;
       
@@ -65,13 +69,13 @@ export const createFilterSlice: StateCreator<
       state.stateVersion++;
     }),
   
-  updateScenarioFilter: (id, payload) =>
+  updateScenarioFilter: (id: string, payload: Partial<FilterActionParams>, scenarioId?) =>
     set((state: Draft<AppState>) => {
       const workspaceIndex = state.items.findIndex(w => w.id === state.selected.workspace);
       if (workspaceIndex === -1) return;
       
       const scenarioIndex = state.items[workspaceIndex].children.findIndex(
-        s => s.id === state.selected.scenario
+        s => s.id === (scenarioId || state.selected.scenario)
       );
       if (scenarioIndex === -1) return;
       
@@ -125,13 +129,13 @@ export const createFilterSlice: StateCreator<
       state.stateVersion++;
     }),
   
-  deleteScenarioFilter: (id) =>
+  deleteScenarioFilter: (id: string, scenarioId?) =>
     set((state: Draft<AppState>) => {
       const workspaceIndex = state.items.findIndex(w => w.id === state.selected.workspace);
       if (workspaceIndex === -1) return;
       
       const scenarioIndex = state.items[workspaceIndex].children.findIndex(
-        s => s.id === state.selected.scenario
+        s => s.id === (scenarioId || state.selected.scenario)
       );
       if (scenarioIndex === -1) return;
       
@@ -160,13 +164,13 @@ export const createFilterSlice: StateCreator<
       state.stateVersion++;
     }),
   
-  toggleScenarioFilter: (id) =>
+  toggleScenarioFilter: (id: string, scenarioId?) =>
     set((state: Draft<AppState>) => {
       const workspaceIndex = state.items.findIndex(w => w.id === state.selected.workspace);
       if (workspaceIndex === -1) return;
       
       const scenarioIndex = state.items[workspaceIndex].children.findIndex(
-        s => s.id === state.selected.scenario
+        s => s.id === (scenarioId || state.selected.scenario)
       );
       if (scenarioIndex === -1) return;
       
@@ -195,9 +199,62 @@ export const createFilterSlice: StateCreator<
       state.stateVersion++;
     }),
   
-  checkScenarioFilterMatch: () => {
+  // Pomocnicza funkcja do ewaluacji pojedynczego filtra
+  evaluateFilter: (filter: Filter, contextItems: ContextItem[]): boolean => {
+    const contextItem = contextItems.find(item => item.title === filter.contextKey);
+    
+    // Jeśli kontekst nie istnieje, zwracamy true tylko dla operatora EMPTY
+    if (!contextItem) {
+      return filter.operator === FilterOperator.EMPTY;
+    }
+    
+    const value = contextItem.content;
+    
+    switch (filter.operator) {
+      case FilterOperator.EQUALS:
+        return value === filter.value;
+      case FilterOperator.NOT_EQUALS:
+        return value !== filter.value;
+      case FilterOperator.CONTAINS:
+        return value.includes(filter.value || "");
+      case FilterOperator.NOT_CONTAINS:
+        return !value.includes(filter.value || "");
+      case FilterOperator.EMPTY:
+        return value === "" || value === null || value === undefined;
+      case FilterOperator.NOT_EMPTY:
+        return value !== "" && value !== null && value !== undefined;
+      case FilterOperator.GREATER_THAN:
+        return parseFloat(value) > parseFloat(filter.value || "0");
+      case FilterOperator.LESS_THAN:
+        return parseFloat(value) < parseFloat(filter.value || "0");
+      case FilterOperator.JSON_PATH:
+        try {
+          const parsedJson = JSON.parse(value);
+          // Basic JSON path implementation
+          if (filter.value && filter.value.includes('.')) {
+            const path = filter.value.split('.');
+            let result = parsedJson;
+            for (const key of path) {
+              if (result && typeof result === 'object' && key in result) {
+                result = result[key];
+              } else {
+                return false;
+              }
+            }
+            return result !== undefined && result !== null;
+          }
+          return parsedJson[filter.value || ''] !== undefined;
+        } catch {
+          return false;
+        }
+      default:
+        return true;
+    }
+  },
+  
+  checkScenarioFilterMatch: (scenarioId?) => {
     const state = get();
-    const filters = state.getScenarioFilters();
+    const filters = state.getScenarioFilters(scenarioId);
     
     // If no active filters, return true
     const activeFilters = filters.filter(f => f.enabled);
@@ -206,57 +263,9 @@ export const createFilterSlice: StateCreator<
     // Get context items
     const contextItems = state.getContextItems();
     
-    // Check each active filter
-    return activeFilters.every(filter => {
-      const contextItem = contextItems.find(item => item.title === filter.contextKey);
-      
-      // Context key doesn't exist
-      if (!contextItem) {
-        return filter.operator === FilterOperator.EMPTY;
-      }
-      
-      const value = contextItem.content;
-      
-      switch (filter.operator) {
-        case FilterOperator.EQUALS:
-          return value === filter.value;
-        case FilterOperator.NOT_EQUALS:
-          return value !== filter.value;
-        case FilterOperator.CONTAINS:
-          return value.includes(filter.value || "");
-        case FilterOperator.NOT_CONTAINS:
-          return !value.includes(filter.value || "");
-        case FilterOperator.EMPTY:
-          return value === "" || value === null || value === undefined;
-        case FilterOperator.NOT_EMPTY:
-          return value !== "" && value !== null && value !== undefined;
-        case FilterOperator.GREATER_THAN:
-          return parseFloat(value) > parseFloat(filter.value || "0");
-        case FilterOperator.LESS_THAN:
-          return parseFloat(value) < parseFloat(filter.value || "0");
-        case FilterOperator.JSON_PATH:
-          try {
-            const parsedJson = JSON.parse(value);
-            // Basic JSON path implementation
-            if (filter.value && filter.value.includes('.')) {
-              const path = filter.value.split('.');
-              let result = parsedJson;
-              for (const key of path) {
-                if (result && typeof result === 'object' && key in result) {
-                  result = result[key];
-                } else {
-                  return false;
-                }
-              }
-              return result !== undefined && result !== null;
-            }
-            return parsedJson[filter.value || ''] !== undefined;
-          } catch {
-            return false;
-          }
-        default:
-          return true;
-      }
-    });
+    // Wykorzystanie funkcji pomocniczej evaluateFilter do sprawdzenia każdego filtra
+    return activeFilters.every(filter => 
+      state.evaluateFilter(filter, contextItems)
+    );
   }
 });

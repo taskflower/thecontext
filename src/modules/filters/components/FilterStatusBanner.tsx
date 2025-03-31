@@ -1,11 +1,7 @@
 // src/modules/filters/components/FilterStatusBanner.tsx
 import React from "react";
 import { cn } from "@/utils/utils";
-
-interface FilterStatusBannerProps {
-  filtersMatch: boolean;
-  activeFiltersCount: number;
-}
+import { FilterStatusBannerProps } from "../types";
 
 const FilterStatusBanner: React.FC<FilterStatusBannerProps> = ({
   filtersMatch,
