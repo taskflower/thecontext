@@ -245,10 +245,10 @@ ExercisePlugin.optionsSchema = {
     description: 'The question to ask the user'
   },
   options: {
-    type: 'array',
+    type: 'json',
     label: 'Answer Options',
     default: ['Hola', 'Gracias', 'Adiós', 'Por favor'],
-    description: 'Options for multiple-choice questions'
+    description: 'Options for multiple-choice questions (as JSON array)'
   },
   correctAnswer: {
     type: 'string',

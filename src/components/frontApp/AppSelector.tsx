@@ -36,7 +36,7 @@ const AppSelector: React.FC = () => {
   
   // Store actions
   const selectWorkspace = useAppStore((state) => state.selectWorkspace);
-  const currentWorkspaceId = useAppStore((state) => state.selected.workspace);
+  // Workspace ID is fetched from the parent component
   const workspaces = useAppStore((state) => state.items);
   
   // Define available applications
@@ -120,7 +120,7 @@ const AppSelector: React.FC = () => {
   };
   
   // Navigate to selected app
-  const navigateToApp = (app: AppDefinition, workspace: any) => {
+  const navigateToApp = (_: AppDefinition, workspace: {id: string, slug?: string}) => {
     if (workspace) {
       // Select workspace and navigate to its URL
       selectWorkspace(workspace.id);

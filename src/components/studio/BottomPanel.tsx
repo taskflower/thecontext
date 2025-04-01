@@ -38,7 +38,10 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({
   // Subscribe to dashboard store changes with proper cleanup
   useEffect(() => {
     // Handler function to update title based on selected dashboard
-    const handleDashboardChange = (state: any) => {
+    const handleDashboardChange = (state: {
+      selectedDashboardId: string | null;
+      getDashboard: (id: string) => {name: string} | undefined;
+    }) => {
       const selectedId = state.selectedDashboardId;
       if (!selectedId) {
         setDashboardTitle("Dashboard");
