@@ -26,8 +26,20 @@ export function ScenariosWidget({ config }: WidgetComponentProps) {
   
   // Handle scenario click
   const handleScenarioClick = (id: string) => {
+    // Debug log to check scenario selection
+    console.log("ScenariosWidget - Selected scenario ID:", id);
+    
     // First select the scenario and start flow session
     useAppStore.getState().selectScenario(id);
+    
+    // Check scenario after selection
+    const selectedScenario = useAppStore.getState().getCurrentScenario();
+    console.log("ScenariosWidget - After selection, current scenario:", {
+      id: selectedScenario?.id,
+      name: selectedScenario?.name,
+      template: selectedScenario?.template
+    });
+    
     useAppStore.getState().startFlowSession();
     
     // Then emit custom event to notify WorkspacePage to show flow player

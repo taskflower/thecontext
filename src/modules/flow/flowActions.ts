@@ -131,15 +131,26 @@ export const createFlowSlice: StateCreator<
    */
   startFlowSession: () => 
     set((state: Draft<AppState>) => {
+      // Add debug log for current scenario
+      const currentScenario = state.getCurrentScenario();
+      console.log("flowActions.startFlowSession - Current scenario before starting:", {
+        id: currentScenario?.id,
+        name: currentScenario?.name, 
+        template: currentScenario?.template
+      });
+      
       // If we have existing session with steps but not playing (was paused)
       if (!state.flowSession?.isPlaying && state.flowSession?.temporarySteps && state.flowSession.temporarySteps.length > 0) {
         // Just resume session
         state.flowSession.isPlaying = true;
+        console.log("flowActions.startFlowSession - Resuming existing session");
         return;
       }
       
       // Otherwise create new session
       const path = state.calculateFlowPath();
+      console.log("flowActions.startFlowSession - Path calculated, length:", path.length);
+      
       if (path.length > 0) {
         // Initialize flow session if doesn't exist
         if (!state.flowSession) {
@@ -154,6 +165,9 @@ export const createFlowSlice: StateCreator<
         state.flowSession.temporarySteps = JSON.parse(JSON.stringify(path));
         state.flowSession.currentStepIndex = 0;
         state.flowSession.isPlaying = true;
+        console.log("flowActions.startFlowSession - New flow session created");
+      } else {
+        console.log("flowActions.startFlowSession - No steps in path");
       }
     }),
   

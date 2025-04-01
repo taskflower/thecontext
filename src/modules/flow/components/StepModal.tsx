@@ -4,10 +4,11 @@ import { StepModalProps } from "../types";
 import { useAppStore } from "../../store";
 import { usePlugins } from "@/modules/plugins/pluginContext";
 import StepPluginWrapper from "@/modules/plugins/wrappers/StepPluginWrapper";
-import { PluginComponentWithSchema } from "@/modules/plugins/types";
+import { PluginComponentWithSchema, SectionSettings } from "@/modules/plugins/types";
 import { processTemplateWithItems } from "@/modules/context/utils";
 import { updateContextFromNodeInput } from "../contextHandler";
-import { getTemplateComponents } from "./templateFactory";
+import { getTemplateComponents, getAvailableTemplates } from "./templateFactory";
+import { FlowNode } from "@/modules/graph/types";
 
 /**
  * Modal dialog for flow steps that displays a step in the flow 
@@ -38,7 +39,7 @@ export const StepModal: React.FC<StepModalProps> = ({
   });
   
   // Current node data
-  const currentNode = temporarySteps[currentStepIndex];
+  const currentNode = temporarySteps[currentStepIndex] as FlowNode;
   const isLastStep = currentStepIndex === temporarySteps.length - 1;
   
   // UI state
@@ -47,6 +48,15 @@ export const StepModal: React.FC<StepModalProps> = ({
   // Get template components based on template name
   // Use template from props if provided, otherwise use from scenario
   const finalTemplate = template || scenarioTemplate;
+  
+  // Log template information for debugging
+  console.log('Template info:', { 
+    fromProps: template, 
+    fromScenario: scenarioTemplate, 
+    finalTemplate,
+    scenarioId: useAppStore.getState().selected.scenario,
+    availableTemplates: getAvailableTemplates()
+  });
   
   const { 
     Header, 
@@ -152,13 +162,13 @@ export const StepModal: React.FC<StepModalProps> = ({
   const nodeDataForPlugin = {
     ...currentNode,
     assistantMessage: processedMessage,
-    createdAt: currentNode.createdAt ? new Date(currentNode.createdAt) : undefined,
-    updatedAt: currentNode.updatedAt ? new Date(currentNode.updatedAt) : undefined
+    createdAt: currentNode.createdAt ? new Date(currentNode.createdAt as number) : undefined,
+    updatedAt: currentNode.updatedAt ? new Date(currentNode.updatedAt as number) : undefined
   };
 
   // Get plugin component and section settings if available
   let PluginComponent: PluginComponentWithSchema | null = null;
-  let sectionSettings = { 
+  let sectionSettings: SectionSettings = { 
     replaceHeader: false, 
     replaceAssistantView: false, 
     replaceUserInput: false,
@@ -169,12 +179,20 @@ export const StepModal: React.FC<StepModalProps> = ({
     PluginComponent = getPluginComponent(currentNode.pluginKey) as PluginComponentWithSchema;
     
     // First priority: Use settings from node's pluginData if available
-    if (currentNode.pluginData?.[currentNode.pluginKey]?._sectionSettings) {
-      const nodeSectionSettings = currentNode.pluginData[currentNode.pluginKey]._sectionSettings;
-      sectionSettings = {
-        ...sectionSettings,
-        ...nodeSectionSettings
-      };
+    if (currentNode.pluginData && 
+        currentNode.pluginKey in currentNode.pluginData && 
+        currentNode.pluginData[currentNode.pluginKey] && 
+        typeof currentNode.pluginData[currentNode.pluginKey] === 'object') {
+        
+      // Safely access _sectionSettings with proper type checking
+      const pluginData = currentNode.pluginData[currentNode.pluginKey] as Record<string, unknown>;
+      if ('_sectionSettings' in pluginData && pluginData._sectionSettings) {
+        const nodeSectionSettings = pluginData._sectionSettings as SectionSettings;
+        sectionSettings = {
+          ...sectionSettings,
+          ...nodeSectionSettings
+        };
+      }
     } 
     // Second priority (backwards compatibility): Use settings from plugin component if available
     else if (PluginComponent?.pluginSettings) {

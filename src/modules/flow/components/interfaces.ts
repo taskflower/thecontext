@@ -64,7 +64,7 @@ export interface ContextUpdateInfoProps {
 /**
  * Available dialog template types
  */
-export type DialogTemplate = 'default' | 'alternative';
+export type DialogTemplate = 'default' | 'alternative' | "elearning";
 
 /**
  * Factory interface for dialog components

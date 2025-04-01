@@ -89,6 +89,14 @@ const WorkspacePage = () => {
 
   // Start flow session
   const handleStartFlow = () => {
+    // Debug log to check current scenario before starting flow
+    const currentScenario = useAppStore.getState().getCurrentScenario();
+    console.log("WorkspacePage - Starting flow with scenario:", {
+      id: currentScenario?.id,
+      name: currentScenario?.name,
+      template: currentScenario?.template
+    });
+    
     useAppStore.getState().startFlowSession();
     setShowFlowPlayer(true);
   };

@@ -87,9 +87,19 @@ export const createScenarioSlice: StateCreator<
       (w: any) => w.id === state.selected.workspace
     );
     if (!workspace) return null;
-    return (
-      workspace.children.find((s: any) => s.id === state.selected.scenario) ||
-      null
-    );
+    const scenario = workspace.children.find((s: any) => s.id === state.selected.scenario) || null;
+    
+    // Log the scenario to debug template issues
+    if (scenario) {
+      console.log("getCurrentScenario - found scenario:", {
+        id: scenario.id,
+        name: scenario.name,
+        template: scenario.template,
+      });
+    } else {
+      console.log("getCurrentScenario - no scenario found with ID:", state.selected.scenario);
+    }
+    
+    return scenario;
   },
 });
