@@ -110,7 +110,6 @@ const WorkspacePage = () => {
           <div className="w-full h-full">
             <StepModal
               onClose={() => setShowFlowPlayer(false)}
-              template="alternative"
             />
           </div>
         ) : (

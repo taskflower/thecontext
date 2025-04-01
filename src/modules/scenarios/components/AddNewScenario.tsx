@@ -6,7 +6,9 @@ import {
   InputField,
   SaveButton,
   TextAreaField,
+  SelectField,
 } from "@/components/studio";
+import { getAvailableTemplates } from "@/modules/flow/components/templateFactory";
 
 interface AddNewScenarioProps {
   isOpen: boolean;
@@ -22,7 +24,14 @@ const AddNewScenario: React.FC<AddNewScenarioProps> = ({
   const [formData, setFormData] = useState({
     name: "",
     description: "",
+    template: "default",
   });
+  
+  // Get available templates
+  const templates = getAvailableTemplates().map(template => ({
+    value: template,
+    label: template.charAt(0).toUpperCase() + template.slice(1)
+  }));
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -39,9 +48,18 @@ const AddNewScenario: React.FC<AddNewScenarioProps> = ({
     addScenario({
       name: formData.name,
       description: formData.description,
+      template: formData.template,
     });
-    setFormData({ name: "", description: "" });
+    setFormData({ name: "", description: "", template: "default" });
     setIsOpen(false);
+  };
+  
+  // Handle template select change
+  const handleTemplateChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      template: value
+    }));
   };
 
   const handleClose = () => setIsOpen(false);
@@ -78,6 +96,16 @@ const AddNewScenario: React.FC<AddNewScenarioProps> = ({
         onChange={handleChange}
         placeholder="What this scenario is for..."
         rows={3}
+      />
+      
+      <SelectField
+        id="template"
+        name="template"
+        label="UI Template"
+        value={formData.template}
+        onChange={handleTemplateChange}
+        options={templates}
+        description="Select the UI template to use for this scenario's flow"
       />
     </DialogModal>
   );

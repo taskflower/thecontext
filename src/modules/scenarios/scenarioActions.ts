@@ -24,6 +24,7 @@ export const createScenarioSlice: StateCreator<
         type: TYPES.SCENARIO,
         name: payload.name,
         description: payload.description,
+        template: payload.template,
         children: [],
         edges: [],
       };
@@ -49,6 +50,9 @@ export const createScenarioSlice: StateCreator<
         if (scenario) {
           scenario.name = payload.name;
           scenario.description = payload.description;
+          if (payload.template) {
+            scenario.template = payload.template;
+          }
           state.stateVersion++;
         }
       }

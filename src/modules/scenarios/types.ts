@@ -1,6 +1,7 @@
 import { Edge, FlowNode } from "../graph/types";
 import { BaseItem } from "../store";
 import { Filter } from "../filters/types";
+import { DialogTemplate } from "../flow/components/interfaces";
 
 export interface Scenario extends BaseItem {
   name: string;
@@ -8,6 +9,7 @@ export interface Scenario extends BaseItem {
   children: FlowNode[];
   edges: Edge[];
   filters?: Filter[];
+  template?: DialogTemplate;
 }
 
 export interface ScenarioActions {
@@ -21,4 +23,5 @@ export interface ScenarioActions {
 export interface ScenarioPayload {
   name: string;
   description: string;
+  template?: DialogTemplate;
 }

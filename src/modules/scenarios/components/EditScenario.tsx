@@ -6,7 +6,9 @@ import {
   InputField,
   SaveButton,
   TextAreaField,
+  SelectField,
 } from "@/components/studio";
+import { getAvailableTemplates } from "@/modules/flow/components/templateFactory";
 
 interface EditScenarioProps {
   isOpen: boolean;
@@ -25,7 +27,14 @@ const EditScenario: React.FC<EditScenarioProps> = ({
   const [formData, setFormData] = useState({
     name: "",
     description: "",
+    template: "default",
   });
+  
+  // Get available templates
+  const templates = getAvailableTemplates().map(template => ({
+    value: template,
+    label: template.charAt(0).toUpperCase() + template.slice(1)
+  }));
 
   // Load scenario data when component mounts or scenarioId changes
   useEffect(() => {
@@ -35,6 +44,7 @@ const EditScenario: React.FC<EditScenarioProps> = ({
         setFormData({
           name: scenario.name,
           description: scenario.description || "",
+          template: scenario.template || "default",
         });
       }
     }
@@ -55,8 +65,17 @@ const EditScenario: React.FC<EditScenarioProps> = ({
     updateScenario(scenarioId, {
       name: formData.name,
       description: formData.description,
+      template: formData.template,
     });
     setIsOpen(false);
+  };
+  
+  // Handle template select change
+  const handleTemplateChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      template: value
+    }));
   };
 
   const handleClose = () => setIsOpen(false);
@@ -93,6 +112,16 @@ const EditScenario: React.FC<EditScenarioProps> = ({
         onChange={handleChange}
         placeholder="What this scenario is for..."
         rows={3}
+      />
+      
+      <SelectField
+        id="template"
+        name="template"
+        label="UI Template"
+        value={formData.template}
+        onChange={handleTemplateChange}
+        options={templates}
+        description="Select the UI template to use for this scenario's flow"
       />
     </DialogModal>
   );

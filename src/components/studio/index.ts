@@ -13,7 +13,8 @@ export {
   InputField,
   TextAreaField,
   ColorField,
-  CheckboxField
+  CheckboxField,
+  SelectField
 } from './CommonFormField';
 
 // Export panel and toolbar components

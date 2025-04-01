@@ -1,4 +1,11 @@
 import React from "react";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 
 interface FormFieldProps {
   id: string;
@@ -9,6 +16,16 @@ interface FormFieldProps {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
   placeholder?: string;
+}
+
+interface SelectFieldProps {
+  id: string;
+  name: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: { value: string; label: string }[];
+  description?: string;
 }
 
 export const InputField: React.FC<FormFieldProps> = ({
@@ -138,6 +155,48 @@ export const CheckboxField: React.FC<{
       </div>
       {description && (
         <p className="text-xs text-muted-foreground pl-6">{description}</p>
+      )}
+    </div>
+  );
+};
+
+// Select field component
+export const SelectField: React.FC<SelectFieldProps> = ({
+  id,
+  // name parameter is used in the interface definition
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  name,
+  label,
+  value,
+  onChange,
+  options,
+  description
+}) => {
+  return (
+    <div className="space-y-2 my-4">
+      <label
+        htmlFor={id}
+        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+      >
+        {label}
+      </label>
+      <Select
+        value={value}
+        onValueChange={onChange}
+      >
+        <SelectTrigger id={id} className="w-full">
+          <SelectValue placeholder="Select option" />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {description && (
+        <p className="text-xs text-muted-foreground mt-1">{description}</p>
       )}
     </div>
   );

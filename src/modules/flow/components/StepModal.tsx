@@ -15,7 +15,7 @@ import { getTemplateComponents } from "./templateFactory";
  */
 export const StepModal: React.FC<StepModalProps> = ({ 
   onClose, 
-  template = 'default'
+  template
 }) => {
   const { getPluginComponent } = usePlugins();
   
@@ -31,6 +31,12 @@ export const StepModal: React.FC<StepModalProps> = ({
   const updateTempNodeUserPrompt = useAppStore(state => state.updateTempNodeUserPrompt);
   const updateTempNodeAssistantMessage = useAppStore(state => state.updateTempNodeAssistantMessage);
   
+  // Get template from current scenario
+  const scenarioTemplate = useAppStore(state => {
+    const scenario = state.getCurrentScenario();
+    return scenario?.template || 'default';
+  });
+  
   // Current node data
   const currentNode = temporarySteps[currentStepIndex];
   const isLastStep = currentStepIndex === temporarySteps.length - 1;
@@ -39,13 +45,16 @@ export const StepModal: React.FC<StepModalProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   
   // Get template components based on template name
+  // Use template from props if provided, otherwise use from scenario
+  const finalTemplate = template || scenarioTemplate;
+  
   const { 
     Header, 
     AssistantMessage, 
     UserInput, 
     NavigationButtons, 
     ContextUpdateInfo 
-  } = getTemplateComponents(template);
+  } = getTemplateComponents(finalTemplate);
   
   // Process assistant message tokens with context values
   const processedMessage = useMemo(() => {

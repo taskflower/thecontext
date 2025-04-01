@@ -47,7 +47,8 @@ const PluginOptionsEditor: React.FC<PluginOptionsEditorProps> = ({ nodeId, onClo
       const pluginDataWithoutSettings = { ...currentData };
       if ('_sectionSettings' in pluginDataWithoutSettings) {
         // @ts-expect-error - We know this property exists because we just checked
-        const { _sectionSettings: _, ...restData } = pluginDataWithoutSettings;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { _sectionSettings, ...restData } = pluginDataWithoutSettings;
         setPluginData(restData);
       } else {
         setPluginData(pluginDataWithoutSettings);
@@ -95,7 +96,8 @@ const PluginOptionsEditor: React.FC<PluginOptionsEditorProps> = ({ nodeId, onClo
     const pluginDataWithoutSettings = { ...currentData };
     if ('_sectionSettings' in pluginDataWithoutSettings) {
       // @ts-expect-error - We know this property exists because we just checked
-      const { _sectionSettings: _, ...restData } = pluginDataWithoutSettings;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { _sectionSettings, ...restData } = pluginDataWithoutSettings;
       setPluginData(restData);
     } else {
       setPluginData(pluginDataWithoutSettings);
