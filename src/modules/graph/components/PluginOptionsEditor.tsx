@@ -10,6 +10,7 @@ import {
   SaveButton,
 } from '@/components/studio';
 import { CheckboxField, ColorField } from '@/components/studio/CommonFormField';
+import { SectionSettings } from '@/modules/plugins/types';
 import { X } from 'lucide-react';
 
 interface PluginOptionsEditorProps {
@@ -19,6 +20,12 @@ interface PluginOptionsEditorProps {
 
 const PluginOptionsEditor: React.FC<PluginOptionsEditorProps> = ({ nodeId, onClose }) => {
   const [pluginData, setPluginData] = useState<Record<string, any>>({});
+  const [sectionSettings, setSectionSettings] = useState<SectionSettings>({
+    replaceHeader: false,
+    replaceAssistantView: false,
+    replaceUserInput: false,
+    hideNavigationButtons: false
+  });
   const [loading, setLoading] = useState(true);
   const [isDirty, setIsDirty] = useState(false);
   
@@ -32,7 +39,27 @@ const PluginOptionsEditor: React.FC<PluginOptionsEditorProps> = ({ nodeId, onClo
     if (node && node.pluginKey) {
       // Load the current plugin data
       const currentData = node.pluginData?.[node.pluginKey] || {};
-      setPluginData(currentData);
+      
+      // Extract section settings if they exist, or use defaults
+      const currentSectionSettings = currentData._sectionSettings || {};
+      
+      // Create a new object without _sectionSettings instead of modifying the original
+      const pluginDataWithoutSettings = { ...currentData };
+      if ('_sectionSettings' in pluginDataWithoutSettings) {
+        // @ts-ignore - We know this property exists because we just checked
+        const { _sectionSettings, ...restData } = pluginDataWithoutSettings;
+        setPluginData(restData);
+      } else {
+        setPluginData(pluginDataWithoutSettings);
+      }
+      
+      setSectionSettings({
+        replaceHeader: Boolean(currentSectionSettings.replaceHeader),
+        replaceAssistantView: Boolean(currentSectionSettings.replaceAssistantView),
+        replaceUserInput: Boolean(currentSectionSettings.replaceUserInput),
+        hideNavigationButtons: Boolean(currentSectionSettings.hideNavigationButtons)
+      });
+      
       setLoading(false);
     } else {
       setLoading(false);
@@ -47,7 +74,12 @@ const PluginOptionsEditor: React.FC<PluginOptionsEditorProps> = ({ nodeId, onClo
   
   // Save changes
   const handleSave = () => {
-    useAppStore.getState().updateNodePluginData(nodeId, pluginKey, pluginData);
+    // Combine plugin data with section settings
+    const combinedData = {
+      ...pluginData,
+      _sectionSettings: sectionSettings
+    };
+    useAppStore.getState().updateNodePluginData(nodeId, pluginKey, combinedData);
     setIsDirty(false);
     onClose();
   };
@@ -55,7 +87,27 @@ const PluginOptionsEditor: React.FC<PluginOptionsEditorProps> = ({ nodeId, onClo
   // Reset changes
   const handleReset = () => {
     const currentData = node.pluginData?.[pluginKey] || {};
-    setPluginData(currentData);
+    
+    // Extract section settings if they exist
+    const currentSectionSettings = currentData._sectionSettings || {};
+    
+    // Create a new object without _sectionSettings instead of modifying the original
+    const pluginDataWithoutSettings = { ...currentData };
+    if ('_sectionSettings' in pluginDataWithoutSettings) {
+      // @ts-ignore - We know this property exists because we just checked
+      const { _sectionSettings, ...restData } = pluginDataWithoutSettings;
+      setPluginData(restData);
+    } else {
+      setPluginData(pluginDataWithoutSettings);
+    }
+    
+    setSectionSettings({
+      replaceHeader: Boolean(currentSectionSettings.replaceHeader),
+      replaceAssistantView: Boolean(currentSectionSettings.replaceAssistantView),
+      replaceUserInput: Boolean(currentSectionSettings.replaceUserInput),
+      hideNavigationButtons: Boolean(currentSectionSettings.hideNavigationButtons)
+    });
+    
     setIsDirty(false);
   };
   
@@ -65,6 +117,15 @@ const PluginOptionsEditor: React.FC<PluginOptionsEditorProps> = ({ nodeId, onClo
       const newData = { ...prev, [key]: value };
       setIsDirty(true);
       return newData;
+    });
+  };
+  
+  // Handle section settings changes
+  const handleSectionSettingChange = (key: keyof SectionSettings, value: boolean) => {
+    setSectionSettings(prev => {
+      const newSettings = { ...prev, [key]: value };
+      setIsDirty(true);
+      return newSettings;
     });
   };
   
@@ -80,6 +141,50 @@ const PluginOptionsEditor: React.FC<PluginOptionsEditorProps> = ({ nodeId, onClo
     </>
   );
   
+  // UI section settings component
+  const SectionSettingsForm: React.FC = () => (
+    <div className="border-t border-border pt-4 mt-6">
+      <h3 className="text-sm font-medium mb-3">UI Section Settings</h3>
+      <div className="space-y-3">
+        <CheckboxField
+          id="section-replace-header"
+          name="replaceHeader"
+          label="Replace header section"
+          checked={sectionSettings.replaceHeader}
+          onChange={(e) => handleSectionSettingChange('replaceHeader', e.target.checked)}
+          description="Plugin will replace the default header section"
+        />
+        
+        <CheckboxField
+          id="section-replace-assistant"
+          name="replaceAssistantView"
+          label="Replace assistant message section"
+          checked={sectionSettings.replaceAssistantView}
+          onChange={(e) => handleSectionSettingChange('replaceAssistantView', e.target.checked)}
+          description="Plugin will replace the default assistant message section"
+        />
+        
+        <CheckboxField
+          id="section-replace-user-input"
+          name="replaceUserInput"
+          label="Replace user input section"
+          checked={sectionSettings.replaceUserInput}
+          onChange={(e) => handleSectionSettingChange('replaceUserInput', e.target.checked)}
+          description="Plugin will replace the default user input section"
+        />
+        
+        <CheckboxField
+          id="section-hide-navigation"
+          name="hideNavigationButtons"
+          label="Hide navigation buttons"
+          checked={sectionSettings.hideNavigationButtons}
+          onChange={(e) => handleSectionSettingChange('hideNavigationButtons', e.target.checked)}
+          description="Hide the default navigation buttons (plugin can provide custom navigation)"
+        />
+      </div>
+    </div>
+  );
+
   return (
     <DialogModal
       isOpen={true}
@@ -94,18 +199,23 @@ const PluginOptionsEditor: React.FC<PluginOptionsEditorProps> = ({ nodeId, onClo
         </div>
       ) : (
         <>
-          {hasOptionsSchema ? (
-            <DynamicOptionsForm 
-              schema={(pluginComponent as any).optionsSchema}
-              data={pluginData}
-              onChange={handleInputChange}
-            />
-          ) : (
-            <GenericOptionsForm 
-              data={pluginData}
-              onChange={handleInputChange}
-            />
-          )}
+          <SectionSettingsForm />
+          
+          <div className="border-t border-border pt-4 mt-6">
+            <h3 className="text-sm font-medium mb-3">Plugin Options</h3>
+            {hasOptionsSchema ? (
+              <DynamicOptionsForm 
+                schema={(pluginComponent as any).optionsSchema}
+                data={pluginData}
+                onChange={handleInputChange}
+              />
+            ) : (
+              <GenericOptionsForm 
+                data={pluginData}
+                onChange={handleInputChange}
+              />
+            )}
+          </div>
           
           {isDirty && (
             <div className="mt-4 p-3 bg-muted/30 rounded-md">

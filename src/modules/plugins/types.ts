@@ -12,7 +12,11 @@ export interface PluginComponentProps<T = unknown> {
   /** Application context data */
   appContext: AppContextData;
   
-  /** UI replacement flags */
+  /** 
+   * UI replacement flags
+   * @deprecated These flags should no longer be used. UI section visibility
+   * is now configured through node's pluginData._sectionSettings
+   */
   replaceHeader?: boolean;
   replaceAssistantView?: boolean;
   replaceUserInput?: boolean;
@@ -20,8 +24,20 @@ export interface PluginComponentProps<T = unknown> {
 
 /**
  * Static plugin settings defined at component level
+ * @deprecated Use section settings in node pluginData instead
  */
 export interface PluginSettings {
+  replaceHeader?: boolean;
+  replaceAssistantView?: boolean;
+  replaceUserInput?: boolean;
+  hideNavigationButtons?: boolean;
+}
+
+/**
+ * Section settings for a node's plugin
+ * These determine which UI sections are displayed/replaced in the flow
+ */
+export interface SectionSettings {
   replaceHeader?: boolean;
   replaceAssistantView?: boolean;
   replaceUserInput?: boolean;
@@ -66,7 +82,10 @@ export interface PluginOptionSchema {
 export interface PluginComponentWithSchema<T = unknown> extends React.FC<PluginComponentProps<T>> {
   /** Schema definition for plugin options */
   optionsSchema?: Record<string, PluginOptionSchema>;
-  /** Static plugin settings */
+  /** 
+   * Static plugin settings 
+   * @deprecated Use section settings in node pluginData._sectionSettings instead
+   */
   pluginSettings?: PluginSettings;
 }
 

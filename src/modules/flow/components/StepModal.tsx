@@ -147,9 +147,9 @@ export const StepModal: React.FC<StepModalProps> = ({
     updatedAt: currentNode.updatedAt ? new Date(currentNode.updatedAt) : undefined
   };
 
-  // Get plugin component and settings if available
+  // Get plugin component and section settings if available
   let PluginComponent: PluginComponentWithSchema | null = null;
-  let pluginSettings = { 
+  let sectionSettings = { 
     replaceHeader: false, 
     replaceAssistantView: false, 
     replaceUserInput: false,
@@ -158,9 +158,19 @@ export const StepModal: React.FC<StepModalProps> = ({
 
   if (currentNode.pluginKey) {
     PluginComponent = getPluginComponent(currentNode.pluginKey) as PluginComponentWithSchema;
-    if (PluginComponent?.pluginSettings) {
-      pluginSettings = {
-        ...pluginSettings,
+    
+    // First priority: Use settings from node's pluginData if available
+    if (currentNode.pluginData?.[currentNode.pluginKey]?._sectionSettings) {
+      const nodeSectionSettings = currentNode.pluginData[currentNode.pluginKey]._sectionSettings;
+      sectionSettings = {
+        ...sectionSettings,
+        ...nodeSectionSettings
+      };
+    } 
+    // Second priority (backwards compatibility): Use settings from plugin component if available
+    else if (PluginComponent?.pluginSettings) {
+      sectionSettings = {
+        ...sectionSettings,
         ...PluginComponent.pluginSettings
       };
     }
@@ -170,7 +180,7 @@ export const StepModal: React.FC<StepModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="flex flex-col bg-background rounded-lg border border-border shadow-lg w-full max-w-4xl min-h-[95vh] max-h-[95vh]">
         {/* Header */}
-        {!pluginSettings.replaceHeader && (
+        {!sectionSettings.replaceHeader && (
           <Header
             currentStepIndex={currentStepIndex}
             totalSteps={temporarySteps.length}
@@ -182,7 +192,7 @@ export const StepModal: React.FC<StepModalProps> = ({
         <div className="overflow-y-auto">
           <div className="p-6">
             {/* Assistant message */}
-            {!pluginSettings.replaceAssistantView && (
+            {!sectionSettings.replaceAssistantView && (
               <AssistantMessage message={processedMessage} />
             )}
 
@@ -197,7 +207,7 @@ export const StepModal: React.FC<StepModalProps> = ({
             )}
 
             {/* User input */}
-            {!pluginSettings.replaceUserInput && (
+            {!sectionSettings.replaceUserInput && (
               <>
                 <UserInput
                   value={processedUserPrompt}
@@ -213,7 +223,7 @@ export const StepModal: React.FC<StepModalProps> = ({
         </div>
 
         {/* Navigation buttons */}
-        {!pluginSettings.hideNavigationButtons && (
+        {!sectionSettings.hideNavigationButtons && (
           <NavigationButtons
             isFirstStep={currentStepIndex === 0}
             isLastStep={isLastStep}
