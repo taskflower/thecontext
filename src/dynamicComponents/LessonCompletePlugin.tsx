@@ -1,9 +1,9 @@
 import React from 'react';
 import { PluginComponentWithSchema, PluginComponentProps } from '@/modules/plugins/types';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAppStore } from '@/modules/store';
+import { Sparkles, Trophy, Star, ChevronRight, BookOpen, ArrowRight } from 'lucide-react';
 
 interface LessonCompleteData {
   lessonId: string;
@@ -65,33 +65,82 @@ const LessonCompletePlugin: PluginComponentWithSchema<LessonCompleteData> = ({
   };
   
   return (
-    <div className="my-8 space-y-6">
-      <Card className="p-6 bg-green-100 dark:bg-green-900/30 border-green-200 dark:border-green-800">
-        <h3 className="text-xl font-semibold mb-2">Lesson Completed!</h3>
-        <p className="text-muted-foreground">
-          Congratulations on completing this lesson.
-        </p>
+    <div className="max-w-md mx-auto py-6 px-4">
+      {/* Celebration header */}
+      <div className="flex flex-col items-center mb-8">
+        <div className="w-20 h-20 rounded-full bg-amber-400 flex items-center justify-center mb-4">
+          <Trophy className="h-12 w-12 text-white" />
+        </div>
+        <h2 className="text-2xl font-bold text-center mb-1">Lesson Completed!</h2>
+        <p className="text-muted-foreground text-center">Great job! You've mastered this material.</p>
+      </div>
+      
+      {/* XP and score animation */}
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6">
+        <div className="flex items-center justify-center mb-3">
+          <Sparkles className="h-5 w-5 text-amber-500 mr-2" />
+          <span className="font-bold text-amber-800">Rewards Earned</span>
+        </div>
         
-        <div className="mt-4 flex items-center justify-between py-2 px-4 bg-background rounded-md">
-          <span className="font-medium">Your Score</span>
-          <span className="text-xl font-bold">{lessonData.score} points</span>
+        <div className="flex justify-center">
+          <div className="flex items-center justify-center bg-amber-500 text-white font-bold rounded-full px-6 py-2 text-lg">
+            <Star className="h-6 w-6 mr-2" />
+            <span>+{lessonData.score} XP</span>
+          </div>
         </div>
-      </Card>
+      </div>
       
-      <Card className="p-6 bg-primary/10 border-primary/20">
-        <h3 className="text-lg font-semibold mb-2">Up Next</h3>
-        <div className="flex items-center space-x-2">
-          <Badge variant="outline">Lesson {lessonData.nextLessonId.replace('lesson', '')}</Badge>
-          <span>More practice and new vocabulary</span>
+      {/* Streak card */}
+      <div className="bg-white rounded-xl shadow-md p-4 mb-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center mr-3">
+              <Star className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Daily Streak</p>
+              <p className="font-bold text-lg">7 days</p>
+            </div>
+          </div>
+          <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+            +1
+          </div>
         </div>
-      </Card>
+      </div>
       
+      {/* Next lesson preview */}
+      <div className="bg-white rounded-xl shadow-md p-4 mb-8">
+        <h3 className="font-bold mb-3 flex items-center">
+          <BookOpen className="h-5 w-5 text-primary mr-2" />
+          Up Next
+        </h3>
+        
+        <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+          <Badge className="bg-primary text-primary-foreground">
+            Lesson {lessonData.nextLessonId.replace('lesson', '')}
+          </Badge>
+          <span className="text-sm">New vocabulary & expressions</span>
+          <ArrowRight className="h-4 w-4 text-primary ml-auto" />
+        </div>
+      </div>
+      
+      {/* Continue button */}
       <Button 
         onClick={handleFinish}
         disabled={isFinishing}
-        className="w-full py-6 text-lg"
+        className="w-full py-6 rounded-xl text-lg font-bold transition-transform active:scale-95"
       >
-        {isFinishing ? 'Finishing...' : 'Finish Lesson'}
+        {isFinishing ? (
+          <div className="flex items-center justify-center space-x-2">
+            <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin"></div>
+            <span>Saving progress...</span>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center">
+            <span>Continue</span>
+            <ChevronRight className="h-5 w-5 ml-2" />
+          </div>
+        )}
       </Button>
     </div>
   );

@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
 import { PluginComponentWithSchema, PluginComponentProps } from '@/modules/plugins/types';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useAppStore } from '@/modules/store';
+import { Check, X, ChevronRight, Sparkles, Award } from 'lucide-react';
 
 interface ExerciseData {
   exerciseId: string;
@@ -107,111 +104,170 @@ const ExercisePlugin: PluginComponentWithSchema<ExerciseData> = ({
     }
   };
   
+  // Render feedback after submission
+  const renderFeedback = () => {
+    if (!submitted) return null;
+    
+    return (
+      <div className="my-6 flex flex-col items-center">
+        <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-2 ${isCorrect ? 'bg-green-100' : 'bg-red-100'}`}>
+          {isCorrect ? (
+            <Check className="h-8 w-8 text-green-500" />
+          ) : (
+            <X className="h-8 w-8 text-red-500" />
+          )}
+        </div>
+        
+        <h3 className={`text-xl font-bold ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
+          {isCorrect ? 'Great job!' : 'Not quite!'}
+        </h3>
+        
+        {!isCorrect && (
+          <div className="mt-2 text-center">
+            <p className="text-muted-foreground mb-1">Correct answer:</p>
+            <p className="font-semibold text-foreground">{exerciseData.correctAnswer}</p>
+          </div>
+        )}
+        
+        {isCorrect && (
+          <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-center">
+            <Sparkles className="h-5 w-5 text-amber-500 mr-2" />
+            <span className="text-amber-800 font-semibold">+10 XP</span>
+          </div>
+        )}
+      </div>
+    );
+  };
+  
   // Render multiple choice exercise
   if (exerciseData.exerciseType === 'multiple-choice') {
     return (
-      <div className="my-8 space-y-6">
-        <Card className="p-6">
-          <h3 className="text-xl font-semibold mb-4">{exerciseData.question}</h3>
-          
-          <RadioGroup 
-            value={answer} 
-            onValueChange={handleOptionSelect}
-            className="space-y-3"
-            disabled={submitted}
-          >
+      <div className="max-w-md mx-auto py-6 px-4">
+        {/* Question */}
+        <div className="mb-6 text-center">
+          <h2 className="text-xl font-bold mb-2">Choose the correct answer</h2>
+          <p className="text-lg">{exerciseData.question}</p>
+        </div>
+        
+        {submitted ? (
+          renderFeedback()
+        ) : (
+          /* Options */
+          <div className="space-y-3 mb-8">
             {exerciseData.options?.map((option, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <RadioGroupItem id={`option-${index}`} value={option} />
-                <Label 
-                  htmlFor={`option-${index}`}
-                  className={`text-base flex-1 p-3 rounded ${submitted && option === exerciseData.correctAnswer ? 'bg-green-100 dark:bg-green-900/30' : ''}`}
-                >
-                  {option}
-                  {submitted && option === exerciseData.correctAnswer && (
-                    <Badge variant="outline" className="ml-2">Correct</Badge>
-                  )}
-                </Label>
-              </div>
+              <button
+                key={index}
+                onClick={() => handleOptionSelect(option)}
+                disabled={submitted}
+                className={`w-full p-4 rounded-xl border-2 transition-all text-left font-medium
+                  ${answer === option 
+                    ? 'border-primary bg-primary/10' 
+                    : 'border-border hover:border-primary/50 hover:bg-primary/5'}`}
+              >
+                {option}
+              </button>
             ))}
-          </RadioGroup>
-          
-          {submitted && (
-            <div className={`mt-4 p-4 rounded-md ${isCorrect ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
-              <p className="font-medium">
-                {isCorrect ? '✓ Correct!' : `✗ Incorrect. The correct answer is: ${exerciseData.correctAnswer}`}
-              </p>
-            </div>
-          )}
-        </Card>
+          </div>
+        )}
         
         {submitted ? (
           <Button 
             onClick={handleContinue}
             disabled={isContinuing}
-            className="w-full py-6"
+            className="w-full py-6 rounded-xl text-lg font-bold"
           >
-            {isContinuing ? 'Loading...' : 'Continue to Next Exercise'}
+            {isContinuing ? (
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin"></div>
+                <span>Loading...</span>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center">
+                <span>Continue</span>
+                <ChevronRight className="ml-2 h-5 w-5" />
+              </div>
+            )}
           </Button>
         ) : (
           <Button 
             onClick={handleSubmit}
             disabled={!answer}
-            className="w-full py-6"
+            className="w-full py-6 rounded-xl text-lg font-bold"
           >
-            Check Answer
+            Check
           </Button>
         )}
+        
+        {/* Progress indicator */}
+        <div className="flex justify-center mt-6">
+          <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+            <Award className="h-4 w-4 mr-1" />
+            <span>+10 XP</span>
+          </div>
+        </div>
       </div>
     );
   }
   
   // Render translation exercise
   return (
-    <div className="my-8 space-y-6">
-      <Card className="p-6">
-        <h3 className="text-xl font-semibold mb-4">{exerciseData.question}</h3>
-        
-        <div className="space-y-3">
-          <Label htmlFor="translation-input" className="text-base">
-            Your translation:
-          </Label>
+    <div className="max-w-md mx-auto py-6 px-4">
+      {/* Question */}
+      <div className="mb-6 text-center">
+        <h2 className="text-xl font-bold mb-2">Translate this text</h2>
+        <p className="text-lg">{exerciseData.question}</p>
+      </div>
+      
+      {submitted ? (
+        renderFeedback()
+      ) : (
+        /* Translation input */
+        <div className="mb-8">
           <Input
-            id="translation-input"
             value={answer}
             onChange={handleInputChange}
             placeholder="Type your answer here"
-            className="w-full py-6 text-lg"
+            className="w-full p-4 text-lg border-2 border-primary/30 rounded-xl focus:border-primary focus:ring-primary"
             disabled={submitted}
           />
         </div>
-        
-        {submitted && (
-          <div className={`mt-4 p-4 rounded-md ${isCorrect ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
-            <p className="font-medium">
-              {isCorrect ? '✓ Correct!' : `✗ Incorrect. The correct answer is: ${exerciseData.correctAnswer}`}
-            </p>
-          </div>
-        )}
-      </Card>
+      )}
       
       {submitted ? (
         <Button 
           onClick={handleContinue}
           disabled={isContinuing}
-          className="w-full py-6"
+          className="w-full py-6 rounded-xl text-lg font-bold"
         >
-          {isContinuing ? 'Loading...' : 'Continue to Next Exercise'}
+          {isContinuing ? (
+            <div className="flex items-center justify-center space-x-2">
+              <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin"></div>
+              <span>Loading...</span>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center">
+              <span>Continue</span>
+              <ChevronRight className="ml-2 h-5 w-5" />
+            </div>
+          )}
         </Button>
       ) : (
         <Button 
           onClick={handleSubmit}
           disabled={!answer.trim()}
-          className="w-full py-6"
+          className="w-full py-6 rounded-xl text-lg font-bold"
         >
-          Check Answer
+          Check
         </Button>
       )}
+      
+      {/* Progress indicator */}
+      <div className="flex justify-center mt-6">
+        <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+          <Award className="h-4 w-4 mr-1" />
+          <span>+10 XP</span>
+        </div>
+      </div>
     </div>
   );
 };
