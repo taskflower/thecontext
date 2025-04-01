@@ -25,7 +25,7 @@ export function WorkspaceDashboard({ workspaceId }: WorkspaceDashboardProps) {
   
   // Get dashboard store data
   const dashboards = useWidgetStore(state => state.dashboards);
-  const selectedDashboardId = useWidgetStore(state => state.selectedDashboardId);
+  useWidgetStore(state => state.selectedDashboardId);
   
   // Find dashboard for this workspace
   const workspaceDashboard = React.useMemo(() => {

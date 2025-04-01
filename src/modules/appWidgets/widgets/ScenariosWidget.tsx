@@ -1,10 +1,10 @@
 /**
  * Scenarios Widget Component
  */
-import React from 'react';
 import { WidgetComponentProps } from '../types';
 import { Folder, PlayCircle, Users, Clock } from 'lucide-react';
 import { useAppStore } from '@/modules/store';
+import { Scenario } from '@/modules/scenarios';
 
 /**
  * Scenarios widget displays recent scenarios from the workspace
@@ -55,21 +55,21 @@ export function ScenariosWidget({ config }: WidgetComponentProps) {
       <div className="flex-1 overflow-auto">
         {recentScenarios.length > 0 ? (
           <div className="space-y-3">
-            {recentScenarios.map(scenario => (
+            {recentScenarios.map((scenario:Scenario) => (
               <div 
                 key={scenario.id}
                 className="p-3 border rounded flex items-center justify-between hover:bg-muted/30 cursor-pointer transition-colors"
                 onClick={() => handleScenarioClick(scenario.id)}
               >
                 <div>
-                  <div className="font-medium">{scenario.title}</div>
+                  <div className="font-medium">{scenario.name}</div>
                   <div className="text-xs text-muted-foreground flex items-center mt-1 gap-3">
                     <span className="flex items-center gap-1">
                       <Clock className="h-3 w-3" /> {formatDate(scenario.updatedAt)}
                     </span>
-                    {scenario.author && (
+                    {scenario.type && (
                       <span className="flex items-center gap-1">
-                        <Users className="h-3 w-3" /> {scenario.author}
+                        <Users className="h-3 w-3" /> {scenario.type}
                       </span>
                     )}
                   </div>

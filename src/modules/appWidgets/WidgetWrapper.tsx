@@ -6,7 +6,7 @@ import { useWidgetStore } from './widgetStore';
 import { getWidget } from './widgetRegistry';
 import { WidgetComponentProps, WidgetConfig } from './types';
 import { Card } from '@/components/ui/card';
-import { Settings, Trash2, Grip, ChevronDown, ChevronUp } from 'lucide-react';
+import { Settings, Trash2, Grip } from 'lucide-react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

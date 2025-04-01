@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/studio/exportImport/ExportImport.tsx
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Workspace } from "@/modules/workspaces/types";
+import { Edge } from "reactflow";
+import { ContextItem } from "@/services/PluginAuthAdapter";
+import { Scenario } from "@/modules/scenarios";
 
 // Instancja serwisu Firestore dla workspace'ów
 const firestoreWorkspaceService = new FirestoreWorkspaceService();
@@ -42,7 +46,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         <div className="py-2">
           <p className="mb-2">{message}</p>
 
-          <Alert variant="warning" className="mt-4">
+          <Alert variant="destructive" className="mt-4">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               This action will modify your workspaces and scenarios. Make sure you have a backup before proceeding.
@@ -96,7 +100,7 @@ export const ExportImport: React.FC = () => {
   const currentScenarioId = state.selected.scenario;
   
   // Get auth context
-  const { currentUser, isLoading: authLoading } = useAuth();
+  const { currentUser } = useAuth();
   
   // Handle file selection for import
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,7 +111,7 @@ export const ExportImport: React.FC = () => {
   
   // Firebase/cloud action types
   const [dataMode, setDataMode] = useState<"basic" | "full">("full");
-  const [fullWorkspaces, setFullWorkspaces] = useState<any[]>([]);
+  const [, setFullWorkspaces] = useState<any[]>([]);
   const [updateMode, setUpdateMode] = useState<"add" | "update">("add");
   
   // Load workspaces from cloud storage when cloudAction changes to "load"
@@ -437,7 +441,7 @@ export const ExportImport: React.FC = () => {
                 fullWorkspace.content.appState) {
               
               // Ekstraktujemy zawartość workspace'a z pełnych danych
-              const workspaceData = fullWorkspace.content.workspaceData;
+              const workspaceData = fullWorkspace.content.workspaceData as { id: string };
               
               if (updateMode === "update" && existingWorkspaceIds.includes(workspaceData.id)) {
                 // Update existing workspace
@@ -681,7 +685,7 @@ export const ExportImport: React.FC = () => {
           const itemsToImport = importData["flowchart-app-state"]?.state?.items || importData.items;
           
           // Track ID mappings for cross-references
-          const idMapping = {};
+          const idMapping: { [key: string]: string } = {};
           
           const newWorkspaces = itemsToImport.map((workspace: any) => {
             // Create new workspace ID
@@ -719,9 +723,9 @@ export const ExportImport: React.FC = () => {
                 
                 // First, assign new IDs to all children (nodes)
                 if (newScenario.children && newScenario.children.length > 0) {
-                  const nodeIdMap = {}; // Map old node IDs to new node IDs
+                  const nodeIdMap: { [key: string]: string } = {}; // Map old node IDs to new node IDs
                   
-                  newScenario.children = newScenario.children.map(node => {
+                  newScenario.children = newScenario.children.map((node : { id: string })=> {
                     const oldNodeId = node.id;
                     const newNodeId = `node-${currentTime}-${Math.floor(Math.random() * 10000)}`;
                     
@@ -737,7 +741,7 @@ export const ExportImport: React.FC = () => {
                   
                   // Update any existing edges with the new node IDs
                   if (newScenario.edges && newScenario.edges.length > 0) {
-                    newScenario.edges = newScenario.edges.map(edge => ({
+                    newScenario.edges = newScenario.edges.map((edge: Edge)=> ({
                       ...edge,
                       id: `edge-${currentTime}-${Math.floor(Math.random() * 10000)}`,
                       source: nodeIdMap[edge.source] || edge.source,
@@ -794,7 +798,7 @@ export const ExportImport: React.FC = () => {
           const rootContextItems = importData["flowchart-app-state"]?.state?.contextItems || [];
           
           // Also look for context items in each workspace
-          const workspaceContextItems = [];
+          const workspaceContextItems: ContextItem[] = [];
           const importedWorkspaces = importData["flowchart-app-state"]?.state?.items || [];
           
           // Gather context items from workspaces
@@ -842,7 +846,7 @@ export const ExportImport: React.FC = () => {
               if (!item.scenarioId) return true;
               
               // Otherwise check if this workspace has the scenario
-              return workspace.children.some(scenario => scenario.id === item.scenarioId);
+              return workspace.children.some((scenario: Scenario) => scenario.id === item.scenarioId);
             });
             
             // Add the context items to the workspace
@@ -869,7 +873,7 @@ export const ExportImport: React.FC = () => {
             } else {
               console.warn(`No context items matched for workspace ${workspace.title}`);
               console.log('Available items:', updatedContextItems);
-              console.log('Workspace scenarios:', workspace.children.map(s => s.id));
+              console.log('Workspace scenarios:', workspace.children.map((s:Scenario) => s.id));
             }
           }
           
@@ -946,7 +950,7 @@ export const ExportImport: React.FC = () => {
         setConfirmationAction(() => () => {
           // Generate new IDs for imported scenarios but preserve structure
           const currentTime = Date.now();
-          const idMapping = {}; // To track old ID to new ID mapping
+          const idMapping: { [key: string]: string } = {}; // To track old ID to new ID mapping
           
           const newScenarios = allImportedScenarios.map((scenario: any) => {
             // Generate new ID for scenario
@@ -973,9 +977,9 @@ export const ExportImport: React.FC = () => {
             
             // First, assign new IDs to all children (nodes)
             if (newScenario.children && newScenario.children.length > 0) {
-              const nodeIdMap = {}; // Map old node IDs to new node IDs
+              const nodeIdMap: { [key: string]: string } = {};  // Map old node IDs to new node IDs
               
-              newScenario.children = newScenario.children.map(node => {
+              newScenario.children = newScenario.children.map((node: any)  => {
                 const oldNodeId = node.id;
                 const newNodeId = `node-${currentTime}-${Math.floor(Math.random() * 10000)}`;
                 
@@ -991,7 +995,7 @@ export const ExportImport: React.FC = () => {
               
               // Update any existing edges with the new node IDs
               if (newScenario.edges && newScenario.edges.length > 0) {
-                newScenario.edges = newScenario.edges.map(edge => ({
+                newScenario.edges = newScenario.edges.map((edge:Edge) => ({
                   ...edge,
                   id: `edge-${currentTime}-${Math.floor(Math.random() * 10000)}`,
                   source: nodeIdMap[edge.source] || edge.source,
@@ -1064,7 +1068,7 @@ export const ExportImport: React.FC = () => {
           const rootContextItems = importData["flowchart-app-state"]?.state?.contextItems || [];
           
           // Also look for context items in each workspace
-          const workspaceContextItems = [];
+          const workspaceContextItems: ContextItem[] = [];
           const importedWorkspaces = importData["flowchart-app-state"]?.state?.items || [];
           
           // Gather context items from workspaces
@@ -1117,7 +1121,7 @@ export const ExportImport: React.FC = () => {
             console.log(`Added ${updatedContextItems.length} context items to workspace ${updatedWorkspaces[targetWorkspaceIndex].title}:`, updatedWorkspaces[targetWorkspaceIndex].contextItems);
             
             // Check if the context items are correctly linked to scenarios
-            const scenarios = updatedWorkspaces[targetWorkspaceIndex].children.map(s => s.id);
+            const scenarios = updatedWorkspaces[targetWorkspaceIndex].children.map((s:Scenario) => s.id);
             console.log('Scenario IDs in target workspace:', scenarios);
             console.log('Context items with scenarioId:');
             for (const item of updatedContextItems) {

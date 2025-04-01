@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { DashboardPluginComponentProps } from '../modules/appDashboard/types';
-
 // Simple mock data for chart
 const generateChartData = () => {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];

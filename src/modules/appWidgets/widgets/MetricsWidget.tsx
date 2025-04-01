@@ -1,7 +1,6 @@
 /**
  * Metrics Widget Component
  */
-import React from 'react';
 import { WidgetComponentProps } from '../types';
 import { BarChart3, LineChart, Activity } from 'lucide-react';
 

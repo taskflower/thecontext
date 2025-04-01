@@ -22,6 +22,13 @@ interface ApiServiceData {
   contextJsonKey?: string; // Klucz w kontekście do znalezienia schematu JSON
 }
 
+interface ResponseData {
+  message: {
+    content: string;
+    parsedJson?: any;
+  };
+}
+
 const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
   data,
   appContext,

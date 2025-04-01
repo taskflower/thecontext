@@ -73,7 +73,7 @@ export const useWidgetStore = create<WidgetStore>()(
       updateDashboard: (id, data) => {
         try {
           set(produce(state => {
-            const dashboard = state.dashboards.find(d => d.id === id);
+            const dashboard = state.dashboards.find((d: DashboardConfig) => d.id === id);
             if (!dashboard) {
               state.error = `Dashboard with id ${id} not found`;
               return;
@@ -96,7 +96,7 @@ export const useWidgetStore = create<WidgetStore>()(
       deleteDashboard: (id) => {
         try {
           set(produce(state => {
-            const index = state.dashboards.findIndex(d => d.id === id);
+            const index = state.dashboards.findIndex((d: DashboardConfig) => d.id === id);
             if (index === -1) {
               state.error = `Dashboard with id ${id} not found`;
               return;
@@ -126,7 +126,7 @@ export const useWidgetStore = create<WidgetStore>()(
           const now = timestamp();
           
           set(produce(state => {
-            const dashboard = state.dashboards.find(d => d.id === dashboardId);
+            const dashboard = state.dashboards.find((d: DashboardConfig) => d.id === dashboardId);
             if (!dashboard) {
               state.error = `Dashboard with id ${dashboardId} not found`;
               return;
@@ -160,13 +160,13 @@ export const useWidgetStore = create<WidgetStore>()(
       updateWidget: (dashboardId, widgetId, data) => {
         try {
           set(produce(state => {
-            const dashboard = state.dashboards.find(d => d.id === dashboardId);
+            const dashboard = state.dashboards.find((d: DashboardConfig) => d.id === dashboardId);
             if (!dashboard) {
               state.error = `Dashboard with id ${dashboardId} not found`;
               return;
             }
             
-            const widget = dashboard.widgets.find(w => w.id === widgetId);
+            const widget = dashboard.widgets.find((w: WidgetConfig) => w.id === widgetId);
             if (!widget) {
               state.error = `Widget with id ${widgetId} not found`;
               return;
@@ -199,13 +199,13 @@ export const useWidgetStore = create<WidgetStore>()(
       deleteWidget: (dashboardId, widgetId) => {
         try {
           set(produce(state => {
-            const dashboard = state.dashboards.find(d => d.id === dashboardId);
+            const dashboard = state.dashboards.find((d: DashboardConfig) => d.id === dashboardId);
             if (!dashboard) {
               state.error = `Dashboard with id ${dashboardId} not found`;
               return;
             }
             
-            const widgetIndex = dashboard.widgets.findIndex(w => w.id === widgetId);
+            const widgetIndex = dashboard.widgets.findIndex((w: WidgetConfig) => w.id === widgetId);
             if (widgetIndex === -1) {
               state.error = `Widget with id ${widgetId} not found`;
               return;
@@ -259,7 +259,7 @@ export const useWidgetStore = create<WidgetStore>()(
         // Basic state merge
         const mergedState = {
           ...currentState,
-          ...persistedState,
+          ...persistedState as object,
           isLoading: false,
           error: null,
         };
@@ -267,18 +267,18 @@ export const useWidgetStore = create<WidgetStore>()(
         // Data cleanup/validation
         if (Array.isArray(mergedState.dashboards)) {
           // Validate each dashboard
-          mergedState.dashboards = mergedState.dashboards.filter(dashboard => 
-            dashboard && 
-            typeof dashboard === 'object' && 
-            typeof dashboard.id === 'string' && 
-            typeof dashboard.name === 'string' &&
-            Array.isArray(dashboard.widgets)
+          mergedState.dashboards = mergedState.dashboards.filter((d: DashboardConfig) => 
+            d && 
+            typeof d === 'object' && 
+            typeof d.id === 'string' && 
+            typeof d.name === 'string' &&
+            Array.isArray(d.widgets)
           );
           
           // Validate widgets in each dashboard
-          mergedState.dashboards.forEach(dashboard => {
-            if (dashboard.widgets) {
-              dashboard.widgets = dashboard.widgets.filter(widget => 
+          mergedState.dashboards.forEach((d: DashboardConfig) => {
+            if (d.widgets) {
+              d.widgets = d.widgets.filter(widget => 
                 widget && 
                 typeof widget === 'object' && 
                 typeof widget.id === 'string' && 
@@ -293,7 +293,7 @@ export const useWidgetStore = create<WidgetStore>()(
         
         // Validate selectedDashboardId
         if (mergedState.selectedDashboardId && 
-            (!mergedState.dashboards.some(d => d.id === mergedState.selectedDashboardId))) {
+            (!mergedState.dashboards.some((d: DashboardConfig) => d.id === mergedState.selectedDashboardId))) {
           mergedState.selectedDashboardId = null;
         }
         

@@ -10,12 +10,10 @@ import {
 import PluginCard from "./components/PluginCard";
 import EditorPluginWrapper from "./wrappers/EditorPluginWrapper";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PluginType } from "./types";
 import { Badge } from "@/components/ui/badge";
 import {
   PanelRight,
   LayoutDashboard,
-  Grid3X3,
   Box,
   Puzzle,
 } from "lucide-react";

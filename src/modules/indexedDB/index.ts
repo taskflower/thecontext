@@ -96,6 +96,7 @@ class IndexedDBManager {
       this.currentVersion = newVersion;
       
       this.dbPromise = openDB(DB_NAME, newVersion, {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         upgrade: (db, _oldVersion, _newVersion) => {
           console.log(`Creating object store: ${collectionName}`);
           // Create object store with auto-incrementing key if it doesn't exist

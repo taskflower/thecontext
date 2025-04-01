@@ -1,7 +1,7 @@
 /**
  * Dashboard component to display widgets
  */
-import React, { useMemo } from 'react';
+import  { useMemo } from 'react';
 import { useWidgetStore } from './widgetStore';
 import { WidgetWrapper } from './WidgetWrapper';
 import { Plus } from 'lucide-react';

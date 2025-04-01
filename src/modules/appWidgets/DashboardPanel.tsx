@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useWidgetStore } from './widgetStore';
 import { useAppStore } from '@/modules/store';
 import { Badge } from '@/components/ui/badge';
-import { LayoutDashboard, Plus, Trash2, Edit, Link2, Copy } from 'lucide-react';
+import { LayoutDashboard, Plus, Trash2, Edit, Link2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import Dashboard from './Dashboard';
@@ -94,7 +94,7 @@ export function DashboardPanel() {
     useWidgetStore.getState().createDashboard({
       name,
       description,
-      workspaceId: workspaceId === 'none' ? null : workspaceId,
+      workspaceId: workspaceId === 'none' ? "" : workspaceId,
     });
     
     setIsCreatingDashboard(false);
@@ -106,7 +106,7 @@ export function DashboardPanel() {
     useWidgetStore.getState().updateDashboard(editId, {
       name,
       description,
-      workspaceId: workspaceId === 'none' ? null : workspaceId,
+     workspaceId: workspaceId === 'none' ? undefined : workspaceId,
     });
     
     setIsEditingDashboard(false);

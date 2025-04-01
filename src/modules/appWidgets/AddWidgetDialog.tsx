@@ -1,13 +1,13 @@
 /**
  * Add widget dialog component
  */
-import React, { useState, useMemo } from 'react';
+import  { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Tab, Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {  Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Layout, BadgeCheck } from 'lucide-react';
 import { useWidgetStore } from './widgetStore';
 import { getAllWidgets, getWidgetsByCategories } from './widgetRegistry';

@@ -1,7 +1,7 @@
 /**
  * Status Widget Component
  */
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { WidgetComponentProps } from '../types';
 import { Server, CheckCircle, Cpu } from 'lucide-react';
 

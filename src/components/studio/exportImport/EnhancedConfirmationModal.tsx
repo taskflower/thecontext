@@ -28,7 +28,7 @@ export const EnhancedConfirmationModal: React.FC<EnhancedConfirmationModalProps>
         <div className="py-2">
           <p className="mb-2">{message}</p>
 
-          <Alert variant="warning" className="mt-4">
+          <Alert variant="destructive" className="mt-4">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               This action will modify your workspaces and scenarios. Make sure you have a backup before proceeding.
