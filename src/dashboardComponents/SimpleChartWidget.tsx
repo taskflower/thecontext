@@ -1,6 +1,6 @@
 // src/dashboardComponents/SimpleChartWidget.tsx
-import React, { useEffect, useState } from 'react';
-import { PluginComponentProps } from '../modules/plugins/types';
+import{ useEffect, useState } from 'react';
+import { PluginComponentWithSchema } from '../modules/plugins/types';
 
 interface SimpleChartData {
   title?: string;
@@ -16,7 +16,7 @@ interface SimpleChartData {
   };
 }
 
-const SimpleChartWidget: React.FC<PluginComponentProps<SimpleChartData>> = ({ 
+const SimpleChartWidget: PluginComponentWithSchema<SimpleChartData> = ({ 
   data,
   appContext 
 }) => {

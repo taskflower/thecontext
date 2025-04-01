@@ -6,7 +6,12 @@ interface ChartData {
   values: number[];
 }
 
-const ChartDashboardPlugin: React.FC<DashboardPluginComponentProps> = ({
+export interface DashboardPluginComponentWithSettings<T = unknown> 
+  extends React.FC<DashboardPluginComponentProps<T>> {
+  pluginSettings?: Record<string, unknown>;
+}
+
+const ChartDashboardPlugin: DashboardPluginComponentWithSettings = ({
   data,
   onRefresh
 }) => {

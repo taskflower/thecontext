@@ -8,7 +8,12 @@ interface StatisticsData {
   contexts: number;
 }
 
-const StatisticsDashboardPlugin: React.FC<DashboardPluginComponentProps> = ({
+export interface DashboardPluginComponentWithSettings<T = unknown> 
+  extends React.FC<DashboardPluginComponentProps<T>> {
+  pluginSettings?: Record<string, unknown>;
+}
+
+const StatisticsDashboardPlugin: DashboardPluginComponentWithSettings = ({
   data,
   onRefresh
 }) => {
