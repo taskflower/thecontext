@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDashboardStore } from '../dashboardStore';
 import { useAppStore } from '@/modules/store';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { LayoutGrid, Plus } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';

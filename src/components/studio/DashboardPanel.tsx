@@ -26,7 +26,7 @@ const DashboardPanel: React.FC = () => {
   
   // Get dashboards from dashboard store
   const { 
-    addDashboard, 
+    createDashboard, 
     dashboards, 
     updateDashboard,
     deleteDashboard,
@@ -52,7 +52,7 @@ const DashboardPanel: React.FC = () => {
       widgets: []
     };
     
-    addDashboard(dashboardData);
+    createDashboard(dashboardData);
     setIsCreatingDashboard(false);
   };
   
