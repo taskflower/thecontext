@@ -4,8 +4,9 @@ import useDynamicComponentStore from './pluginsStore';
 import { PluginType } from './types';
 import { SystemConfig } from '../systemConfig';
 
-// Flag to track if components have been loaded
+// Flags to track plugin loading state
 let componentsLoaded = false;
+let componentsLoading = false;
 
 /**
  * Configuration for plugin discovery
@@ -47,11 +48,20 @@ const createBasicComponent = (name: string, content: string) => {
  * Uses dynamic Vite imports to load components from dynamic and dashboard components folders
  */
 export async function discoverAndLoadComponents(config?: PluginDiscoveryConfig) {
-  // Skip if components already loaded
+  // Skip if components already loaded or currently loading
   if (componentsLoaded) {
     console.log('Plugin components already loaded, skipping discovery');
     return;
   }
+  
+  // Prevent concurrent loading attempts
+  if (componentsLoading) {
+    console.log('Plugin discovery already in progress, skipping duplicate call');
+    return;
+  }
+  
+  // Set loading flag
+  componentsLoading = true;
 
   // Merge with default config
   const finalConfig = { ...defaultDiscoveryConfig, ...config };
@@ -78,6 +88,10 @@ export async function discoverAndLoadComponents(config?: PluginDiscoveryConfig) 
     
     // Add fallback components even if there's an error
     registerFallbackComponents(store);
+  }
+  finally {
+    // Always reset loading flag
+    componentsLoading = false;
   }
 }
 

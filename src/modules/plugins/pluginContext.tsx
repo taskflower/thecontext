@@ -45,14 +45,20 @@ export const PluginProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const store = useDynamicComponentStore();
   const getComponentKeys = store.getComponentKeys;
   
-  // Initialize plugins
+  // Initialize plugins with proper error handling
   useEffect(() => {
+    // Track if the effect has been cleaned up
+    let isMounted = true;
+    
     const initPlugins = async () => {
       try {
         console.log('Initializing plugin system...');
         
         // Discover and load plugins
         await discoverAndLoadComponents();
+        
+        // Skip state updates if component unmounted
+        if (!isMounted) return;
         
         // Initialize plugin state
         const keys = getComponentKeys();
@@ -66,12 +72,21 @@ export const PluginProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       } catch (error) {
         console.error('Failed to initialize plugin system:', error);
         
+        // Skip state updates if component unmounted
+        if (!isMounted) return;
+        
         // Even on error, mark as loaded to prevent UI from hanging
         setIsLoaded(true);
       }
     };
     
+    // Start plugin initialization
     initPlugins();
+    
+    // Cleanup function that runs on unmount
+    return () => {
+      isMounted = false;
+    };
   }, [getComponentKeys]);
   
   // Memoize plugin registration functions to prevent re-renders
@@ -135,13 +150,23 @@ export const PluginProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     return store.getComponentKeysByType(type);
   }, [store]);
   
-  // Get plugins by type
+  // Get plugins by type with error handling
   const getPluginsByType = useCallback((type: PluginType): Plugin[] => {
-    return store.getComponentKeysByType(type).map(key => ({
-      key,
-      enabled: isPluginEnabled(key),
-      type
-    }));
+    try {
+      // Get component keys filtered by type
+      const keys = store.getComponentKeysByType(type);
+      
+      // Map to plugin objects with additional data
+      return keys.map(key => ({
+        key,
+        enabled: isPluginEnabled(key),
+        type,
+        // Can add additional metadata here if needed
+      }));
+    } catch (err) {
+      console.error(`Error getting plugins of type ${type}:`, err);
+      return []; // Return empty array on error
+    }
   }, [store, isPluginEnabled]);
   
   // Get plugin type

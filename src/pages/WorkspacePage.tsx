@@ -11,7 +11,7 @@ import {
   WorkspaceHeader,
 } from "@/components/frontApp";
 
-import { WorkspaceDashboard } from "@/modules/appDashboard";
+import { WorkspaceDashboard } from "@/modules/appWidgets";
 
 const WorkspacePage = () => {
   // Fixed state initialization - useState returns [value, setter function]

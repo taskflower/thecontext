@@ -3,7 +3,7 @@ import { PluginsApp } from "@/modules/plugins";
 import { FiltersList } from "@/modules/filters";
 import { ContextsList } from "@/modules/context";
 import { useAppStore } from "@/modules/store";
-import { useDashboardStore } from "@/modules/appDashboard/dashboardStore";
+import { useWidgetStore } from "@/modules/appWidgets";
 import React, { useState, useEffect } from "react";
 import ExportImport from "./exportImport/ExportImport";
 
@@ -35,10 +35,10 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({
   // State for dashboard title
   const [dashboardTitle, setDashboardTitle] = useState("Dashboard");
 
-  // Subscribe to dashboard store changes
+  // Subscribe to dashboard store changes with proper cleanup
   useEffect(() => {
-    // Create a subscription to dashboard store
-    const unsubscribe = useDashboardStore.subscribe((state) => {
+    // Handler function to update title based on selected dashboard
+    const handleDashboardChange = (state: any) => {
       const selectedId = state.selectedDashboardId;
       if (!selectedId) {
         setDashboardTitle("Dashboard");
@@ -51,20 +51,18 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({
       } else {
         setDashboardTitle("Dashboard");
       }
-    });
+    };
 
-    // Initial setup
-    const state = useDashboardStore.getState();
-    const selectedId = state.selectedDashboardId;
-    if (selectedId) {
-      const dashboard = state.getDashboard(selectedId);
-      if (dashboard) {
-        setDashboardTitle(`Dashboard - ${dashboard.name}`);
-      }
-    }
+    // Create a subscription to dashboard store
+    const unsubscribe = useWidgetStore.subscribe(handleDashboardChange);
+
+    // Initial setup by calling the handler with current state
+    handleDashboardChange(useWidgetStore.getState());
 
     // Cleanup subscription on unmount
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   return (

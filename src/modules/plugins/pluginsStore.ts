@@ -32,32 +32,59 @@ const useDynamicComponentStore = create<DynamicComponentStore>()(
         key: string, 
         component: ComponentType<PluginComponentProps>,
         type: PluginType = 'flow'
-      ) =>
+      ) => {
+        // Check if component is already registered with same type
+        const state = get();
+        if (state.components[key] && state.pluginTypes[key] === type) {
+          console.log(`Component already registered: ${key} (type: ${type})`);
+          return; // Skip if already registered with same type
+        }
+        
         set(
           produce((state) => {
+            // Register the component
             state.components[key] = component;
+            
             // Initialize component data if not already present
             if (!state.componentData[key]) {
               state.componentData[key] = null;
             }
+            
             // Set plugin type
             state.pluginTypes[key] = type;
+            
             console.log(`Component registered: ${key} (type: ${type})`);
           })
-        ),
+        );
+      },
 
       /**
        * Unregisters a component from the store
        * @param key Unique identifier of the component to unregister
        */
-      unregisterComponent: (key: string) =>
+      unregisterComponent: (key: string) => {
+        // Check if component exists before trying to unregister
+        const state = get();
+        if (!state.components[key]) {
+          console.log(`Component not found for unregistration: ${key}`);
+          return;
+        }
+        
         set(
           produce((state) => {
+            // Remove component
             delete state.components[key];
+            
+            // Remove plugin type
             delete state.pluginTypes[key];
+            
+            // Don't remove the data to allow persistence between sessions
+            // If needed, the data can be explicitly cleared with setComponentData(key, null)
+            
             console.log(`Component unregistered: ${key}`);
           })
-        ),
+        );
+      },
 
       /**
        * Sets data for a specific component
@@ -106,9 +133,14 @@ const useDynamicComponentStore = create<DynamicComponentStore>()(
        * @returns Array of component keys matching the specified type
        */
       getComponentKeysByType: (type: PluginType): string[] => {
-        const { pluginTypes } = get();
+        const { pluginTypes, components } = get();
+        
+        // Filter by plugin type and ensure component still exists
         return Object.entries(pluginTypes)
-          .filter(([, pluginType]) => pluginType === type)
+          .filter(([key, pluginType]) => 
+            pluginType === type && 
+            components[key] !== undefined
+          )
           .map(([key]) => key);
       },
       
