@@ -24,6 +24,10 @@ export const useDashboardStore = create<DashboardStore>()(
         return get().dashboards.find(dashboard => dashboard.id === id);
       },
       
+      getDashboardByWorkspaceId: (workspaceId: string) => {
+        return get().dashboards.find(dashboard => dashboard.workspaceId === workspaceId);
+      },
+      
       getWidget: (dashboardId: string, widgetId: string) => {
         const dashboard = get().getDashboard(dashboardId);
         if (!dashboard) return undefined;

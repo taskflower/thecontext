@@ -51,7 +51,19 @@ const Dashboard: React.FC<DashboardProps> = ({ dashboardId }) => {
   return (
     <div className="h-full flex flex-col">
       <div className="p-4 border-b flex justify-between items-center">
-        <h1 className="text-xl font-semibold">{currentDashboard.name}</h1>
+        <div>
+          <h1 className="text-xl font-semibold">{currentDashboard.name}</h1>
+          {currentDashboard.description && (
+            <p className="text-sm text-muted-foreground">{currentDashboard.description}</p>
+          )}
+          {currentDashboard.workspaceId && (
+            <div className="flex items-center mt-1">
+              <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                Workspace Dashboard
+              </span>
+            </div>
+          )}
+        </div>
         <Button onClick={handleAddWidget}>Add Widget</Button>
       </div>
       

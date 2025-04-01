@@ -3,15 +3,28 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
 import { Input } from '../../../components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select';
 import { useDashboardStore } from '../dashboardStore';
+import { useAppStore } from '@/modules/store';
 import { DashboardConfig } from '../types';
 
 interface CreateDashboardDialogProps {
   onClose: () => void;
+  workspaceId?: string | null; // If undefined, show selection; if string, force that workspace; if null, force global
 }
 
-const CreateDashboardDialog: React.FC<CreateDashboardDialogProps> = ({ onClose }) => {
+const CreateDashboardDialog: React.FC<CreateDashboardDialogProps> = ({ 
+  onClose,
+  workspaceId 
+}) => {
   const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(
+    workspaceId === undefined ? null : workspaceId
+  );
+  
+  // Get workspaces for selection if needed
+  const workspaces = useAppStore(state => state.items);
   
   const { createDashboard, setSelectedDashboard } = useDashboardStore();
   
@@ -22,14 +35,16 @@ const CreateDashboardDialog: React.FC<CreateDashboardDialogProps> = ({ onClose }
     
     const newDashboard: Omit<DashboardConfig, 'id'> = {
       name,
+      description: description || `Dashboard created on ${new Date().toLocaleDateString()}`,
       widgets: [],
+      workspaceId: selectedWorkspaceId === null ? undefined : selectedWorkspaceId,
       metadata: {},
     };
     
     const dashboardId = createDashboard(newDashboard);
     setSelectedDashboard(dashboardId);
     onClose();
-  }, [createDashboard, name, onClose, setSelectedDashboard]);
+  }, [createDashboard, name, description, selectedWorkspaceId, onClose, setSelectedDashboard]);
   
   return (
     <Dialog open={true} onOpenChange={onClose}>
@@ -49,6 +64,41 @@ const CreateDashboardDialog: React.FC<CreateDashboardDialogProps> = ({ onClose }
               required
             />
           </div>
+          
+          <div className="grid w-full items-center gap-1.5">
+            <Label htmlFor="dashboard-description">Description</Label>
+            <Input
+              id="dashboard-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Dashboard description (optional)"
+            />
+          </div>
+          
+          {workspaceId === undefined && (
+            <div className="grid w-full items-center gap-1.5">
+              <Label htmlFor="dashboard-workspace">Associate with Workspace</Label>
+              <Select 
+                value={selectedWorkspaceId || "none"} 
+                onValueChange={(value) => setSelectedWorkspaceId(value === "none" ? null : value)}
+              >
+                <SelectTrigger id="dashboard-workspace">
+                  <SelectValue placeholder="Select a workspace (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None (Global Dashboard)</SelectItem>
+                  {workspaces.map(workspace => (
+                    <SelectItem key={workspace.id} value={workspace.id}>
+                      {workspace.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                Associating with a workspace will make it appear in that workspace's page
+              </p>
+            </div>
+          )}
           
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>

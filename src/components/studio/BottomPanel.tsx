@@ -3,9 +3,11 @@ import { PluginsApp } from "@/modules/plugins";
 import { FiltersList } from "@/modules/filters";
 import { ContextsList } from "@/modules/context";
 import { useAppStore } from "@/modules/store";
-import React from "react";
+import { useDashboardStore } from "@/modules/appDashboard/dashboardStore";
+import React, { useState, useEffect } from "react";
 import ExportImport from "./exportImport/ExportImport";
 import DatabaseConfigurator from "@/modules/databaseConfigurator/componentst/DatabaseConfigurator";
+import DashboardPanel from "./DashboardPanel";
 
 
 type PanelContentType =
@@ -14,6 +16,7 @@ type PanelContentType =
   | "conversation"
   | "plugins"
   | "exportimport"
+  | "dashboard"
   | "";
 
 interface BottomPanelProps {
@@ -28,6 +31,43 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({
   // Get selected workspace for context
   const selectedWorkspaceId = useAppStore((state) => state.selected.workspace);
   const selectedScenarioId = useAppStore((state) => state.selected.scenario);
+  
+  // State for dashboard title
+  const [dashboardTitle, setDashboardTitle] = useState("Dashboard");
+  
+  // Subscribe to dashboard store changes
+  useEffect(() => {
+    // Create a subscription to dashboard store
+    const unsubscribe = useDashboardStore.subscribe(
+      (state) => {
+        const selectedId = state.selectedDashboardId;
+        if (!selectedId) {
+          setDashboardTitle("Dashboard");
+          return;
+        }
+        
+        const dashboard = state.getDashboard(selectedId);
+        if (dashboard) {
+          setDashboardTitle(`Dashboard - ${dashboard.name}`);
+        } else {
+          setDashboardTitle("Dashboard");
+        }
+      }
+    );
+    
+    // Initial setup
+    const state = useDashboardStore.getState();
+    const selectedId = state.selectedDashboardId;
+    if (selectedId) {
+      const dashboard = state.getDashboard(selectedId);
+      if (dashboard) {
+        setDashboardTitle(`Dashboard - ${dashboard.name}`);
+      }
+    }
+    
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, []);
 
   return (
     <div className="border-t border-border bg-background flex flex-col h-2/3">
@@ -38,7 +78,7 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({
           {content === "conversation" && "Conversation History"}
           {content === "plugins" && "Plugins"}
           {content === "exportimport" && "Export/Import"}
-          {content === "appmanagement" && "Application Management"}
+          {content === "dashboard" && dashboardTitle}
         </h3>
         <button className="p-1 rounded-md hover:bg-muted/50" onClick={onClose}>
           <span className="sr-only">Close panel</span>
@@ -99,13 +139,17 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({
         )}
         {content === "conversation" && (
           <div className="p-4">
-            {/* <HistoryView /> */}
             <DatabaseConfigurator/>
           </div>
         )}
         {content === "exportimport" && (
           <div className="p-4">
             <ExportImport />
+          </div>
+        )}
+        {content === "dashboard" && (
+          <div className="h-full overflow-auto">
+            <DashboardPanel />
           </div>
         )}
       </div>

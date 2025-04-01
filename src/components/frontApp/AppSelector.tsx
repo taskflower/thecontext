@@ -47,8 +47,8 @@ const AppSelector: React.FC = () => {
       description: "Panel kontrolny aplikacji z widgetami",
       icon: <LayoutDashboard className="h-5 w-5 mr-2 text-orange-500" />,
       setupFunction: async () => {
-        // Navigate to dashboard
-        navigate('/dashboard');
+        // Navigate to home which is now Dashboard
+        navigate('/');
       }
     },
     {

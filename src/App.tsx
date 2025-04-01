@@ -27,11 +27,10 @@ function App() {
           <div className="content">
             <Suspense fallback={<LoadingFallback />}>
               <Routes>
-                <Route path="/" element={<WorkspacePage />} />
+                <Route path="/" element={<AppDashboardPage />} />
                 <Route path="/rd" element={<EnergyTraderTraining />} />
                 <Route path="/:slug" element={<WorkspacePage />} />
                 <Route path="/studio" element={<Studio />} />
-                <Route path="/dashboard" element={<AppDashboardPage />} />
                 <Route path="/payment/success" element={<PaymentSuccessPage />} />
               </Routes>
             </Suspense>

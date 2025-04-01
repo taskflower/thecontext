@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { WorkspaceDashboard } from "@/modules/appDashboard";
 
 const WorkspacePage = () => {
   // Fixed state initialization - useState returns [value, setter function]
@@ -118,9 +119,16 @@ const WorkspacePage = () => {
                 Add Scenario
               </Button>
             </div>
-
+            
             <Separator className="my-6" />
-
+            
+            {/* Workspace Dashboard */}
+            <div className="mb-8">
+              <WorkspaceDashboard workspaceId={currentWorkspace?.id} />
+            </div>
+            
+            <h3 className="text-xl font-semibold mb-4">Scenarios</h3>
+            
             {matchingScenarios.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {matchingScenarios.map((scenario) => (

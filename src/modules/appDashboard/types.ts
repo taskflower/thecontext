@@ -27,6 +27,8 @@ export interface DashboardWidgetConfig {
   pluginData?: Record<string, unknown>;
   /** Widget metadata */
   metadata?: Record<string, unknown>;
+  /** Widget workspace ID (optional) */
+  workspaceId?: string;
 }
 
 /**
@@ -37,10 +39,14 @@ export interface DashboardConfig {
   id: string;
   /** Dashboard name */
   name: string;
+  /** Dashboard description */
+  description?: string;
   /** Widgets configuration */
   widgets: DashboardWidgetConfig[];
   /** Dashboard metadata */
   metadata?: Record<string, unknown>;
+  /** Associated workspace ID (optional) */
+  workspaceId?: string;
   /** Creation date */
   createdAt?: Date;
   /** Last updated date */
@@ -57,6 +63,8 @@ export interface DashboardPluginComponentProps<T = unknown> extends PluginCompon
   widgetId?: string;
   /** Dashboard ID */
   dashboardId?: string;
+  /** Workspace ID */
+  workspaceId?: string;
   /** Widget refresh callback */
   onRefresh?: () => void;
   /** Widget configuration change callback */
@@ -78,6 +86,8 @@ export interface DashboardStore {
   
   /** Get dashboard by ID */
   getDashboard: (id: string) => DashboardConfig | undefined;
+  /** Get dashboard by workspace ID */
+  getDashboardByWorkspaceId: (workspaceId: string) => DashboardConfig | undefined;
   /** Get widget by ID */
   getWidget: (dashboardId: string, widgetId: string) => DashboardWidgetConfig | undefined;
   
