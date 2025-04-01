@@ -79,7 +79,7 @@ export const ViewContext: React.FC<ViewContextProps> = ({
       title="Podgląd elementu kontekstu"
       description="Szczegóły elementu kontekstu"
       footer={renderFooter()}
-      size={contextItem.type === ContextType.INDEXED_DB ? "lg" : "md"}
+      
     >
       <div className="space-y-4">
         <div>

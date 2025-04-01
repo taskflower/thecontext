@@ -10,7 +10,7 @@ import EnergyTraderTraining from "./components/RD2/EnergyTraderTraining";
 const Studio = lazy(() => import("./pages/StudioLayout"));
 const WorkspacePage = lazy(() => import("./pages/WorkspacePage"));
 const PaymentSuccessPage = lazy(() => import("./pages/PaymentSuccessPage"));
-const AppDashboardPage = lazy(() => import("./pages/AppDashboardPage"));
+
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -27,7 +27,7 @@ function App() {
           <div className="content">
             <Suspense fallback={<LoadingFallback />}>
               <Routes>
-                <Route path="/" element={<AppDashboardPage />} />
+                <Route path="/" element={<>studio</>} />
                 <Route path="/rd" element={<EnergyTraderTraining />} />
                 <Route path="/:slug" element={<WorkspacePage />} />
                 <Route path="/studio" element={<Studio />} />

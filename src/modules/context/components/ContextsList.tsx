@@ -18,9 +18,7 @@ interface ContextsListProps {
 }
 
 const ContextsList: React.FC<ContextsListProps> = ({ 
-  scenarioId,
-  onOpenDatabaseConfigurator
-}) => {
+  scenarioId}) => {
   const getContextItems = useAppStore((state) => state.getContextItems);
   const deleteContextItem = useAppStore((state) => state.deleteContextItem);
   const updateContextItem = useAppStore((state) => state.updateContextItem);
@@ -112,6 +110,10 @@ const ContextsList: React.FC<ContextsListProps> = ({
     state.checkScenarioFilterMatch(currentScenarioId)
   );
 
+  const activeFiltersCount = useAppStore(state => 
+    state.getScenarioFilters(currentScenarioId).filter(f => f.enabled).length
+  );
+
   return (
     <div className="h-full flex flex-col">
       {/* Nagłówek elementów kontekstu */}
@@ -140,13 +142,9 @@ const ContextsList: React.FC<ContextsListProps> = ({
       {/* Status filtrów */}
       {hasActiveFilters && (
         <FilterStatusBanner
-          filtersMatch={filtersMatch}
-          activeFiltersCount={
-            useAppStore(state => 
-              state.getScenarioFilters(currentScenarioId).filter(f => f.enabled).length
-            )
-          }
-        />
+        filtersMatch={filtersMatch}
+        activeFiltersCount={activeFiltersCount}
+      />
       )}
       
       {/* Pasek filtrów */}

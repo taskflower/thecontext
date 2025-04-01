@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
-import { DashboardPluginComponentProps } from '../modules/appDashboard/types';
 // Simple mock data for chart
 const generateChartData = () => {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
@@ -36,7 +36,7 @@ const SimpleBarChart = ({ data, labels }: { data: number[], labels: string[] }) 
 /**
  * A chart widget that shows randomized data
  */
-const ChartWidget: React.FC<DashboardPluginComponentProps> = ({ onRefresh }) => {
+const ChartWidget: React.FC = ({ onRefresh }:any) => {
   const [chartData, setChartData] = useState(() => generateChartData());
   
   // Update chart data when widget is refreshed

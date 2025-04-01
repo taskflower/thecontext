@@ -1,7 +1,7 @@
  
 // src/modules/graph/types.ts
 import { PluginDataMap } from "../plugins/types";
-import { BaseItem } from "../store";
+import { BaseItem, ItemType } from "../store";
 
 // Position interface for nodes
 export interface Position {
@@ -55,7 +55,7 @@ export interface Edge extends BaseItem {
   source: string;
   target: string;
   label?: string;
-  type: string;
+  type: ItemType;
 }
 
 export interface EdgeActions {
@@ -68,5 +68,5 @@ export interface EdgePayload {
   source: string;
   target: string;
   label?: string;
-  type?: string;
+  type?: ItemType;
 }

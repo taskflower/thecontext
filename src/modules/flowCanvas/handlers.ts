@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { Connection, Node, NodeChange } from "reactflow";
-import { useAppStore } from "../store";
+import { TYPES, useAppStore } from "../store";
 import { usePanelStore } from "../PanelStore";
 
 /**
@@ -23,7 +23,7 @@ export const useFlowHandlers = () => {
         addEdge({
           source: params.source,
           target: params.target,
-          type: "step",
+          type: TYPES.EDGE,
         });
       }
     },

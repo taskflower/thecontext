@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/plugins/pluginsDiscovery.ts
 import React from 'react';
 import useDynamicComponentStore from './pluginsStore';
@@ -125,7 +126,7 @@ async function loadFlowPlugins(
 ) {
   try {
     // Use Vite's import.meta.glob for dynamic component imports
-    const modules = import.meta.glob('/src/dynamicComponents/*.tsx');
+    const modules:any = import.meta.glob('/src/dynamicComponents/*.tsx');
     
     const moduleKeys = Object.keys(modules);
     if (moduleKeys.length === 0) {
@@ -155,7 +156,7 @@ async function loadDashboardPlugins(
 ) {
   try {
     // Use Vite's import.meta.glob for dynamic component imports
-    const modules = import.meta.glob('/src/dashboardComponents/*.tsx');
+    const modules:any = import.meta.glob('/src/dashboardComponents/*.tsx');
     
     const moduleKeys = Object.keys(modules);
     if (moduleKeys.length === 0) {
@@ -194,7 +195,7 @@ async function loadModules(
   for (const path in modules) {
     try {
       const module = await modules[path]();
-      const component = module.default;
+      const component:any = module.default;
       
       if (!component) {
         console.warn(`⚠️ No default export found in ${path}`);

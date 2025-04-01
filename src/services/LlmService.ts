@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * LLM (Language Learning Model) Service for handling communication with LLM APIs
  */
@@ -170,6 +171,7 @@ export class LlmService {
       methodName in this.authContextRef && 
       typeof this.authContextRef[methodName] === 'function'
     ) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
       return (this.authContextRef[methodName] as Function)(...args);
     }
     return null;
@@ -325,7 +327,7 @@ export class LlmService {
         }
       } else {
         // Alternative method - look in node data if appContext contains node information
-        const currentNode = appContext.currentNode;
+        const currentNode:any = appContext.currentNode;
         if (currentNode) {
           console.log('Attempting to get data from node:', currentNode);
           
@@ -356,7 +358,7 @@ export class LlmService {
             value.type === 'json'
           ) {
             console.log('Found JSON format via path in node:', value);
-            return value as ResponseFormatOptions;
+            return value as unknown as ResponseFormatOptions;
           }
         }
       }

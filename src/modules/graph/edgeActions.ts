@@ -1,7 +1,7 @@
 import { StateCreator } from "zustand";
 import { Draft } from "immer";
 import { EdgeActions, Edge } from "../graph/types";
-import { AppState, TYPES } from "../store";
+import { AppState, ItemType, TYPES } from "../store";
 
 export const createEdgeSlice: StateCreator<
   AppState,
@@ -13,7 +13,7 @@ export const createEdgeSlice: StateCreator<
     source: string;
     target: string;
     label?: string;
-    type?: string;
+    type?: ItemType;
   }) =>
     set((state: Draft<AppState>) => {
       const newEdge: Edge = {

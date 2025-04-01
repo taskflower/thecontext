@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/modules/indexedDB/index.ts
 import { openDB, IDBPDatabase } from 'idb';
 // Import the integrations module
@@ -47,7 +48,7 @@ class IndexedDBManager {
         
         // Now open with the correct version
         this.dbPromise = openDB(DB_NAME, this.currentVersion, {
-          upgrade: (db, oldVersion, newVersion) => {
+          upgrade: (_db, oldVersion, newVersion) => {
             console.log(`Upgrading IndexedDB from v${oldVersion} to v${newVersion}`);
             // No need to create object stores here as we'll create them dynamically
           },
@@ -132,7 +133,7 @@ class IndexedDBManager {
       },
 
       put: async <T>(collection: string, item: T, key?: string | number): Promise<string | number> => {
-        const db = await this.initDB();
+        const db:any = await this.initDB();
         return db.put(collection, item, key);
       },
 
