@@ -15,6 +15,7 @@ import { LayoutDashboard, Plus, Trash2, Edit, Link2 } from 'lucide-react';
 const DashboardPanel: React.FC = () => {
   const [isCreatingDashboard, setIsCreatingDashboard] = useState(false);
   const [deletingDashboardId, setDeletingDashboardId] = useState<string | null>(null);
+  const [editingDashboardId, setEditingDashboardId] = useState<string | null>(null);
   const [newDashboardName, setNewDashboardName] = useState('');
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | 'none'>('none');
   const [dashboardDescription, setDashboardDescription] = useState('');
@@ -24,14 +25,14 @@ const DashboardPanel: React.FC = () => {
   const workspaces = useAppStore(state => state.items);
   const currentWorkspaceId = useAppStore(state => state.selected.workspace);
   
-  // Get dashboards from dashboard store
-  const { 
-    createDashboard, 
-    dashboards, 
-    updateDashboard,
-    deleteDashboard,
-    setSelectedDashboard
-  } = useDashboardStore();
+  // Pobierz store dashboard bezpośrednio
+  const dashboards = useDashboardStore(state => state.dashboards);
+  
+  // Pobierz funkcje ze store
+  const createDashboard = useDashboardStore.getState().createDashboard;
+  const updateDashboard = useDashboardStore.getState().updateDashboard;
+  const deleteDashboard = useDashboardStore.getState().deleteDashboard;
+  const setSelectedDashboard = useDashboardStore.getState().setSelectedDashboard;
   
   // Reset form when dialog closes
   useEffect(() => {
@@ -64,6 +65,35 @@ const DashboardPanel: React.FC = () => {
     if (deletingDashboardId) {
       deleteDashboard(deletingDashboardId);
       setDeletingDashboardId(null);
+    }
+  };
+  
+  const handleEditDashboard = (dashboardId: string) => {
+    // Znajdź dashboard do edycji
+    const dashboard = dashboards.find(d => d.id === dashboardId);
+    if (dashboard) {
+      // Ustaw stan dla formularza edycji
+      setNewDashboardName(dashboard.name);
+      setDashboardDescription(dashboard.description || '');
+      setSelectedWorkspaceId(dashboard.workspaceId || 'none');
+      setEditingDashboardId(dashboardId);
+    }
+  };
+  
+  const saveEditedDashboard = () => {
+    if (editingDashboardId) {
+      // Aktualizuj dashboard
+      updateDashboard(editingDashboardId, {
+        name: newDashboardName.trim(),
+        description: dashboardDescription,
+        workspaceId: selectedWorkspaceId === 'none' ? undefined : selectedWorkspaceId
+      });
+      
+      // Resetuj stan
+      setEditingDashboardId(null);
+      setNewDashboardName('');
+      setDashboardDescription('');
+      setSelectedWorkspaceId('none');
     }
   };
   
@@ -181,6 +211,13 @@ const DashboardPanel: React.FC = () => {
                               >
                                 View
                               </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEditDashboard(dashboard.id)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
                               <Button 
                                 variant="destructive" 
                                 size="sm"
@@ -240,6 +277,13 @@ const DashboardPanel: React.FC = () => {
                                   }}
                                 >
                                   View
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleEditDashboard(dashboard.id)}
+                                >
+                                  <Edit className="h-4 w-4" />
                                 </Button>
                                 <Button 
                                   variant="destructive" 
@@ -320,6 +364,69 @@ const DashboardPanel: React.FC = () => {
             </Button>
             <Button onClick={handleCreateDashboard} disabled={!newDashboardName.trim()}>
               Create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Edit Dashboard Dialog */}
+      <Dialog open={!!editingDashboardId} onOpenChange={(open) => !open && setEditingDashboardId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Dashboard</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-dashboard-name">Dashboard Name</Label>
+              <Input 
+                id="edit-dashboard-name" 
+                value={newDashboardName}
+                onChange={(e) => setNewDashboardName(e.target.value)}
+                placeholder="Dashboard Name"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="edit-dashboard-description">Description</Label>
+              <Input 
+                id="edit-dashboard-description" 
+                value={dashboardDescription}
+                onChange={(e) => setDashboardDescription(e.target.value)}
+                placeholder="Dashboard description (optional)"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="edit-dashboard-workspace">Associate with Workspace</Label>
+              <Select 
+                value={selectedWorkspaceId} 
+                onValueChange={setSelectedWorkspaceId}
+              >
+                <SelectTrigger id="edit-dashboard-workspace">
+                  <SelectValue placeholder="Select a workspace (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None (Global Dashboard)</SelectItem>
+                  {workspaces.map(workspace => (
+                    <SelectItem key={workspace.id} value={workspace.id}>
+                      {workspace.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                Associating a dashboard with a workspace will make it appear in that workspace's page
+              </p>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingDashboardId(null)}>
+              Cancel
+            </Button>
+            <Button onClick={saveEditedDashboard} disabled={!newDashboardName.trim()}>
+              Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>
