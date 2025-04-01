@@ -171,8 +171,9 @@ const FlowGraph: React.FC<FlowGraphProps> = ({
           </button>
         )}
         <button
+          
           onClick={handleNewSession}
-          className="p-2 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90"
+          className="p-3 rounded-md bg-primary text-primary-foreground text-md font-medium hover:bg-primary/90"
           disabled={isFlowPlaying}
         >
           {isFlowPlaying ? "Flow w trakcie..." : "Nowa sesja Flow"}
