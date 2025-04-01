@@ -1,9 +1,9 @@
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { DashboardWidgetConfig } from '../types';
 import { usePlugins } from '../../plugins/pluginContext';
 import { useDashboardStore } from '../dashboardStore';
 import { Card } from '../../../components/ui/card';
-import { Settings, RefreshCw, X, AlertTriangle } from 'lucide-react';
+import { Settings, RefreshCw, X, AlertTriangle, Loader2 } from 'lucide-react';
 import { lazy, Suspense } from 'react';
 
 // Lazy load dialog for better performance
@@ -82,20 +82,56 @@ const WidgetHeader = ({
   </div>
 );
 
+/**
+ * Loading state component
+ */
+const WidgetLoadingState = ({ title }: { title: string }) => (
+  <Card className="shadow-sm overflow-hidden">
+    <div className="flex justify-between items-center p-3 border-b">
+      <h3 className="font-medium text-sm">{title}</h3>
+    </div>
+    <div className="p-4 flex items-center justify-center">
+      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+    </div>
+  </Card>
+);
+
+/**
+ * Dashboard widget component that renders a widget based on its configuration
+ */
 const DashboardWidget: React.FC<DashboardWidgetProps> = ({ widget, dashboardId }) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   
-  // Zamiast selektorów, użyjmy referencji do funkcji
+  // Get store functions directly for better performance
   const updateWidget = useDashboardStore.getState().updateWidget;
   const deleteWidget = useDashboardStore.getState().deleteWidget;
   
-  // Użyj bezpośrednio getPluginComponent i getPluginType
-  const { getPluginComponent, getPluginType } = usePlugins();
-  const pluginType = getPluginType(widget.pluginKey);
-  const PluginComponent = getPluginComponent(widget.pluginKey);
+  // Get plugin information
+  const { getPluginComponent, getPluginType, isLoaded } = usePlugins();
   
-  // Create a stabilny (statyczny) app context to prevent unnecessary re-renders
+  // Calculate plugin component information
+  const pluginInfo = useMemo(() => {
+    if (!isLoaded) {
+      return { isLoading: true, component: null, isValidType: false };
+    }
+    
+    try {
+      const pluginType = getPluginType(widget.pluginKey);
+      const component = getPluginComponent(widget.pluginKey);
+      
+      return {
+        isLoading: false,
+        component,
+        isValidType: pluginType === 'dashboard'
+      };
+    } catch (err) {
+      console.error(`Error loading plugin ${widget.pluginKey}:`, err);
+      return { isLoading: false, component: null, isValidType: false };
+    }
+  }, [getPluginComponent, getPluginType, widget.pluginKey, isLoaded]);
+  
+  // Create a static app context to prevent unnecessary re-renders
   const appContext = useMemo(() => ({
     currentWorkspace: null,
     currentScenario: null,
@@ -107,9 +143,9 @@ const DashboardWidget: React.FC<DashboardWidgetProps> = ({ widget, dashboardId }
     },
     stateVersion: 0,
     getContextItems: () => []
-  }), [/* pusty array zależności, kontekst jest statyczny */]);
+  }), []);
   
-  // Upraszczamy wszystkie funkcje obsługi - bez useCallback
+  // Widget action handlers
   function handleRefresh() {
     setRefreshKey(prev => prev + 1);
   }
@@ -138,8 +174,13 @@ const DashboardWidget: React.FC<DashboardWidgetProps> = ({ widget, dashboardId }
     setIsEditDialogOpen(false);
   }
   
-  // Handle invalid plugin
-  if (!PluginComponent || pluginType !== 'dashboard') {
+  // Handle loading state
+  if (pluginInfo.isLoading) {
+    return <WidgetLoadingState title={widget.title} />;
+  }
+  
+  // Handle invalid plugin type or missing plugin
+  if (!pluginInfo.component || !pluginInfo.isValidType) {
     return (
       <WidgetErrorState 
         title={widget.title} 
@@ -148,6 +189,9 @@ const DashboardWidget: React.FC<DashboardWidgetProps> = ({ widget, dashboardId }
       />
     );
   }
+  
+  // Render widget with plugin component
+  const PluginComponent = pluginInfo.component;
   
   return (
     <Card className="shadow-sm overflow-hidden">
@@ -191,7 +235,7 @@ const DashboardWidget: React.FC<DashboardWidgetProps> = ({ widget, dashboardId }
       </div>
       
       {isEditDialogOpen && (
-        <Suspense fallback={<div className="text-center p-4">Loading...</div>}>
+        <Suspense fallback={<div className="text-center p-4">Loading editor...</div>}>
           <EditWidgetDialog
             dashboardId={dashboardId}
             widgetId={widget.id}
@@ -229,28 +273,27 @@ class ErrorBoundary extends React.Component<
   }
 }
 
-// Używamy areEqual aby zapewnić, że komponent nie renderuje się ponownie,
-// chyba że jego właściwości rzeczywiście się zmieniły
+// Use React.memo with custom comparison function to prevent unnecessary re-renders
 const areEqual = (prevProps: DashboardWidgetProps, nextProps: DashboardWidgetProps) => {
-  // Porównaj ID dashboardu
+  // Compare dashboard ID
   if (prevProps.dashboardId !== nextProps.dashboardId) {
     return false;
   }
   
-  // Porównaj podstawowe właściwości widgetu
+  // Compare basic widget properties
   if (prevProps.widget.id !== nextProps.widget.id || 
       prevProps.widget.title !== nextProps.widget.title ||
       prevProps.widget.pluginKey !== nextProps.widget.pluginKey) {
     return false;
   }
   
-  // Porównaj wymiary
+  // Compare dimensions
   if (prevProps.widget.size.height !== nextProps.widget.size.height ||
       prevProps.widget.size.width !== nextProps.widget.size.width) {
     return false;
   }
   
-  // Płytkie porównanie pluginData
+  // Shallow compare pluginData
   const prevData = prevProps.widget.pluginData || {};
   const nextData = nextProps.widget.pluginData || {};
   const prevKeys = Object.keys(prevData);

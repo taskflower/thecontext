@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '../../../components/ui/dialog';
 import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
@@ -9,7 +9,7 @@ import { usePlugins } from '../../plugins/pluginContext';
 import { useDashboardStore } from '../dashboardStore';
 import { DashboardWidgetConfig } from '../types';
 import { Alert, AlertDescription } from '../../../components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 
 interface AddWidgetDialogProps {
   dashboardId: string;
@@ -51,31 +51,49 @@ const AddWidgetDialog: React.FC<AddWidgetDialogProps> = ({ dashboardId, onClose 
   const [title, setTitle] = useState('');
   const [pluginKey, setPluginKey] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   
-  // Use selectors to prevent unnecessary re-renders
-  const { addWidget } = useDashboardStore(state => ({
-    addWidget: state.addWidget
-  }));
+  // Get access to dashboard store functions
+  const addWidget = useDashboardStore(state => state.addWidget);
   
-  const { getPluginsByType } = usePlugins();
+  // Get plugin system functions
+  const { getPluginsByType, isLoaded } = usePlugins();
   
-  // Memoize dashboard plugins
-  const dashboardPlugins = useMemo(() => 
-    getPluginsByType('dashboard').map(plugin => ({
-      key: plugin.key,
-      name: plugin.name || plugin.key,
-      description: plugin.description
-    })),
-    [getPluginsByType]
-  );
+  // Set loading state based on plugin system loading state
+  useEffect(() => {
+    setIsLoading(!isLoaded);
+  }, [isLoaded]);
   
-  // Show error if no plugins available
-  const noPluginsAvailable = useMemo(() => dashboardPlugins.length === 0, [dashboardPlugins]);
+  // Safely get dashboard plugins
+  const dashboardPlugins = useMemo(() => {
+    if (!isLoaded) return [];
+    
+    try {
+      // Get plugins of type 'dashboard'
+      const plugins = getPluginsByType('dashboard');
+      
+      // Map to simplified structure
+      return plugins.map(plugin => ({
+        key: plugin.key,
+        name: plugin.key, // Use key as name since plugins might not have names
+        description: plugin.description
+      }));
+    } catch (err) {
+      console.error('Error getting dashboard plugins:', err);
+      setError('Failed to load dashboard plugins');
+      return [];
+    }
+  }, [getPluginsByType, isLoaded]);
   
+  // Check if plugins are available
+  const noPluginsAvailable = dashboardPlugins.length === 0;
+  
+  // Handle form submission
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     
+    // Validate inputs
     if (!title.trim()) {
       setError('Please enter a widget title');
       return;
@@ -87,6 +105,7 @@ const AddWidgetDialog: React.FC<AddWidgetDialogProps> = ({ dashboardId, onClose 
     }
     
     try {
+      // Create widget configuration
       const newWidget: Omit<DashboardWidgetConfig, 'id'> = {
         title: title.trim(),
         pluginKey,
@@ -101,20 +120,37 @@ const AddWidgetDialog: React.FC<AddWidgetDialogProps> = ({ dashboardId, onClose 
         pluginData: {},
       };
       
+      // Add the widget to the dashboard
       const widgetId = addWidget(dashboardId, newWidget);
       if (!widgetId) {
         throw new Error('Failed to add widget');
       }
       
+      // Close the dialog on success
       onClose();
     } catch (err) {
       setError(`Error adding widget: ${err instanceof Error ? err.message : String(err)}`);
     }
   }, [addWidget, dashboardId, onClose, pluginKey, title]);
   
+  // Handler for selecting a plugin
   const selectPlugin = useCallback((key: string) => {
     setPluginKey(key);
   }, []);
+  
+  // Loading state
+  if (isLoading) {
+    return (
+      <Dialog open={true} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[500px]">
+          <div className="flex flex-col items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground mt-4">Loading plugins...</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
   
   return (
     <Dialog open={true} onOpenChange={onClose}>

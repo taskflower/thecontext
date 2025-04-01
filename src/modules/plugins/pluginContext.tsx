@@ -48,17 +48,27 @@ export const PluginProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   // Initialize plugins
   useEffect(() => {
     const initPlugins = async () => {
-      // Discover and load plugins
-      await discoverAndLoadComponents();
-      
-      // Initialize plugin state
-      const keys = getComponentKeys();
-      const initialState = Object.fromEntries(
-        keys.map(key => [key, true])
-      );
-      
-      setPluginState(initialState);
-      setIsLoaded(true);
+      try {
+        console.log('Initializing plugin system...');
+        
+        // Discover and load plugins
+        await discoverAndLoadComponents();
+        
+        // Initialize plugin state
+        const keys = getComponentKeys();
+        const initialState = Object.fromEntries(
+          keys.map(key => [key, true])
+        );
+        
+        setPluginState(initialState);
+        setIsLoaded(true);
+        console.log('Plugin system initialized with', keys.length, 'plugins');
+      } catch (error) {
+        console.error('Failed to initialize plugin system:', error);
+        
+        // Even on error, mark as loaded to prevent UI from hanging
+        setIsLoaded(true);
+      }
     };
     
     initPlugins();
