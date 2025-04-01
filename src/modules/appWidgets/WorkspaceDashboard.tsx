@@ -1,6 +1,3 @@
-/**
- * Workspace dashboard component
- */
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useWidgetStore } from './widgetStore';
@@ -21,7 +18,18 @@ export function WorkspaceDashboard({ workspaceId }: WorkspaceDashboardProps) {
   const [isAddingWidget, setIsAddingWidget] = useState(false);
   
   // Get current workspace ID from props or app store
-  const currentWorkspaceId = workspaceId || useAppStore(state => state.selected.workspace);
+  const selectedWorkspaceId = useAppStore(state => state.selected.workspace);
+  const currentWorkspaceId = workspaceId || selectedWorkspaceId;
+  
+  // Get current workspace name/title
+  const workspaceTitle = useAppStore(state => {
+    if (!currentWorkspaceId) return '';
+    // Find the workspace in items array and get its name
+    const workspace = state.items.find(item => 
+      item.id === currentWorkspaceId && item.type === 'workspace'
+    );
+    return workspace?.name || 'Workspace';
+  });
   
   // Get dashboard store data
   const dashboards = useWidgetStore(state => state.dashboards);
@@ -40,7 +48,7 @@ export function WorkspaceDashboard({ workspaceId }: WorkspaceDashboardProps) {
   const createWorkspaceDashboard = () => {
     if (!currentWorkspaceId) return;
     
-    const name = `Dashboard for ${useAppStore.getState().getWorkspaceTitle(currentWorkspaceId)}`;
+    const name = `Dashboard for ${workspaceTitle}`;
     
     const dashboardId = useWidgetStore.getState().createDashboard({
       name,
