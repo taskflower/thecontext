@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useDashboardStore } from '../dashboardStore';
 import { useAppStore } from '@/modules/store';
 import { Button } from '@/components/ui/button';
@@ -15,12 +15,25 @@ interface WorkspaceDashboardProps {
 const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ workspaceId }) => {
   const [isCreatingDashboard, setIsCreatingDashboard] = useState(false);
   const [newDashboardName, setNewDashboardName] = useState('');
-  const { 
-    dashboards, 
-    createDashboard, 
-    getDashboardByWorkspaceId,
-    addWidget
-  } = useDashboardStore();
+  // Użyj indywidualnych selectorów
+  const dashboards = useDashboardStore(state => state.dashboards);
+  
+  // Memoizuj funkcje ze store
+  const createDashboard = useMemo(() => 
+    useDashboardStore.getState().createDashboard, 
+  []);
+  
+  const getDashboardByWorkspaceId = useMemo(() => 
+    useDashboardStore.getState().getDashboardByWorkspaceId, 
+  []);
+  
+  const addWidget = useMemo(() => 
+    useDashboardStore.getState().addWidget, 
+  []);
+  
+  const setSelectedDashboard = useMemo(() => 
+    useDashboardStore.getState().setSelectedDashboard, 
+  []);
   
   // Get the current workspace
   const currentWorkspace = useAppStore(state => {
@@ -32,30 +45,27 @@ const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ workspaceId }) 
   
   const currentWorkspaceId = currentWorkspace?.id;
   
-  // Find dashboard for this workspace
-  const workspaceDashboard = currentWorkspaceId 
-    ? getDashboardByWorkspaceId(currentWorkspaceId)
-    : null;
+  // Find dashboard for this workspace - NIE aktualizujemy wybranego dashboardu tutaj
+  const workspaceDashboard = useMemo(() => {
+    if (!currentWorkspaceId) return null;
+    return getDashboardByWorkspaceId(currentWorkspaceId);
+  }, [currentWorkspaceId, getDashboardByWorkspaceId]);
   
+  // Oddzielny efekt do aktualizacji wybranego dashboardu
+  useEffect(() => {
+    if (workspaceDashboard) {
+      // Tylko jeśli dashboard istnieje, aktualizujemy wybrany dashboard
+      setSelectedDashboard(workspaceDashboard.id);
+    }
+  }, [workspaceDashboard?.id, setSelectedDashboard]);
+
   // Create a default dashboard for the workspace if none exists
   useEffect(() => {
-    if (currentWorkspaceId && !workspaceDashboard && dashboards.length > 0) {
-      // If no workspace dashboard, but other dashboards exist, create one for this workspace
-      const dashboardName = currentWorkspace?.title 
-        ? `${currentWorkspace.title} Dashboard` 
-        : 'Workspace Dashboard';
-      
-      createDashboard({
-        name: dashboardName,
-        description: 'Dashboard for this workspace',
-        workspaceId: currentWorkspaceId,
-        widgets: []
-      });
-    } else if (currentWorkspaceId && !workspaceDashboard && dashboards.length === 0) {
-      // No dashboards at all, prompt the user to create one
+    if (currentWorkspaceId && !workspaceDashboard) {
+      // Always show the creation dialog when no dashboard for workspace
       setIsCreatingDashboard(true);
     }
-  }, [currentWorkspaceId, workspaceDashboard, dashboards.length]);
+  }, [currentWorkspaceId, workspaceDashboard]);
   
   // Handle creating a new dashboard for the workspace
   const handleCreateDashboard = () => {

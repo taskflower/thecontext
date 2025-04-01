@@ -1,14 +1,15 @@
 // src/modules/appDashboard/components/EditWidgetDialog.tsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../components/ui/dialog';
 import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
 import { Input } from '../../../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select';
-import { Tabs, TabsList, TabsTrigger } from '../../../components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../components/ui/tabs';
 import { Textarea } from '../../../components/ui/textarea';
 import { Switch } from '../../../components/ui/switch';
-import { Checkbox } from '../../../components/ui/checkbox';
+import { Slider } from '../../../components/ui/slider';
+import { debounce } from '../../../utils/utils';
 import { usePlugins } from '../../plugins/pluginContext';
 import { useDashboardStore } from '../dashboardStore';
 import { DashboardWidgetConfig } from '../types';
@@ -20,12 +21,175 @@ interface EditWidgetDialogProps {
   onClose: () => void;
 }
 
+/**
+ * Individual form field component
+ */
+const PluginOptionField = ({ 
+  id, 
+  schema, 
+  value, 
+  onChange 
+}: { 
+  id: string; 
+  schema: PluginOptionSchema; 
+  value: any; 
+  onChange: (value: any) => void; 
+}) => {
+  const currentValue = value !== undefined ? value : schema.default;
+  
+  switch (schema.type) {
+    case 'string':
+      return schema.inputType === 'textarea' ? (
+        <Textarea
+          id={id}
+          value={currentValue || ''}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={schema.description}
+          className="resize-none"
+        />
+      ) : (
+        <Input
+          id={id}
+          type={schema.inputType || 'text'}
+          value={currentValue || ''}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={schema.description}
+        />
+      );
+    
+    case 'number':
+      return (
+        <Input
+          id={id}
+          type="number"
+          value={currentValue}
+          onChange={(e) => onChange(parseFloat(e.target.value))}
+          placeholder={schema.description}
+        />
+      );
+    
+    case 'boolean':
+      return (
+        <Switch
+          id={id}
+          checked={!!currentValue}
+          onCheckedChange={onChange}
+        />
+      );
+    
+    case 'select':
+      return (
+        <Select 
+          value={String(currentValue)} 
+          onValueChange={onChange}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder={schema.description} />
+          </SelectTrigger>
+          <SelectContent>
+            {schema.options?.map((option) => (
+              <SelectItem 
+                key={String(option.value)} 
+                value={String(option.value)}
+              >
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      );
+    
+    default:
+      return (
+        <Input
+          id={id}
+          value={currentValue || ''}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={schema.description}
+        />
+      );
+  }
+};
+
+/**
+ * Appearance tab content
+ */
+const AppearanceTab = ({ 
+  widget, 
+  dashboardId, 
+  widgetId, 
+  updateWidget 
+}: { 
+  widget: DashboardWidgetConfig; 
+  dashboardId: string; 
+  widgetId: string; 
+  updateWidget: (dashboardId: string, widgetId: string, data: Partial<DashboardWidgetConfig>) => void; 
+}) => {
+  const [height, setHeight] = useState(widget.size.height);
+  
+  // Create a debounced update function
+  const debouncedUpdateHeight = useCallback(
+    debounce((newHeight: number) => {
+      updateWidget(dashboardId, widgetId, {
+        size: {
+          ...widget.size,
+          height: newHeight
+        }
+      });
+    }, 300),
+    [dashboardId, widgetId, widget.size, updateWidget]
+  );
+  
+  const handleHeightChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newHeight = Number(e.target.value);
+    setHeight(newHeight);
+    debouncedUpdateHeight(newHeight);
+  }, [debouncedUpdateHeight]);
+  
+  return (
+    <div className="space-y-4">
+      <div className="grid w-full items-center gap-1.5">
+        <Label htmlFor="widget-height">Height (pixels)</Label>
+        <div className="flex items-center gap-4">
+          <div className="flex-1">
+            <Slider
+              value={[height]}
+              min={100}
+              max={1000}
+              step={10}
+              onValueChange={(values) => {
+                setHeight(values[0]);
+                debouncedUpdateHeight(values[0]);
+              }}
+            />
+          </div>
+          <div className="w-16">
+            <Input
+              id="widget-height"
+              type="number"
+              value={height}
+              onChange={handleHeightChange}
+              min={100}
+              max={1000}
+              className="w-full"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const EditWidgetDialog: React.FC<EditWidgetDialogProps> = ({ 
   dashboardId, 
   widgetId, 
   onClose 
 }) => {
-  const { updateWidget, getWidget } = useDashboardStore();
+  const { updateWidget, getWidget } = useDashboardStore(state => ({
+    updateWidget: state.updateWidget,
+    getWidget: state.getWidget
+  }));
+  
   const { getPluginComponent } = usePlugins();
   
   // Get the current widget
@@ -38,12 +202,20 @@ const EditWidgetDialog: React.FC<EditWidgetDialogProps> = ({
   );
   const [currentTab, setCurrentTab] = useState<'general' | 'appearance'>('general');
   
-  // Get the widget component to access its optionsSchema
-  const WidgetComponent = widget ? getPluginComponent(widget.pluginKey) : null;
-  const optionsSchema = WidgetComponent && 'optionsSchema' in WidgetComponent 
-    ? (WidgetComponent as any).optionsSchema 
-    : {};
+  // Get the widget component and options schema
+  const WidgetComponent = useMemo(() => 
+    widget ? getPluginComponent(widget.pluginKey) : null, 
+    [widget, getPluginComponent]
+  );
   
+  const optionsSchema = useMemo(() => 
+    WidgetComponent && 'optionsSchema' in WidgetComponent 
+      ? (WidgetComponent as any).optionsSchema 
+      : {},
+    [WidgetComponent]
+  );
+  
+  // Reset form state when widget changes
   useEffect(() => {
     if (widget) {
       setTitle(widget.title);
@@ -71,85 +243,11 @@ const EditWidgetDialog: React.FC<EditWidgetDialogProps> = ({
     }));
   }, []);
   
-  // Render form field based on plugin option schema
-  const renderFormField = (key: string, schema: PluginOptionSchema) => {
-    const value = pluginData[key] !== undefined 
-      ? pluginData[key] 
-      : schema.default;
-    
-    switch (schema.type) {
-      case 'string':
-        return schema.inputType === 'textarea' ? (
-          <Textarea
-            id={`option-${key}`}
-            value={value || ''}
-            onChange={(e) => handlePluginDataChange(key, e.target.value)}
-            placeholder={schema.description}
-            className="resize-none"
-          />
-        ) : (
-          <Input
-            id={`option-${key}`}
-            type={schema.inputType || 'text'}
-            value={value || ''}
-            onChange={(e) => handlePluginDataChange(key, e.target.value)}
-            placeholder={schema.description}
-          />
-        );
-      
-      case 'number':
-        return (
-          <Input
-            id={`option-${key}`}
-            type="number"
-            value={value}
-            onChange={(e) => handlePluginDataChange(key, parseFloat(e.target.value))}
-            placeholder={schema.description}
-          />
-        );
-      
-      case 'boolean':
-        return (
-          <Switch
-            id={`option-${key}`}
-            checked={!!value}
-            onCheckedChange={(checked) => handlePluginDataChange(key, checked)}
-          />
-        );
-      
-      case 'select':
-        return (
-          <Select 
-            value={value} 
-            onValueChange={(v) => handlePluginDataChange(key, v)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={schema.description} />
-            </SelectTrigger>
-            <SelectContent>
-              {schema.options?.map((option) => (
-                <SelectItem 
-                  key={String(option.value)} 
-                  value={String(option.value)}
-                >
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        );
-      
-      default:
-        return (
-          <Input
-            id={`option-${key}`}
-            value={value || ''}
-            onChange={(e) => handlePluginDataChange(key, e.target.value)}
-            placeholder={schema.description}
-          />
-        );
-    }
-  };
+  // Memoize options entries to avoid re-renders
+  const optionsEntries = useMemo(() => 
+    Object.entries(optionsSchema || {}),
+    [optionsSchema]
+  );
   
   if (!widget) {
     return null;
@@ -162,79 +260,68 @@ const EditWidgetDialog: React.FC<EditWidgetDialogProps> = ({
           <DialogTitle>Edit Widget Settings</DialogTitle>
         </DialogHeader>
         
-        <Tabs value={currentTab} onValueChange={(v) => setCurrentTab(v as any)}>
-          <TabsList className="mb-4">
-            <TabsTrigger value="general">General</TabsTrigger>
-            <TabsTrigger value="appearance">Appearance</TabsTrigger>
-          </TabsList>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Tabs value={currentTab} onValueChange={(v) => setCurrentTab(v as any)}>
+            <TabsList className="mb-4">
+              <TabsTrigger value="general">General</TabsTrigger>
+              <TabsTrigger value="appearance">Appearance</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="general" className="space-y-4">
+              <div className="grid w-full items-center gap-1.5">
+                <Label htmlFor="widget-title">Widget Title</Label>
+                <Input
+                  id="widget-title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Enter widget title"
+                  required
+                />
+              </div>
+              
+              {/* Plugin specific options */}
+              {optionsEntries.map(([key, schema]) => (
+                <div key={key} className="grid w-full items-center gap-1.5">
+                  <Label htmlFor={`option-${key}`}>
+                    {schema.label || key}
+                  </Label>
+                  <PluginOptionField
+                    id={`option-${key}`}
+                    schema={schema as PluginOptionSchema}
+                    value={pluginData[key]}
+                    onChange={(value) => handlePluginDataChange(key, value)}
+                  />
+                  {schema.description && (
+                    <p className="text-xs text-muted-foreground">
+                      {schema.description}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </TabsContent>
+            
+            <TabsContent value="appearance">
+              <AppearanceTab
+                widget={widget}
+                dashboardId={dashboardId}
+                widgetId={widgetId}
+                updateWidget={updateWidget}
+              />
+            </TabsContent>
+          </Tabs>
           
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {currentTab === 'general' && (
-              <div className="space-y-4">
-                <div className="grid w-full items-center gap-1.5">
-                  <Label htmlFor="widget-title">Widget Title</Label>
-                  <Input
-                    id="widget-title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Enter widget title"
-                    required
-                  />
-                </div>
-                
-                {/* Plugin specific options */}
-                {Object.entries(optionsSchema || {}).map(([key, schema]) => (
-                  <div key={key} className="grid w-full items-center gap-1.5">
-                    <Label htmlFor={`option-${key}`}>
-                      {schema.label || key}
-                    </Label>
-                    {renderFormField(key, schema as PluginOptionSchema)}
-                    {schema.description && (
-                      <p className="text-xs text-muted-foreground">
-                        {schema.description}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-            
-            {currentTab === 'appearance' && (
-              <div className="space-y-4">
-                <div className="grid w-full items-center gap-1.5">
-                  <Label htmlFor="widget-height">Height (pixels)</Label>
-                  <Input
-                    id="widget-height"
-                    type="number"
-                    value={widget.size.height}
-                    onChange={(e) => {
-                      updateWidget(dashboardId, widgetId, {
-                        size: {
-                          ...widget.size,
-                          height: Number(e.target.value)
-                        }
-                      });
-                    }}
-                    min={100}
-                    max={1000}
-                  />
-                </div>
-              </div>
-            )}
-            
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button type="submit">
-                Save Changes
-              </Button>
-            </DialogFooter>
-          </form>
-        </Tabs>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit">
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
 };
 
-export default EditWidgetDialog;
+export default React.memo(EditWidgetDialog);

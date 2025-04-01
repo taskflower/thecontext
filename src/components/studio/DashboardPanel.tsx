@@ -67,8 +67,21 @@ const DashboardPanel: React.FC = () => {
     }
   };
   
+  // Filter dashboards based on current tab
+  const filteredDashboards = React.useMemo(() => {
+    // W widoku zarządzania, filtrujemy dashboardy względem wybranego workspace
+    if (currentWorkspaceId) {
+      // Pokaż tylko dashboardy powiązane z bieżącym workspace oraz globalne 
+      return dashboards.filter(dashboard => 
+        !dashboard.workspaceId || dashboard.workspaceId === currentWorkspaceId
+      );
+    }
+    // Jeśli nie wybrano workspace, pokaż wszystkie dashboardy
+    return dashboards;
+  }, [dashboards, currentWorkspaceId]);
+  
   // Group dashboards by workspace for better organization
-  const groupedDashboards = dashboards.reduce((groups, dashboard) => {
+  const groupedDashboards = filteredDashboards.reduce((groups, dashboard) => {
     const key = dashboard.workspaceId || 'global';
     if (!groups[key]) {
       groups[key] = [];
@@ -107,7 +120,11 @@ const DashboardPanel: React.FC = () => {
       
       <div className="flex-1 overflow-auto">
         {dashboardView === 'view' ? (
-          <WorkspaceDashboardPage workspaceId={currentWorkspaceId} hideCreateButton={true} />
+          <WorkspaceDashboardPage 
+            workspaceId={currentWorkspaceId} 
+            hideCreateButton={true}
+            forceDashboardId={useDashboardStore.getState().selectedDashboardId}
+          />
         ) : (
           <div className="p-4">
             <h3 className="text-lg font-medium mb-4">Available Dashboards</h3>
@@ -153,7 +170,12 @@ const DashboardPanel: React.FC = () => {
                                 variant="outline" 
                                 size="sm"
                                 onClick={() => {
+                                  // Ustaw dashboard ID i zmień widok
                                   setSelectedDashboard(dashboard.id);
+                                  // Dla dashboardów przypisanych do workspace, ustaw ten workspace jako aktualny
+                                  if (dashboard.workspaceId) {
+                                    useAppStore.getState().selectWorkspace(dashboard.workspaceId);
+                                  }
                                   setDashboardView('view');
                                 }}
                               >
@@ -208,7 +230,12 @@ const DashboardPanel: React.FC = () => {
                                   variant="outline" 
                                   size="sm"
                                   onClick={() => {
+                                    // Ustaw dashboard ID i zmień widok
                                     setSelectedDashboard(dashboard.id);
+                                    // Dla dashboardów przypisanych do workspace, ustaw ten workspace jako aktualny
+                                    if (dashboard.workspaceId) {
+                                      useAppStore.getState().selectWorkspace(dashboard.workspaceId);
+                                    }
                                     setDashboardView('view');
                                   }}
                                 >
