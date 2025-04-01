@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Github, Twitter, Palette, Heart } from "lucide-react";
+import {  Frame, Heart, Linkedin, Youtube } from "lucide-react";
 
 const AppFooter = () => {
   return (
@@ -31,7 +31,7 @@ const AppFooter = () => {
               className="h-7 w-7 sm:h-8 sm:w-8 rounded-full hover:bg-muted"
               aria-label="GitHub"
             >
-              <Github className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <Youtube className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
             <Button
               variant="ghost"
@@ -39,8 +39,9 @@ const AppFooter = () => {
               className="h-7 w-7 sm:h-8 sm:w-8 rounded-full hover:bg-muted"
               aria-label="Twitter"
             >
-              <Twitter className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <Linkedin className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
+            <Separator orientation="vertical" className="h-6 hidden sm:block" />
             <Link to="/studio">
               <Button
                 variant="ghost"
@@ -48,7 +49,7 @@ const AppFooter = () => {
                 className="h-7 w-7 sm:h-8 sm:w-8 rounded-full hover:bg-muted"
                 aria-label="Studio"
               >
-                <Palette className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <Frame className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Button>
             </Link>
             
