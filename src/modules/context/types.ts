@@ -26,12 +26,15 @@ export interface ContextItem {
 
 // Interfejs do dodania/aktualizacji kontekstu
 export interface ContextPayload {
+  id?: string;          // Allow specifying ID during import
   title: string;
   type?: ContextType;
   content: string;
   scenarioId?: string;
   metadata?: any;
   persistent?: boolean;
+  createdAt?: number;   // Allow specifying timestamps during import
+  updatedAt?: number;
 }
 
 export interface ContextActions {

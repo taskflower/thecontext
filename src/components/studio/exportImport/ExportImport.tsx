@@ -546,11 +546,13 @@ export const ExportImport: React.FC = () => {
   const handleExport = () => {
     try {
       if (exportType === "all") {
+        // Context items are now stored in workspaces, no need to get them separately
+        
         // Export all workspaces and settings in the same format as the original
         const exportData = {
           "flowchart-app-state": {
             "state": {
-              "items": state.items,
+              "items": state.items, // Context items are included in each workspace
               "selected": state.selected,
               "stateVersion": state.stateVersion,
               "flowSession": {
@@ -583,11 +585,13 @@ export const ExportImport: React.FC = () => {
           children: [currentScenario]
         };
         
+        // Context items are now included in the workspace
+        
         // Export in the same format as the original
         const exportData = {
           "flowchart-app-state": {
             "state": {
-              "items": [exportWorkspace],
+              "items": [exportWorkspace], // Context items are included in the workspace
               "selected": {
                 workspace: exportWorkspace.id,
                 scenario: currentScenario.id,
@@ -625,6 +629,28 @@ export const ExportImport: React.FC = () => {
       
       const importData = await FileService.readDataFromFile(importFile);
       
+      // Debug information about import file
+      console.log('Import file diagnostics:', {
+        hasFlowchartState: Boolean(importData["flowchart-app-state"]),
+        hasState: Boolean(importData["flowchart-app-state"]?.state),
+        hasItems: Boolean(importData["flowchart-app-state"]?.state?.items),
+        hasContextItems: Boolean(importData["flowchart-app-state"]?.state?.contextItems),
+        contextItemsCount: importData["flowchart-app-state"]?.state?.contextItems?.length || 0
+      });
+      
+      // Check for filters in the import
+      const scenarios = importData["flowchart-app-state"]?.state?.items?.flatMap((w: any) => w.children || []) || [];
+      const filtersCount = scenarios.reduce((count: number, scenario: any) => {
+        return count + (scenario.filters?.length || 0);
+      }, 0);
+      
+      console.log('Import file filters diagnostics:', {
+        scenariosCount: scenarios.length,
+        scenariosWithFilters: scenarios.filter((s: any) => s.filters?.length > 0).length,
+        totalFiltersCount: filtersCount,
+        sampleFilters: scenarios[0]?.filters || []
+      });
+      
       // Validate imported data - handle both direct format and nested format
       let itemsData;
       
@@ -654,16 +680,96 @@ export const ExportImport: React.FC = () => {
           // Get the appropriate items array based on structure
           const itemsToImport = importData["flowchart-app-state"]?.state?.items || importData.items;
           
-          const newWorkspaces = itemsToImport.map((workspace: any) => ({
-            ...workspace,
-            id: `workspace-${currentTime}-${Math.floor(Math.random() * 10000)}`,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-            children: workspace.children.map((scenario: any) => ({
-              ...scenario,
-              id: `scenario-${currentTime}-${Math.floor(Math.random() * 10000)}`
-            }))
-          }));
+          // Track ID mappings for cross-references
+          const idMapping = {};
+          
+          const newWorkspaces = itemsToImport.map((workspace: any) => {
+            // Create new workspace ID
+            const newWorkspaceId = `workspace-${currentTime}-${Math.floor(Math.random() * 10000)}`;
+            
+            // Store mapping
+            idMapping[workspace.id] = newWorkspaceId;
+            
+            return {
+              ...workspace,
+              id: newWorkspaceId,
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+              children: workspace.children.map((scenario: any) => {
+                // Create new scenario ID
+                const newScenarioId = `scenario-${currentTime}-${Math.floor(Math.random() * 10000)}`;
+                
+                // Store mapping
+                idMapping[scenario.id] = newScenarioId;
+                
+                // Create new scenario with preserved properties
+                const newScenario = {
+                  ...scenario,
+                  id: newScenarioId,
+                  // Preserve filters
+                  filters: scenario.filters ? scenario.filters.map((filter: any) => ({
+                    ...filter,
+                    id: `filter-${currentTime}-${Math.floor(Math.random() * 10000)}`,
+                  })) : [],
+                  // Preserve context
+                  context: scenario.context,
+                  // Ensure edges property exists
+                  edges: scenario.edges || []
+                };
+                
+                // First, assign new IDs to all children (nodes)
+                if (newScenario.children && newScenario.children.length > 0) {
+                  const nodeIdMap = {}; // Map old node IDs to new node IDs
+                  
+                  newScenario.children = newScenario.children.map(node => {
+                    const oldNodeId = node.id;
+                    const newNodeId = `node-${currentTime}-${Math.floor(Math.random() * 10000)}`;
+                    
+                    // Store mapping
+                    nodeIdMap[oldNodeId] = newNodeId;
+                    
+                    // Return node with new ID
+                    return {
+                      ...node,
+                      id: newNodeId
+                    };
+                  });
+                  
+                  // Update any existing edges with the new node IDs
+                  if (newScenario.edges && newScenario.edges.length > 0) {
+                    newScenario.edges = newScenario.edges.map(edge => ({
+                      ...edge,
+                      id: `edge-${currentTime}-${Math.floor(Math.random() * 10000)}`,
+                      source: nodeIdMap[edge.source] || edge.source,
+                      target: nodeIdMap[edge.target] || edge.target
+                    }));
+                  }
+                  
+                  // ALWAYS create edges connecting nodes sequentially to ensure proper flow
+                  // This is critical for imported scenarios to work correctly
+                  console.log(`Creating sequential edges for scenario ${newScenarioId} with ${newScenario.children.length} nodes`);
+                  
+                  // Create or replace edges connecting nodes in sequence
+                  newScenario.edges = [];
+                  for (let i = 0; i < newScenario.children.length - 1; i++) {
+                    const sourceNode = newScenario.children[i];
+                    const targetNode = newScenario.children[i+1];
+                    
+                    if (sourceNode && targetNode) {
+                      newScenario.edges.push({
+                        id: `edge-${currentTime}-${i}-${Math.floor(Math.random() * 10000)}`,
+                        source: sourceNode.id,
+                        target: targetNode.id,
+                        type: 'edge'
+                      });
+                    }
+                  }
+                }
+                
+                return newScenario;
+              })
+            };
+          });
           
           // Get current state from localStorage to ensure we're working with the latest data
           const currentStateStr = localStorage.getItem('flowchart-app-state');
@@ -682,6 +788,101 @@ export const ExportImport: React.FC = () => {
             selected: state.selected,
             stateVersion: state.stateVersion
           };
+          
+          // Get any context items from the import - check both locations
+          // Some imports have context items at the root level, others have them in the workspace
+          const rootContextItems = importData["flowchart-app-state"]?.state?.contextItems || [];
+          
+          // Also look for context items in each workspace
+          const workspaceContextItems = [];
+          const importedWorkspaces = importData["flowchart-app-state"]?.state?.items || [];
+          
+          // Gather context items from workspaces
+          importedWorkspaces.forEach((workspace: any) => {
+            if (workspace.contextItems && Array.isArray(workspace.contextItems)) {
+              console.log(`Import found ${workspace.contextItems.length} context items in workspace ${workspace.title}`);
+              workspaceContextItems.push(...workspace.contextItems);
+            }
+          });
+          
+          // Combine all found context items
+          const allContextItemsToImport = [...rootContextItems, ...workspaceContextItems];
+          console.log('Import context items - total found:', allContextItemsToImport.length);
+          console.log('Import context items - root items:', rootContextItems.length);
+          console.log('Import context items - workspace items:', workspaceContextItems.length);
+          
+          // Remap scenario IDs in context items
+          const updatedContextItems = allContextItemsToImport.map((contextItem: any) => {
+            // Create a new ID for the context item
+            const newContextId = `context-${currentTime}-${Math.floor(Math.random() * 10000)}`;
+            
+            // If the context item has a scenarioId, update it with the new ID
+            let updatedScenarioId = contextItem.scenarioId;
+            if (updatedScenarioId && idMapping[updatedScenarioId]) {
+              updatedScenarioId = idMapping[updatedScenarioId];
+            }
+            
+            return {
+              ...contextItem,
+              id: newContextId,
+              scenarioId: updatedScenarioId
+            };
+          });
+          
+          // Add context items to the new workspaces
+          for (const workspace of newWorkspaces) {
+            // Initialize contextItems array if it doesn't exist
+            if (!workspace.contextItems) {
+              workspace.contextItems = [];
+            }
+            
+            // Add context items associated with this workspace's scenarios
+            const contextItemsForWorkspace = updatedContextItems.filter(item => {
+              // If item has no scenarioId, it's a global context
+              if (!item.scenarioId) return true;
+              
+              // Otherwise check if this workspace has the scenario
+              return workspace.children.some(scenario => scenario.id === item.scenarioId);
+            });
+            
+            // Add the context items to the workspace
+            if (contextItemsForWorkspace.length > 0) {
+              workspace.contextItems = [
+                ...workspace.contextItems,
+                ...contextItemsForWorkspace
+              ];
+              console.log(`Added ${contextItemsForWorkspace.length} context items to workspace ${workspace.title}:`, workspace.contextItems);
+              
+              // Validate and fix context items
+              const missingProps = [];
+              for (const item of workspace.contextItems) {
+                if (!item.id) missingProps.push(`id missing for ${item.title}`);
+                if (!item.title) missingProps.push(`title missing for item ${item.id}`);
+                if (!item.type) missingProps.push(`type missing for ${item.title || item.id}`);
+                if (!item.createdAt) item.createdAt = Date.now(); // Fix missing timestamp
+                if (!item.updatedAt) item.updatedAt = Date.now(); // Fix missing timestamp
+              }
+              
+              if (missingProps.length > 0) {
+                console.warn(`Context items in workspace ${workspace.title} missing required properties:`, missingProps);
+              }
+            } else {
+              console.warn(`No context items matched for workspace ${workspace.title}`);
+              console.log('Available items:', updatedContextItems);
+              console.log('Workspace scenarios:', workspace.children.map(s => s.id));
+            }
+          }
+          
+          // Logging the final structure for debugging
+          console.log('Final workspace structure with context items:');
+          for (const workspace of newWorkspaces) {
+            console.log(`Workspace: ${workspace.title}`, {
+              id: workspace.id,
+              contextItemsCount: workspace.contextItems?.length || 0,
+              scenariosCount: workspace.children?.length || 0,
+              contextItems: workspace.contextItems
+            });
+          }
           
           // Add new workspaces to existing ones
           const updatedState = {
@@ -743,12 +944,84 @@ export const ExportImport: React.FC = () => {
         setConfirmationTitle("Import to Existing Workspace");
         setConfirmationMessage(`This will add ${allImportedScenarios.length} scenarios to the workspace "${targetWorkspace.title}". Continue?`);
         setConfirmationAction(() => () => {
-          // Generate new IDs for imported scenarios
+          // Generate new IDs for imported scenarios but preserve structure
           const currentTime = Date.now();
-          const newScenarios = allImportedScenarios.map((scenario: any) => ({
-            ...scenario,
-            id: `scenario-${currentTime}-${Math.floor(Math.random() * 10000)}`
-          }));
+          const idMapping = {}; // To track old ID to new ID mapping
+          
+          const newScenarios = allImportedScenarios.map((scenario: any) => {
+            // Generate new ID for scenario
+            const newScenarioId = `scenario-${currentTime}-${Math.floor(Math.random() * 10000)}`;
+            
+            // Store mapping from old to new ID
+            idMapping[scenario.id] = newScenarioId;
+            
+            // Create the new scenario with all properties
+            const newScenario = {
+              ...scenario,
+              id: newScenarioId,
+              // If filters exist, preserve them
+              filters: scenario.filters ? scenario.filters.map((filter: any) => ({
+                ...filter,
+                id: `filter-${currentTime}-${Math.floor(Math.random() * 10000)}`,
+                // Keep filter structure intact
+              })) : [],
+              // Preserve context references
+              context: scenario.context,
+              // Ensure edges property exists
+              edges: scenario.edges || []
+            };
+            
+            // First, assign new IDs to all children (nodes)
+            if (newScenario.children && newScenario.children.length > 0) {
+              const nodeIdMap = {}; // Map old node IDs to new node IDs
+              
+              newScenario.children = newScenario.children.map(node => {
+                const oldNodeId = node.id;
+                const newNodeId = `node-${currentTime}-${Math.floor(Math.random() * 10000)}`;
+                
+                // Store mapping
+                nodeIdMap[oldNodeId] = newNodeId;
+                
+                // Return node with new ID
+                return {
+                  ...node,
+                  id: newNodeId
+                };
+              });
+              
+              // Update any existing edges with the new node IDs
+              if (newScenario.edges && newScenario.edges.length > 0) {
+                newScenario.edges = newScenario.edges.map(edge => ({
+                  ...edge,
+                  id: `edge-${currentTime}-${Math.floor(Math.random() * 10000)}`,
+                  source: nodeIdMap[edge.source] || edge.source,
+                  target: nodeIdMap[edge.target] || edge.target
+                }));
+              }
+              
+              // ALWAYS create edges connecting nodes sequentially to ensure proper flow
+              // This is critical for imported scenarios to work correctly
+              console.log(`Creating sequential edges for scenario ${newScenarioId} with ${newScenario.children.length} nodes`);
+              
+              // Create or replace edges connecting nodes in sequence
+              newScenario.edges = [];
+              for (let i = 0; i < newScenario.children.length - 1; i++) {
+                const sourceNode = newScenario.children[i];
+                const targetNode = newScenario.children[i+1];
+                
+                if (sourceNode && targetNode) {
+                  newScenario.edges.push({
+                    id: `edge-${currentTime}-${i}-${Math.floor(Math.random() * 10000)}`,
+                    source: sourceNode.id,
+                    target: targetNode.id,
+                    type: 'edge'
+                  });
+                }
+              }
+            }
+            
+            return newScenario;
+          });
           
           // Get current state from localStorage to ensure we're working with the latest data
           const currentStateStr = localStorage.getItem('flowchart-app-state');
@@ -786,6 +1059,103 @@ export const ExportImport: React.FC = () => {
             updatedWorkspaces[targetWorkspaceIndex].updatedAt = Date.now();
           }
           
+          // Get any context items from the import - check both locations
+          // Some imports have context items at the root level, others have them in the workspace
+          const rootContextItems = importData["flowchart-app-state"]?.state?.contextItems || [];
+          
+          // Also look for context items in each workspace
+          const workspaceContextItems = [];
+          const importedWorkspaces = importData["flowchart-app-state"]?.state?.items || [];
+          
+          // Gather context items from workspaces
+          importedWorkspaces.forEach((workspace: any) => {
+            if (workspace.contextItems && Array.isArray(workspace.contextItems)) {
+              console.log(`Import found ${workspace.contextItems.length} context items in workspace ${workspace.title}`);
+              workspaceContextItems.push(...workspace.contextItems);
+            }
+          });
+          
+          // Combine all found context items
+          const allContextItemsToImport = [...rootContextItems, ...workspaceContextItems];
+          console.log('Import context items - total found:', allContextItemsToImport.length);
+          console.log('Import context items - root items:', rootContextItems.length);
+          console.log('Import context items - workspace items:', workspaceContextItems.length);
+          
+          // Remap scenario IDs in context items
+          const updatedContextItems = allContextItemsToImport.map((contextItem: any) => {
+            // Create a new ID for the context item
+            const newContextId = `context-${currentTime}-${Math.floor(Math.random() * 10000)}`;
+            
+            // If the context item has a scenarioId, update it with the new ID
+            let updatedScenarioId = contextItem.scenarioId;
+            if (updatedScenarioId && idMapping[updatedScenarioId]) {
+              updatedScenarioId = idMapping[updatedScenarioId];
+            }
+            
+            return {
+              ...contextItem,
+              id: newContextId,
+              scenarioId: updatedScenarioId
+            };
+          });
+          
+          // Now add context items to the appropriate workspace
+          // The target workspace is already found above (this is where we add the scenarios)
+          
+          if (targetWorkspaceIndex !== -1) {
+            // Initialize contextItems array if it doesn't exist
+            if (!updatedWorkspaces[targetWorkspaceIndex].contextItems) {
+              updatedWorkspaces[targetWorkspaceIndex].contextItems = [];
+            }
+            
+            // Add the context items to the workspace
+            updatedWorkspaces[targetWorkspaceIndex].contextItems = [
+              ...updatedWorkspaces[targetWorkspaceIndex].contextItems,
+              ...updatedContextItems
+            ];
+            
+            console.log(`Added ${updatedContextItems.length} context items to workspace ${updatedWorkspaces[targetWorkspaceIndex].title}:`, updatedWorkspaces[targetWorkspaceIndex].contextItems);
+            
+            // Check if the context items are correctly linked to scenarios
+            const scenarios = updatedWorkspaces[targetWorkspaceIndex].children.map(s => s.id);
+            console.log('Scenario IDs in target workspace:', scenarios);
+            console.log('Context items with scenarioId:');
+            for (const item of updatedContextItems) {
+              if (item.scenarioId) {
+                console.log(`- ${item.title}: scenarioId=${item.scenarioId}, matches scenario: ${scenarios.includes(item.scenarioId)}`);
+              } else {
+                console.log(`- ${item.title}: No scenarioId (global context)`);
+              }
+            }
+            
+            // Validate context items have all required properties
+            const missingProps = [];
+            for (const item of updatedWorkspaces[targetWorkspaceIndex].contextItems) {
+              if (!item.id) missingProps.push(`id missing for ${item.title}`);
+              if (!item.title) missingProps.push(`title missing for item ${item.id}`);
+              if (!item.type) missingProps.push(`type missing for ${item.title || item.id}`);
+              if (!item.createdAt) item.createdAt = Date.now(); // Fix missing timestamp
+              if (!item.updatedAt) item.updatedAt = Date.now(); // Fix missing timestamp
+            }
+            
+            if (missingProps.length > 0) {
+              console.warn('Some context items are missing required properties:', missingProps);
+            }
+          } else {
+            console.warn('Could not find target workspace for context items');
+          }
+          
+          // Verify if contextItems actually made it into the final structure
+          console.log('updatedWorkspaces structure check:');
+          for (const workspace of updatedWorkspaces) {
+            console.log(`Workspace: ${workspace.title}`, {
+              id: workspace.id,
+              contextItemsCount: workspace.contextItems?.length || 0,
+              scenariosCount: workspace.children?.length || 0,
+              firstFewContextItems: workspace.contextItems?.slice(0, 2) || []
+            });
+          }
+          
           // Update local storage with the new state
           const updatedState = {
             ...baseState,
@@ -800,6 +1170,34 @@ export const ExportImport: React.FC = () => {
           };
           
           localStorage.setItem('flowchart-app-state', JSON.stringify(storageData));
+          
+          // After import, do a final check of the workspace structure
+          console.log('IMPORT COMPLETED - Final state check:');
+          try {
+            const finalState = JSON.parse(localStorage.getItem('flowchart-app-state') || '{}');
+            const workspaces = finalState?.state?.items || [];
+            
+            console.log(`IMPORT COMPLETED - Found ${workspaces.length} workspaces in state`);
+            workspaces.forEach((workspace: any, idx: number) => {
+              const hasContextItems = Boolean(workspace.contextItems && workspace.contextItems.length > 0);
+              console.log(`IMPORT COMPLETED - Workspace #${idx}: id=${workspace.id}, title=${workspace.title}`);
+              console.log(`IMPORT COMPLETED - Has contextItems: ${hasContextItems}`);
+              
+              if (hasContextItems) {
+                console.log(`IMPORT COMPLETED - contextItems count: ${workspace.contextItems.length}`);
+                console.log(`IMPORT COMPLETED - First few contextItems:`, 
+                  workspace.contextItems.slice(0, 3).map((item: any) => ({
+                    id: item.id,
+                    title: item.title,
+                    type: item.type,
+                    scenarioId: item.scenarioId
+                  }))
+                );
+              }
+            });
+          } catch (e) {
+            console.error('IMPORT COMPLETED - Error checking final state:', e);
+          }
           
           setImportSuccess(true);
           setImportFile(null);

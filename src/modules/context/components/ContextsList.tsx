@@ -255,10 +255,7 @@ const ContextsList: React.FC<ContextsListProps> = ({
         isOpen={isDbConfigOpen}
         onClose={() => {
           setIsDbConfigOpen(false);
-          // Odświeżenie listy kolekcji po zamknięciu konfiguratora
-          if (onOpenDatabaseConfigurator) {
-            onOpenDatabaseConfigurator();
-          }
+          // Nie wywołujemy tutaj onOpenDatabaseConfigurator, aby uniknąć potencjalnych cykli
         }}
       />
     </div>

@@ -1,0 +1,193 @@
+{
+  "flowchart-app-state": {
+    "state": {
+      "items": [
+        {
+          "id": "language-learning-workspace",
+          "type": "workspace",
+          "title": "Language Learning App",
+          "description": "Learn a new language with interactive exercises and lessons",
+          "slug": "language-learning",
+          "createdAt": 1711902659802,
+          "updatedAt": 1711902659802,
+          "contextItems": [
+            {
+              "id": "context-current-lesson",
+              "title": "current_lesson",
+              "content": "lesson1",
+              "type": "TEXT",
+              "createdAt": 1711902659810,
+              "updatedAt": 1711902659810,
+              "scenarioId": "beginner-spanish-scenario"
+            },
+            {
+              "id": "context-user-answer",
+              "title": "user_answer",
+              "content": "",
+              "type": "TEXT",
+              "createdAt": 1711902659815,
+              "updatedAt": 1711902659815,
+              "scenarioId": "beginner-spanish-scenario"
+            },
+            {
+              "id": "context-user-translation",
+              "title": "user_translation",
+              "content": "",
+              "type": "TEXT",
+              "createdAt": 1711902659820,
+              "updatedAt": 1711902659820,
+              "scenarioId": "beginner-spanish-scenario"
+            },
+            {
+              "id": "context-language-progress",
+              "title": "language_progress",
+              "content": "{ \"completed\": 0, \"current\": \"lesson1\" }",
+              "type": "JSON",
+              "createdAt": 1711902659825,
+              "updatedAt": 1711902659825,
+              "scenarioId": "beginner-spanish-scenario"
+            }
+          ],
+          "children": [
+            {
+              "id": "beginner-spanish-scenario",
+              "type": "scenario",
+              "name": "Beginner Spanish Course",
+              "description": "Learn basic Spanish vocabulary and phrases",
+              "createdAt": 1711902659805,
+              "updatedAt": 1711902659805,
+              "filters": [
+                {
+                  "id": "filter-language-level",
+                  "type": "exact",
+                  "field": "level",
+                  "value": "beginner",
+                  "enabled": true,
+                  "title": "Beginner Level",
+                  "createdAt": 1711902659805,
+                  "updatedAt": 1711902659805
+                },
+                {
+                  "id": "filter-language-type",
+                  "type": "contains",
+                  "field": "language",
+                  "value": "spanish",
+                  "enabled": true,
+                  "title": "Spanish Language",
+                  "createdAt": 1711902659805,
+                  "updatedAt": 1711902659805
+                }
+              ],
+              "children": [
+                {
+                  "id": "lesson-intro-node",
+                  "type": "node",
+                  "label": "Introduction to Spanish",
+                  "assistantMessage": "# Welcome to Spanish Learning\n\nThis course will teach you basic Spanish vocabulary and phrases. We'll start with simple greetings and gradually build up your skills.\n\n**Let's begin!**",
+                  "userPrompt": "",
+                  "contextKey": "current_lesson",
+                  "pluginKey": "LessonIntroPlugin",
+                  "position": {
+                    "x": 100,
+                    "y": 100
+                  },
+                  "createdAt": 1711902659810,
+                  "updatedAt": 1711902659810,
+                  "pluginData": {
+                    "LessonIntroPlugin": {
+                      "lessonId": "lesson1",
+                      "nextExerciseId": "exercise1"
+                    }
+                  }
+                },
+                {
+                  "id": "exercise-multiple-choice-node",
+                  "type": "node",
+                  "label": "Greetings Exercise",
+                  "assistantMessage": "# Greetings in Spanish\n\nLet's practice some basic greetings.",
+                  "userPrompt": "",
+                  "contextKey": "user_answer",
+                  "pluginKey": "ExercisePlugin",
+                  "position": {
+                    "x": 300,
+                    "y": 100
+                  },
+                  "createdAt": 1711902659815,
+                  "updatedAt": 1711902659815,
+                  "pluginData": {
+                    "ExercisePlugin": {
+                      "exerciseId": "exercise1",
+                      "exerciseType": "multiple-choice",
+                      "question": "How do you say 'Hello' in Spanish?",
+                      "options": ["Hola", "Gracias", "Adiós", "Por favor"],
+                      "correctAnswer": "Hola",
+                      "nextExerciseId": "exercise2"
+                    }
+                  }
+                },
+                {
+                  "id": "exercise-translation-node",
+                  "type": "node",
+                  "label": "Translation Exercise",
+                  "assistantMessage": "# Translation Practice\n\nNow, let's try a translation exercise.",
+                  "userPrompt": "",
+                  "contextKey": "user_translation",
+                  "pluginKey": "ExercisePlugin",
+                  "position": {
+                    "x": 500,
+                    "y": 100
+                  },
+                  "createdAt": 1711902659820,
+                  "updatedAt": 1711902659820,
+                  "pluginData": {
+                    "ExercisePlugin": {
+                      "exerciseId": "exercise2",
+                      "exerciseType": "translation",
+                      "question": "Translate 'Good morning' to Spanish",
+                      "correctAnswer": "Buenos días",
+                      "nextExerciseId": "lesson_complete"
+                    }
+                  }
+                },
+                {
+                  "id": "lesson-complete-node",
+                  "type": "node",
+                  "label": "Lesson Complete",
+                  "assistantMessage": "# Great job!\n\nYou've completed the first lesson in Spanish basics.\n\nYour progress has been saved, and you can continue with more exercises in the next session.",
+                  "userPrompt": "",
+                  "contextKey": "",
+                  "pluginKey": "LessonCompletePlugin",
+                  "position": {
+                    "x": 700,
+                    "y": 100
+                  },
+                  "createdAt": 1711902659825,
+                  "updatedAt": 1711902659825,
+                  "pluginData": {
+                    "LessonCompletePlugin": {
+                      "lessonId": "lesson1",
+                      "score": 100,
+                      "nextLessonId": "lesson2"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "selected": {
+        "workspace": "language-learning-workspace",
+        "scenario": "beginner-spanish-scenario",
+        "node": ""
+      },
+      "stateVersion": 1,
+      "flowSession": {
+        "isPlaying": false,
+        "currentStepIndex": 0,
+        "temporarySteps": []
+      }
+    },
+    "version": 1
+  }
+}

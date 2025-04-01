@@ -39,8 +39,9 @@ export const createFlowSlice: StateCreator<
   },
   
   /**
-   * Calculates optimal flow path through the graph using DFS algorithm
-   * Finds start node by identifying node with outgoing edges but no incoming edges
+   * Calculates optimal flow path through the graph
+   * If edges exist, uses DFS algorithm
+   * Otherwise, returns all nodes in the order they appear
    */
   calculateFlowPath: () => {
     const state = get() as AppState;
@@ -48,6 +49,15 @@ export const createFlowSlice: StateCreator<
     if (!scenario) return [];
   
     const { children: scenarioNodes = [], edges: scenarioEdges = [] } = scenario;
+    
+    console.log('Calculating flow path for scenario:', scenario.name);
+    console.log('Number of nodes:', scenarioNodes.length);
+    console.log('Number of edges:', scenarioEdges.length);
+    
+    // If there are no edges, return all nodes in the order they appear
+    if (scenarioEdges.length === 0) {
+      return JSON.parse(JSON.stringify(scenarioNodes));
+    }
   
     // Map counting incoming edges for each node
     const incomingMap = new Map<string, number>();
@@ -101,6 +111,16 @@ export const createFlowSlice: StateCreator<
     };
   
     dfs(startNodeId);
+    
+    // If we didn't visit all nodes with DFS, log this information but don't add unreachable nodes
+    if (path.length < scenarioNodes.length) {
+      console.log(`DFS visited only ${path.length} of ${scenarioNodes.length} nodes. Some nodes are not reachable via edges.`);
+      
+      // We do NOT add unreachable nodes as they should not be part of the flow
+      // This is the correct behavior - only nodes connected via edges should be accessible
+    }
+    
+    console.log('Final path length:', path.length);
     return path;
   },
 

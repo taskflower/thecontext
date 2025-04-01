@@ -1,58 +1,152 @@
 // src/modules/plugins/pluginsDiscovery.ts
-import { ComponentType } from 'react';
-import { PluginRegistry } from './pluginContext';
-import { PluginComponentProps } from './types';
+import React from 'react';
+import useDynamicComponentStore from './pluginsStore';
+import { PluginType } from './types';
+import { setupLanguageLearningData } from '../indexedDB/setupLanguageLearning';
+import { SystemConfig } from '../systemConfig';
 
-// Define the interface for the module
-interface ComponentModule {
-  default: ComponentType<PluginComponentProps>;
+// Flaga określająca, czy komponenty zostały już załadowane
+let componentsLoaded = false;
+
+/**
+ * Configuration for plugin discovery
+ */
+export interface PluginDiscoveryConfig {
+  enableFlowPlugins?: boolean;
+  enableDashboardPlugins?: boolean;
 }
 
-export async function discoverAndLoadComponents() {
-  try {
-    // Use one consistent path to components
-    const componentModules = import.meta.glob('../../dynamicComponents/*.tsx');
-    
-    // Track loaded plugins
-    const loadedPlugins: string[] = [];
-    
-    for (const path in componentModules) {
-      try {
-        const module = await componentModules[path]() as ComponentModule;
-        const componentName = path.split('/').pop()?.replace('.tsx', '') || '';
-        
-        if (module.default) {
-          PluginRegistry.register(componentName, module.default);
-          loadedPlugins.push(componentName);
-          console.log(`Auto-discovered and registered: ${componentName} from ${path}`);
-        }
-      } catch (moduleError) {
-        console.error(`Error loading module from ${path}:`, moduleError);
+/**
+ * Default configuration for plugin discovery
+ */
+const defaultDiscoveryConfig: PluginDiscoveryConfig = {
+  enableFlowPlugins: true,
+  enableDashboardPlugins: true
+};
+
+/**
+ * Funkcja wykrywająca dostępne komponenty pluginów i dodająca je do store
+ * używa dynamicznego importu Vite do wczytania komponentów z katalogu dynamicComponents
+ * oraz dashboardComponents
+ */
+export async function discoverAndLoadComponents(config?: PluginDiscoveryConfig) {
+  // Jeśli komponenty zostały już załadowane, nie rób tego ponownie
+  if (componentsLoaded) {
+    return;
+  }
+
+  // Merge with default config
+  const finalConfig = { ...defaultDiscoveryConfig, ...config };
+  
+  console.log('Discovering and loading plugin components...');
+  const store = useDynamicComponentStore.getState();
+
+  // Wczytaj flow plugins
+  if (finalConfig.enableFlowPlugins) {
+    await loadFlowPlugins(store);
+  }
+  
+  // Wczytaj dashboard plugins
+  if (finalConfig.enableDashboardPlugins) {
+    await loadDashboardPlugins(store);
+  }
+
+  componentsLoaded = true;
+  console.log('Finished loading all plugin components');
+}
+
+/**
+ * Wczytuje pluginy flow
+ */
+async function loadFlowPlugins(
+  store: ReturnType<typeof useDynamicComponentStore.getState>
+) {
+  // Użyj funkcji import.meta.glob z Vite do dynamicznego importowania komponentów
+  const modules = import.meta.glob('/src/dynamicComponents/*.tsx');
+  
+  console.log('Loading flow plugins from /src/dynamicComponents/*.tsx...');
+  await loadModules(modules, 'flow', store);
+}
+
+/**
+ * Wczytuje pluginy dashboard
+ */
+async function loadDashboardPlugins(
+  store: ReturnType<typeof useDynamicComponentStore.getState>
+) {
+  // Użyj funkcji import.meta.glob z Vite do dynamicznego importowania komponentów
+  const modules = import.meta.glob('/src/dashboardComponents/*.tsx');
+  
+  console.log('Loading dashboard plugins from /src/dashboardComponents/*.tsx...');
+  await loadModules(modules, 'dashboard', store);
+}
+
+/**
+ * Wczytuje moduły i rejestruje je w store
+ */
+async function loadModules(
+  modules: Record<string, () => Promise<{ default: React.ComponentType<unknown> }>>,
+  pluginType: PluginType,
+  store: ReturnType<typeof useDynamicComponentStore.getState>
+) {
+  for (const path in modules) {
+    try {
+      const module = await modules[path]();
+      const component = module.default;
+      
+      if (!component) {
+        console.warn(`No default export found in ${path}`);
+        continue;
       }
+      
+      // Pobierz nazwę pliku bez rozszerzenia
+      const fileName = path.split('/').pop() || '';
+      const name = fileName.replace(/\.[^.]+$/, '');
+      
+      // Zarejestruj komponent w store z odpowiednim typem
+      store.registerComponent(name, component, pluginType);
+      console.log(`Registered ${pluginType} plugin component: ${name}`);
+    } catch (error) {
+      console.error(`Error loading component from ${path}:`, error);
     }
-    
-    return loadedPlugins;
-  } catch (error) {
-    console.error("Error during component discovery:", error);
-    return [];
   }
 }
 
-// Function to load a single plugin dynamically
-export async function loadPlugin(path: string): Promise<string | null> {
-  try {
-    const module = await import(/* @vite-ignore */ path) as ComponentModule;
-    const componentName = path.split('/').pop()?.replace(/\.(tsx|jsx|ts|js)$/, '') || '';
-    
-    if (module.default) {
-      PluginRegistry.register(componentName, module.default);
-      console.log(`Dynamically loaded and registered: ${componentName}`);
-      return componentName;
+// Funkcja do inicjalizacji dodatkowych modułów
+export async function initializePluginModules(config?: Partial<SystemConfig>) {
+  const options = config || {};
+  const { 
+    enableLanguageLearning = false, 
+    enableDashboard = true,
+    enableFlowPlugins = true,
+    enableDashboardPlugins = true
+  } = options;
+  
+  // Konfiguracja pluginów
+  const pluginConfig: PluginDiscoveryConfig = {
+    enableFlowPlugins,
+    enableDashboardPlugins: enableDashboard && enableDashboardPlugins,
+  };
+  
+  // Inicjalizuj komponenty pluginów z odpowiednią konfiguracją
+  await discoverAndLoadComponents(pluginConfig);
+  
+  // Inicjalizuj dane dla nauki języków jeśli opcja jest włączona
+  if (enableLanguageLearning) {
+    console.log("Initializing language learning data from plugin module loader");
+    try {
+      await setupLanguageLearningData();
+      console.log("Language learning data initialized successfully");
+    } catch (error) {
+      console.error("Error initializing language learning data:", error);
     }
-    
-    return null;
-  } catch (error) {
-    console.error(`Failed to load plugin from ${path}:`, error);
-    return null;
   }
 }
+
+// Eksportujmy domyślną konfigurację modułów
+export const defaultPluginModulesConfig: Partial<SystemConfig> = {
+  enableLanguageLearning: false,
+  enableDashboard: true,
+  enableFlowPlugins: true,
+  enableDashboardPlugins: true
+};

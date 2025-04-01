@@ -69,22 +69,33 @@ export const EditContext: React.FC<EditContextProps> = ({
   
   // Ładowanie dostępnych kolekcji, gdy komponent jest otwarty i typ to IndexedDB
   useEffect(() => {
+    let isMounted = true;
     async function loadCollections() {
       if (isOpen && formData.type === ContextType.INDEXED_DB) {
         setIsLoadingCollections(true);
         try {
           const collections = await IndexedDBService.getCollections();
-          setAvailableCollections(collections);
+          if (isMounted) {
+            setAvailableCollections(collections);
+          }
         } catch (err) {
           console.error("Error loading collections:", err);
-          setAvailableCollections([]);
+          if (isMounted) {
+            setAvailableCollections([]);
+          }
         } finally {
-          setIsLoadingCollections(false);
+          if (isMounted) {
+            setIsLoadingCollections(false);
+          }
         }
       }
     }
     
     loadCollections();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [isOpen, formData.type]);
 
   const handleChange = (

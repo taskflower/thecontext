@@ -95,19 +95,29 @@ export function useIndexedDB<T>(
         throw new Error('Collection name is not defined');
       }
       
+      let isMounted = true;
+      const unmountCheck = () => isMounted = false;
+      
       try {
         const ops = await dbManager.getOperations(collectionName);
         const key = await ops.put<T>(collectionName, item);
         
-        // Refresh data
+        // Refresh data - tylko jeśli komponent jest nadal zamontowany
         const newItems = await ops.getAll<T>(collectionName);
-        setData(newItems);
+        if (isMounted) {
+          setData(newItems);
+        }
         
         return key;
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
+        if (isMounted) {
+          setError(error);
+        }
         throw error;
+      } finally {
+        // Czyścimy flagę
+        unmountCheck();
       }
     },
     
@@ -116,19 +126,29 @@ export function useIndexedDB<T>(
         throw new Error('Collection name is not defined');
       }
       
+      let isMounted = true;
+      const unmountCheck = () => isMounted = false;
+      
       try {
         const ops = await dbManager.getOperations(collectionName);
         const updatedKey = await ops.put<T>(collectionName, item, key);
         
-        // Refresh data
+        // Refresh data - tylko jeśli komponent jest nadal zamontowany
         const newItems = await ops.getAll<T>(collectionName);
-        setData(newItems);
+        if (isMounted) {
+          setData(newItems);
+        }
         
         return updatedKey;
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
+        if (isMounted) {
+          setError(error);
+        }
         throw error;
+      } finally {
+        // Czyścimy flagę
+        unmountCheck();
       }
     },
     
@@ -137,17 +157,27 @@ export function useIndexedDB<T>(
         throw new Error('Collection name is not defined');
       }
       
+      let isMounted = true;
+      const unmountCheck = () => isMounted = false;
+      
       try {
         const ops = await dbManager.getOperations(collectionName);
         await ops.delete(collectionName, key);
         
-        // Refresh data
+        // Refresh data - tylko jeśli komponent jest nadal zamontowany
         const newItems = await ops.getAll<T>(collectionName);
-        setData(newItems);
+        if (isMounted) {
+          setData(newItems);
+        }
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
+        if (isMounted) {
+          setError(error);
+        }
         throw error;
+      } finally {
+        // Czyścimy flagę
+        unmountCheck();
       }
     },
     
@@ -187,19 +217,31 @@ export function useIndexedDB<T>(
         throw new Error('Collection name is not defined');
       }
       
-      setIsLoading(true);
-      setError(null);
+      let isMounted = true;
+      const unmountCheck = () => isMounted = false;
+      
+      if (isMounted) {
+        setIsLoading(true);
+        setError(null);
+      }
       
       try {
         const ops = await dbManager.getOperations(collectionName);
         const items = await ops.getAll<T>(collectionName);
-        setData(items);
-        setIsLoading(false);
+        if (isMounted) {
+          setData(items);
+          setIsLoading(false);
+        }
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
-        setIsLoading(false);
+        if (isMounted) {
+          setError(error);
+          setIsLoading(false);
+        }
         throw error;
+      } finally {
+        // Czyścimy flagę
+        unmountCheck();
       }
     }
   };

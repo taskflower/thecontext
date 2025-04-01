@@ -6,6 +6,7 @@ import { useAppStore } from "@/modules/store";
 import React from "react";
 import ExportImport from "./exportImport/ExportImport";
 import DatabaseConfigurator from "@/modules/databaseConfigurator/componentst/DatabaseConfigurator";
+import AppManagementPanel from "./AppManagementPanel";
 
 
 type PanelContentType =
@@ -14,6 +15,7 @@ type PanelContentType =
   | "conversation"
   | "plugins"
   | "exportimport"
+  | "appmanagement" // Dodajemy nową zakładkę dla zarządzania aplikacją
   | "";
 
 interface BottomPanelProps {
@@ -38,6 +40,7 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({
           {content === "conversation" && "Conversation History"}
           {content === "plugins" && "Plugins"}
           {content === "exportimport" && "Export/Import"}
+          {content === "appmanagement" && "Language Learning App"}
         </h3>
         <button className="p-1 rounded-md hover:bg-muted/50" onClick={onClose}>
           <span className="sr-only">Close panel</span>
@@ -105,6 +108,11 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({
         {content === "exportimport" && (
           <div className="p-4">
             <ExportImport />
+          </div>
+        )}
+        {content === "appmanagement" && (
+          <div className="h-full overflow-auto">
+            <AppManagementPanel />
           </div>
         )}
       </div>

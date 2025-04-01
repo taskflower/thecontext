@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 // src/modules/graph/types.ts
 import { PluginDataMap } from "../plugins/types";
 import { BaseItem } from "../store";

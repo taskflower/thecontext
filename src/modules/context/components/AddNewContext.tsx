@@ -48,6 +48,10 @@ export const AddNewContext: React.FC<AddNewContextProps> = ({
       setFormData(prev => ({
         ...prev,
         scenarioId: scenarioId || "",
+        title: "", 
+        content: "", 
+        type: ContextType.TEXT,
+        persistent: false,
       }));
       setCollectionError(null);
     }
@@ -55,22 +59,33 @@ export const AddNewContext: React.FC<AddNewContextProps> = ({
   
   // Ładowanie dostępnych kolekcji, gdy typ zmienia się na IndexedDB
   useEffect(() => {
+    let isMounted = true;
     async function loadCollections() {
       if (formData.type === ContextType.INDEXED_DB) {
         setIsLoadingCollections(true);
         try {
           const collections = await IndexedDBService.getCollections();
-          setAvailableCollections(collections);
+          if (isMounted) {
+            setAvailableCollections(collections);
+          }
         } catch (err) {
           console.error("Error loading collections:", err);
-          setAvailableCollections([]);
+          if (isMounted) {
+            setAvailableCollections([]);
+          }
         } finally {
-          setIsLoadingCollections(false);
+          if (isMounted) {
+            setIsLoadingCollections(false);
+          }
         }
       }
     }
     
     loadCollections();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [formData.type]);
 
   const handleChange = (
@@ -143,6 +158,16 @@ export const AddNewContext: React.FC<AddNewContextProps> = ({
       if (!collectionReady) return;
     }
     
+    // Log context item creation for debugging
+    console.log('Adding new context item:', {
+      title: formData.title,
+      type: formData.type,
+      scenarioId: formData.scenarioId || undefined,
+      content: formData.content.substring(0, 50) + (formData.content.length > 50 ? '...' : ''),
+      persistent: formData.persistent
+    });
+    
+    // Create context item with all required properties
     addContextItem({
       title: formData.title,
       content: formData.content,
@@ -151,7 +176,10 @@ export const AddNewContext: React.FC<AddNewContextProps> = ({
       persistent: formData.persistent,
       metadata: formData.type === ContextType.INDEXED_DB ? {
         collection: formData.content
-      } : undefined
+      } : undefined,
+      // These fields are expected to be set and might be needed for proper context handling
+      createdAt: Date.now(),
+      updatedAt: Date.now()
     });
     
     // Resetowanie formularza

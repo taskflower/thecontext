@@ -1,19 +1,21 @@
 // src/modules/plugins/pluginContext.tsx
 import React, { createContext, useContext, useEffect, useState, ReactNode, useMemo, useCallback } from 'react';
 import useDynamicComponentStore from './pluginsStore';
-import { PluginComponentProps, Plugin } from './types';
+import { PluginComponentProps, Plugin, PluginType } from './types';
 import { discoverAndLoadComponents } from './pluginsDiscovery';
 
 // Define the interface for our plugin context
 interface PluginContextType {
   // Plugin registration
-  registerPlugin: (key: string, component: React.ComponentType<PluginComponentProps>) => void;
+  registerPlugin: (key: string, component: React.ComponentType<PluginComponentProps>, type?: PluginType) => void;
   unregisterPlugin: (key: string) => void;
   
   // Plugin state management
   getPluginComponent: (key: string) => React.ComponentType<PluginComponentProps> | null;
   getPluginKeys: () => string[];
+  getPluginKeysByType: (type: PluginType) => string[];
   getAllPlugins: () => Plugin[];
+  getPluginsByType: (type: PluginType) => Plugin[];
   
   // Plugin data management
   setPluginData: (key: string, data: unknown) => void;
@@ -22,6 +24,10 @@ interface PluginContextType {
   // Plugin state (enabled/disabled)
   isPluginEnabled: (key: string) => boolean;
   togglePlugin: (key: string) => void;
+  
+  // Plugin type management
+  getPluginType: (key: string) => PluginType | undefined;
+  setPluginType: (key: string, type: PluginType) => void;
   
   // Loaded state
   isLoaded: boolean;
@@ -59,8 +65,8 @@ export const PluginProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   }, [getComponentKeys]);
   
   // Memoize plugin registration functions to prevent re-renders
-  const registerPlugin = useCallback((key: string, component: React.ComponentType<PluginComponentProps>) => {
-    store.registerComponent(key, component);
+  const registerPlugin = useCallback((key: string, component: React.ComponentType<PluginComponentProps>, type: PluginType = 'flow') => {
+    store.registerComponent(key, component, type);
     
     // Update plugin state if this is a new plugin
     setPluginState(prev => ({
@@ -109,9 +115,34 @@ export const PluginProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const getAllPlugins = useCallback((): Plugin[] => {
     return getComponentKeys().map(key => ({
       key,
-      enabled: isPluginEnabled(key)
+      enabled: isPluginEnabled(key),
+      type: store.getPluginType(key)
     }));
-  }, [getComponentKeys, isPluginEnabled]);
+  }, [getComponentKeys, isPluginEnabled, store]);
+  
+  // Get plugins by type
+  const getPluginKeysByType = useCallback((type: PluginType): string[] => {
+    return store.getComponentKeysByType(type);
+  }, [store]);
+  
+  // Get plugins by type
+  const getPluginsByType = useCallback((type: PluginType): Plugin[] => {
+    return store.getComponentKeysByType(type).map(key => ({
+      key,
+      enabled: isPluginEnabled(key),
+      type
+    }));
+  }, [store, isPluginEnabled]);
+  
+  // Get plugin type
+  const getPluginType = useCallback((key: string): PluginType | undefined => {
+    return store.getPluginType(key);
+  }, [store]);
+  
+  // Set plugin type
+  const setPluginType = useCallback((key: string, type: PluginType): void => {
+    store.setPluginType(key, type);
+  }, [store]);
   
   // Memoize context value to prevent unnecessary re-renders
   const contextValue = useMemo<PluginContextType>(() => ({
@@ -119,22 +150,30 @@ export const PluginProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     unregisterPlugin,
     getPluginComponent,
     getPluginKeys: getComponentKeys,
+    getPluginKeysByType,
     getAllPlugins,
+    getPluginsByType,
     setPluginData,
     getPluginData,
     isPluginEnabled,
     togglePlugin,
+    getPluginType,
+    setPluginType,
     isLoaded
   }), [
     registerPlugin,
     unregisterPlugin,
     getPluginComponent,
     getComponentKeys,
+    getPluginKeysByType,
     getAllPlugins,
+    getPluginsByType,
     setPluginData,
     getPluginData,
     isPluginEnabled,
     togglePlugin,
+    getPluginType,
+    setPluginType,
     isLoaded
   ]);
   
@@ -156,21 +195,44 @@ export const usePlugins = (): PluginContextType => {
   return context;
 };
 
-// Export direct access to the plugin registry for external usage
+// Implementacja PluginRegistry używająca store bezpośrednio
+// Uwaga: To rozwiązanie powinno być używane tylko poza komponentami React
+// W komponentach React zawsze używaj hooków (usePlugins)
 export const PluginRegistry = {
-  register: (key: string, component: React.ComponentType<PluginComponentProps>) => {
-    useDynamicComponentStore.getState().registerComponent(key, component);
+  register: (key: string, component: React.ComponentType<PluginComponentProps>, type: PluginType = 'flow') => {
+    // Używamy create() aby uzyskać kopię store z dostępem do metod
+    const store = useDynamicComponentStore.getState();
+    store.registerComponent(key, component, type);
   },
   unregister: (key: string) => {
-    useDynamicComponentStore.getState().unregisterComponent(key);
+    const store = useDynamicComponentStore.getState();
+    store.unregisterComponent(key);
   },
   getComponent: (key: string) => {
-    return useDynamicComponentStore.getState().getComponent(key);
+    const store = useDynamicComponentStore.getState();
+    return store.getComponent(key);
   },
   setData: (key: string, data: unknown) => {
-    useDynamicComponentStore.getState().setComponentData(key, data);
+    const store = useDynamicComponentStore.getState();
+    store.setComponentData(key, data);
   },
   getData: (key: string) => {
-    return useDynamicComponentStore.getState().getComponentData(key);
+    const store = useDynamicComponentStore.getState();
+    return store.getComponentData(key);
+  },
+  getPluginType: (key: string) => {
+    const store = useDynamicComponentStore.getState();
+    return store.getPluginType(key);
+  },
+  setPluginType: (key: string, type: PluginType) => {
+    const store = useDynamicComponentStore.getState();
+    store.setPluginType(key, type);
+  },
+  getComponentsByType: (type: PluginType) => {
+    const store = useDynamicComponentStore.getState();
+    return store.getComponentKeysByType(type).map(key => ({
+      key,
+      component: store.getComponent(key)
+    }));
   }
 };

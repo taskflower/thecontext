@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 
 // Panel content types
 export type LeftPanelTab = 'workspace' | 'scenarios' | 'nodes' | 'edges'
-export type BottomPanelTab = 'context' | 'filters' | 'conversation' | 'plugins' | 'exportimport' | ''
+export type BottomPanelTab = 'context' | 'filters' | 'conversation' | 'plugins' | 'exportimport' | 'appmanagement' | ''
 
 // Dialog types
 export type DialogType = 'editNode' | 'editEdge' | 'configurePlugin' | 'editPluginOptions' | 'addNode' | 'addEdge'

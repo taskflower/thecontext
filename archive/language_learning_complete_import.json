@@ -1,0 +1,260 @@
+{
+  "flowchart-app-state": {
+    "state": {
+      "items": [
+        {
+          "id": "language-learning-workspace",
+          "type": "workspace",
+          "title": "Language Learning App",
+          "description": "Learn a new language with interactive exercises and lessons",
+          "slug": "language-learning",
+          "createdAt": 1711902659802,
+          "updatedAt": 1711902659802,
+          "children": [
+            {
+              "id": "beginner-spanish-scenario",
+              "type": "scenario",
+              "name": "Beginner Spanish Course",
+              "description": "Learn basic Spanish vocabulary and phrases",
+              "createdAt": 1711902659805,
+              "updatedAt": 1711902659805,
+              "filters": [],
+              "children": [
+                {
+                  "id": "lesson-intro-node",
+                  "type": "node",
+                  "label": "Introduction to Spanish",
+                  "assistantMessage": "# Welcome to Spanish Learning\n\nThis course will teach you basic Spanish vocabulary and phrases. We'll start with simple greetings and gradually build up your skills.\n\n**Let's begin!**",
+                  "userPrompt": "",
+                  "contextKey": "current_lesson",
+                  "pluginKey": "LessonIntroPlugin",
+                  "position": {
+                    "x": 100,
+                    "y": 100
+                  },
+                  "createdAt": 1711902659810,
+                  "updatedAt": 1711902659810,
+                  "pluginData": {
+                    "LessonIntroPlugin": {
+                      "lessonId": "lesson1",
+                      "nextExerciseId": "exercise1"
+                    }
+                  }
+                },
+                {
+                  "id": "exercise-multiple-choice-node",
+                  "type": "node",
+                  "label": "Greetings Exercise",
+                  "assistantMessage": "# Greetings in Spanish\n\nLet's practice some basic greetings.",
+                  "userPrompt": "",
+                  "contextKey": "user_answer",
+                  "pluginKey": "ExercisePlugin",
+                  "position": {
+                    "x": 300,
+                    "y": 100
+                  },
+                  "createdAt": 1711902659815,
+                  "updatedAt": 1711902659815,
+                  "pluginData": {
+                    "ExercisePlugin": {
+                      "exerciseId": "exercise1",
+                      "exerciseType": "multiple-choice",
+                      "question": "How do you say 'Hello' in Spanish?",
+                      "options": ["Hola", "Gracias", "Adiós", "Por favor"],
+                      "correctAnswer": "Hola",
+                      "nextExerciseId": "exercise2"
+                    }
+                  }
+                },
+                {
+                  "id": "exercise-translation-node",
+                  "type": "node",
+                  "label": "Translation Exercise",
+                  "assistantMessage": "# Translation Practice\n\nNow, let's try a translation exercise.",
+                  "userPrompt": "",
+                  "contextKey": "user_translation",
+                  "pluginKey": "ExercisePlugin",
+                  "position": {
+                    "x": 500,
+                    "y": 100
+                  },
+                  "createdAt": 1711902659820,
+                  "updatedAt": 1711902659820,
+                  "pluginData": {
+                    "ExercisePlugin": {
+                      "exerciseId": "exercise2",
+                      "exerciseType": "translation",
+                      "question": "Translate 'Good morning' to Spanish",
+                      "correctAnswer": "Buenos días",
+                      "nextExerciseId": "lesson_complete"
+                    }
+                  }
+                },
+                {
+                  "id": "lesson-complete-node",
+                  "type": "node",
+                  "label": "Lesson Complete",
+                  "assistantMessage": "# Great job!\n\nYou've completed the first lesson in Spanish basics.\n\nYour progress has been saved, and you can continue with more exercises in the next session.",
+                  "userPrompt": "",
+                  "contextKey": "",
+                  "pluginKey": "LessonCompletePlugin",
+                  "position": {
+                    "x": 700,
+                    "y": 100
+                  },
+                  "createdAt": 1711902659825,
+                  "updatedAt": 1711902659825,
+                  "pluginData": {
+                    "LessonCompletePlugin": {
+                      "lessonId": "lesson1",
+                      "score": 100,
+                      "nextLessonId": "lesson2"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "selected": {
+        "workspace": "language-learning-workspace",
+        "scenario": "beginner-spanish-scenario",
+        "node": ""
+      },
+      "stateVersion": 1,
+      "flowSession": {
+        "isPlaying": false,
+        "currentStepIndex": 0,
+        "temporarySteps": []
+      }
+    },
+    "version": 1
+  },
+  "indexedDB": {
+    "collections": [
+      {
+        "name": "language_lessons",
+        "items": [
+          {
+            "id": "lesson1",
+            "title": "Greetings and Basic Phrases",
+            "description": "Learn how to greet people and use basic phrases in Spanish",
+            "level": "beginner",
+            "language": "spanish",
+            "order": 1,
+            "exercises": ["exercise1", "exercise2"],
+            "completed": false
+          },
+          {
+            "id": "lesson2",
+            "title": "Numbers and Counting",
+            "description": "Learn to count and use numbers in Spanish",
+            "level": "beginner",
+            "language": "spanish",
+            "order": 2,
+            "exercises": ["exercise3", "exercise4"],
+            "completed": false
+          }
+        ]
+      },
+      {
+        "name": "language_exercises",
+        "items": [
+          {
+            "id": "exercise1",
+            "lessonId": "lesson1",
+            "type": "multiple-choice",
+            "question": "How do you say 'Hello' in Spanish?",
+            "options": ["Hola", "Gracias", "Adiós", "Por favor"],
+            "correctAnswer": "Hola",
+            "explanation": "Hola is the Spanish word for Hello",
+            "order": 1
+          },
+          {
+            "id": "exercise2",
+            "lessonId": "lesson1",
+            "type": "translation",
+            "question": "Translate 'Good morning' to Spanish",
+            "correctAnswer": "Buenos días",
+            "explanation": "Buenos días is the Spanish phrase for Good morning",
+            "order": 2
+          },
+          {
+            "id": "exercise3",
+            "lessonId": "lesson2",
+            "type": "multiple-choice",
+            "question": "What is 'five' in Spanish?",
+            "options": ["Uno", "Tres", "Cinco", "Siete"],
+            "correctAnswer": "Cinco",
+            "explanation": "Cinco is the Spanish word for five",
+            "order": 1
+          },
+          {
+            "id": "exercise4",
+            "lessonId": "lesson2",
+            "type": "translation",
+            "question": "Translate 'I want two apples' to Spanish",
+            "correctAnswer": "Quiero dos manzanas",
+            "explanation": "Quiero = I want, dos = two, manzanas = apples",
+            "order": 2
+          }
+        ]
+      },
+      {
+        "name": "user_progress",
+        "items": [
+          {
+            "id": "user_default",
+            "completedLessons": [],
+            "completedExercises": [],
+            "currentLessonId": "lesson1",
+            "currentExerciseId": "exercise1",
+            "score": 0
+          }
+        ]
+      }
+    ]
+  },
+  "context": [
+    {
+      "id": "current_lesson",
+      "title": "Current Lesson",
+      "value": "lesson1",
+      "description": "ID of the current lesson"
+    },
+    {
+      "id": "current_exercise",
+      "title": "Current Exercise",
+      "value": "exercise1",
+      "description": "ID of the current exercise"
+    },
+    {
+      "id": "user_answer",
+      "title": "User Answer",
+      "value": "",
+      "description": "The user's answer to the current exercise"
+    },
+    {
+      "id": "user_translation",
+      "title": "User Translation",
+      "value": "",
+      "description": "The user's translation for the current exercise"
+    }
+  ],
+  "components": [
+    {
+      "name": "LessonIntroPlugin",
+      "code": "import React, { useEffect } from 'react';\nimport { PluginComponentWithSchema, PluginComponentProps } from '@/modules/plugins/types';\nimport { Button } from '@/components/ui/button';\nimport { IndexedDBService } from '@/modules/indexedDB/service';\n\ninterface LessonIntroData {\n  lessonId: string;\n  nextExerciseId: string;\n}\n\nconst LessonIntroPlugin: PluginComponentWithSchema<LessonIntroData> = ({ \n  data, \n  appContext \n}: PluginComponentProps<LessonIntroData>) => {\n  const lessonData = data as LessonIntroData;\n  \n  // Load lesson data from IndexedDB when component mounts\n  useEffect(() => {\n    const loadLesson = async () => {\n      try {\n        // Ensure collection exists\n        await IndexedDBService.ensureCollection('language_lessons');\n        \n        // Get lesson data\n        const lesson = await IndexedDBService.getItem('language_lessons', lessonData.lessonId);\n        console.log('Loaded lesson:', lesson);\n        \n        // Update user progress\n        await IndexedDBService.ensureCollection('user_progress');\n        let progress = await IndexedDBService.getItem('user_progress', 'user_default');\n        \n        if (!progress) {\n          progress = {\n            id: 'user_default',\n            completedLessons: [],\n            completedExercises: [],\n            currentLessonId: lessonData.lessonId,\n            currentExerciseId: lessonData.nextExerciseId,\n            score: 0\n          };\n        } else {\n          progress.currentLessonId = lessonData.lessonId;\n          progress.currentExerciseId = lessonData.nextExerciseId;\n        }\n        \n        await IndexedDBService.saveItem('user_progress', progress);\n      } catch (error) {\n        console.error('Error loading lesson:', error);\n      }\n    };\n    \n    loadLesson();\n  }, [lessonData.lessonId, lessonData.nextExerciseId]);\n  \n  const handleContinue = () => {\n    if (appContext?.nextStep) {\n      appContext.nextStep();\n    }\n  };\n  \n  return (\n    <div className=\"my-8 space-y-6\">\n      <div className=\"p-6 bg-primary/10 rounded-lg border border-primary/20\">\n        <h3 className=\"text-xl font-semibold mb-2\">Ready to begin?</h3>\n        <p className=\"text-muted-foreground\">\n          You're about to start the lesson. Click the button below when you're ready to continue.\n        </p>\n      </div>\n      \n      <Button \n        onClick={handleContinue}\n        className=\"w-full py-6 text-lg\"\n      >\n        Start Lesson\n      </Button>\n    </div>\n  );\n};\n\nLessonIntroPlugin.pluginSettings = {\n  replaceUserInput: true,\n  hideNavigationButtons: true\n};\n\nexport default LessonIntroPlugin;"
+    },
+    {
+      "name": "ExercisePlugin",
+      "code": "import React, { useState, useEffect } from 'react';\nimport { PluginComponentWithSchema, PluginComponentProps } from '@/modules/plugins/types';\nimport { Button } from '@/components/ui/button';\nimport { Card } from '@/components/ui/card';\nimport { IndexedDBService } from '@/modules/indexedDB/service';\nimport { Input } from '@/components/ui/input';\nimport { Label } from '@/components/ui/label';\nimport { Badge } from '@/components/ui/badge';\nimport { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';\nimport { updateContextFromNodeInput } from '@/modules/flow/contextHandler';\n\ninterface MultipleChoiceExerciseData {\n  exerciseId: string;\n  exerciseType: 'multiple-choice' | 'translation';\n  question: string;\n  options?: string[];\n  correctAnswer: string;\n  nextExerciseId: string;\n}\n\nconst ExercisePlugin: PluginComponentWithSchema<MultipleChoiceExerciseData> = ({ \n  data, \n  appContext \n}: PluginComponentProps<MultipleChoiceExerciseData>) => {\n  const exerciseData = data as MultipleChoiceExerciseData;\n  \n  const [answer, setAnswer] = useState('');\n  const [submitted, setSubmitted] = useState(false);\n  const [isCorrect, setIsCorrect] = useState(false);\n  const [exercise, setExercise] = useState<any>(null);\n  \n  // Load exercise data from IndexedDB when component mounts\n  useEffect(() => {\n    const loadExercise = async () => {\n      try {\n        // Ensure collection exists\n        await IndexedDBService.ensureCollection('language_exercises');\n        \n        // Get exercise data\n        const exerciseData = await IndexedDBService.getItem('language_exercises', exerciseData.exerciseId);\n        setExercise(exerciseData);\n        console.log('Loaded exercise:', exerciseData);\n        \n        // Update user progress\n        await IndexedDBService.ensureCollection('user_progress');\n        let progress = await IndexedDBService.getItem('user_progress', 'user_default');\n        \n        if (!progress) {\n          progress = {\n            id: 'user_default',\n            completedLessons: [],\n            completedExercises: [],\n            currentLessonId: '',\n            currentExerciseId: exerciseData.exerciseId,\n            score: 0\n          };\n        } else {\n          progress.currentExerciseId = exerciseData.exerciseId;\n        }\n        \n        await IndexedDBService.saveItem('user_progress', progress);\n      } catch (error) {\n        console.error('Error loading exercise:', error);\n      }\n    };\n    \n    loadExercise();\n  }, [exerciseData.exerciseId]);\n  \n  const handleOptionSelect = (option: string) => {\n    setAnswer(option);\n  };\n  \n  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {\n    setAnswer(e.target.value);\n  };\n  \n  const handleSubmit = async () => {\n    // Check if answer is correct\n    const correct = answer.toLowerCase() === exerciseData.correctAnswer.toLowerCase();\n    setIsCorrect(correct);\n    setSubmitted(true);\n    \n    try {\n      // Update context with user's answer\n      if (appContext?.currentNode?.id && appContext.updateNodeUserPrompt) {\n        const contextValue = answer;\n        appContext.updateNodeUserPrompt(appContext.currentNode.id, contextValue);\n        \n        // Update context\n        if (appContext.currentNode.contextKey) {\n          updateContextFromNodeInput(appContext.currentNode.id);\n        }\n      }\n      \n      // Update user progress\n      await IndexedDBService.ensureCollection('user_progress');\n      let progress = await IndexedDBService.getItem('user_progress', 'user_default');\n      \n      if (progress) {\n        if (correct) {\n          progress.score += 10;\n          if (!progress.completedExercises.includes(exerciseData.exerciseId)) {\n            progress.completedExercises.push(exerciseData.exerciseId);\n          }\n        }\n        \n        await IndexedDBService.saveItem('user_progress', progress);\n      }\n    } catch (error) {\n      console.error('Error updating progress:', error);\n    }\n  };\n  \n  const handleContinue = () => {\n    if (appContext?.nextStep) {\n      appContext.nextStep();\n    }\n  };\n  \n  // Render multiple choice exercise\n  if (exerciseData.exerciseType === 'multiple-choice') {\n    return (\n      <div className=\"my-8 space-y-6\">\n        <div className=\"p-6 bg-card rounded-lg border\">\n          <h3 className=\"text-xl font-semibold mb-4\">{exerciseData.question}</h3>\n          \n          <RadioGroup \n            value={answer} \n            onValueChange={handleOptionSelect}\n            className=\"space-y-3\"\n            disabled={submitted}\n          >\n            {exerciseData.options?.map((option, index) => (\n              <div key={index} className=\"flex items-center space-x-2\">\n                <RadioGroupItem id={`option-${index}`} value={option} />\n                <Label \n                  htmlFor={`option-${index}`}\n                  className={`text-base flex-1 p-3 rounded ${submitted && option === exerciseData.correctAnswer ? 'bg-green-100 dark:bg-green-900/30' : ''}`}\n                >\n                  {option}\n                  {submitted && option === exerciseData.correctAnswer && (\n                    <Badge variant=\"success\" className=\"ml-2\">Correct</Badge>\n                  )}\n                </Label>\n              </div>\n            ))}\n          </RadioGroup>\n          \n          {submitted && (\n            <div className={`mt-4 p-4 rounded-md ${isCorrect ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>\n              <p className=\"font-medium\">\n                {isCorrect ? '✓ Correct!' : `✗ Incorrect. The correct answer is: ${exerciseData.correctAnswer}`}\n              </p>\n              {exercise?.explanation && (\n                <p className=\"mt-2 text-muted-foreground\">{exercise.explanation}</p>\n              )}\n            </div>\n          )}\n        </div>\n        \n        {submitted ? (\n          <Button \n            onClick={handleContinue}\n            className=\"w-full py-6\"\n          >\n            Continue to Next Exercise\n          </Button>\n        ) : (\n          <Button \n            onClick={handleSubmit}\n            disabled={!answer}\n            className=\"w-full py-6\"\n          >\n            Check Answer\n          </Button>\n        )}\n      </div>\n    );\n  }\n  \n  // Render translation exercise\n  return (\n    <div className=\"my-8 space-y-6\">\n      <div className=\"p-6 bg-card rounded-lg border\">\n        <h3 className=\"text-xl font-semibold mb-4\">{exerciseData.question}</h3>\n        \n        <div className=\"space-y-3\">\n          <Label htmlFor=\"translation-input\" className=\"text-base\">\n            Your translation:\n          </Label>\n          <Input\n            id=\"translation-input\"\n            value={answer}\n            onChange={handleInputChange}\n            placeholder=\"Type your answer here\"\n            className=\"w-full py-6 text-lg\"\n            disabled={submitted}\n          />\n        </div>\n        \n        {submitted && (\n          <div className={`mt-4 p-4 rounded-md ${isCorrect ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>\n            <p className=\"font-medium\">\n              {isCorrect ? '✓ Correct!' : `✗ Incorrect. The correct answer is: ${exerciseData.correctAnswer}`}\n            </p>\n            {exercise?.explanation && (\n              <p className=\"mt-2 text-muted-foreground\">{exercise.explanation}</p>\n            )}\n          </div>\n        )}\n      </div>\n      \n      {submitted ? (\n        <Button \n          onClick={handleContinue}\n          className=\"w-full py-6\"\n        >\n          Continue to Next Exercise\n        </Button>\n      ) : (\n        <Button \n          onClick={handleSubmit}\n          disabled={!answer}\n          className=\"w-full py-6\"\n        >\n          Check Answer\n        </Button>\n      )}\n    </div>\n  );\n};\n\nExercisePlugin.pluginSettings = {\n  replaceUserInput: true,\n  hideNavigationButtons: true\n};\n\nexport default ExercisePlugin;"
+    },
+    {
+      "name": "LessonCompletePlugin",
+      "code": "import React, { useEffect, useState } from 'react';\nimport { PluginComponentWithSchema, PluginComponentProps } from '@/modules/plugins/types';\nimport { Button } from '@/components/ui/button';\nimport { IndexedDBService } from '@/modules/indexedDB/service';\nimport { useAppStore } from '@/modules/store';\n\ninterface LessonCompleteData {\n  lessonId: string;\n  score: number;\n  nextLessonId: string;\n}\n\nconst LessonCompletePlugin: PluginComponentWithSchema<LessonCompleteData> = ({ \n  data, \n  appContext \n}: PluginComponentProps<LessonCompleteData>) => {\n  const lessonData = data as LessonCompleteData;\n  const [userScore, setUserScore] = useState(0);\n  const [lesson, setLesson] = useState<any>(null);\n  const [nextLesson, setNextLesson] = useState<any>(null);\n  \n  // Get stop flow session function from store\n  const stopFlowSession = useAppStore(state => state.stopFlowSession);\n  \n  // Load user progress and mark lesson as completed\n  useEffect(() => {\n    const updateProgress = async () => {\n      try {\n        // Get user progress\n        await IndexedDBService.ensureCollection('user_progress');\n        let progress = await IndexedDBService.getItem('user_progress', 'user_default');\n        \n        if (progress) {\n          // Mark lesson as completed\n          if (!progress.completedLessons.includes(lessonData.lessonId)) {\n            progress.completedLessons.push(lessonData.lessonId);\n          }\n          \n          // Update next lesson\n          progress.currentLessonId = lessonData.nextLessonId;\n          \n          // Save progress\n          await IndexedDBService.saveItem('user_progress', progress);\n          \n          // Set user score\n          setUserScore(progress.score);\n        }\n        \n        // Get lesson info\n        await IndexedDBService.ensureCollection('language_lessons');\n        const currentLesson = await IndexedDBService.getItem('language_lessons', lessonData.lessonId);\n        setLesson(currentLesson);\n        \n        // Get next lesson info\n        const next = await IndexedDBService.getItem('language_lessons', lessonData.nextLessonId);\n        setNextLesson(next);\n      } catch (error) {\n        console.error('Error updating progress:', error);\n      }\n    };\n    \n    updateProgress();\n  }, [lessonData.lessonId, lessonData.nextLessonId]);\n  \n  const handleFinish = () => {\n    // Close the flow session and save changes\n    if (stopFlowSession) {\n      stopFlowSession(true);\n    }\n    \n    if (appContext?.nextStep) {\n      appContext.nextStep();\n    }\n  };\n  \n  return (\n    <div className=\"my-8 space-y-6\">\n      <div className=\"p-6 bg-green-100 dark:bg-green-900/30 rounded-lg border border-green-200 dark:border-green-800\">\n        <h3 className=\"text-xl font-semibold mb-2\">Lesson Completed!</h3>\n        <p className=\"text-muted-foreground\">\n          Congratulations on completing {lesson?.title || 'this lesson'}.\n        </p>\n        \n        <div className=\"mt-4 flex items-center justify-between py-2 px-4 bg-background rounded-md\">\n          <span className=\"font-medium\">Your Score</span>\n          <span className=\"text-xl font-bold\">{userScore} points</span>\n        </div>\n      </div>\n      \n      {nextLesson && (\n        <div className=\"p-6 bg-primary/10 rounded-lg border border-primary/20\">\n          <h3 className=\"text-lg font-semibold mb-2\">Up Next</h3>\n          <p className=\"font-medium\">{nextLesson.title}</p>\n          <p className=\"text-sm text-muted-foreground\">{nextLesson.description}</p>\n        </div>\n      )}\n      \n      <Button \n        onClick={handleFinish}\n        className=\"w-full py-6 text-lg\"\n      >\n        Finish Lesson\n      </Button>\n    </div>\n  );\n};\n\nLessonCompletePlugin.pluginSettings = {\n  replaceUserInput: true,\n  hideNavigationButtons: true\n};\n\nexport default LessonCompletePlugin;"
+    }
+  ],
+  "initialization_script": "// This script runs when the import is processed\n(function() {\n  // Import necessary functions\n  // Note: This would normally be handled by the import system\n  // but we need to ensure the components get registered\n  try {\n    // Register the components with the plugin system\n    const registerComponents = async () => {\n      // Wait for the DOM to be fully loaded\n      if (document.readyState !== 'complete') {\n        window.addEventListener('load', registerComponents);\n        return;\n      }\n\n      // Give the app time to initialize\n      setTimeout(async () => {\n        // Get the PluginRegistry from the app\n        if (window.PluginRegistry) {\n          console.log('Found PluginRegistry, registering components...');\n\n          // Create React components from the code strings\n          const componentsData = JSON.parse(sessionStorage.getItem('importedComponents') || '[]');\n          \n          for (const componentData of componentsData) {\n            try {\n              // Create a new Function to evaluate the component code\n              // This is necessary because we need to create a proper React component\n              const componentFn = new Function(\n                'React', \n                'PluginComponentWithSchema', \n                'PluginComponentProps',\n                'Button',\n                'Card',\n                'Input',\n                'Label',\n                'Badge',\n                'RadioGroup', \n                'RadioGroupItem',\n                'IndexedDBService',\n                'updateContextFromNodeInput',\n                'useAppStore',\n                `const module = {}; ${componentData.code}; return module.default;`\n              );\n              \n              // Execute the function with required dependencies\n              const component = componentFn(\n                window.React, \n                {}, // PluginComponentWithSchema placeholder\n                {}, // PluginComponentProps placeholder\n                {}, // Button placeholder\n                {}, // Card placeholder\n                {}, // Input placeholder\n                {}, // Label placeholder\n                {}, // Badge placeholder\n                {}, // RadioGroup placeholder\n                {}, // RadioGroupItem placeholder\n                {}, // IndexedDBService placeholder\n                () => {}, // updateContextFromNodeInput placeholder\n                () => ({}) // useAppStore placeholder\n              );\n              \n              // Register the component\n              if (component) {\n                console.log(`Registering component: ${componentData.name}`);\n                window.PluginRegistry.register(componentData.name, component);\n              }\n            } catch (err) {\n              console.error(`Error registering component ${componentData.name}:`, err);\n            }\n          }\n        } else {\n          console.warn('PluginRegistry not found, retrying in 2 seconds...');\n          setTimeout(registerComponents, 2000);\n        }\n        \n        // Set up IndexedDB collections and data\n        const setupIndexedDB = async () => {\n          if (!window.IndexedDBService) {\n            console.warn('IndexedDBService not found, retrying in 2 seconds...');\n            setTimeout(setupIndexedDB, 2000);\n            return;\n          }\n          \n          try {\n            // Get collections data\n            const collectionsData = JSON.parse(sessionStorage.getItem('importedCollections') || '[]');\n            \n            for (const collection of collectionsData) {\n              try {\n                // Ensure collection exists\n                await window.IndexedDBService.ensureCollection(collection.name);\n                \n                // Add items to the collection\n                for (const item of collection.items) {\n                  await window.IndexedDBService.saveItem(collection.name, item);\n                }\n                \n                console.log(`Initialized collection: ${collection.name} with ${collection.items.length} items`);\n              } catch (err) {\n                console.error(`Error initializing collection ${collection.name}:`, err);\n              }\n            }\n          } catch (err) {\n            console.error('Error setting up IndexedDB:', err);\n          }\n        };\n        \n        setupIndexedDB();\n      }, 1000);\n    };\n\n    // Store component and collection data in sessionStorage for use by the script\n    if (typeof sessionStorage !== 'undefined') {\n      // Store components data\n      const componentsData = JSON.parse(document.getElementById('importedData').getAttribute('data-components') || '[]');\n      sessionStorage.setItem('importedComponents', JSON.stringify(componentsData));\n      \n      // Store collections data\n      const collectionsData = JSON.parse(document.getElementById('importedData').getAttribute('data-collections') || '[]');\n      sessionStorage.setItem('importedCollections', JSON.stringify(collectionsData));\n      \n      // Start the registration process\n      registerComponents();\n    }\n  } catch (err) {\n    console.error('Error in initialization script:', err);\n  }\n})();"
+}

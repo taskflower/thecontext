@@ -6,7 +6,7 @@ import { produce } from "immer";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { ComponentType } from "react";
-import { DynamicComponentStore, PluginComponentProps } from "./types";
+import { DynamicComponentStore, PluginComponentProps, PluginType } from "./types";
 
 /**
  * Creates a singleton store instance for managing dynamic plugin components
@@ -20,13 +20,19 @@ const useDynamicComponentStore = create<DynamicComponentStore>()(
       // State properties
       components: {},
       componentData: {},
+      pluginTypes: {} as Record<string, PluginType>,
 
       /**
        * Registers a component with the store
        * @param key Unique identifier for the component
        * @param component The React component to register
+       * @param type Optional plugin type, defaults to 'flow'
        */
-      registerComponent: (key: string, component: ComponentType<PluginComponentProps>) =>
+      registerComponent: (
+        key: string, 
+        component: ComponentType<PluginComponentProps>,
+        type: PluginType = 'flow'
+      ) =>
         set(
           produce((state) => {
             state.components[key] = component;
@@ -34,7 +40,9 @@ const useDynamicComponentStore = create<DynamicComponentStore>()(
             if (!state.componentData[key]) {
               state.componentData[key] = null;
             }
-            console.log(`Component registered: ${key}`);
+            // Set plugin type
+            state.pluginTypes[key] = type;
+            console.log(`Component registered: ${key} (type: ${type})`);
           })
         ),
 
@@ -46,6 +54,7 @@ const useDynamicComponentStore = create<DynamicComponentStore>()(
         set(
           produce((state) => {
             delete state.components[key];
+            delete state.pluginTypes[key];
             console.log(`Component unregistered: ${key}`);
           })
         ),
@@ -90,14 +99,49 @@ const useDynamicComponentStore = create<DynamicComponentStore>()(
         const { components } = get();
         return components[key] || null;
       },
+      
+      /**
+       * Gets component keys by type
+       * @param type Plugin type to filter by
+       * @returns Array of component keys matching the specified type
+       */
+      getComponentKeysByType: (type: PluginType): string[] => {
+        const { pluginTypes } = get();
+        return Object.entries(pluginTypes)
+          .filter(([, pluginType]) => pluginType === type)
+          .map(([key]) => key);
+      },
+      
+      /**
+       * Gets the type of a plugin
+       * @param key Plugin identifier
+       * @returns The plugin type or undefined if not found
+       */
+      getPluginType: (key: string): PluginType | undefined => {
+        const { pluginTypes } = get();
+        return pluginTypes[key];
+      },
+      
+      /**
+       * Sets the type of a plugin
+       * @param key Plugin identifier
+       * @param type Plugin type
+       */
+      setPluginType: (key: string, type: PluginType) => 
+        set(
+          produce((state) => {
+            state.pluginTypes[key] = type;
+          })
+        ),
     }),
     {
       name: "plugin-storage", // unique name for localStorage key
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
-        // Only persist the componentData, not the actual components
+        // Only persist the componentData and pluginTypes, not the actual components
         // since functions can't be serialized to JSON
         componentData: state.componentData,
+        pluginTypes: state.pluginTypes,
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {

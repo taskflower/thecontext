@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -53,9 +53,11 @@ const FlowGraph: React.FC<FlowGraphProps> = ({
     onNodesChange: handlersOnNodesChange,
   } = useFlowHandlers();
 
+  const selectNode = useAppStore(state => state.selectNode);
+  
   const onPaneClick = useCallback(() => {
-    useAppStore.getState().selectNode("");
-  }, []);
+    selectNode("");
+  }, [selectNode]);
 
   const { nodes: originalNodes, edges: originalEdges } =
     getActiveScenarioData();
@@ -74,21 +76,30 @@ const FlowGraph: React.FC<FlowGraphProps> = ({
     [onNodesChange, handlersOnNodesChange]
   );
 
+  // Pobierz sesję za pomocą hooka, a nie getState()
+  const flowSession = useAppStore(state => state.flowSession);
+  
   // Automatyczne uruchamianie sesji przy ładowaniu
   useEffect(() => {
-    const savedSession = useAppStore.getState().flowSession;
+    let timeoutId: NodeJS.Timeout | null = null;
+    
     if (
-      savedSession &&
-      !savedSession.isPlaying &&
-      savedSession.temporarySteps &&
-      savedSession.temporarySteps.length > 0
+      flowSession &&
+      !flowSession.isPlaying &&
+      flowSession.temporarySteps &&
+      flowSession.temporarySteps.length > 0
     ) {
       // Uruchom sesję automatycznie - używamy setTimeout, aby dać czas na inicjalizację innych komponentów
-      setTimeout(() => {
+      timeoutId = setTimeout(() => {
         startFlowSession();
       }, 500);
     }
-  }, []); 
+    
+    // Czyszczenie timeoutu przy odmontowaniu komponentu
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [flowSession, startFlowSession]); 
 
   // Update graph on data changes
   useEffect(() => {
@@ -132,12 +143,18 @@ const FlowGraph: React.FC<FlowGraphProps> = ({
     startFlowSession();
   }, [hasExistingSession, resetFlowSession, startFlowSession]);
 
-  const state = useAppStore.getState();
-  const workspace = state.items.find((w) => w.id === state.selected.workspace);
-  const scenario = workspace?.children.find(
-    (s) => s.id === state.selected.scenario
-  );
-  const selectedNode = scenario?.children.find((n) => n.id === selectedNodeId);
+  // Użycie hooków zamiast getState()
+  const items = useAppStore(state => state.items);
+  const selected = useAppStore(state => state.selected);
+  
+  // Memoizacja obliczeń aby uniknąć niepotrzebnych re-renderów
+  const selectedNode = useMemo(() => {
+    const workspace = items.find((w) => w.id === selected.workspace);
+    const scenario = workspace?.children.find(
+      (s) => s.id === selected.scenario
+    );
+    return scenario?.children.find((n) => n.id === selectedNodeId);
+  }, [items, selected, selectedNodeId]);
 
   const hasPlugin = selectedNode?.pluginKey !== undefined;
 

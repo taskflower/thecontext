@@ -4,6 +4,7 @@ import {
   MessageSquare,
   Puzzle,
   FileJson,
+  BookOpen,
 } from "lucide-react";
 import { ToolbarButton } from "./ToolbarButton";
 import React from "react";
@@ -44,6 +45,12 @@ export const BottomToolbar: React.FC = () => {
           label="Export/Import"
           active={bottomPanelTab === "exportimport"}
           onClick={() => toggleBottomPanel("exportimport")}
+        />
+        <ToolbarButton
+          icon={<BookOpen className="h-4 w-4" />}
+          label="Language Learning"
+          active={bottomPanelTab === "appmanagement"}
+          onClick={() => toggleBottomPanel("appmanagement")}
         />
       </div>
     </div>

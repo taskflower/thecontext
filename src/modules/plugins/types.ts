@@ -71,6 +71,11 @@ export interface PluginComponentWithSchema<T = unknown> extends React.FC<PluginC
 }
 
 /**
+ * Plugin types
+ */
+export type PluginType = 'flow' | 'dashboard';
+
+/**
  * Plugin registration state
  */
 export interface Plugin {
@@ -82,6 +87,8 @@ export interface Plugin {
   version?: string;
   /** Other plugins this plugin depends on */
   dependencies?: string[];
+  /** Plugin type - flow or dashboard */
+  type?: PluginType;
 }
 
 /**
@@ -185,11 +192,14 @@ export interface DynamicComponentStore {
   components: Record<string, ComponentType<PluginComponentProps>>;
   /** Plugin component data */
   componentData: Record<string, unknown>;
+  /** Plugin types mapping */
+  pluginTypes: Record<string, PluginType>;
 
   /** Register a component */
   registerComponent: (
     key: string,
-    component: ComponentType<PluginComponentProps>
+    component: ComponentType<PluginComponentProps>,
+    type?: PluginType
   ) => void;
   /** Unregister a component */
   unregisterComponent: (key: string) => void;
@@ -199,8 +209,14 @@ export interface DynamicComponentStore {
   getComponentData: (key: string) => unknown;
   /** Get all registered component keys */
   getComponentKeys: () => string[];
+  /** Get component keys by type */
+  getComponentKeysByType: (type: PluginType) => string[];
   /** Get a component by key */
   getComponent: (key: string) => ComponentType<PluginComponentProps> | null;
+  /** Get plugin type by key */
+  getPluginType: (key: string) => PluginType | undefined;
+  /** Set plugin type */
+  setPluginType: (key: string, type: PluginType) => void;
 }
 
 /**

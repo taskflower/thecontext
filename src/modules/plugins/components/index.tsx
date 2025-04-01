@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import React from 'react';
 import { Power, PowerOff, PlugZap, Check, Puzzle, GitBranch, Layers, Code, AlertCircle} from 'lucide-react';
 import { cn } from '@/utils/utils';

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { StateCreator } from "zustand";
 import { Draft } from "immer";
 import { Workspace, WorkspaceActions, WorkspacePayload } from "./types";

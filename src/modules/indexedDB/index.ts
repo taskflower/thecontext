@@ -1,5 +1,7 @@
 // src/modules/indexedDB/index.ts
 import { openDB, IDBPDatabase } from 'idb';
+// Import the integrations module
+import { initializeIntegrations } from './integrations';
 
 // Constants
 const DB_NAME = 'contextDB';
@@ -60,6 +62,14 @@ class IndexedDBManager {
           },
         });
       }
+
+      // Initialize integrations data after database is ready
+      this.dbPromise.then(() => {
+        // Initialize all integrations
+        initializeIntegrations().catch(err => {
+          console.error('Error initializing integrations:', err);
+        });
+      });
     }
     return this.dbPromise;
   }

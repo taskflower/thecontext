@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Box, ChevronDown, Menu, Plus, Home, Settings } from "lucide-react";
 import { AuthButton } from "../AuthButton";
-import { WorkspaceContext } from "./";
+import { WorkspaceContext, AppSelector } from "./";
 import { useAppStore } from "@/modules/store";
 import { Avatar, AvatarFallback } from "./Avatr";
 
@@ -136,7 +136,8 @@ const WorkspaceHeader: React.FC = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <div className="flex items-center gap-2 mt-2 sm:mt-0">
+          <div className="flex items-center gap-4 mt-2 sm:mt-0">
+            <AppSelector />
             <WorkspaceContext />
           </div>
 

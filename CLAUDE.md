@@ -1,24 +1,27 @@
 # The Context App - Development Guidelines
 
 ## Commands
-- `npm run dev` - Start development server
-- `npm run build` - Build for production (runs TypeScript compiler)
-- `npm run lint` - Run ESLint
-- `npm run build:plugins` - Build plugins
-- `npm run messages:extract` - Extract i18n messages
+- `npm run dev` - Start the development server (Vite)
+- `npm run build` - Build for production (runs TypeScript compiler + Vite build)
+- `npm run lint` - Run ESLint to check for code issues
+- `npm run build:plugins` - Build plugins with custom TypeScript config
+- `npm run preview` - Preview the production build locally
+- `npm run messages:extract` - Extract i18n messages with Lingui
 
-## Code Style
-- **TypeScript**: Strict mode, explicit return types
-- **Components**: Use functional components with React.FC type
-- **Naming**: PascalCase for components/types, camelCase for functions/variables
-- **Imports**: Third-party first, then app imports using @/ alias
-- **Styling**: Tailwind CSS with utility classes, use cn() for conditionals
-- **State**: Zustand for state management, use selector pattern
-- **Error Handling**: Try/catch with fallbacks, console logging for development
-- **Formatting**: 2-space indentation, semicolons required
-- **Testing**: No specific test setup found in package.json
+## Code Style & Conventions
+- **Components**: Use functional components with explicit types (`React.FC<Props>`)
+- **TypeScript**: Always define interfaces/types for props, state, and function returns
+- **Naming**: PascalCase for components/types/interfaces, camelCase for functions/variables
+- **Imports**: Group imports (React, third-party, internal) with alias paths (@/ prefix)
+- **State Management**: Zustand with immer middleware for immutable state updates
+- **Module Structure**: Domain-driven approach with modules in `src/modules/`
+- **UI Components**: Use shadcn/ui components from `src/components/ui/`
+- **Error Handling**: Use try/catch blocks with meaningful error messages
+- **Internationalization**: Use Lingui macros for translations
+- **Formatting**: 2-space indentation, semicolons, 100-character line length
 
-## Project Structure
-- Feature-based organization in src/modules/
-- Shared components in src/components/
-- i18n messages in src/locales/ using Lingui
+## Project Architecture
+- Feature modules in `src/modules/` with component/context/action separation
+- UI component library in `src/components/ui/` based on shadcn
+- IndexedDB for client-side storage with central service
+- Firebase (optional) for backend services when available
