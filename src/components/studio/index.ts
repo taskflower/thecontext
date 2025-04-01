@@ -24,4 +24,3 @@ export { BottomToolbar } from './BottomToolbar';
 export { default as FlowGraph } from './FlowGraph';
 export { TabButton } from './TabButton';
 export { ToolbarButton } from './ToolbarButton';
-export { default as AppManagementPanel } from './AppManagementPanel';

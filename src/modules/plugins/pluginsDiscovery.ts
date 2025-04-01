@@ -2,7 +2,6 @@
 import React from 'react';
 import useDynamicComponentStore from './pluginsStore';
 import { PluginType } from './types';
-import { setupLanguageLearningData } from '../indexedDB/setupLanguageLearning';
 import { SystemConfig } from '../systemConfig';
 
 // Flaga określająca, czy komponenty zostały już załadowane
@@ -131,15 +130,9 @@ export async function initializePluginModules(config?: Partial<SystemConfig>) {
   // Inicjalizuj komponenty pluginów z odpowiednią konfiguracją
   await discoverAndLoadComponents(pluginConfig);
   
-  // Inicjalizuj dane dla nauki języków jeśli opcja jest włączona
+  // Opcja nauki języków powinna być implementowana przez pluginy stworzone w GUI
   if (enableLanguageLearning) {
-    console.log("Initializing language learning data from plugin module loader");
-    try {
-      await setupLanguageLearningData();
-      console.log("Language learning data initialized successfully");
-    } catch (error) {
-      console.error("Error initializing language learning data:", error);
-    }
+    console.log("Language learning should be implemented through GUI plugins rather than hardcoded components");
   }
 }
 

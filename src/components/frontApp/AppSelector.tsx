@@ -12,7 +12,7 @@ import { Button } from "../ui/button";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
 import { AppWindow, ChevronDown, BookOpen, MessageSquare, Database, ExternalLink, LayoutDashboard } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
-import { setupLanguageLearningData } from "../../modules/indexedDB/setupLanguageLearning";
+// Language learning should be implemented via plugins in GUI
 import { useAppStore } from "../../modules/store";
 import { IndexedDBService } from "../../modules/indexedDB/service";
 
@@ -59,8 +59,8 @@ const AppSelector: React.FC = () => {
       workspaceId: "language-learning-workspace",
       slug: "language-learning",
       setupFunction: async () => {
-        // Initialize IndexedDB data for language learning
-        await setupLanguageLearningData();
+        // Language learning should be implemented via plugins in GUI
+        console.log("Language learning should be implemented through GUI plugins");
       }
     },
     {

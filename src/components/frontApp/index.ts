@@ -6,7 +6,6 @@ import FilterDialog from "./FilterDialog";
 import ScenarioCard from "./ScenarioCard";
 import WorkspaceHeader from "./WorkspaceHeader";
 import WorkspaceContext from "./WorkspaceContext";
-import AddLanguageDbContext from "./AddLanguageDbContext";
 
 export {
   AppFooter,
@@ -15,6 +14,5 @@ export {
   FilterDialog,
   ScenarioCard,
   WorkspaceHeader,
-  WorkspaceContext,
-  AddLanguageDbContext
+  WorkspaceContext
 };

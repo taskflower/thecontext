@@ -1,16 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { PluginComponentWithSchema, PluginComponentProps } from '@/modules/plugins/types';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { IndexedDBService } from '@/modules/indexedDB/service';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { updateContextFromNodeInput } from '@/modules/flow/contextHandler';
 import { useAppStore } from '@/modules/store';
 
-interface MultipleChoiceExerciseData {
+interface ExerciseData {
   exerciseId: string;
   exerciseType: 'multiple-choice' | 'translation';
   question: string;
@@ -19,125 +17,25 @@ interface MultipleChoiceExerciseData {
   nextExerciseId: string;
 }
 
-const ExercisePlugin: PluginComponentWithSchema<MultipleChoiceExerciseData> = ({ 
+const ExercisePlugin: PluginComponentWithSchema<ExerciseData> = ({ 
   data, 
   appContext 
-}: PluginComponentProps<MultipleChoiceExerciseData>) => {
-  // Ensure data is defined with fallback values to prevent null/undefined errors
-  const exerciseData: MultipleChoiceExerciseData = {
-    exerciseId: "default-exercise",
-    exerciseType: "multiple-choice",
-    question: "Sample question",
-    options: ["Option 1", "Option 2", "Option 3", "Option 4"],
-    correctAnswer: "Option 1",
-    nextExerciseId: "next-exercise",
-    ...(data || {}) // Spread the actual data if it exists
-  };
-  
+}: PluginComponentProps<ExerciseData>) => {
   const [answer, setAnswer] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
-  const [exercise, setExercise] = useState<any>(null);
+  const [isContinuing, setIsContinuing] = useState(false);
   
-  // Load exercise data from IndexedDB when component mounts or when exercise ID changes
-  useEffect(() => {
-    const loadExercise = async () => {
-      let exerciseId = exerciseData.exerciseId;
-      
-      // If no specific exercise ID, try to get current exercise from user progress
-      if (!exerciseId || exerciseId === "default-exercise") {
-        try {
-          console.log('No explicit exerciseId, checking user progress');
-          await IndexedDBService.ensureCollection('user_progress');
-          const progress = await IndexedDBService.getItem('user_progress', 'user_default');
-          
-          if (progress && progress.currentExerciseId) {
-            exerciseId = progress.currentExerciseId;
-            console.log(`Using exercise ID from user progress: ${exerciseId}`);
-          }
-        } catch (err) {
-          console.error('Error retrieving current exercise from user progress:', err);
-        }
-      }
-      
-      // Also check context if available
-      if ((!exerciseId || exerciseId === "default-exercise") && appContext?.currentNode?.contextKey) {
-        try {
-          console.log('Checking context for exercise ID');
-          const contextItems = useAppStore.getState().getContextItems();
-          const contextItem = contextItems.find(item => item.title === appContext.currentNode?.contextKey);
-          
-          if (contextItem && contextItem.content) {
-            exerciseId = contextItem.content;
-            console.log(`Using exercise ID from context: ${exerciseId}`);
-          }
-        } catch (err) {
-          console.error('Error retrieving exercise ID from context:', err);
-        }
-      }
-      
-      if (!exerciseId || exerciseId === "default-exercise") {
-        console.error('No valid exerciseId provided or found');
-        return;
-      }
-      
-      try {
-        console.log('Loading exercise data for ID:', exerciseId);
-        
-        // Ensure collection exists
-        await IndexedDBService.ensureCollection('language_exercises');
-        
-        // Get exercise data
-        const loadedExerciseData = await IndexedDBService.getItem('language_exercises', exerciseId);
-        
-        if (loadedExerciseData) {
-          setExercise(loadedExerciseData);
-          console.log('Loaded exercise:', loadedExerciseData);
-          
-          // If we found a valid exercise, update the component's data
-          if (exerciseId !== exerciseData.exerciseId) {
-            exerciseData.exerciseId = exerciseId;
-            exerciseData.exerciseType = loadedExerciseData.type || exerciseData.exerciseType;
-            exerciseData.question = loadedExerciseData.question || exerciseData.question;
-            
-            if (loadedExerciseData.type === 'multiple-choice') {
-              exerciseData.options = loadedExerciseData.options || exerciseData.options;
-            }
-            
-            exerciseData.correctAnswer = loadedExerciseData.correctAnswer || exerciseData.correctAnswer;
-            exerciseData.nextExerciseId = loadedExerciseData.nextExerciseId || null;
-          }
-        } else {
-          console.warn('Exercise not found in IndexedDB, using plugin data instead');
-          setExercise(exerciseData);
-        }
-        
-        // Update user progress
-        await IndexedDBService.ensureCollection('user_progress');
-        let progress = await IndexedDBService.getItem('user_progress', 'user_default');
-        
-        if (!progress) {
-          progress = {
-            id: 'user_default',
-            completedLessons: [],
-            completedExercises: [],
-            currentLessonId: '',
-            currentExerciseId: exerciseId,
-            score: 0
-          };
-        } else {
-          progress.currentExerciseId = exerciseId;
-        }
-        
-        await IndexedDBService.saveItem('user_progress', progress);
-        console.log('Updated user progress with current exercise ID:', exerciseId);
-      } catch (error) {
-        console.error('Error loading exercise:', error);
-      }
-    };
-    
-    loadExercise();
-  }, [exerciseData.exerciseId, appContext?.currentNode?.contextKey]);
+  // Ensure data is defined with fallback values
+  const exerciseData: ExerciseData = {
+    exerciseId: "exercise1",
+    exerciseType: "multiple-choice",
+    question: "How do you say 'Hello' in Spanish?",
+    options: ["Hola", "Gracias", "Adiós", "Por favor"],
+    correctAnswer: "Hola",
+    nextExerciseId: "exercise2",
+    ...(data || {})
+  };
   
   const handleOptionSelect = (option: string) => {
     setAnswer(option);
@@ -147,124 +45,65 @@ const ExercisePlugin: PluginComponentWithSchema<MultipleChoiceExerciseData> = ({
     setAnswer(e.target.value);
   };
   
-  const handleSubmit = async () => {
-    console.log('ExercisePlugin: Submit button clicked');
+  const handleSubmit = () => {
+    if (!answer.trim()) return;
     
     // Check if answer is correct
     const correct = answer.toLowerCase() === exerciseData.correctAnswer.toLowerCase();
     setIsCorrect(correct);
     setSubmitted(true);
     
-    try {
-      // Update context with user's answer - more direct approach
-      if (appContext?.currentNode?.id && appContext.currentNode.contextKey) {
-        console.log('Updating context from ExercisePlugin...');
-        
-        // First update the node's user prompt directly
+    // Update context with user's answer
+    if (appContext?.currentNode?.id && appContext.currentNode.contextKey) {
+      try {
+        // Update node's user prompt
         if (appContext.updateNodeUserPrompt) {
           appContext.updateNodeUserPrompt(appContext.currentNode.id, answer);
         }
         
-        // Then update the context directly
+        // Update context directly
         const contextItems = useAppStore.getState().getContextItems();
-        const contextItem = contextItems.find(item => item.title === appContext.currentNode?.contextKey);
+        const contextItem = contextItems.find(
+          item => item.title === appContext.currentNode?.contextKey
+        );
         
         if (contextItem) {
           useAppStore.getState().updateContextItem(contextItem.id, {
             content: answer
           });
-          console.log('Context updated with:', answer);
         }
-        
-        // Also try the standard method
-        updateContextFromNodeInput(appContext.currentNode.id);
+      } catch (error) {
+        console.error('Error updating context:', error);
       }
-      
-      // Update user progress
-      await IndexedDBService.ensureCollection('user_progress');
-      const progress = await IndexedDBService.getItem('user_progress', 'user_default');
-      
-      if (progress) {
-        if (correct) {
-          progress.score += 10;
-          if (!progress.completedExercises.includes(exerciseData.exerciseId)) {
-            progress.completedExercises.push(exerciseData.exerciseId);
-          }
-        }
-        
-        await IndexedDBService.saveItem('user_progress', progress);
-        console.log('User progress updated:', progress);
-      }
-    } catch (error) {
-      console.error('Error updating progress:', error);
     }
   };
   
-  const handleContinue = async () => {
-    console.log('ExercisePlugin: Continue button clicked');
+  const handleContinue = () => {
+    setIsContinuing(true);
     
     try {
-      // Get next exercise ID either from current exercise data or from lesson data
-      let nextExerciseId = exerciseData.nextExerciseId;
-      
-      // If not specified in the current exercise data, try to get from lesson structure
-      if (!nextExerciseId && exercise?.lessonId) {
-        try {
-          // Get the current lesson
-          const lesson = await IndexedDBService.getItem('language_lessons', exercise.lessonId);
-          
-          if (lesson && lesson.exercises && Array.isArray(lesson.exercises)) {
-            // Find the current exercise index in the lesson
-            const currentIndex = lesson.exercises.indexOf(exerciseData.exerciseId);
-            
-            // If found and not the last exercise, get the next one
-            if (currentIndex !== -1 && currentIndex < lesson.exercises.length - 1) {
-              nextExerciseId = lesson.exercises[currentIndex + 1];
-              console.log(`Found next exercise ID from lesson structure: ${nextExerciseId}`);
-            }
-          }
-        } catch (err) {
-          console.error('Error finding next exercise from lesson:', err);
+      // Update context with next exercise ID
+      if (appContext?.currentNode?.contextKey) {
+        const contextItems = useAppStore.getState().getContextItems();
+        const contextItem = contextItems.find(
+          item => item.title === appContext.currentNode?.contextKey
+        );
+        
+        if (contextItem) {
+          useAppStore.getState().updateContextItem(contextItem.id, {
+            content: exerciseData.nextExerciseId
+          });
         }
       }
       
-      console.log(`Next exercise ID: ${nextExerciseId}`);
-      
-      // Update user progress with next exercise ID
-      if (nextExerciseId) {
-        await IndexedDBService.ensureCollection('user_progress');
-        const progress = await IndexedDBService.getItem('user_progress', 'user_default');
-        
-        if (progress) {
-          progress.currentExerciseId = nextExerciseId;
-          await IndexedDBService.saveItem('user_progress', progress);
-          console.log(`Updated user progress with next exercise ID: ${nextExerciseId}`);
-        }
-        
-        // Store the next exercise ID in context if a context key is provided
-        if (appContext?.currentNode?.contextKey) {
-          // Update context for the next step
-          const contextItems = useAppStore.getState().getContextItems();
-          const contextItem = contextItems.find(item => item.title === appContext.currentNode?.contextKey);
-          
-          if (contextItem) {
-            useAppStore.getState().updateContextItem(contextItem.id, {
-              content: nextExerciseId
-            });
-            console.log(`Updated context with next exercise ID: ${nextExerciseId}`);
-          }
-        }
-      }
-      
-      // Move to next step in the flow
+      // Move to next step
       if (appContext?.nextStep) {
-        console.log('Moving to next step in flow...');
         appContext.nextStep();
-      } else {
-        console.error('nextStep function not available in appContext');
       }
     } catch (error) {
       console.error('Error in handleContinue:', error);
+    } finally {
+      setIsContinuing(false);
     }
   };
   
@@ -272,7 +111,7 @@ const ExercisePlugin: PluginComponentWithSchema<MultipleChoiceExerciseData> = ({
   if (exerciseData.exerciseType === 'multiple-choice') {
     return (
       <div className="my-8 space-y-6">
-        <div className="p-6 bg-card rounded-lg border">
+        <Card className="p-6">
           <h3 className="text-xl font-semibold mb-4">{exerciseData.question}</h3>
           
           <RadioGroup 
@@ -302,19 +141,17 @@ const ExercisePlugin: PluginComponentWithSchema<MultipleChoiceExerciseData> = ({
               <p className="font-medium">
                 {isCorrect ? '✓ Correct!' : `✗ Incorrect. The correct answer is: ${exerciseData.correctAnswer}`}
               </p>
-              {exercise?.explanation && (
-                <p className="mt-2 text-muted-foreground">{exercise.explanation}</p>
-              )}
             </div>
           )}
-        </div>
+        </Card>
         
         {submitted ? (
           <Button 
             onClick={handleContinue}
+            disabled={isContinuing}
             className="w-full py-6"
           >
-            Continue to Next Exercise
+            {isContinuing ? 'Loading...' : 'Continue to Next Exercise'}
           </Button>
         ) : (
           <Button 
@@ -332,7 +169,7 @@ const ExercisePlugin: PluginComponentWithSchema<MultipleChoiceExerciseData> = ({
   // Render translation exercise
   return (
     <div className="my-8 space-y-6">
-      <div className="p-6 bg-card rounded-lg border">
+      <Card className="p-6">
         <h3 className="text-xl font-semibold mb-4">{exerciseData.question}</h3>
         
         <div className="space-y-3">
@@ -354,24 +191,22 @@ const ExercisePlugin: PluginComponentWithSchema<MultipleChoiceExerciseData> = ({
             <p className="font-medium">
               {isCorrect ? '✓ Correct!' : `✗ Incorrect. The correct answer is: ${exerciseData.correctAnswer}`}
             </p>
-            {exercise?.explanation && (
-              <p className="mt-2 text-muted-foreground">{exercise.explanation}</p>
-            )}
           </div>
         )}
-      </div>
+      </Card>
       
       {submitted ? (
         <Button 
           onClick={handleContinue}
+          disabled={isContinuing}
           className="w-full py-6"
         >
-          Continue to Next Exercise
+          {isContinuing ? 'Loading...' : 'Continue to Next Exercise'}
         </Button>
       ) : (
         <Button 
           onClick={handleSubmit}
-          disabled={!answer}
+          disabled={!answer.trim()}
           className="w-full py-6"
         >
           Check Answer
@@ -384,6 +219,49 @@ const ExercisePlugin: PluginComponentWithSchema<MultipleChoiceExerciseData> = ({
 ExercisePlugin.pluginSettings = {
   replaceUserInput: true,
   hideNavigationButtons: true
+};
+
+ExercisePlugin.optionsSchema = {
+  exerciseId: {
+    type: 'string',
+    label: 'Exercise ID',
+    default: 'exercise1',
+    description: 'Unique identifier for this exercise'
+  },
+  exerciseType: {
+    type: 'select',
+    label: 'Exercise Type',
+    default: 'multiple-choice',
+    options: [
+      { label: 'Multiple Choice', value: 'multiple-choice' },
+      { label: 'Translation', value: 'translation' }
+    ],
+    description: 'Type of exercise to display'
+  },
+  question: {
+    type: 'string',
+    label: 'Question',
+    default: 'How do you say "Hello" in Spanish?',
+    description: 'The question to ask the user'
+  },
+  options: {
+    type: 'array',
+    label: 'Answer Options',
+    default: ['Hola', 'Gracias', 'Adiós', 'Por favor'],
+    description: 'Options for multiple-choice questions'
+  },
+  correctAnswer: {
+    type: 'string',
+    label: 'Correct Answer',
+    default: 'Hola',
+    description: 'The correct answer to the question'
+  },
+  nextExerciseId: {
+    type: 'string',
+    label: 'Next Exercise ID',
+    default: 'exercise2',
+    description: 'ID of the next exercise to transition to'
+  }
 };
 
 export default ExercisePlugin;
