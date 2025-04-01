@@ -93,67 +93,114 @@ export function WidgetWrapper({ widget, dashboardId }: WidgetWrapperProps) {
   // The widget component
   const WidgetComponent = widgetInfo.component;
   
-  return (
-    <>
-      <Card className="overflow-hidden">
-        {/* Widget header */}
-        <div className="px-3 py-2 border-b bg-muted/20 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Grip className="h-3 w-3 text-muted-foreground cursor-move" />
-            <div className="font-medium text-sm truncate" title={widget.title}>
-              {widget.title}
+  // Check current page to determine rendering style
+  const currentView = window.location.pathname.includes('studio') ? 'studio' : 'workspace';
+  const isStudioView = currentView === 'studio';
+  
+  if (isStudioView) {
+    // Studio view with full technical UI
+    return (
+      <>
+        <Card className="overflow-hidden">
+          {/* Widget header */}
+          <div className="px-3 py-2 border-b bg-muted/20 flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Grip className="h-3 w-3 text-muted-foreground cursor-move" />
+              <div className="font-medium text-sm truncate" title={widget.title}>
+                {widget.title}
+              </div>
             </div>
-          </div>
-          <div className="flex gap-1">
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Settings"
-              onClick={() => {
-                setEditedTitle(widget.title);
-                setEditedHeight(widget.height);
-                setIsSettingsOpen(true);
-              }}
-            >
-              <Settings className="h-3.5 w-3.5" />
-            </Button>
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" title="Remove"
-              onClick={() => deleteWidget(dashboardId, widget.id)}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-        </div>
-        
-        {/* Widget content */}
-        <div 
-          className="overflow-hidden" 
-          style={{ height: `${widget.height}px` }}
-        >
-          {/* Error state */}
-          {isError ? (
-            <div className="p-4 text-center h-full flex flex-col items-center justify-center">
-              <p className="text-sm text-destructive font-medium">
-                An error occurred in this widget
-              </p>
-              <p className="text-xs text-muted-foreground mt-1 mb-3">
-                The widget could not be rendered properly
-              </p>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setIsError(false)}
+            <div className="flex gap-1">
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Settings"
+                onClick={() => {
+                  setEditedTitle(widget.title);
+                  setEditedHeight(widget.height);
+                  setIsSettingsOpen(true);
+                }}
               >
-                Try Again
+                <Settings className="h-3.5 w-3.5" />
+              </Button>
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" title="Remove"
+                onClick={() => deleteWidget(dashboardId, widget.id)}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
               </Button>
             </div>
-          ) : (
-            // Render widget component in error boundary
-            <ErrorBoundary onError={handleWidgetError}>
-              <WidgetComponent {...componentProps} />
-            </ErrorBoundary>
-          )}
+          </div>
+          
+          {/* Widget content */}
+          <div 
+            className="overflow-hidden" 
+            style={{ height: `${widget.height}px` }}
+          >
+            {/* Error state */}
+            {isError ? (
+              <div className="p-4 text-center h-full flex flex-col items-center justify-center">
+                <p className="text-sm text-destructive font-medium">
+                  An error occurred in this widget
+                </p>
+                <p className="text-xs text-muted-foreground mt-1 mb-3">
+                  The widget could not be rendered properly
+                </p>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setIsError(false)}
+                >
+                  Try Again
+                </Button>
+              </div>
+            ) : (
+              // Render widget component in error boundary
+              <ErrorBoundary onError={handleWidgetError}>
+                <WidgetComponent {...componentProps} />
+              </ErrorBoundary>
+            )}
+          </div>
+        </Card>
+      </>
+    );
+  } else {
+    // Workspace view without technical UI - clean design
+    return (
+      <>
+        <div className="overflow-hidden rounded-lg border">          
+          {/* Widget content - no header, just the content */}
+          <div 
+            className="overflow-hidden" 
+            style={{ height: `${widget.height}px` }}
+          >
+            {/* Error state */}
+            {isError ? (
+              <div className="p-4 text-center h-full flex flex-col items-center justify-center">
+                <p className="text-sm text-destructive font-medium">
+                  An error occurred
+                </p>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setIsError(false)}
+                  className="mt-2"
+                >
+                  Try Again
+                </Button>
+              </div>
+            ) : (
+              // Render widget component in error boundary
+              <ErrorBoundary onError={handleWidgetError}>
+                <WidgetComponent {...componentProps} />
+              </ErrorBoundary>
+            )}
+          </div>
         </div>
-      </Card>
+      </>
+    );
+  }
       
-      {/* Settings dialog */}
+  {/* Settings dialog */}
+  return (
+    <>
+      {/* Render the component conditionally above */}
       <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
         <DialogContent>
           <DialogHeader>

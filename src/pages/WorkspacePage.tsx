@@ -40,6 +40,21 @@ const WorkspacePage = () => {
   // Get current workspace
   const currentWorkspace = getCurrentWorkspace();
 
+  // Add event listener for showing flow player from widgets
+  useEffect(() => {
+    const handleShowFlowPlayer = () => {
+      setShowFlowPlayer(true);
+    };
+
+    // Create custom event listener for showing flow player
+    document.addEventListener("show-flow-player", handleShowFlowPlayer);
+
+    // Cleanup on unmount
+    return () => {
+      document.removeEventListener("show-flow-player", handleShowFlowPlayer);
+    };
+  }, []);
+
   // Get all scenarios from current workspace with filter status
   const scenariosWithStatus = React.useMemo(() => {
     if (!currentWorkspace) return [];
@@ -90,7 +105,7 @@ const WorkspacePage = () => {
       <WorkspaceHeader />
 
       {/* Main content */}
-      <main className="flex-1 px-4 py-6 md:px-6 md:py-8 max-w-5xl mx-auto w-full">
+      <main className="flex-1   max-w-5xl mx-auto w-full">
         {showFlowPlayer ? (
           <div className="w-full h-full">
             <StepModal
@@ -101,9 +116,8 @@ const WorkspacePage = () => {
         ) : (
           <>
             {/* Workspace Dashboard */}
-            <div className="mb-8">
-              <WorkspaceDashboard workspaceId={currentWorkspace?.id} />
-            </div>
+
+            <WorkspaceDashboard workspaceId={currentWorkspace?.id} />
 
             <h3 className="text-xl font-semibold mb-4">Scenarios</h3>
 

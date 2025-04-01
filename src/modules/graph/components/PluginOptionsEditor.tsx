@@ -46,8 +46,8 @@ const PluginOptionsEditor: React.FC<PluginOptionsEditorProps> = ({ nodeId, onClo
       // Create a new object without _sectionSettings instead of modifying the original
       const pluginDataWithoutSettings = { ...currentData };
       if ('_sectionSettings' in pluginDataWithoutSettings) {
-        // @ts-ignore - We know this property exists because we just checked
-        const { _sectionSettings, ...restData } = pluginDataWithoutSettings;
+        // @ts-expect-error - We know this property exists because we just checked
+        const { _sectionSettings: _, ...restData } = pluginDataWithoutSettings;
         setPluginData(restData);
       } else {
         setPluginData(pluginDataWithoutSettings);
@@ -94,8 +94,8 @@ const PluginOptionsEditor: React.FC<PluginOptionsEditorProps> = ({ nodeId, onClo
     // Create a new object without _sectionSettings instead of modifying the original
     const pluginDataWithoutSettings = { ...currentData };
     if ('_sectionSettings' in pluginDataWithoutSettings) {
-      // @ts-ignore - We know this property exists because we just checked
-      const { _sectionSettings, ...restData } = pluginDataWithoutSettings;
+      // @ts-expect-error - We know this property exists because we just checked
+      const { _sectionSettings: _, ...restData } = pluginDataWithoutSettings;
       setPluginData(restData);
     } else {
       setPluginData(pluginDataWithoutSettings);

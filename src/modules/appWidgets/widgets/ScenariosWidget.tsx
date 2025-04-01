@@ -26,8 +26,12 @@ export function ScenariosWidget({ config }: WidgetComponentProps) {
   
   // Handle scenario click
   const handleScenarioClick = (id: string) => {
+    // First select the scenario and start flow session
     useAppStore.getState().selectScenario(id);
     useAppStore.getState().startFlowSession();
+    
+    // Then emit custom event to notify WorkspacePage to show flow player
+    document.dispatchEvent(new CustomEvent('show-flow-player'));
   };
   
   // Format date
@@ -40,17 +44,15 @@ export function ScenariosWidget({ config }: WidgetComponentProps) {
   
   return (
     <div className="p-4 h-full flex flex-col">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-sm font-medium flex items-center gap-1">
-          <Folder className="h-4 w-4" /> Recent Scenarios
-        </h3>
+      
         
-        {currentWorkspace && (
-          <div className="text-xs font-medium px-2 py-1 bg-muted/30 rounded">
-            {currentWorkspace.title}
-          </div>
-        )}
-      </div>
+        
+          {/* {currentWorkspace && (
+            <div className="text-xs font-medium px-2 py-1 bg-muted/30 rounded">
+              {currentWorkspace.title}
+            </div>
+          )} */}
+     
       
       <div className="flex-1 overflow-auto">
         {recentScenarios.length > 0 ? (
