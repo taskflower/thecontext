@@ -75,7 +75,7 @@ const WorkspaceContext: React.FC = () => {
             title="Open Workspace Context"
           >
             <Database className="h-4 w-4" />
-            <span className="hidden sm:inline">Context</span>
+            
             {contextItemsCount > 0 && (
               <Badge 
                 variant="secondary" 

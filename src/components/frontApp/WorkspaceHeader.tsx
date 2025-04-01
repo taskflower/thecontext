@@ -65,7 +65,7 @@ const WorkspaceHeader: React.FC = () => {
 
         <div className="flex items-center gap-4 mt-2 sm:mt-0">
           <AuthButton />
-          <WorkspaceContext />
+          <WorkspaceContext />c
         </div>
       </div>
     </header>
