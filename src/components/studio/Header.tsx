@@ -14,8 +14,8 @@ export const Header: React.FC = () => {
     <header className="border-b border-border h-14 px-4 flex items-center justify-between bg-background z-10">
       <div className="flex items-center gap-3">
         <h1 className="text-xs font-semibold flex items-center">
-          <Focus className="mr-2 h-4 w-4 text-primary" />
-          <Link to="/">RevertContext.com <p className="font-normal">Wizard style AI:APPS framework</p></Link>
+          <Focus className="mr-2 h-4 w-4 text-primary -mt-1" />
+          <Link to="/">RevertContext.com <p className="font-normal">Wizard style AI aplications framework</p></Link>
         </h1>
       </div>
       <div className="flex items-center gap-3 z-30">
