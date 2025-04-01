@@ -10,8 +10,7 @@ import { AuthUser } from "../services/authService";
 import { useAuth } from "../context/AuthContext";
 import { useAppStore } from "../modules/store";
 
-
-// Definiuje strukturę danych pluginu
+// Define the API service data structure
 interface ApiServiceData {
   buttonText?: string;
   assistantMessage?: string;
@@ -22,10 +21,17 @@ interface ApiServiceData {
   contextJsonKey?: string; // Klucz w kontekście do znalezienia schematu JSON
 }
 
-interface ResponseData {
-  message: {
-    content: string;
-    parsedJson?: any;
+// Define the API response structure
+interface ApiResponse {
+  success: boolean;
+  data?: {
+    success: boolean;
+    data?: {
+      message: {
+        content: string;
+        parsedJson?: any;
+      };
+    };
   };
 }
 
@@ -56,7 +62,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
   const getContextItems = useAppStore((state) => state.getContextItems);
 
   // Rozszerzony kontekst aplikacji z dodatkową funkcją getContextItems
-  const enhancedAppContext = {
+  const enhancedAppContext:any = {
     ...appContext,
     authContext: auth,
     getContextItems: getContextItems,
@@ -170,7 +176,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
       };
 
       // Wysłanie żądania za pomocą LlmService
-      const response = await llmService.sendRequest(requestParams);
+      const response = await llmService.sendRequest(requestParams) as ApiResponse;
 
       const formattedResponse = JSON.stringify(response.data, null, 2);
       setApiResponse(formattedResponse);
@@ -242,13 +248,6 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
 
   return (
     <div className="mt-6 space-y-5">
-      {/* Informacja o używanym kluczu kontekstu w stylizowanym elemencie */}
-     
-
-      {/* Odpowiedź API (jeśli istnieje) - zakomentowana tak jak w oryginalnym kodzie */}
-      {/* TODO - nie usuwaj tego - apiResponse przenosi sie pomiedzy krokami - to jest bład */}
-      {}
-
       {/* Przycisk wywołania API */}
       <div className="space-y-3">
         <div className="space-y-3 relative">
@@ -275,14 +274,17 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
           </button>
           <div className="absolute -bottom-2 -right-2 flex gap-1">
           {options.useJsonResponse && options.contextJsonKey && (
-        <div className="w-6 h-6 rounded-full bg-white  p-1"><Layers className="w-4 h-4 text-black"/></div>
-      )}
+            <div className="w-6 h-6 rounded-full bg-white p-1">
+              <Layers className="w-4 h-4 text-black"/>
+            </div>
+          )}
           {/* Informacja o użytkowniku */}
           {!authLoading && currentUser && (
-            <div className="w-6 h-6 rounded-full bg-white  p-1"><User className="w-4 h-4 text-black"/></div>
+            <div className="w-6 h-6 rounded-full bg-white p-1">
+              <User className="w-4 h-4 text-black"/>
+            </div>
           )}
           </div>
-         
         </div>
       </div>
 
