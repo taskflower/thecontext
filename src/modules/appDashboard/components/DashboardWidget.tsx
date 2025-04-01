@@ -1,8 +1,10 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { DashboardWidgetConfig } from '../types';
 import { usePlugins } from '../../plugins/pluginContext';
 import { useDashboardStore } from '../dashboardStore';
 import { Card } from '../../../components/ui/card';
+import { Settings, RefreshCw, X } from 'lucide-react';
+import EditWidgetDialog from './EditWidgetDialog';
 
 interface DashboardWidgetProps {
   widget: DashboardWidgetConfig;
@@ -10,6 +12,7 @@ interface DashboardWidgetProps {
 }
 
 const DashboardWidget: React.FC<DashboardWidgetProps> = ({ widget, dashboardId }) => {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { getPluginComponent, getPluginType } = usePlugins();
   const { updateWidget, deleteWidget } = useDashboardStore();
   
@@ -29,14 +32,27 @@ const DashboardWidget: React.FC<DashboardWidgetProps> = ({ widget, dashboardId }
     deleteWidget(dashboardId, widget.id);
   }, [dashboardId, deleteWidget, widget.id]);
   
+  const openEditDialog = useCallback(() => {
+    setIsEditDialogOpen(true);
+  }, []);
+  
+  const closeEditDialog = useCallback(() => {
+    setIsEditDialogOpen(false);
+  }, []);
+  
   if (!PluginComponent || pluginType !== 'dashboard') {
     return (
-      <Card className="p-4 shadow-sm">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-medium">{widget.title}</h3>
-          <button onClick={handleDelete} className="text-red-500 text-sm">Remove</button>
+      <Card className="shadow-sm overflow-hidden">
+        <div className="flex justify-between items-center p-3 border-b">
+          <h3 className="font-medium text-sm">{widget.title}</h3>
+          <button 
+            onClick={handleDelete} 
+            className="text-destructive/80 hover:text-destructive p-1 rounded-md hover:bg-muted/50 transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
-        <div className="p-4 bg-gray-100 rounded text-center">
+        <div className="p-4 bg-muted/10 text-center">
           Plugin not found: {widget.pluginKey}
         </div>
       </Card>
@@ -45,25 +61,34 @@ const DashboardWidget: React.FC<DashboardWidgetProps> = ({ widget, dashboardId }
   
   return (
     <Card className="shadow-sm overflow-hidden">
-      <div className="flex justify-between items-center p-3 border-b bg-gray-50">
-        <h3 className="font-medium">{widget.title}</h3>
-        <div className="flex space-x-2">
+      <div className="flex justify-between items-center p-2 px-3 border-b bg-muted/10">
+        <h3 className="font-medium text-sm">{widget.title}</h3>
+        <div className="flex space-x-1">
           <button 
-            className="text-gray-500 hover:text-gray-700 text-sm"
+            className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted/50 transition-colors"
             onClick={handleRefresh}
+            title="Refresh Widget"
           >
-            Refresh
+            <RefreshCw className="h-3.5 w-3.5" />
           </button>
           <button 
-            className="text-red-500 hover:text-red-700 text-sm"
-            onClick={handleDelete}
+            className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted/50 transition-colors"
+            onClick={openEditDialog}
+            title="Widget Settings"
           >
-            Remove
+            <Settings className="h-3.5 w-3.5" />
+          </button>
+          <button 
+            className="text-destructive/80 hover:text-destructive p-1 rounded-md hover:bg-muted/50 transition-colors"
+            onClick={handleDelete}
+            title="Remove Widget"
+          >
+            <X className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>
       
-      <div className="p-4" style={{ height: `${widget.size.height}px` }}>
+      <div className="overflow-hidden" style={{ height: `${widget.size.height}px` }}>
         <PluginComponent
           data={widget.pluginData}
           appContext={{
@@ -75,7 +100,8 @@ const DashboardWidget: React.FC<DashboardWidgetProps> = ({ widget, dashboardId }
               scenarioId: '',
               nodeId: ''
             },
-            stateVersion: 0
+            stateVersion: 0,
+            getContextItems: () => []
           }}
           widgetConfig={widget}
           widgetId={widget.id}
@@ -84,6 +110,15 @@ const DashboardWidget: React.FC<DashboardWidgetProps> = ({ widget, dashboardId }
           onConfigChange={handleConfigChange}
         />
       </div>
+      
+      {/* Widget settings dialog */}
+      {isEditDialogOpen && (
+        <EditWidgetDialog
+          dashboardId={dashboardId}
+          widgetId={widget.id}
+          onClose={closeEditDialog}
+        />
+      )}
     </Card>
   );
 };
