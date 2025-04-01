@@ -1507,10 +1507,17 @@ export const ExportImport: React.FC = () => {
       <div className="p-4 space-y-4">
         <Tabs defaultValue="export" className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-4">
-            <TabsTrigger value="import"><Upload className="mr-2 h-4 w-4"/> Import</TabsTrigger>
-            <TabsTrigger value="export"><Download className="mr-2 h-4 w-4"/> Export</TabsTrigger>
+            <TabsTrigger value="import">
+              <Upload className="mr-2 h-4 w-4" /> Import
+            </TabsTrigger>
+            <TabsTrigger value="export">
+              <Download className="mr-2 h-4 w-4" /> Export
+            </TabsTrigger>
 
-            <TabsTrigger value="cloud"><Save className="mr-2 h-4 w-4"/>Backup and Restore</TabsTrigger>
+            <TabsTrigger value="cloud">
+              <Save className="mr-2 h-4 w-4" />
+              Backup and Restore
+            </TabsTrigger>
           </TabsList>
 
           {/* EXPORT TAB */}
