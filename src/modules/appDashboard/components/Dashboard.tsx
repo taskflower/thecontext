@@ -32,11 +32,20 @@ const Dashboard: React.FC<DashboardProps> = ({ dashboardId }) => {
     [dashboardId, selectedDashboardId]
   );
   
-  // Bezpośrednie pobieranie dashboardu z listy dashboardów
-  const currentDashboard = useMemo(() => 
-    currentDashboardId ? dashboards.find(d => d.id === currentDashboardId) : undefined,
-    [currentDashboardId, dashboards]
-  );
+  // Bezpośrednie pobieranie dashboardu z listy dashboardów, z uwzględnieniem workspaceId
+  const currentDashboard = useMemo(() => {
+    if (!currentDashboardId) return undefined;
+    
+    const dashboard = dashboards.find(d => d.id === currentDashboardId);
+    
+    // Jeśli dashboard ma przypisany workspace, sprawdź czy odpowiada bieżącemu workspace
+    if (dashboard?.workspaceId && dashboard.workspaceId !== currentWorkspaceId) {
+      // Nie pokazuj dashboardu przypisanego do innego workspace
+      return undefined;
+    }
+    
+    return dashboard;
+  }, [currentDashboardId, dashboards, currentWorkspaceId]);
 
   // Memoize the list of widgets to prevent unnecessary re-renders
   const widgets = useMemo(() => 
