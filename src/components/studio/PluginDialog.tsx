@@ -78,7 +78,7 @@
         title="Configure Plugin"
         description={`Select a plugin for node: ${node.label}`}
         footer={renderFooter()}
-      >xxxx
+      >
         <div className="space-y-1 max-h-80 overflow-auto">
           <button
             onClick={() => handleSelectPlugin(null)}

@@ -20,7 +20,7 @@ export const ToolbarButton: React.FC<ToolbarButtonProps> = ({
       className={cn(
         "py-1.5 px-3 rounded-md flex items-center gap-2 text-sm font-medium",
         active
-          ? "bg-muted text-primary"
+          ? "bg-primary text-muted"
           : "text-muted-foreground hover:bg-muted/50"
       )}
       onClick={onClick}

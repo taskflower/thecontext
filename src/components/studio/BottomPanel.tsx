@@ -6,9 +6,9 @@ import { useAppStore } from "@/modules/store";
 import { useDashboardStore } from "@/modules/appDashboard/dashboardStore";
 import React, { useState, useEffect } from "react";
 import ExportImport from "./exportImport/ExportImport";
-import DatabaseConfigurator from "@/modules/databaseConfigurator/componentst/DatabaseConfigurator";
-import DashboardPanel from "./DashboardPanel";
 
+import DashboardPanel from "./DashboardPanel";
+import HistoryView from "@/modules/history/components/HistoryView";
 
 type PanelContentType =
   | "context"
@@ -31,30 +31,28 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({
   // Get selected workspace for context
   const selectedWorkspaceId = useAppStore((state) => state.selected.workspace);
   const selectedScenarioId = useAppStore((state) => state.selected.scenario);
-  
+
   // State for dashboard title
   const [dashboardTitle, setDashboardTitle] = useState("Dashboard");
-  
+
   // Subscribe to dashboard store changes
   useEffect(() => {
     // Create a subscription to dashboard store
-    const unsubscribe = useDashboardStore.subscribe(
-      (state) => {
-        const selectedId = state.selectedDashboardId;
-        if (!selectedId) {
-          setDashboardTitle("Dashboard");
-          return;
-        }
-        
-        const dashboard = state.getDashboard(selectedId);
-        if (dashboard) {
-          setDashboardTitle(`Dashboard - ${dashboard.name}`);
-        } else {
-          setDashboardTitle("Dashboard");
-        }
+    const unsubscribe = useDashboardStore.subscribe((state) => {
+      const selectedId = state.selectedDashboardId;
+      if (!selectedId) {
+        setDashboardTitle("Dashboard");
+        return;
       }
-    );
-    
+
+      const dashboard = state.getDashboard(selectedId);
+      if (dashboard) {
+        setDashboardTitle(`Dashboard - ${dashboard.name}`);
+      } else {
+        setDashboardTitle("Dashboard");
+      }
+    });
+
     // Initial setup
     const state = useDashboardStore.getState();
     const selectedId = state.selectedDashboardId;
@@ -64,7 +62,7 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({
         setDashboardTitle(`Dashboard - ${dashboard.name}`);
       }
     }
-    
+
     // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
@@ -139,7 +137,7 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({
         )}
         {content === "conversation" && (
           <div className="p-4">
-            <DatabaseConfigurator/>
+            <HistoryView />
           </div>
         )}
         {content === "exportimport" && (

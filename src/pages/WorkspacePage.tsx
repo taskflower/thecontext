@@ -10,9 +10,7 @@ import {
   ScenarioCard,
   WorkspaceHeader,
 } from "@/components/frontApp";
-import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+
 import { WorkspaceDashboard } from "@/modules/appDashboard";
 
 const WorkspacePage = () => {
@@ -102,33 +100,13 @@ const WorkspacePage = () => {
           </div>
         ) : (
           <>
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold tracking-tight text-foreground">
-                  {currentWorkspace?.title || "Workspace"}
-                </h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {currentWorkspace?.description || "Manage your scenarios"}
-                </p>
-              </div>
-              <Button 
-                onClick={handleCreateNewScenario}
-                className="gap-2"
-              >
-                <PlusCircle className="h-4 w-4" />
-                Add Scenario
-              </Button>
-            </div>
-            
-            <Separator className="my-6" />
-            
             {/* Workspace Dashboard */}
             <div className="mb-8">
               <WorkspaceDashboard workspaceId={currentWorkspace?.id} />
             </div>
-            
+
             <h3 className="text-xl font-semibold mb-4">Scenarios</h3>
-            
+
             {matchingScenarios.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {matchingScenarios.map((scenario) => (

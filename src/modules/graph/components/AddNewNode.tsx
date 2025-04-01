@@ -81,9 +81,29 @@ const AddNewNode: React.FC<AddNewNodeProps> = ({ isOpen, setIsOpen }) => {
         placeholder="Node label"
       />
 
+      <TextAreaField
+        id="assistantMessage"
+        name="assistantMessage"
+        label="Assistant Message (Question)"
+        value={formData.assistantMessage}
+        onChange={handleChange}
+        placeholder="Assistant message for this node..."
+        rows={4}
+      />
+
+      <TextAreaField
+        id="userPrompt"
+        name="userPrompt"
+        label="User Prompt (Answer)"
+        value={formData.userPrompt}
+        onChange={handleChange}
+        placeholder="User prompt for this node..."
+        rows={3}
+      />
+
       <div className="mb-4">
         <label htmlFor="contextKey" className="block text-sm font-medium mb-1">
-          Context Key
+          Save answer to Context Key
         </label>
         <select
           id="contextKey"
@@ -103,26 +123,6 @@ const AddNewNode: React.FC<AddNewNodeProps> = ({ isOpen, setIsOpen }) => {
           Associate this node with a context item
         </p>
       </div>
-
-      <TextAreaField
-        id="assistantMessage"
-        name="assistantMessage"
-        label="Assistant Message"
-        value={formData.assistantMessage}
-        onChange={handleChange}
-        placeholder="Assistant message for this node..."
-        rows={4}
-      />
-
-      <TextAreaField
-        id="userPrompt"
-        name="userPrompt"
-        label="User Prompt"
-        value={formData.userPrompt}
-        onChange={handleChange}
-        placeholder="User prompt for this node..."
-        rows={3}
-      />
     </DialogModal>
   );
 };
