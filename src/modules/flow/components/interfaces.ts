@@ -1,5 +1,5 @@
 // src/modules/flow/components/interfaces.ts
-import React from 'react';
+import React from "react";
 
 /**
  * Props for the Header component
@@ -64,7 +64,11 @@ export interface ContextUpdateInfoProps {
 /**
  * Available dialog template types
  */
-export type DialogTemplate = 'default' | 'alternative' | "elearning";
+export type DialogTemplate =
+  | "default"
+  | "alternative"
+  | "elearning"
+  | "bigballs";
 
 /**
  * Factory interface for dialog components

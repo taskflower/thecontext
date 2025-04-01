@@ -3,12 +3,14 @@ import { DialogComponents, DialogTemplate } from './interfaces';
 import * as defaultTemplate from './templates/default';
 import * as alternativeTemplate from './templates/alternative';
 import * as elearningTemplate from './templates/elearning';
+import * as bigballsTemplate from './templates/bigballs';
 
 // Słownik dostępnych szablonów
 const templates: Record<DialogTemplate, DialogComponents> = {
   default: defaultTemplate.components,
   alternative: alternativeTemplate.components,
-  elearning: elearningTemplate.components
+  elearning: elearningTemplate.components,
+  bigballs: bigballsTemplate.components
 };
 
 // Własne szablony zarejestrowane przez aplikację
