@@ -9,6 +9,7 @@ import {
   SelectField,
 } from "@/components/studio";
 import { getAvailableTemplates } from "@/modules/flow/components/templateFactory";
+import { DialogTemplate } from "@/modules/flow/components/interfaces";
 
 interface AddNewScenarioProps {
   isOpen: boolean;
@@ -58,7 +59,7 @@ const AddNewScenario: React.FC<AddNewScenarioProps> = ({
   const handleTemplateChange = (value: string) => {
     setFormData(prev => ({
       ...prev,
-      template: value
+      template: value as DialogTemplate
     }));
   };
 

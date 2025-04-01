@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { AuthProvider } from "./context/AuthContext";
 import { Loader2 } from "lucide-react";
-import EnergyTraderTraining from "./components/RD2/EnergyTraderTraining";
 
 // Dynamic imports
 const Studio = lazy(() => import("./pages/StudioLayout"));
@@ -28,7 +27,6 @@ function App() {
             <Suspense fallback={<LoadingFallback />}>
               <Routes>
                 <Route path="/" element={<>studio</>} />
-                <Route path="/rd" element={<EnergyTraderTraining />} />
                 <Route path="/:slug" element={<WorkspacePage />} />
                 <Route path="/studio" element={<Studio />} />
                 <Route path="/payment/success" element={<PaymentSuccessPage />} />

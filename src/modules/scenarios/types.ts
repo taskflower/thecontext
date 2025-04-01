@@ -23,5 +23,5 @@ export interface ScenarioActions {
 export interface ScenarioPayload {
   name: string;
   description: string;
-  template?: DialogTemplate;
+  template: DialogTemplate;
 }

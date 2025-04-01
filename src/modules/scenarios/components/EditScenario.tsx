@@ -9,6 +9,7 @@ import {
   SelectField,
 } from "@/components/studio";
 import { getAvailableTemplates } from "@/modules/flow/components/templateFactory";
+import { DialogTemplate } from "@/modules/flow/components/interfaces";
 
 interface EditScenarioProps {
   isOpen: boolean;
@@ -27,7 +28,7 @@ const EditScenario: React.FC<EditScenarioProps> = ({
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    template: "default",
+    template: "default" as DialogTemplate,
   });
   
   // Get available templates
@@ -74,7 +75,7 @@ const EditScenario: React.FC<EditScenarioProps> = ({
   const handleTemplateChange = (value: string) => {
     setFormData(prev => ({
       ...prev,
-      template: value
+      template: value as DialogTemplate
     }));
   };
 
