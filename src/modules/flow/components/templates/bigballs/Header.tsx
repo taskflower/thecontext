@@ -14,7 +14,7 @@ const Header: React.FC<HeaderProps> = ({
   const getCurrentWorkspace = useAppStore((state) => state.getCurrentWorkspace);
   const currentWorkspace = getCurrentWorkspace();
 
-  return (
+  return (<>
     <div className="px-5 py-6 bg-white">
       {/* Logo/brand area */}
       <div className="w-full flex items-center justify-between">
@@ -51,7 +51,7 @@ const Header: React.FC<HeaderProps> = ({
           Krok {currentStepIndex + 1}: {nodeName || `Etap ${currentStepIndex + 1}`}
         </h3>
       </div>
-    </div>
+    </div><div className="flex-1"></div></>
   );
 };
 

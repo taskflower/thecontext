@@ -18,6 +18,8 @@ interface PluginOptionsEditorProps {
   onClose: () => void;
 }
 
+type TabType = 'plugin-options' | 'ui-settings';
+
 const PluginOptionsEditor: React.FC<PluginOptionsEditorProps> = ({ nodeId, onClose }) => {
   const [pluginData, setPluginData] = useState<Record<string, any>>({});
   const [sectionSettings, setSectionSettings] = useState<SectionSettings>({
@@ -28,6 +30,7 @@ const PluginOptionsEditor: React.FC<PluginOptionsEditorProps> = ({ nodeId, onClo
   });
   const [loading, setLoading] = useState(true);
   const [isDirty, setIsDirty] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>('plugin-options');
   
   // Direct access to state to avoid selector issues
   const state = useAppStore.getState();
@@ -38,7 +41,7 @@ const PluginOptionsEditor: React.FC<PluginOptionsEditorProps> = ({ nodeId, onClo
   useEffect(() => {
     if (node && node.pluginKey) {
       // Load the current plugin data
-      const currentData = node.pluginData?.[node.pluginKey] || {};
+      const currentData:any = node.pluginData?.[node.pluginKey] || {};
       
       // Extract section settings if they exist, or use defaults
       const currentSectionSettings = currentData._sectionSettings || {};
@@ -46,7 +49,7 @@ const PluginOptionsEditor: React.FC<PluginOptionsEditorProps> = ({ nodeId, onClo
       // Create a new object without _sectionSettings instead of modifying the original
       const pluginDataWithoutSettings = { ...currentData };
       if ('_sectionSettings' in pluginDataWithoutSettings) {
-        // @ts-expect-error - We know this property exists because we just checked
+        /* @_ts-expect-error - We know this property exists because we just checked */
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { _sectionSettings, ...restData } = pluginDataWithoutSettings;
         setPluginData(restData);
@@ -87,7 +90,7 @@ const PluginOptionsEditor: React.FC<PluginOptionsEditorProps> = ({ nodeId, onClo
   
   // Reset changes
   const handleReset = () => {
-    const currentData = node.pluginData?.[pluginKey] || {};
+    const currentData:any = node.pluginData?.[pluginKey] || {};
     
     // Extract section settings if they exist
     const currentSectionSettings = currentData._sectionSettings || {};
@@ -95,7 +98,7 @@ const PluginOptionsEditor: React.FC<PluginOptionsEditorProps> = ({ nodeId, onClo
     // Create a new object without _sectionSettings instead of modifying the original
     const pluginDataWithoutSettings = { ...currentData };
     if ('_sectionSettings' in pluginDataWithoutSettings) {
-      // @ts-expect-error - We know this property exists because we just checked
+
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { _sectionSettings, ...restData } = pluginDataWithoutSettings;
       setPluginData(restData);
@@ -145,44 +148,65 @@ const PluginOptionsEditor: React.FC<PluginOptionsEditorProps> = ({ nodeId, onClo
   
   // UI section settings component
   const SectionSettingsForm: React.FC = () => (
-    <div className="border-t border-border pt-4 mt-6">
-      <h3 className="text-sm font-medium mb-3">UI Section Settings</h3>
-      <div className="space-y-3">
-        <CheckboxField
-          id="section-replace-header"
-          name="replaceHeader"
-          label="Replace header section"
-          checked={sectionSettings.replaceHeader}
-          onChange={(e) => handleSectionSettingChange('replaceHeader', e.target.checked)}
-          description="Plugin will replace the default header section"
-        />
-        
-        <CheckboxField
-          id="section-replace-assistant"
-          name="replaceAssistantView"
-          label="Replace assistant message section"
-          checked={sectionSettings.replaceAssistantView}
-          onChange={(e) => handleSectionSettingChange('replaceAssistantView', e.target.checked)}
-          description="Plugin will replace the default assistant message section"
-        />
-        
-        <CheckboxField
-          id="section-replace-user-input"
-          name="replaceUserInput"
-          label="Replace user input section"
-          checked={sectionSettings.replaceUserInput}
-          onChange={(e) => handleSectionSettingChange('replaceUserInput', e.target.checked)}
-          description="Plugin will replace the default user input section"
-        />
-        
-        <CheckboxField
-          id="section-hide-navigation"
-          name="hideNavigationButtons"
-          label="Hide navigation buttons"
-          checked={sectionSettings.hideNavigationButtons}
-          onChange={(e) => handleSectionSettingChange('hideNavigationButtons', e.target.checked)}
-          description="Hide the default navigation buttons (plugin can provide custom navigation)"
-        />
+    <div className="space-y-3">
+      <CheckboxField
+        id="section-replace-header"
+        name="replaceHeader"
+        label="Replace header section"
+        checked={sectionSettings.replaceHeader ?? false}
+        onChange={(e) => handleSectionSettingChange('replaceHeader', e.target.checked)}
+        description="Plugin will replace the default header section"
+      />
+      
+      <CheckboxField
+        id="section-replace-assistant"
+        name="replaceAssistantView"
+        label="Replace assistant message section"
+        checked={sectionSettings.replaceAssistantView ?? false}
+        onChange={(e) => handleSectionSettingChange('replaceAssistantView', e.target.checked)}
+        description="Plugin will replace the default assistant message section"
+      />
+      
+      <CheckboxField
+        id="section-replace-user-input"
+        name="replaceUserInput"
+        label="Replace user input section"
+        checked={sectionSettings.replaceUserInput ?? false}
+        onChange={(e) => handleSectionSettingChange('replaceUserInput', e.target.checked)}
+        description="Plugin will replace the default user input section"
+      />
+      
+      <CheckboxField
+        id="section-hide-navigation"
+        name="hideNavigationButtons"
+        label="Hide navigation buttons"
+        checked={sectionSettings.hideNavigationButtons ?? false}
+        onChange={(e) => handleSectionSettingChange('hideNavigationButtons', e.target.checked)}
+        description="Hide the default navigation buttons (plugin can provide custom navigation)"
+      />
+    </div>
+  );
+
+  // Tab navigation component
+  const TabNavigation: React.FC = () => (
+    <div className="border-b border-border mb-4">
+      <div className="flex space-x-2">
+        <button
+          className={`px-4 py-2 text-sm font-medium ${activeTab === 'plugin-options' 
+            ? 'border-b-2 border-primary text-primary' 
+            : 'text-muted-foreground hover:text-foreground'}`}
+          onClick={() => setActiveTab('plugin-options')}
+        >
+          Plugin Options
+        </button>
+        <button
+          className={`px-4 py-2 text-sm font-medium ${activeTab === 'ui-settings' 
+            ? 'border-b-2 border-primary text-primary' 
+            : 'text-muted-foreground hover:text-foreground'}`}
+          onClick={() => setActiveTab('ui-settings')}
+        >
+          UI Settings
+        </button>
       </div>
     </div>
   );
@@ -201,23 +225,32 @@ const PluginOptionsEditor: React.FC<PluginOptionsEditorProps> = ({ nodeId, onClo
         </div>
       ) : (
         <>
-          <SectionSettingsForm />
+          <TabNavigation />
           
-          <div className="border-t border-border pt-4 mt-6">
-            <h3 className="text-sm font-medium mb-3">Plugin Options</h3>
-            {hasOptionsSchema ? (
-              <DynamicOptionsForm 
-                schema={(pluginComponent as any).optionsSchema}
-                data={pluginData}
-                onChange={handleInputChange}
-              />
-            ) : (
-              <GenericOptionsForm 
-                data={pluginData}
-                onChange={handleInputChange}
-              />
-            )}
-          </div>
+          {activeTab === 'ui-settings' && (
+            <div>
+              <h3 className="text-sm font-medium mb-3">UI Section Settings</h3>
+              <SectionSettingsForm />
+            </div>
+          )}
+          
+          {activeTab === 'plugin-options' && (
+            <div>
+              <h3 className="text-sm font-medium mb-3">Plugin Options</h3>
+              {hasOptionsSchema ? (
+                <DynamicOptionsForm 
+                  schema={(pluginComponent as any).optionsSchema}
+                  data={pluginData}
+                  onChange={handleInputChange}
+                />
+              ) : (
+                <GenericOptionsForm 
+                  data={pluginData}
+                  onChange={handleInputChange}
+                />
+              )}
+            </div>
+          )}
           
           {isDirty && (
             <div className="mt-4 p-3 bg-muted/30 rounded-md">
