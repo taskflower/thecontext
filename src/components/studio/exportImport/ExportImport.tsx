@@ -5,14 +5,30 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Download, Upload, AlertCircle, RefreshCw, Database, Save, CloudUpload, CloudDownload, X } from "lucide-react";
+import {
+  Download,
+  Upload,
+  AlertCircle,
+  RefreshCw,
+  Database,
+  Save,
+  CloudUpload,
+  CloudDownload,
+  X,
+} from "lucide-react";
 import { FileService } from "@/services/FileService";
 import { FirestoreWorkspaceService } from "@/services/FirestoreWorkspaceService";
 import { useAppStore } from "@/modules/store";
 import { useAuth } from "@/context/AuthContext";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Workspace } from "@/modules/workspaces/types";
 import { Edge } from "reactflow";
 import { ContextItem } from "@/services/PluginAuthAdapter";
@@ -33,7 +49,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   title,
   message,
   onConfirm,
-  onCancel
+  onCancel,
 }) => (
   <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
     <div className="bg-background rounded-lg shadow-lg max-w-md w-full p-6">
@@ -49,7 +65,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <Alert variant="destructive" className="mt-4">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              This action will modify your workspaces and scenarios. Make sure you have a backup before proceeding.
+              This action will modify your workspaces and scenarios. Make sure
+              you have a backup before proceeding.
             </AlertDescription>
           </Alert>
         </div>
@@ -58,9 +75,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <Button variant="outline" onClick={onCancel}>
             Cancel
           </Button>
-          <Button onClick={onConfirm}>
-            Confirm
-          </Button>
+          <Button onClick={onConfirm}>Confirm</Button>
         </div>
       </div>
     </div>
@@ -73,120 +88,152 @@ export const ExportImport: React.FC = () => {
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [importSuccess, setImportSuccess] = useState<boolean>(false);
-  const [importType, setImportType] = useState<"new-workspace" | "existing-workspace">("new-workspace");
+  const [importType, setImportType] = useState<
+    "new-workspace" | "existing-workspace"
+  >("new-workspace");
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>("");
-  
+
   // Export states
-  const [exportType, setExportType] = useState<"all" | "current-scenario">("all");
-  
+  const [exportType, setExportType] = useState<"all" | "current-scenario">(
+    "all"
+  );
+
   // Firebase states
   const [cloudAction, setCloudAction] = useState<"save" | "load">("save");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [cloudError, setCloudError] = useState<string | null>(null);
   const [cloudSuccess, setCloudSuccess] = useState<string | null>(null);
   const [cloudWorkspaces, setCloudWorkspaces] = useState<any[]>([]);
-  const [selectedCloudWorkspaceIds, setSelectedCloudWorkspaceIds] = useState<string[]>([]);
-  
+  const [selectedCloudWorkspaceIds, setSelectedCloudWorkspaceIds] = useState<
+    string[]
+  >([]);
+
   // Confirmation dialog state
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
-  const [confirmationAction, setConfirmationAction] = useState<() => void>(() => {});
+  const [confirmationAction, setConfirmationAction] = useState<() => void>(
+    () => {}
+  );
   const [confirmationMessage, setConfirmationMessage] = useState<string>("");
   const [confirmationTitle, setConfirmationTitle] = useState<string>("");
-  
+
   // Get app state
   const state = useAppStore();
   const workspaces = state.items;
   const currentWorkspaceId = state.selected.workspace;
   const currentScenarioId = state.selected.scenario;
-  
+
   // Get auth context
   const { currentUser } = useAuth();
-  
+
   // Handle file selection for import
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     setImportError(null);
     setImportSuccess(false);
     setImportFile(e.target.files?.[0] || null);
   };
-  
+
   // Firebase/cloud action types
   const [dataMode, setDataMode] = useState<"basic" | "full">("full");
   const [, setFullWorkspaces] = useState<any[]>([]);
   const [updateMode, setUpdateMode] = useState<"add" | "update">("add");
-  
+
   // Load workspaces from cloud storage when cloudAction changes to "load"
   useEffect(() => {
     async function loadCloudWorkspaces() {
       if (cloudAction === "load" && currentUser) {
         try {
-          console.log('Loading cloud workspaces...');
-          console.log('Current user:', currentUser.uid);
-          console.log('Data mode:', dataMode);
-          
+          console.log("Loading cloud workspaces...");
+          console.log("Current user:", currentUser.uid);
+          console.log("Data mode:", dataMode);
+
           setIsLoading(true);
           setCloudError(null);
           setCloudSuccess(null);
-          
+
           try {
             if (dataMode === "basic") {
               // Pobierz podstawowe workspace'y (bez scenariuszy)
-              console.log('Fetching basic workspaces');
-              const workspaces = await firestoreWorkspaceService.getUserWorkspaces(currentUser.uid);
-              console.log('Basic workspaces loaded:', workspaces.length);
-              
+              console.log("Fetching basic workspaces");
+              const workspaces =
+                await firestoreWorkspaceService.getUserWorkspaces(
+                  currentUser.uid
+                );
+              console.log("Basic workspaces loaded:", workspaces.length);
+
               if (workspaces.length === 0) {
-                console.log('No workspaces found - this is normal for first-time users');
+                console.log(
+                  "No workspaces found - this is normal for first-time users"
+                );
               }
-              
+
               setCloudWorkspaces(workspaces);
-              setCloudSuccess(`Successfully loaded ${workspaces.length} workspaces from cloud storage (or fallback storage).`);
+              setCloudSuccess(
+                `Successfully loaded ${workspaces.length} workspaces from cloud storage (or fallback storage).`
+              );
             } else {
               // Pobierz pełne workspace'y (ze scenariuszami i kontekstem)
-              console.log('Fetching full workspaces');
-              const fullWorkspacesData = await firestoreWorkspaceService.getUserFullWorkspaces(currentUser.uid);
-              console.log('Full workspaces loaded:', fullWorkspacesData.length);
-              
+              console.log("Fetching full workspaces");
+              const fullWorkspacesData =
+                await firestoreWorkspaceService.getUserFullWorkspaces(
+                  currentUser.uid
+                );
+              console.log("Full workspaces loaded:", fullWorkspacesData.length);
+
               setFullWorkspaces(fullWorkspacesData);
-              
+
               if (fullWorkspacesData.length === 0) {
-                console.log('No full workspaces found - this is normal for first-time users');
+                console.log(
+                  "No full workspaces found - this is normal for first-time users"
+                );
               }
-              
+
               // Ustaw również podstawowe workspace'y dla wyświetlenia ich w liście
-              const basicInfo = fullWorkspacesData.map(w => ({
+              const basicInfo = fullWorkspacesData.map((w) => ({
                 id: w.id,
                 title: w.title,
                 description: w.description,
                 slug: w.slug,
                 updatedAt: w.updatedAt,
                 createdAt: w.createdAt,
-                userId: w.userId
+                userId: w.userId,
               }));
-              console.log('Setting cloud workspaces UI list:', basicInfo.length);
+              console.log(
+                "Setting cloud workspaces UI list:",
+                basicInfo.length
+              );
               setCloudWorkspaces(basicInfo);
-              setCloudSuccess(`Successfully loaded ${fullWorkspacesData.length} workspaces with full content from cloud storage (or fallback storage).`);
+              setCloudSuccess(
+                `Successfully loaded ${fullWorkspacesData.length} workspaces with full content from cloud storage (or fallback storage).`
+              );
             }
           } catch (error) {
             console.error("Error during workspace fetch operation:", error);
             if (error instanceof Error) {
-              console.error('Error message:', error.message);
-              console.error('Error stack:', error.stack);
+              console.error("Error message:", error.message);
+              console.error("Error stack:", error.stack);
             }
-            
+
             // Show error but don't block the UI
-            setCloudError("Failed to load workspaces from cloud. Using local storage as fallback. Error: " + 
-              (error instanceof Error ? error.message : String(error)));
-              
+            setCloudError(
+              "Failed to load workspaces from cloud. Using local storage as fallback. Error: " +
+                (error instanceof Error ? error.message : String(error))
+            );
+
             // Set empty array to avoid UI issues
             setCloudWorkspaces([]);
             setFullWorkspaces([]);
           }
         } catch (error) {
           console.error("Unexpected error during load operation:", error);
-          console.error('Error details:', error instanceof Error ? error.stack : String(error));
-          
-          setCloudError("Unexpected error loading workspaces. Please try again later.");
-          
+          console.error(
+            "Error details:",
+            error instanceof Error ? error.stack : String(error)
+          );
+
+          setCloudError(
+            "Unexpected error loading workspaces. Please try again later."
+          );
+
           // Set empty arrays to avoid UI issues
           setCloudWorkspaces([]);
           setFullWorkspaces([]);
@@ -195,40 +242,42 @@ export const ExportImport: React.FC = () => {
         }
       }
     }
-    
+
     loadCloudWorkspaces();
   }, [cloudAction, currentUser, dataMode]);
-  
+
   // Update selected cloud workspace IDs when checkbox is clicked
   const toggleCloudWorkspaceSelection = (workspaceId: string) => {
-    setSelectedCloudWorkspaceIds(prev => {
+    setSelectedCloudWorkspaceIds((prev) => {
       if (prev.includes(workspaceId)) {
-        return prev.filter(id => id !== workspaceId);
+        return prev.filter((id) => id !== workspaceId);
       } else {
         return [...prev, workspaceId];
       }
     });
   };
-  
+
   // Save workspaces to cloud storage
   const handleSaveToFirebase = async () => {
     if (!currentUser) {
       setCloudError("You must be logged in to save workspaces");
       return;
     }
-    
+
     if (workspaces.length === 0) {
       setCloudError("You don't have any workspaces to save");
       return;
     }
-    
+
     let confirmMessage = "";
     if (dataMode === "basic") {
-      confirmMessage = "This will save all your workspaces (without content) to cloud storage. Continue?";
+      confirmMessage =
+        "This will save all your workspaces (without content) to cloud storage. Continue?";
     } else {
-      confirmMessage = "This will save all your workspaces with their FULL content (scenarios, plugins, context, etc.) to cloud storage. Continue?";
+      confirmMessage =
+        "This will save all your workspaces with their FULL content (scenarios, plugins, context, etc.) to cloud storage. Continue?";
     }
-    
+
     setConfirmationTitle("Save to Cloud Storage");
     setConfirmationMessage(confirmMessage);
     setConfirmationAction(() => async () => {
@@ -236,23 +285,28 @@ export const ExportImport: React.FC = () => {
         setIsLoading(true);
         setCloudError(null);
         setCloudSuccess(null);
-        
+
         if (dataMode === "basic") {
           // Zapisz tylko podstawowe informacje o workspace'ach
-          const savedIds = await firestoreWorkspaceService.saveWorkspaces(workspaces as Workspace[], currentUser.uid);
-          setCloudSuccess(`Successfully saved ${savedIds.length} workspace(s) (basic info only)`);
+          const savedIds = await firestoreWorkspaceService.saveWorkspaces(
+            workspaces as Workspace[],
+            currentUser.uid
+          );
+          setCloudSuccess(
+            `Successfully saved ${savedIds.length} workspace(s) (basic info only)`
+          );
         } else {
           // Zapisz pełne workspace'y z wszystkimi danymi
-          
+
           // Przygotuj pełny stan aplikacji do zapisu
-          const appStateStr = localStorage.getItem('flowchart-app-state');
+          const appStateStr = localStorage.getItem("flowchart-app-state");
           if (!appStateStr) {
             throw new Error("Could not find application state in localStorage");
           }
-          
+
           const appState = JSON.parse(appStateStr);
           const savedIds: string[] = [];
-          
+
           // Zapisz każdy workspace oddzielnie
           for (const workspace of workspaces) {
             // Przygotuj dane workspace'a do zapisu
@@ -267,53 +321,60 @@ export const ExportImport: React.FC = () => {
                   stateVersion: appState.state.stateVersion,
                   selected: appState.state.selected,
                   // Filtrujemy dane dla kontekstu, scenariuszy, nodów, krawędzi itp.
-                  items: appState.state.items.filter((item: any) => item.id === workspace.id),
+                  items: appState.state.items.filter(
+                    (item: any) => item.id === workspace.id
+                  ),
                   // Jeśli są dodatkowe pola stanu, które są potrzebne, dodaj je tutaj
-                }
-              }
+                },
+              },
             };
-            
+
             // Zapisz pełne dane workspace'a
             const id = await firestoreWorkspaceService.saveFullWorkspace(
-              workspace as Workspace, 
+              workspace as Workspace,
               workspaceFullData,
               currentUser.uid
             );
             savedIds.push(id);
           }
-          
-          setCloudSuccess(`Successfully saved ${savedIds.length} workspace(s) with FULL content`);
+
+          setCloudSuccess(
+            `Successfully saved ${savedIds.length} workspace(s) with FULL content`
+          );
         }
       } catch (error) {
         console.error("Error saving workspaces:", error);
-        setCloudError("Failed to save workspaces: " + (error instanceof Error ? error.message : String(error)));
+        setCloudError(
+          "Failed to save workspaces: " +
+            (error instanceof Error ? error.message : String(error))
+        );
       } finally {
         setIsLoading(false);
       }
     });
-    
+
     setShowConfirmation(true);
   };
-  
+
   // Load workspaces from cloud storage
   const handleLoadFromFirebase = async () => {
     if (!currentUser) {
       setCloudError("You must be logged in to load workspaces");
       return;
     }
-    
+
     if (selectedCloudWorkspaceIds.length === 0) {
       setCloudError("Please select at least one workspace to load");
       return;
     }
-    
+
     let confirmMessage = "";
     if (dataMode === "basic") {
       confirmMessage = `This will load ${selectedCloudWorkspaceIds.length} workspace(s) (without content) from cloud storage. Continue?`;
     } else {
       confirmMessage = `This will load ${selectedCloudWorkspaceIds.length} workspace(s) with their FULL content (scenarios, plugins, context, etc.) from cloud storage. Continue?`;
     }
-    
+
     setConfirmationTitle("Load from Cloud Storage");
     setConfirmationMessage(confirmMessage);
     setConfirmationAction(() => async () => {
@@ -321,50 +382,52 @@ export const ExportImport: React.FC = () => {
         setIsLoading(true);
         setCloudError(null);
         setCloudSuccess(null);
-        
+
         // Get current state from localStorage to ensure we're working with the latest data
-        const currentStateStr = localStorage.getItem('flowchart-app-state');
+        const currentStateStr = localStorage.getItem("flowchart-app-state");
         let currentState;
-        
+
         try {
           currentState = currentStateStr ? JSON.parse(currentStateStr) : null;
         } catch (e) {
           console.error("Failed to parse current state:", e);
           currentState = null;
         }
-        
+
         // Use the parsed state or fall back to the current state from the store
         const baseState = currentState?.state || {
           items: state.items,
           selected: state.selected,
-          stateVersion: state.stateVersion
+          stateVersion: state.stateVersion,
         };
-        
+
         if (dataMode === "basic") {
           // Get the selected cloud workspaces
-          const selectedWorkspaces = cloudWorkspaces.filter(workspace => 
+          const selectedWorkspaces = cloudWorkspaces.filter((workspace) =>
             selectedCloudWorkspaceIds.includes(workspace.id)
           );
-          
+
           // Convert to application workspaces (without scenarios or other data)
-          const newWorkspaces = selectedWorkspaces.map(workspace => ({
+          const newWorkspaces = selectedWorkspaces.map((workspace) => ({
             id: workspace.id,
             title: workspace.title,
             description: workspace.description,
             slug: workspace.slug,
             updatedAt: workspace.updatedAt,
             createdAt: workspace.createdAt,
-            children: [] // Workspace without scenarios
+            children: [], // Workspace without scenarios
           }));
-          
+
           // Create a copy of the current items array
           let updatedItems = [...baseState.items];
-          
+
           if (updateMode === "update") {
             // Update existing workspaces or add new ones
             for (const newWorkspace of newWorkspaces) {
-              const existingIndex = updatedItems.findIndex((item: any) => item.id === newWorkspace.id);
-              
+              const existingIndex = updatedItems.findIndex(
+                (item: any) => item.id === newWorkspace.id
+              );
+
               if (existingIndex !== -1) {
                 // Update existing workspace
                 updatedItems[existingIndex] = {
@@ -372,7 +435,7 @@ export const ExportImport: React.FC = () => {
                   title: newWorkspace.title,
                   description: newWorkspace.description,
                   slug: newWorkspace.slug,
-                  updatedAt: newWorkspace.updatedAt
+                  updatedAt: newWorkspace.updatedAt,
                 };
               } else {
                 // Add new workspace
@@ -382,85 +445,115 @@ export const ExportImport: React.FC = () => {
           } else {
             // Add as new workspaces with new IDs
             const timestampNow = Date.now();
-            const workspacesWithNewIds = newWorkspaces.map((workspace, index) => ({
-              ...workspace,
-              id: `workspace-${timestampNow}-${index}-${Math.floor(Math.random() * 10000)}`
-            }));
-            
+            const workspacesWithNewIds = newWorkspaces.map(
+              (workspace, index) => ({
+                ...workspace,
+                id: `workspace-${timestampNow}-${index}-${Math.floor(
+                  Math.random() * 10000
+                )}`,
+              })
+            );
+
             updatedItems = [...updatedItems, ...workspacesWithNewIds];
           }
-          
+
           // Update state
           const updatedState = {
             ...baseState,
             items: updatedItems,
-            stateVersion: (baseState.stateVersion || 0) + 1
+            stateVersion: (baseState.stateVersion || 0) + 1,
           };
-          
+
           // Format in the same structure as the original
           const storageData = {
             state: updatedState,
-            version: currentState?.version || 1
+            version: currentState?.version || 1,
           };
-          
+
           // Update local storage directly
-          localStorage.setItem('flowchart-app-state', JSON.stringify(storageData));
-          
-          setCloudSuccess(`Successfully ${updateMode === "update" ? "updated" : "added"} ${selectedWorkspaces.length} basic workspace(s)`);
+          localStorage.setItem(
+            "flowchart-app-state",
+            JSON.stringify(storageData)
+          );
+
+          setCloudSuccess(
+            `Successfully ${updateMode === "update" ? "updated" : "added"} ${
+              selectedWorkspaces.length
+            } basic workspace(s)`
+          );
         } else {
           // Load full workspaces with all their data
           // Iterate through each selected workspace and get its full data
           const loadedWorkspaces = [];
-          
+
           for (const workspaceId of selectedCloudWorkspaceIds) {
-            const fullWorkspace = await firestoreWorkspaceService.getFullWorkspace(workspaceId, currentUser.uid);
-            
+            const fullWorkspace =
+              await firestoreWorkspaceService.getFullWorkspace(
+                workspaceId,
+                currentUser.uid
+              );
+
             if (fullWorkspace) {
               loadedWorkspaces.push(fullWorkspace);
             }
           }
-          
+
           if (loadedWorkspaces.length === 0) {
             throw new Error("No workspaces could be loaded");
           }
-          
+
           // Przygotowanie tablicy nowych workspace'ów do dodania do stanu aplikacji
           const newItems = [];
-          
+
           // Get existing workspace IDs
-          const existingWorkspaceIds = baseState.items.map((item: any) => item.id);
-          
+          const existingWorkspaceIds = baseState.items.map(
+            (item: any) => item.id
+          );
+
           // Create a copy of the current items array
           let updatedItems = [...baseState.items];
-          
+
           // Przetwarzanie każdego wczytanego workspace'a
           for (const fullWorkspace of loadedWorkspaces) {
             // Jeśli workspace ma pełną zawartość, użyj jej
-            if (fullWorkspace.content && 
-                fullWorkspace.content.workspaceData && 
-                fullWorkspace.content.appState) {
-              
+            if (
+              fullWorkspace.content &&
+              fullWorkspace.content.workspaceData &&
+              fullWorkspace.content.appState
+            ) {
               // Ekstraktujemy zawartość workspace'a z pełnych danych
-              const workspaceData = fullWorkspace.content.workspaceData as { id: string };
-              
-              if (updateMode === "update" && existingWorkspaceIds.includes(workspaceData.id)) {
+              const workspaceData = fullWorkspace.content.workspaceData as {
+                id: string;
+              };
+
+              if (
+                updateMode === "update" &&
+                existingWorkspaceIds.includes(workspaceData.id)
+              ) {
                 // Update existing workspace
-                const existingIndex = updatedItems.findIndex((item: any) => item.id === workspaceData.id);
-                
+                const existingIndex = updatedItems.findIndex(
+                  (item: any) => item.id === workspaceData.id
+                );
+
                 if (existingIndex !== -1) {
                   // Replace with the new workspace data
                   updatedItems[existingIndex] = workspaceData;
                 }
-              } else if (updateMode === "add" && existingWorkspaceIds.includes(workspaceData.id)) {
+              } else if (
+                updateMode === "add" &&
+                existingWorkspaceIds.includes(workspaceData.id)
+              ) {
                 // Add as new with a new ID
-                const newId = `workspace-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
-                
+                const newId = `workspace-${Date.now()}-${Math.floor(
+                  Math.random() * 10000
+                )}`;
+
                 // Aktualizuj ID workspace'a i przygotuj do dodania
                 const modifiedWorkspace = {
                   ...workspaceData,
-                  id: newId
+                  id: newId,
                 };
-                
+
                 newItems.push(modifiedWorkspace);
               } else {
                 // It's a new workspace, just add it
@@ -475,14 +568,19 @@ export const ExportImport: React.FC = () => {
                 slug: fullWorkspace.slug,
                 updatedAt: fullWorkspace.updatedAt,
                 createdAt: fullWorkspace.createdAt,
-                children: [] // Pusty workspace
+                children: [], // Pusty workspace
               };
-              
+
               // Handle same way based on update mode
-              if (updateMode === "update" && existingWorkspaceIds.includes(basicWorkspace.id)) {
+              if (
+                updateMode === "update" &&
+                existingWorkspaceIds.includes(basicWorkspace.id)
+              ) {
                 // Update existing workspace
-                const existingIndex = updatedItems.findIndex((item: any) => item.id === basicWorkspace.id);
-                
+                const existingIndex = updatedItems.findIndex(
+                  (item: any) => item.id === basicWorkspace.id
+                );
+
                 if (existingIndex !== -1) {
                   // Only update basic properties, leave children intact
                   updatedItems[existingIndex] = {
@@ -490,16 +588,21 @@ export const ExportImport: React.FC = () => {
                     title: basicWorkspace.title,
                     description: basicWorkspace.description,
                     slug: basicWorkspace.slug,
-                    updatedAt: basicWorkspace.updatedAt
+                    updatedAt: basicWorkspace.updatedAt,
                   };
                 }
-              } else if (updateMode === "add" && existingWorkspaceIds.includes(basicWorkspace.id)) {
+              } else if (
+                updateMode === "add" &&
+                existingWorkspaceIds.includes(basicWorkspace.id)
+              ) {
                 // Add as new with a new ID
-                const newId = `workspace-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
-                
+                const newId = `workspace-${Date.now()}-${Math.floor(
+                  Math.random() * 10000
+                )}`;
+
                 newItems.push({
                   ...basicWorkspace,
-                  id: newId
+                  id: newId,
                 });
               } else {
                 // New workspace
@@ -507,193 +610,229 @@ export const ExportImport: React.FC = () => {
               }
             }
           }
-          
+
           // If we're in update mode, we've already updated the items array
           // Otherwise, add all new items to the existing ones
           if (updateMode === "add") {
             updatedItems = [...updatedItems, ...newItems];
           }
-          
+
           // Aktualizuj stan aplikacji z nowymi workspace'ami
           const updatedState = {
             ...baseState,
             items: updatedItems,
-            stateVersion: (baseState.stateVersion || 0) + 1
+            stateVersion: (baseState.stateVersion || 0) + 1,
           };
-          
+
           // Format in the same structure as the original
           const storageData = {
             state: updatedState,
-            version: currentState?.version || 1
+            version: currentState?.version || 1,
           };
-          
+
           // Update local storage directly
-          localStorage.setItem('flowchart-app-state', JSON.stringify(storageData));
-          
-          setCloudSuccess(`Successfully ${updateMode === "update" ? "updated" : "added"} ${loadedWorkspaces.length} full workspace(s) with all their content`);
+          localStorage.setItem(
+            "flowchart-app-state",
+            JSON.stringify(storageData)
+          );
+
+          setCloudSuccess(
+            `Successfully ${updateMode === "update" ? "updated" : "added"} ${
+              loadedWorkspaces.length
+            } full workspace(s) with all their content`
+          );
         }
-        
+
         // Reset selection
         setSelectedCloudWorkspaceIds([]);
       } catch (error) {
         console.error("Error loading workspaces:", error);
-        setCloudError("Failed to load workspaces: " + (error instanceof Error ? error.message : String(error)));
+        setCloudError(
+          "Failed to load workspaces: " +
+            (error instanceof Error ? error.message : String(error))
+        );
       } finally {
         setIsLoading(false);
       }
     });
-    
+
     setShowConfirmation(true);
   };
-  
+
   // Export function
   const handleExport = () => {
     try {
       if (exportType === "all") {
         // Context items are now stored in workspaces, no need to get them separately
-        
+
         // Export all workspaces and settings in the same format as the original
         const exportData = {
           "flowchart-app-state": {
-            "state": {
-              "items": state.items, // Context items are included in each workspace
-              "selected": state.selected,
-              "stateVersion": state.stateVersion,
-              "flowSession": {
-                "isPlaying": false,
-                "currentStepIndex": 0,
-                "temporarySteps": []
-              }
+            state: {
+              items: state.items, // Context items are included in each workspace
+              selected: state.selected,
+              stateVersion: state.stateVersion,
+              flowSession: {
+                isPlaying: false,
+                currentStepIndex: 0,
+                temporarySteps: [],
+              },
             },
-            "version": 1
-          }
+            version: 1,
+          },
         };
         FileService.exportDataToFile(exportData);
       } else {
         // Export only current scenario
-        const currentWorkspace = state.items.find(w => w.id === currentWorkspaceId);
+        const currentWorkspace = state.items.find(
+          (w) => w.id === currentWorkspaceId
+        );
         if (!currentWorkspace) {
           setImportError("No workspace selected");
           return;
         }
-        
-        const currentScenario = currentWorkspace.children.find(s => s.id === currentScenarioId);
+
+        const currentScenario = currentWorkspace.children.find(
+          (s) => s.id === currentScenarioId
+        );
         if (!currentScenario) {
           setImportError("No scenario selected");
           return;
         }
-        
+
         // Create a new workspace with only the selected scenario
         const exportWorkspace = {
           ...currentWorkspace,
-          children: [currentScenario]
+          children: [currentScenario],
         };
-        
+
         // Context items are now included in the workspace
-        
+
         // Export in the same format as the original
         const exportData = {
           "flowchart-app-state": {
-            "state": {
-              "items": [exportWorkspace], // Context items are included in the workspace
-              "selected": {
+            state: {
+              items: [exportWorkspace], // Context items are included in the workspace
+              selected: {
                 workspace: exportWorkspace.id,
                 scenario: currentScenario.id,
-                node: ""
+                node: "",
               },
-              "stateVersion": state.stateVersion,
-              "flowSession": {
-                "isPlaying": false,
-                "currentStepIndex": 0,
-                "temporarySteps": []
-              }
+              stateVersion: state.stateVersion,
+              flowSession: {
+                isPlaying: false,
+                currentStepIndex: 0,
+                temporarySteps: [],
+              },
             },
-            "version": 1
-          }
+            version: 1,
+          },
         };
-        
+
         FileService.exportDataToFile(exportData);
       }
     } catch (error) {
       console.error("Export failed:", error);
-      setImportError("Export failed: " + (error instanceof Error ? error.message : String(error)));
+      setImportError(
+        "Export failed: " +
+          (error instanceof Error ? error.message : String(error))
+      );
     }
   };
-  
+
   // Import function
   const handleImport = async () => {
     try {
       setImportError(null);
       setImportSuccess(false);
-      
+
       if (!importFile) {
         setImportError("Please select a file to import");
         return;
       }
-      
+
       const importData = await FileService.readDataFromFile(importFile);
-      
+
       // Debug information about import file
-      console.log('Import file diagnostics:', {
+      console.log("Import file diagnostics:", {
         hasFlowchartState: Boolean(importData["flowchart-app-state"]),
         hasState: Boolean(importData["flowchart-app-state"]?.state),
         hasItems: Boolean(importData["flowchart-app-state"]?.state?.items),
-        hasContextItems: Boolean(importData["flowchart-app-state"]?.state?.contextItems),
-        contextItemsCount: importData["flowchart-app-state"]?.state?.contextItems?.length || 0
+        hasContextItems: Boolean(
+          importData["flowchart-app-state"]?.state?.contextItems
+        ),
+        contextItemsCount:
+          importData["flowchart-app-state"]?.state?.contextItems?.length || 0,
       });
-      
+
       // Check for filters in the import
-      const scenarios = importData["flowchart-app-state"]?.state?.items?.flatMap((w: any) => w.children || []) || [];
+      const scenarios =
+        importData["flowchart-app-state"]?.state?.items?.flatMap(
+          (w: any) => w.children || []
+        ) || [];
       const filtersCount = scenarios.reduce((count: number, scenario: any) => {
         return count + (scenario.filters?.length || 0);
       }, 0);
-      
-      console.log('Import file filters diagnostics:', {
+
+      console.log("Import file filters diagnostics:", {
         scenariosCount: scenarios.length,
-        scenariosWithFilters: scenarios.filter((s: any) => s.filters?.length > 0).length,
+        scenariosWithFilters: scenarios.filter(
+          (s: any) => s.filters?.length > 0
+        ).length,
         totalFiltersCount: filtersCount,
-        sampleFilters: scenarios[0]?.filters || []
+        sampleFilters: scenarios[0]?.filters || [],
       });
-      
+
       // Validate imported data - handle both direct format and nested format
       let itemsData;
-      
+
       // Check if data is in nested format (flowchart-app-state.state.items)
-      if (importData["flowchart-app-state"] && importData["flowchart-app-state"].state && importData["flowchart-app-state"].state.items) {
+      if (
+        importData["flowchart-app-state"] &&
+        importData["flowchart-app-state"].state &&
+        importData["flowchart-app-state"].state.items
+      ) {
         itemsData = importData["flowchart-app-state"].state.items;
-      } 
+      }
       // Check if data is in direct format (items)
       else if (importData.items) {
         itemsData = importData.items;
       }
-      
+
       if (!itemsData || !Array.isArray(itemsData)) {
-        setImportError("Invalid import file: missing or invalid 'items' property");
+        setImportError(
+          "Invalid import file: missing or invalid 'items' property"
+        );
         return;
       }
-      
+
       // Handle import based on selected method
       if (importType === "new-workspace") {
         // Confirm before importing as new workspace
         setConfirmationTitle("Import as New Workspace");
-        setConfirmationMessage("This will add all imported workspaces to your list. Continue?");
+        setConfirmationMessage(
+          "This will add all imported workspaces to your list. Continue?"
+        );
         setConfirmationAction(() => () => {
           // Add imported workspaces with new IDs to prevent conflicts
           const currentTime = Date.now();
-          
+
           // Get the appropriate items array based on structure
-          const itemsToImport = importData["flowchart-app-state"]?.state?.items || importData.items;
-          
+          const itemsToImport =
+            importData["flowchart-app-state"]?.state?.items || importData.items;
+
           // Track ID mappings for cross-references
           const idMapping: { [key: string]: string } = {};
-          
+
           const newWorkspaces = itemsToImport.map((workspace: any) => {
             // Create new workspace ID
-            const newWorkspaceId = `workspace-${currentTime}-${Math.floor(Math.random() * 10000)}`;
-            
+            const newWorkspaceId = `workspace-${currentTime}-${Math.floor(
+              Math.random() * 10000
+            )}`;
+
             // Store mapping
             idMapping[workspace.id] = newWorkspaceId;
-            
+
             return {
               ...workspace,
               id: newWorkspaceId,
@@ -701,214 +840,277 @@ export const ExportImport: React.FC = () => {
               updatedAt: Date.now(),
               children: workspace.children.map((scenario: any) => {
                 // Create new scenario ID
-                const newScenarioId = `scenario-${currentTime}-${Math.floor(Math.random() * 10000)}`;
-                
+                const newScenarioId = `scenario-${currentTime}-${Math.floor(
+                  Math.random() * 10000
+                )}`;
+
                 // Store mapping
                 idMapping[scenario.id] = newScenarioId;
-                
+
                 // Create new scenario with preserved properties
                 const newScenario = {
                   ...scenario,
                   id: newScenarioId,
                   // Preserve filters
-                  filters: scenario.filters ? scenario.filters.map((filter: any) => ({
-                    ...filter,
-                    id: `filter-${currentTime}-${Math.floor(Math.random() * 10000)}`,
-                  })) : [],
+                  filters: scenario.filters
+                    ? scenario.filters.map((filter: any) => ({
+                        ...filter,
+                        id: `filter-${currentTime}-${Math.floor(
+                          Math.random() * 10000
+                        )}`,
+                      }))
+                    : [],
                   // Preserve context
                   context: scenario.context,
                   // Ensure edges property exists
-                  edges: scenario.edges || []
+                  edges: scenario.edges || [],
                 };
-                
+
                 // First, assign new IDs to all children (nodes)
                 if (newScenario.children && newScenario.children.length > 0) {
                   const nodeIdMap: { [key: string]: string } = {}; // Map old node IDs to new node IDs
-                  
-                  newScenario.children = newScenario.children.map((node : { id: string })=> {
-                    const oldNodeId = node.id;
-                    const newNodeId = `node-${currentTime}-${Math.floor(Math.random() * 10000)}`;
-                    
-                    // Store mapping
-                    nodeIdMap[oldNodeId] = newNodeId;
-                    
-                    // Return node with new ID
-                    return {
-                      ...node,
-                      id: newNodeId
-                    };
-                  });
-                  
+
+                  newScenario.children = newScenario.children.map(
+                    (node: { id: string }) => {
+                      const oldNodeId = node.id;
+                      const newNodeId = `node-${currentTime}-${Math.floor(
+                        Math.random() * 10000
+                      )}`;
+
+                      // Store mapping
+                      nodeIdMap[oldNodeId] = newNodeId;
+
+                      // Return node with new ID
+                      return {
+                        ...node,
+                        id: newNodeId,
+                      };
+                    }
+                  );
+
                   // Update any existing edges with the new node IDs
                   if (newScenario.edges && newScenario.edges.length > 0) {
-                    newScenario.edges = newScenario.edges.map((edge: Edge)=> ({
+                    newScenario.edges = newScenario.edges.map((edge: Edge) => ({
                       ...edge,
-                      id: `edge-${currentTime}-${Math.floor(Math.random() * 10000)}`,
+                      id: `edge-${currentTime}-${Math.floor(
+                        Math.random() * 10000
+                      )}`,
                       source: nodeIdMap[edge.source] || edge.source,
-                      target: nodeIdMap[edge.target] || edge.target
+                      target: nodeIdMap[edge.target] || edge.target,
                     }));
                   }
-                  
+
                   // ALWAYS create edges connecting nodes sequentially to ensure proper flow
                   // This is critical for imported scenarios to work correctly
-                  console.log(`Creating sequential edges for scenario ${newScenarioId} with ${newScenario.children.length} nodes`);
-                  
+                  console.log(
+                    `Creating sequential edges for scenario ${newScenarioId} with ${newScenario.children.length} nodes`
+                  );
+
                   // Create or replace edges connecting nodes in sequence
                   newScenario.edges = [];
                   for (let i = 0; i < newScenario.children.length - 1; i++) {
                     const sourceNode = newScenario.children[i];
-                    const targetNode = newScenario.children[i+1];
-                    
+                    const targetNode = newScenario.children[i + 1];
+
                     if (sourceNode && targetNode) {
                       newScenario.edges.push({
-                        id: `edge-${currentTime}-${i}-${Math.floor(Math.random() * 10000)}`,
+                        id: `edge-${currentTime}-${i}-${Math.floor(
+                          Math.random() * 10000
+                        )}`,
                         source: sourceNode.id,
                         target: targetNode.id,
-                        type: 'edge'
+                        type: "edge",
                       });
                     }
                   }
                 }
-                
+
                 return newScenario;
-              })
+              }),
             };
           });
-          
+
           // Get current state from localStorage to ensure we're working with the latest data
-          const currentStateStr = localStorage.getItem('flowchart-app-state');
+          const currentStateStr = localStorage.getItem("flowchart-app-state");
           let currentState;
-          
+
           try {
             currentState = currentStateStr ? JSON.parse(currentStateStr) : null;
           } catch (e) {
             console.error("Failed to parse current state:", e);
             currentState = null;
           }
-          
+
           // Use the parsed state or fall back to the current state from the store
           const baseState = currentState?.state || {
             items: state.items,
             selected: state.selected,
-            stateVersion: state.stateVersion
+            stateVersion: state.stateVersion,
           };
-          
+
           // Get any context items from the import - check both locations
           // Some imports have context items at the root level, others have them in the workspace
-          const rootContextItems = importData["flowchart-app-state"]?.state?.contextItems || [];
-          
+          const rootContextItems =
+            importData["flowchart-app-state"]?.state?.contextItems || [];
+
           // Also look for context items in each workspace
           const workspaceContextItems: ContextItem[] = [];
-          const importedWorkspaces = importData["flowchart-app-state"]?.state?.items || [];
-          
+          const importedWorkspaces =
+            importData["flowchart-app-state"]?.state?.items || [];
+
           // Gather context items from workspaces
           importedWorkspaces.forEach((workspace: any) => {
-            if (workspace.contextItems && Array.isArray(workspace.contextItems)) {
-              console.log(`Import found ${workspace.contextItems.length} context items in workspace ${workspace.title}`);
+            if (
+              workspace.contextItems &&
+              Array.isArray(workspace.contextItems)
+            ) {
+              console.log(
+                `Import found ${workspace.contextItems.length} context items in workspace ${workspace.title}`
+              );
               workspaceContextItems.push(...workspace.contextItems);
             }
           });
-          
+
           // Combine all found context items
-          const allContextItemsToImport = [...rootContextItems, ...workspaceContextItems];
-          console.log('Import context items - total found:', allContextItemsToImport.length);
-          console.log('Import context items - root items:', rootContextItems.length);
-          console.log('Import context items - workspace items:', workspaceContextItems.length);
-          
+          const allContextItemsToImport = [
+            ...rootContextItems,
+            ...workspaceContextItems,
+          ];
+          console.log(
+            "Import context items - total found:",
+            allContextItemsToImport.length
+          );
+          console.log(
+            "Import context items - root items:",
+            rootContextItems.length
+          );
+          console.log(
+            "Import context items - workspace items:",
+            workspaceContextItems.length
+          );
+
           // Remap scenario IDs in context items
-          const updatedContextItems = allContextItemsToImport.map((contextItem: any) => {
-            // Create a new ID for the context item
-            const newContextId = `context-${currentTime}-${Math.floor(Math.random() * 10000)}`;
-            
-            // If the context item has a scenarioId, update it with the new ID
-            let updatedScenarioId = contextItem.scenarioId;
-            if (updatedScenarioId && idMapping[updatedScenarioId]) {
-              updatedScenarioId = idMapping[updatedScenarioId];
+          const updatedContextItems = allContextItemsToImport.map(
+            (contextItem: any) => {
+              // Create a new ID for the context item
+              const newContextId = `context-${currentTime}-${Math.floor(
+                Math.random() * 10000
+              )}`;
+
+              // If the context item has a scenarioId, update it with the new ID
+              let updatedScenarioId = contextItem.scenarioId;
+              if (updatedScenarioId && idMapping[updatedScenarioId]) {
+                updatedScenarioId = idMapping[updatedScenarioId];
+              }
+
+              return {
+                ...contextItem,
+                id: newContextId,
+                scenarioId: updatedScenarioId,
+              };
             }
-            
-            return {
-              ...contextItem,
-              id: newContextId,
-              scenarioId: updatedScenarioId
-            };
-          });
-          
+          );
+
           // Add context items to the new workspaces
           for (const workspace of newWorkspaces) {
             // Initialize contextItems array if it doesn't exist
             if (!workspace.contextItems) {
               workspace.contextItems = [];
             }
-            
+
             // Add context items associated with this workspace's scenarios
-            const contextItemsForWorkspace = updatedContextItems.filter(item => {
-              // If item has no scenarioId, it's a global context
-              if (!item.scenarioId) return true;
-              
-              // Otherwise check if this workspace has the scenario
-              return workspace.children.some((scenario: Scenario) => scenario.id === item.scenarioId);
-            });
-            
+            const contextItemsForWorkspace = updatedContextItems.filter(
+              (item) => {
+                // If item has no scenarioId, it's a global context
+                if (!item.scenarioId) return true;
+
+                // Otherwise check if this workspace has the scenario
+                return workspace.children.some(
+                  (scenario: Scenario) => scenario.id === item.scenarioId
+                );
+              }
+            );
+
             // Add the context items to the workspace
             if (contextItemsForWorkspace.length > 0) {
               workspace.contextItems = [
                 ...workspace.contextItems,
-                ...contextItemsForWorkspace
+                ...contextItemsForWorkspace,
               ];
-              console.log(`Added ${contextItemsForWorkspace.length} context items to workspace ${workspace.title}:`, workspace.contextItems);
-              
+              console.log(
+                `Added ${contextItemsForWorkspace.length} context items to workspace ${workspace.title}:`,
+                workspace.contextItems
+              );
+
               // Validate and fix context items
               const missingProps = [];
               for (const item of workspace.contextItems) {
                 if (!item.id) missingProps.push(`id missing for ${item.title}`);
-                if (!item.title) missingProps.push(`title missing for item ${item.id}`);
-                if (!item.type) missingProps.push(`type missing for ${item.title || item.id}`);
+                if (!item.title)
+                  missingProps.push(`title missing for item ${item.id}`);
+                if (!item.type)
+                  missingProps.push(
+                    `type missing for ${item.title || item.id}`
+                  );
                 if (!item.createdAt) item.createdAt = Date.now(); // Fix missing timestamp
                 if (!item.updatedAt) item.updatedAt = Date.now(); // Fix missing timestamp
               }
-              
+
               if (missingProps.length > 0) {
-                console.warn(`Context items in workspace ${workspace.title} missing required properties:`, missingProps);
+                console.warn(
+                  `Context items in workspace ${workspace.title} missing required properties:`,
+                  missingProps
+                );
               }
             } else {
-              console.warn(`No context items matched for workspace ${workspace.title}`);
-              console.log('Available items:', updatedContextItems);
-              console.log('Workspace scenarios:', workspace.children.map((s:Scenario) => s.id));
+              console.warn(
+                `No context items matched for workspace ${workspace.title}`
+              );
+              console.log("Available items:", updatedContextItems);
+              console.log(
+                "Workspace scenarios:",
+                workspace.children.map((s: Scenario) => s.id)
+              );
             }
           }
-          
+
           // Logging the final structure for debugging
-          console.log('Final workspace structure with context items:');
+          console.log("Final workspace structure with context items:");
           for (const workspace of newWorkspaces) {
             console.log(`Workspace: ${workspace.title}`, {
               id: workspace.id,
               contextItemsCount: workspace.contextItems?.length || 0,
               scenariosCount: workspace.children?.length || 0,
-              contextItems: workspace.contextItems
+              contextItems: workspace.contextItems,
             });
           }
-          
+
           // Add new workspaces to existing ones
           const updatedState = {
             ...baseState,
             items: [...baseState.items, ...newWorkspaces],
-            stateVersion: (baseState.stateVersion || 0) + 1
+            stateVersion: (baseState.stateVersion || 0) + 1,
           };
-          
+
           // Format in the same structure as the original
           const storageData = {
             state: updatedState,
-            version: currentState?.version || 1
+            version: currentState?.version || 1,
           };
-          
+
           // Update local storage directly
-          localStorage.setItem('flowchart-app-state', JSON.stringify(storageData));
-          
+          localStorage.setItem(
+            "flowchart-app-state",
+            JSON.stringify(storageData)
+          );
+
           setImportSuccess(true);
           setImportFile(null);
-          
+
           // Reset file input
-          const fileInput = document.getElementById("import-file") as HTMLInputElement;
+          const fileInput = document.getElementById(
+            "import-file"
+          ) as HTMLInputElement;
           if (fileInput) fileInput.value = "";
         });
         setShowConfirmation(true);
@@ -918,313 +1120,397 @@ export const ExportImport: React.FC = () => {
           setImportError("Please select a workspace to import scenarios into");
           return;
         }
-        
+
         // Find the selected workspace
-        const targetWorkspace = state.items.find(w => w.id === selectedWorkspaceId);
+        const targetWorkspace = state.items.find(
+          (w) => w.id === selectedWorkspaceId
+        );
         if (!targetWorkspace) {
           setImportError("Selected workspace not found");
           return;
         }
-        
+
         // Get the appropriate items array based on structure
-        const itemsToImport = importData["flowchart-app-state"]?.state?.items || importData.items;
-        
+        const itemsToImport =
+          importData["flowchart-app-state"]?.state?.items || importData.items;
+
         // Make sure imported data has at least one workspace with scenarios
         if (itemsToImport.length === 0 || !itemsToImport[0].children) {
           setImportError("No scenarios found in import file");
           return;
         }
-        
+
         // Get all scenarios from all workspaces in the import
-        const allImportedScenarios = itemsToImport.flatMap((workspace: any) => 
-          workspace.children || []);
-        
+        const allImportedScenarios = itemsToImport.flatMap(
+          (workspace: any) => workspace.children || []
+        );
+
         if (allImportedScenarios.length === 0) {
           setImportError("No scenarios found in import file");
           return;
         }
-        
+
         // Confirm before adding scenarios to existing workspace
         setConfirmationTitle("Import to Existing Workspace");
-        setConfirmationMessage(`This will add ${allImportedScenarios.length} scenarios to the workspace "${targetWorkspace.title}". Continue?`);
+        setConfirmationMessage(
+          `This will add ${allImportedScenarios.length} scenarios to the workspace "${targetWorkspace.title}". Continue?`
+        );
         setConfirmationAction(() => () => {
           // Generate new IDs for imported scenarios but preserve structure
           const currentTime = Date.now();
           const idMapping: { [key: string]: string } = {}; // To track old ID to new ID mapping
-          
+
           const newScenarios = allImportedScenarios.map((scenario: any) => {
             // Generate new ID for scenario
-            const newScenarioId = `scenario-${currentTime}-${Math.floor(Math.random() * 10000)}`;
-            
+            const newScenarioId = `scenario-${currentTime}-${Math.floor(
+              Math.random() * 10000
+            )}`;
+
             // Store mapping from old to new ID
             idMapping[scenario.id] = newScenarioId;
-            
+
             // Create the new scenario with all properties
             const newScenario = {
               ...scenario,
               id: newScenarioId,
               // If filters exist, preserve them
-              filters: scenario.filters ? scenario.filters.map((filter: any) => ({
-                ...filter,
-                id: `filter-${currentTime}-${Math.floor(Math.random() * 10000)}`,
-                // Keep filter structure intact
-              })) : [],
+              filters: scenario.filters
+                ? scenario.filters.map((filter: any) => ({
+                    ...filter,
+                    id: `filter-${currentTime}-${Math.floor(
+                      Math.random() * 10000
+                    )}`,
+                    // Keep filter structure intact
+                  }))
+                : [],
               // Preserve context references
               context: scenario.context,
               // Ensure edges property exists
-              edges: scenario.edges || []
+              edges: scenario.edges || [],
             };
-            
+
             // First, assign new IDs to all children (nodes)
             if (newScenario.children && newScenario.children.length > 0) {
-              const nodeIdMap: { [key: string]: string } = {};  // Map old node IDs to new node IDs
-              
-              newScenario.children = newScenario.children.map((node: any)  => {
+              const nodeIdMap: { [key: string]: string } = {}; // Map old node IDs to new node IDs
+
+              newScenario.children = newScenario.children.map((node: any) => {
                 const oldNodeId = node.id;
-                const newNodeId = `node-${currentTime}-${Math.floor(Math.random() * 10000)}`;
-                
+                const newNodeId = `node-${currentTime}-${Math.floor(
+                  Math.random() * 10000
+                )}`;
+
                 // Store mapping
                 nodeIdMap[oldNodeId] = newNodeId;
-                
+
                 // Return node with new ID
                 return {
                   ...node,
-                  id: newNodeId
+                  id: newNodeId,
                 };
               });
-              
+
               // Update any existing edges with the new node IDs
               if (newScenario.edges && newScenario.edges.length > 0) {
-                newScenario.edges = newScenario.edges.map((edge:Edge) => ({
+                newScenario.edges = newScenario.edges.map((edge: Edge) => ({
                   ...edge,
-                  id: `edge-${currentTime}-${Math.floor(Math.random() * 10000)}`,
+                  id: `edge-${currentTime}-${Math.floor(
+                    Math.random() * 10000
+                  )}`,
                   source: nodeIdMap[edge.source] || edge.source,
-                  target: nodeIdMap[edge.target] || edge.target
+                  target: nodeIdMap[edge.target] || edge.target,
                 }));
               }
-              
+
               // ALWAYS create edges connecting nodes sequentially to ensure proper flow
               // This is critical for imported scenarios to work correctly
-              console.log(`Creating sequential edges for scenario ${newScenarioId} with ${newScenario.children.length} nodes`);
-              
+              console.log(
+                `Creating sequential edges for scenario ${newScenarioId} with ${newScenario.children.length} nodes`
+              );
+
               // Create or replace edges connecting nodes in sequence
               newScenario.edges = [];
               for (let i = 0; i < newScenario.children.length - 1; i++) {
                 const sourceNode = newScenario.children[i];
-                const targetNode = newScenario.children[i+1];
-                
+                const targetNode = newScenario.children[i + 1];
+
                 if (sourceNode && targetNode) {
                   newScenario.edges.push({
-                    id: `edge-${currentTime}-${i}-${Math.floor(Math.random() * 10000)}`,
+                    id: `edge-${currentTime}-${i}-${Math.floor(
+                      Math.random() * 10000
+                    )}`,
                     source: sourceNode.id,
                     target: targetNode.id,
-                    type: 'edge'
+                    type: "edge",
                   });
                 }
               }
             }
-            
+
             return newScenario;
           });
-          
+
           // Get current state from localStorage to ensure we're working with the latest data
-          const currentStateStr = localStorage.getItem('flowchart-app-state');
+          const currentStateStr = localStorage.getItem("flowchart-app-state");
           let currentState;
-          
+
           try {
             currentState = currentStateStr ? JSON.parse(currentStateStr) : null;
           } catch (e) {
             console.error("Failed to parse current state:", e);
             currentState = null;
           }
-          
+
           // Use the parsed state or fall back to the current state from the store
           const baseState = currentState?.state || state;
-          
+
           // Create a deep copy of the current items
-          const updatedWorkspaces = JSON.parse(JSON.stringify(baseState.items || []));
-          
+          const updatedWorkspaces = JSON.parse(
+            JSON.stringify(baseState.items || [])
+          );
+
           // Find the target workspace and append the new scenarios
-          const targetWorkspaceIndex = updatedWorkspaces.findIndex((w: any) => w.id === selectedWorkspaceId);
-          
+          const targetWorkspaceIndex = updatedWorkspaces.findIndex(
+            (w: any) => w.id === selectedWorkspaceId
+          );
+
           if (targetWorkspaceIndex !== -1) {
             // Ensure workspace has children array
             if (!updatedWorkspaces[targetWorkspaceIndex].children) {
               updatedWorkspaces[targetWorkspaceIndex].children = [];
             }
-            
+
             // Add new scenarios to the workspace
             updatedWorkspaces[targetWorkspaceIndex].children = [
               ...updatedWorkspaces[targetWorkspaceIndex].children,
-              ...newScenarios
+              ...newScenarios,
             ];
-            
+
             // Update timestamp
             updatedWorkspaces[targetWorkspaceIndex].updatedAt = Date.now();
           }
-          
+
           // Get any context items from the import - check both locations
           // Some imports have context items at the root level, others have them in the workspace
-          const rootContextItems = importData["flowchart-app-state"]?.state?.contextItems || [];
-          
+          const rootContextItems =
+            importData["flowchart-app-state"]?.state?.contextItems || [];
+
           // Also look for context items in each workspace
           const workspaceContextItems: ContextItem[] = [];
-          const importedWorkspaces = importData["flowchart-app-state"]?.state?.items || [];
-          
+          const importedWorkspaces =
+            importData["flowchart-app-state"]?.state?.items || [];
+
           // Gather context items from workspaces
           importedWorkspaces.forEach((workspace: any) => {
-            if (workspace.contextItems && Array.isArray(workspace.contextItems)) {
-              console.log(`Import found ${workspace.contextItems.length} context items in workspace ${workspace.title}`);
+            if (
+              workspace.contextItems &&
+              Array.isArray(workspace.contextItems)
+            ) {
+              console.log(
+                `Import found ${workspace.contextItems.length} context items in workspace ${workspace.title}`
+              );
               workspaceContextItems.push(...workspace.contextItems);
             }
           });
-          
+
           // Combine all found context items
-          const allContextItemsToImport = [...rootContextItems, ...workspaceContextItems];
-          console.log('Import context items - total found:', allContextItemsToImport.length);
-          console.log('Import context items - root items:', rootContextItems.length);
-          console.log('Import context items - workspace items:', workspaceContextItems.length);
-          
+          const allContextItemsToImport = [
+            ...rootContextItems,
+            ...workspaceContextItems,
+          ];
+          console.log(
+            "Import context items - total found:",
+            allContextItemsToImport.length
+          );
+          console.log(
+            "Import context items - root items:",
+            rootContextItems.length
+          );
+          console.log(
+            "Import context items - workspace items:",
+            workspaceContextItems.length
+          );
+
           // Remap scenario IDs in context items
-          const updatedContextItems = allContextItemsToImport.map((contextItem: any) => {
-            // Create a new ID for the context item
-            const newContextId = `context-${currentTime}-${Math.floor(Math.random() * 10000)}`;
-            
-            // If the context item has a scenarioId, update it with the new ID
-            let updatedScenarioId = contextItem.scenarioId;
-            if (updatedScenarioId && idMapping[updatedScenarioId]) {
-              updatedScenarioId = idMapping[updatedScenarioId];
+          const updatedContextItems = allContextItemsToImport.map(
+            (contextItem: any) => {
+              // Create a new ID for the context item
+              const newContextId = `context-${currentTime}-${Math.floor(
+                Math.random() * 10000
+              )}`;
+
+              // If the context item has a scenarioId, update it with the new ID
+              let updatedScenarioId = contextItem.scenarioId;
+              if (updatedScenarioId && idMapping[updatedScenarioId]) {
+                updatedScenarioId = idMapping[updatedScenarioId];
+              }
+
+              return {
+                ...contextItem,
+                id: newContextId,
+                scenarioId: updatedScenarioId,
+              };
             }
-            
-            return {
-              ...contextItem,
-              id: newContextId,
-              scenarioId: updatedScenarioId
-            };
-          });
-          
+          );
+
           // Now add context items to the appropriate workspace
           // The target workspace is already found above (this is where we add the scenarios)
-          
+
           if (targetWorkspaceIndex !== -1) {
             // Initialize contextItems array if it doesn't exist
             if (!updatedWorkspaces[targetWorkspaceIndex].contextItems) {
               updatedWorkspaces[targetWorkspaceIndex].contextItems = [];
             }
-            
+
             // Add the context items to the workspace
             updatedWorkspaces[targetWorkspaceIndex].contextItems = [
               ...updatedWorkspaces[targetWorkspaceIndex].contextItems,
-              ...updatedContextItems
+              ...updatedContextItems,
             ];
-            
-            console.log(`Added ${updatedContextItems.length} context items to workspace ${updatedWorkspaces[targetWorkspaceIndex].title}:`, updatedWorkspaces[targetWorkspaceIndex].contextItems);
-            
+
+            console.log(
+              `Added ${updatedContextItems.length} context items to workspace ${updatedWorkspaces[targetWorkspaceIndex].title}:`,
+              updatedWorkspaces[targetWorkspaceIndex].contextItems
+            );
+
             // Check if the context items are correctly linked to scenarios
-            const scenarios = updatedWorkspaces[targetWorkspaceIndex].children.map((s:Scenario) => s.id);
-            console.log('Scenario IDs in target workspace:', scenarios);
-            console.log('Context items with scenarioId:');
+            const scenarios = updatedWorkspaces[
+              targetWorkspaceIndex
+            ].children.map((s: Scenario) => s.id);
+            console.log("Scenario IDs in target workspace:", scenarios);
+            console.log("Context items with scenarioId:");
             for (const item of updatedContextItems) {
               if (item.scenarioId) {
-                console.log(`- ${item.title}: scenarioId=${item.scenarioId}, matches scenario: ${scenarios.includes(item.scenarioId)}`);
+                console.log(
+                  `- ${item.title}: scenarioId=${
+                    item.scenarioId
+                  }, matches scenario: ${scenarios.includes(item.scenarioId)}`
+                );
               } else {
                 console.log(`- ${item.title}: No scenarioId (global context)`);
               }
             }
-            
+
             // Validate context items have all required properties
             const missingProps = [];
-            for (const item of updatedWorkspaces[targetWorkspaceIndex].contextItems) {
+            for (const item of updatedWorkspaces[targetWorkspaceIndex]
+              .contextItems) {
               if (!item.id) missingProps.push(`id missing for ${item.title}`);
-              if (!item.title) missingProps.push(`title missing for item ${item.id}`);
-              if (!item.type) missingProps.push(`type missing for ${item.title || item.id}`);
+              if (!item.title)
+                missingProps.push(`title missing for item ${item.id}`);
+              if (!item.type)
+                missingProps.push(`type missing for ${item.title || item.id}`);
               if (!item.createdAt) item.createdAt = Date.now(); // Fix missing timestamp
               if (!item.updatedAt) item.updatedAt = Date.now(); // Fix missing timestamp
             }
-            
+
             if (missingProps.length > 0) {
-              console.warn('Some context items are missing required properties:', missingProps);
+              console.warn(
+                "Some context items are missing required properties:",
+                missingProps
+              );
             }
           } else {
-            console.warn('Could not find target workspace for context items');
+            console.warn("Could not find target workspace for context items");
           }
-          
+
           // Verify if contextItems actually made it into the final structure
-          console.log('updatedWorkspaces structure check:');
+          console.log("updatedWorkspaces structure check:");
           for (const workspace of updatedWorkspaces) {
             console.log(`Workspace: ${workspace.title}`, {
               id: workspace.id,
               contextItemsCount: workspace.contextItems?.length || 0,
               scenariosCount: workspace.children?.length || 0,
-              firstFewContextItems: workspace.contextItems?.slice(0, 2) || []
+              firstFewContextItems: workspace.contextItems?.slice(0, 2) || [],
             });
           }
-          
+
           // Update local storage with the new state
           const updatedState = {
             ...baseState,
             items: updatedWorkspaces,
-            stateVersion: (baseState.stateVersion || 0) + 1
+            stateVersion: (baseState.stateVersion || 0) + 1,
           };
-          
+
           // Format in the same structure as the original
           const storageData = {
             state: updatedState,
-            version: currentState?.version || 1
+            version: currentState?.version || 1,
           };
-          
-          localStorage.setItem('flowchart-app-state', JSON.stringify(storageData));
-          
+
+          localStorage.setItem(
+            "flowchart-app-state",
+            JSON.stringify(storageData)
+          );
+
           // After import, do a final check of the workspace structure
-          console.log('IMPORT COMPLETED - Final state check:');
+          console.log("IMPORT COMPLETED - Final state check:");
           try {
-            const finalState = JSON.parse(localStorage.getItem('flowchart-app-state') || '{}');
+            const finalState = JSON.parse(
+              localStorage.getItem("flowchart-app-state") || "{}"
+            );
             const workspaces = finalState?.state?.items || [];
-            
-            console.log(`IMPORT COMPLETED - Found ${workspaces.length} workspaces in state`);
+
+            console.log(
+              `IMPORT COMPLETED - Found ${workspaces.length} workspaces in state`
+            );
             workspaces.forEach((workspace: any, idx: number) => {
-              const hasContextItems = Boolean(workspace.contextItems && workspace.contextItems.length > 0);
-              console.log(`IMPORT COMPLETED - Workspace #${idx}: id=${workspace.id}, title=${workspace.title}`);
-              console.log(`IMPORT COMPLETED - Has contextItems: ${hasContextItems}`);
-              
+              const hasContextItems = Boolean(
+                workspace.contextItems && workspace.contextItems.length > 0
+              );
+              console.log(
+                `IMPORT COMPLETED - Workspace #${idx}: id=${workspace.id}, title=${workspace.title}`
+              );
+              console.log(
+                `IMPORT COMPLETED - Has contextItems: ${hasContextItems}`
+              );
+
               if (hasContextItems) {
-                console.log(`IMPORT COMPLETED - contextItems count: ${workspace.contextItems.length}`);
-                console.log(`IMPORT COMPLETED - First few contextItems:`, 
+                console.log(
+                  `IMPORT COMPLETED - contextItems count: ${workspace.contextItems.length}`
+                );
+                console.log(
+                  `IMPORT COMPLETED - First few contextItems:`,
                   workspace.contextItems.slice(0, 3).map((item: any) => ({
                     id: item.id,
                     title: item.title,
                     type: item.type,
-                    scenarioId: item.scenarioId
+                    scenarioId: item.scenarioId,
                   }))
                 );
               }
             });
           } catch (e) {
-            console.error('IMPORT COMPLETED - Error checking final state:', e);
+            console.error("IMPORT COMPLETED - Error checking final state:", e);
           }
-          
+
           setImportSuccess(true);
           setImportFile(null);
-          
+
           // Reset file input
-          const fileInput = document.getElementById("import-file") as HTMLInputElement;
+          const fileInput = document.getElementById(
+            "import-file"
+          ) as HTMLInputElement;
           if (fileInput) fileInput.value = "";
         });
         setShowConfirmation(true);
       }
     } catch (error) {
-      setImportError("Failed to import: " + (error instanceof Error ? error.message : String(error)));
+      setImportError(
+        "Failed to import: " +
+          (error instanceof Error ? error.message : String(error))
+      );
     }
   };
-  
+
   return (
     <div className="h-full overflow-auto">
       <div className="p-4 space-y-4">
         <Tabs defaultValue="export" className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-4">
-            <TabsTrigger value="export">Export</TabsTrigger>
-            <TabsTrigger value="import">Import</TabsTrigger>
-            <TabsTrigger value="cloud">Backup & Restore</TabsTrigger>
+            <TabsTrigger value="import"><Upload className="mr-2 h-4 w-4"/> Import</TabsTrigger>
+            <TabsTrigger value="export"><Download className="mr-2 h-4 w-4"/> Export</TabsTrigger>
+
+            <TabsTrigger value="cloud"><Save className="mr-2 h-4 w-4"/>Backup and Restore</TabsTrigger>
           </TabsList>
 
           {/* EXPORT TAB */}
@@ -1233,7 +1519,9 @@ export const ExportImport: React.FC = () => {
               <CardHeader className="p-4">
                 <RadioGroup
                   value={exportType}
-                  onValueChange={(value) => setExportType(value as "all" | "current-scenario")}
+                  onValueChange={(value) =>
+                    setExportType(value as "all" | "current-scenario")
+                  }
                   className="space-y-3"
                 >
                   <div className="flex items-start space-x-2">
@@ -1243,37 +1531,46 @@ export const ExportImport: React.FC = () => {
                         Export all workspaces
                       </Label>
                       <p className="text-sm text-muted-foreground">
-                        Export all workspaces with all scenarios, nodes, and edges
+                        Export all workspaces with all scenarios, nodes, and
+                        edges
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start space-x-2">
-                    <RadioGroupItem value="current-scenario" id="export-current" />
+                    <RadioGroupItem
+                      value="current-scenario"
+                      id="export-current"
+                    />
                     <div className="grid gap-1.5">
                       <Label htmlFor="export-current" className="font-medium">
                         Export current scenario only
                       </Label>
                       <p className="text-sm text-muted-foreground">
-                        Export only the currently selected scenario with its nodes and edges
+                        Export only the currently selected scenario with its
+                        nodes and edges
                       </p>
-                      {(exportType === "current-scenario" && (!currentWorkspaceId || !currentScenarioId)) && (
-                        <Alert variant="destructive" className="mt-2">
-                          <AlertCircle className="h-4 w-4" />
-                          <AlertDescription>
-                            Please select a workspace and scenario first
-                          </AlertDescription>
-                        </Alert>
-                      )}
+                      {exportType === "current-scenario" &&
+                        (!currentWorkspaceId || !currentScenarioId) && (
+                          <Alert variant="destructive" className="mt-2">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription>
+                              Please select a workspace and scenario first
+                            </AlertDescription>
+                          </Alert>
+                        )}
                     </div>
                   </div>
                 </RadioGroup>
               </CardHeader>
             </Card>
-            
+
             <Button
               onClick={handleExport}
-              disabled={exportType === "current-scenario" && (!currentWorkspaceId || !currentScenarioId)}
+              disabled={
+                exportType === "current-scenario" &&
+                (!currentWorkspaceId || !currentScenarioId)
+              }
               className="mt-4"
             >
               <Download className="h-4 w-4 mr-2" />
@@ -1287,7 +1584,11 @@ export const ExportImport: React.FC = () => {
               <CardHeader className="p-4">
                 <RadioGroup
                   value={importType}
-                  onValueChange={(value) => setImportType(value as "new-workspace" | "existing-workspace")}
+                  onValueChange={(value) =>
+                    setImportType(
+                      value as "new-workspace" | "existing-workspace"
+                    )
+                  }
                   className="space-y-3"
                 >
                   <div className="flex items-start space-x-2">
@@ -1301,23 +1602,30 @@ export const ExportImport: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start space-x-2">
-                    <RadioGroupItem value="existing-workspace" id="import-existing" />
+                    <RadioGroupItem
+                      value="existing-workspace"
+                      id="import-existing"
+                    />
                     <div className="grid gap-1.5">
                       <Label htmlFor="import-existing" className="font-medium">
                         Import scenarios to existing workspace
                       </Label>
                       <p className="text-sm text-muted-foreground">
-                        Add imported scenarios to one of your existing workspaces
+                        Add imported scenarios to one of your existing
+                        workspaces
                       </p>
                     </div>
                   </div>
                 </RadioGroup>
-                
+
                 {importType === "existing-workspace" && (
                   <div className="mt-4">
-                    <Label htmlFor="workspace-select" className="mb-2 block text-sm font-medium">
+                    <Label
+                      htmlFor="workspace-select"
+                      className="mb-2 block text-sm font-medium"
+                    >
                       Select target workspace
                     </Label>
                     <Select
@@ -1341,7 +1649,10 @@ export const ExportImport: React.FC = () => {
             </Card>
 
             <div className="mt-4">
-              <Label htmlFor="import-file" className="text-sm font-medium mb-2 block">
+              <Label
+                htmlFor="import-file"
+                className="text-sm font-medium mb-2 block"
+              >
                 Select JSON file to import:
               </Label>
               <input
@@ -1368,7 +1679,8 @@ export const ExportImport: React.FC = () => {
               <Alert className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-100 mt-4">
                 <AlertTitle>Success</AlertTitle>
                 <AlertDescription>
-                  Data imported successfully. Please refresh the page to see changes.
+                  Data imported successfully. Please refresh the page to see
+                  changes.
                 </AlertDescription>
               </Alert>
             )}
@@ -1376,7 +1688,10 @@ export const ExportImport: React.FC = () => {
             <div className="flex gap-2 mt-4">
               <Button
                 onClick={handleImport}
-                disabled={!importFile || (importType === "existing-workspace" && !selectedWorkspaceId)}
+                disabled={
+                  !importFile ||
+                  (importType === "existing-workspace" && !selectedWorkspaceId)
+                }
                 className="mt-4"
               >
                 <Upload className="h-4 w-4 mr-2" />
@@ -1412,7 +1727,9 @@ export const ExportImport: React.FC = () => {
                   <CardHeader className="p-4">
                     <RadioGroup
                       value={cloudAction}
-                      onValueChange={(value) => setCloudAction(value as "save" | "load")}
+                      onValueChange={(value) =>
+                        setCloudAction(value as "save" | "load")
+                      }
                       className="space-y-3"
                     >
                       <div className="flex items-start space-x-2">
@@ -1426,7 +1743,7 @@ export const ExportImport: React.FC = () => {
                           </p>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-start space-x-2">
                         <RadioGroupItem value="load" id="cloud-load" />
                         <div className="grid gap-1.5">
@@ -1439,12 +1756,14 @@ export const ExportImport: React.FC = () => {
                         </div>
                       </div>
                     </RadioGroup>
-                    
+
                     <div className="mt-4 border-t pt-4">
                       <h4 className="text-sm font-medium mb-2">Data Mode</h4>
                       <RadioGroup
                         value={dataMode}
-                        onValueChange={(value) => setDataMode(value as "basic" | "full")}
+                        onValueChange={(value) =>
+                          setDataMode(value as "basic" | "full")
+                        }
                         className="space-y-3"
                       >
                         <div className="flex items-start space-x-2">
@@ -1458,7 +1777,7 @@ export const ExportImport: React.FC = () => {
                             </p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-start space-x-2">
                           <RadioGroupItem value="full" id="data-full" />
                           <div className="grid gap-1.5">
@@ -1466,41 +1785,57 @@ export const ExportImport: React.FC = () => {
                               Full Content
                             </Label>
                             <p className="text-sm text-muted-foreground">
-                              Save/load complete workspace with all scenarios, plugins, context, etc.
+                              Save/load complete workspace with all scenarios,
+                              plugins, context, etc.
                             </p>
                           </div>
                         </div>
                       </RadioGroup>
                     </div>
-                    
+
                     {cloudAction === "load" && (
                       <div className="mt-4 border-t pt-4">
-                        <h4 className="text-sm font-medium mb-2">Update Mode</h4>
+                        <h4 className="text-sm font-medium mb-2">
+                          Update Mode
+                        </h4>
                         <RadioGroup
                           value={updateMode}
-                          onValueChange={(value) => setUpdateMode(value as "add" | "update")}
+                          onValueChange={(value) =>
+                            setUpdateMode(value as "add" | "update")
+                          }
                           className="space-y-3"
                         >
                           <div className="flex items-start space-x-2">
                             <RadioGroupItem value="add" id="update-add" />
                             <div className="grid gap-1.5">
-                              <Label htmlFor="update-add" className="font-medium">
+                              <Label
+                                htmlFor="update-add"
+                                className="font-medium"
+                              >
                                 Add New Workspaces
                               </Label>
                               <p className="text-sm text-muted-foreground">
-                                Add loaded workspaces as new items (even if they exist already)
+                                Add loaded workspaces as new items (even if they
+                                exist already)
                               </p>
                             </div>
                           </div>
-                          
+
                           <div className="flex items-start space-x-2">
-                            <RadioGroupItem value="update" id="update-existing" />
+                            <RadioGroupItem
+                              value="update"
+                              id="update-existing"
+                            />
                             <div className="grid gap-1.5">
-                              <Label htmlFor="update-existing" className="font-medium">
+                              <Label
+                                htmlFor="update-existing"
+                                className="font-medium"
+                              >
                                 Update Existing Workspaces
                               </Label>
                               <p className="text-sm text-muted-foreground">
-                                Replace existing workspaces with the same ID, add any new ones
+                                Replace existing workspaces with the same ID,
+                                add any new ones
                               </p>
                             </div>
                           </div>
@@ -1518,26 +1853,35 @@ export const ExportImport: React.FC = () => {
                         Save Workspaces to Cloud Storage
                       </h3>
                       <p className="text-sm text-muted-foreground mt-2">
-                        {dataMode === "full" 
+                        {dataMode === "full"
                           ? "This will save all your workspaces with their FULL content (scenarios, context, plugins, etc.) to cloud storage."
                           : "This will save all your workspaces (without content) to cloud storage."}
                         &nbsp;You can load them later or on another device.
                       </p>
                       <Alert className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-100 my-2">
                         <AlertDescription>
-                          <strong>Storage Notice:</strong> This app tries to use Firebase for cloud storage first. If Firebase permissions are unavailable (which is common in some browsers or environments), the system will automatically save to your browser's local storage instead. This fallback still allows you to back up and restore workspaces, but they'll only be accessible on this specific device and browser.
+                          <strong>Storage Notice:</strong> This app tries to use
+                          Firebase for cloud storage first. If Firebase
+                          permissions are unavailable (which is common in some
+                          browsers or environments), the system will
+                          automatically save to your browser's local storage
+                          instead. This fallback still allows you to back up and
+                          restore workspaces, but they'll only be accessible on
+                          this specific device and browser.
                         </AlertDescription>
                       </Alert>
                       {dataMode === "full" && (
                         <Alert className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-100 my-2">
                           <AlertDescription>
-                            <strong>Full Content Mode enabled!</strong> Saving workspaces with all scenarios, nodes, plugins and context data.
+                            <strong>Full Content Mode enabled!</strong> Saving
+                            workspaces with all scenarios, nodes, plugins and
+                            context data.
                           </AlertDescription>
                         </Alert>
                       )}
                       <div className="mt-4">
-                        <Button 
-                          onClick={handleSaveToFirebase} 
+                        <Button
+                          onClick={handleSaveToFirebase}
                           disabled={isLoading || workspaces.length === 0}
                           className="w-full"
                         >
@@ -1546,7 +1890,10 @@ export const ExportImport: React.FC = () => {
                           ) : (
                             <>
                               <CloudUpload className="h-4 w-4 mr-2" />
-                              Save {workspaces.length} Workspace(s) {dataMode === "full" ? "with Full Content" : "Basic Info Only"}
+                              Save {workspaces.length} Workspace(s){" "}
+                              {dataMode === "full"
+                                ? "with Full Content"
+                                : "Basic Info Only"}
                             </>
                           )}
                         </Button>
@@ -1561,19 +1908,27 @@ export const ExportImport: React.FC = () => {
                         Load Workspaces from Cloud Storage
                       </h3>
                       <p className="text-sm text-muted-foreground mt-2">
-                        {dataMode === "full" 
+                        {dataMode === "full"
                           ? "Select workspaces to load with their FULL content (scenarios, contexts, plugins, etc.):"
                           : "Select workspaces to load (basic info only, without content):"}
                       </p>
                       <Alert className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-100 my-2">
                         <AlertDescription>
-                          <strong>Storage Notice:</strong> This app tries to use Firebase for cloud storage first. If Firebase permissions are unavailable (which is common in some browsers or environments), the system will automatically use your browser's local storage as a fallback. In fallback mode, you'll only see workspaces saved on this specific device and browser.
+                          <strong>Storage Notice:</strong> This app tries to use
+                          Firebase for cloud storage first. If Firebase
+                          permissions are unavailable (which is common in some
+                          browsers or environments), the system will
+                          automatically use your browser's local storage as a
+                          fallback. In fallback mode, you'll only see workspaces
+                          saved on this specific device and browser.
                         </AlertDescription>
                       </Alert>
                       {dataMode === "full" && (
                         <Alert className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-100 my-2">
                           <AlertDescription>
-                            <strong>Full Content Mode enabled!</strong> Loading workspaces with all scenarios, nodes, plugins and context data.
+                            <strong>Full Content Mode enabled!</strong> Loading
+                            workspaces with all scenarios, nodes, plugins and
+                            context data.
                           </AlertDescription>
                         </Alert>
                       )}
@@ -1586,81 +1941,130 @@ export const ExportImport: React.FC = () => {
                           <Alert className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-100">
                             <AlertTitle>No Workspaces Found</AlertTitle>
                             <AlertDescription>
-                              You don't have any workspaces saved in cloud storage.
+                              You don't have any workspaces saved in cloud
+                              storage.
                             </AlertDescription>
                           </Alert>
                         ) : (
                           <div className="space-y-2">
                             {cloudWorkspaces && cloudWorkspaces.length > 0 ? (
                               cloudWorkspaces.map((workspace) => (
-                                <div key={workspace.id} className="flex items-center p-2 border rounded hover:bg-gray-50 dark:hover:bg-gray-800">
+                                <div
+                                  key={workspace.id}
+                                  className="flex items-center p-2 border rounded hover:bg-gray-50 dark:hover:bg-gray-800"
+                                >
                                   <input
                                     type="checkbox"
                                     id={`workspace-${workspace.id}`}
-                                    checked={selectedCloudWorkspaceIds.includes(workspace.id)}
-                                    onChange={() => toggleCloudWorkspaceSelection(workspace.id)}
+                                    checked={selectedCloudWorkspaceIds.includes(
+                                      workspace.id
+                                    )}
+                                    onChange={() =>
+                                      toggleCloudWorkspaceSelection(
+                                        workspace.id
+                                      )
+                                    }
                                     className="mr-2"
                                   />
-                                  <Label htmlFor={`workspace-${workspace.id}`} className="flex-1 cursor-pointer">
-                                    <span className="font-medium">{workspace.title || "Untitled Workspace"}</span>
+                                  <Label
+                                    htmlFor={`workspace-${workspace.id}`}
+                                    className="flex-1 cursor-pointer"
+                                  >
+                                    <span className="font-medium">
+                                      {workspace.title || "Untitled Workspace"}
+                                    </span>
                                     <p className="text-xs text-muted-foreground">
-                                      {workspace.description || "No description"}
+                                      {workspace.description ||
+                                        "No description"}
                                     </p>
                                     <p className="text-xs text-muted-foreground mt-1">
-                                      Updated: {workspace.updatedAt ? new Date(workspace.updatedAt).toLocaleString() : "N/A"}
+                                      Updated:{" "}
+                                      {workspace.updatedAt
+                                        ? new Date(
+                                            workspace.updatedAt
+                                          ).toLocaleString()
+                                        : "N/A"}
                                     </p>
                                   </Label>
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    // Confirm before deleting
-                                    setConfirmationTitle("Delete Cloud Workspace");
-                                    setConfirmationMessage(`Are you sure you want to delete workspace "${workspace.title}" from cloud storage? This cannot be undone.`);
-                                    setConfirmationAction(() => async () => {
-                                      try {
-                                        setIsLoading(true);
-                                        setCloudError(null);
-                                        setCloudSuccess(null);
-                                        
-                                        // Delete the workspace from cloud storage
-                                        await firestoreWorkspaceService.deleteWorkspace(workspace.id);
-                                        
-                                        // Remove from state
-                                        setCloudWorkspaces(prev => prev.filter(w => w.id !== workspace.id));
-                                        setSelectedCloudWorkspaceIds(prev => prev.filter(id => id !== workspace.id));
-                                        
-                                        // Clear any previous errors and show success message
-                                        setCloudError(null);
-                                        setCloudSuccess(`Successfully deleted workspace "${workspace.title}" from cloud storage`);
-                                      } catch (error) {
-                                        console.error("Error deleting workspace from cloud storage:", error);
-                                        setCloudError("Failed to delete workspace: " + (error instanceof Error ? error.message : String(error)));
-                                      } finally {
-                                        setIsLoading(false);
-                                      }
-                                    });
-                                    setShowConfirmation(true);
-                                  }}
-                                  className="ml-2 p-1 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
-                                  title="Delete from cloud storage"
-                                >
-                                  <X className="h-4 w-4" />
-                                </button>
-                              </div>
-                            ))
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      // Confirm before deleting
+                                      setConfirmationTitle(
+                                        "Delete Cloud Workspace"
+                                      );
+                                      setConfirmationMessage(
+                                        `Are you sure you want to delete workspace "${workspace.title}" from cloud storage? This cannot be undone.`
+                                      );
+                                      setConfirmationAction(() => async () => {
+                                        try {
+                                          setIsLoading(true);
+                                          setCloudError(null);
+                                          setCloudSuccess(null);
+
+                                          // Delete the workspace from cloud storage
+                                          await firestoreWorkspaceService.deleteWorkspace(
+                                            workspace.id
+                                          );
+
+                                          // Remove from state
+                                          setCloudWorkspaces((prev) =>
+                                            prev.filter(
+                                              (w) => w.id !== workspace.id
+                                            )
+                                          );
+                                          setSelectedCloudWorkspaceIds((prev) =>
+                                            prev.filter(
+                                              (id) => id !== workspace.id
+                                            )
+                                          );
+
+                                          // Clear any previous errors and show success message
+                                          setCloudError(null);
+                                          setCloudSuccess(
+                                            `Successfully deleted workspace "${workspace.title}" from cloud storage`
+                                          );
+                                        } catch (error) {
+                                          console.error(
+                                            "Error deleting workspace from cloud storage:",
+                                            error
+                                          );
+                                          setCloudError(
+                                            "Failed to delete workspace: " +
+                                              (error instanceof Error
+                                                ? error.message
+                                                : String(error))
+                                          );
+                                        } finally {
+                                          setIsLoading(false);
+                                        }
+                                      });
+                                      setShowConfirmation(true);
+                                    }}
+                                    className="ml-2 p-1 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                                    title="Delete from cloud storage"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </button>
+                                </div>
+                              ))
                             ) : (
                               <div className="flex items-center justify-center py-4">
-                                <p className="text-sm text-muted-foreground">No workspaces found. You can save some first.</p>
+                                <p className="text-sm text-muted-foreground">
+                                  No workspaces found. You can save some first.
+                                </p>
                               </div>
                             )}
                           </div>
                         )}
                       </div>
                       <div className="mt-4">
-                        <Button 
-                          onClick={handleLoadFromFirebase} 
-                          disabled={isLoading || selectedCloudWorkspaceIds.length === 0}
+                        <Button
+                          onClick={handleLoadFromFirebase}
+                          disabled={
+                            isLoading || selectedCloudWorkspaceIds.length === 0
+                          }
                           className="w-full"
                         >
                           {isLoading ? (
@@ -1668,7 +2072,11 @@ export const ExportImport: React.FC = () => {
                           ) : (
                             <>
                               <CloudDownload className="h-4 w-4 mr-2" />
-                              Load {selectedCloudWorkspaceIds.length} Selected Workspace(s) {dataMode === "full" ? "with Full Content" : "Basic Info Only"}
+                              Load {selectedCloudWorkspaceIds.length} Selected
+                              Workspace(s){" "}
+                              {dataMode === "full"
+                                ? "with Full Content"
+                                : "Basic Info Only"}
                             </>
                           )}
                         </Button>
