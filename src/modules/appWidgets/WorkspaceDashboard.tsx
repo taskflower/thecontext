@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { useWidgetStore } from './widgetStore';
-import { useAppStore } from '../store';
-import Dashboard from './Dashboard';
-import AddWidgetDialog from './AddWidgetDialog';
-import { Plus } from 'lucide-react';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useWidgetStore } from "./widgetStore";
+import { useAppStore } from "../store";
+import Dashboard from "./Dashboard";
+import AddWidgetDialog from "./AddWidgetDialog";
+import { Plus } from "lucide-react";
 
 interface WorkspaceDashboardProps {
   workspaceId?: string | null;
@@ -16,82 +16,35 @@ interface WorkspaceDashboardProps {
  */
 export function WorkspaceDashboard({ workspaceId }: WorkspaceDashboardProps) {
   const [isAddingWidget, setIsAddingWidget] = useState(false);
-  
+
   // Get current workspace ID from props or app store
-  const selectedWorkspaceId = useAppStore(state => state.selected.workspace);
+  const selectedWorkspaceId = useAppStore((state) => state.selected.workspace);
   const currentWorkspaceId = workspaceId || selectedWorkspaceId;
-  
-  // Get current workspace name/title
-  const workspaceTitle = useAppStore(state => {
-    if (!currentWorkspaceId) return '';
-    // Find the workspace in items array and get its name
-    const workspace = state.items.find(item => 
-      item.id === currentWorkspaceId && item.type === 'workspace'
-    );
-    return workspace?.name || 'Workspace';
-  });
-  
+
   // Get dashboard store data
-  const dashboards = useWidgetStore(state => state.dashboards);
-  useWidgetStore(state => state.selectedDashboardId);
-  
+  const dashboards = useWidgetStore((state) => state.dashboards);
+  useWidgetStore((state) => state.selectedDashboardId);
+
   // Find dashboard for this workspace
   const workspaceDashboard = React.useMemo(() => {
     // Only look for a dashboard specifically for this workspace
     if (!currentWorkspaceId) return null;
-    
-    const dashboard = dashboards.find(d => d.workspaceId === currentWorkspaceId);
+
+    const dashboard = dashboards.find(
+      (d) => d.workspaceId === currentWorkspaceId
+    );
     return dashboard || null;
   }, [currentWorkspaceId, dashboards]);
-  
-  // Create a dashboard for this workspace if needed
-  const createWorkspaceDashboard = () => {
-    if (!currentWorkspaceId) return;
-    
-    const name = `Dashboard for ${workspaceTitle}`;
-    
-    const dashboardId = useWidgetStore.getState().createDashboard({
-      name,
-      description: 'Workspace dashboard',
-      workspaceId: currentWorkspaceId,
-    });
-    
-    useWidgetStore.getState().selectDashboard(dashboardId);
-  };
-  
-  // If no suitable dashboard and we have a workspace, offer to create one
-  if (!workspaceDashboard && currentWorkspaceId) {
-    return (
-      <div className="h-full">
-        <div className="flex flex-col items-center justify-center h-64">
-          <p className="text-muted-foreground mb-4 text-center max-w-md">
-            No dashboard available for this workspace. 
-            Create a workspace dashboard to visualize data for this workspace.
-          </p>
-          <Button onClick={createWorkspaceDashboard}>
-            Create Workspace Dashboard
-          </Button>
-        </div>
-      </div>
-    );
-  }
-  
-  // If no dashboard and no workspace, show message
+
   if (!workspaceDashboard) {
-    return (
-      <div className=" h-full">
-        <div className="flex flex-col items-center justify-center h-64">
-          <p className="text-muted-foreground mb-4 text-center max-w-md">
-            Please select a workspace first to view or create a dashboard.
-          </p>
-        </div>
-      </div>
-    );
+    return <></>;
   }
-  
+
   // Check current page to determine rendering style
-  const currentView = window.location.pathname.includes('studio') ? 'studio' : 'workspace';
-  const isStudioView = currentView === 'studio';
+  const currentView = window.location.pathname.includes("studio")
+    ? "studio"
+    : "workspace";
+  const isStudioView = currentView === "studio";
 
   return (
     <div className="h-full flex flex-col">
@@ -106,8 +59,8 @@ export function WorkspaceDashboard({ workspaceId }: WorkspaceDashboardProps) {
               </p>
             )}
           </div>
-          
-          <Button 
+
+          <Button
             id="add-widget-button"
             onClick={() => setIsAddingWidget(true)}
             className="gap-2"
@@ -117,12 +70,12 @@ export function WorkspaceDashboard({ workspaceId }: WorkspaceDashboardProps) {
           </Button>
         </div>
       )}
-      
+
       {/* Dashboard */}
       <div className={`flex-1 overflow-auto`}>
         <Dashboard dashboardId={workspaceDashboard.id} />
       </div>
-      
+
       {/* Add widget dialog */}
       {isAddingWidget && (
         <AddWidgetDialog

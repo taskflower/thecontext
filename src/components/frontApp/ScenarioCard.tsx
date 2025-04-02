@@ -46,7 +46,7 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
       onClick={handleCardClick}
     >
       <CardHeader className="pb-3">
-      <div className="h-24"></div>
+      <div className="h-12 md:h-24"></div>
         <div className="flex justify-between items-start">
           <CardTitle className="text-base sm:text-lg font-bold break-words">
             {scenario.name}

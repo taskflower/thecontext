@@ -26,7 +26,7 @@ export const ToolbarButton: React.FC<ToolbarButtonProps> = ({
       onClick={onClick}
     >
       {icon}
-      <span>{label}</span>
+      <span className="hidden md:inline">{label}</span>
     </button>
   );
 };

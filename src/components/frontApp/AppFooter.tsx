@@ -19,8 +19,7 @@ const AppFooter = () => {
                 className="font-medium text-foreground text-xs underline-offset-4 "
               >
                 REVERTCONTEXT.COM
-              </a>{" "}
-              All rights reserved.
+              </a>
             </p>
           </div>
           

@@ -1,10 +1,10 @@
 import {
-  Database,
   Filter,
   MessageSquare,
   Puzzle,
-  FileJson,
   LayoutDashboard,
+  Save,
+  Layers,
 } from "lucide-react";
 import { ToolbarButton } from "./ToolbarButton";
 import React from "react";
@@ -15,15 +15,15 @@ export const BottomToolbar: React.FC = () => {
 
   return (
     <div className="border-t border-border bg-muted/10 py-2 px-4 flex items-center">
-      <div className="flex items-center gap-2">
-      <ToolbarButton
+      <div className="flex items-center gap-2 justify-between md:justify-start flex-1">
+        <ToolbarButton
           icon={<MessageSquare className="h-4 w-4" />}
           label="Conversations History"
           active={bottomPanelTab === "conversation"}
           onClick={() => toggleBottomPanel("conversation")}
         />
         <ToolbarButton
-          icon={<Database className="h-4 w-4" />}
+          icon={<Layers className="h-4 w-4" />}
           label="Context"
           active={bottomPanelTab === "context"}
           onClick={() => toggleBottomPanel("context")}
@@ -34,7 +34,7 @@ export const BottomToolbar: React.FC = () => {
           active={bottomPanelTab === "filters"}
           onClick={() => toggleBottomPanel("filters")}
         />
-      
+
         <ToolbarButton
           icon={<Puzzle className="h-4 w-4" />}
           label="Plugins"
@@ -47,8 +47,8 @@ export const BottomToolbar: React.FC = () => {
           active={bottomPanelTab === "dashboard"}
           onClick={() => toggleBottomPanel("dashboard")}
         />
-         <ToolbarButton
-          icon={<FileJson className="h-4 w-4" />}
+        <ToolbarButton
+          icon={<Save className="h-4 w-4" />}
           label="Export/Import"
           active={bottomPanelTab === "exportimport"}
           onClick={() => toggleBottomPanel("exportimport")}

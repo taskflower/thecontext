@@ -100,12 +100,12 @@ const WorkspacePage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background px-2 md:px-0">
       {/* Header */}
       <WorkspaceHeader />
 
       {/* Main content */}
-      <main className="flex-1 max-w-5xl mx-auto w-full">
+      <main className="flex-1 max-w-5xl mx-auto w-full pt-4">
         {showFlowPlayer ? (
           <div className="w-full h-full">
             <StepModal onClose={() => setShowFlowPlayer(false)} />
@@ -118,7 +118,7 @@ const WorkspacePage = () => {
             
 
             {scenariosWithStatus.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 border ">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {scenariosWithStatus.map((scenario:Scenario) => (
                   <ScenarioCard
                     key={scenario.id}
