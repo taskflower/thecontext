@@ -8,13 +8,17 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { Package, Layers, Code, Database, Plus, Frame } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { validateWorkspace, addWorkspace, replaceWorkspace } from "@/components/studio/cloud-sync/workspaceUtils";
+import {
+  validateWorkspace,
+  addWorkspace,
+  replaceWorkspace,
+} from "@/components/studio/cloud-sync/workspaceUtils";
 
 const FrameworkPage: React.FC = () => {
   const [workspaces, setWorkspaces] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
-  
+
   // Get needed elements from the app state
   const state = useAppStore();
 
@@ -57,27 +61,34 @@ const FrameworkPage: React.FC = () => {
   const handleWorkspaceClick = async (workspace: any) => {
     try {
       setLoading(true);
-      
+
       // Important: Get userId from the workspace data
       const userId = workspace.userId || ""; // Use userId directly from workspace metadata
-      
+
       // Get full workspace data from Firebase using workspaceService
-      const fullWorkspace = await workspaceService.getWorkspace(workspace.id, userId);
-      
+      const fullWorkspace = await workspaceService.getWorkspace(
+        workspace.id,
+        userId
+      );
+
       if (!fullWorkspace) {
         console.error(`Cannot load workspace data for ID: ${workspace.id}`);
         return;
       }
-      
+
       // Validate workspace to ensure it has the correct structure
       // Using the same validateWorkspace function as in CloudSync
       const validWorkspace = validateWorkspace(fullWorkspace);
-      
-      console.log(`[DEBUG] Loaded workspace with ${validWorkspace.children?.length || 0} scenarios`);
-      
+
+      console.log(
+        `[DEBUG] Loaded workspace with ${
+          validWorkspace.children?.length || 0
+        } scenarios`
+      );
+
       // Check if workspace already exists locally
-      const existingWorkspace = state.items.find(w => w.id === workspace.id);
-      
+      const existingWorkspace = state.items.find((w) => w.id === workspace.id);
+
       if (existingWorkspace) {
         // If workspace already exists, replace it with the new one
         // Using the same replaceWorkspace function as in CloudSync
@@ -89,13 +100,12 @@ const FrameworkPage: React.FC = () => {
         console.log(`[DEBUG] Adding new workspace: ${workspace.id}`);
         addWorkspace(validWorkspace);
       }
-      
+
       // Navigate to workspace page
       const path = workspace.slug
         ? `/${workspace.slug}`
         : `/workspace/${workspace.id}`;
       navigate(path);
-      
     } catch (error) {
       console.error("Error loading workspace:", error);
     } finally {
@@ -234,8 +244,8 @@ const FrameworkPage: React.FC = () => {
 
           {/* CTA Button */}
           <div className="text-center pt-8">
-            <Link 
-              to="/new" 
+            <Link
+              to="/studio"
               className="h-12 rounded-md bg-primary text-primary-foreground px-8 text-sm font-medium inline-flex items-center gap-2"
             >
               <Plus size={18} />
