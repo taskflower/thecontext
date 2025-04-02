@@ -5,10 +5,11 @@ import { ContextsList } from "@/modules/context";
 import { useAppStore } from "@/modules/store";
 import { useWidgetStore } from "@/modules/appWidgets";
 import React, { useState, useEffect } from "react";
-import ExportImport from "./exportImport/ExportImport";
+
 
 import DashboardPanel from "./DashboardPanel";
 import HistoryView from "@/modules/history/components/HistoryView";
+import CloudSync from "./cloud-sync/CloudSync";
 
 type PanelContentType =
   | "context"
@@ -143,7 +144,7 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({
         )}
         {content === "exportimport" && (
           <div className="p-4">
-            <ExportImport />
+            <CloudSync />
           </div>
         )}
         {content === "dashboard" && (
