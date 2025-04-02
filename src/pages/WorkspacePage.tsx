@@ -114,7 +114,7 @@ const WorkspacePage = () => {
             {/* Workspace Dashboard */}
             <WorkspaceDashboard workspaceId={currentWorkspace?.id} />
 
-            <h3 className="text-xl font-semibold mb-4">Scenarios</h3>
+            
 
             {scenariosWithStatus.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 border ">

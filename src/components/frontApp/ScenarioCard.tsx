@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import { CheckCircle, Clock, Play} from "lucide-react";
+import { CheckCircle,  Hourglass, Play} from "lucide-react";
 import { useAppStore } from "@/modules/store";
 import { Scenario } from "./types";
 
@@ -63,9 +63,9 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
             {isActive ? (
               <CheckCircle className="h-3.5 w-3.5 text-green-600" />
             ) : (
-              <Clock className="h-3.5 w-3.5" />
+              <Hourglass className="h-3.5 w-3.5" />
             )}
-            <span>{isActive ? "Active" : "Inactive"}</span>
+           
           </div>
         </div>
       </CardContent>
