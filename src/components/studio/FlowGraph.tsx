@@ -20,7 +20,7 @@ import {
   DEFAULT_MAX_ZOOM,
 } from "@/modules/flowCanvas";
 
-import { Edit, Puzzle, Sliders } from "lucide-react";
+import { Edit, PlayCircle, Puzzle, Sliders } from "lucide-react";
 
 // Interfejs dla props
 interface FlowGraphProps {
@@ -161,7 +161,7 @@ const FlowGraph: React.FC<FlowGraphProps> = ({
   return (
     <div className="bg-card rounded-md shadow-sm p-0 h-full w-full relative">
       {/* Right side buttons */}
-      <div className="absolute top-2 right-2 z-10 flex space-x-2">
+      <div className="absolute top-2 left-2 z-10 flex space-x-2">
         {hasExistingSession && (
           <button
             onClick={handlePlay}
@@ -173,10 +173,10 @@ const FlowGraph: React.FC<FlowGraphProps> = ({
         <button
           
           onClick={handleNewSession}
-          className="p-3 rounded-md bg-primary text-primary-foreground text-md font-medium hover:bg-primary/90"
+          className="flex gap-2 p-3 rounded-md bg-primary text-primary-foreground text-md font-medium hover:bg-primary/90"
           disabled={isFlowPlaying}
         >
-          {isFlowPlaying ? "Flow w trakcie..." : "Nowa sesja Flow"}
+         <PlayCircle/> {isFlowPlaying ? "Flow w trakcie..." : "Testuj sesja Flow"}
         </button>
       </div>
 
