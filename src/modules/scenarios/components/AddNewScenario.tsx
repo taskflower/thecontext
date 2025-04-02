@@ -49,7 +49,7 @@ const AddNewScenario: React.FC<AddNewScenarioProps> = ({
     addScenario({
       name: formData.name,
       description: formData.description,
-      template: formData.template,
+      template: formData.template as DialogTemplate,
     });
     setFormData({ name: "", description: "", template: "default" });
     setIsOpen(false);

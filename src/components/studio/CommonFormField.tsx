@@ -163,9 +163,6 @@ export const CheckboxField: React.FC<{
 // Select field component
 export const SelectField: React.FC<SelectFieldProps> = ({
   id,
-  // name parameter is used in the interface definition
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  name,
   label,
   value,
   onChange,
