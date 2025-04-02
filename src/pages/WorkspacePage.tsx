@@ -63,21 +63,20 @@ const WorkspacePage = () => {
         hasFilters && scenario.filters
           ? scenario.filters.filter((f) => f.enabled)
           : [];
-      const matchesFilter = checkScenarioFilterMatch();
+
+      // FIX: Pass the specific scenario ID to check if its filters match
+      const matchesFilter = hasFilters
+        ? checkScenarioFilterMatch(scenario.id)
+        : true;
 
       return {
         ...scenario,
         hasFilters,
         activeFiltersCount: activeFilters.length,
-        matchesFilter: hasFilters ? matchesFilter : true,
+        matchesFilter: matchesFilter,
       };
     });
   }, [currentWorkspace, checkScenarioFilterMatch]);
-
-  // Get matching scenarios
-  const matchingScenarios = scenariosWithStatus.filter(
-    (scenario) => scenario.matchesFilter
-  );
 
   // Handle filter click
   const handleFilterClick = (e: React.MouseEvent, scenarioId: string) => {
@@ -92,13 +91,12 @@ const WorkspacePage = () => {
     console.log("WorkspacePage - Starting flow with scenario:", {
       id: currentScenario?.id,
       name: currentScenario?.name,
-      template: currentScenario?.template
+      template: currentScenario?.template,
     });
-    
+
     useAppStore.getState().startFlowSession();
     setShowFlowPlayer(true);
   };
-
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -109,21 +107,18 @@ const WorkspacePage = () => {
       <main className="flex-1 max-w-5xl mx-auto w-full">
         {showFlowPlayer ? (
           <div className="w-full h-full">
-            <StepModal
-              onClose={() => setShowFlowPlayer(false)}
-            />
+            <StepModal onClose={() => setShowFlowPlayer(false)} />
           </div>
         ) : (
           <>
             {/* Workspace Dashboard */}
-
             <WorkspaceDashboard workspaceId={currentWorkspace?.id} />
 
             <h3 className="text-xl font-semibold mb-4">Scenarios</h3>
 
-            {matchingScenarios.length > 0 ? (
+            {scenariosWithStatus.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 border ">
-                {matchingScenarios.map((scenario) => (
+                {scenariosWithStatus.map((scenario) => (
                   <ScenarioCard
                     key={scenario.id}
                     scenario={scenario}
@@ -150,14 +145,6 @@ const WorkspacePage = () => {
           scenarioId={editingFilterId}
         />
       )}
-
-      {/* Add Scenario Dialog - Replace with your actual component */}
-      {/* {isAddingScenario && (
-        <AddNewScenario
-          isOpen={isAddingScenario}
-          onOpenChange={(open) => setIsAddingScenario(open)}
-        />
-      )} */}
     </div>
   );
 };
