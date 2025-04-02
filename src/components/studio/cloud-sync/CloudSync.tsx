@@ -3,13 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   CloudUpload,
@@ -369,233 +362,220 @@ export const CloudSync: React.FC<CloudSyncProps> = () => {
 
   return (
     <div className="h-full flex flex-col">
-      <Card className="flex-1 flex flex-col">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-xl">Firebase Sync</CardTitle>
-          <CardDescription>
-            Save and restore your workspaces from the cloud
-          </CardDescription>
-        </CardHeader>
+      {!currentUser ? (
+        <Alert variant="destructive">
+          <ShieldAlert className="h-4 w-4" />
+          <AlertTitle>Authentication Required</AlertTitle>
+          <AlertDescription>
+            You need to log in to use the Firebase backup and restore
+            functionality.
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <div className="flex-1 flex flex-col py-2 px-4">
+          <Tabs defaultValue="save" className="w-full flex-1 flex flex-col">
+            <TabsList className="w-full grid grid-cols-2 mb-4">
+              <TabsTrigger value="save">
+                <CloudUpload className="h-4 w-4 mr-2" /> Save to Cloud
+              </TabsTrigger>
+              <TabsTrigger value="load">
+                <CloudDownload className="h-4 w-4 mr-2" /> Load from Cloud
+              </TabsTrigger>
+            </TabsList>
 
-        {!currentUser ? (
-          <CardContent>
-            <Alert variant="destructive">
-              <ShieldAlert className="h-4 w-4" />
-              <AlertTitle>Authentication Required</AlertTitle>
-              <AlertDescription>
-                You need to log in to use the Firebase backup and restore
-                functionality.
-              </AlertDescription>
-            </Alert>
-          </CardContent>
-        ) : (
-          <CardContent className="flex-1 flex flex-col">
-            <Tabs defaultValue="save" className="w-full flex-1 flex flex-col">
-              <TabsList className="w-full grid grid-cols-2 mb-4">
-                <TabsTrigger value="save">
-                  <CloudUpload className="h-4 w-4 mr-2" /> Save to Cloud
-                </TabsTrigger>
-                <TabsTrigger value="load">
-                  <CloudDownload className="h-4 w-4 mr-2" /> Load from Cloud
-                </TabsTrigger>
-              </TabsList>
+            {/* SAVE TAB */}
+            <TabsContent
+              value="save"
+              className="flex-1 flex flex-col space-y-4"
+            >
+              {currentWorkspace ? (
+                <div className="space-y-4 flex-1 flex flex-col">
+                  <div className="p-4 bg-secondary/30 rounded-md">
+                    <p className="font-medium text-lg">
+                      {currentWorkspace.title}
+                    </p>
 
-              {/* SAVE TAB */}
-              <TabsContent
-                value="save"
-                className="flex-1 flex flex-col space-y-4"
-              >
-                {currentWorkspace ? (
-                  <div className="space-y-4 flex-1 flex flex-col">
-                    <div className="p-4 bg-secondary/30 rounded-md">
-                      <p className="font-medium text-lg">
-                        {currentWorkspace.title}
+                    {currentWorkspace.description && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {currentWorkspace.description}
                       </p>
+                    )}
 
-                      {currentWorkspace.description && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {currentWorkspace.description}
-                        </p>
+                    {cloudWorkspaces.some(
+                      (w) => w.id === currentWorkspace.id
+                    ) && (
+                      <div className="text-sm text-amber-600 mt-2 p-2 bg-amber-50 dark:bg-amber-900/20 rounded-sm border border-amber-200 dark:border-amber-800">
+                        This workspace already exists in the cloud and will be
+                        overwritten
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-auto">
+                    <Button
+                      onClick={handleSaveToFirebase}
+                      disabled={isLoading}
+                      className="w-full"
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader className="h-4 w-4 mr-2 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <CloudUpload className="h-4 w-4 mr-2" />
+                          Save to Firebase
+                        </>
                       )}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex-1 flex items-center justify-center text-center py-6 text-muted-foreground">
+                  <div>
+                    <p>No workspace selected</p>
+                    <p className="text-sm mt-1">
+                      Select a workspace to save it to the cloud
+                    </p>
+                  </div>
+                </div>
+              )}
+            </TabsContent>
 
-                      {cloudWorkspaces.some(
-                        (w) => w.id === currentWorkspace.id
-                      ) && (
-                        <div className="text-sm text-amber-600 mt-2 p-2 bg-amber-50 dark:bg-amber-900/20 rounded-sm border border-amber-200 dark:border-amber-800">
-                          This workspace already exists in the cloud and will be
-                          overwritten
-                        </div>
-                      )}
-                    </div>
+            {/* LOAD TAB */}
+            <TabsContent value="load" className="flex-1 flex flex-col">
+              <div className="flex-1 flex flex-col">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-base font-medium">Cloud Workspaces</h3>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleLoadFromFirebase}
+                    disabled={isLoading}
+                  >
+                    <RefreshCw
+                      className={`h-4 w-4 mr-1 ${
+                        isLoading ? "animate-spin" : ""
+                      }`}
+                    />
+                    Refresh
+                  </Button>
+                </div>
 
-                    <div className="mt-auto">
-                      <Button
-                        onClick={handleSaveToFirebase}
-                        disabled={isLoading}
-                        className="w-full"
-                      >
-                        {isLoading ? (
-                          <>
-                            <Loader className="h-4 w-4 mr-2 animate-spin" />
-                            Saving...
-                          </>
-                        ) : (
-                          <>
-                            <CloudUpload className="h-4 w-4 mr-2" />
-                            Save to Firebase
-                          </>
-                        )}
-                      </Button>
+                {isLoading && cloudWorkspaces.length === 0 ? (
+                  <div className="flex-1 flex justify-center items-center py-6">
+                    <Loader className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                ) : cloudWorkspaces.length === 0 ? (
+                  <div className="flex-1 flex items-center justify-center text-center py-6 text-muted-foreground border border-dashed rounded-md">
+                    <div>
+                      <p>No workspaces found in Firebase</p>
+                      <p className="text-sm mt-1">
+                        Save a workspace to be able to load it later
+                      </p>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex-1 flex items-center justify-center text-center py-6 text-muted-foreground">
-                    <div>
-                      <p>No workspace selected</p>
-                      <p className="text-sm mt-1">
-                        Select a workspace to save it to the cloud
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </TabsContent>
-
-              {/* LOAD TAB */}
-              <TabsContent value="load" className="flex-1 flex flex-col">
-                <div className="flex-1 flex flex-col">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-base font-medium">Cloud Workspaces</h3>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleLoadFromFirebase}
-                      disabled={isLoading}
-                    >
-                      <RefreshCw
-                        className={`h-4 w-4 mr-1 ${
-                          isLoading ? "animate-spin" : ""
-                        }`}
-                      />
-                      Refresh
-                    </Button>
-                  </div>
-
-                  {isLoading && cloudWorkspaces.length === 0 ? (
-                    <div className="flex-1 flex justify-center items-center py-6">
-                      <Loader className="h-6 w-6 animate-spin text-primary" />
-                    </div>
-                  ) : cloudWorkspaces.length === 0 ? (
-                    <div className="flex-1 flex items-center justify-center text-center py-6 text-muted-foreground border border-dashed rounded-md">
-                      <div>
-                        <p>No workspaces found in Firebase</p>
-                        <p className="text-sm mt-1">
-                          Save a workspace to be able to load it later
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4 flex-1 flex flex-col">
-                      <ScrollArea className="flex-1 rounded-md border">
-                        <div className="p-1">
-                          {cloudWorkspaces.map((workspace) => (
-                            <div
-                              key={workspace.id}
-                              onClick={() =>
-                                setSelectedWorkspaceId(workspace.id)
-                              }
-                              className={`p-3 rounded-md cursor-pointer transition-colors mb-1 ${
-                                selectedWorkspaceId === workspace.id
-                                  ? "bg-secondary/50 border border-secondary"
-                                  : "hover:bg-secondary/20 border border-transparent"
-                              }`}
-                            >
-                              <div className="flex items-center">
-                                <input
-                                  type="radio"
-                                  id={`workspace-${workspace.id}`}
-                                  name="workspace-selection"
-                                  checked={selectedWorkspaceId === workspace.id}
-                                  onChange={() =>
-                                    setSelectedWorkspaceId(workspace.id)
-                                  }
-                                  className="mr-3"
-                                />
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex justify-between">
-                                    <p className="font-medium">
-                                      {workspace.title || "Untitled Workspace"}
-                                    </p>
-                                    {state.items.some(
-                                      (w) => w.id === workspace.id
-                                    ) && (
-                                      <span className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-100 px-2 py-0.5 rounded-sm">
-                                        Exists locally
-                                      </span>
-                                    )}
-                                  </div>
-
-                                  {workspace.description && (
-                                    <p className="text-sm text-muted-foreground truncate mt-1">
-                                      {workspace.description}
-                                    </p>
+                  <div className="space-y-4 flex-1 flex flex-col">
+                    <ScrollArea className="flex-1 rounded-md border">
+                      <div className="p-1">
+                        {cloudWorkspaces.map((workspace) => (
+                          <div
+                            key={workspace.id}
+                            onClick={() => setSelectedWorkspaceId(workspace.id)}
+                            className={`p-3 rounded-md cursor-pointer transition-colors mb-1 ${
+                              selectedWorkspaceId === workspace.id
+                                ? "bg-secondary/50 border border-secondary"
+                                : "hover:bg-secondary/20 border border-transparent"
+                            }`}
+                          >
+                            <div className="flex items-center">
+                              <input
+                                type="radio"
+                                id={`workspace-${workspace.id}`}
+                                name="workspace-selection"
+                                checked={selectedWorkspaceId === workspace.id}
+                                onChange={() =>
+                                  setSelectedWorkspaceId(workspace.id)
+                                }
+                                className="mr-3"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex justify-between">
+                                  <p className="font-medium">
+                                    {workspace.title || "Untitled Workspace"}
+                                  </p>
+                                  {state.items.some(
+                                    (w) => w.id === workspace.id
+                                  ) && (
+                                    <span className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-100 px-2 py-0.5 rounded-sm">
+                                      Exists locally
+                                    </span>
                                   )}
+                                </div>
 
-                                  <div className="flex items-center text-xs text-muted-foreground mt-2">
-                                    <Calendar className="h-3 w-3 mr-1" />
-                                    {formatDate(workspace.updatedAt)}
-                                  </div>
+                                {workspace.description && (
+                                  <p className="text-sm text-muted-foreground truncate mt-1">
+                                    {workspace.description}
+                                  </p>
+                                )}
+
+                                <div className="flex items-center text-xs text-muted-foreground mt-2">
+                                  <Calendar className="h-3 w-3 mr-1" />
+                                  {formatDate(workspace.updatedAt)}
                                 </div>
                               </div>
                             </div>
-                          ))}
-                        </div>
-                      </ScrollArea>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
 
-                      <Button
-                        onClick={handleLoadSelectedWorkspace}
-                        disabled={isLoading || !selectedWorkspaceId}
-                        className="mt-auto"
-                      >
-                        {isLoading ? (
-                          <>
-                            <Loader className="h-4 w-4 mr-2 animate-spin" />
-                            Loading...
-                          </>
-                        ) : (
-                          <>
-                            <CloudDownload className="h-4 w-4 mr-2" />
-                            Load Selected Workspace
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </TabsContent>
-            </Tabs>
+                    <Button
+                      onClick={handleLoadSelectedWorkspace}
+                      disabled={isLoading || !selectedWorkspaceId}
+                      className="mt-auto"
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader className="h-4 w-4 mr-2 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          <CloudDownload className="h-4 w-4 mr-2" />
+                          Load Selected Workspace
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
 
-            {/* Notifications */}
-            {cloudError && (
-              <Alert variant="destructive" className="mt-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{cloudError}</AlertDescription>
-              </Alert>
-            )}
+          {/* Notifications */}
+          {cloudError && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{cloudError}</AlertDescription>
+            </Alert>
+          )}
 
-            {cloudSuccess && (
-              <Alert
-                variant="default"
-                className="bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-100 mt-4 border-green-200 dark:border-green-800"
-              >
-                <Check className="h-4 w-4" />
-                <AlertTitle>Success</AlertTitle>
-                <AlertDescription>{cloudSuccess}</AlertDescription>
-              </Alert>
-            )}
-          </CardContent>
-        )}
-      </Card>
+          {cloudSuccess && (
+            <Alert
+              variant="default"
+              className="bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-100 mt-4 border-green-200 dark:border-green-800"
+            >
+              <Check className="h-4 w-4" />
+              <AlertTitle>Success</AlertTitle>
+              <AlertDescription>{cloudSuccess}</AlertDescription>
+            </Alert>
+          )}
+        </div>
+      )}
 
       {showConfirmation && (
         <ConfirmationModal
