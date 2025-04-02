@@ -5,7 +5,7 @@ import { db } from "@/firebase/config";
 import { workspaceService } from "@/services/WorkspaceService";
 import { useAppStore } from "@/modules/store";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { Package, Layers, Code, Database, Plus, Frame } from "lucide-react";
+import { Package, Layers, Code, Database,  Frame, Trophy } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -248,8 +248,8 @@ const FrameworkPage: React.FC = () => {
               to="/studio"
               className="h-12 rounded-md bg-primary text-primary-foreground px-8 text-sm font-medium inline-flex items-center gap-2"
             >
-              <Plus size={18} />
-              New App
+              <Trophy size={18} />
+              Try build
             </Link>
           </div>
         </div>

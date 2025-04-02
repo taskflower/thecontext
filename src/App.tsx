@@ -4,12 +4,13 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { AuthProvider } from "./context/AuthContext";
 import { Loader2 } from "lucide-react";
-import FrameworkPage from "./pages/FrameworkPage";
+
 
 // Dynamic imports
 const Studio = lazy(() => import("./pages/StudioLayout"));
 const WorkspacePage = lazy(() => import("./pages/WorkspacePage"));
 const PaymentSuccessPage = lazy(() => import("./pages/PaymentSuccessPage"));
+const FrameworkPage = lazy(() => import("./pages/FrameworkPage"));
 
 
 // Loading fallback component
