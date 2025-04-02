@@ -119,7 +119,7 @@ export function WorkspaceDashboard({ workspaceId }: WorkspaceDashboardProps) {
       )}
       
       {/* Dashboard */}
-      <div className={`flex-1 overflow-auto ${!isStudioView ? 'px-0 py-2' : ''}`}>
+      <div className={`flex-1 overflow-auto`}>
         <Dashboard dashboardId={workspaceDashboard.id} />
       </div>
       

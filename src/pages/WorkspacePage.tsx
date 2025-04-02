@@ -11,6 +11,7 @@ import {
 } from "@/components/frontApp";
 
 import { WorkspaceDashboard } from "@/modules/appWidgets";
+import { Scenario } from "@/modules/scenarios";
 
 const WorkspacePage = () => {
   // Fixed state initialization - useState returns [value, setter function]
@@ -118,7 +119,7 @@ const WorkspacePage = () => {
 
             {scenariosWithStatus.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 border ">
-                {scenariosWithStatus.map((scenario) => (
+                {scenariosWithStatus.map((scenario:Scenario) => (
                   <ScenarioCard
                     key={scenario.id}
                     scenario={scenario}

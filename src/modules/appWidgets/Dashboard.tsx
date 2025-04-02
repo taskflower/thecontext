@@ -103,11 +103,11 @@ export function Dashboard({ dashboardId }: DashboardProps) {
 
   // Render dashboard with widgets
   return (
-    <div className="p-4 h-full overflow-auto">
+    <div className="h-full overflow-auto">
       {activeDashboard.widgets.length === 0 ? (
         <></>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
           {activeDashboard.widgets.map((widget) => (
             <WidgetWrapper
               key={widget.id}

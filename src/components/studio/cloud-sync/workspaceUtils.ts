@@ -1,5 +1,5 @@
-// src/utils/cloud-sync/workspaceUtils.ts
-import { Workspace } from "@/modules/workspaces/types";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// src/components/studio/cloud-sync/workspaceUtils.ts
 import { useAppStore } from "@/modules/store";
 
 /**
@@ -12,119 +12,107 @@ export const formatDate = (timestamp: number): string => {
 };
 
 /**
- * Adds a workspace to the app store
+ * Waliduje i przygotowuje workspace do operacji
  */
-export const addWorkspace = (workspace: Workspace): void => {
-  console.log(
-    "[DEBUG] addWorkspace - workspace:",
-    JSON.stringify(
-      {
-        id: workspace.id,
-        title: workspace.title,
-        childrenCount: workspace.children?.length || 0,
-      },
-      null,
-      2
-    )
-  );
-
-  if (!workspace.children) {
-    console.warn(
-      "[DEBUG] Children array doesn't exist, initializing as empty array"
-    );
-    workspace.children = [];
+export const validateWorkspace = (workspace: any): any => {
+  // Sprawdź czy mamy prawidłowy workspace
+  if (!workspace || typeof workspace !== 'object') {
+    console.error('[ERROR] Nieprawidłowy workspace');
+    return workspace;
   }
-
-  // Use set directly instead of addWorkspace
-  useAppStore.setState((state) => {
-    return {
-      ...state,
-      items: [...state.items, workspace],
-      selected: {
-        ...state.selected,
-        workspace: workspace.id,
-        scenario:
-          workspace.children && workspace.children.length > 0
-            ? workspace.children[0].id
-            : "",
-        node: "",
-      },
-      stateVersion: state.stateVersion + 1,
-    };
-  });
-
-  console.log(
-    "[DEBUG] Workspace added, number of scenarios:",
-    workspace.children.length
-  );
+  
+  // Utwórz kopię workspace
+  const workspaceCopy = JSON.parse(JSON.stringify(workspace));
+  
+  // Sprawdź czy tablica children istnieje
+  if (!Array.isArray(workspaceCopy.children)) {
+    console.warn('[DEBUG] Brak tablicy children, inicjalizuję jako pustą tablicę');
+    workspaceCopy.children = [];
+  }
+  
+  // Zwróć przygotowany workspace
+  return workspaceCopy;
 };
 
 /**
- * Replaces an existing workspace with a new one in the app store
+ * Dodaje workspace do store
  */
-export const replaceWorkspace = (
-  workspace: Workspace,
-  oldWorkspaceId: string
-): void => {
+export const addWorkspace = (workspace: any): void => {
+  // Upewnij się, że workspace jest ważny
+  const validWorkspace = validateWorkspace(workspace);
+  
   console.log(
-    "[DEBUG] replaceWorkspace - workspace:",
-    JSON.stringify(
-      {
-        id: workspace.id,
-        title: workspace.title,
-        childrenCount: workspace.children?.length || 0,
-      },
-      null,
-      2
-    )
+    "[DEBUG] addWorkspace - workspace:",
+    JSON.stringify({
+      id: validWorkspace.id,
+      title: validWorkspace.title,
+      childrenCount: validWorkspace.children?.length || 0,
+      hasDashboards: !!validWorkspace.dashboards,
+      dashboardsCount: validWorkspace.dashboards?.length || 0
+    }, null, 2)
   );
 
-  if (!workspace.children) {
-    console.warn(
-      "[DEBUG] Children array doesn't exist, initializing as empty array"
-    );
-    workspace.children = [];
-  }
-
-  // Use set directly instead of state methods
+  // Dodaj do store
   useAppStore.setState((state) => {
-    // First remove old workspace
+    return {
+      ...state,
+      items: [...state.items, validWorkspace],
+      selected: {
+        ...state.selected,
+        workspace: validWorkspace.id,
+        scenario:
+          validWorkspace.children && validWorkspace.children.length > 0
+            ? validWorkspace.children[0].id
+            : "",
+        node: ""
+      },
+      stateVersion: state.stateVersion + 1
+    };
+  });
+}
+
+/**
+ * Zastępuje istniejący workspace
+ */
+export const replaceWorkspace = (
+  workspace: any,
+  oldWorkspaceId: string
+): void => {
+  // Upewnij się, że workspace jest ważny
+  const validWorkspace = validateWorkspace(workspace);
+  
+  console.log(
+    "[DEBUG] replaceWorkspace - workspace:",
+    JSON.stringify({
+      id: validWorkspace.id,
+      title: validWorkspace.title,
+      childrenCount: validWorkspace.children?.length || 0,
+      hasDashboards: !!validWorkspace.dashboards,
+      dashboardsCount: validWorkspace.dashboards?.length || 0
+    }, null, 2)
+  );
+
+  // Zastąp w store
+  useAppStore.setState((state) => {
+    // Usuń stary workspace
     const filteredItems = state.items.filter(
       (item) => item.id !== oldWorkspaceId
     );
 
-    // Then add new workspace
+    // Dodaj nowy workspace
     return {
       ...state,
-      items: [...filteredItems, workspace],
+      items: [...filteredItems, validWorkspace],
       selected: {
         ...state.selected,
-        workspace: workspace.id,
+        workspace: validWorkspace.id,
         scenario:
-          workspace.children && workspace.children.length > 0
-            ? workspace.children[0].id
+          validWorkspace.children && validWorkspace.children.length > 0
+            ? validWorkspace.children[0].id
             : "",
-        node: "",
+        node: ""
       },
-      stateVersion: state.stateVersion + 1,
+      stateVersion: state.stateVersion + 1
     };
   });
-
-  console.log(
-    "[DEBUG] Workspace replaced, number of scenarios:",
-    workspace.children.length
-  );
-};
-
-/**
- * Ensures a workspace has a valid children array
- */
-export const validateWorkspace = (workspace: Workspace): Workspace => {
-  if (!workspace.children) {
-    console.warn(
-      "[DEBUG] Children array doesn't exist, initializing as empty array"
-    );
-    return { ...workspace, children: [] };
-  }
-  return workspace;
-};
+}

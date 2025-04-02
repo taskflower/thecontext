@@ -85,12 +85,12 @@ const HistoryView: React.FC = () => {
                     className="p-1 text-muted-foreground hover:text-destructive rounded-full hover:bg-muted"
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (confirm("Czy na pewno chcesz usunąć tę konwersację?")) {
+                     
                         deleteConversation(conv.id);
                         if (selectedConversation === conv.id) {
                           setSelectedConversation(null);
                         }
-                      }
+                     
                     }}
                   >
                     <Trash className="h-3.5 w-3.5" />
