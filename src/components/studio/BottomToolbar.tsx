@@ -16,6 +16,12 @@ export const BottomToolbar: React.FC = () => {
   return (
     <div className="border-t border-border bg-muted/10 py-2 px-4 flex items-center">
       <div className="flex items-center gap-2">
+      <ToolbarButton
+          icon={<MessageSquare className="h-4 w-4" />}
+          label="Conversations History"
+          active={bottomPanelTab === "conversation"}
+          onClick={() => toggleBottomPanel("conversation")}
+        />
         <ToolbarButton
           icon={<Database className="h-4 w-4" />}
           label="Context"
@@ -28,12 +34,7 @@ export const BottomToolbar: React.FC = () => {
           active={bottomPanelTab === "filters"}
           onClick={() => toggleBottomPanel("filters")}
         />
-        <ToolbarButton
-          icon={<MessageSquare className="h-4 w-4" />}
-          label="Conversations History"
-          active={bottomPanelTab === "conversation"}
-          onClick={() => toggleBottomPanel("conversation")}
-        />
+      
         <ToolbarButton
           icon={<Puzzle className="h-4 w-4" />}
           label="Plugins"
@@ -41,16 +42,16 @@ export const BottomToolbar: React.FC = () => {
           onClick={() => toggleBottomPanel("plugins")}
         />
         <ToolbarButton
+          icon={<LayoutDashboard className="h-4 w-4" />}
+          label="Dashboards"
+          active={bottomPanelTab === "dashboard"}
+          onClick={() => toggleBottomPanel("dashboard")}
+        />
+         <ToolbarButton
           icon={<FileJson className="h-4 w-4" />}
           label="Export/Import"
           active={bottomPanelTab === "exportimport"}
           onClick={() => toggleBottomPanel("exportimport")}
-        />
-        <ToolbarButton
-          icon={<LayoutDashboard className="h-4 w-4" />}
-          label="Dashboard"
-          active={bottomPanelTab === "dashboard"}
-          onClick={() => toggleBottomPanel("dashboard")}
         />
       </div>
     </div>
