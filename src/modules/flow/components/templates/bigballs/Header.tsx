@@ -15,17 +15,17 @@ const Header: React.FC<HeaderProps> = ({
   const currentWorkspace = getCurrentWorkspace();
 
   return (<>
-    <div className="px-5 py-6 bg-white">
+    <div className="px-5 py-6 bg-background">
       {/* Logo/brand area */}
       <div className="w-full flex items-center justify-between">
-        <div className="font-black text-xl tracking-tighter">
+        <div className="font-black text-xl tracking-tighter text-foreground">
           {currentWorkspace?.title || "WISE.ADS"}
         </div>
         <Button
           variant="ghost"
           size="icon"
           onClick={onClose}
-          className="h-8 w-8 rounded-full text-black hover:bg-gray-100"
+          className="h-8 w-8 rounded-full text-foreground hover:bg-accent"
         >
           <X className="h-4 w-4" />
         </Button>
@@ -33,7 +33,7 @@ const Header: React.FC<HeaderProps> = ({
 
       {/* Main heading */}
       <div className="mt-10 mb-8">
-        <h2 className="text-3xl font-normal">
+        <h2 className="text-3xl font-normal text-foreground">
           Przeprowadzimy 
           <br />
           Cię przez Twoją
@@ -47,7 +47,7 @@ const Header: React.FC<HeaderProps> = ({
 
       {/* Current step indicator */}
       <div className="mb-4">
-        <h3 className="font-bold text-base">
+        <h3 className="font-bold text-base text-foreground">
           Krok {currentStepIndex + 1}: {nodeName || `Etap ${currentStepIndex + 1}`}
         </h3>
       </div>

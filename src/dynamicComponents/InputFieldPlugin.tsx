@@ -203,10 +203,16 @@ const InputFieldPlugin: PluginComponentWithSchema<InputFieldData> = ({
         </div>
       ) : options.fieldType === "url" ? (
         <div className="space-y-3">
+           {!isValidUrl && inputValue.trim().length > 0 && (
+              <p className="text-muted-foreground text-sm italic">
+                Please enter a valid URL with a domain extension (e.g. .com)
+              </p>
+            )}
           <label className="text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             {options.labelText}
           </label>
           <div className="space-y-3">
+            
             {/* Redesigned URL field to match checkbox styling */}
             <div
               className={`relative w-full border-2 rounded-md transition-all ${
@@ -221,8 +227,8 @@ const InputFieldPlugin: PluginComponentWithSchema<InputFieldData> = ({
                 <div
                   className={`flex items-center justify-center h-12 px-3 text-base rounded-md ${
                     urlSubmitEnabled
-                      ? "bg-primary/10 text-primary"
-                      : "bg-muted/30 text-muted-foreground"
+                      ? "bg-primary/30 text-primary"
+                      : "bg-primary/10 text-muted-foreground"
                   }`}
                 >
                   http://
@@ -237,11 +243,7 @@ const InputFieldPlugin: PluginComponentWithSchema<InputFieldData> = ({
               </div>
             </div>
 
-            {!isValidUrl && inputValue.trim().length > 0 && (
-              <p className="text-muted-foreground text-sm">
-                Please enter a valid URL with a domain extension (e.g. .com)
-              </p>
-            )}
+           
 
             <button
               onClick={handleUrlSubmit}

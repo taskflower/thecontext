@@ -13,7 +13,7 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
     <button
       onClick={onNext}
       disabled={isProcessing}
-      className="w-full bg-black text-white font-medium py-3 px-6 rounded hover:bg-gray-800 transition-colors"
+      className="w-full bg-primary text-primary-foreground font-medium py-3 px-6 rounded hover:bg-primary/90 transition-colors"
     >
       {isProcessing
         ? "Przetwarzanie..."
@@ -29,7 +29,7 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
         <button
           onClick={onPrevious}
           disabled={isProcessing}
-          className="text-sm text-gray-500 hover:text-gray-800"
+          className="text-sm text-muted-foreground hover:text-foreground"
         >
           Wróć do poprzedniego kroku
         </button>
@@ -43,8 +43,8 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
           key={i}
           className={`w-2 h-2 rounded-full ${
             i === (isFirstStep ? 0 : isLastStep ? 4 : 2)
-              ? "bg-black"
-              : "bg-gray-300"
+              ? "bg-primary"
+              : "bg-muted"
           }`}
         />
       ))}
