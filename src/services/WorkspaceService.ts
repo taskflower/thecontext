@@ -89,15 +89,34 @@ import {
         // Traktujemy dane wejściowe jako any i zapewniamy, że mają wszystkie niezbędne pola
         const workspace = workspaceInput as any;
         
-        // Upewnij się, że children istnieje i wykonaj głęboką kopię
-        const workspaceCopy = this.deepClone({
-          ...workspace,
-          children: workspace.children || []
-        });
+        // Utworzenie głębokiej kopii i upewnienie się, że children istnieje
+        const workspaceCopy = this.deepClone(workspace);
+        
+        // Sprawdź, czy children istnieje
+        if (!workspaceCopy.children) {
+          console.log('[DEBUG] Tablica children nie istnieje, inicjalizuję jako pustą tablicę');
+          workspaceCopy.children = [];
+        }
+        
+        // Sprawdź, czy każdy element w children ma wymagane pola
+        if (workspaceCopy.children.length > 0) {
+          workspaceCopy.children = workspaceCopy.children.map((child: any) => {
+            // Dodaj brakujące pola, jeśli są potrzebne
+            if (!child.id) {
+              console.warn('[DEBUG] Scenariusz bez ID, generuję nowe ID');
+              child.id = crypto.randomUUID ? crypto.randomUUID() : `scenario-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+            }
+            return child;
+          });
+        }
         
         console.log('[DEBUG] Zapisywany workspace:', 
           JSON.stringify({id: workspaceCopy.id, title: workspaceCopy.title}, null, 2));
         console.log('[DEBUG] Liczba scenariuszy w workspace:', workspaceCopy.children?.length || 0);
+        
+        if (workspaceCopy.children.length > 0) {
+          console.log('[DEBUG] Pierwszy scenariusz:', JSON.stringify(workspaceCopy.children[0], null, 2).substring(0, 200) + '...');
+        }
         
         const docRef = doc(this.collectionRef, workspace.id);
         const docSnap = await getDoc(docRef);
@@ -119,8 +138,8 @@ import {
           workspaceData = {
             id: workspaceCopy.id,
             title: workspaceCopy.title,
-            description: workspaceCopy.description,
-            slug: workspaceCopy.slug,
+            description: workspaceCopy.description || '',
+            slug: workspaceCopy.slug || '',
             updatedAt: Date.now(),
             createdAt: originalCreatedAt, // Użyj oryginalnej daty utworzenia
             userId: userId,
@@ -137,8 +156,8 @@ import {
           workspaceData = {
             id: workspaceCopy.id,
             title: workspaceCopy.title,
-            description: workspaceCopy.description,
-            slug: workspaceCopy.slug,
+            description: workspaceCopy.description || '',
+            slug: workspaceCopy.slug || '',
             updatedAt: Date.now(),
             createdAt: workspaceCopy.createdAt || Date.now(),
             userId: userId,
@@ -152,9 +171,17 @@ import {
           };
         }
         
+        // Dodatkowa walidacja
+        console.log('[DEBUG] Workspace przed zapisem do Firestore:',
+          JSON.stringify({
+            id: workspaceData.id,
+            title: workspaceData.title,
+            childrenCount: workspaceData.content.workspace.children?.length || 0
+          }, null, 2));
+        
         // Zapisz dokument
         await setDoc(docRef, this.sanitizeData(workspaceData));
-        console.log(`Workspace ${workspace.id} został zapisany`);
+        console.log(`Workspace ${workspace.id} został zapisany z ${workspaceData.content.workspace.children?.length || 0} scenariuszami`);
         
         return workspace.id;
       } catch (error) {
@@ -176,12 +203,32 @@ import {
           
           // Sprawdź, czy workspace należy do użytkownika
           if (data.userId === userId) {
-            // Workspace z Firestore
+            // Pobierz workspace z Firestore
             const workspace = this.deepClone(data.content.workspace);
+            
+            // Debugowanie
+            console.log(`[DEBUG] Wczytany workspace z Firestore:`, 
+              JSON.stringify({
+                id: workspace.id, 
+                title: workspace.title,
+                childrenCount: workspace.children?.length || 0
+              }, null, 2));
             
             // Jeśli children nie istnieje, zainicjuj jako pustą tablicę
             if (!workspace.children) {
+              console.log('[DEBUG] Tablica children nie istnieje, inicjalizuję jako pustą tablicę');
               workspace.children = [];
+            } else {
+              console.log(`[DEBUG] Liczba scenariuszy w wczytanym workspace: ${workspace.children.length}`);
+              
+              // Sprawdź, czy każdy element w children ma wymagane pola
+              workspace.children = workspace.children.map((child:any) => {
+                if (!child.id) {
+                  console.warn('[DEBUG] Scenariusz bez ID, generuję nowe ID');
+                  child.id = crypto.randomUUID ? crypto.randomUUID() : `scenario-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+                }
+                return child;
+              });
             }
             
             return workspace;
@@ -211,12 +258,15 @@ import {
         
         const querySnapshot = await getDocs(q);
         
-        return querySnapshot.docs.map(doc => {
+        const workspaces = querySnapshot.docs.map(doc => {
           const data = doc.data();
           
           // Opcjonalnie pomijaj duże pola dla optymalizacji wydajności
           if (!options.withContent) {
-            const {  ...metadata } = data;
+            // Stwórz obiekt z wszystkimi polami z data, ale bez zawartości
+            // Destrukturyzujemy content żeby go usunąć i zostawić tylko metadane
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { content, ...metadata } = data;
             return { ...metadata, id: doc.id } as WorkspaceStorageItem;
           }
           
@@ -228,6 +278,9 @@ import {
           // Wykonaj głęboką kopię dla bezpieczeństwa
           return this.deepClone(data);
         });
+        
+        console.log(`Pobrano ${workspaces.length} workspace'ów z Firebase dla użytkownika ${userId}`);
+        return workspaces;
       } catch (error) {
         this.handleError('pobierania workspace\'ów użytkownika', error);
         throw error;

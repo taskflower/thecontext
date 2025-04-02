@@ -123,15 +123,19 @@ export const CloudTab: React.FC<CloudTabProps> = ({
         { withContent: false }
       );
 
-      setCloudWorkspaces(
-        userWorkspaces.map((w) => ({
-          id: w.id,
-          title: w.title,
-          description: w.description,
-          updatedAt: w.updatedAt,
-          createdAt: w.createdAt,
-        }))
-      );
+      console.log(`Otrzymano ${userWorkspaces.length} workspace'ów w CloudTab`);
+      
+      // Mapuj pobrane dane do modelu widoku
+      const mappedWorkspaces = userWorkspaces.map((w) => ({
+        id: w.id,
+        title: w.title || "Workspace bez nazwy",
+        description: w.description || "",
+        updatedAt: w.updatedAt || Date.now(),
+        createdAt: w.createdAt || Date.now(),
+      }));
+      
+      console.log(`Zmapowano ${mappedWorkspaces.length} workspace'ów w CloudTab`);
+      setCloudWorkspaces(mappedWorkspaces);
 
       if (userWorkspaces.length === 0) {
         setCloudSuccess("Nie znaleziono workspace'ów w Firebase");
@@ -186,17 +190,27 @@ export const CloudTab: React.FC<CloudTabProps> = ({
         if (!workspace) {
           throw new Error("Nie można wczytać danych workspace'a");
         }
+        
+        // Dodatkowe sprawdzenie, czy workspace zawiera children
+        if (!workspace.children) {
+          console.warn("[DEBUG] Wczytany workspace nie ma tablicy children, inicjalizuję jako pustą tablicę");
+          workspace.children = [];
+        }
+        
+        console.log(`[DEBUG] Wczytano workspace z ${workspace.children.length} scenariuszami`);
 
         if (existingWorkspace) {
           // Jeżeli workspace o tym ID już istnieje, zastąp go
+          console.log(`[DEBUG] Zastępowanie istniejącego workspace'a (id: ${existingWorkspace.id})`);
           onWorkspaceReplaced(workspace, existingWorkspace.id);
           setCloudSuccess(
-            `Workspace '${workspace.title}' został zaktualizowany lokalnie`
+            `Workspace '${workspace.title}' został zaktualizowany lokalnie z ${workspace.children.length} scenariuszami`
           );
         } else {
           // Jeżeli workspace o tym ID nie istnieje, dodaj go jako nowy
+          console.log(`[DEBUG] Dodawanie nowego workspace'a (id: ${workspace.id})`);
           onWorkspaceAdded(workspace);
-          setCloudSuccess(`Pomyślnie wczytano workspace '${workspace.title}'`);
+          setCloudSuccess(`Pomyślnie wczytano workspace '${workspace.title}' z ${workspace.children.length} scenariuszami`);
         }
       } catch (error) {
         console.error("Błąd podczas wczytywania workspace'a:", error);

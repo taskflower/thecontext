@@ -31,22 +31,71 @@ export const ExportImport: React.FC = () => {
 
   // Handle adding a new workspace
   const handleWorkspaceAdded = (workspace: Workspace) => {
-    // Add workspace to state
-    state.addWorkspace(workspace);
-    // Switch to the new workspace
-    state.selectWorkspace(workspace.id);
+    console.log("[DEBUG] handleWorkspaceAdded - workspace przed dodaniem:", 
+      JSON.stringify({
+        id: workspace.id,
+        title: workspace.title,
+        childrenCount: workspace.children?.length || 0
+      }, null, 2));
+
+    if (!workspace.children) {
+      console.warn("[DEBUG] Tablica children nie istnieje, inicjalizuję jako pustą tablicę");
+      workspace.children = [];
+    }
+
+    // Używamy set bezpośrednio zamiast addWorkspace
+    useAppStore.setState((state) => {
+      // Modyfikujemy kopię stanu
+      return {
+        ...state,
+        items: [...state.items, workspace],
+        selected: {
+          ...state.selected,
+          workspace: workspace.id,
+          scenario: workspace.children && workspace.children.length > 0 ? workspace.children[0].id : "",
+          node: ""
+        },
+        stateVersion: state.stateVersion + 1
+      };
+    });
+
+    console.log("[DEBUG] Workspace dodany, liczba scenariuszy:", workspace.children.length);
   };
 
   // Handle replacing an existing workspace by deleting and adding a new one
   const handleWorkspaceReplaced = (workspace: Workspace, oldWorkspaceId: string) => {
-    // First, delete the old workspace
-    state.deleteWorkspace(oldWorkspaceId);
+    console.log("[DEBUG] handleWorkspaceReplaced - workspace przed zastąpieniem:", 
+      JSON.stringify({
+        id: workspace.id,
+        title: workspace.title,
+        childrenCount: workspace.children?.length || 0
+      }, null, 2));
+
+    if (!workspace.children) {
+      console.warn("[DEBUG] Tablica children nie istnieje, inicjalizuję jako pustą tablicę");
+      workspace.children = [];
+    }
+
+    // Używamy set bezpośrednio zamiast metod state
+    useAppStore.setState((state) => {
+      // Najpierw usuń stary workspace
+      const filteredItems = state.items.filter(item => item.id !== oldWorkspaceId);
+      
+      // Następnie dodaj nowy workspace
+      return {
+        ...state,
+        items: [...filteredItems, workspace],
+        selected: {
+          ...state.selected,
+          workspace: workspace.id,
+          scenario: workspace.children && workspace.children.length > 0 ? workspace.children[0].id : "",
+          node: ""
+        },
+        stateVersion: state.stateVersion + 1
+      };
+    });
     
-    // Then add the new workspace
-    state.addWorkspace(workspace);
-    
-    // Switch to the new workspace
-    state.selectWorkspace(workspace.id);
+    console.log("[DEBUG] Workspace zastąpiony, liczba scenariuszy:", workspace.children.length);
   };
 
   // Confirmation dialog handlers
