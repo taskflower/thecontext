@@ -6,7 +6,7 @@ import {  Frame, Heart, Linkedin, Youtube } from "lucide-react";
 
 const AppFooter = () => {
   return (
-    <footer className="border-t bg-background/80 backdrop-blur-sm">
+    <footer className="bg-background/80 backdrop-blur-sm">
       <div className="max-w-5xl mx-auto py-4">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2 text-center md:text-left mb-2 md:mb-0">

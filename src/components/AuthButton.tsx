@@ -29,7 +29,7 @@ export const AuthButton: React.FC = () => {
     return (
       <button className="p-2 rounded-md bg-muted/20 text-foreground flex items-center gap-2" disabled>
         <Loader2 className="h-5 w-5 animate-spin" />
-        <span className="text-xs">Loading...</span>
+        <span className="text-xs">...</span>
       </button>
     );
   }
@@ -47,7 +47,7 @@ export const AuthButton: React.FC = () => {
   }
 
   return (
-    <div className="relative mt-2 sm:mt-0 w-full sm:w-auto">
+    <div className="relative sm:mt-0 w-full sm:w-auto">
       <button
         className={cn(
           "p-2 rounded-md hover:bg-muted/50 text-foreground flex items-center gap-2",
@@ -56,7 +56,7 @@ export const AuthButton: React.FC = () => {
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
       >
         <User className="h-4 w-4" />
-        <span className="text-xs max-w-[100px] truncate">{currentUser.email}</span>
+        <span className="text-xs max-w-[100px] truncate hidden md:inline">{currentUser.email}</span>
       </button>
       
       {isDropdownOpen && (

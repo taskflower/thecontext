@@ -1,17 +1,12 @@
 // src/components/frontApp/WorkspaceHeader.tsx
 import React from "react";
 
-import { Button } from "@/components/ui/button";
-
-import { Menu } from "lucide-react";
 import { AuthButton } from "../AuthButton";
 import { WorkspaceContext } from "./";
 import { useAppStore } from "@/modules/store";
 import { Avatar, AvatarFallback } from "./Avatr";
 
 const WorkspaceHeader: React.FC = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-
   // Get data and actions from the store
   const workspaces = useAppStore((state) => state.items);
   const currentWorkspaceId = useAppStore((state) => state.selected.workspace);
@@ -29,8 +24,8 @@ const WorkspaceHeader: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur-sm">
-      <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between py-4 sm:py-6">
+    <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm">
+      <div className="max-w-5xl mx-auto flex  items-center  justify-between py-4 sm:py-6">
         <div className="flex w-full sm:w-auto justify-between items-center">
           <div className="flex items-center gap-3">
             {currentWorkspace && (
@@ -42,29 +37,19 @@ const WorkspaceHeader: React.FC = () => {
             )}
 
             <div>
-              
               <h1 className="text-md font-bold tracking-tight text-foreground">
                 {currentWorkspace?.title || "Workspace"}
               </h1>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground ">
                 {currentScenario
                   ? `Scenario: ${currentScenario.name}`
                   : "No scenario selected"}
               </p>
             </div>
           </div>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="sm:hidden"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
         </div>
 
-        <div className="flex items-center gap-4 mt-2 sm:mt-0">
+        <div className="flex items-center gap-4  sm:mt-0">
           <AuthButton />
           <WorkspaceContext />
         </div>
