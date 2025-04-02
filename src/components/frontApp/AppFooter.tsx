@@ -7,7 +7,7 @@ import {  Frame, Heart, Linkedin, Youtube } from "lucide-react";
 const AppFooter = () => {
   return (
     <footer className="border-t bg-background/80 backdrop-blur-sm">
-      <div className="max-w-5xl mx-auto py-4 px-4 sm:px-6 md:px-8">
+      <div className="max-w-5xl mx-auto py-4">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2 text-center md:text-left mb-2 md:mb-0">
             <p className="text-xs sm:text-sm text-muted-foreground">
@@ -16,7 +16,7 @@ const AppFooter = () => {
                 href="https://revertcontext.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="font-medium text-foreground hover:text-primary transition-colors underline-offset-4 hover:underline"
+                className="font-medium text-foreground text-xs underline-offset-4 "
               >
                 REVERTCONTEXT.COM
               </a>{" "}
