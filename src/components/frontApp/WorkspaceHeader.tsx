@@ -30,19 +30,20 @@ const WorkspaceHeader: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur-sm">
-      <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-6">
+      <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between py-4 sm:py-6">
         <div className="flex w-full sm:w-auto justify-between items-center">
           <div className="flex items-center gap-3">
             {currentWorkspace && (
-              <Avatar className="h-8 w-8 bg-primary/10 text-primary">
-                <AvatarFallback className="text-sm font-medium">
+              <Avatar className="h-12 w-12 bg-primary/10 text-primary">
+                <AvatarFallback className="text-md font-medium">
                   {getWorkspaceInitial(currentWorkspace.title)}
                 </AvatarFallback>
               </Avatar>
             )}
 
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+              
+              <h1 className="text-md font-bold tracking-tight text-foreground">
                 {currentWorkspace?.title || "Workspace"}
               </h1>
               <p className="text-xs text-muted-foreground mt-1">

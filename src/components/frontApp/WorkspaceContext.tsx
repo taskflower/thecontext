@@ -1,7 +1,7 @@
 // src/components/frontApp/WorkspaceContext.tsx
 import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Database, FileText, FileJson,  Search } from "lucide-react";
+import {  FileText, FileJson,  Search, Layers } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet";
 import { useAppStore } from "@/modules/store";
 import { Input } from "@/components/ui/input";
@@ -74,7 +74,7 @@ const WorkspaceContext: React.FC = () => {
             className="gap-2 shadow-sm w-full sm:w-auto"
             title="Open Workspace Context"
           >
-            <Database className="h-4 w-4" />
+            <Layers className="h-4 w-4" />
             
             {contextItemsCount > 0 && (
               <Badge 
@@ -138,7 +138,7 @@ const WorkspaceContext: React.FC = () => {
               </div>
             ) : (
               <div className="text-center p-6 bg-muted/50 rounded-lg">
-                <Database className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+                <Layers className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">
                   {workspace ? 
                     searchQuery ? 

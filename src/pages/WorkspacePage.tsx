@@ -5,7 +5,6 @@ import { useAppStore } from "@/modules/store";
 import { StepModal } from "@/modules/flow/components/StepModal";
 import {
   AppFooter,
-  EmptyScenarios,
   FilterDialog,
   ScenarioCard,
   WorkspaceHeader,
@@ -17,7 +16,6 @@ const WorkspacePage = () => {
   // Fixed state initialization - useState returns [value, setter function]
   const [showFlowPlayer, setShowFlowPlayer] = useState<boolean>(false);
   const [editingFilterId, setEditingFilterId] = useState<string | null>(null);
-  const [, setIsAddingScenario] = useState<boolean>(false);
 
   const { slug } = useParams();
   const {
@@ -101,11 +99,6 @@ const WorkspacePage = () => {
     setShowFlowPlayer(true);
   };
 
-  // Create new scenario
-  const handleCreateNewScenario = () => {
-    // Fixed - now using the setter function correctly
-    setIsAddingScenario(true);
-  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -113,7 +106,7 @@ const WorkspacePage = () => {
       <WorkspaceHeader />
 
       {/* Main content */}
-      <main className="flex-1   max-w-5xl mx-auto w-full">
+      <main className="flex-1 max-w-5xl mx-auto w-full">
         {showFlowPlayer ? (
           <div className="w-full h-full">
             <StepModal
@@ -129,7 +122,7 @@ const WorkspacePage = () => {
             <h3 className="text-xl font-semibold mb-4">Scenarios</h3>
 
             {matchingScenarios.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 border ">
                 {matchingScenarios.map((scenario) => (
                   <ScenarioCard
                     key={scenario.id}
@@ -140,7 +133,7 @@ const WorkspacePage = () => {
                 ))}
               </div>
             ) : (
-              <EmptyScenarios onCreateNew={handleCreateNewScenario} />
+              <></>
             )}
           </>
         )}
