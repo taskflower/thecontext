@@ -14,8 +14,8 @@ const AppFooter = () => {
               © 2025 Powered by{" "}
               <Link
                 to="/" 
-                target="_blank" 
-                rel="noopener noreferrer"
+               
+  
                 className="font-medium text-foreground text-xs underline-offset-4 "
               >
                 REVERTCONTEXT.COM

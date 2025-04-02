@@ -1,16 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import WorkspaceIcon from "@/components/frameworkLanding/WorkspaceIcon";
 import { AppFooter } from "@/components/frontApp";
 import { db } from "@/firebase/config";
-import { WorkspaceStorageItem } from "@/services/WorkspaceService";
+import { workspaceService } from "@/services/WorkspaceService";
+import { useAppStore } from "@/modules/store";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { Package, Layers, Code, Database, Plus, Frame } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { validateWorkspace, addWorkspace, replaceWorkspace } from "@/components/studio/cloud-sync/workspaceUtils";
 
 const FrameworkPage: React.FC = () => {
-  const [workspaces, setWorkspaces] = useState<WorkspaceStorageItem[]>([]);
+  const [workspaces, setWorkspaces] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
+  
+  // Get needed elements from the app state
+  const state = useAppStore();
 
   useEffect(() => {
     const fetchOfficialWorkspaces = async () => {
@@ -23,12 +29,17 @@ const FrameworkPage: React.FC = () => {
         );
         const querySnapshot = await getDocs(q);
 
-        const officialWorkspaces: WorkspaceStorageItem[] = [];
+        const officialWorkspaces: any[] = [];
         querySnapshot.forEach((doc) => {
-          const data = doc.data() as WorkspaceStorageItem;
+          // Only extract the metadata we need for display
+          const data = doc.data();
           officialWorkspaces.push({
-            ...data,
             id: doc.id,
+            title: data.title,
+            description: data.description || "",
+            slug: data.slug || "",
+            permission: data.permission,
+            userId: data.userId || "", // Include userId from workspace data
           });
         });
 
@@ -43,18 +54,60 @@ const FrameworkPage: React.FC = () => {
     fetchOfficialWorkspaces();
   }, []);
 
-  const handleWorkspaceClick = (workspace: WorkspaceStorageItem) => {
-    // Navigate to the workspace using React Router
-    const path = workspace.slug
-      ? `/${workspace.slug}`
-      : `/workspace/${workspace.id}`;
-    navigate(path);
+  const handleWorkspaceClick = async (workspace: any) => {
+    try {
+      setLoading(true);
+      
+      // Important: Get userId from the workspace data
+      const userId = workspace.userId || ""; // Use userId directly from workspace metadata
+      
+      // Get full workspace data from Firebase using workspaceService
+      const fullWorkspace = await workspaceService.getWorkspace(workspace.id, userId);
+      
+      if (!fullWorkspace) {
+        console.error(`Cannot load workspace data for ID: ${workspace.id}`);
+        return;
+      }
+      
+      // Validate workspace to ensure it has the correct structure
+      // Using the same validateWorkspace function as in CloudSync
+      const validWorkspace = validateWorkspace(fullWorkspace);
+      
+      console.log(`[DEBUG] Loaded workspace with ${validWorkspace.children?.length || 0} scenarios`);
+      
+      // Check if workspace already exists locally
+      const existingWorkspace = state.items.find(w => w.id === workspace.id);
+      
+      if (existingWorkspace) {
+        // If workspace already exists, replace it with the new one
+        // Using the same replaceWorkspace function as in CloudSync
+        console.log(`[DEBUG] Replacing existing workspace: ${workspace.id}`);
+        replaceWorkspace(validWorkspace, existingWorkspace.id);
+      } else {
+        // If workspace doesn't exist, add it as new
+        // Using the same addWorkspace function as in CloudSync
+        console.log(`[DEBUG] Adding new workspace: ${workspace.id}`);
+        addWorkspace(validWorkspace);
+      }
+      
+      // Navigate to workspace page
+      const path = workspace.slug
+        ? `/${workspace.slug}`
+        : `/workspace/${workspace.id}`;
+      navigate(path);
+      
+    } catch (error) {
+      console.error("Error loading workspace:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // Rest of the component remains unchanged
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col items-center">
       <main className="max-w-5xl w-full py-16 px-4 md:px-6">
-        {/* Title Section - New York Style with emphasis */}
+        {/* Title Section */}
         <div className="mb-12 text-center">
           <div className="flex justify-center mb-6">
             <Frame />
@@ -69,7 +122,7 @@ const FrameworkPage: React.FC = () => {
         </div>
 
         <div className="space-y-16">
-          {/* Navigation links - centered */}
+          {/* Navigation links */}
           <div className="flex justify-center space-x-8 text-sm font-medium">
             <Link
               className="border-b-2 border-primary pb-1 text-foreground transition-colors"
@@ -132,35 +185,6 @@ const FrameworkPage: React.FC = () => {
             )}
           </section>
 
-          {/* Recent workspaces section */}
-          {/* <section>
-            <div className="flex items-center justify-center mb-8">
-              <h2 className="text-2xl font-medium">Recent Workspaces</h2>
-            </div>
-
-            <div className="border border-border rounded-lg divide-y divide-border">
-              {[...Array(3)].map((_, index) => (
-                <div
-                  key={index}
-                  className="p-6 flex items-center hover:bg-muted/50 cursor-pointer transition-colors"
-                >
-                  <div className="h-12 w-12 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center mr-6 text-primary">
-                    <Code size={20} />
-                  </div>
-                  <div>
-                    <p className="font-medium">Example Workspace {index + 1}</p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Last edited: today
-                    </p>
-                  </div>
-                  <div className="ml-auto text-sm text-muted-foreground">
-                    2 components
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section> */}
-
           {/* Features section */}
           <section className="pt-8 border-t border-border">
             <h2 className="text-2xl font-medium text-center mb-12">
@@ -210,10 +234,13 @@ const FrameworkPage: React.FC = () => {
 
           {/* CTA Button */}
           <div className="text-center pt-8">
-            <button className="h-12 rounded-md bg-primary text-primary-foreground px-8 text-sm font-medium inline-flex items-center gap-2">
+            <Link 
+              to="/new" 
+              className="h-12 rounded-md bg-primary text-primary-foreground px-8 text-sm font-medium inline-flex items-center gap-2"
+            >
               <Plus size={18} />
               New App
-            </button>
+            </Link>
           </div>
         </div>
       </main>

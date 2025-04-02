@@ -58,7 +58,7 @@ const WorkspaceIcon: React.FC<WorkspaceIconProps> = ({ workspace, onClick }) => 
   
   return (
     <div 
-      className="flex flex-col items-center cursor-pointer"
+      className="flex flex-col items-center cursor-pointer w-20"
       onClick={onClick}
     >
       <div 
@@ -67,7 +67,7 @@ const WorkspaceIcon: React.FC<WorkspaceIconProps> = ({ workspace, onClick }) => 
       >
         <IconComponent size={24} strokeWidth={2} />
       </div>
-      <div className="mt-2 text-center">
+      <div className="mt-2 text-center grid">
         <p className="text-sm font-medium truncate max-w-full">
           {workspace.title}
         </p>
