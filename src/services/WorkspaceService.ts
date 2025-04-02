@@ -15,10 +15,11 @@ import {
     WithFieldValue
   } from 'firebase/firestore';
   import { db } from '@/firebase/config';
-  import { Workspace } from '@/modules/workspaces/types';
+
   
   const COLLECTION_NAME = 'workspaces';
   
+  // Upewnijmy się, że nasz typ WorkspaceStorage zawiera wszystkie potrzebne pola
   export interface WorkspaceStorageItem {
     id: string;
     title: string;
@@ -28,7 +29,7 @@ import {
     createdAt: number;
     userId: string;
     content: {
-      workspace: Workspace;
+      workspace: any; // Używamy any dla workspace aby uniknąć problemów z typami
       metadata: {
         version: string;
         exportedAt: string;
@@ -38,7 +39,10 @@ import {
   
   // Konwerter dla WorkspaceStorageItem
   const workspaceConverter: FirestoreDataConverter<WorkspaceStorageItem> = {
-    toFirestore: (workspace: WithFieldValue<WorkspaceStorageItem>): DocumentData => workspace,
+    toFirestore: (workspace: WithFieldValue<WorkspaceStorageItem>): DocumentData => {
+      // Głęboka kopia obiektu przed zapisem
+      return JSON.parse(JSON.stringify(workspace));
+    },
     fromFirestore: (snapshot: QueryDocumentSnapshot): WorkspaceStorageItem => {
       const data = snapshot.data();
       return { ...data, id: snapshot.id } as WorkspaceStorageItem;
@@ -63,39 +67,94 @@ import {
     }
   
     /**
+     * Deep clone object to ensure all nested properties are copied
+     */
+    private deepClone<T>(obj: T): T {
+      return JSON.parse(JSON.stringify(obj));
+    }
+  
+    /**
      * Standardowa obsługa błędów
      */
     private handleError(operation: string, error: unknown): void {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error(`Błąd podczas ${operation}:`, errorMessage);
-      // Tutaj możesz dodać integrację z systemem monitoringu błędów
     }
   
     /**
      * Zapisuje workspace do Firestore
      */
-    async saveWorkspace(workspace: Workspace, userId: string): Promise<string> {
+    async saveWorkspace(workspaceInput: any, userId: string): Promise<string> {
       try {
-        const workspaceData: WorkspaceStorageItem = {
-          id: workspace.id,
-          title: workspace.title,
-          description: workspace.description,
-          slug: workspace.slug,
-          updatedAt: Date.now(),
-          createdAt: workspace.createdAt,
-          userId: userId,
-          content: {
-            workspace: workspace,
-            metadata: {
-              version: "1.0",
-              exportedAt: new Date().toISOString()
-            }
-          }
-        };
+        // Traktujemy dane wejściowe jako any i zapewniamy, że mają wszystkie niezbędne pola
+        const workspace = workspaceInput as any;
         
-        // Zapis do Firestore
+        // Upewnij się, że children istnieje i wykonaj głęboką kopię
+        const workspaceCopy = this.deepClone({
+          ...workspace,
+          children: workspace.children || []
+        });
+        
+        console.log('[DEBUG] Zapisywany workspace:', 
+          JSON.stringify({id: workspaceCopy.id, title: workspaceCopy.title}, null, 2));
+        console.log('[DEBUG] Liczba scenariuszy w workspace:', workspaceCopy.children?.length || 0);
+        
         const docRef = doc(this.collectionRef, workspace.id);
+        const docSnap = await getDoc(docRef);
+        
+        let workspaceData: WorkspaceStorageItem;
+        
+        // Sprawdź, czy workspace istnieje
+        if (docSnap.exists()) {
+          const existingData = docSnap.data();
+          
+          // Sprawdź, czy workspace należy do użytkownika
+          if (existingData.userId !== userId) {
+            throw new Error("Brak uprawnień do aktualizacji tego workspace'a");
+          }
+          
+          // Zachowaj oryginalną datę utworzenia dla istniejących workspace'ów
+          const originalCreatedAt = existingData.createdAt;
+          
+          workspaceData = {
+            id: workspaceCopy.id,
+            title: workspaceCopy.title,
+            description: workspaceCopy.description,
+            slug: workspaceCopy.slug,
+            updatedAt: Date.now(),
+            createdAt: originalCreatedAt, // Użyj oryginalnej daty utworzenia
+            userId: userId,
+            content: {
+              workspace: workspaceCopy,
+              metadata: {
+                version: "1.0",
+                exportedAt: new Date().toISOString()
+              }
+            }
+          };
+        } else {
+          // Tworzenie nowego workspace'a
+          workspaceData = {
+            id: workspaceCopy.id,
+            title: workspaceCopy.title,
+            description: workspaceCopy.description,
+            slug: workspaceCopy.slug,
+            updatedAt: Date.now(),
+            createdAt: workspaceCopy.createdAt || Date.now(),
+            userId: userId,
+            content: {
+              workspace: workspaceCopy,
+              metadata: {
+                version: "1.0",
+                exportedAt: new Date().toISOString()
+              }
+            }
+          };
+        }
+        
+        // Zapisz dokument
         await setDoc(docRef, this.sanitizeData(workspaceData));
+        console.log(`Workspace ${workspace.id} został zapisany`);
         
         return workspace.id;
       } catch (error) {
@@ -107,7 +166,7 @@ import {
     /**
      * Pobiera workspace z Firestore
      */
-    async getWorkspace(workspaceId: string, userId: string): Promise<Workspace | null> {
+    async getWorkspace(workspaceId: string, userId: string): Promise<any> {
       try {
         const docRef = doc(this.collectionRef, workspaceId);
         const docSnap = await getDoc(docRef);
@@ -117,7 +176,15 @@ import {
           
           // Sprawdź, czy workspace należy do użytkownika
           if (data.userId === userId) {
-            return data.content.workspace;
+            // Workspace z Firestore
+            const workspace = this.deepClone(data.content.workspace);
+            
+            // Jeśli children nie istnieje, zainicjuj jako pustą tablicę
+            if (!workspace.children) {
+              workspace.children = [];
+            }
+            
+            return workspace;
           }
         }
         
@@ -149,11 +216,17 @@ import {
           
           // Opcjonalnie pomijaj duże pola dla optymalizacji wydajności
           if (!options.withContent) {
-            const { ...metadata } = data;
-            return metadata as WorkspaceStorageItem;
+            const {  ...metadata } = data;
+            return { ...metadata, id: doc.id } as WorkspaceStorageItem;
           }
           
-          return data;
+          // Upewnij się, że children istnieje w każdym workspace
+          if (data.content?.workspace && !data.content.workspace.children) {
+            data.content.workspace.children = [];
+          }
+          
+          // Wykonaj głęboką kopię dla bezpieczeństwa
+          return this.deepClone(data);
         });
       } catch (error) {
         this.handleError('pobierania workspace\'ów użytkownika', error);
@@ -167,13 +240,18 @@ import {
     async deleteWorkspace(workspaceId: string, userId: string): Promise<void> {
       try {
         // Najpierw sprawdzamy, czy workspace należy do użytkownika
-        const workspace = await this.getWorkspace(workspaceId, userId);
+        const docRef = doc(this.collectionRef, workspaceId);
+        const docSnap = await getDoc(docRef);
         
-        if (!workspace) {
-          throw new Error('Workspace nie istnieje lub brak uprawnień do usunięcia');
+        if (!docSnap.exists()) {
+          throw new Error('Workspace nie istnieje');
         }
         
-        const docRef = doc(this.collectionRef, workspaceId);
+        const data = docSnap.data();
+        if (data.userId !== userId) {
+          throw new Error('Brak uprawnień do usunięcia workspace');
+        }
+        
         await deleteDoc(docRef);
       } catch (error) {
         this.handleError('usuwania workspace', error);

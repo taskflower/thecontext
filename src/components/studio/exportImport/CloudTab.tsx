@@ -1,45 +1,59 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/studio/exportImport/CloudTab.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { 
-  CloudUpload, 
-  CloudDownload, 
+import {
+  CloudUpload,
+  CloudDownload,
   AlertCircle,
-  Loader
+  Loader,
+  RefreshCw,
+  Calendar,
 } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Workspace } from "@/modules/workspaces/types";
 import { workspaceService } from "@/services/WorkspaceService";
 
-
 interface CloudTabProps {
   currentUser: any;
   currentWorkspace: Workspace | null;
-  workspaces: Workspace[]; 
-  showConfirmation: (title: string, message: string, action: () => void) => void;
+  workspaces: Workspace[];
+  showConfirmation: (
+    title: string,
+    message: string,
+    action: () => void
+  ) => void;
   onWorkspaceAdded: (workspace: Workspace) => void;
   onWorkspaceReplaced: (workspace: Workspace, oldWorkspaceId: string) => void;
 }
 
-export const CloudTab: React.FC<CloudTabProps> = ({ 
-  currentUser, 
+export const CloudTab: React.FC<CloudTabProps> = ({
+  currentUser,
   currentWorkspace,
   workspaces,
   showConfirmation,
   onWorkspaceAdded,
-  onWorkspaceReplaced
+  onWorkspaceReplaced,
 }) => {
   // States
   const [cloudAction, setCloudAction] = useState<"save" | "load">("save");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [cloudError, setCloudError] = useState<string | null>(null);
   const [cloudSuccess, setCloudSuccess] = useState<string | null>(null);
-  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(null);
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(
+    null
+  );
   const [cloudWorkspaces, setCloudWorkspaces] = useState<any[]>([]);
+
+  // Efekt do automatycznego ładowania workspace'ów przy zmianie akcji na "load"
+  useEffect(() => {
+    if (cloudAction === "load" && currentUser && cloudWorkspaces.length === 0) {
+      handleLoadFromFirebase();
+    }
+  }, [cloudAction, currentUser]);
 
   // Save current workspace to Firebase
   const handleSaveToFirebase = () => {
@@ -53,30 +67,42 @@ export const CloudTab: React.FC<CloudTabProps> = ({
       return;
     }
 
-    showConfirmation(
-      "Zapisz do Firebase",
-      "Ta operacja zapisze kopię bieżącego workspace'a do Firebase. Kontynuować?",
-      async () => {
-        try {
-          setIsLoading(true);
-          setCloudError(null);
-          setCloudSuccess(null);
-
-          // Zapisz workspace do Firebase
-          await workspaceService.saveWorkspace(currentWorkspace, currentUser.uid);
-          
-          setCloudSuccess(`Workspace "${currentWorkspace.title}" został zapisany do Firebase`);
-        } catch (error) {
-          console.error("Błąd podczas zapisywania workspace:", error);
-          setCloudError(
-            "Nie udało się zapisać workspace'a: " +
-              (error instanceof Error ? error.message : String(error))
-          );
-        } finally {
-          setIsLoading(false);
-        }
-      }
+    // Sprawdź, czy workspace o tym ID już istnieje w chmurze
+    const existsInCloud = cloudWorkspaces.some(
+      (w) => w.id === currentWorkspace.id
     );
+    const confirmMessage = existsInCloud
+      ? `Workspace "${currentWorkspace.title}" już istnieje w chmurze. Czy chcesz go nadpisać?`
+      : `Ta operacja zapisze kopię bieżącego workspace'a do Firebase. Kontynuować?`;
+
+    showConfirmation("Zapisz do Firebase", confirmMessage, async () => {
+      try {
+        setIsLoading(true);
+        setCloudError(null);
+        setCloudSuccess(null);
+
+        // Zapisz workspace do Firebase
+        await workspaceService.saveWorkspace(currentWorkspace, currentUser.uid);
+
+        const actionMsg = existsInCloud ? "zaktualizowany" : "zapisany";
+        setCloudSuccess(
+          `Workspace "${currentWorkspace.title}" został ${actionMsg} w Firebase`
+        );
+
+        // Odśwież listę workspace'ów w chmurze, jeśli jesteśmy na widoku load
+        if (cloudAction === "load") {
+          await handleLoadFromFirebase();
+        }
+      } catch (error) {
+        console.error("Błąd podczas zapisywania workspace:", error);
+        setCloudError(
+          "Nie udało się zapisać workspace'a: " +
+            (error instanceof Error ? error.message : String(error))
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    });
   };
 
   // Load workspaces from Firebase
@@ -92,15 +118,20 @@ export const CloudTab: React.FC<CloudTabProps> = ({
       setCloudSuccess(null);
 
       // Pobierz workspace'y z Firebase - bez pełnej zawartości dla optymalizacji
-      const userWorkspaces = await workspaceService.getUserWorkspaces(currentUser.uid, { withContent: false });
-      
-      setCloudWorkspaces(userWorkspaces.map(w => ({
-        id: w.id,
-        title: w.title,
-        description: w.description,
-        updatedAt: w.updatedAt,
-        createdAt: w.createdAt
-      })));
+      const userWorkspaces = await workspaceService.getUserWorkspaces(
+        currentUser.uid,
+        { withContent: false }
+      );
+
+      setCloudWorkspaces(
+        userWorkspaces.map((w) => ({
+          id: w.id,
+          title: w.title,
+          description: w.description,
+          updatedAt: w.updatedAt,
+          createdAt: w.createdAt,
+        }))
+      );
 
       if (userWorkspaces.length === 0) {
         setCloudSuccess("Nie znaleziono workspace'ów w Firebase");
@@ -123,48 +154,67 @@ export const CloudTab: React.FC<CloudTabProps> = ({
       return;
     }
 
-    showConfirmation(
-      "Wczytaj z Firebase",
-      "Ta operacja wczyta wybrany workspace z Firebase. Jeśli workspace o tym ID już istnieje, zostanie usunięty i zastąpiony nowym. Kontynuować?",
-      async () => {
-        try {
-          setIsLoading(true);
-          setCloudError(null);
-          setCloudSuccess(null);
-
-          // Pobierz workspace z Firebase
-          const workspace = await workspaceService.getWorkspace(
-            selectedWorkspaceId,
-            currentUser.uid
-          );
-
-          if (!workspace) {
-            throw new Error("Nie można wczytać danych workspace'a");
-          }
-
-          // Sprawdź, czy workspace o takim ID już istnieje
-          const existingWorkspace = workspaces.find(w => w.id === workspace.id);
-          
-          if (existingWorkspace) {
-            // Jeżeli workspace o tym ID już istnieje, usuń go i dodaj nowy
-            onWorkspaceReplaced(workspace, existingWorkspace.id);
-            setCloudSuccess(`Workspace '${workspace.title}' został zaktualizowany`);
-          } else {
-            // Jeżeli workspace o tym ID nie istnieje, dodaj go jako nowy
-            onWorkspaceAdded(workspace);
-            setCloudSuccess(`Pomyślnie wczytano workspace '${workspace.title}'`);
-          }
-        } catch (error) {
-          console.error("Błąd podczas wczytywania workspace'a:", error);
-          setCloudError(
-            "Nie udało się wczytać workspace'a: " +
-              (error instanceof Error ? error.message : String(error))
-          );
-        } finally {
-          setIsLoading(false);
-        }
-      }
+    const selectedWorkspace = cloudWorkspaces.find(
+      (w) => w.id === selectedWorkspaceId
     );
+    if (!selectedWorkspace) {
+      setCloudError("Nie można znaleźć wybranego workspace'a");
+      return;
+    }
+
+    // Sprawdź, czy workspace o takim ID już istnieje lokalnie
+    const existingWorkspace = workspaces.find(
+      (w) => w.id === selectedWorkspaceId
+    );
+
+    const confirmMessage = existingWorkspace
+      ? `Workspace "${selectedWorkspace.title}" już istnieje lokalnie. Wczytanie zastąpi lokalną wersję. Kontynuować?`
+      : `Ta operacja wczyta workspace "${selectedWorkspace.title}" z Firebase. Kontynuować?`;
+
+    showConfirmation("Wczytaj z Firebase", confirmMessage, async () => {
+      try {
+        setIsLoading(true);
+        setCloudError(null);
+        setCloudSuccess(null);
+
+        // Pobierz workspace z Firebase
+        const workspace = await workspaceService.getWorkspace(
+          selectedWorkspaceId,
+          currentUser.uid
+        );
+
+        if (!workspace) {
+          throw new Error("Nie można wczytać danych workspace'a");
+        }
+
+        if (existingWorkspace) {
+          // Jeżeli workspace o tym ID już istnieje, zastąp go
+          onWorkspaceReplaced(workspace, existingWorkspace.id);
+          setCloudSuccess(
+            `Workspace '${workspace.title}' został zaktualizowany lokalnie`
+          );
+        } else {
+          // Jeżeli workspace o tym ID nie istnieje, dodaj go jako nowy
+          onWorkspaceAdded(workspace);
+          setCloudSuccess(`Pomyślnie wczytano workspace '${workspace.title}'`);
+        }
+      } catch (error) {
+        console.error("Błąd podczas wczytywania workspace'a:", error);
+        setCloudError(
+          "Nie udało się wczytać workspace'a: " +
+            (error instanceof Error ? error.message : String(error))
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    });
+  };
+
+  // Format date
+  const formatDate = (timestamp: number) => {
+    if (!timestamp) return "N/A";
+    const date = new Date(timestamp);
+    return date.toLocaleString();
   };
 
   return (
@@ -174,56 +224,72 @@ export const CloudTab: React.FC<CloudTabProps> = ({
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Wymagane uwierzytelnienie</AlertTitle>
           <AlertDescription>
-            Musisz się zalogować, aby korzystać z funkcji kopii zapasowej i przywracania Firebase.
+            Musisz się zalogować, aby korzystać z funkcji kopii zapasowej i
+            przywracania Firebase.
           </AlertDescription>
         </Alert>
       ) : (
-        <>
-          <Card>
-            <CardHeader className="p-4">
-              <RadioGroup
-                value={cloudAction}
-                onValueChange={(value) => setCloudAction(value as "save" | "load")}
-                className="space-y-3"
+        <div className="space-y-4">
+          {/* Vertical radio options */}
+
+          <RadioGroup
+            value={cloudAction}
+            onValueChange={(value) => setCloudAction(value as "save" | "load")}
+            className="flex items-center gap-2  "
+          >
+            <div className="border border-border rounded-md flex p-6 gap-4">
+              <RadioGroupItem value="save" id="cloud-save" />
+
+              <Label
+                htmlFor="cloud-save"
+                className="font-medium flex items-center"
               >
-                <div className="flex items-start space-x-2">
-                  <RadioGroupItem value="save" id="cloud-save" />
-                  <div className="grid gap-1.5">
-                    <Label htmlFor="cloud-save" className="font-medium">
-                      Zapisz do Firebase
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Zapisz bieżący workspace do Firebase
-                    </p>
-                  </div>
-                </div>
+                <CloudUpload className="h-4 w-4 mr-2 text-primary" />
+                Zapisz do Firebase
+              </Label>
+            </div>
+            <div className="border border-border rounded-md flex p-6 gap-4">
+              <RadioGroupItem value="load" id="cloud-load" />
 
-                <div className="flex items-start space-x-2">
-                  <RadioGroupItem value="load" id="cloud-load" />
-                  <div className="grid gap-1.5">
-                    <Label htmlFor="cloud-load" className="font-medium">
-                      Wczytaj z Firebase
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Wczytaj swoje workspace'y z Firebase
-                    </p>
-                  </div>
-                </div>
-              </RadioGroup>
-            </CardHeader>
-          </Card>
+              <Label
+                htmlFor="cloud-load"
+                className="font-medium flex items-center"
+              >
+                <CloudDownload className="h-4 w-4 mr-2 text-primary" />
+                Wczytaj z Firebase
+              </Label>
+            </div>
+          </RadioGroup>
 
+          {/* Content based on selected action */}
           {cloudAction === "save" ? (
-            <Card>
-              <CardHeader className="p-4">
-                <h3 className="text-lg font-medium">Zapisz bieżący workspace do Firebase</h3>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Ta operacja zapisze bieżący workspace do Firebase.
-                </p>
-                <div className="mt-4">
+            <CardContent className="pt-6">
+              {currentWorkspace ? (
+                <div className="space-y-4">
+                  <div className="p-4 bg-muted rounded-md">
+                    <p className="font-medium text-lg">
+                      {currentWorkspace.title}
+                    </p>
+
+                    {currentWorkspace.description && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {currentWorkspace.description}
+                      </p>
+                    )}
+
+                    {cloudWorkspaces.some(
+                      (w) => w.id === currentWorkspace.id
+                    ) && (
+                      <div className="text-sm text-amber-600 mt-2 p-2 bg-amber-50 dark:bg-amber-900/20 rounded-sm border border-amber-200 dark:border-amber-800">
+                        Ten workspace już istnieje w chmurze i zostanie
+                        nadpisany
+                      </div>
+                    )}
+                  </div>
+
                   <Button
                     onClick={handleSaveToFirebase}
-                    disabled={isLoading || !currentWorkspace}
+                    disabled={isLoading}
                     className="w-full"
                   >
                     {isLoading ? (
@@ -234,26 +300,109 @@ export const CloudTab: React.FC<CloudTabProps> = ({
                     ) : (
                       <>
                         <CloudUpload className="h-4 w-4 mr-2" />
-                        Zapisz {currentWorkspace ? currentWorkspace.title : "workspace"}
+                        Zapisz do Firebase
                       </>
                     )}
                   </Button>
                 </div>
-              </CardHeader>
-            </Card>
+              ) : (
+                <div className="text-center py-6 text-muted-foreground">
+                  <p>Nie wybrano żadnego workspace'a</p>
+                  <p className="text-sm mt-1">
+                    Wybierz workspace, aby zapisać go w chmurze
+                  </p>
+                </div>
+              )}
+            </CardContent>
           ) : (
-            <Card>
-              <CardHeader className="p-4">
-                <h3 className="text-lg font-medium">Wczytaj workspace'y z Firebase</h3>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Wybierz workspace do wczytania:
-                </p>
-                
-                <div className="mt-4">
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-base font-medium">Workspace'y w chmurze</h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLoadFromFirebase}
+                  disabled={isLoading}
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 mr-1 ${
+                      isLoading ? "animate-spin" : ""
+                    }`}
+                  />
+                  Odśwież
+                </Button>
+              </div>
+
+              {isLoading && cloudWorkspaces.length === 0 ? (
+                <div className="flex justify-center py-6">
+                  <Loader className="h-6 w-6 animate-spin text-primary" />
+                </div>
+              ) : cloudWorkspaces.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground border border-dashed rounded-md p-4">
+                  <p>Nie znaleziono workspace'ów w Firebase</p>
+                  <p className="text-sm mt-1">
+                    Zapisz jakiś workspace, aby móc go później wczytać
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="space-y-2 rounded-md bg-background max-h-60 overflow-y-auto">
+                    {cloudWorkspaces.map((workspace) => (
+                      <div
+                        key={workspace.id}
+                        onClick={() => setSelectedWorkspaceId(workspace.id)}
+                        className={`p-3 rounded-md cursor-pointer transition-colors ${
+                          selectedWorkspaceId === workspace.id
+                            ? " border border-primary/20"
+                            : "hover:bg-muted border border-transparent"
+                        }`}
+                      >
+                        <div className="flex items-center">
+                          <input
+                            type="radio"
+                            id={`workspace-${workspace.id}`}
+                            name="workspace-selection"
+                            checked={selectedWorkspaceId === workspace.id}
+                            onChange={() =>
+                              setSelectedWorkspaceId(workspace.id)
+                            }
+                            className="mr-3"
+                          />
+                          <div className="flex-1 min-w-0 grid grid-cols-2">
+                            <p className="font-medium">
+                              {workspace.title || "Workspace bez nazwy"}
+                            </p>
+
+                            {workspace.description && (
+                              <p className="text-right text-sm text-muted-foreground truncate mt-1">
+                                {workspace.description}
+                              </p>
+                            )}
+
+                            <div className="flex items-center justify-between mt-2">
+                              <div className="flex items-center text-xs text-muted-foreground">
+                                <Calendar className="h-3 w-3 mr-1" />
+                                {formatDate(workspace.updatedAt)}
+                              </div>
+
+                              {workspaces.some(
+                                (w) => w.id === workspace.id
+                              ) && (
+                                <span className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-100 px-2 py-0.5 rounded">
+                                  Istnieje lokalnie
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
                   <Button
-                    onClick={handleLoadFromFirebase}
-                    disabled={isLoading}
-                    className="w-full mb-4"
+                    onClick={handleLoadSelectedWorkspace}
+                    disabled={isLoading || !selectedWorkspaceId}
+                    className="w-full"
                   >
                     {isLoading ? (
                       <>
@@ -263,71 +412,18 @@ export const CloudTab: React.FC<CloudTabProps> = ({
                     ) : (
                       <>
                         <CloudDownload className="h-4 w-4 mr-2" />
-                        Pobierz workspace'y
+                        Wczytaj wybrany workspace
                       </>
                     )}
                   </Button>
-
-                  {cloudWorkspaces.length > 0 && (
-                    <div className="mt-4 max-h-60 overflow-y-auto">
-                      <div className="space-y-2">
-                        {cloudWorkspaces.map((workspace) => (
-                          <div
-                            key={workspace.id}
-                            className="flex items-center p-2 border rounded hover:bg-gray-50 dark:hover:bg-gray-800"
-                          >
-                            <input
-                              type="radio"
-                              id={`workspace-${workspace.id}`}
-                              name="workspace-selection"
-                              checked={selectedWorkspaceId === workspace.id}
-                              onChange={() => setSelectedWorkspaceId(workspace.id)}
-                              className="mr-2"
-                            />
-                            <Label
-                              htmlFor={`workspace-${workspace.id}`}
-                              className="flex-1 cursor-pointer"
-                            >
-                              <span className="font-medium">
-                                {workspace.title || "Workspace bez nazwy"}
-                              </span>
-                              <p className="text-xs text-muted-foreground">
-                                {workspace.description || "Brak opisu"}
-                              </p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                Zaktualizowano: {workspace.updatedAt ? new Date(workspace.updatedAt).toLocaleString() : "N/A"}
-                              </p>
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                      
-                      <Button
-                        onClick={handleLoadSelectedWorkspace}
-                        disabled={isLoading || !selectedWorkspaceId}
-                        className="w-full mt-4"
-                      >
-                        {isLoading ? (
-                          <>
-                            <Loader className="h-4 w-4 mr-2 animate-spin" />
-                            Wczytywanie...
-                          </>
-                        ) : (
-                          <>
-                            <CloudDownload className="h-4 w-4 mr-2" />
-                            Wczytaj wybrany workspace
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  )}
                 </div>
-              </CardHeader>
-            </Card>
+              )}
+            </div>
           )}
 
+          {/* Notifications */}
           {cloudError && (
-            <Alert variant="destructive" className="mt-4">
+            <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Błąd</AlertTitle>
               <AlertDescription>{cloudError}</AlertDescription>
@@ -335,12 +431,12 @@ export const CloudTab: React.FC<CloudTabProps> = ({
           )}
 
           {cloudSuccess && (
-            <Alert className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-100 mt-4">
+            <Alert className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-100">
               <AlertTitle>Sukces</AlertTitle>
               <AlertDescription>{cloudSuccess}</AlertDescription>
             </Alert>
           )}
-        </>
+        </div>
       )}
     </>
   );
