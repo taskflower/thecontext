@@ -10,11 +10,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import sanitizeHtml from "@/utils/utils";
 
 const Header: React.FC<HeaderProps> = ({
   currentStepIndex,
   totalSteps,
   nodeName,
+  nodeDescription,
   onClose,
 }) => {
   // Pobierz informacje o bieżącym workspace
@@ -62,6 +64,17 @@ const Header: React.FC<HeaderProps> = ({
           {nodeName || `Step ${currentStepIndex + 1}`}
         </CardTitle>
       </div>
+      
+      {/* Node description - obsługa HTML */}
+      {nodeDescription && (
+        <div className="mt-2 text-sm text-muted-foreground prose prose-sm max-w-none">
+          <div
+              dangerouslySetInnerHTML={{
+                __html: sanitizeHtml(nodeDescription),
+              }}
+            />
+        </div>
+      )}
     </CardHeader>
   );
 };

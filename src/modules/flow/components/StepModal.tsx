@@ -212,6 +212,7 @@ export const StepModal: React.FC<StepModalProps> = ({
             currentStepIndex={currentStepIndex}
             totalSteps={temporarySteps.length}
             nodeName={currentNode.label}
+            nodeDescription={currentNode.description}
             onClose={() => handleClose(true)}
           />
         )}

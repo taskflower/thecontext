@@ -17,6 +17,7 @@ export const createNodeSlice: StateCreator<
 
   addNode: (payload: {
     label: string;
+    description?: string;
     assistantMessage: string;
     userPrompt?: string;
     position?: { x: number; y: number };
@@ -27,6 +28,7 @@ export const createNodeSlice: StateCreator<
         id: `node-${Date.now()}`,
         type: TYPES.NODE,
         label: payload.label,
+        description: payload.description || "",
         assistantMessage: payload.assistantMessage,
         userPrompt: payload.userPrompt || "",
         position: payload.position || { x: 100, y: 100 },
@@ -100,6 +102,22 @@ export const createNodeSlice: StateCreator<
       const node = scenario?.children.find((n) => n.id === nodeId);
       if (node) {
         node.label = label;
+        state.stateVersion++;
+      }
+    }),
+
+  // Method to update node description
+  updateNodeDescription: (nodeId: string, description: string) =>
+    set((state: Draft<AppState>) => {
+      const workspace = state.items.find(
+        (w) => w.id === state.selected.workspace
+      );
+      const scenario = workspace?.children.find(
+        (s) => s.id === state.selected.scenario
+      );
+      const node = scenario?.children.find((n) => n.id === nodeId);
+      if (node) {
+        node.description = description;
         state.stateVersion++;
       }
     }),

@@ -21,9 +21,10 @@ const AddNewNode: React.FC<AddNewNodeProps> = ({ isOpen, setIsOpen }) => {
 
   const [formData, setFormData] = useState({
     label: "",
+    description: "", // Dodane pole opisu
     assistantMessage: "",
     userPrompt: "",
-    contextKey: "", // Add contextKey to formData
+    contextKey: "",
   });
 
   const handleChange = (
@@ -42,12 +43,14 @@ const AddNewNode: React.FC<AddNewNodeProps> = ({ isOpen, setIsOpen }) => {
     if (!formData.label.trim()) return;
     addNode({
       label: formData.label,
+      description: formData.description, // Dodane pole opisu
       assistantMessage: formData.assistantMessage,
       userPrompt: formData.userPrompt,
-      contextKey: formData.contextKey || undefined, // Add contextKey to node data
+      contextKey: formData.contextKey || undefined,
     });
     setFormData({
       label: "",
+      description: "", // Dodane pole opisu
       assistantMessage: "",
       userPrompt: "",
       contextKey: "",
@@ -79,6 +82,16 @@ const AddNewNode: React.FC<AddNewNodeProps> = ({ isOpen, setIsOpen }) => {
         value={formData.label}
         onChange={handleChange}
         placeholder="Node label"
+      />
+
+      <TextAreaField
+        id="description"
+        name="description"
+        label="Description"
+        value={formData.description}
+        onChange={handleChange}
+        placeholder="Node description (optional)"
+        rows={2}
       />
 
       <TextAreaField

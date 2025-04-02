@@ -1,15 +1,17 @@
-// src/modules/flow/components/templates/duolingo/Header.tsx
+// src/modules/flow/components/templates/elearning/Header.tsx
 import React from "react";
 import { X, Heart } from "lucide-react";
 import { HeaderProps } from "../../interfaces";
 import { useAppStore } from "@/modules/store";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import sanitizeHtml from "@/utils/utils";
 
 const Header: React.FC<HeaderProps> = ({
   currentStepIndex,
   totalSteps,
   nodeName,
+  nodeDescription,
   onClose,
 }) => {
   // Get current workspace information
@@ -32,14 +34,14 @@ const Header: React.FC<HeaderProps> = ({
         {/* Progress dots - centered */}
         <div className="flex-1 flex items-center justify-center gap-1 mx-4">
           {Array.from({ length: totalSteps }).map((_, index) => (
-            <div 
-              key={index} 
+            <div
+              key={index}
               className={`rounded-full transition-all ${
-                index === currentStepIndex 
-                  ? "w-3 h-3 bg-primary animate-pulse" 
-                  : index < currentStepIndex 
-                    ? "w-2 h-2 bg-primary/80" 
-                    : "w-2 h-2 bg-muted"
+                index === currentStepIndex
+                  ? "w-3 h-3 bg-primary animate-pulse"
+                  : index < currentStepIndex
+                  ? "w-2 h-2 bg-primary/80"
+                  : "w-2 h-2 bg-muted"
               }`}
             />
           ))}
@@ -57,15 +59,29 @@ const Header: React.FC<HeaderProps> = ({
         <h2 className="text-lg font-bold text-foreground">
           {nodeName || `Lesson ${currentStepIndex + 1}`}
         </h2>
+
+        {/* Node description - obsługa HTML */}
+        {nodeDescription && (
+          <div className="text-sm text-muted-foreground mt-1 prose prose-sm max-w-none mx-auto">
+            <div
+              dangerouslySetInnerHTML={{
+                __html: sanitizeHtml(nodeDescription),
+              }}
+            />
+          </div>
+        )}
+
         {currentWorkspace && (
-          <p className="text-xs text-muted-foreground">{currentWorkspace.title}</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {currentWorkspace.title}
+          </p>
         )}
       </div>
 
       {/* Progress indicator */}
       <div className="flex justify-center mb-2">
-        <Badge 
-          variant="outline" 
+        <Badge
+          variant="outline"
           className="text-xs bg-primary/10 text-primary border-primary/20"
         >
           {currentStepIndex + 1} of {totalSteps}

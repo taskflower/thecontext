@@ -11,6 +11,8 @@ export interface HeaderProps {
   totalSteps: number;
   /** Name of the current node */
   nodeName?: string;
+   /** Description of the current node */
+   nodeDescription?: string;
   /** Callback when close button is clicked */
   onClose: () => void;
 }

@@ -18,9 +18,10 @@ interface EditNodeProps {
 const EditNode: React.FC<EditNodeProps> = ({ isOpen, setIsOpen, nodeId }) => {
   const [formData, setFormData] = useState({
     label: "",
+    description: "", // Dodane pole opisu
     userPrompt: "",
     assistantMessage: "",
-    contextKey: "", // Add contextKey to formData
+    contextKey: "",
   });
 
   // Get necessary state and actions
@@ -38,9 +39,10 @@ const EditNode: React.FC<EditNodeProps> = ({ isOpen, setIsOpen, nodeId }) => {
     if (isOpen && nodeId && node) {
       setFormData({
         label: node.label || "",
+        description: node.description || "", // Dodane pole opisu
         userPrompt: node.userPrompt || "",
         assistantMessage: node.assistantMessage || "",
-        contextKey: node.contextKey || "", // Load contextKey from node
+        contextKey: node.contextKey || "",
       });
     }
   }, [isOpen, nodeId, node]);
@@ -63,9 +65,10 @@ const EditNode: React.FC<EditNodeProps> = ({ isOpen, setIsOpen, nodeId }) => {
     // Update the node
     const updateNode = useAppStore.getState();
     updateNode.updateNodeLabel(nodeId, formData.label);
+    updateNode.updateNodeDescription(nodeId, formData.description); // Dodana aktualizacja opisu
     updateNode.updateNodeUserPrompt(nodeId, formData.userPrompt);
     updateNode.updateNodeAssistantMessage(nodeId, formData.assistantMessage);
-    updateNode.updateNodeContextKey(nodeId, formData.contextKey); // Update contextKey
+    updateNode.updateNodeContextKey(nodeId, formData.contextKey);
 
     setIsOpen(false);
   };
@@ -94,6 +97,16 @@ const EditNode: React.FC<EditNodeProps> = ({ isOpen, setIsOpen, nodeId }) => {
         value={formData.label}
         onChange={handleChange}
         placeholder="Node label"
+      />
+
+      <TextAreaField
+        id="description"
+        name="description"
+        label="Description"
+        value={formData.description}
+        onChange={handleChange}
+        placeholder="Node description (optional)"
+        rows={2}
       />
 
       <TextAreaField

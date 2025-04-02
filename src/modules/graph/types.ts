@@ -1,4 +1,3 @@
- 
 // src/modules/graph/types.ts
 import { PluginDataMap } from "../plugins/types";
 import { BaseItem, ItemType } from "../store";
@@ -11,6 +10,7 @@ export interface Position {
 
 export interface FlowNode extends BaseItem {
   label: string;
+  description?: string; // Dodane pole opisu
   assistantMessage: string;
   userPrompt?: string;
   position: Position;
@@ -36,6 +36,7 @@ export interface NodeActions {
   ) => void;
   getNodePluginData: (nodeId: string, pluginKey: string) => unknown;
   updateNodeLabel: (nodeId: string, label: string) => void;
+  updateNodeDescription: (nodeId: string, description: string) => void; // Dodana metoda
   updateNodeUserPrompt: (nodeId: string, prompt: string) => void;
   updateNodeAssistantMessage: (nodeId: string, message: string) => void;
   updateNodeContextKey: (nodeId: string, contextKey: string) => void; // Added method
@@ -43,6 +44,7 @@ export interface NodeActions {
 
 export interface NodePayload {
   label: string;
+  description?: string; // Dodane pole opisu
   assistantMessage: string;
   userPrompt?: string;
   position?: Position;

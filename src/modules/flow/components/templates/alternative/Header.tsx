@@ -4,17 +4,15 @@ import { X } from "lucide-react";
 import { HeaderProps } from "../../interfaces";
 import { useAppStore } from "@/modules/store";
 import { Button } from "@/components/ui/button";
-import {
-  CardHeader,
-  CardDescription,
-  CardTitle,
-} from "@/components/ui/card";
+import { CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import sanitizeHtml from "@/utils/utils";
 
 const Header: React.FC<HeaderProps> = ({
   currentStepIndex,
   totalSteps,
   nodeName,
+  nodeDescription,
   onClose,
 }) => {
   // Get current workspace information
@@ -43,9 +41,9 @@ const Header: React.FC<HeaderProps> = ({
             {currentWorkspace.title}
           </Badge>
           {currentWorkspace.description && (
-            <CardDescription className="text-xs text-muted-foreground max-w-md">
+            <div className="text-xs text-muted-foreground max-w-md">
               {currentWorkspace.description}
-            </CardDescription>
+            </div>
           )}
         </div>
       )}
@@ -53,8 +51,8 @@ const Header: React.FC<HeaderProps> = ({
       {/* Progress indicator and step title */}
       <div className="flex flex-col space-y-2">
         <div className="flex items-center gap-2">
-          <Badge 
-            variant="outline" 
+          <Badge
+            variant="outline"
             className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/10"
           >
             {currentStepIndex + 1}/{totalSteps}
@@ -66,11 +64,22 @@ const Header: React.FC<HeaderProps> = ({
         <CardTitle className="text-xl font-bold tracking-tight text-foreground">
           {nodeName || `Step ${currentStepIndex + 1}`}
         </CardTitle>
+
+        {/* Node description - obsługa HTML */}
+        {nodeDescription && (
+          <div className="text-sm text-muted-foreground mt-1 prose prose-sm max-w-none">
+            <div
+              dangerouslySetInnerHTML={{
+                __html: sanitizeHtml(nodeDescription),
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Progress bar */}
       <div className="w-full h-1 mt-4 bg-muted rounded-full overflow-hidden">
-        <div 
+        <div
           className="h-full bg-primary transition-all duration-300 ease-in-out rounded-full"
           style={{ width: `${((currentStepIndex + 1) / totalSteps) * 100}%` }}
         />
