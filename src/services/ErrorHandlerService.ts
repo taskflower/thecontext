@@ -2,7 +2,12 @@
  * ErrorHandlerService - Centralizuje obsługę błędów w aplikacji
  * Zapewnia spójną obsługę i prezentację błędów
  */
-import { ErrorResponse } from './LlmService';
+// Struktura błędu z backendu - reeksportowana dla wygody użycia
+export interface ErrorResponse {
+  code: string;
+  message: string;
+  details?: Record<string, unknown> | null;
+}
 
 // Kody błędów z backendu
 export enum ErrorCode {
@@ -66,12 +71,7 @@ class ErrorHandlerService {
     this.components = { ...this.components, ...components };
   }
 
-  /**
-   * Pobiera komponent lub zwraca funkcję dummy
-   */
-  private getComponent<T extends keyof ErrorHandlerComponents>(name: T): NonNullable<ErrorHandlerComponents[T]> {
-    return this.components[name] || (() => console.warn(`Brak zarejestrowanego komponentu ${name}`));
-  }
+  // Funkcje pomocnicze do obsługi komponentów
 
   /**
    * Sprawdza, czy obiekt jest typu ErrorResponse

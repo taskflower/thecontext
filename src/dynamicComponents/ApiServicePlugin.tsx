@@ -71,7 +71,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
   const getContextItems = useAppStore((state) => state.getContextItems);
 
   // Rozszerzony kontekst aplikacji z dodatkową funkcją getContextItems
-  const enhancedAppContext:any = {
+  const enhancedAppContext: any = {
     ...appContext,
     authContext: auth,
     getContextItems: getContextItems,
@@ -121,8 +121,10 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
 
   // Stan do obsługi żądania API
   const [isLoading, setIsLoading] = useState(false);
-  const [, setApiResponse] = useState<string | null>(null);
-  const [, setHasError] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_apiResponse, setApiResponse] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_hasError, setHasError] = useState(false);
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [, setAuthAttempts] = useState(authAdapter.getAuthAttempts());
@@ -166,19 +168,6 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
   const callApi = async () => {
     if (!currentNodeId) return;
 
-    // Symulacja błędu - ustaw na true do testowania
-    const fakeError = false;
-    
-    if (fakeError) {
-      console.log("SYMULACJA: Zwracam błąd API");
-      setApiError({
-        code: "INTERNAL_ERROR",
-        message: "Gemini Service Error",
-        details: "Failed to register token usage"
-      });
-      return;
-    }
-
     setIsLoading(true);
     setApiResponse(null);
     setHasError(false);
@@ -205,7 +194,6 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
       
       // BARDZO WAŻNE: Natychmiast sprawdź czy jest błąd i ustaw go
       if (!response.success && response.error) {
-        console.log("ZNALEZIONO BŁĄD W ODPOWIEDZI:", response.error);
         if (typeof response.error === 'object') {
           setApiError(response.error as ApiErrorResponse);
         } else if (typeof response.error === 'string') {
@@ -321,13 +309,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
 
   // Funkcja obsługi logowania
   const handleLogin = () => {
-    // Przekierowanie do strony logowania
-    if (auth?.login) {
-      auth.login();
-    } else {
-      // Fallback - przekierowanie na stronę główną
-      window.location.href = '/login';
-    }
+    alert('TODO')
   };
 
   return (
@@ -386,7 +368,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
         </div>
       </div>
 
-      
+     
     </div>
   );
 };

@@ -4,6 +4,7 @@ import { cn } from '@/utils/utils';
 import { Button } from './button';
 import { ErrorResponse } from '@/services/ErrorHandlerService';
 
+
 export type ErrorDisplayVariant = 'error' | 'warning' | 'info';
 
 export interface ErrorDisplayProps {
