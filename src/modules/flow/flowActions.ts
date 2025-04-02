@@ -54,74 +54,83 @@ export const createFlowSlice: StateCreator<
     console.log('Number of nodes:', scenarioNodes.length);
     console.log('Number of edges:', scenarioEdges.length);
     
-    // If there are no edges, return all nodes in the order they appear
-    if (scenarioEdges.length === 0) {
+    try {
+      // If there are no edges, return all nodes in the order they appear
+      if (scenarioEdges.length === 0) {
+        return JSON.parse(JSON.stringify(scenarioNodes));
+      }
+    
+      // Map counting incoming edges for each node
+      const incomingMap = new Map<string, number>();
+      scenarioEdges.forEach((edge) => {
+        incomingMap.set(edge.target, (incomingMap.get(edge.target) || 0) + 1);
+      });
+    
+      // Find start node (has outgoing edges but no incoming)
+      let startNodeId: string | null = null;
+      for (const node of scenarioNodes) {
+        const hasOutgoing = scenarioEdges.some((edge) => edge.source === node.id);
+        const incomingCount = incomingMap.get(node.id) || 0;
+    
+        if (hasOutgoing && incomingCount === 0) {
+          startNodeId = node.id;
+          break;
+        }
+      }
+    
+      // Fallback to first node if no clear start node
+      if (!startNodeId && scenarioNodes.length > 0) {
+        startNodeId = scenarioNodes[0].id;
+      }
+    
+      if (!startNodeId) return [];
+    
+      // Create graph adjacency map
+      const edgesMap = new Map<string, string[]>();
+      scenarioEdges.forEach((edge) => {
+        if (!edgesMap.has(edge.source)) edgesMap.set(edge.source, []);
+        edgesMap.get(edge.source)?.push(edge.target);
+      });
+    
+      // Traverse path using DFS
+      const path: any[] = [];
+      const visited = new Set<string>();
+    
+      const dfs = (nodeId: string) => {
+        if (visited.has(nodeId)) return;
+    
+        const nodeData = scenarioNodes.find((n) => n.id === nodeId);
+        if (nodeData) {
+          // Create deep copy to avoid modifying original
+          const nodeCopy = JSON.parse(JSON.stringify(nodeData));
+          path.push(nodeCopy);
+          visited.add(nodeId);
+    
+          const nextNodes = edgesMap.get(nodeId) || [];
+          for (const next of nextNodes) dfs(next);
+        }
+      };
+    
+      dfs(startNodeId);
+      
+      // If we didn't visit all nodes with DFS, log this information but don't add unreachable nodes
+      if (path.length < scenarioNodes.length) {
+        console.log(`DFS visited only ${path.length} of ${scenarioNodes.length} nodes. Some nodes are not reachable via edges.`);
+        
+        // We do NOT add unreachable nodes as they should not be part of the flow
+        // This is the correct behavior - only nodes connected via edges should be accessible
+      }
+      
+      console.log('Final path length:', path.length);
+      return path;
+    } catch (error) {
+      // Import here to avoid circular dependencies
+      const { handleFlowPathError } = require('./errorHandling');
+      handleFlowPathError(error, scenario.id);
+      
+      // Fallback: return all nodes in order as a safe default
       return JSON.parse(JSON.stringify(scenarioNodes));
     }
-  
-    // Map counting incoming edges for each node
-    const incomingMap = new Map<string, number>();
-    scenarioEdges.forEach((edge) => {
-      incomingMap.set(edge.target, (incomingMap.get(edge.target) || 0) + 1);
-    });
-  
-    // Find start node (has outgoing edges but no incoming)
-    let startNodeId: string | null = null;
-    for (const node of scenarioNodes) {
-      const hasOutgoing = scenarioEdges.some((edge) => edge.source === node.id);
-      const incomingCount = incomingMap.get(node.id) || 0;
-  
-      if (hasOutgoing && incomingCount === 0) {
-        startNodeId = node.id;
-        break;
-      }
-    }
-  
-    // Fallback to first node if no clear start node
-    if (!startNodeId && scenarioNodes.length > 0) {
-      startNodeId = scenarioNodes[0].id;
-    }
-  
-    if (!startNodeId) return [];
-  
-    // Create graph adjacency map
-    const edgesMap = new Map<string, string[]>();
-    scenarioEdges.forEach((edge) => {
-      if (!edgesMap.has(edge.source)) edgesMap.set(edge.source, []);
-      edgesMap.get(edge.source)?.push(edge.target);
-    });
-  
-    // Traverse path using DFS
-    const path: any[] = [];
-    const visited = new Set<string>();
-  
-    const dfs = (nodeId: string) => {
-      if (visited.has(nodeId)) return;
-  
-      const nodeData = scenarioNodes.find((n) => n.id === nodeId);
-      if (nodeData) {
-        // Create deep copy to avoid modifying original
-        const nodeCopy = JSON.parse(JSON.stringify(nodeData));
-        path.push(nodeCopy);
-        visited.add(nodeId);
-  
-        const nextNodes = edgesMap.get(nodeId) || [];
-        for (const next of nextNodes) dfs(next);
-      }
-    };
-  
-    dfs(startNodeId);
-    
-    // If we didn't visit all nodes with DFS, log this information but don't add unreachable nodes
-    if (path.length < scenarioNodes.length) {
-      console.log(`DFS visited only ${path.length} of ${scenarioNodes.length} nodes. Some nodes are not reachable via edges.`);
-      
-      // We do NOT add unreachable nodes as they should not be part of the flow
-      // This is the correct behavior - only nodes connected via edges should be accessible
-    }
-    
-    console.log('Final path length:', path.length);
-    return path;
   },
 
   /**

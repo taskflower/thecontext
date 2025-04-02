@@ -9,6 +9,7 @@ import { LlmService } from "../services/LlmService";
 import { AuthUser } from "../services/authService";
 import { useAuth } from "../context/AuthContext";
 import { useAppStore } from "../modules/store";
+import ErrorDisplay from "@/components/ui/error-display";
 
 // Define the API service data structure
 interface ApiServiceData {
@@ -19,6 +20,13 @@ interface ApiServiceData {
   // JSON response options
   useJsonResponse?: boolean;
   contextJsonKey?: string; // Klucz w kontekście do znalezienia schematu JSON
+}
+
+// Define the error structure from backend
+interface ApiErrorResponse {
+  code: string;
+  message: string;
+  details?: Record<string, unknown> | null;
 }
 
 // Define the API response structure
@@ -33,6 +41,7 @@ interface ApiResponse {
       };
     };
   };
+  error?: ApiErrorResponse | string;
 }
 
 const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
@@ -112,11 +121,13 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
 
   // Stan do obsługi żądania API
   const [isLoading, setIsLoading] = useState(false);
-  const [apiResponse, setApiResponse] = useState<string | null>(null);
-  const [hasError, setHasError] = useState(false);
+  const [, setApiResponse] = useState<string | null>(null);
+  const [, setHasError] = useState(false);
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [, setAuthAttempts] = useState(authAdapter.getAuthAttempts());
+  // Zmieniliśmy nazwę stanu na apiError, aby odzwierciedlało to wszystkie typy błędów, nie tylko autoryzacji
+  const [apiError, setApiError] = useState<ApiErrorResponse | null>(null);
 
   // Pobranie wartości z kontekstu aplikacji
   const currentNodeId = appContext?.currentNode?.id;
@@ -155,9 +166,23 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
   const callApi = async () => {
     if (!currentNodeId) return;
 
+    // Symulacja błędu - ustaw na true do testowania
+    const fakeError = false;
+    
+    if (fakeError) {
+      console.log("SYMULACJA: Zwracam błąd API");
+      setApiError({
+        code: "INTERNAL_ERROR",
+        message: "Gemini Service Error",
+        details: "Failed to register token usage"
+      });
+      return;
+    }
+
     setIsLoading(true);
     setApiResponse(null);
     setHasError(false);
+    setApiError(null); // Resetuj błąd przy każdym nowym żądaniu
 
     try {
       // Pobranie bieżącego ID użytkownika lub użycie anonimowego
@@ -177,8 +202,23 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
 
       // Wysłanie żądania za pomocą LlmService
       const response = await llmService.sendRequest(requestParams) as ApiResponse;
+      
+      // BARDZO WAŻNE: Natychmiast sprawdź czy jest błąd i ustaw go
+      if (!response.success && response.error) {
+        console.log("ZNALEZIONO BŁĄD W ODPOWIEDZI:", response.error);
+        if (typeof response.error === 'object') {
+          setApiError(response.error as ApiErrorResponse);
+        } else if (typeof response.error === 'string') {
+          setApiError({
+            code: "INTERNAL_ERROR",
+            message: response.error,
+            details: null
+          });
+        }
+        setHasError(true);
+      }
 
-      const formattedResponse = JSON.stringify(response.data, null, 2);
+      const formattedResponse = JSON.stringify(response, null, 2);
       setApiResponse(formattedResponse);
 
       if (
@@ -217,18 +257,51 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
           moveToNextNode(currentNodeId);
         }
       } else {
+        // Uwaga: główna obsługa błędu jest już wykonana na początku, 
+        // więc tutaj tylko logujemy i kontynuujemy logikę dodawania komunikatu
+        console.log("Błędna odpowiedź bez wiadomości");
+        
+        // Jeśli jeszcze nie mamy błędu, ustaw jakiś domyślny
+        if (!apiError) {
+          setApiError({
+            code: "RESPONSE_PARSING_ERROR",
+            message: "Nie udało się przetworzyć odpowiedzi z API",
+            details: { response: JSON.stringify(response) }
+          });
+        }
+        
         setHasError(true);
 
         // Dodanie ostrzeżenia do konwersacji
         if (addNodeMessage) {
-          addNodeMessage(
-            currentNodeId,
-            "Warning: Could not extract content from API response."
-          );
+          let errorMsg = "Warning: Could not extract content from API response.";
+          
+          // Dodaj informację o błędzie, jeśli jest dostępna
+          if (apiError) {
+            errorMsg = `Warning: ${apiError.code} - ${apiError.message}`;
+          } else if (response.error) {
+            if (typeof response.error === 'object' && response.error.message) {
+              errorMsg = `Warning: ${response.error.message}`;
+            } else if (typeof response.error === 'string') {
+              errorMsg = `Warning: ${response.error}`;
+            }
+          }
+            
+          addNodeMessage(currentNodeId, errorMsg);
         }
       }
     } catch (error) {
       console.error("API error:", error);
+      
+      // Sprawdź, czy to obiekt błędu z kodem
+      if (
+        typeof error === 'object' && 
+        error !== null && 
+        'code' in error
+      ) {
+        setApiError(error as ApiErrorResponse);
+      }
+      
       setApiResponse(
         `Error: ${error instanceof Error ? error.message : String(error)}`
       );
@@ -246,8 +319,33 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
     }
   };
 
+  // Funkcja obsługi logowania
+  const handleLogin = () => {
+    // Przekierowanie do strony logowania
+    if (auth?.login) {
+      auth.login();
+    } else {
+      // Fallback - przekierowanie na stronę główną
+      window.location.href = '/login';
+    }
+  };
+
   return (
     <div className="mt-6 space-y-5">
+      {/* Komunikat błędu API - używamy komponentu ErrorDisplay */}
+      {apiError && (
+        <ErrorDisplay 
+          error={apiError}
+          variant="error"
+          className="mb-4"
+          onClose={() => setApiError(null)}
+          onPrimaryAction={apiError.code === 'UNAUTHORIZED' ? handleLogin : undefined}
+          primaryActionLabel={apiError.code === 'UNAUTHORIZED' ? "Zaloguj się" : undefined}
+          secondaryActionLabel="Zamknij"
+          onSecondaryAction={() => setApiError(null)}
+        />
+      )}
+
       {/* Przycisk wywołania API */}
       <div className="space-y-3">
         <div className="space-y-3 relative">
@@ -288,19 +386,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
         </div>
       </div>
 
-      {/* Informacja o błędzie - jeśli wystąpił */}
-      {hasError && apiResponse && (
-        <div className="space-y-3">
-          <label className="text-base font-medium leading-none text-destructive">
-            Błąd odpowiedzi API
-          </label>
-          <div className="w-full border-2 border-destructive rounded-md bg-destructive/5 px-4 py-3">
-            <pre className="text-sm whitespace-pre-wrap text-destructive">
-              {apiResponse}
-            </pre>
-          </div>
-        </div>
-      )}
+      
     </div>
   );
 };

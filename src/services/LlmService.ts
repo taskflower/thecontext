@@ -101,6 +101,18 @@ export interface LlmResponseData {
 }
 
 /**
+ * Error response structure from backend
+ */
+export interface ErrorResponse {
+  /** Error code from backend */
+  code: string;
+  /** Human-readable error message */
+  message: string;
+  /** Optional additional error details */
+  details?: Record<string, unknown>;
+}
+
+/**
  * Response from an LLM API request
  */
 export interface LlmResponse {
@@ -108,8 +120,8 @@ export interface LlmResponse {
   success: boolean;
   /** Response data */
   data?: LlmResponseData;
-  /** Error message if unsuccessful */
-  error?: string;
+  /** Error object if unsuccessful */
+  error?: ErrorResponse | string;
 }
 
 /**
