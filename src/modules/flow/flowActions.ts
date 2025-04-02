@@ -124,9 +124,10 @@ export const createFlowSlice: StateCreator<
       console.log('Final path length:', path.length);
       return path;
     } catch (error) {
-      // Import here to avoid circular dependencies
-      const { handleFlowPathError } = require('./errorHandling');
-      handleFlowPathError(error, scenario.id);
+      // Log error and continue with fallback
+      console.error("Error in flow path calculation:", error);
+      // Attempt to pass error details in console for debugging
+      console.error(`Error details: Scenario ${scenario.id}, Nodes: ${scenarioNodes.length}, Edges: ${scenarioEdges.length}`);
       
       // Fallback: return all nodes in order as a safe default
       return JSON.parse(JSON.stringify(scenarioNodes));
