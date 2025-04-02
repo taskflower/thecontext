@@ -35,12 +35,12 @@ const Header: React.FC<HeaderProps> = ({
 
         {/* Main heading */}
         <div className="mt-10 mb-8">
-          <h2 className="text-4xl font-normal text-foreground">
+          <p className="text-4xl font-normal text-foreground">
             {/* Node description - obsługa HTML */}
             {nodeDescription && (
               <h2 dangerouslySetInnerHTML={{ __html: nodeDescription }} />
             )}
-          </h2>
+          </p>
         </div>
 
         {/* Current step indicator */}
