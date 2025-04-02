@@ -1,10 +1,11 @@
 /**
  * Scenarios Widget Component
  */
+import React from 'react';
 import { WidgetComponentProps } from '../types';
-import { Folder, PlayCircle, Users, Clock } from 'lucide-react';
+import { Folder } from 'lucide-react';
 import { useAppStore } from '@/modules/store';
-import { Scenario } from '@/modules/scenarios';
+import { ScenarioCard } from "@/components/frontApp";
 
 /**
  * Scenarios widget displays recent scenarios from the workspace
@@ -14,83 +15,75 @@ export function ScenariosWidget({ config }: WidgetComponentProps) {
   const workspaces = useAppStore(state => state.items);
   const selectedWorkspace = useAppStore(state => state.selected.workspace);
   const currentWorkspaceId = (config.workspaceId as string) || selectedWorkspace;
+  const checkScenarioFilterMatch = useAppStore(state => state.checkScenarioFilterMatch);
   
   // Get current workspace and scenarios
   const currentWorkspace = workspaces.find(w => w.id === currentWorkspaceId);
-  const scenarios = currentWorkspace?.children || [];
   
-  // Limit to most recent scenarios
-  const recentScenarios = scenarios
-    .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
-    .slice(0, 5);
-  
-  // Handle scenario click
-  const handleScenarioClick = (id: string) => {
-    // Debug log to check scenario selection
-    console.log("ScenariosWidget - Selected scenario ID:", id);
-    
-    // First select the scenario and start flow session
-    useAppStore.getState().selectScenario(id);
-    
-    // Check scenario after selection
-    const selectedScenario = useAppStore.getState().getCurrentScenario();
-    console.log("ScenariosWidget - After selection, current scenario:", {
-      id: selectedScenario?.id,
-      name: selectedScenario?.name,
-      template: selectedScenario?.template
+  // Process scenarios with filter status - similar to WorkspacePage
+  const scenariosWithStatus = React.useMemo(() => {
+    if (!currentWorkspace) return [];
+
+    return currentWorkspace.children.map((scenario) => {
+      const hasFilters = !!scenario.filters && scenario.filters.length > 0;
+      const activeFilters =
+        hasFilters && scenario.filters
+          ? scenario.filters.filter((f) => f.enabled)
+          : [];
+
+      // Check if scenario filters match
+      const matchesFilter = hasFilters
+        ? checkScenarioFilterMatch(scenario.id)
+        : true;
+
+      return {
+        ...scenario,
+        hasFilters,
+        activeFiltersCount: activeFilters.length,
+        matchesFilter: matchesFilter,
+      };
     });
-    
+  }, [currentWorkspace, checkScenarioFilterMatch]);
+  
+
+  
+  // Handle scenario click (now handled by the ScenarioCard)
+  const handleStartFlow = () => {
+    // Debug log to check current scenario before starting flow
+    const currentScenario = useAppStore.getState().getCurrentScenario();
+    console.log("ScenariosWidget - Starting flow with scenario:", {
+      id: currentScenario?.id,
+      name: currentScenario?.name,
+      template: currentScenario?.template,
+    });
+
     useAppStore.getState().startFlowSession();
     
     // Then emit custom event to notify WorkspacePage to show flow player
     document.dispatchEvent(new CustomEvent('show-flow-player'));
   };
   
-  // Format date
-  const formatDate = (timestamp?: number) => {
-    if (!timestamp) return 'Unknown';
-    
-    const date = new Date(timestamp);
-    return date.toLocaleDateString();
+  // Handle filter click
+  const handleFilterClick = (e: React.MouseEvent, scenarioId: string) => {
+    e.stopPropagation();
+    // You might want to implement filter dialog opening here
+    // or dispatch an event to be handled by the parent component
+    console.log("Filter clicked for scenario:", scenarioId);
   };
   
+
   return (
     <div className="p-4 h-full flex flex-col">
-      
-        
-        
-          {/* {currentWorkspace && (
-            <div className="text-xs font-medium px-2 py-1 bg-muted/30 rounded">
-              {currentWorkspace.title}
-            </div>
-          )} */}
-     
-      
       <div className="flex-1 overflow-auto">
-        {recentScenarios.length > 0 ? (
+        {scenariosWithStatus.length > 0 ? (
           <div className="space-y-3">
-            {recentScenarios.map((scenario:Scenario) => (
-              <div 
+            {scenariosWithStatus.map((scenario) => (
+              <ScenarioCard
                 key={scenario.id}
-                className="p-3 border rounded flex items-center justify-between hover:bg-muted/30 cursor-pointer transition-colors"
-                onClick={() => handleScenarioClick(scenario.id)}
-              >
-                <div>
-                  <div className="font-medium">{scenario.name}</div>
-                  <div className="text-xs text-muted-foreground flex items-center mt-1 gap-3">
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" /> {formatDate(scenario.updatedAt)}
-                    </span>
-                    {scenario.type && (
-                      <span className="flex items-center gap-1">
-                        <Users className="h-3 w-3" /> {scenario.type}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                
-                <PlayCircle className="h-5 w-5 text-primary" />
-              </div>
+                scenario={scenario}
+                onFilterClick={handleFilterClick}
+                onStartFlow={handleStartFlow}
+              />
             ))}
           </div>
         ) : (
@@ -98,7 +91,11 @@ export function ScenariosWidget({ config }: WidgetComponentProps) {
             <div>
               <Folder className="h-10 w-10 mx-auto mb-2 opacity-50" />
               <p>No scenarios available</p>
-              <p className="text-xs mt-1">Create scenarios in the workspace to see them here</p>
+              <p className="text-xs mt-1">
+                {currentWorkspace ? 
+                  "No scenarios match the current filters" : 
+                  "Create scenarios in the workspace to see them here"}
+              </p>
             </div>
           </div>
         )}
