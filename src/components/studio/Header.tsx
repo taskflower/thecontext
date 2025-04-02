@@ -1,4 +1,4 @@
-import { Focus, PanelLeft, Sun, Moon } from "lucide-react";
+import {   PanelLeft, Sun, Moon, Frame } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/utils/utils";
 import { AuthButton } from "../AuthButton";
@@ -13,7 +13,7 @@ export const Header: React.FC = () => {
     <header className="z-20 border-b border-border h-14 px-4 flex items-center justify-between bg-background z-10">
       <div className="flex items-center gap-3">
         <h1 className="text-xs font-semibold flex items-center">
-          <Focus className="mr-2 h-4 w-4 text-primary -mt-1" />
+          <Frame className="mr-2 h-3 w-3 text-primary m-0 md:-mt-2" />
           <Link to="/">
             RevertContext{" "}
             <p className="font-normal">

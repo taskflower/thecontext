@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { AuthProvider } from "./context/AuthContext";
 import { Loader2 } from "lucide-react";
+import FrameworkPage from "./pages/FrameworkPage";
 
 // Dynamic imports
 const Studio = lazy(() => import("./pages/StudioLayout"));
@@ -26,7 +27,7 @@ function App() {
           <div className="content">
             <Suspense fallback={<LoadingFallback />}>
               <Routes>
-                <Route path="/" element={<>studio</>} />
+                <Route path="/" element={<FrameworkPage />} />
                 <Route path="/:slug" element={<WorkspacePage />} />
                 <Route path="/studio" element={<Studio />} />
                 <Route path="/payment/success" element={<PaymentSuccessPage />} />

@@ -28,6 +28,7 @@ export interface WorkspaceStorageItem {
   updatedAt: number;
   createdAt: number;
   userId: string;
+  permission: string; // Dodane pole permission
   // Osobne pole na dashboardy jako kontener
   dashboardsContainer?: any[];
   content: {
@@ -166,6 +167,8 @@ export class WorkspaceService {
         // Zachowaj oryginalną datę utworzenia dla istniejących workspace'ów
         const originalCreatedAt = existingData.createdAt;
         
+        
+        
         workspaceData = {
           id: workspaceCopy.id,
           title: workspaceCopy.title,
@@ -174,6 +177,7 @@ export class WorkspaceService {
           updatedAt: Date.now(),
           createdAt: originalCreatedAt, // Użyj oryginalnej daty utworzenia
           userId: userId,
+          permission: "user", // Dodane pole permission
           // Dodaj dashboardy do osobnego kontenera jeśli istnieją
           dashboardsContainer: dashboardsContainer || [],
           content: {
@@ -194,6 +198,7 @@ export class WorkspaceService {
           updatedAt: Date.now(),
           createdAt: workspaceCopy.createdAt || Date.now(),
           userId: userId,
+          permission: "user", // Dodane pole permission
           // Dodaj dashboardy do osobnego kontenera jeśli istnieją
           dashboardsContainer: dashboardsContainer || [],
           content: {
@@ -215,8 +220,20 @@ export class WorkspaceService {
           dashboardsCount: workspaceData.dashboardsContainer?.length || 0
         }, null, 2));
       
+      // Zawsze ustaw permission na "user" przed zapisem
+      workspaceData.permission = "user";
+      
       // Zapisz dokument
       await setDoc(docRef, this.sanitizeData(workspaceData));
+      
+      // Dodaj informację o zmianie permission, jeśli nastąpiła
+      if (docSnap.exists()) {
+        const existingData = docSnap.data();
+        if (existingData.permission && existingData.permission !== "user") {
+          console.log(`[DEBUG] Zmieniono wartość permission z "${existingData.permission}" na "user"`);
+        }
+      }
+      
       console.log(`Workspace ${workspace.id} został zapisany z ${workspaceData.content.workspace.children?.length || 0} scenariuszami i ${workspaceData.dashboardsContainer?.length || 0} dashboardami`);
       
       return workspace.id;
@@ -383,10 +400,12 @@ export class WorkspaceService {
         throw new Error('Brak uprawnień do aktualizacji workspace');
       }
       
-      // Aktualizuj tylko wybrane pola
+      // Zawsze zapewnij, że permission jest ustawione na "user"
+      // Aktualizuj tylko wybrane pola oraz permission
       await setDoc(docRef, {
         ...this.sanitizeData(metadata),
-        updatedAt: Date.now()
+        updatedAt: Date.now(),
+        permission: "user" // Zawsze ustawiamy permission na "user"
       }, { merge: true });
     } catch (error) {
       this.handleError('aktualizacji metadanych workspace', error);

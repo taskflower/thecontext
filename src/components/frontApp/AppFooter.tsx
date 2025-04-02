@@ -12,14 +12,14 @@ const AppFooter = () => {
           <div className="flex items-center gap-2 text-center md:text-left mb-2 md:mb-0">
             <p className="text-xs sm:text-sm text-muted-foreground">
               © 2025 Powered by{" "}
-              <a 
-                href="https://revertcontext.com" 
+              <Link
+                to="/" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="font-medium text-foreground text-xs underline-offset-4 "
               >
                 REVERTCONTEXT.COM
-              </a>
+              </Link>
             </p>
           </div>
           
