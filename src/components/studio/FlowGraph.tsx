@@ -161,7 +161,7 @@ const FlowGraph: React.FC<FlowGraphProps> = ({
   return (
     <div className="bg-card rounded-md shadow-sm p-0 h-full w-full relative">
       {/* Right side buttons */}
-      <div className="absolute top-2 left-2 z-10 flex space-x-2">
+      <div className="absolute top-2 right-2 z-10 flex space-x-2">
         {hasExistingSession && (
           <button
             onClick={handlePlay}

@@ -11,14 +11,14 @@ export const Header: React.FC = () => {
   const { showLeftPanel, toggleLeftPanel } = usePanelStore();
   
   return (
-    <header className="border-b border-border h-14 px-4 flex items-center justify-between bg-background z-10">
+    <header className="z-20 border-b border-border h-14 px-4 flex items-center justify-between bg-background z-10">
       <div className="flex items-center gap-3">
         <h1 className="text-xs font-semibold flex items-center">
           <Focus className="mr-2 h-4 w-4 text-primary -mt-1" />
           <Link to="/">RevertContext.com <p className="font-normal">Wizard style AI aplications framework</p></Link>
         </h1>
       </div>
-      <div className="flex items-center gap-3 z-30">
+      <div className="flex items-center gap-3">
         {/* Google Authentication Button */}
         <AuthButton />
 

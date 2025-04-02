@@ -204,8 +204,8 @@ export const StepModal: React.FC<StepModalProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="flex flex-col bg-background rounded-lg border border-border shadow-lg w-full max-w-4xl min-h-[95vh] max-h-[95vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 ">
+      <div className="  flex flex-col bg-background rounded-lg border border-border shadow-lg w-full max-w-4xl h-full md:min-h-[95vh] md:max-h-[95vh]">
         {/* Header */}
         {!sectionSettings.replaceHeader && (
           <Header

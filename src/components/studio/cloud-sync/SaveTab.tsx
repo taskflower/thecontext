@@ -48,8 +48,8 @@ export const SaveTab: React.FC<SaveTabProps> = ({
         )}
       </div>
 
-      <div className="mt-auto">
-        <Button onClick={onSave} disabled={isLoading} className="w-full">
+      <div className="mt-auto ml-auto">
+        <Button onClick={onSave} disabled={isLoading} className="">
           {isLoading ? (
             <>
               <Loader className="h-4 w-4 mr-2 animate-spin" />
