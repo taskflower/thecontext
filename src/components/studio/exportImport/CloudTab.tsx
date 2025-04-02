@@ -13,15 +13,16 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Workspace } from "@/modules/workspaces/types";
-import { firebaseStorageWorkspaceService } from "@/services/FirebaseStorageWorkspaceService";
+import { workspaceService } from "@/services/WorkspaceService";
+
 
 interface CloudTabProps {
   currentUser: any;
   currentWorkspace: Workspace | null;
-  workspaces: Workspace[]; // Lista wszystkich workspace'ów
+  workspaces: Workspace[]; 
   showConfirmation: (title: string, message: string, action: () => void) => void;
   onWorkspaceAdded: (workspace: Workspace) => void;
-  onWorkspaceReplaced: (workspace: Workspace, oldWorkspaceId: string) => void; // Funkcja do zastępowania workspace'a
+  onWorkspaceReplaced: (workspace: Workspace, oldWorkspaceId: string) => void;
 }
 
 export const CloudTab: React.FC<CloudTabProps> = ({ 
@@ -62,7 +63,7 @@ export const CloudTab: React.FC<CloudTabProps> = ({
           setCloudSuccess(null);
 
           // Zapisz workspace do Firebase
-          await firebaseStorageWorkspaceService.saveWorkspace(currentWorkspace, currentUser.uid);
+          await workspaceService.saveWorkspace(currentWorkspace, currentUser.uid);
           
           setCloudSuccess(`Workspace "${currentWorkspace.title}" został zapisany do Firebase`);
         } catch (error) {
@@ -90,10 +91,10 @@ export const CloudTab: React.FC<CloudTabProps> = ({
       setCloudError(null);
       setCloudSuccess(null);
 
-      // Pobierz workspace'y z Firebase
-      const userWorkspaces = await firebaseStorageWorkspaceService.getUserWorkspaces(currentUser.uid);
+      // Pobierz workspace'y z Firebase - bez pełnej zawartości dla optymalizacji
+      const userWorkspaces = await workspaceService.getUserWorkspaces(currentUser.uid, { withContent: false });
       
-      setCloudWorkspaces(userWorkspaces.map((w:any) => ({
+      setCloudWorkspaces(userWorkspaces.map(w => ({
         id: w.id,
         title: w.title,
         description: w.description,
@@ -132,7 +133,7 @@ export const CloudTab: React.FC<CloudTabProps> = ({
           setCloudSuccess(null);
 
           // Pobierz workspace z Firebase
-          const workspace = await firebaseStorageWorkspaceService.getWorkspace(
+          const workspace = await workspaceService.getWorkspace(
             selectedWorkspaceId,
             currentUser.uid
           );
