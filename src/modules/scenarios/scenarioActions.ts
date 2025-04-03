@@ -81,6 +81,38 @@ export const createScenarioSlice: StateCreator<
       }
     }),
 
+  moveScenarioUp: (scenarioId: string) =>
+    set((state: Draft<AppState>) => {
+      const workspace = state.items.find(
+        (w) => w.id === state.selected.workspace
+      );
+      if (workspace) {
+        const index = workspace.children.findIndex((s) => s.id === scenarioId);
+        if (index > 0) {
+          // Swap with the previous item
+          [workspace.children[index - 1], workspace.children[index]] = 
+          [workspace.children[index], workspace.children[index - 1]];
+          state.stateVersion++;
+        }
+      }
+    }),
+
+  moveScenarioDown: (scenarioId: string) =>
+    set((state: Draft<AppState>) => {
+      const workspace = state.items.find(
+        (w) => w.id === state.selected.workspace
+      );
+      if (workspace) {
+        const index = workspace.children.findIndex((s) => s.id === scenarioId);
+        if (index !== -1 && index < workspace.children.length - 1) {
+          // Swap with the next item
+          [workspace.children[index], workspace.children[index + 1]] = 
+          [workspace.children[index + 1], workspace.children[index]];
+          state.stateVersion++;
+        }
+      }
+    }),
+
   getCurrentScenario: () => {
     const state = get() as any;
     const workspace = state.items.find(

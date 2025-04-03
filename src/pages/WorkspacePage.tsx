@@ -144,7 +144,7 @@ const WorkspacePage = () => {
     // Użyj setTimeout, aby dać czas na renderowanie interfejsu
     setTimeout(() => {
       useAppStore.getState().startFlowSession();
-    }, 100);
+    }, 350);
   };
 
   // Handle close flow modal - zachowaj stan sesji

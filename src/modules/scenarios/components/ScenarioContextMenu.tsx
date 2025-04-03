@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import { X, Edit } from "lucide-react";
+import { X, Edit, ArrowUp, ArrowDown } from "lucide-react";
 import { useAppStore } from "../../store";
 
 interface ScenarioContextMenuProps {
@@ -16,6 +16,8 @@ const ScenarioContextMenu: React.FC<ScenarioContextMenuProps> = ({
   onEdit,
 }) => {
   const deleteScenario = useAppStore((state) => state.deleteScenario);
+  const moveScenarioUp = useAppStore((state) => state.moveScenarioUp);
+  const moveScenarioDown = useAppStore((state) => state.moveScenarioDown);
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Handle click outside to close menu
@@ -44,6 +46,19 @@ const ScenarioContextMenu: React.FC<ScenarioContextMenuProps> = ({
   // Handle edit scenario
   const handleEdit = () => {
     onEdit(scenarioId);
+    onClose();
+  };
+
+  // Handle move up
+  const handleMoveUp = () => {
+    moveScenarioUp(scenarioId);
+    onClose();
+  };
+
+  // Handle move down
+  const handleMoveDown = () => {
+    moveScenarioDown(scenarioId);
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -59,6 +74,20 @@ const ScenarioContextMenu: React.FC<ScenarioContextMenuProps> = ({
       >
         <Edit className="h-4 w-4 mr-2" />
         Edit
+      </button>
+      <button
+        onClick={handleMoveUp}
+        className="w-full text-left px-3 py-2 text-sm hover:bg-muted flex items-center"
+      >
+        <ArrowUp className="h-4 w-4 mr-2" />
+        Move Up
+      </button>
+      <button
+        onClick={handleMoveDown}
+        className="w-full text-left px-3 py-2 text-sm hover:bg-muted flex items-center"
+      >
+        <ArrowDown className="h-4 w-4 mr-2" />
+        Move Down
       </button>
       <button
         onClick={handleDelete}

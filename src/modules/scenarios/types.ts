@@ -17,6 +17,8 @@ export interface ScenarioActions {
   addScenario: (payload: ScenarioPayload) => void;
   updateScenario: (scenarioId: string, payload: ScenarioPayload) => void;
   deleteScenario: (scenarioId: string) => void;
+  moveScenarioUp: (scenarioId: string) => void;
+  moveScenarioDown: (scenarioId: string) => void;
   getCurrentScenario: () => Scenario | null;
 }
 
