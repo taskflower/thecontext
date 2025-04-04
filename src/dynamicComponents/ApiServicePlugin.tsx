@@ -18,7 +18,6 @@ interface ApiServiceData {
   fillUserInput?: boolean;
   apiUrl?: string;
   // JSON response options
-  useJsonResponse?: boolean;
   contextJsonKey?: string; // Klucz w kontekście do znalezienia schematu JSON
 }
 
@@ -54,7 +53,6 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
     assistantMessage: "This is the message that will be sent to the API.",
     fillUserInput: false,
     apiUrl: "api/v1/services/chat/completion",
-    useJsonResponse: false,
     contextJsonKey: "",
   };
 
@@ -92,8 +90,8 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
       apiBaseUrl: apiBaseUrl,
     };
 
-    // Dodanie kontekstowego klucza JSON, jeśli używany
-    if (options.useJsonResponse && options.contextJsonKey) {
+    // Dodanie kontekstowego klucza JSON, jeśli podany
+    if (options.contextJsonKey) {
       serviceOptions.contextJsonKey = options.contextJsonKey;
       console.log(
         `Using JSON response format with context key: ${options.contextJsonKey}`
@@ -217,8 +215,8 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
         // Wyodrębnienie zawartości - może być zarówno przeanalizowany obiekt JSON, jak i zawartość tekstowa
         let assistantContent = response.data.data.message.content;
 
-        // Sprawdzenie przeanalizowanego JSON, jeśli używamy formatu odpowiedzi JSON
-        if (options.useJsonResponse && response.data.data.message.parsedJson) {
+        // Sprawdzenie przeanalizowanego JSON, jeśli otrzymaliśmy parsedJson
+        if (response.data.data.message.parsedJson) {
           assistantContent = JSON.stringify(
             response.data.data.message.parsedJson,
             null,
@@ -233,7 +231,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
 
         // Dodanie odpowiedzi API do konwersacji
         if (addNodeMessage) {
-          const messageType = options.useJsonResponse ? "json" : "text";
+          const messageType = response.data.data.message.parsedJson ? "json" : "text";
           addNodeMessage(
             currentNodeId,
             `API Response (${messageType}):\n\`\`\`json\n${formattedResponse}\n\`\`\``
@@ -353,7 +351,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
             )}
           </button>
           <div className="absolute -bottom-2 -right-2 flex gap-1">
-          {options.useJsonResponse && options.contextJsonKey && (
+          {options.contextJsonKey && (
             <div className="w-6 h-6 rounded-full bg-white p-1">
               <Layers className="w-4 h-4 text-black"/>
             </div>
@@ -379,7 +377,6 @@ const schemaDefaults = {
   assistantMessage: "This is the message that will be sent to the API.",
   fillUserInput: false,
   apiUrl: "api/v1/services/chat/completion",
-  useJsonResponse: false,
   contextJsonKey: "",
 };
 
@@ -415,21 +412,11 @@ ApiServicePlugin.optionsSchema = {
     default: schemaDefaults.apiUrl,
     description: "Path to the API endpoint (appended to API base URL)",
   },
-  useJsonResponse: {
-    type: "boolean",
-    label: "Force JSON Response",
-    default: schemaDefaults.useJsonResponse,
-    description: "Request response in JSON format",
-  },
   contextJsonKey: {
     type: "string",
     label: "Context JSON Key",
     default: schemaDefaults.contextJsonKey,
     description: "Tytuł elementu kontekstowego zawierającego schemat JSON",
-    conditional: {
-      field: "useJsonResponse",
-      value: true,
-    },
   },
 };
 
