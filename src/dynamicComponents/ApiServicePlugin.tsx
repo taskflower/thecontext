@@ -2,23 +2,26 @@
 // src/components/plugins/ApiServicePlugin.tsx
 import { useState, useEffect } from "react";
 import { PluginComponentWithSchema } from "../modules/plugins/types";
-import { Send, Loader2, User, Layers } from "lucide-react";
+import { Send, Loader2, User, Layers, AlertCircle, RotateCw } from "lucide-react";
 
 import { PluginAuthAdapter } from "../services/PluginAuthAdapter";
 import { LlmService } from "../services/LlmService";
 import { AuthUser } from "../services/authService";
 import { useAuth } from "../context/AuthContext";
 import { useAppStore } from "../modules/store";
+import { updateContextFromNodeInput } from "../modules/flow/contextHandler";
 import ErrorDisplay from "@/components/ui/error-display";
 
 // Define the API service data structure
 interface ApiServiceData {
   buttonText?: string;
   assistantMessage?: string;
-  fillUserInput?: boolean;
+  fillUserInput?: boolean; // Nie ma już wpływu na aktualizację kontekstu - zawsze aktualizujemy
   apiUrl?: string;
   // JSON response options
   contextJsonKey?: string; // Klucz w kontekście do znalezienia schematu JSON
+  autoAdvanceOnSuccess?: boolean; // Automatycznie przechodzi do następnego kroku przy sukcesie
+  autoSendOnEnter?: boolean; // Automatycznie wysyła zapytanie po wejściu na krok
 }
 
 // Define the error structure from backend
@@ -54,6 +57,8 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
     fillUserInput: false,
     apiUrl: "api/v1/services/chat/completion",
     contextJsonKey: "",
+    autoAdvanceOnSuccess: true,
+    autoSendOnEnter: false,
   };
 
   // Połączenie dostarczonych danych z domyślnymi
@@ -135,7 +140,7 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
     appContext?.currentNode?.assistantMessage || options.assistantMessage;
 
   // Rzutowanie metod z appContext
-  const { addNodeMessage, moveToNextNode } = (appContext || {}) as any;
+  const { addNodeMessage, moveToNextNode, nextStep } = (appContext || {}) as any;
 
   // Załadowanie danych użytkownika po zamontowaniu komponentu
   useEffect(() => {
@@ -161,6 +166,19 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
 
     loadAuth();
   }, [auth, authAdapter]);
+  
+  // Automatyczne wysłanie zapytania po wejściu na krok
+  useEffect(() => {
+    if (options.autoSendOnEnter && currentNodeId && !isLoading) {
+      console.log("Auto sending request on node enter...");
+      // Małe opóźnienie, aby upewnić się, że wszystko jest załadowane
+      const timer = setTimeout(() => {
+        callApi();
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [currentNodeId, options.autoSendOnEnter]);
 
   // Funkcja wywołania API
   const callApi = async () => {
@@ -207,39 +225,91 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
       const formattedResponse = JSON.stringify(response, null, 2);
       setApiResponse(formattedResponse);
 
-      if (
-        response.success &&
-        response.data?.success &&
-        response.data?.data?.message
-      ) {
-        // Wyodrębnienie zawartości - może być zarówno przeanalizowany obiekt JSON, jak i zawartość tekstowa
-        let assistantContent = response.data.data.message.content;
-
-        // Sprawdzenie przeanalizowanego JSON, jeśli otrzymaliśmy parsedJson
-        if (response.data.data.message.parsedJson) {
-          assistantContent = JSON.stringify(
-            response.data.data.message.parsedJson,
-            null,
-            2
-          );
+      console.log("Response:", response, "autoAdvanceOnSuccess:", options.autoAdvanceOnSuccess);
+      
+      // Sprawdź główny warunek sukcesu
+      const isSuccessful = response.success;
+      
+      // Sprawdź, czy mamy jakąś wiadomość do wyświetlenia
+      const hasMessage = (
+        // Standardowy format
+        (response.data?.success && response.data?.data?.message) || 
+        // Alternatywny format 1 - bezpośrednio message w data
+        (response.data?.message) ||
+        // Alternatywny format 2 - inne pola w data
+        (response.data && Object.keys(response.data).length > 0)
+      );
+      
+      if (isSuccessful && hasMessage) {
+        // Wyodrębnienie zawartości - może być w różnych formatach
+        let assistantContent = "";
+        
+        // Próba odczytania treści w różnych formatach
+        if (response.data?.data?.message?.content) {
+          // Standardowy format
+          assistantContent = response.data.data.message.content;
+          
+          // Sprawdzenie przeanalizowanego JSON w standardowym formacie
+          if (response.data.data.message.parsedJson) {
+            assistantContent = JSON.stringify(
+              response.data.data.message.parsedJson,
+              null,
+              2
+            );
+          }
+        } else if (response.data?.message?.content) {
+          // Alternatywny format 1
+          assistantContent = response.data.message.content;
+        } else if (response.data) {
+          // Alternatywny format 2 - użyj całej odpowiedzi jako zawartości
+          assistantContent = JSON.stringify(response.data, null, 2);
         }
 
         // Aktualizacja wiadomości użytkownika o zawartość z API, jeśli włączone
-        if (options.fillUserInput && appContext?.updateNodeUserPrompt) {
+        if (appContext?.updateNodeUserPrompt) {
+          // Zawsze aktualizuj dane wejściowe węzła, nawet jeśli ukryte
           appContext.updateNodeUserPrompt(currentNodeId, assistantContent);
+          
+          // Aktualizacja kontekstu jeśli węzeł ma przypisany klucz kontekstu
+          if (appContext.currentNode?.contextKey) {
+            console.log("Aktualizuję kontekst z API response", appContext.currentNode.contextKey);
+            updateContextFromNodeInput(currentNodeId);
+          }
         }
 
         // Dodanie odpowiedzi API do konwersacji
         if (addNodeMessage) {
-          const messageType = response.data.data.message.parsedJson ? "json" : "text";
+          // Określenie typu wiadomości na podstawie dostępnych danych
+          let messageType = "text";
+          
+          if (response.data?.data?.message?.parsedJson) {
+            messageType = "json";
+          } else if (typeof assistantContent === 'string' && (
+            assistantContent.startsWith('{') || assistantContent.startsWith('[')
+          )) {
+            messageType = "json";
+          }
+          
           addNodeMessage(
             currentNodeId,
             `API Response (${messageType}):\n\`\`\`json\n${formattedResponse}\n\`\`\``
           );
         }
 
-        // Przejście do następnego węzła, jeśli nie wypełniamy wpisu użytkownika
-        if (!options.fillUserInput && moveToNextNode) {
+        // Przejście do następnego węzła w zależności od ustawień
+        console.log("Preparing to advance: autoAdvanceOnSuccess=", options.autoAdvanceOnSuccess, 
+                   "nextStep=", !!nextStep, "currentNodeId=", currentNodeId);
+        
+        if (options.autoAdvanceOnSuccess && nextStep) {
+          // Zawsze przejdzie do następnego węzła przy sukcesie, jeśli opcja włączona
+          console.log("Auto advancing to next step...");
+          // Użyj metody nextStep, która jest używana przez inne pluginy
+          setTimeout(() => {
+            nextStep();
+          }, 100); // Mały delay, aby upewnić się, że UI zdąży się zaktualizować
+        } else if (!options.fillUserInput && moveToNextNode) {
+          // Stare zachowanie: przejście tylko jeśli nie wypełniamy wpisu użytkownika
+          console.log("Standard advancing to next node (when not filling user input)...");
           moveToNextNode(currentNodeId);
         }
       } else {
@@ -326,6 +396,15 @@ const ApiServicePlugin: PluginComponentWithSchema<ApiServiceData> = ({
         />
       )}
 
+      {/* Animowana ikona nad przyciskiem, gdy proces jest w trakcie */}
+      {isLoading && (
+        <div className="flex justify-center mb-4">
+          <div className="p-3 bg-primary/10 rounded-full">
+            <RotateCw className="h-8 w-8 text-primary animate-spin" />
+          </div>
+        </div>
+      )}
+      
       {/* Przycisk wywołania API */}
       <div className="space-y-3">
         <div className="space-y-3 relative">
@@ -378,6 +457,8 @@ const schemaDefaults = {
   fillUserInput: false,
   apiUrl: "api/v1/services/chat/completion",
   contextJsonKey: "",
+  autoAdvanceOnSuccess: true,
+  autoSendOnEnter: false,
 };
 
 // Określenie, że ten plugin powinien zastąpić widok asystenta
@@ -402,9 +483,9 @@ ApiServicePlugin.optionsSchema = {
   },
   fillUserInput: {
     type: "boolean",
-    label: "Fill User Input",
+    label: "Pokaż pole użytkownika",
     default: schemaDefaults.fillUserInput,
-    description: "Fill the user input with API response content",
+    description: "Pokaż wypełnione pole użytkownika (kontekst będzie zapisany niezależnie od tego)",
   },
   apiUrl: {
     type: "string",
@@ -417,6 +498,18 @@ ApiServicePlugin.optionsSchema = {
     label: "Context JSON Key",
     default: schemaDefaults.contextJsonKey,
     description: "Tytuł elementu kontekstowego zawierającego schemat JSON",
+  },
+  autoAdvanceOnSuccess: {
+    type: "boolean",
+    label: "Auto przejście przy sukcesie",
+    default: schemaDefaults.autoAdvanceOnSuccess,
+    description: "Automatycznie przejdź do kolejnego kroku po otrzymaniu poprawnej odpowiedzi z serwera",
+  },
+  autoSendOnEnter: {
+    type: "boolean",
+    label: "Auto wysyłanie po wejściu",
+    default: schemaDefaults.autoSendOnEnter,
+    description: "Automatycznie wyślij zapytanie po wejściu na krok",
   },
 };
 
