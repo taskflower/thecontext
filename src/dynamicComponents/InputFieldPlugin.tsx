@@ -2,8 +2,10 @@ import {
   PluginComponentWithSchema,
   PluginComponentProps,
 } from "../modules/plugins/types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { updateContextFromNodeInput } from "../modules/flow/contextHandler";
+import { processTemplateWithItems } from "../modules/context/utils";
+import { useAppStore } from "../modules/store";
 
 interface InputFieldData {
   fieldType: "input" | "checkbox" | "url" | "textarea";
@@ -11,6 +13,7 @@ interface InputFieldData {
   placeholderText?: string;
   defaultChecked?: boolean;
   rows?: number;
+  showCurrentUserMessage?: boolean; // Czy wyświetlać aktualną zawartość userMessage
 }
 
 const defaultData: InputFieldData = {
@@ -19,6 +22,7 @@ const defaultData: InputFieldData = {
   placeholderText: "Wpisz ją tutaj...",
   defaultChecked: false,
   rows: 3,
+  showCurrentUserMessage: false,
 };
 
 const InputFieldPlugin: PluginComponentWithSchema<InputFieldData> = ({
@@ -32,7 +36,33 @@ const InputFieldPlugin: PluginComponentWithSchema<InputFieldData> = ({
 
   // Track initial checkbox state to detect changes
   const [initialCheckedState] = useState(options.defaultChecked || false);
-  const [inputValue, setInputValue] = useState("");
+  
+  // Pobierz elementy kontekstu, aby obsłużyć zmienne w formacie {{nazwa}} lub {{nazwa.pole}}
+  const contextItems = useAppStore(state => state.getContextItems());
+  
+  // Pobierz aktualną wartość userMessage, jeśli showCurrentUserMessage jest włączone
+  let currentUserMessage = "";
+  if (options.showCurrentUserMessage && appContext?.currentNode?.userPrompt) {
+    // Przetwórz tekst, aby rozwiązać zmienne kontekstowe w formacie {{nazwa}} lub {{nazwa.pole}}
+    currentUserMessage = processTemplateWithItems(
+      appContext.currentNode.userPrompt,
+      contextItems
+    );
+  }
+  
+  const [inputValue, setInputValue] = useState(currentUserMessage);
+  
+  // Aktualizuj wartość, gdy zmienia się userPrompt w kontekście lub kontekst - dla przypadków automatycznych aktualizacji
+  useEffect(() => {
+    if (options.showCurrentUserMessage && appContext?.currentNode?.userPrompt) {
+      // Przetwórz tekst przy każdej aktualizacji
+      const processedValue = processTemplateWithItems(
+        appContext.currentNode.userPrompt,
+        contextItems
+      );
+      setInputValue(processedValue);
+    }
+  }, [appContext?.currentNode?.userPrompt, options.showCurrentUserMessage, contextItems]);
   const [isChecked, setIsChecked] = useState(options.defaultChecked || false);
   const [isValidUrl, setIsValidUrl] = useState(true);
 
@@ -364,6 +394,12 @@ InputFieldPlugin.optionsSchema = {
     default: defaultData.rows,
     description:
       "Number of rows for textarea (only applies when Field Type is 'textarea')",
+  },
+  showCurrentUserMessage: {
+    type: "boolean",
+    label: "Pokaż aktualną wartość",
+    default: defaultData.showCurrentUserMessage,
+    description: "Gdy zaznaczone, pole będzie zawierać aktualną wartość z węzła",
   },
 };
 
