@@ -16,6 +16,7 @@ interface JsonContextViewerData {
  */
 const JsonContextViewer: PluginComponentWithSchema<JsonContextViewerData> = ({
   data,
+  appContext,
 }) => {
   // Wartości domyślne dla konfiguracji pluginu
   const defaultOptions = {
