@@ -22,6 +22,7 @@ export const createNodeSlice: StateCreator<
     userPrompt?: string;
     position?: { x: number; y: number };
     contextKey?: string;
+    contextJsonPath?: string;
   }) =>
     set((state: Draft<AppState>) => {
       const newNode: FlowNode = {
@@ -33,6 +34,7 @@ export const createNodeSlice: StateCreator<
         userPrompt: payload.userPrompt || "",
         position: payload.position || { x: 100, y: 100 },
         contextKey: payload.contextKey,
+        contextJsonPath: payload.contextJsonPath,
       };
 
       const workspace = state.items.find(
@@ -168,8 +170,31 @@ export const createNodeSlice: StateCreator<
         if (contextKey === "") {
           // If empty string, remove the property
           delete node.contextKey;
+          // Also clear the contextJsonPath if context key is removed
+          delete node.contextJsonPath;
         } else {
           node.contextKey = contextKey;
+        }
+        state.stateVersion++;
+      }
+    }),
+    
+  // Method to update node context JSON path
+  updateNodeContextJsonPath: (nodeId: string, jsonPath: string) =>
+    set((state: Draft<AppState>) => {
+      const workspace = state.items.find(
+        (w) => w.id === state.selected.workspace
+      );
+      const scenario = workspace?.children.find(
+        (s) => s.id === state.selected.scenario
+      );
+      const node = scenario?.children.find((n) => n.id === nodeId);
+      if (node) {
+        if (jsonPath === "") {
+          // If empty string, remove the property
+          delete node.contextJsonPath;
+        } else {
+          node.contextJsonPath = jsonPath;
         }
         state.stateVersion++;
       }

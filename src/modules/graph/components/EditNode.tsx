@@ -22,6 +22,7 @@ const EditNode: React.FC<EditNodeProps> = ({ isOpen, setIsOpen, nodeId }) => {
     userPrompt: "",
     assistantMessage: "",
     contextKey: "",
+    contextJsonPath: "",
   });
 
   // Get necessary state and actions
@@ -43,6 +44,7 @@ const EditNode: React.FC<EditNodeProps> = ({ isOpen, setIsOpen, nodeId }) => {
         userPrompt: node.userPrompt || "",
         assistantMessage: node.assistantMessage || "",
         contextKey: node.contextKey || "",
+        contextJsonPath: node.contextJsonPath || "",
       });
     }
   }, [isOpen, nodeId, node]);
@@ -69,6 +71,7 @@ const EditNode: React.FC<EditNodeProps> = ({ isOpen, setIsOpen, nodeId }) => {
     updateNode.updateNodeUserPrompt(nodeId, formData.userPrompt);
     updateNode.updateNodeAssistantMessage(nodeId, formData.assistantMessage);
     updateNode.updateNodeContextKey(nodeId, formData.contextKey);
+    updateNode.updateNodeContextJsonPath(nodeId, formData.contextJsonPath);
 
     setIsOpen(false);
   };
@@ -151,6 +154,27 @@ const EditNode: React.FC<EditNodeProps> = ({ isOpen, setIsOpen, nodeId }) => {
           Associate this node with a context item
         </p>
       </div>
+      
+      {/* JSON Path field - only show if context key is selected and the context type is JSON */}
+      {formData.contextKey && (
+        <div className="mb-4">
+          <label htmlFor="contextJsonPath" className="block text-sm font-medium mb-1">
+            JSON Path (optional)
+          </label>
+          <input
+            type="text"
+            id="contextJsonPath"
+            name="contextJsonPath"
+            value={formData.contextJsonPath}
+            onChange={handleChange}
+            placeholder="e.g. data.user.name (leave empty for entire JSON)"
+            className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Save only part of the JSON to context (supports dot notation)
+          </p>
+        </div>
+      )}
     </DialogModal>
   );
 };

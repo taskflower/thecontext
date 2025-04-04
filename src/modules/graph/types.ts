@@ -17,6 +17,7 @@ export interface FlowNode extends BaseItem {
   pluginKey?: string;
   pluginData?: PluginDataMap;
   contextKey?: string; // Added field for context
+  contextJsonPath?: string; // Added field for JSON path within context
 }
 
 export interface NodeActions {
@@ -40,6 +41,7 @@ export interface NodeActions {
   updateNodeUserPrompt: (nodeId: string, prompt: string) => void;
   updateNodeAssistantMessage: (nodeId: string, message: string) => void;
   updateNodeContextKey: (nodeId: string, contextKey: string) => void; // Added method
+  updateNodeContextJsonPath: (nodeId: string, jsonPath: string) => void; // Added method for JSON path
 }
 
 export interface NodePayload {
@@ -51,6 +53,7 @@ export interface NodePayload {
   pluginKey?: string;
   pluginData?: PluginDataMap;
   contextKey?: string; // Added field for context
+  contextJsonPath?: string; // Added field for JSON path within context
 }
 
 export interface Edge extends BaseItem {
