@@ -1,55 +1,119 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/modules/context/types.ts
-export enum ContextType {
-  TEXT = 'text',
-  JSON = 'json',
-  MARKDOWN = 'markdown',
-  INDEXED_DB = 'indexedDB',
+/**
+ * Context Management Types
+ * Types for the context management system
+ */
+
+// Content type enum (for proper rendering and editing)
+export enum ContextContentType {
+  TEXT = 'text/plain',
+  JSON = 'application/json',
+  MARKDOWN = 'text/markdown',
+  HTML = 'text/html',
+  XML = 'application/xml',
+  YAML = 'application/yaml',
+  CSV = 'text/csv'
 }
 
+// Visibility settings for context items
+export enum ContextVisibility {
+  PRIVATE = 'private',
+  PUBLIC = 'public',
+  WORKSPACE = 'workspace'
+}
+
+// Schema status (whether the item has a defined schema)
+export enum SchemaStatus {
+  NONE = 'none',
+  SIMPLE = 'simple',   // Basic type validation
+  COMPLEX = 'complex'  // Full JSON schema
+}
+
+// Context Item interface
 export interface ContextItem {
   id: string;
-  title: string;            // klucz kontekstu
-  type: ContextType;        // typ zawartości kontekstu
-  content: string;          // wartość kontekstu
-  scenarioId?: string;      // powiązanie z konkretnym scenariuszem (opcjonalne)
-  metadata?: {              // dodatkowe metadane zależne od typu
-    schema?: any;           // schemat dla JSON
-    collection?: string;    // nazwa kolekcji dla IndexedDB
-    contentRef?: string;    // referencja do zawartości w przypadku dużych danych
-    // inne metadane...
-  };
-  persistent?: boolean;     // czy kontekst powinien być zachowany między sesjami
-  createdAt: number;
-  updatedAt: number;
-}
-
-// Interfejs do dodania/aktualizacji kontekstu
-export interface ContextPayload {
-  id?: string;          // Allow specifying ID during import
+  workspaceId: string;
   title: string;
-  type?: ContextType;
+  description?: string;
   content: string;
-  scenarioId?: string;
-  metadata?: any;
-  persistent?: boolean;
-  createdAt?: number;   // Allow specifying timestamps during import
-  updatedAt?: number;
+  contentType: ContextContentType;
+  visibility: ContextVisibility;
+  schemaStatus: SchemaStatus;
+  schema?: string;     // JSON Schema as string, if applicable
+  createdAt: Date;
+  updatedAt: Date;
+  tags: string[];
+  metadata?: Record<string, any>;
 }
 
-export interface ContextActions {
-  // Get context items for the current workspace
-  getContextItems: (scenarioId?: string) => ContextItem[];
-  
-  // Add a new context item to the current workspace
-  addContextItem: (payload: ContextPayload) => void;
-  
-  // Update an existing context item
-  updateContextItem: (id: string, payload: Partial<ContextPayload>) => void;
-  
-  // Delete a context item
-  deleteContextItem: (id: string) => void;
-  
-  // Get context item by title
-  getContextItemByTitle: (title: string) => ContextItem | undefined;
+// Create context item params
+export interface CreateContextItemParams {
+  workspaceId: string;
+  title: string;
+  description?: string;
+  content: string;
+  contentType: ContextContentType;
+  visibility?: ContextVisibility;
+  schemaStatus?: SchemaStatus;
+  schema?: string;
+  tags?: string[];
+  metadata?: Record<string, any>;
+}
+
+// Update context item params
+export interface UpdateContextItemParams {
+  id: string;
+  title?: string;
+  description?: string;
+  content?: string;
+  contentType?: ContextContentType;
+  visibility?: ContextVisibility;
+  schemaStatus?: SchemaStatus;
+  schema?: string;
+  tags?: string[];
+  metadata?: Record<string, any>;
+}
+
+// Context validation result
+export interface ContextValidationResult {
+  isValid: boolean;
+  errors?: Array<{
+    path: string;
+    message: string;
+  }>;
+}
+
+// Context search/filter params
+export interface ContextFilterParams {
+  workspaceId?: string;
+  contentType?: ContextContentType;
+  visibility?: ContextVisibility;
+  schemaStatus?: SchemaStatus;
+  tags?: string[];
+  query?: string; // Search in title, description, content
+}
+
+// Context store state
+export interface ContextState {
+  items: Record<string, ContextItem>;
+  isLoading: boolean;
+  error: string | null;
+  currentItemId: string | null;
+}
+
+// Context serialization for import/export
+export interface ContextExport {
+  version: string;
+  exportedAt: string;
+  items: ContextItem[];
+}
+
+// Context import result
+export interface ContextImportResult {
+  success: boolean;
+  importedCount: number;
+  errors: Array<{
+    itemId?: string;
+    message: string;
+  }>;
+  importedIds: string[];
 }
