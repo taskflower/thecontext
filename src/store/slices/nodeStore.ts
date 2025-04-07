@@ -28,21 +28,26 @@ const createNodeSlice: StateCreator<
     const nodes = get().getNodes();
     
     if (!nodes.length || flowState.currentIndex >= nodes.length) {
+      console.log("Cannot prepare node: index out of bounds or no nodes");
       set({ currentFlowNode: null });
       return;
     }
     
     const currentNode = nodes[flowState.currentIndex];
     if (!currentNode) {
+      console.log("Cannot prepare node: current node is null");
       set({ currentFlowNode: null });
       return;
     }
     
     try {
+      // Upewnij się, że używamy odpowiedniego ID węzła
+      console.log("Preparing node:", currentNode.id, "with context:", contextItems);
       const preparedNode = nodeManager.prepareNodeForDisplay(currentNode.id, contextItems);
+      console.log("Prepared node:", preparedNode);
       set({ currentFlowNode: preparedNode });
     } catch (error) {
-      console.error("Error preparing node:", error);
+      console.error("Error preparing node:", error, "Node:", currentNode);
       set({ currentFlowNode: currentNode });
     }
   },

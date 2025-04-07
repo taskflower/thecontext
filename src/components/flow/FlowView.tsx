@@ -1,65 +1,57 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // components/flow/FlowView.tsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import useStore from "../../store";
 import { Node, Scenario } from "../../store/types";
 
-interface NodeData extends Node {
-  // Add any additional properties that might be added by nodeManager.prepareNodeForDisplay
-  [key: string]: any;
-}
-
 const FlowView: React.FC = () => {
   // Pobieramy minimalne niezbędne dane ze store
-  const workspaces = useStore(state => state.workspaces);
-  const selectedIds = useStore(state => state.selectedIds);
-  const flowState = useStore(state => state.flowState);
-  const nodeManager = useStore(state => state.nodeManager);
-  const contextItems = useStore(state => state.contextItems);
-  
+  const workspaces = useStore((state) => state.workspaces);
+  const selectedIds = useStore((state) => state.selectedIds);
+  const flowState = useStore((state) => state.flowState);
+  const currentFlowNode = useStore((state) => state.currentFlowNode);
+
+  useStore((state) => state.nodeManager);
+  useStore((state) => state.contextItems);
+
   // Używamy lokalnego stanu zamiast skomplikowanych selektorów
   const [scenario, setScenario] = useState<Scenario | null>(null);
   const [nodes, setNodes] = useState<Node[]>([]);
-  const [currentNode, setCurrentNode] = useState<NodeData | null>(null);
-  
+
   // Pobieramy funkcje tylko te, które są potrzebne
-  const updateFlowInput = useStore(state => state.updateFlowInput);
-  const nextStep = useStore(state => state.nextStep);
-  const prevStep = useStore(state => state.prevStep);
-  const finishFlow = useStore(state => state.finishFlow);
-  const createNode = useStore(state => state.createNode);
-  
+  const updateFlowInput = useStore((state) => state.updateFlowInput);
+  const nextStep = useStore((state) => state.nextStep);
+  const prevStep = useStore((state) => state.prevStep);
+  const finishFlow = useStore((state) => state.finishFlow);
+  const createNode = useStore((state) => state.createNode);
+  const prepareCurrentNode = useStore((state) => state.prepareCurrentNode);
+
   // Efekt do pobrania scenariusza
   useEffect(() => {
     if (selectedIds.workspace && selectedIds.scenario) {
-      const workspace = workspaces.find(w => w.id === selectedIds.workspace);
-      const foundScenario = workspace?.scenarios.find(s => s.id === selectedIds.scenario);
+      const workspace = workspaces.find((w) => w.id === selectedIds.workspace);
+      const foundScenario = workspace?.scenarios.find(
+        (s) => s.id === selectedIds.scenario
+      );
       setScenario(foundScenario || null);
       setNodes(foundScenario?.nodes || []);
     }
   }, [selectedIds, workspaces]);
-  
-  // Efekt do przygotowania bieżącego węzła
+
+  // Efekt do zainicjowania flow - przygotowanie pierwszego węzła
   useEffect(() => {
-    if (!nodes.length || flowState.currentIndex >= nodes.length) {
-      setCurrentNode(null);
-      return;
+    // Przygotuj pierwszy węzeł gdy otwieramy widok flow
+    if (nodes.length > 0) {
+      console.log("Initializing flow with nodes:", nodes);
+      prepareCurrentNode();
     }
-    
-    const node = nodes[flowState.currentIndex];
-    if (!node) {
-      setCurrentNode(null);
-      return;
+  }, [nodes, prepareCurrentNode]);
+
+  // Logujemy dla debugowania
+  useEffect(() => {
+    if (currentFlowNode) {
+      console.log("Current flow node updated:", currentFlowNode);
     }
-    
-    try {
-      const preparedNode = nodeManager.prepareNodeForDisplay(node.id, contextItems);
-      setCurrentNode(preparedNode);
-    } catch (error) {
-      console.error("Error preparing node:", error);
-      setCurrentNode(node as NodeData);
-    }
-  }, [nodes, flowState.currentIndex, nodeManager, contextItems]);
+  }, [currentFlowNode]);
 
   if (nodes.length === 0) {
     return (
@@ -81,7 +73,16 @@ const FlowView: React.FC = () => {
     );
   }
 
-  if (!currentNode) return null;
+  if (!currentFlowNode) {
+    return (
+      <div className="flex-1 p-6 bg-gray-50">
+        <h1 className="text-2xl font-bold mb-6">{scenario?.name || "Flow"}</h1>
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <p className="mb-4">Ładowanie węzła...</p>
+        </div>
+      </div>
+    );
+  }
 
   const isLastStep = flowState.currentIndex === nodes.length - 1;
 
@@ -95,14 +96,14 @@ const FlowView: React.FC = () => {
           <span>
             Krok {flowState.currentIndex + 1} z {nodes.length}
           </span>
-          <span>{currentNode.label}</span>
+          <span>{currentFlowNode.label}</span>
         </div>
 
         {/* Wiadomość asystenta */}
         <div className="bg-blue-50 p-4 rounded-lg mb-4">
           <h3 className="text-sm font-semibold mb-2">Wiadomość asystenta:</h3>
           <div className="text-gray-700 whitespace-pre-line">
-            {currentNode.assistantMessage}
+            {currentFlowNode.assistantMessage}
           </div>
         </div>
 
@@ -117,18 +118,18 @@ const FlowView: React.FC = () => {
             rows={4}
           />
 
-          {currentNode.contextKey && (
+          {currentFlowNode.contextKey && (
             <div className="mt-2 text-xs text-gray-500">
               Odpowiedź zapisana w:{" "}
               <code className="bg-gray-100 px-1 py-0.5 rounded">
-                {currentNode.contextKey}
+                {currentFlowNode.contextKey}
               </code>
-              {currentNode.contextJsonPath && (
+              {currentFlowNode.contextJsonPath && (
                 <span>
                   {" "}
                   (ścieżka:{" "}
                   <code className="bg-gray-100 px-1 py-0.5 rounded">
-                    {currentNode.contextJsonPath}
+                    {currentFlowNode.contextJsonPath}
                   </code>
                   )
                 </span>
