@@ -10,12 +10,12 @@ const Sidebar: React.FC = () => {
   const view = useStore(state => state.view);
   
   return (
-    <div className="w-64 h-screen bg-gray-100 border-r border-gray-200 flex flex-col">
-      <div className="p-4 border-b border-gray-200 bg-gray-200">
-        <h1 className="text-xl font-bold">Flow Builder</h1>
+    <div className="sidebar">
+      <div className="sidebar-header">
+        <h1 className="text-lg font-bold tracking-tight">Flow Builder</h1>
       </div>
       
-      <div className="flex-1 overflow-y-auto">
+      <div className="sidebar-content">
         {view === 'workspaces' && <WorkspacesList />}
         {view === 'scenarios' && <ScenariosList />}
         {(view === 'flow' || view === 'nodeEditor' || view === 'contextEditor') && <NodesList />}

@@ -1,4 +1,4 @@
-// components/ui/BackButton.tsx
+// components/theme/BackButton.tsx
 import React from 'react';
 
 interface BackButtonProps {
@@ -6,7 +6,7 @@ interface BackButtonProps {
 }
 
 export const BackButton: React.FC<BackButtonProps> = ({ onClick }) => (
-  <button onClick={onClick} className="text-blue-500 hover:text-blue-700">
+  <button onClick={onClick} className="btn-back">
     ← Powrót
   </button>
 );

@@ -1,7 +1,8 @@
 // components/workspaces/WorkspaceItem.tsx
+import useStore from "@/store";
+import { Workspace } from "@/store/types";
 import React from "react";
-import useStore from "../../store";
-import { Workspace } from "../../store";
+
 
 interface WorkspaceItemProps {
   workspace: Workspace;
@@ -26,11 +27,15 @@ const WorkspaceItem: React.FC<WorkspaceItemProps> = ({ workspace }) => {
 
   return (
     <div
-      className="flex justify-between items-center p-2 bg-white rounded shadow cursor-pointer hover:bg-gray-50"
+      className="list-item"
       onClick={handleSelect}
     >
-      <span>{workspace.name}</span>
-      <button onClick={handleDelete} className="text-red-500">
+      <span className="font-medium">{workspace.name}</span>
+      <button 
+        onClick={handleDelete} 
+        className="text-destructive hover:text-destructive/80"
+        aria-label="Usuń workspace"
+      >
         ×
       </button>
     </div>

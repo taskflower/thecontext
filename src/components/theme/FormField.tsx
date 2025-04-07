@@ -1,4 +1,4 @@
-// components/ui/FormField.tsx
+// components/theme/FormField.tsx
 import React, { ChangeEvent } from "react";
 
 interface FormFieldProps {
@@ -24,8 +24,8 @@ export const FormField: React.FC<FormFieldProps> = ({
   rows = 0,
   hint = "",
 }) => (
-  <div className="mb-3">
-    <label className="block text-sm font-medium mb-1" htmlFor={name}>
+  <div className="mb-4">
+    <label className="block text-sm font-medium mb-2" htmlFor={name}>
       {label}
     </label>
     {rows > 0 ? (
@@ -35,7 +35,7 @@ export const FormField: React.FC<FormFieldProps> = ({
         value={value || ""}
         onChange={onChange}
         placeholder={placeholder}
-        className="w-full p-2 border rounded"
+        className="form-textarea"
         rows={rows}
         required={required}
       />
@@ -47,10 +47,10 @@ export const FormField: React.FC<FormFieldProps> = ({
         value={value || ""}
         onChange={onChange}
         placeholder={placeholder}
-        className="w-full p-2 border rounded"
+        className="form-input"
         required={required}
       />
     )}
-    {hint && <p className="mt-1 text-xs text-gray-500">{hint}</p>}
+    {hint && <p className="mt-1.5 text-xs text-muted-foreground">{hint}</p>}
   </div>
 );

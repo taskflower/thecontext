@@ -1,4 +1,4 @@
-// components/ui/AddButton.tsx
+// components/theme/AddButton.tsx
 import React from 'react';
 
 interface AddButtonProps {
@@ -9,7 +9,7 @@ interface AddButtonProps {
 export const AddButton: React.FC<AddButtonProps> = ({ onClick, title }) => (
   <button 
     onClick={onClick}
-    className="bg-blue-500 text-white p-1 rounded-full w-6 h-6 flex items-center justify-center"
+    className="btn-add"
     title={title}
   >+</button>
 );

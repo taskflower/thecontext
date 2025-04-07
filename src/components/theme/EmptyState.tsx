@@ -1,4 +1,4 @@
-// components/ui/EmptyState.tsx
+// components/theme/EmptyState.tsx
 import React from 'react';
 
 interface EmptyStateProps {
@@ -6,5 +6,5 @@ interface EmptyStateProps {
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({ message }) => (
-  <div className="text-gray-500 text-sm italic">{message}</div>
+  <div className="empty-state">{message}</div>
 );

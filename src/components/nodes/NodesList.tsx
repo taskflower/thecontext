@@ -19,13 +19,13 @@ const NodesList: React.FC = () => {
   };
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-2">
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-4">
         <BackButton onClick={navigateBack} />
-        <div className="flex space-x-1">
+        <div className="flex space-x-2">
           <button
             onClick={editContext}
-            className="bg-green-500 text-white p-1 rounded-full w-6 h-6 flex items-center justify-center"
+            className="bg-secondary text-secondary-foreground h-6 w-6 rounded-full flex items-center justify-center hover:bg-secondary/80 text-xs font-medium"
             title="Edytuj kontekst"
           >
             C
@@ -36,7 +36,7 @@ const NodesList: React.FC = () => {
 
       <Header title={scenario?.name || "Węzły"} />
 
-      <div className="space-y-2">
+      <div className="list-container">
         {nodes.map((node, index) => (
           <NodeItem key={node.id} node={node} index={index} />
         ))}

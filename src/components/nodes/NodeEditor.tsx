@@ -3,7 +3,6 @@ import React, { ChangeEvent } from 'react';
 import { FormField } from '../theme';
 import useStore from '@/store';
 
-
 const NodeEditor: React.FC = () => {
   const nodeForm = useStore(state => state.nodeForm);
   const updateNode = useStore(state => state.updateNode);
@@ -22,10 +21,10 @@ const NodeEditor: React.FC = () => {
   };
   
   return (
-    <div className="flex-1 p-6 bg-gray-50">
-      <h1 className="text-2xl font-bold mb-6">Edycja węzła: {nodeForm.label}</h1>
+    <div className="flex-1 p-8 bg-background">
+      <h1 className="text-2xl font-semibold tracking-tight mb-6">Edycja węzła: {nodeForm.label}</h1>
       
-      <div className="bg-white p-6 rounded-lg shadow-md">
+      <div className="card p-6">
         <form onSubmit={(e) => { e.preventDefault(); updateNode(); }}>
           <FormField
             label="Etykieta"
@@ -72,15 +71,15 @@ const NodeEditor: React.FC = () => {
             hint="Przykład: user.preferences.theme"
           />
           
-          <div className="flex justify-end space-x-4 mt-6">
+          <div className="flex justify-end space-x-4 mt-8">
             <button
               type="button"
               onClick={handleCancel}
-              className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+              className="btn btn-secondary px-4 py-2"
             >Anuluj</button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className="btn btn-primary px-4 py-2"
             >Zapisz</button>
           </div>
         </form>

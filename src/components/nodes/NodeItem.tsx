@@ -32,22 +32,23 @@ const NodeItem: React.FC<NodeItemProps> = ({ node, index }) => {
   
   return (
     <div 
-      className={`flex justify-between items-center p-2 rounded shadow cursor-pointer hover:bg-gray-50 ${
+      className={`list-item ${
         isActive
-          ? 'bg-blue-100 border-l-4 border-blue-500' 
+          ? 'list-item-selected border-primary' 
           : isSelected 
-            ? 'bg-green-100 border-l-4 border-green-500' 
-            : 'bg-white'
+            ? 'list-item-selected border-green-500' 
+            : ''
       }`}
       onClick={handleSelect}
     >
       <div>
-        <div>{node.label || `Node ${index + 1}`}</div>
-        {node.description && <div className="text-xs text-gray-500">{node.description}</div>}
+        <div className="font-medium">{node.label || `Node ${index + 1}`}</div>
+        {node.description && <div className="text-xs text-muted-foreground mt-0.5">{node.description}</div>}
       </div>
       <button 
         onClick={handleDelete}
-        className="text-red-500"
+        className="text-destructive hover:text-destructive/80"
+        aria-label="Usuń węzeł"
       >×</button>
     </div>
   );

@@ -3,7 +3,6 @@ import useStore from "@/store";
 import { Scenario } from "@/store/types";
 import React from "react";
 
-
 interface ScenarioItemProps {
   scenario: Scenario;
 }
@@ -27,16 +26,20 @@ const ScenarioItem: React.FC<ScenarioItemProps> = ({ scenario }) => {
 
   return (
     <div
-      className="flex justify-between items-center p-2 bg-white rounded shadow cursor-pointer hover:bg-gray-50"
+      className="list-item"
       onClick={handleSelect}
     >
       <div>
-        <div>{scenario.name}</div>
+        <div className="font-medium">{scenario.name}</div>
         {scenario.description && (
-          <div className="text-xs text-gray-500">{scenario.description}</div>
+          <div className="text-xs text-muted-foreground mt-0.5">{scenario.description}</div>
         )}
       </div>
-      <button onClick={handleDelete} className="text-red-500">
+      <button 
+        onClick={handleDelete} 
+        className="text-destructive hover:text-destructive/80"
+        aria-label="Usuń scenariusz"
+      >
         ×
       </button>
     </div>

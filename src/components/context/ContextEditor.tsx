@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { EmptyState, FormField } from "../theme";
 import useStore from "@/store";
 
-
 const ContextEditor: React.FC = () => {
   const contextForm = useStore((state) => state.contextForm);
   const updateContextForm = useStore((state) => state.updateContextForm);
@@ -41,15 +40,15 @@ const ContextEditor: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 p-6 bg-gray-50">
-      <h1 className="text-2xl font-bold mb-6">Edycja kontekstu</h1>
+    <div className="flex-1 p-8 bg-background">
+      <h1 className="text-2xl font-semibold tracking-tight mb-6">Edycja kontekstu</h1>
 
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-lg font-semibold mb-4">Elementy kontekstu</h2>
+      <div className="card p-6">
+        <h2 className="text-xl font-semibold tracking-tight mb-4">Elementy kontekstu</h2>
 
         <div className="space-y-4 mb-6">
           {contextForm.map((item, index) => (
-            <div key={item.id} className="border border-gray-200 rounded p-3">
+            <div key={item.id} className="border border-border rounded-md p-4">
               <div className="flex justify-between items-center mb-2">
                 <div className="font-medium">{item.title}</div>
                 <div className="space-x-2">
@@ -57,13 +56,13 @@ const ContextEditor: React.FC = () => {
                     onClick={() =>
                       setEditingItem(editingItem === index ? null : index)
                     }
-                    className="text-blue-500 text-sm"
+                    className="text-primary text-sm hover:text-primary/80"
                   >
                     {editingItem === index ? "Zakończ" : "Edytuj"}
                   </button>
                   <button
                     onClick={() => handleRemoveItem(index)}
-                    className="text-red-500 text-sm"
+                    className="text-destructive text-sm hover:text-destructive/80"
                   >
                     Usuń
                   </button>
@@ -71,7 +70,7 @@ const ContextEditor: React.FC = () => {
               </div>
 
               {editingItem === index ? (
-                <div className="space-y-2">
+                <div className="space-y-3 mt-3">
                   <FormField
                     label="ID"
                     value={item.id}
@@ -96,7 +95,7 @@ const ContextEditor: React.FC = () => {
                   />
                 </div>
               ) : (
-                <div className="text-sm bg-gray-50 p-2 rounded overflow-auto max-h-24">
+                <div className="text-sm bg-muted p-2 rounded-md overflow-auto max-h-24 mt-1">
                   {item.content}
                 </div>
               )}
@@ -108,9 +107,9 @@ const ContextEditor: React.FC = () => {
           )}
         </div>
 
-        <div className="border-t pt-4">
-          <h3 className="text-sm font-semibold mb-2">Dodaj nowy element</h3>
-          <div className="space-y-2">
+        <div className="border-t border-border pt-6 mt-6">
+          <h3 className="text-sm font-semibold mb-3">Dodaj nowy element</h3>
+          <div className="space-y-3">
             <FormField
               label="Nazwa/ID"
               value={newItemName}
@@ -127,28 +126,26 @@ const ContextEditor: React.FC = () => {
             <button
               onClick={handleAddItem}
               disabled={!newItemName.trim()}
-              className={`px-4 py-2 rounded ${
+              className={`btn ${
                 !newItemName.trim()
-                  ? "bg-gray-300 cursor-not-allowed"
-                  : "bg-blue-500 text-white hover:bg-blue-600"
-              }`}
+                  ? "bg-muted text-muted-foreground cursor-not-allowed"
+                  : "btn-primary"
+              } px-4 py-2`}
             >
               Dodaj element
             </button>
           </div>
         </div>
 
-        <div className="border-t mt-6 pt-6 flex justify-end">
+        <div className="border-t border-border mt-8 pt-6 flex justify-end">
           <button
             onClick={saveContext}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="btn btn-primary px-4 py-2"
           >
             Zapisz zmiany
           </button>
         </div>
       </div>
     </div>
-  );
-};
-
-export default ContextEditor;
+  )}
+  export default ContextEditor
