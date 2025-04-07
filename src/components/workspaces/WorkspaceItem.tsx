@@ -3,7 +3,6 @@ import useStore from "@/store";
 import { Workspace } from "@/store/types";
 import React from "react";
 
-
 interface WorkspaceItemProps {
   workspace: Workspace;
 }
@@ -27,17 +26,22 @@ const WorkspaceItem: React.FC<WorkspaceItemProps> = ({ workspace }) => {
 
   return (
     <div
-      className="list-item"
+      className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
       onClick={handleSelect}
     >
-      <span className="font-medium">{workspace.name}</span>
-      <button 
-        onClick={handleDelete} 
-        className="text-destructive hover:text-destructive/80"
-        aria-label="Usuń workspace"
-      >
-        ×
-      </button>
+      <div className="flex justify-between items-center">
+        <h3 className="font-medium">{workspace.name}</h3>
+        <button 
+          onClick={handleDelete} 
+          className="text-[hsl(var(--destructive))] hover:opacity-80"
+          aria-label="Usuń workspace"
+        >
+          &times;
+        </button>
+      </div>
+      <div className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
+        {workspace.scenarios.length} scenariuszy
+      </div>
     </div>
   );
 };

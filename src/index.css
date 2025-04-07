@@ -1,209 +1,53 @@
+/* src/index.css */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-    /* Dodane zmienne dla sidebar */
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 3.9%;
-    --sidebar-primary: 0 0% 9%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 0 0% 96.1%;
-    --sidebar-accent-foreground: 0 0% 9%;
-    --sidebar-border: 0 0% 89.8%;
-    --sidebar-ring: 0 0% 3.9%;
-  }
-  .dark {
-    --background: 220 10% 10%;
-    --foreground: 220 5% 92%;
-    --card: 220 10% 12%;
-    --card-foreground: 220 5% 92%;
-    --popover: 220 10% 12%;
-    --popover-foreground: 220 5% 92%;
-    --primary: 220 5% 92%;
-    --primary-foreground: 220 10% 10%;
-    --secondary: 220 8% 15%;
-    --secondary-foreground: 220 5% 92%;
-    --muted: 220 8% 15%;
-    --muted-foreground: 220 5% 70%;
-    --accent: 220 8% 15%;
-    --accent-foreground: 220 5% 92%;
-    --destructive: 0 40% 40%;
-    --destructive-foreground: 220 5% 92%;
-    --border: 220 8% 20%;
-    --input: 220 8% 20%;
-    --ring: 220 5% 65%;
-    --chart-1: 220 30% 65%;
-    --chart-2: 190 25% 60%;
-    --chart-3: 260 20% 55%;
-    --chart-4: 290 15% 50%;
-    --chart-5: 320 10% 45%;
-    /* Dodane zmienne dla sidebar w trybie ciemnym */
-    --sidebar-background: 220 10% 8%;
-    --sidebar-foreground: 220 5% 92%;
-    --sidebar-primary: 220 5% 92%;
-    --sidebar-primary-foreground: 220 10% 10%;
-    --sidebar-accent: 220 8% 15%;
-    --sidebar-accent-foreground: 220 5% 92%;
-    --sidebar-border: 220 8% 20%;
-    --sidebar-ring: 220 5% 65%;
-  }
+:root {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 3.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 3.9%;
+  --primary: 0 0% 9%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 0 0% 96.1%;
+  --secondary-foreground: 0 0% 9%;
+  --muted: 0 0% 96.1%;
+  --muted-foreground: 0 0% 45.1%;
+  --accent: 0 0% 96.1%;
+  --accent-foreground: 0 0% 9%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 89.8%;
+  --input: 0 0% 89.8%;
+  --ring: 0 0% 3.9%;
+  --radius: 0.5rem;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground font-sans antialiased;
-  }
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-medium tracking-tight text-foreground;
-  }
+.dark {
+  --background: 220 10% 10%;
+  --foreground: 220 5% 92%;
+  --card: 220 10% 12%;
+  --card-foreground: 220 5% 92%;
+  --popover: 220 10% 12%;
+  --popover-foreground: 220 5% 92%;
+  --primary: 220 5% 92%;
+  --primary-foreground: 220 10% 10%;
+  --secondary: 220 8% 15%;
+  --secondary-foreground: 220 5% 92%;
+  --muted: 220 8% 15%;
+  --muted-foreground: 220 5% 70%;
+  --accent: 220 8% 15%;
+  --accent-foreground: 220 5% 92%;
+  --destructive: 0 40% 40%;
+  --destructive-foreground: 220 5% 92%;
+  --border: 220 8% 20%;
+  --input: 220 8% 20%;
+  --ring: 220 5% 65%;
 }
 
-@layer components {
-  /* Common component styles */
-  .btn {
-    @apply inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
-  }
-  .btn-primary {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90;
-  }
-  .btn-secondary {
-    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
-  }
-  .btn-destructive {
-    @apply bg-destructive text-destructive-foreground hover:bg-destructive/90;
-  }
-  .btn-outline {
-    @apply border border-input bg-transparent hover:bg-accent hover:text-accent-foreground;
-  }
-  .btn-ghost {
-    @apply hover:bg-accent hover:text-accent-foreground;
-  }
-  .btn-icon {
-    @apply h-10 w-10 p-0;
-  }
-  
-  /* Card styles */
-  .card {
-    @apply rounded-lg border bg-card text-card-foreground shadow-sm;
-  }
-  
-  /* Form field styles */
-  .form-input {
-    @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
-  }
-  .form-textarea {
-    @apply flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
-  }
-  
-  /* Layout components - zaktualizowane do użycia zmiennych sidebar */
-  .sidebar {
-    @apply w-64 h-screen bg-sidebar border-r border-sidebar-border flex flex-col;
-  }
-  .sidebar-header {
-    @apply p-4 border-b border-sidebar-border bg-sidebar-accent/50;
-  }
-  .sidebar-content {
-    @apply flex-1 overflow-y-auto;
-  }
-  .sidebar-section {
-    @apply p-4 border-t border-sidebar-border bg-sidebar-accent/30;
-  }
-  
-  /* Poprawione style dla list */
-  .list-container {
-    @apply space-y-2;
-  }
-  
-  /* Klasyczny styl listy punktowej */
-  ul.list-bulleted {
-    @apply pl-6 space-y-2 list-disc;
-  }
-  
-  ul.list-bulleted li {
-    @apply leading-7 text-foreground;
-  }
-  
-  /* ShadCN UI zgodny styl dla elementów listy */
-  .list-item {
-    @apply flex items-center py-2 px-3 rounded-md text-sm cursor-pointer hover:bg-accent transition-colors;
-  }
-  
-  .list-item-selected {
-    @apply bg-accent text-accent-foreground border-l-2 border-primary;
-  }
-  
-  /* Alternatywny styl listy w zgodzie z ShadCN UI */
-  .shadcn-list {
-    @apply space-y-1;
-  }
-  
-  .shadcn-list-item {
-    @apply flex items-center space-x-2 rounded-md py-1.5 px-2 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none;
-  }
-  
-  .shadcn-list-item-selected {
-    @apply bg-accent text-accent-foreground;
-  }
-  
-  /* Ikonka kropki dla listy */
-  .list-bullet {
-    @apply h-1.5 w-1.5 rounded-full bg-primary mr-2;
-  }
-  
-  /* Empty states */
-  .empty-state {
-    @apply text-muted-foreground text-sm italic py-2;
-  }
-  
-  /* Flow components */
-  .flow-message {
-    @apply bg-accent/50 p-4 rounded-md mb-4 border border-border;
-  }
-  .flow-textarea {
-    @apply w-full p-3 border rounded-md focus:ring-2 focus:ring-ring focus:ring-offset-1 focus:outline-none;
-  }
-  
-  /* Button variations */
-  .btn-sm {
-    @apply h-9 rounded-md px-3;
-  }
-  .btn-lg {
-    @apply h-11 rounded-md px-8;
-  }
-  .btn-back {
-    @apply text-primary hover:text-primary/80 flex items-center gap-1 text-sm font-medium;
-  }
-  .btn-add {
-    @apply bg-primary text-primary-foreground h-6 w-6 rounded-full flex items-center justify-center hover:bg-primary/90;
-  }
-}
+/* Usunięto wszystkie style wykorzystujące @apply - 
+   zamiast tego używamy klas tailwind bezpośrednio w komponentach */

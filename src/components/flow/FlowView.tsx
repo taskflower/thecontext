@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import useStore from "../../store";
 import { Node, Scenario } from "../../store/types";
+import NodesList from "../nodes/NodesList";
+import ContextSection from "../context/ContextSection";
 
 const FlowView: React.FC = () => {
   // Pobieramy minimalne niezbędne dane ze store
@@ -9,6 +11,7 @@ const FlowView: React.FC = () => {
   const selectedIds = useStore((state) => state.selectedIds);
   const flowState = useStore((state) => state.flowState);
   const currentFlowNode = useStore((state) => state.currentFlowNode);
+  const navigateBack = useStore((state) => state.navigateBack);
 
   useStore((state) => state.nodeManager);
   useStore((state) => state.contextItems);
@@ -55,16 +58,24 @@ const FlowView: React.FC = () => {
 
   if (nodes.length === 0) {
     return (
-      <div className="flex-1 p-8 bg-background">
-        <h1 className="text-2xl font-semibold tracking-tight mb-6">{scenario?.name || "Flow"}</h1>
-        <div className="card p-6">
-          <p className="mb-6 text-card-foreground">Ten scenariusz nie ma jeszcze żadnych węzłów.</p>
+      <div className="p-8 bg-[hsl(var(--background))]">
+        <div className="flex items-center gap-2 mb-6">
+          <button 
+            onClick={navigateBack}
+            className="text-[hsl(var(--primary))] hover:opacity-80 text-sm font-medium"
+          >
+            ← Powrót
+          </button>
+          <h1 className="text-2xl font-semibold">{scenario?.name || "Flow"}</h1>
+        </div>
+        <div className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-sm">
+          <p className="mb-6 text-[hsl(var(--card-foreground))]">Ten scenariusz nie ma jeszcze żadnych węzłów.</p>
           <button
             onClick={() => {
               const label = prompt("Nazwa węzła:");
               if (label?.trim()) createNode(label);
             }}
-            className="btn btn-primary px-4 py-2"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] transition-colors hover:bg-opacity-90 px-4 py-2"
           >
             Dodaj pierwszy węzeł
           </button>
@@ -75,10 +86,18 @@ const FlowView: React.FC = () => {
 
   if (!currentFlowNode) {
     return (
-      <div className="flex-1 p-8 bg-background">
-        <h1 className="text-2xl font-semibold tracking-tight mb-6">{scenario?.name || "Flow"}</h1>
-        <div className="card p-6">
-          <p className="text-card-foreground">Ładowanie węzła...</p>
+      <div className="p-8 bg-[hsl(var(--background))]">
+        <div className="flex items-center gap-2 mb-6">
+          <button 
+            onClick={navigateBack}
+            className="text-[hsl(var(--primary))] hover:opacity-80 text-sm font-medium"
+          >
+            ← Powrót
+          </button>
+          <h1 className="text-2xl font-semibold">{scenario?.name || "Flow"}</h1>
+        </div>
+        <div className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-sm">
+          <p className="text-[hsl(var(--card-foreground))]">Ładowanie węzła...</p>
         </div>
       </div>
     );
@@ -87,87 +106,104 @@ const FlowView: React.FC = () => {
   const isLastStep = flowState.currentIndex === nodes.length - 1;
 
   return (
-    <div className="flex-1 p-8 bg-background">
-      <h1 className="text-2xl font-semibold tracking-tight mb-6">{scenario?.name}</h1>
-
-      <div className="card p-6">
-        {/* Informacje o kroku */}
-        <div className="flex justify-between items-center mb-6 text-sm text-muted-foreground">
-          <span>
-            Krok {flowState.currentIndex + 1} z {nodes.length}
-          </span>
-          <span>{currentFlowNode.label}</span>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
+      <div className="md:col-span-2">
+        <div className="flex items-center gap-2 mb-4">
+          <button 
+            onClick={navigateBack}
+            className="text-[hsl(var(--primary))] hover:opacity-80 text-sm font-medium"
+          >
+            ← Powrót
+          </button>
+          <h1 className="text-2xl font-semibold">{scenario?.name}</h1>
         </div>
 
-        {/* Wiadomość asystenta */}
-        <div className="flow-message mb-6">
-          <h3 className="text-sm font-medium mb-2">Wiadomość asystenta:</h3>
-          <div className="text-foreground whitespace-pre-line">
-            {currentFlowNode.assistantMessage}
+        <div className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-sm">
+          {/* Informacje o kroku */}
+          <div className="flex justify-between items-center mb-6 text-sm text-[hsl(var(--muted-foreground))]">
+            <span>
+              Krok {flowState.currentIndex + 1} z {nodes.length}
+            </span>
+            <span>{currentFlowNode.label}</span>
+          </div>
+
+          {/* Wiadomość asystenta */}
+          <div className="mb-6">
+            <h3 className="text-sm font-medium mb-2">Wiadomość asystenta:</h3>
+            <div className="bg-[hsl(var(--accent))] bg-opacity-50 p-4 rounded-md border border-[hsl(var(--border))]">
+              <div className="text-[hsl(var(--foreground))] whitespace-pre-line">
+                {currentFlowNode.assistantMessage}
+              </div>
+            </div>
+          </div>
+
+          {/* Input użytkownika */}
+          <div className="mb-6">
+            <h3 className="text-sm font-medium mb-2">Odpowiedź:</h3>
+            <textarea
+              value={flowState.userInput}
+              onChange={(e) => updateFlowInput(e.target.value)}
+              placeholder="Wpisz swoją odpowiedź..."
+              className="w-full p-3 border border-[hsl(var(--input))] rounded-md focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))]"
+              rows={4}
+            />
+
+            {currentFlowNode.contextKey && (
+              <div className="mt-2 text-xs text-[hsl(var(--muted-foreground))]">
+                Odpowiedź zapisana w:{" "}
+                <code className="bg-[hsl(var(--muted))] px-1.5 py-0.5 rounded text-xs">
+                  {currentFlowNode.contextKey}
+                </code>
+                {currentFlowNode.contextJsonPath && (
+                  <span>
+                    {" "}
+                    (ścieżka:{" "}
+                    <code className="bg-[hsl(var(--muted))] px-1.5 py-0.5 rounded text-xs">
+                      {currentFlowNode.contextJsonPath}
+                    </code>
+                    )
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Przyciski nawigacyjne */}
+          <div className="flex justify-between">
+            <button
+              onClick={prevStep}
+              disabled={flowState.currentIndex === 0}
+              className={`inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors px-4 py-2
+                ${flowState.currentIndex === 0
+                  ? "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] cursor-not-allowed"
+                  : "bg-[hsl(var(--secondary))] text-[hsl(var(--secondary-foreground))] hover:bg-opacity-80"
+                }`}
+            >
+              ← Wstecz
+            </button>
+
+            {isLastStep ? (
+              <button
+                onClick={finishFlow}
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] transition-colors hover:bg-opacity-90 px-4 py-2"
+              >
+                Zakończ
+              </button>
+            ) : (
+              <button
+                onClick={nextStep}
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] transition-colors hover:bg-opacity-90 px-4 py-2"
+              >
+                Dalej →
+              </button>
+            )}
           </div>
         </div>
+      </div>
 
-        {/* Input użytkownika */}
-        <div className="mb-6">
-          <h3 className="text-sm font-medium mb-2">Odpowiedź:</h3>
-          <textarea
-            value={flowState.userInput}
-            onChange={(e) => updateFlowInput(e.target.value)}
-            placeholder="Wpisz swoją odpowiedź..."
-            className="flow-textarea"
-            rows={4}
-          />
-
-          {currentFlowNode.contextKey && (
-            <div className="mt-2 text-xs text-muted-foreground">
-              Odpowiedź zapisana w:{" "}
-              <code className="bg-muted px-1.5 py-0.5 rounded text-xs">
-                {currentFlowNode.contextKey}
-              </code>
-              {currentFlowNode.contextJsonPath && (
-                <span>
-                  {" "}
-                  (ścieżka:{" "}
-                  <code className="bg-muted px-1.5 py-0.5 rounded text-xs">
-                    {currentFlowNode.contextJsonPath}
-                  </code>
-                  )
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Przyciski nawigacyjne */}
-        <div className="flex justify-between">
-          <button
-            onClick={prevStep}
-            disabled={flowState.currentIndex === 0}
-            className={`btn ${
-              flowState.currentIndex === 0
-                ? "bg-muted text-muted-foreground cursor-not-allowed"
-                : "btn-secondary"
-            } px-4 py-2`}
-          >
-            ← Wstecz
-          </button>
-
-          {isLastStep ? (
-            <button
-              onClick={finishFlow}
-              className="btn btn-primary px-4 py-2"
-            >
-              Zakończ
-            </button>
-          ) : (
-            <button
-              onClick={nextStep}
-              className="btn btn-primary px-4 py-2"
-            >
-              Dalej →
-            </button>
-          )}
-        </div>
+      <div className="space-y-6">
+        <NodesList />
+        <ContextSection />
       </div>
     </div>
   );

@@ -1,7 +1,6 @@
 // components/workspaces/WorkspacesList.tsx
 import React from 'react';
 import WorkspaceItem from './WorkspaceItem';
-import { AddButton, EmptyState, Header } from '../theme';
 import useStore from '@/store';
 
 const WorkspacesList: React.FC = () => {
@@ -18,11 +17,15 @@ const WorkspacesList: React.FC = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
-        <Header title="Workspaces" />
-        <AddButton onClick={handleCreate} title="Dodaj workspace" />
+        <h2 className="text-xl font-semibold">Workspaces</h2>
+        <button 
+          onClick={handleCreate}
+          className="bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] h-6 w-6 rounded-full flex items-center justify-center hover:bg-opacity-90"
+          title="Dodaj workspace"
+        >+</button>
       </div>
       
-      <div className="list-container">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {workspaces.map(workspace => (
           <WorkspaceItem 
             key={workspace.id} 
@@ -31,7 +34,9 @@ const WorkspacesList: React.FC = () => {
         ))}
         
         {workspaces.length === 0 && (
-          <EmptyState message="Brak workspace'ów" />
+          <div className="text-[hsl(var(--muted-foreground))] text-sm italic py-2">
+            Brak workspace'ów
+          </div>
         )}
       </div>
     </div>

@@ -5,7 +5,7 @@ import useStore from '../../store';
 import type { Node as FlowNode } from '../../store/types';
 
 interface NodeItemProps {
-  node: FlowNode;  // Zmieniona nazwa, aby uniknąć konfliktu
+  node: FlowNode;
   index: number;
 }
 
@@ -32,24 +32,24 @@ const NodeItem: React.FC<NodeItemProps> = ({ node, index }) => {
   
   return (
     <div 
-      className={`list-item ${
+      className={`flex items-center py-2 px-3 rounded-md text-sm cursor-pointer hover:bg-[hsl(var(--accent))] transition-colors ${
         isActive
-          ? 'list-item-selected border-primary' 
-          : isSelected 
-            ? 'list-item-selected border-green-500' 
+          ? 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] border-l-2 border-[hsl(var(--primary))]'
+          : isSelected
+            ? 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] border-l-2 border-green-500'
             : ''
       }`}
       onClick={handleSelect}
     >
-      <div>
+      <div className="flex-1">
         <div className="font-medium">{node.label || `Node ${index + 1}`}</div>
-        {node.description && <div className="text-xs text-muted-foreground mt-0.5">{node.description}</div>}
+        {node.description && <div className="text-xs text-[hsl(var(--muted-foreground))] mt-0.5">{node.description}</div>}
       </div>
       <button 
         onClick={handleDelete}
-        className="text-destructive hover:text-destructive/80"
+        className="text-[hsl(var(--destructive))] hover:opacity-80"
         aria-label="Usuń węzeł"
-      >×</button>
+      >&times;</button>
     </div>
   );
 };

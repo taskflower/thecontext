@@ -1,7 +1,60 @@
 // components/nodes/NodeEditor.tsx
 import React, { ChangeEvent } from 'react';
-import { FormField } from '../theme';
 import useStore from '@/store';
+
+interface FormFieldProps {
+  label: string;
+  name?: string;
+  value: string | number;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  type?: "text" | "number" | "email" | "password";
+  placeholder?: string;
+  required?: boolean;
+  rows?: number;
+  hint?: string;
+}
+
+const FormField: React.FC<FormFieldProps> = ({
+  label,
+  name,
+  value,
+  onChange,
+  type = "text",
+  placeholder = "",
+  required = false,
+  rows = 0,
+  hint = "",
+}) => (
+  <div className="mb-4">
+    <label className="block text-sm font-medium mb-2" htmlFor={name}>
+      {label}
+    </label>
+    {rows > 0 ? (
+      <textarea
+        id={name}
+        name={name}
+        value={value || ""}
+        onChange={onChange}
+        placeholder={placeholder}
+        className="flex min-h-[80px] w-full rounded-md border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))]"
+        rows={rows}
+        required={required}
+      />
+    ) : (
+      <input
+        id={name}
+        name={name}
+        type={type}
+        value={value || ""}
+        onChange={onChange}
+        placeholder={placeholder}
+        className="flex h-10 w-full rounded-md border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))]"
+        required={required}
+      />
+    )}
+    {hint && <p className="mt-1.5 text-xs text-[hsl(var(--muted-foreground))]">{hint}</p>}
+  </div>
+);
 
 const NodeEditor: React.FC = () => {
   const nodeForm = useStore(state => state.nodeForm);
@@ -21,10 +74,10 @@ const NodeEditor: React.FC = () => {
   };
   
   return (
-    <div className="flex-1 p-8 bg-background">
-      <h1 className="text-2xl font-semibold tracking-tight mb-6">Edycja węzła: {nodeForm.label}</h1>
+    <div className="p-8 bg-[hsl(var(--background))]">
+      <h1 className="text-2xl font-semibold mb-6">Edycja węzła: {nodeForm.label}</h1>
       
-      <div className="card p-6">
+      <div className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-sm">
         <form onSubmit={(e) => { e.preventDefault(); updateNode(); }}>
           <FormField
             label="Etykieta"
@@ -75,11 +128,11 @@ const NodeEditor: React.FC = () => {
             <button
               type="button"
               onClick={handleCancel}
-              className="btn btn-secondary px-4 py-2"
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-[hsl(var(--secondary))] text-[hsl(var(--secondary-foreground))] hover:bg-opacity-80 px-4 py-2"
             >Anuluj</button>
             <button
               type="submit"
-              className="btn btn-primary px-4 py-2"
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:bg-opacity-90 px-4 py-2"
             >Zapisz</button>
           </div>
         </form>

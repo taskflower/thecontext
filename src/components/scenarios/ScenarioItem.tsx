@@ -26,22 +26,27 @@ const ScenarioItem: React.FC<ScenarioItemProps> = ({ scenario }) => {
 
   return (
     <div
-      className="list-item"
+      className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
       onClick={handleSelect}
     >
-      <div>
-        <div className="font-medium">{scenario.name}</div>
-        {scenario.description && (
-          <div className="text-xs text-muted-foreground mt-0.5">{scenario.description}</div>
-        )}
+      <div className="flex justify-between items-center">
+        <h3 className="font-medium">{scenario.name}</h3>
+        <button 
+          onClick={handleDelete} 
+          className="text-[hsl(var(--destructive))] hover:opacity-80"
+          aria-label="Usuń scenariusz"
+        >
+          &times;
+        </button>
       </div>
-      <button 
-        onClick={handleDelete} 
-        className="text-destructive hover:text-destructive/80"
-        aria-label="Usuń scenariusz"
-      >
-        ×
-      </button>
+      {scenario.description && (
+        <div className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
+          {scenario.description}
+        </div>
+      )}
+      <div className="mt-2 text-xs text-[hsl(var(--muted-foreground))]">
+        {scenario.nodes.length} węzłów
+      </div>
     </div>
   );
 };

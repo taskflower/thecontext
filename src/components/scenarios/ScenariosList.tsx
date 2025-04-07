@@ -1,6 +1,5 @@
 // components/scenarios/ScenariosList.tsx
 import React from "react";
-import { AddButton, BackButton, EmptyState, Header } from "../theme";
 import ScenarioItem from "./ScenarioItem";
 import useStore from "@/store";
 
@@ -19,19 +18,31 @@ const ScenariosList: React.FC = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
-        <BackButton onClick={navigateBack} />
-        <AddButton onClick={handleCreate} title="Dodaj scenariusz" />
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={navigateBack}
+            className="text-[hsl(var(--primary))] hover:opacity-80 text-sm font-medium"
+          >
+            ← Powrót
+          </button>
+          <h2 className="text-xl font-semibold">{workspace?.name || "Scenariusze"}</h2>
+        </div>
+        <button 
+          onClick={handleCreate}
+          className="bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] h-6 w-6 rounded-full flex items-center justify-center hover:bg-opacity-90"
+          title="Dodaj scenariusz"
+        >+</button>
       </div>
 
-      <Header title={workspace?.name || "Scenariusze"} />
-
-      <div className="list-container">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {workspace?.scenarios.map((scenario) => (
           <ScenarioItem key={scenario.id} scenario={scenario} />
         ))}
 
         {!workspace?.scenarios.length && (
-          <EmptyState message="Brak scenariuszy" />
+          <div className="text-[hsl(var(--muted-foreground))] text-sm italic py-2">
+            Brak scenariuszy
+          </div>
         )}
       </div>
     </div>

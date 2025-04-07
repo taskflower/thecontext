@@ -1,11 +1,10 @@
 // App.tsx
 import { useEffect, useState } from "react";
-import { WorkspaceView } from "./components/workspaces";
-import { ScenarioView } from "./components/scenarios";
+import { WorkspacesList } from "./components/workspaces";
+import { ScenariosList } from "./components/scenarios";
 import FlowView from "./components/flow/FlowView";
 import { NodeEditor } from "./components/nodes";
 import { ContextEditor } from "./components/context";
-import Sidebar from "./components/layout/Sidebar";
 import useStore from "./store";
 
 function App() {
@@ -50,9 +49,9 @@ function App() {
   const renderContent = () => {
     switch (view) {
       case "workspaces":
-        return <WorkspaceView />;
+        return <WorkspacesList />;
       case "scenarios":
-        return <ScenarioView />;
+        return <ScenariosList />;
       case "flow":
         return <FlowView />;
       case "nodeEditor":
@@ -66,9 +65,8 @@ function App() {
 
   // Renderowanie aplikacji
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar />
-      {renderContent()}
+    <div className="min-h-screen bg-[hsl(var(--background))]">
+      <div className="container mx-auto p-4">{renderContent()}</div>
     </div>
   );
 }
