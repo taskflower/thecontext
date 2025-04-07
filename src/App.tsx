@@ -1,1001 +1,805 @@
-/**
- * Main Application Component
- * Implementation of the workspace → scenario → flow pattern
- */
-import React, { useState } from 'react';
-import type { TemplateConfig } from './templates/types';
-import { useTemplateSystem } from './core/hooks/useTemplateSystem';
-import { HookPointProvider } from './hookPoints';
-import { PluginProvider } from './plugins/context';
-import { apiServicePlugin } from './plugins/samples/index';
-import FlowPlayer from './flow/components/FlowPlayer';
-import ContextManager, { useContextStore } from './modules/context';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect, ChangeEvent } from 'react';
+import { NodeManager} from '../raw_modules/nodes-module/src';
 
-// Define our app view states
-type AppView = 'workspaces' | 'scenarios' | 'flow' | 'templates' | 'edit-node' | 'context-manager';
-
-interface Workspace {
-  id: string;
-  name: string;
-  description?: string;
-}
-
-interface Scenario {
-  id: string;
-  workspaceId: string;
-  name: string;
-  description?: string;
-  nodes: any[];
-}
-
-interface Node {
-  id: string;
+// Define the type for FormField props
+interface FormFieldProps {
   label: string;
-  description?: string;
-  position: { x: number, y: number };
-  assistantMessage?: string;
-  contextKey?: string;
-  contextJsonPath?: string;
-  pluginKey?: string;
-  pluginData?: Record<string, any>;
+  name?: string;
+  value: string | number;
+  onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  type?: 'text' | 'number' | 'email' | 'password';
+  placeholder?: string;
+  required?: boolean;
+  rows?: number;
+  hint?: string;
 }
 
-const App: React.FC = () => {
-  // State for managing active view
-  const [activeView, setActiveView] = useState<AppView>('workspaces');
-  
-  // State for workspace and scenario
-  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(null);
-  const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(null);
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-  
-  // State for template
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('default');
-  
-  // State for showing options
-  const [showOptions, setShowOptions] = useState(false);
-  
-  // State for scenarios data - now we need to be able to update it
-  const [scenariosData, setScenariosData] = useState<Scenario[]>([
-    // Education Workspace Scenarios
-    {
-      id: 'scenario-1',
-      workspaceId: 'workspace-1',
-      name: 'Introduction to Templates',
-      description: 'Learn how the template system works',
+const FormField: React.FC<FormFieldProps> = ({ 
+  label, 
+  name, 
+  value, 
+  onChange, 
+  type = 'text', 
+  placeholder = '', 
+  required = false, 
+  rows = 0, 
+  hint = '' 
+}) => (
+  <div className="mb-3">
+    <label className="block text-sm font-medium mb-1" htmlFor={name}>{label}</label>
+    {rows > 0 ? (
+      <textarea
+        id={name}
+        name={name}
+        value={value || ''}
+        onChange={onChange}
+        placeholder={placeholder}
+        className="w-full p-2 border rounded"
+        rows={rows}
+        required={required}
+      />
+    ) : (
+      <input
+        id={name}
+        name={name}
+        type={type}
+        value={value || ''}
+        onChange={onChange}
+        placeholder={placeholder}
+        className="w-full p-2 border rounded"
+        required={required}
+      />
+    )}
+    {hint && <p className="mt-1 text-xs text-gray-500">{hint}</p>}
+  </div>
+);
+
+
+
+// Komponent do wyświetlania przycisków "z powrotem"
+const BackButton = ({ onClick }) => (
+  <button onClick={onClick} className="text-blue-500 hover:text-blue-700">
+    ← Powrót
+  </button>
+);
+
+// Komponent głównej aplikacji
+function App() {
+  // Stan aplikacji
+  const [nodeManager] = useState(() => new NodeManager());
+  const [workspaces, setWorkspaces] = useState([{
+    id: 'workspace-1', name: 'Podstawowy workspace', 
+    scenarios: [{
+      id: 'scenario-1', name: 'Prosty scenariusz', description: 'Przykładowy scenariusz',
       nodes: [
-        {
-          id: "node-1-1",
-          label: "Introduction",
-          description: "Templates overview",
-          position: { x: 100, y: 100 },
-          assistantMessage: "Welcome to the **Templates Introduction**! Templates allow you to change the visual style of the application without changing the underlying functionality.",
-          contextKey: "template_feedback"
-        },
-        {
-          id: "node-1-2",
-          label: "Template Components",
-          description: "Understanding template components",
-          position: { x: 300, y: 100 },
-          assistantMessage: "Templates consist of several key components:\n\n- Header\n- Navigation\n- Message display\n- User input\n\nEach template provides its own implementation of these components.",
-          contextKey: "component_feedback"
-        },
-        {
-          id: "node-1-3",
-          label: "Try Templates",
-          description: "Try different templates",
-          position: { x: 500, y: 100 },
-          assistantMessage: "Use the template selector in the options menu to switch between different visual styles.\n\nWhich template do you prefer and why?",
-          contextKey: "template_preference"
-        }
+        { id: 'node-1', scenarioId: 'scenario-1', label: 'Powitanie', description: 'Pytanie o imię',
+          position: { x: 100, y: 100 }, assistantMessage: 'Cześć! Jak masz na imię?', contextKey: 'user_name' },
+        { id: 'node-2', scenarioId: 'scenario-1', label: 'Odpowiedź', description: 'Powitanie użytkownika',
+          position: { x: 100, y: 250 }, assistantMessage: 'Miło Cię poznać, {{user_name}}!', contextKey: 'user_request' }
       ]
-    },
-    {
-      id: 'scenario-2',
-      workspaceId: 'workspace-1',
-      name: 'Plugin System Tutorial',
-      description: 'Understand how plugins extend functionality',
-      nodes: [
-        {
-          id: "node-2-1",
-          label: "Introduction to Plugins",
-          description: "Plugin system overview",
-          position: { x: 100, y: 100 },
-          assistantMessage: "Welcome to the **Plugin System Tutorial**! Plugins allow extending the application with custom functionality.\n\nPlugins can add new features without modifying the core application.",
-          contextKey: "plugin_feedback"
-        },
-        {
-          id: "node-2-2",
-          label: "API Service Plugin",
-          description: "Demo of the API service plugin",
-          position: { x: 300, y: 100 },
-          assistantMessage: "Below is a demonstration of the API Service plugin. This plugin allows integration with external APIs.\n\nTry clicking the button to see it in action!",
-          contextKey: "api_feedback",
-          pluginKey: "api-service",
-          pluginData: {
-            "api-service": {
-              buttonText: "Execute API Call",
-              apiUrl: "https://api.example.com/demo",
-              autoAdvanceOnSuccess: false,
-              responseMessage: "API integration successful! In a real application, this would connect to an actual API endpoint."
-            }
-          }
-        },
-        {
-          id: "node-2-3",
-          label: "Plugin Development",
-          description: "How to create custom plugins",
-          position: { x: 500, y: 100 },
-          assistantMessage: "Creating custom plugins involves:\n\n1. Defining a plugin manifest\n2. Creating plugin components\n3. Registering the plugin\n\nWhat kind of plugin would you create?",
-          contextKey: "plugin_idea"
-        }
-      ]
-    },
-    // Development Workspace Scenarios
-    {
-      id: 'scenario-3',
-      workspaceId: 'workspace-2',
-      name: 'React Basics',
-      description: 'Introduction to React development',
-      nodes: [
-        {
-          id: "node-3-1",
-          label: "React Components",
-          description: "Introduction to React components",
-          position: { x: 100, y: 100 },
-          assistantMessage: "Welcome to React Basics! React is a JavaScript library for building user interfaces based on components.\n\nComponents are reusable pieces of code that return React elements describing what should appear on the screen.",
-          contextKey: "react_understanding"
-        },
-        {
-          id: "node-3-2",
-          label: "State and Props",
-          description: "Understanding state and props",
-          position: { x: 300, y: 100 },
-          assistantMessage: "React components use two types of data:\n\n1. **Props** - Passed down from parent (read-only)\n2. **State** - Internal component data that can change\n\nHow would you describe the difference between them?",
-          contextKey: "state_props_answer"
-        }
-      ]
-    },
-    // Customer Support Workspace Scenarios
-    {
-      id: 'scenario-4',
-      workspaceId: 'workspace-3',
-      name: 'Handling Customer Complaints',
-      description: 'Protocol for dealing with upset customers',
-      nodes: [
-        {
-          id: "node-4-1",
-          label: "Active Listening",
-          description: "How to properly listen to customer issues",
-          position: { x: 100, y: 100 },
-          assistantMessage: "When a customer has a complaint, the first step is **active listening**:\n\n- Let them explain their issue without interruption\n- Show empathy and understanding\n- Take notes on key points\n\nWhat else would you add to this approach?",
-          contextKey: "listening_feedback"
-        },
-        {
-          id: "node-4-2",
-          label: "Solution Options",
-          description: "Presenting options to the customer",
-          position: { x: 300, y: 100 },
-          assistantMessage: "After understanding the issue, present solution options clearly:\n\n1. Explain what you can do immediately\n2. Outline additional steps if needed\n3. Be honest about limitations\n\nHow would you handle a situation where you can't fully resolve their issue?",
-          contextKey: "solution_approach"
-        }
-      ]
+    }]
+  }]);
+  
+  // Stan UI
+  const [view, setView] = useState('workspaces');
+  const [selectedIds, setSelectedIds] = useState({ workspace: null, scenario: null, node: null });
+  const [nodeForm, setNodeForm] = useState(null);
+  const [contextForm, setContextForm] = useState(null);
+  const [flowState, setFlowState] = useState({ currentIndex: 0, userInput: '' });
+  const [contextItems, setContextItems] = useState([]);
+
+  // Aktualizacja NodeManager gdy zmienia się scenariusz
+  useEffect(() => {
+    const { workspace, scenario } = selectedIds;
+    if (workspace && scenario) {
+      const ws = workspaces.find(w => w.id === workspace);
+      const sc = ws?.scenarios.find(s => s.id === scenario);
+      if (sc?.nodes.length) {
+        nodeManager.importNodes(sc.nodes);
+        setFlowState({ currentIndex: 0, userInput: '' });
+      }
     }
-  ]);
+  }, [selectedIds.workspace, selectedIds.scenario, workspaces, nodeManager]);
 
-  // State for node editing form
-  const [editingNode, setEditingNode] = useState<Node | null>(null);
-  
-  // Template system
-  const { 
-    availableTemplates, 
-    currentTemplateId, 
-    setCurrentTemplateId 
-  } = useTemplateSystem({
-    initialTemplateId: selectedTemplateId
-  });
-  
-  // Sample workspaces
-  const workspaces: Workspace[] = [
-    {
-      id: 'workspace-1',
-      name: 'Education Workspace',
-      description: 'Contains educational scenarios and learning materials'
+  // Pomocnicze funkcje dostępu do danych
+  const getWorkspace = () => workspaces.find(w => w.id === selectedIds.workspace);
+  const getScenario = () => getWorkspace()?.scenarios.find(s => s.id === selectedIds.scenario);
+  const getNodes = () => getScenario()?.nodes || [];
+  const getNode = (id) => getNodes().find(n => n.id === id);
+  const getCurrentFlowNode = () => {
+    const nodes = getNodes();
+    const { currentIndex } = flowState;
+    if (!nodes.length || currentIndex >= nodes.length) return null;
+    return nodeManager.prepareNodeForDisplay(nodes[currentIndex].id, contextItems);
+  };
+
+  // Funkcje dla workspace'ów
+  const handleWorkspaces = {
+    create: () => {
+      const name = prompt('Nazwa workspace:');
+      if (name?.trim()) {
+        setWorkspaces([...workspaces, { id: `ws-${Date.now()}`, name, scenarios: [] }]);
+      }
     },
-    {
-      id: 'workspace-2',
-      name: 'Development Workspace',
-      description: 'Programming and development training flows'
+    select: (id) => {
+      setSelectedIds({ workspace: id, scenario: null, node: null });
+      setView('scenarios');
     },
-    {
-      id: 'workspace-3',
-      name: 'Customer Support',
-      description: 'Customer support scripts and scenarios'
+    delete: (id) => {
+      if (confirm('Usunąć ten workspace?')) {
+        setWorkspaces(workspaces.filter(w => w.id !== id));
+        if (selectedIds.workspace === id) {
+          setSelectedIds({ workspace: null, scenario: null, node: null });
+          setView('workspaces');
+        }
+      }
     }
-  ];
-  
-  // Function to get scenarios for a workspace
-  const getWorkspaceScenarios = (workspaceId: string) => {
-    return scenariosData.filter(scenario => scenario.workspaceId === workspaceId);
-  };
-  
-  // Function to find a specific scenario
-  const getScenario = (scenarioId: string) => {
-    return scenariosData.find(scenario => scenario.id === scenarioId);
   };
 
-  // Function to find a specific node
-  const getNode = (scenarioId: string, nodeId: string) => {
-    const scenario = getScenario(scenarioId);
-    if (!scenario) return null;
-    return scenario.nodes.find(node => node.id === nodeId);
+  // Funkcje dla scenariuszy
+  const handleScenarios = {
+    create: () => {
+      if (!selectedIds.workspace) return;
+      const name = prompt('Nazwa scenariusza:');
+      if (name?.trim()) {
+        setWorkspaces(workspaces.map(w => w.id === selectedIds.workspace ? {
+          ...w, scenarios: [...w.scenarios, { id: `sc-${Date.now()}`, name, description: '', nodes: [] }]
+        } : w));
+      }
+    },
+    select: (id) => {
+      setSelectedIds({ ...selectedIds, scenario: id, node: null });
+      setView('flow');
+    },
+    delete: (id) => {
+      if (confirm('Usunąć ten scenariusz?')) {
+        setWorkspaces(workspaces.map(w => w.id === selectedIds.workspace ? {
+          ...w, scenarios: w.scenarios.filter(s => s.id !== id)
+        } : w));
+        if (selectedIds.scenario === id) {
+          setSelectedIds({ ...selectedIds, scenario: null, node: null });
+          setView('scenarios');
+        }
+      }
+    }
   };
 
-  // Function to update a node
-  const updateNode = (scenarioId: string, nodeId: string, updates: Partial<Node>) => {
-    setScenariosData(prevScenarios => 
-      prevScenarios.map(scenario => {
-        if (scenario.id !== scenarioId) return scenario;
-        
-        return {
-          ...scenario,
-          nodes: scenario.nodes.map(node => 
-            node.id === nodeId ? { ...node, ...updates } : node
-          )
+  // Funkcje dla węzłów
+  const handleNodes = {
+    create: () => {
+      if (!selectedIds.scenario) return;
+      const label = prompt('Nazwa węzła:');
+      if (label?.trim()) {
+        const newNode = {
+          id: `node-${Date.now()}`,
+          scenarioId: selectedIds.scenario,
+          label,
+          description: '',
+          position: { x: 100, y: 100 + getNodes().length * 150 },
+          assistantMessage: 'Wiadomość asystenta',
+          contextKey: ''
         };
-      })
-    );
-  };
-  
-  // Handle workspace selection
-  const handleSelectWorkspace = (workspaceId: string) => {
-    setSelectedWorkspaceId(workspaceId);
-    setSelectedScenarioId(null);
-    setActiveView('scenarios');
-  };
-  
-  // Handle opening context manager
-  const handleOpenContextManager = (workspaceId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setSelectedWorkspaceId(workspaceId);
-    setSelectedScenarioId(null);
-    setActiveView('context-manager');
-  };
-  
-  // Handle scenario selection
-  const handleSelectScenario = (scenarioId: string) => {
-    setSelectedScenarioId(scenarioId);
-    setActiveView('flow');
-  };
-
-  // Handle node editing
-  const handleEditNode = (scenarioId: string, nodeId: string) => {
-    const node = getNode(scenarioId, nodeId);
-    if (!node) return;
-    
-    setSelectedNodeId(nodeId);
-    setEditingNode({ ...node });
-    setActiveView('edit-node');
-  };
-
-  // Handle node update
-  const handleNodeUpdate = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!selectedScenarioId || !selectedNodeId || !editingNode) return;
-    
-    updateNode(selectedScenarioId, selectedNodeId, editingNode);
-    setActiveView('flow');
-  };
-  
-  // Handle back navigation
-  const handleBack = () => {
-    switch (activeView) {
-      case 'scenarios':
-        setActiveView('workspaces');
-        setSelectedWorkspaceId(null);
-        break;
-      case 'flow':
-        setActiveView('scenarios');
-        setSelectedScenarioId(null);
-        break;
-      case 'templates':
-        // Return to previous view
-        if (selectedScenarioId) {
-          setActiveView('flow');
-        } else if (selectedWorkspaceId) {
-          setActiveView('scenarios');
+        
+        nodeManager.addNode(newNode);
+        setWorkspaces(workspaces.map(w => w.id === selectedIds.workspace ? {
+          ...w, scenarios: w.scenarios.map(s => s.id === selectedIds.scenario ? {
+            ...s, nodes: [...s.nodes, newNode]
+          } : s)
+        } : w));
+      }
+    },
+    edit: (id) => {
+      try {
+        const node = getNode(id);
+        if (node) {
+          setSelectedIds({ ...selectedIds, node: id });
+          setNodeForm({ ...node });
+          setView('nodeEditor');
         } else {
-          setActiveView('workspaces');
+          console.error(`Node ${id} not found`);
+          alert(`Błąd: Węzeł o ID ${id} nie został znaleziony`);
         }
-        break;
-      case 'edit-node':
-        setActiveView('flow');
-        setEditingNode(null);
-        setSelectedNodeId(null);
-        break;
-      case 'context-manager':
-        // Go back to scenarios if we came from there, otherwise go to workspaces
-        if (selectedScenarioId) {
-          setActiveView('scenarios');
-        } else if (selectedWorkspaceId) {
-          setActiveView('scenarios');
-        } else {
-          setActiveView('workspaces');
+      } catch (error) {
+        console.error('Error in edit node:', error);
+      }
+    },
+    update: () => {
+      if (!nodeForm) return;
+      
+      nodeManager.updateNode(nodeForm.id, nodeForm);
+      setWorkspaces(workspaces.map(w => w.id === selectedIds.workspace ? {
+        ...w, scenarios: w.scenarios.map(s => s.id === selectedIds.scenario ? {
+          ...s, nodes: s.nodes.map(n => n.id === nodeForm.id ? nodeForm : n)
+        } : s)
+      } : w));
+      
+      setNodeForm(null);
+      setSelectedIds({ ...selectedIds, node: null });
+      setView('flow');
+    },
+    delete: (id) => {
+      if (confirm('Usunąć ten węzeł?')) {
+        nodeManager.removeNode(id);
+        setWorkspaces(workspaces.map(w => w.id === selectedIds.workspace ? {
+          ...w, scenarios: w.scenarios.map(s => s.id === selectedIds.scenario ? {
+            ...s, nodes: s.nodes.filter(n => n.id !== id)
+          } : s)
+        } : w));
+        
+        if (selectedIds.node === id) {
+          setSelectedIds({ ...selectedIds, node: null });
+          setView('flow');
         }
-        break;
-      default:
-        setActiveView('workspaces');
+      }
     }
   };
-  
-  // Render workspaces screen
-  const renderWorkspacesScreen = () => (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Workspaces</h1>
-        <div className="flex space-x-2">
-          <button
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-            onClick={() => setActiveView('templates')}
-          >
-            Change Template
-          </button>
-          <button
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-            onClick={() => setShowOptions(!showOptions)}
-          >
-            {showOptions ? 'Hide Options' : 'Show Options'}
-          </button>
-        </div>
+
+  // Funkcje dla navigacji
+  const handleNavigation = {
+    back: () => {
+      switch (view) {
+        case 'scenarios': 
+          setSelectedIds({ workspace: null, scenario: null, node: null });
+          setView('workspaces');
+          break;
+        case 'flow':
+          setSelectedIds({ ...selectedIds, scenario: null, node: null });
+          setView('scenarios');
+          break;
+        case 'nodeEditor':
+        case 'contextEditor':
+          setNodeForm(null);
+          setContextForm(null);
+          setSelectedIds({ ...selectedIds, node: null });
+          setView('flow');
+          break;
+      }
+    }
+  };
+
+  // Funkcje dla flow
+  const handleFlow = {
+    updateInput: (e) => setFlowState({ ...flowState, userInput: e.target.value }),
+    next: () => {
+      const currentNode = getCurrentFlowNode();
+      if (!currentNode) return;
+      
+      const result = nodeManager.executeNode(currentNode.id, flowState.userInput, contextItems);
+      if (result?.contextUpdated) {
+        setContextItems(result.updatedContext);
+      }
+      
+      const nodes = getNodes();
+      if (flowState.currentIndex < nodes.length - 1) {
+        setFlowState({ currentIndex: flowState.currentIndex + 1, userInput: '' });
+      }
+    },
+    prev: () => {
+      if (flowState.currentIndex > 0) {
+        setFlowState({ ...flowState, currentIndex: flowState.currentIndex - 1 });
+      }
+    },
+    finish: () => {
+      const currentNode = getCurrentFlowNode();
+      if (!currentNode) return;
+      
+      const result = nodeManager.executeNode(currentNode.id, flowState.userInput, contextItems);
+      if (result?.contextUpdated) {
+        setContextItems(result.updatedContext);
+      }
+      
+      setView('scenarios');
+    },
+    editContext: () => {
+      setContextForm([...contextItems]);
+      setView('contextEditor');
+    },
+    saveContext: () => {
+      setContextItems([...contextForm]);
+      setContextForm(null);
+      setView('flow');
+    }
+  };
+
+  // Renderowanie listy workspace'ów
+  const renderWorkspaces = () => (
+    <div className="p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold">Workspaces</h2>
+        <button 
+          onClick={handleWorkspaces.create}
+          className="bg-blue-500 text-white p-1 rounded-full w-6 h-6 flex items-center justify-center"
+        >+</button>
       </div>
       
-      {showOptions && (
-        <div className="mb-6 p-4 bg-gray-100 rounded-lg border border-gray-300">
-          <h2 className="text-lg font-semibold mb-3">Application Options</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Template</label>
-              <select
-                value={selectedTemplateId}
-                onChange={(e) => {
-                  setSelectedTemplateId(e.target.value);
-                  setCurrentTemplateId(e.target.value);
-                }}
-                className="w-full p-2 border border-gray-300 rounded"
-              >
-                {availableTemplates.map((template) => (
-                  <option key={template.id} value={template.id}>
-                    {template.name} - {template.description}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {workspaces.map((workspace) => (
+      <div className="space-y-2">
+        {workspaces.map(workspace => (
           <div 
             key={workspace.id}
-            className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg cursor-pointer transition-all"
-            onClick={() => handleSelectWorkspace(workspace.id)}
+            className="flex justify-between items-center p-2 bg-white rounded shadow cursor-pointer hover:bg-gray-50"
+            onClick={() => handleWorkspaces.select(workspace.id)}
           >
-            <div className="flex justify-between items-start">
-              <div>
-                <h2 className="text-xl font-bold mb-2">{workspace.name}</h2>
-                {workspace.description && (
-                  <p className="text-gray-600 mb-3">{workspace.description}</p>
-                )}
-                <div className="text-sm text-gray-500">
-                  {getWorkspaceScenarios(workspace.id).length} scenarios
-                </div>
-              </div>
-              
-              <button
-                onClick={(e) => handleOpenContextManager(workspace.id, e)}
-                className="p-2 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 flex items-center text-sm"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
-                Manage Context
-              </button>
-            </div>
+            <span>{workspace.name}</span>
+            <button 
+              onClick={(e) => { e.stopPropagation(); handleWorkspaces.delete(workspace.id); }}
+              className="text-red-500"
+            >×</button>
           </div>
         ))}
       </div>
     </div>
   );
-  
-  // Render scenarios screen
-  const renderScenariosScreen = () => {
-    const workspace = workspaces.find(w => w.id === selectedWorkspaceId);
-    const workspaceScenarios = getWorkspaceScenarios(selectedWorkspaceId || '');
-    
+
+  // Renderowanie listy scenariuszy
+  const renderScenarios = () => {
+    const workspace = getWorkspace();
     return (
-      <div className="container mx-auto p-6">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <button 
-              className="text-blue-500 mb-2 flex items-center"
-              onClick={handleBack}
-            >
-              ← Back to Workspaces
-            </button>
-            <h1 className="text-3xl font-bold">{workspace?.name} Scenarios</h1>
-          </div>
-          <div className="flex space-x-2">
-            <button
-              onClick={(e) => handleOpenContextManager(selectedWorkspaceId || '', e)}
-              className="px-4 py-2 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 flex items-center"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-              </svg>
-              Manage Context
-            </button>
-            <button
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-              onClick={() => setShowOptions(!showOptions)}
-            >
-              {showOptions ? 'Hide Options' : 'Show Options'}
-            </button>
-          </div>
+      <div className="p-4">
+        <div className="flex justify-between items-center mb-2">
+          <BackButton onClick={handleNavigation.back} />
+          <button 
+            onClick={handleScenarios.create}
+            className="bg-blue-500 text-white p-1 rounded-full w-6 h-6 flex items-center justify-center"
+          >+</button>
         </div>
         
-        {showOptions && (
-          <div className="mb-6 p-4 bg-gray-100 rounded-lg border border-gray-300">
-            <h2 className="text-lg font-semibold mb-3">Scenario Options</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Template</label>
-                <select
-                  value={selectedTemplateId}
-                  onChange={(e) => {
-                    setSelectedTemplateId(e.target.value);
-                    setCurrentTemplateId(e.target.value);
-                  }}
-                  className="w-full p-2 border border-gray-300 rounded"
-                >
-                  {availableTemplates.map((template) => (
-                    <option key={template.id} value={template.id}>
-                      {template.name} - {template.description}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <button
-                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                >
-                  New Scenario
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <h2 className="text-lg font-semibold mb-4">{workspace?.name || 'Scenariusze'}</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {workspaceScenarios.map((scenario) => (
+        <div className="space-y-2">
+          {workspace?.scenarios.map(scenario => (
             <div 
               key={scenario.id}
-              className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg cursor-pointer transition-all"
-              onClick={() => handleSelectScenario(scenario.id)}
+              className="flex justify-between items-center p-2 bg-white rounded shadow cursor-pointer hover:bg-gray-50"
+              onClick={() => handleScenarios.select(scenario.id)}
             >
-              <h2 className="text-xl font-bold mb-2">{scenario.name}</h2>
-              {scenario.description && (
-                <p className="text-gray-600 mb-3">{scenario.description}</p>
-              )}
-              <div className="text-sm text-gray-500">
-                {scenario.nodes.length} steps
+              <div>
+                <div>{scenario.name}</div>
+                {scenario.description && <div className="text-xs text-gray-500">{scenario.description}</div>}
               </div>
+              <button 
+                onClick={(e) => { e.stopPropagation(); handleScenarios.delete(scenario.id); }}
+                className="text-red-500"
+              >×</button>
             </div>
           ))}
+          
+          {(!workspace?.scenarios.length) && <div className="text-gray-500 text-sm italic">Brak scenariuszy</div>}
         </div>
       </div>
     );
   };
-  
-  // Render templates selection screen
-  const renderTemplatesScreen = () => (
-    <div className="container mx-auto p-6">
-      <div className="flex items-center mb-6">
-        <button 
-          className="text-blue-500 mr-4 flex items-center"
-          onClick={handleBack}
-        >
-          ← Back
-        </button>
-        <h1 className="text-3xl font-bold">Template Selection</h1>
-      </div>
-      
-      <p className="text-gray-600 mb-8">
-        Choose a template to see how the UI changes while maintaining the same functionality.
-      </p>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {availableTemplates.map((template: TemplateConfig) => (
-          <div 
-            key={template.id}
-            className={`p-6 rounded-lg border-2 cursor-pointer transition-all ${
-              currentTemplateId === template.id 
-                ? 'border-blue-500 bg-blue-50' 
-                : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
-            }`}
-            onClick={() => setCurrentTemplateId(template.id)}
-          >
-            <h2 className="text-xl font-bold mb-2">{template.name}</h2>
-            <p className="text-gray-600 mb-3">{template.description}</p>
-            <p className="text-sm text-gray-500">Author: {template.author}</p>
-            <p className="text-sm text-gray-500">Version: {template.version}</p>
-            
-            {currentTemplateId === template.id && (
-              <div className="mt-4 text-blue-700 font-medium">Currently selected</div>
-            )}
+
+  // Renderowanie listy węzłów
+  const renderNodesList = () => {
+    const nodes = getNodes();
+    return (
+      <div className="p-4">
+        <div className="flex justify-between items-center mb-2">
+          <BackButton onClick={handleNavigation.back} />
+          <div className="flex space-x-1">
+            <button 
+              onClick={handleFlow.editContext}
+              className="bg-green-500 text-white p-1 rounded-full w-6 h-6 flex items-center justify-center"
+              title="Edytuj kontekst"
+            >C</button>
+            <button 
+              onClick={handleNodes.create}
+              className="bg-blue-500 text-white p-1 rounded-full w-6 h-6 flex items-center justify-center"
+              title="Dodaj węzeł"
+            >+</button>
           </div>
-        ))}
+        </div>
+        
+        <h2 className="text-lg font-semibold mb-4">{getScenario()?.name || 'Węzły'}</h2>
+        
+        <div className="space-y-2">
+          {nodes.map((node, index) => (
+            <div 
+              key={node.id}
+              className={`flex justify-between items-center p-2 rounded shadow cursor-pointer hover:bg-gray-50 ${
+                flowState.currentIndex === index && view === 'flow' 
+                  ? 'bg-blue-100 border-l-4 border-blue-500' 
+                  : node.id === selectedIds.node 
+                    ? 'bg-green-100 border-l-4 border-green-500' 
+                    : 'bg-white'
+              }`}
+              onClick={() => handleNodes.edit(node.id)}
+            >
+              <div>
+                <div>{node.label || `Node ${index + 1}`}</div>
+                {node.description && <div className="text-xs text-gray-500">{node.description}</div>}
+              </div>
+              <button 
+                onClick={(e) => { e.stopPropagation(); handleNodes.delete(node.id); }}
+                className="text-red-500"
+              >×</button>
+            </div>
+          ))}
+          
+          {(nodes.length === 0) && <div className="text-gray-500 text-sm italic">Brak węzłów</div>}
+        </div>
       </div>
-      
-      <div className="mt-8 flex justify-center">
-        <button
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-          onClick={() => {
-            setSelectedTemplateId(currentTemplateId);
-            handleBack();
-          }}
-        >
-          Apply {availableTemplates.find(t => t.id === currentTemplateId)?.name} Template
-        </button>
+    );
+  };
+
+  // Renderowanie sekcji kontekstu
+  const renderContextSection = () => (
+    <div className="p-4 border-t border-gray-200 bg-gray-50">
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-sm font-semibold">Kontekst</h3>
+        <button 
+          onClick={handleFlow.editContext}
+          className="text-xs text-blue-500 hover:text-blue-700"
+        >Edytuj</button>
+      </div>
+      <div className="max-h-52 overflow-y-auto">
+        {contextItems.length > 0 ? (
+          <div className="space-y-1">
+            {contextItems.map(item => (
+              <div key={item.id} className="text-sm bg-white p-2 rounded shadow-sm">
+                <span className="font-medium">{item.title}:</span>{' '}
+                <span className="text-xs overflow-hidden overflow-ellipsis whitespace-nowrap">{item.content}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-gray-500 text-sm italic">Brak elementów kontekstu</div>
+        )}
       </div>
     </div>
   );
 
-  // Render node editor
-  const renderNodeEditor = () => {
-    if (!editingNode) return null;
-
-    return (
-      <div className="container mx-auto p-6">
-        <div className="flex items-center mb-6">
-          <button 
-            className="text-blue-500 mr-4 flex items-center"
-            onClick={handleBack}
-          >
-            ← Back to Flow
-          </button>
-          <h1 className="text-3xl font-bold">Edit Node</h1>
+  // Renderowanie widoku flow
+  const renderFlow = () => {
+    const scenario = getScenario();
+    const nodes = getNodes();
+    
+    if (nodes.length === 0) {
+      return (
+        <div className="flex-1 p-6 bg-gray-50">
+          <h1 className="text-2xl font-bold mb-6">{scenario?.name || 'Flow'}</h1>
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <p className="mb-4">Ten scenariusz nie ma jeszcze żadnych węzłów.</p>
+            <button 
+              onClick={handleNodes.create}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >Dodaj pierwszy węzeł</button>
+          </div>
         </div>
-
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <form onSubmit={handleNodeUpdate} className="space-y-6">
-            {/* Basic Information */}
-            <div className="border-b pb-6">
-              <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Node Label</label>
-                  <input
-                    type="text"
-                    value={editingNode.label}
-                    onChange={(e) => setEditingNode({...editingNode, label: e.target.value})}
-                    className="w-full p-2 border border-gray-300 rounded"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Description</label>
-                  <input
-                    type="text"
-                    value={editingNode.description || ''}
-                    onChange={(e) => setEditingNode({...editingNode, description: e.target.value})}
-                    className="w-full p-2 border border-gray-300 rounded"
-                  />
-                </div>
+      );
+    }
+    
+    const currentNode = getCurrentFlowNode();
+    if (!currentNode) return null;
+    
+    const isLastStep = flowState.currentIndex === nodes.length - 1;
+    
+    return (
+      <div className="flex-1 p-6 bg-gray-50">
+        <h1 className="text-2xl font-bold mb-6">{scenario?.name}</h1>
+        
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          {/* Informacje o kroku */}
+          <div className="flex justify-between items-center mb-4 text-sm text-gray-500">
+            <span>Krok {flowState.currentIndex + 1} z {nodes.length}</span>
+            <span>{currentNode.label}</span>
+          </div>
+          
+          {/* Wiadomość asystenta */}
+          <div className="bg-blue-50 p-4 rounded-lg mb-4">
+            <h3 className="text-sm font-semibold mb-2">Wiadomość asystenta:</h3>
+            <div className="text-gray-700 whitespace-pre-line">{currentNode.assistantMessage}</div>
+          </div>
+          
+          {/* Input użytkownika */}
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold mb-2">Odpowiedź:</h3>
+            <textarea
+              value={flowState.userInput}
+              onChange={handleFlow.updateInput}
+              placeholder="Wpisz swoją odpowiedź..."
+              className="w-full p-3 border rounded-lg"
+              rows={4}
+            />
+            
+            {currentNode.contextKey && (
+              <div className="mt-2 text-xs text-gray-500">
+                Odpowiedź zapisana w: <code className="bg-gray-100 px-1 py-0.5 rounded">{currentNode.contextKey}</code>
+                {currentNode.contextJsonPath && (
+                  <span> (ścieżka: <code className="bg-gray-100 px-1 py-0.5 rounded">{currentNode.contextJsonPath}</code>)</span>
+                )}
               </div>
-            </div>
+            )}
+          </div>
+          
+          {/* Przyciski nawigacyjne */}
+          <div className="flex justify-between">
+            <button
+              onClick={handleFlow.prev}
+              disabled={flowState.currentIndex === 0}
+              className={`px-4 py-2 rounded ${
+                flowState.currentIndex === 0
+                  ? 'bg-gray-300 cursor-not-allowed'
+                  : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+              }`}
+            >← Wstecz</button>
+            
+            {isLastStep ? (
+              <button
+                onClick={handleFlow.finish}
+                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+              >Zakończ</button>
+            ) : (
+              <button
+                onClick={handleFlow.next}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >Dalej →</button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
-            {/* Assistant Message */}
-            <div className="border-b pb-6">
-              <h2 className="text-xl font-semibold mb-4">Assistant Message</h2>
-              <div>
-                <textarea
-                  value={editingNode.assistantMessage || ''}
-                  onChange={(e) => setEditingNode({...editingNode, assistantMessage: e.target.value})}
-                  className="w-full p-2 border border-gray-300 rounded"
-                  rows={8}
-                />
-                <p className="text-sm text-gray-500 mt-1">
-                  Supports Markdown formatting
-                </p>
-              </div>
-            </div>
-
-            {/* Context Configuration */}
-            <div className="border-b pb-6">
-              <h2 className="text-xl font-semibold mb-4">Context Configuration</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Context Key</label>
-                  <input
-                    type="text"
-                    value={editingNode.contextKey || ''}
-                    onChange={(e) => setEditingNode({...editingNode, contextKey: e.target.value})}
-                    className="w-full p-2 border border-gray-300 rounded"
-                    placeholder="e.g. user_input"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Variable name to store user's response
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Context JSON Path</label>
-                  <input
-                    type="text"
-                    value={editingNode.contextJsonPath || ''}
-                    onChange={(e) => setEditingNode({...editingNode, contextJsonPath: e.target.value})}
-                    className="w-full p-2 border border-gray-300 rounded"
-                    placeholder="e.g. answers.question1"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Optional path for nested data
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Plugin Configuration */}
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Plugin Configuration</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Plugin Key</label>
-                  <select
-                    value={editingNode.pluginKey || ''}
-                    onChange={(e) => {
-                      const newValue = e.target.value;
-                      setEditingNode({
-                        ...editingNode, 
-                        pluginKey: newValue || undefined,
-                        // Initialize plugin data if not already present and plugin selected
-                        pluginData: newValue && !editingNode.pluginData ? 
-                          { [newValue]: {} } : editingNode.pluginData
-                      });
-                    }}
-                    className="w-full p-2 border border-gray-300 rounded"
-                  >
-                    <option value="">No Plugin</option>
-                    <option value="api-service">API Service</option>
-                    <option value="input-field">Input Field</option>
-                    <option value="multiple-choice">Multiple Choice</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Plugin-specific configuration */}
-              {editingNode.pluginKey === 'api-service' && (
-                <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <h3 className="font-medium mb-3">API Service Configuration</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Button Text</label>
-                      <input
-                        type="text"
-                        value={editingNode.pluginData?.['api-service']?.buttonText || 'Send API Request'}
-                        onChange={(e) => {
-                          setEditingNode({
-                            ...editingNode,
-                            pluginData: {
-                              ...editingNode.pluginData,
-                              'api-service': {
-                                ...editingNode.pluginData?.['api-service'],
-                                buttonText: e.target.value
-                              }
-                            }
-                          });
-                        }}
-                        className="w-full p-2 border border-gray-300 rounded"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">API URL</label>
-                      <input
-                        type="text"
-                        value={editingNode.pluginData?.['api-service']?.apiUrl || 'https://api.example.com'}
-                        onChange={(e) => {
-                          setEditingNode({
-                            ...editingNode,
-                            pluginData: {
-                              ...editingNode.pluginData,
-                              'api-service': {
-                                ...editingNode.pluginData?.['api-service'],
-                                apiUrl: e.target.value
-                              }
-                            }
-                          });
-                        }}
-                        className="w-full p-2 border border-gray-300 rounded"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Response Message</label>
-                      <input
-                        type="text"
-                        value={editingNode.pluginData?.['api-service']?.responseMessage || 'API request completed successfully!'}
-                        onChange={(e) => {
-                          setEditingNode({
-                            ...editingNode,
-                            pluginData: {
-                              ...editingNode.pluginData,
-                              'api-service': {
-                                ...editingNode.pluginData?.['api-service'],
-                                responseMessage: e.target.value
-                              }
-                            }
-                          });
-                        }}
-                        className="w-full p-2 border border-gray-300 rounded"
-                      />
-                    </div>
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="autoAdvance"
-                        checked={editingNode.pluginData?.['api-service']?.autoAdvanceOnSuccess || false}
-                        onChange={(e) => {
-                          setEditingNode({
-                            ...editingNode,
-                            pluginData: {
-                              ...editingNode.pluginData,
-                              'api-service': {
-                                ...editingNode.pluginData?.['api-service'],
-                                autoAdvanceOnSuccess: e.target.checked
-                              }
-                            }
-                          });
-                        }}
-                        className="h-4 w-4 text-blue-600 rounded border-gray-300"
-                      />
-                      <label htmlFor="autoAdvance" className="ml-2 text-sm text-gray-700">
-                        Auto-advance on success
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Submit Buttons */}
-            <div className="flex justify-end space-x-3 pt-4">
+  // Renderowanie widoku edytora węzła
+  const renderNodeEditor = () => {
+    if (!nodeForm) return null;
+    
+    const handleChange = (e:any) => {
+      const { name, value } = e.target;
+      setNodeForm({ ...nodeForm, [name]: value });
+    };
+    
+    return (
+      <div className="flex-1 p-6 bg-gray-50">
+        <h1 className="text-2xl font-bold mb-6">Edycja węzła: {nodeForm.label}</h1>
+        
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <form onSubmit={(e) => { e.preventDefault(); handleNodes.update(); }}>
+            <FormField
+              label="Etykieta"
+              name="label"
+              value={nodeForm.label}
+              onChange={handleChange}
+              placeholder="Etykieta węzła"
+              required
+            />
+            
+            <FormField
+              label="Opis"
+              name="description"
+              value={nodeForm.description}
+              onChange={handleChange}
+              placeholder="Opcjonalny opis"
+            />
+            
+            <FormField
+              label="Wiadomość asystenta"
+              name="assistantMessage"
+              value={nodeForm.assistantMessage}
+              onChange={handleChange}
+              placeholder="Wiadomość wyświetlana użytkownikowi"
+              rows={6}
+              hint="Użyj {{nazwa_zmiennej}} aby wstawić wartość z kontekstu."
+            />
+            
+            <FormField
+              label="Klucz kontekstu"
+              name="contextKey"
+              value={nodeForm.contextKey}
+              onChange={handleChange}
+              placeholder="Nazwa zmiennej kontekstowej (opcjonalnie)"
+              hint="Jeśli wypełnione, odpowiedź użytkownika będzie zapisana pod tą nazwą."
+            />
+            
+            <FormField
+              label="Ścieżka JSON"
+              name="contextJsonPath"
+              value={nodeForm.contextJsonPath}
+              onChange={handleChange}
+              placeholder="Ścieżka JSON dla zagnieżdżonych danych (opcjonalnie)"
+              hint="Przykład: user.preferences.theme"
+            />
+            
+            <div className="flex justify-end space-x-4 mt-6">
               <button
                 type="button"
-                onClick={handleBack}
-                className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-100"
-              >
-                Cancel
-              </button>
+                onClick={() => { setNodeForm(null); setView('flow'); }}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+              >Anuluj</button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                Save Changes
-              </button>
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >Zapisz</button>
             </div>
           </form>
         </div>
       </div>
     );
   };
-  
-  // Render flow player with edit controls
-  const renderFlowPlayer = () => {
-    const scenario = getScenario(selectedScenarioId || '');
-    
-    if (!scenario) {
-      return (
-        <div className="container mx-auto p-6">
-          <button 
-            className="text-blue-500 mb-4 flex items-center"
-            onClick={handleBack}
-          >
-            ← Back to Scenarios
-          </button>
-          <div className="p-6 bg-red-50 rounded-lg border border-red-200 text-red-700">
-            Scenario not found
-          </div>
-        </div>
-      );
-    }
-    
-    return (
-      <div className="container mx-auto p-6">
-        <div className="mb-4 flex justify-between items-center">
-          <button 
-            className="text-blue-500 flex items-center"
-            onClick={handleBack}
-          >
-            ← Back to Scenarios
-          </button>
-          <button
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-            onClick={() => setShowOptions(!showOptions)}
-          >
-            {showOptions ? 'Hide Options' : 'Show Options'}
-          </button>
-        </div>
-        
-        {showOptions && (
-          <div className="mb-6 p-4 bg-gray-100 rounded-lg border border-gray-300">
-            <h2 className="text-lg font-semibold mb-3">Flow Options</h2>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Template</label>
-                <select
-                  value={selectedTemplateId}
-                  onChange={(e) => {
-                    setSelectedTemplateId(e.target.value);
-                    setCurrentTemplateId(e.target.value);
-                  }}
-                  className="w-full p-2 border border-gray-300 rounded"
-                >
-                  {availableTemplates.map((template) => (
-                    <option key={template.id} value={template.id}>
-                      {template.name} - {template.description}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
 
-            {/* Node Management Section */}
-            <div className="mt-6 pt-4 border-t border-gray-300">
-              <h3 className="font-medium mb-3">Node Management</h3>
-              
-              <div className="mt-2 space-y-2">
-                <p className="text-sm mb-2">Select a node to edit:</p>
-                {scenario.nodes.map((node) => (
-                  <div key={node.id} className="flex items-center">
-                    <button
-                      onClick={() => handleEditNode(scenario.id, node.id)}
-                      className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 mb-1 w-full text-left"
-                    >
-                      {node.label} {node.description ? `- ${node.description}` : ''}
-                    </button>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="flex items-center mt-4">
-                <button
-                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 mr-2"
-                >
-                  Add New Step
-                </button>
-                <button
-                  className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
-                >
-                  Save Flow
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        <FlowPlayer 
-          nodes={scenario.nodes}
-          title={scenario.name}
-          description={scenario.description}
-          onBack={handleBack}
-          onComplete={(userInputs, contextItems) => {
-            console.log('Flow completed with inputs:', userInputs);
-            console.log('Flow context items:', contextItems);
-            
-            // Here you could save the context for later use
-            
-            handleBack();
-          }}
-          templateId={selectedTemplateId}
-          contextItems={[
-            // Initial context items for the flow
-            {
-              id: 'user_name',
-              title: 'User Name',
-              content: 'Flow User',
-              contentType: 'text/plain'
-            },
-            {
-              id: 'scenario_info',
-              title: 'Scenario Information',
-              content: JSON.stringify({
-                name: scenario.name,
-                id: scenario.id,
-                workspaceId: scenario.workspaceId,
-                totalSteps: scenario.nodes.length
-              }),
-              contentType: 'application/json'
-            },
-            // Use context items from the context store if any exist
-            ...(useContextStore.getState().filterItems({ workspaceId: scenario.workspaceId }) || []).map(item => ({
-              id: item.id,
-              title: item.title,
-              content: item.content,
-              contentType: item.contentType
-            }))
-          ]}
-        />
-      </div>
-    );
-  };
-  
-  // Render context manager view
-  const renderContextManagerScreen = () => {
-    const workspace = workspaces.find(w => w.id === selectedWorkspaceId);
+  // Renderowanie widoku edytora kontekstu
+  const renderContextEditor = () => {
+    if (!contextForm) return null;
+    
+    const [newItemName, setNewItemName] = useState('');
+    const [newItemContent, setNewItemContent] = useState('');
+    const [editingItem, setEditingItem] = useState(null);
+    
+    const handleChangeItem = (index, field, value) => {
+      const updatedItems = [...contextForm];
+      updatedItems[index] = { ...updatedItems[index], [field]: value };
+      setContextForm(updatedItems);
+    };
+    
+    const handleAddItem = () => {
+      if (!newItemName.trim()) return;
+      
+      const newItem = {
+        id: newItemName,
+        title: newItemName,
+        content: newItemContent || '{}'
+      };
+      
+      setContextForm([...contextForm, newItem]);
+      setNewItemName('');
+      setNewItemContent('');
+    };
+    
+    const handleRemoveItem = (index) => {
+      const updatedItems = contextForm.filter((_, i) => i !== index);
+      setContextForm(updatedItems);
+    };
     
     return (
-      <div className="container mx-auto p-6">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <button 
-              className="text-blue-500 mb-2 flex items-center"
-              onClick={handleBack}
-            >
-              ← Back to Workspace
-            </button>
-            <h1 className="text-3xl font-bold">Context Management: {workspace?.name}</h1>
-          </div>
-        </div>
+      <div className="flex-1 p-6 bg-gray-50">
+        <h1 className="text-2xl font-bold mb-6">Edycja kontekstu</h1>
         
-        <div className="grid grid-cols-1 gap-6">
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="p-2 bg-gray-50 border-b border-gray-200">
-              <div className="text-sm text-gray-500">
-                Manage context items for this workspace. Context items can be used in flows and plugins.
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-lg font-semibold mb-4">Elementy kontekstu</h2>
+          
+          <div className="space-y-4 mb-6">
+            {contextForm.map((item, index) => (
+              <div key={item.id} className="border border-gray-200 rounded p-3">
+                <div className="flex justify-between items-center mb-2">
+                  <div className="font-medium">{item.title}</div>
+                  <div className="space-x-2">
+                    <button
+                      onClick={() => setEditingItem(editingItem === index ? null : index)}
+                      className="text-blue-500 text-sm"
+                    >{editingItem === index ? 'Zakończ' : 'Edytuj'}</button>
+                    <button
+                      onClick={() => handleRemoveItem(index)}
+                      className="text-red-500 text-sm"
+                    >Usuń</button>
+                  </div>
+                </div>
+                
+                {editingItem === index ? (
+                  <div className="space-y-2">
+                    <FormField
+                      label="ID"
+                      value={item.id}
+                      onChange={(e:any) => handleChangeItem(index, 'id', e.target.value)} name={undefined}                    />
+                    <FormField
+                      label="Tytuł"
+                      value={item.title}
+                      onChange={(e:any) => handleChangeItem(index, 'title', e.target.value)} name={undefined}                    />
+                    <FormField
+                      label="Zawartość"
+                      value={item.content}
+                      onChange={(e:any) => handleChangeItem(index, 'content', e.target.value)}
+                      rows={3} name={undefined}                    />
+                  </div>
+                ) : (
+                  <div className="text-sm bg-gray-50 p-2 rounded overflow-auto max-h-24">
+                    {item.content}
+                  </div>
+                )}
               </div>
-            </div>
+            ))}
             
-            {/* Context Manager Component */}
-            <div className="p-0">
-              <ContextManager 
-                workspaceId={selectedWorkspaceId || ''}
-              />
+            {!contextForm?.length && (
+              <div className="text-gray-500 text-sm italic">Brak elementów kontekstu</div>
+            )}
+          </div>
+          
+          <div className="border-t pt-4">
+            <h3 className="text-sm font-semibold mb-2">Dodaj nowy element</h3>
+            <div className="space-y-2">
+              <FormField
+                label="Nazwa/ID"
+                value={newItemName}
+                onChange={(e:any) => setNewItemName(e.target.value)}
+                placeholder="Nazwa/ID elementu" name={undefined}              />
+              <FormField
+                label="Zawartość"
+                value={newItemContent}
+                onChange={(e:any) => setNewItemContent(e.target.value)}
+                placeholder="Zawartość (JSON lub tekst)"
+                rows={3} name={undefined}              />
+              <button
+                onClick={handleAddItem}
+                disabled={!newItemName.trim()}
+                className={`px-4 py-2 rounded ${
+                  !newItemName.trim()
+                    ? 'bg-gray-300 cursor-not-allowed'
+                    : 'bg-blue-500 text-white hover:bg-blue-600'
+                }`}
+              >Dodaj element</button>
             </div>
+          </div>
+          
+          <div className="border-t mt-6 pt-6 flex justify-end">
+            <button
+              onClick={handleFlow.saveContext}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >Zapisz zmiany</button>
           </div>
         </div>
       </div>
     );
   };
-  
-  // Main render
-  return (
-    <HookPointProvider>
-      <PluginProvider initialPlugins={[apiServicePlugin]}>
-        <div className="min-h-screen bg-gray-100">
-          <header className="bg-white shadow-sm p-4">
-            <div className="container mx-auto flex justify-between items-center">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-800">The Context App</h1>
-                <p className="text-gray-500">Template-based Architecture Demo</p>
-              </div>
-              <div className="text-sm text-gray-600">
-                Current Template: <span className="font-medium">{availableTemplates.find(t => t.id === selectedTemplateId)?.name}</span>
-              </div>
-            </div>
-          </header>
-          
-          <main>
-            {activeView === 'workspaces' && renderWorkspacesScreen()}
-            {activeView === 'scenarios' && renderScenariosScreen()}
-            {activeView === 'flow' && renderFlowPlayer()}
-            {activeView === 'templates' && renderTemplatesScreen()}
-            {activeView === 'edit-node' && renderNodeEditor()}
-            {activeView === 'context-manager' && renderContextManagerScreen()}
-          </main>
-        </div>
-      </PluginProvider>
-    </HookPointProvider>
+
+  // Renderowanie sidebara
+  const renderSidebar = () => (
+    <div className="w-64 h-screen bg-gray-100 border-r border-gray-200 flex flex-col">
+      <div className="p-4 border-b border-gray-200 bg-gray-200">
+        <h1 className="text-xl font-bold">Flow Builder</h1>
+      </div>
+      
+      <div className="flex-1 overflow-y-auto">
+        {view === 'workspaces' && renderWorkspaces()}
+        {view === 'scenarios' && renderScenarios()}
+        {(view === 'flow' || view === 'nodeEditor' || view === 'contextEditor') && renderNodesList()}
+      </div>
+      
+      {(view === 'flow' || view === 'nodeEditor' || view === 'contextEditor') && renderContextSection()}
+    </div>
   );
-};
+  
+  // Renderowanie głównej zawartości
+  const renderContent = () => {
+    switch (view) {
+      case 'workspaces':
+        return (
+          <div className="flex-1 p-6 bg-gray-50">
+            <h1 className="text-2xl font-bold mb-6">Wybierz workspace</h1>
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <p className="mb-4 text-gray-700">Wybierz workspace z menu po lewej stronie lub utwórz nowy.</p>
+              <p className="text-gray-500 text-sm">Workspaces to kontenery na scenariusze i węzły.</p>
+            </div>
+          </div>
+        );
+      case 'scenarios':
+        return (
+          <div className="flex-1 p-6 bg-gray-50">
+            <h1 className="text-2xl font-bold mb-6">Workspace: {getWorkspace()?.name}</h1>
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <p className="mb-4 text-gray-700">Wybierz scenariusz z menu po lewej stronie lub utwórz nowy.</p>
+              <p className="text-gray-500 text-sm">Scenariusze to sekwencje węzłów tworzące flow interakcji.</p>
+            </div>
+          </div>
+        );
+      case 'flow':
+        return renderFlow();
+      case 'nodeEditor':
+        return renderNodeEditor();
+      case 'contextEditor':
+        return renderContextEditor();
+      default:
+        return null;
+    }
+  };
+  
+  // Renderowanie aplikacji
+  return (
+    <div className="flex h-screen bg-gray-50">
+      {renderSidebar()}
+      {renderContent()}
+    </div>
+  );
+}
 
 export default App;
