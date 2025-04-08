@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/lib/templateRegistry.ts
-import { lazy, ComponentType } from "react";
+import { ComponentType } from "react";
+import { layouts } from '../templates/layouts';
+import { widgets } from '../templates/widgets';
+import { flowSteps } from '../templates/flowSteps';
 
 // Define the category type to ensure type safety
 export type WidgetCategory = "scenario" | "workspace" | "flow";
@@ -48,82 +51,30 @@ export interface FlowStepProps {
   contextItems?: any[];
 }
 
-// Custom lazy loader function with type safety
-function safeImport<T>(path: string): ComponentType<T> {
-  return lazy(() => import(path).then((module) => ({ default: module.default })));
-}
-
-// Definitions for default templates with proper dynamic imports
-const defaultTemplates = {
-  layouts: [
-    {
-      id: "default",
-      name: "Default Layout",
-      component: safeImport<LayoutProps>("../templates/layouts/DefaultLayout"),
-    },
-    {
-      id: "sidebar",
-      name: "Sidebar Layout",
-      component: safeImport<LayoutProps>("../templates/layouts/SidebarLayout"),
-    },
-  ],
-  widgets: [
-    {
-      id: "card-list",
-      name: "Card List",
-      category: "scenario" as WidgetCategory,
-      component: safeImport<WidgetProps>("../templates/widgets/CardListWidget"),
-    },
-    {
-      id: "table-list",
-      name: "Table List",
-      category: "scenario" as WidgetCategory,
-      component: safeImport<WidgetProps>("../templates/widgets/TableListWidget"),
-    },
-  ],
-  flowSteps: [
-    {
-      id: "basic-step",
-      name: "Basic Step",
-      component: safeImport<FlowStepProps>("../templates/flowSteps/BasicStepTemplate"),
-      compatibleNodeTypes: ["default", "input"],
-    },
-    {
-      id: "llm-query",
-      name: "LLM Query",
-      component: safeImport<FlowStepProps>("../templates/flowSteps/LlmQueryTemplate"),
-      compatibleNodeTypes: ["llm"],
-    },
-    {
-      id: "form-step",
-      name: "Form Input",
-      component: safeImport<FlowStepProps>("../templates/flowSteps/FormInputTemplate"),
-      compatibleNodeTypes: ["form"],
-    },
-  ],
-};
-
 class TemplateRegistry {
   private layouts: Map<string, LayoutTemplate> = new Map();
   private widgets: Map<string, WidgetTemplate> = new Map();
   private flowSteps: Map<string, FlowStepTemplate> = new Map();
 
   constructor() {
-    // Register default templates
-    this.registerDefaults();
+    // Register templates from import maps
+    this.registerTemplates();
   }
 
-  private registerDefaults() {
-    defaultTemplates.layouts.forEach((layout) => {
-      this.layouts.set(layout.id, layout);
+  private registerTemplates() {
+    // Rejestrowanie layoutów
+    Object.values(layouts).forEach(layout => {
+      this.layouts.set(layout.id, layout as LayoutTemplate);
     });
 
-    defaultTemplates.widgets.forEach((widget) => {
-      this.widgets.set(widget.id, widget);
+    // Rejestrowanie widgetów
+    Object.values(widgets).forEach(widget => {
+      this.widgets.set(widget.id, widget as WidgetTemplate);
     });
 
-    defaultTemplates.flowSteps.forEach((flowStep) => {
-      this.flowSteps.set(flowStep.id, flowStep);
+    // Rejestrowanie kroków przepływu
+    Object.values(flowSteps).forEach(flowStep => {
+      this.flowSteps.set(flowStep.id, flowStep as FlowStepTemplate);
     });
   }
 

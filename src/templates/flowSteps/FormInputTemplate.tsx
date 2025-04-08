@@ -2,6 +2,14 @@
 import React, { useState } from 'react';
 import { FlowStepProps } from '../../lib/templateRegistry';  // Fix the import path
 
+// Definicja interfejsu dla pola formularza
+interface FormField {
+  name: string;
+  label: string;
+  type: string;
+  required: boolean;
+}
+
 const FormInputTemplate: React.FC<FlowStepProps> = ({ 
   node, 
   onSubmit, 
@@ -11,10 +19,10 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   
   // Parse form fields from node config
-  const formFields = node.formFields || [
+  const formFields = (node.formFields || [
     { name: 'name', label: 'Name', type: 'text', required: true },
     { name: 'email', label: 'Email', type: 'email', required: true }
-  ];
+  ]) as FormField[];
 
   const handleChange = (name: string, value: string) => {
     setFormValues(prev => ({ ...prev, [name]: value }));
@@ -28,8 +36,8 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
 
   const isFormValid = () => {
     return formFields
-      .filter(field => field.required)
-      .every(field => formValues[field.name] && formValues[field.name].trim() !== '');
+      .filter((field: FormField) => field.required)
+      .every((field: FormField) => formValues[field.name] && formValues[field.name].trim() !== '');
   };
 
   return (
@@ -41,7 +49,7 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
         </p>
         
         <div className="space-y-4">
-          {formFields.map(field => (
+          {formFields.map((field: FormField) => (
             <div key={field.name} className="space-y-1">
               <label className="block text-sm font-medium text-gray-700">
                 {field.label} {field.required && <span className="text-red-500">*</span>}
