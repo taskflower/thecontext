@@ -2,12 +2,15 @@
 import { create } from "zustand";
 import { NodeData, Scenario } from "../../raw_modules/nodes-module/src";
 
+// Define workspace type
+interface Workspace {
+  id: string;
+  name: string;
+  scenarios: Scenario[];
+}
+
 interface AppState {
-  workspaces: {
-    id: string;
-    name: string;
-    scenarios: Scenario[];
-  }[];
+  workspaces: Workspace[];
   selectedWorkspace?: string;
   selectedScenario?: string;
   currentNodeIndex: number;
@@ -16,14 +19,15 @@ interface AppState {
 interface AppActions {
   selectWorkspace: (workspaceId: string) => void;
   selectScenario: (scenarioId: string) => void;
-  createWorkspace: (name: string) => void;
-  createScenario: (workspaceId: string, scenario: Partial<Scenario>) => void;
+  createWorkspace: (name: string) => Workspace;
+  createScenario: (workspaceId: string, scenario: Partial<Scenario>) => Scenario;
   addNodeToScenario: (scenarioId: string, node: NodeData) => void;
   nextNode: () => void;
   prevNode: () => void;
+  setNodeIndex: (index: number) => void;
 }
 
-const createInitialWorkspace = () => {
+const createInitialWorkspace = (): Workspace => {
   const initialNode: NodeData = {
     id: "node-1",
     scenarioId: "scenario-1",
@@ -35,7 +39,7 @@ const createInitialWorkspace = () => {
     id: "node-2",
     scenarioId: "scenario-1",
     label: "Greeting",
-    // Użycie szablonu do podmiany na wartość z kontekstu
+    // Using template to replace with context value
     assistantMessage: "Nice to meet you, {{userName}}! How can I help you today?",
     contextKey: "userRequest",
   };
@@ -53,7 +57,6 @@ const createInitialWorkspace = () => {
     scenarios: [initialScenario],
   };
 };
-
 
 export const useAppStore = create<AppState & AppActions>((set, get) => ({
   workspaces: [createInitialWorkspace()],
@@ -74,37 +77,43 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
       currentNodeIndex: 0,
     }),
 
-  createWorkspace: (name) =>
+  createWorkspace: (name) => {
+    const newWorkspace: Workspace = {
+      id: `workspace-${Date.now()}`,
+      name,
+      scenarios: [],
+    };
+    
     set((state) => ({
-      workspaces: [
-        ...state.workspaces,
-        {
-          id: `workspace-${Date.now()}`,
-          name,
-          scenarios: [],
-        },
-      ],
-    })),
+      workspaces: [...state.workspaces, newWorkspace],
+      selectedWorkspace: newWorkspace.id,
+    }));
+    
+    return newWorkspace;
+  },
 
-  createScenario: (workspaceId, scenario) =>
+  createScenario: (workspaceId, scenario) => {
+    const newScenario: Scenario = {
+      id: `scenario-${Date.now()}`,
+      name: scenario.name || "New scenario",
+      description: scenario.description || "",
+      nodes: scenario.nodes || [],
+    };
+    
     set((state) => ({
       workspaces: state.workspaces.map((workspace) =>
         workspace.id === workspaceId
           ? {
               ...workspace,
-              scenarios: [
-                ...workspace.scenarios,
-                {
-                  id: `scenario-${Date.now()}`,
-                  name: scenario.name || "Nowy scenariusz",
-                  description: scenario.description || "",
-                  nodes: scenario.nodes || [],
-                },
-              ],
+              scenarios: [...workspace.scenarios, newScenario],
             }
           : workspace
       ),
-    })),
+      selectedScenario: newScenario.id,
+    }));
+    
+    return newScenario;
+  },
 
   addNodeToScenario: (scenarioId, node) =>
     set((state) => ({
@@ -137,5 +146,9 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
     if (currentNodeIndex > 0) {
       set((state) => ({ currentNodeIndex: state.currentNodeIndex - 1 }));
     }
+  },
+  
+  setNodeIndex: (index) => {
+    set({ currentNodeIndex: index });
   },
 }));

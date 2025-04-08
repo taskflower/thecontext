@@ -1,44 +1,70 @@
 // src/components/FlowView.tsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAppStore } from '../lib/store';
-// Make sure we're using the updated version
 import { useNodeManager } from '../hooks/useNodeManager';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 export const FlowView: React.FC = () => {
   const { 
+    workspace: workspaceId, 
+    scenario: scenarioId, 
+    node: nodeParam 
+  } = useParams<{ workspace: string; scenario: string; node?: string }>();
+  
+  const { 
     workspaces, 
-    selectedWorkspace, 
-    selectedScenario, 
+    selectWorkspace, 
+    selectScenario,
     currentNodeIndex,
     nextNode,
     prevNode 
   } = useAppStore();
+  
   const { currentNode, executeNode, contextItems, setContextItems } = useNodeManager();
   const [userInput, setUserInput] = useState('');
   const navigate = useNavigate();
 
-  // Obliczenie aktualnego scenariusza
-  const currentScenario = useMemo(() => {
-    const workspace = workspaces.find(w => w.id === selectedWorkspace);
-    return workspace?.scenarios.find(s => s.id === selectedScenario);
-  }, [workspaces, selectedWorkspace, selectedScenario]);
+  // Set the selected workspace and scenario based on URL params
+  useEffect(() => {
+    if (workspaceId) {
+      selectWorkspace(workspaceId);
+    }
+    if (scenarioId) {
+      selectScenario(scenarioId);
+    }
+  }, [workspaceId, scenarioId, selectWorkspace, selectScenario]);
 
-  // Sprawdzenie, czy jesteśmy na ostatnim kroku
+  // Calculate current scenario
+  const currentScenario = useMemo(() => {
+    const workspace = workspaces.find(w => w.id === workspaceId);
+    return workspace?.scenarios.find(s => s.id === scenarioId);
+  }, [workspaces, workspaceId, scenarioId]);
+
+  // Check if we're on the last node
   const isLastNode = currentScenario 
     ? currentNodeIndex === currentScenario.nodes.length - 1 
     : false;
 
+  // Handle specific node navigation if node param is present
+  useEffect(() => {
+    if (nodeParam && currentScenario) {
+      const nodeIndex = currentScenario.nodes.findIndex(n => n.id === nodeParam);
+      if (nodeIndex !== -1) {
+        // TODO: Add functionality to jump to specific node
+      }
+    }
+  }, [nodeParam, currentScenario]);
+
   useEffect(() => {
     console.log('Current Flow State:', {
       workspaces,
-      selectedWorkspace,
-      selectedScenario,
+      workspaceId,
+      scenarioId,
       currentNodeIndex,
       currentNode,
-      contextItems // Log context for debugging
+      contextItems
     });
-  }, [workspaces, selectedWorkspace, selectedScenario, currentNodeIndex, currentNode, contextItems]);
+  }, [workspaces, workspaceId, scenarioId, currentNodeIndex, currentNode, contextItems]);
 
   const handleSubmit = () => {
     if (currentNode) {
@@ -51,18 +77,35 @@ export const FlowView: React.FC = () => {
       }
       
       if (!isLastNode) {
+        // Navigate to the next node
         nextNode();
+        
+        // If we know what the next node will be, update URL
+        if (currentScenario && currentNodeIndex + 1 < currentScenario.nodes.length) {
+          const nextNodeId = currentScenario.nodes[currentNodeIndex + 1].id;
+          navigate(`/${workspaceId}/${scenarioId}/${nextNodeId}`);
+        }
       } else {
-        // Akcja po zakończeniu flow – przykładowo przekierowanie do listy scenariuszy
-        alert('Flow zakończony!');
-        navigate('/scenarios');
+        // Action after flow completion - redirect to scenarios list
+        alert('Flow completed!');
+        navigate(`/${workspaceId}`);
       }
       setUserInput('');
     }
   };
 
-  if (!selectedWorkspace) return <div>No workspace selected</div>;
-  if (!selectedScenario) return <div>No scenario selected</div>;
+  const handlePrevious = () => {
+    if (currentNodeIndex > 0 && currentScenario) {
+      prevNode();
+      
+      // Update URL to previous node
+      const prevNodeId = currentScenario.nodes[currentNodeIndex - 1].id;
+      navigate(`/${workspaceId}/${scenarioId}/${prevNodeId}`);
+    }
+  };
+
+  if (!workspaceId) return <div>No workspace selected</div>;
+  if (!scenarioId) return <div>No scenario selected</div>;
   if (!currentNode) return <div>No current node available</div>;
 
   return (
@@ -70,7 +113,7 @@ export const FlowView: React.FC = () => {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Flow: {currentNode.label}</h1>
         <button 
-          onClick={() => window.history.back()}
+          onClick={() => navigate(`/${workspaceId}`)}
           className="text-sm text-gray-600"
         >
           Back to Scenarios
@@ -95,7 +138,7 @@ export const FlowView: React.FC = () => {
 
         <div className="flex justify-between">
           <button 
-            onClick={prevNode}
+            onClick={handlePrevious}
             disabled={currentNodeIndex === 0}
             className="bg-gray-200 px-4 py-2 rounded disabled:opacity-50"
           >
@@ -105,7 +148,7 @@ export const FlowView: React.FC = () => {
             onClick={handleSubmit}
             className="bg-blue-500 text-white px-4 py-2 rounded"
           >
-            {isLastNode ? 'Zakończ' : 'Next'}
+            {isLastNode ? 'Finish' : 'Next'}
           </button>
         </div>
 
@@ -113,12 +156,12 @@ export const FlowView: React.FC = () => {
           <h3 className="font-bold">Debug Info:</h3>
           <pre className="text-xs overflow-auto">
             {JSON.stringify({
-              workspaceId: selectedWorkspace,
-              scenarioId: selectedScenario,
+              workspaceId,
+              scenarioId,
+              nodeId: currentNode.id,
               currentNodeIndex,
-              currentNodeId: currentNode.id,
               currentNodeLabel: currentNode.label,
-              contextItems: contextItems // Added context to debug info
+              contextItems
             }, null, 2)}
           </pre>
         </div>

@@ -4,22 +4,23 @@ import { useAppStore } from '../lib/store';
 import { useNavigate } from 'react-router-dom';
 
 export const WorkspaceList: React.FC = () => {
-  const { workspaces, createWorkspace, selectWorkspace } = useAppStore();
+  const { workspaces, createWorkspace } = useAppStore();
   const [newWorkspaceName, setNewWorkspaceName] = useState('');
   const navigate = useNavigate();
 
   const handleCreate = () => {
     if (newWorkspaceName.trim()) {
-      createWorkspace(newWorkspaceName);
+      const newWorkspace = createWorkspace(newWorkspaceName);
       setNewWorkspaceName('');
-      // Po utworzeniu workspace'u przekierowujemy do sekcji scenariuszy
-      navigate('/scenarios');
+      
+      // Navigate to the new workspace
+      navigate(`/${newWorkspace.id}`);
     }
   };
 
   const handleSelect = (workspaceId: string) => {
-    selectWorkspace(workspaceId);
-    navigate('/scenarios');
+    // Navigate to the selected workspace
+    navigate(`/${workspaceId}`);
   };
 
   return (

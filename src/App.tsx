@@ -11,10 +11,19 @@ const App: React.FC = () => {
       <div className="min-h-screen bg-gray-50 p-4">
         <div className="container mx-auto">
           <Routes>
+            {/* Home route showing all workspaces */}
             <Route path="/" element={<WorkspaceList />} />
-            <Route path="/scenarios" element={<ScenarioList />} />
-            <Route path="/flow" element={<FlowView />} />
-            {/* Przekierowanie nieznanych ścieżek do workspace'ów */}
+            
+            {/* Workspace route showing scenarios for a specific workspace */}
+            <Route path="/:workspace" element={<ScenarioList />} />
+            
+            {/* Scenario route showing flow for a specific scenario */}
+            <Route path="/:workspace/:scenario" element={<FlowView />} />
+            
+            {/* Node route showing a specific node in a flow */}
+            <Route path="/:workspace/:scenario/:node" element={<FlowView />} />
+            
+            {/* Redirect unknown paths to home */}
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>

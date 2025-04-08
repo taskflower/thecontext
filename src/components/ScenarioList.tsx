@@ -1,34 +1,45 @@
 // src/components/ScenarioList.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppStore } from '../lib/store';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 export const ScenarioList: React.FC = () => {
-  const { workspaces, selectedWorkspace, createScenario, selectScenario } = useAppStore();
+  const { workspace: workspaceId } = useParams<{ workspace: string }>();
+  const { workspaces, selectWorkspace, createScenario } = useAppStore();
   const [newScenarioName, setNewScenarioName] = useState('');
   const navigate = useNavigate();
 
-  const currentWorkspace = workspaces.find(w => w.id === selectedWorkspace);
+  // Set the selected workspace based on URL param
+  useEffect(() => {
+    if (workspaceId) {
+      selectWorkspace(workspaceId);
+    }
+  }, [workspaceId, selectWorkspace]);
+
+  const currentWorkspace = workspaces.find(w => w.id === workspaceId);
 
   const handleCreate = () => {
-    if (newScenarioName.trim() && selectedWorkspace) {
-      createScenario(selectedWorkspace, { name: newScenarioName });
+    if (newScenarioName.trim() && workspaceId) {
+      const newScenario = createScenario(workspaceId, { name: newScenarioName });
       setNewScenarioName('');
-      // Po utworzeniu scenariusza przekierowujemy do widoku flow
-      navigate('/flow');
+      
+      // Navigate to the new scenario
+      navigate(`/${workspaceId}/${newScenario.id}`);
     }
   };
 
   const handleSelect = (scenarioId: string) => {
-    selectScenario(scenarioId);
-    navigate('/flow');
+    // Navigate to the selected scenario
+    navigate(`/${workspaceId}/${scenarioId}`);
   };
+
+  if (!currentWorkspace) return <div>Workspace not found</div>;
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">
-          {currentWorkspace?.name} - Scenarios
+          {currentWorkspace.name} - Scenarios
         </h1>
         <button 
           onClick={() => navigate('/')}
@@ -55,7 +66,7 @@ export const ScenarioList: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {currentWorkspace?.scenarios.map(scenario => (
+        {currentWorkspace.scenarios.map(scenario => (
           <div 
             key={scenario.id} 
             onClick={() => handleSelect(scenario.id)}
