@@ -6,11 +6,16 @@ import { NodeData, ContextItem, NodeExecutionResult } from "../../raw_modules/no
 import { useAppStore } from "../lib/store";
 import { useNavigate, useParams } from 'react-router-dom';
 
-// Define a proper interface for the hook return type
+// Lokalny interfejs rozszerzający NodeData z dodatkiem templateId
+interface EnhancedNodeData extends NodeData {
+  templateId?: string;
+}
+
+// Zaktualizowany interfejs dla zwracanego obiektu z hooka
 interface NodeManagerHook {
   // Node data
   nodeManager: NodeManager;
-  currentNode: NodeData | null;
+  currentNode: EnhancedNodeData | null;
   currentScenario: any | null;
   isLastNode: boolean;
   
@@ -55,6 +60,9 @@ export function useNodeManager(): NodeManagerHook {
   
   const [contextItems, setContextItems] = useState<ContextItem[]>([]);
 
+  // Używamy EnhancedNodeData zamiast NodeData dla currentNode
+  const [currentNode, setCurrentNode] = useState<EnhancedNodeData | null>(null);
+
   // Set the selected workspace and scenario based on URL params
   useEffect(() => {
     if (workspaceId) {
@@ -77,8 +85,6 @@ export function useNodeManager(): NodeManagerHook {
   const nodeManager = useMemo(() => {
     return new NodeManager(currentScenario?.nodes || []);
   }, [currentScenario?.nodes]);
-
-  const [currentNode, setCurrentNode] = useState<NodeData | null>(null);
 
   // Check if we're on the last node
   const isLastNode = currentScenario 
@@ -111,18 +117,20 @@ export function useNodeManager(): NodeManagerHook {
         );
 
         // Get the templateId directly from the scenario definition
-        // This ensures we're using the explicit templateId from your data structure
         const currentTemplateId = (currentScenario.nodes[currentNodeIndex] as any).templateId || 
-                                 currentWorkspace?.templateSettings?.defaultFlowStepTemplate || 
-                                 'basic-step';
+                               currentWorkspace?.templateSettings?.defaultFlowStepTemplate || 
+                               'basic-step';
 
-        // Make sure to apply the templateId to the prepared node
-        const enhancedNode = {
-          ...preparedNode,
-          templateId: currentTemplateId
-        };
-
-        setCurrentNode(enhancedNode);
+        // Używamy spread operatora aby zachować właściwości i dodać templateId
+        if (preparedNode) {
+          // Tworzymy obiekt EnhancedNodeData
+          const enhancedNode: EnhancedNodeData = {
+            ...preparedNode,
+            templateId: currentTemplateId
+          };
+          
+          setCurrentNode(enhancedNode);
+        }
       }
     }
   }, [currentScenario, currentNodeIndex, contextItems, nodeManager, currentWorkspace]);
