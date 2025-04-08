@@ -1,74 +1,26 @@
-// App.tsx
-import { useEffect, useState } from "react";
-import { WorkspacesList } from "./components/workspaces";
-import { ScenariosList } from "./components/scenarios";
-import FlowView from "./components/flow/FlowView";
-import { NodeEditor } from "./components/nodes";
-import { ContextEditor } from "./components/context";
-import useStore from "./store";
+// src/App.tsx
+import React from 'react';
+import { useAppStore } from './lib/store';
+import { WorkspaceList } from './components/WorkspaceList';
+import { ScenarioList } from './components/ScenarioList';
+import { FlowView } from './components/FlowView';
 
-function App() {
-  const view = useStore((state) => state.view);
-  const selectedIds = useStore((state) => state.selectedIds);
-  const nodeManager = useStore((state) => state.nodeManager);
-  const workspaces = useStore((state) => state.workspaces);
+const App: React.FC = () => {
+  const { selectedWorkspace, selectedScenario } = useAppStore();
 
-  // Użyj useState zamiast pobierać funkcje ze store
-  const [, setInitialized] = useState(false);
-
-  // Zaktualizowana inicjalizacja nodeManager
-  useEffect(() => {
-    if (selectedIds.workspace && selectedIds.scenario) {
-      // Znajdź scenariusz bezpośrednio
-      const workspace = workspaces.find((w) => w.id === selectedIds.workspace);
-      const scenario = workspace?.scenarios.find(
-        (s) => s.id === selectedIds.scenario
-      );
-
-      if (scenario?.nodes.length) {
-        // Zawsze odświeżaj węzły przy zmianie scenariusza
-        nodeManager.importNodes(scenario.nodes);
-        setInitialized(true);
-
-        // Jeśli jesteśmy w widoku flow, przygotuj węzeł
-        if (view === "flow") {
-          const prepareNode = useStore.getState().prepareCurrentNode;
-          prepareNode();
-        }
-      }
-    }
-  }, [
-    selectedIds.workspace,
-    selectedIds.scenario,
-    workspaces,
-    nodeManager,
-    view,
-  ]);
-
-  // Renderowanie głównej zawartości
   const renderContent = () => {
-    switch (view) {
-      case "workspaces":
-        return <WorkspacesList />;
-      case "scenarios":
-        return <ScenariosList />;
-      case "flow":
-        return <FlowView />;
-      case "nodeEditor":
-        return <NodeEditor />;
-      case "contextEditor":
-        return <ContextEditor />;
-      default:
-        return null;
-    }
+    if (!selectedWorkspace) return <WorkspaceList />;
+    if (!selectedScenario) return <ScenarioList />;
+    return <FlowView />;
   };
 
-  // Renderowanie aplikacji
   return (
-    <div className="min-h-screen bg-[hsl(var(--background))]">
-      <div className="container mx-auto p-4">{renderContent()}</div>
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="container mx-auto">
+        {renderContent()}
+      </div>
     </div>
   );
-}
+};
 
 export default App;
