@@ -34,9 +34,10 @@ const createInitialWorkspace = () => {
   const secondNode: NodeData = {
     id: "node-2",
     scenarioId: "scenario-1",
-    label: "CHA",
-    assistantMessage: "Hello! What is your name?",
-    contextKey: "userName",
+    label: "Greeting",
+    // Użycie szablonu do podmiany na wartość z kontekstu
+    assistantMessage: "Nice to meet you, {{userName}}! How can I help you today?",
+    contextKey: "userRequest",
   };
 
   const initialScenario: Scenario = {
@@ -52,6 +53,7 @@ const createInitialWorkspace = () => {
     scenarios: [initialScenario],
   };
 };
+
 
 export const useAppStore = create<AppState & AppActions>((set, get) => ({
   workspaces: [createInitialWorkspace()],

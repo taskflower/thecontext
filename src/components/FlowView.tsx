@@ -1,6 +1,7 @@
 // src/components/FlowView.tsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAppStore } from '../lib/store';
+// Make sure we're using the updated version
 import { useNodeManager } from '../hooks/useNodeManager';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,7 +14,7 @@ export const FlowView: React.FC = () => {
     nextNode,
     prevNode 
   } = useAppStore();
-  const { currentNode, executeNode } = useNodeManager();
+  const { currentNode, executeNode, contextItems, setContextItems } = useNodeManager();
   const [userInput, setUserInput] = useState('');
   const navigate = useNavigate();
 
@@ -34,13 +35,21 @@ export const FlowView: React.FC = () => {
       selectedWorkspace,
       selectedScenario,
       currentNodeIndex,
-      currentNode
+      currentNode,
+      contextItems // Log context for debugging
     });
-  }, [workspaces, selectedWorkspace, selectedScenario, currentNodeIndex, currentNode]);
+  }, [workspaces, selectedWorkspace, selectedScenario, currentNodeIndex, currentNode, contextItems]);
 
   const handleSubmit = () => {
     if (currentNode) {
-      executeNode(userInput);
+      // Execute the node and get the result
+      const result = executeNode(userInput);
+      
+      // If the context was updated, update our context state
+      if (result && result.contextUpdated) {
+        setContextItems(result.updatedContext);
+      }
+      
       if (!isLastNode) {
         nextNode();
       } else {
@@ -108,7 +117,8 @@ export const FlowView: React.FC = () => {
               scenarioId: selectedScenario,
               currentNodeIndex,
               currentNodeId: currentNode.id,
-              currentNodeLabel: currentNode.label
+              currentNodeLabel: currentNode.label,
+              contextItems: contextItems // Added context to debug info
             }, null, 2)}
           </pre>
         </div>
