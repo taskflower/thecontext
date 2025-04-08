@@ -1,6 +1,7 @@
 // src/templates/layouts/SidebarLayout.tsx
 import React from 'react';
-import { LayoutProps } from '../../lib/templateRegistry';  // Fix the import path
+import { LayoutProps } from 'template-registry-module';  // Fix the import path
+
 
 const SidebarLayout: React.FC<LayoutProps> = ({ 
   children, 

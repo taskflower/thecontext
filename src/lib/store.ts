@@ -3,15 +3,17 @@ import { create } from "zustand";
 import { NodeData, Scenario } from "../../raw_modules/nodes-module/src";
 
 // Definicja typu Workspace
-interface Workspace {
+export interface TemplateSettings {
+  layoutTemplate: string;  // ID szablonu layoutu
+  scenarioWidgetTemplate: string;  // ID szablonu widgetu scenariusza
+  defaultFlowStepTemplate: string;  // ID domyślnego szablonu kroku
+}
+
+export interface Workspace {
   id: string;
   name: string;
   scenarios: Scenario[];
-  templateSettings: {
-    layoutTemplate: string;
-    scenarioWidgetTemplate: string;
-    defaultFlowStepTemplate: string;
-  }
+  templateSettings: TemplateSettings;
 }
 
 interface AppState {
@@ -30,7 +32,7 @@ interface AppActions {
 }
 
 // Tworzenie domyślnego workspace z ustawieniami szablonów
-const createInitialWorkspace = (): Workspace => {
+const createDefaultWorkspace = (): Workspace => {
   const initialNode: NodeData = {
     id: "node-1",
     scenarioId: "scenario-1",
@@ -58,7 +60,7 @@ const createInitialWorkspace = (): Workspace => {
 
   return {
     id: "workspace-1",
-    name: "My First Workspace",
+    name: "Default Workspace",
     scenarios: [initialScenario],
     templateSettings: {
       layoutTemplate: "default",
@@ -68,8 +70,80 @@ const createInitialWorkspace = (): Workspace => {
   };
 };
 
+// Tworzenie workspace z szablonami New York Style
+const createNewYorkWorkspace = (): Workspace => {
+  const initialNode: NodeData = {
+    id: "nyc-node-1",
+    scenarioId: "nyc-scenario-1",
+    label: "Introduction",
+    assistantMessage: "Welcome to the New York experience. What's your name?",
+    contextKey: "userName",
+    templateId: "newyork-standard"
+  };
+  
+  const secondNode: NodeData = {
+    id: "nyc-node-2",
+    scenarioId: "nyc-scenario-1",
+    label: "Question",
+    assistantMessage: "Great to meet you, {{userName}}. What brings you here today?",
+    contextKey: "userNeed",
+    templateId: "newyork-ai"
+  };
+  
+  const thirdNode: NodeData = {
+    id: "nyc-node-3",
+    scenarioId: "nyc-scenario-1",
+    label: "Feedback",
+    assistantMessage: "Based on what you've told me about {{userNeed}}, I'd recommend exploring our premium options. How does that sound?",
+    contextKey: "userFeedback",
+    templateId: "newyork-standard"
+  };
+
+  const initialScenario: Scenario = {
+    id: "nyc-scenario-1",
+    name: "New York Experience",
+    description: "A sleek, modern user interaction flow",
+    nodes: [initialNode, secondNode, thirdNode],
+  };
+  
+  const secondScenario: Scenario = {
+    id: "nyc-scenario-2",
+    name: "Quick Survey",
+    description: "A brief customer feedback collection",
+    nodes: [
+      {
+        id: "survey-node-1",
+        scenarioId: "nyc-scenario-2",
+        label: "Survey Start",
+        assistantMessage: "We'd love to hear your thoughts on our services. Would you mind taking a quick survey?",
+        contextKey: "surveyConsent",
+        templateId: "newyork-standard"
+      },
+      {
+        id: "survey-node-2",
+        scenarioId: "nyc-scenario-2",
+        label: "Rating Question",
+        assistantMessage: "On a scale of 1-10, how would you rate your experience with us?",
+        contextKey: "userRating",
+        templateId: "newyork-form"
+      }
+    ]
+  };
+
+  return {
+    id: "workspace-2",
+    name: "New York Style Workspace",
+    scenarios: [initialScenario, secondScenario],
+    templateSettings: {
+      layoutTemplate: "newyork-main",
+      scenarioWidgetTemplate: "newyork-card",
+      defaultFlowStepTemplate: "newyork-standard"
+    }
+  };
+};
+
 export const useAppStore = create<AppState & AppActions>((set, get) => ({
-  workspaces: [createInitialWorkspace()],
+  workspaces: [createDefaultWorkspace(), createNewYorkWorkspace()],
   selectedWorkspace: "workspace-1",
   selectedScenario: "scenario-1",
   currentNodeIndex: 0,

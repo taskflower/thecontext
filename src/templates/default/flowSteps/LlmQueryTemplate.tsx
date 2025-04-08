@@ -1,6 +1,6 @@
 // src/templates/flowSteps/LlmQueryTemplate.tsx
 import React, { useState } from 'react';
-import { FlowStepProps } from '../../lib/templateRegistry';  // Fix the import path
+import { FlowStepProps } from 'template-registry-module';
 
 const LlmQueryTemplate: React.FC<FlowStepProps> = ({ 
   node, 

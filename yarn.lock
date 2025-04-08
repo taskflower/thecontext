@@ -1202,10 +1202,10 @@ tailwindcss@^3.3.2:
     resolve "^1.22.8"
     sucrase "^3.35.0"
 
-template-registry-module@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/template-registry-module/-/template-registry-module-1.0.0.tgz#c700200de0840170c541bf788766275a7273e270"
-  integrity sha512-i6SvnOOHllqyvn/5PXBLtF7AKQmFgtJ82En0F34HSO9eBx5FLe3Ex8jP4keBD1pry6NGs4+B/vNMNFcqZEGMoQ==
+template-registry-module@1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/template-registry-module/-/template-registry-module-1.0.3.tgz#52f7a1c2d8b9ddb70b0d99e69e08d6e48df0ae92"
+  integrity sha512-l7ZZyxoppmq9RUKRfDS68DYKpMFMguI2xFIHxNz3b2SIFgBul6N3Q3LkJwQfryac3spm14EPFp7DCkYyesqM4g==
 
 thenify-all@^1.0.0:
   version "1.6.0"

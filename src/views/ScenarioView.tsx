@@ -2,7 +2,7 @@
 import React, { useEffect, Suspense } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
-import { templateRegistry } from '../lib/templates'; // Zaktualizowany import
+import { templateRegistry } from '../templates';
 
 export const ScenarioView: React.FC = () => {
   const { workspace: workspaceId } = useParams<{ workspace: string }>();
@@ -28,7 +28,7 @@ export const ScenarioView: React.FC = () => {
   const LayoutComponent = templateRegistry.getLayout(layoutTemplateId)?.component;
 
   if (!LayoutComponent) {
-    return <div className="p-4">Layout template not found</div>;
+    return <div className="p-4">Layout template not found: {layoutTemplateId}</div>;
   }
 
   // Get the scenario widget template for this workspace
@@ -36,7 +36,7 @@ export const ScenarioView: React.FC = () => {
   const WidgetComponent = templateRegistry.getWidget(widgetTemplateId)?.component;
 
   if (!WidgetComponent) {
-    return <div className="p-4">Widget template not found</div>;
+    return <div className="p-4">Widget template not found: {widgetTemplateId}</div>;
   }
 
   const handleSelect = (scenarioId: string) => {
@@ -58,13 +58,7 @@ export const ScenarioView: React.FC = () => {
   }));
 
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-lg text-gray-600">Ładowanie szablonów...</p>
-        </div>
-      </div>
-    }>
+    <Suspense fallback={<div className="p-4">Loading templates...</div>}>
       <LayoutComponent 
         title={`${currentWorkspace.name} - Scenarios`}
         showBackButton={true}
