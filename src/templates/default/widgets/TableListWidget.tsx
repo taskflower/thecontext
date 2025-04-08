@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/templates/widgets/TableListWidget.tsx
 import React from 'react';
-import { WidgetProps } from '../../lib/templateRegistry';
+import { WidgetProps } from 'template-registry-module';
 
 const TableListWidget: React.FC<WidgetProps> = ({ 
   data = [], 
