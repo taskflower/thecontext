@@ -67,9 +67,14 @@ export const UserDropdown: React.FC<{
             </span>
           </div>
         )}
-        <span className="hidden md:inline">
-          {user.displayName || user.email}
-        </span>
+        <div className="flex flex-col items-start">
+          <span className="hidden md:inline">
+            {user.displayName || user.email}
+          </span>
+          <span className="text-xs text-gray-500">
+            Tokens: {user.tokens?.toLocaleString() || 0}
+          </span>
+        </div>
       </button>
 
       {isOpen && (
@@ -80,6 +85,9 @@ export const UserDropdown: React.FC<{
             </p>
             <p className="text-sm text-gray-500 truncate">
               {user.email}
+            </p>
+            <p className="text-sm text-gray-500">
+              Tokens: {user.tokens?.toLocaleString() || 0}
             </p>
           </div>
           <div className="py-1">

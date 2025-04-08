@@ -9,8 +9,12 @@ import {
 import { doc, getDoc, setDoc } from '@firebase/firestore';
 import { auth, googleProvider, db } from '@/firebase/config';
 
+interface UserWithTokens extends User {
+  tokens?: number;
+}
+
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserWithTokens | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,17 +24,25 @@ export function useAuth() {
         const userDocRef = doc(db, 'users', currentUser.uid);
         const userDoc = await getDoc(userDocRef);
 
+        let userData: UserWithTokens = { ...currentUser };
+
         if (!userDoc.exists()) {
-          // Create user document with initial data
+          // Create user document with initial data and tokens
           await setDoc(userDocRef, {
             email: currentUser.email,
             displayName: currentUser.displayName,
             photoURL: currentUser.photoURL,
             createdAt: new Date(),
+            tokens: 5000 // Add tokens field with initial value of 5000
           });
+          userData.tokens = 5000;
+        } else {
+          // If user document exists, get tokens
+          const data = userDoc.data();
+          userData.tokens = data.tokens || 0;
         }
 
-        setUser(currentUser);
+        setUser(userData);
       } else {
         setUser(null);
       }
