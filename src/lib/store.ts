@@ -2,11 +2,16 @@
 import { create } from "zustand";
 import { NodeData, Scenario } from "../../raw_modules/nodes-module/src";
 
-// Define workspace type
+// Definicja typu Workspace
 interface Workspace {
   id: string;
   name: string;
   scenarios: Scenario[];
+  templateSettings: {
+    layoutTemplate: string;
+    scenarioWidgetTemplate: string;
+    defaultFlowStepTemplate: string;
+  }
 }
 
 interface AppState {
@@ -19,14 +24,12 @@ interface AppState {
 interface AppActions {
   selectWorkspace: (workspaceId: string) => void;
   selectScenario: (scenarioId: string) => void;
-  createWorkspace: (name: string) => Workspace;
-  createScenario: (workspaceId: string, scenario: Partial<Scenario>) => Scenario;
-  addNodeToScenario: (scenarioId: string, node: NodeData) => void;
   nextNode: () => void;
   prevNode: () => void;
   setNodeIndex: (index: number) => void;
 }
 
+// Tworzenie domyślnego workspace z ustawieniami szablonów
 const createInitialWorkspace = (): Workspace => {
   const initialNode: NodeData = {
     id: "node-1",
@@ -34,14 +37,16 @@ const createInitialWorkspace = (): Workspace => {
     label: "Welcome",
     assistantMessage: "Hello! What is your name?",
     contextKey: "userName",
+    templateId: "basic-step"
   };
+  
   const secondNode: NodeData = {
     id: "node-2",
     scenarioId: "scenario-1",
     label: "Greeting",
-    // Using template to replace with context value
     assistantMessage: "Nice to meet you, {{userName}}! How can I help you today?",
     contextKey: "userRequest",
+    templateId: "llm-query"
   };
 
   const initialScenario: Scenario = {
@@ -55,6 +60,11 @@ const createInitialWorkspace = (): Workspace => {
     id: "workspace-1",
     name: "My First Workspace",
     scenarios: [initialScenario],
+    templateSettings: {
+      layoutTemplate: "default",
+      scenarioWidgetTemplate: "card-list",
+      defaultFlowStepTemplate: "basic-step"
+    }
   };
 };
 
@@ -76,59 +86,6 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
       selectedScenario: scenarioId,
       currentNodeIndex: 0,
     }),
-
-  createWorkspace: (name) => {
-    const newWorkspace: Workspace = {
-      id: `workspace-${Date.now()}`,
-      name,
-      scenarios: [],
-    };
-    
-    set((state) => ({
-      workspaces: [...state.workspaces, newWorkspace],
-      selectedWorkspace: newWorkspace.id,
-    }));
-    
-    return newWorkspace;
-  },
-
-  createScenario: (workspaceId, scenario) => {
-    const newScenario: Scenario = {
-      id: `scenario-${Date.now()}`,
-      name: scenario.name || "New scenario",
-      description: scenario.description || "",
-      nodes: scenario.nodes || [],
-    };
-    
-    set((state) => ({
-      workspaces: state.workspaces.map((workspace) =>
-        workspace.id === workspaceId
-          ? {
-              ...workspace,
-              scenarios: [...workspace.scenarios, newScenario],
-            }
-          : workspace
-      ),
-      selectedScenario: newScenario.id,
-    }));
-    
-    return newScenario;
-  },
-
-  addNodeToScenario: (scenarioId, node) =>
-    set((state) => ({
-      workspaces: state.workspaces.map((workspace) => ({
-        ...workspace,
-        scenarios: workspace.scenarios.map((scenario) =>
-          scenario.id === scenarioId
-            ? {
-                ...scenario,
-                nodes: [...scenario.nodes, node],
-              }
-            : scenario
-        ),
-      })),
-    })),
 
   nextNode: () => {
     const { selectedScenario, workspaces, currentNodeIndex } = get();

@@ -30,6 +30,7 @@ interface NodeManagerHook {
     currentNodeIndex: number;
     currentNodeLabel: string | undefined;
     contextItems: ContextItem[];
+    templateId?: string;
   };
 }
 
@@ -64,11 +65,14 @@ export function useNodeManager(): NodeManagerHook {
     }
   }, [workspaceId, scenarioId, selectWorkspace, selectScenario]);
 
-  // Calculate current scenario
+  // Calculate current scenario and workspace
+  const currentWorkspace = useMemo(() => {
+    return workspaces.find(w => w.id === workspaceId);
+  }, [workspaces, workspaceId]);
+
   const currentScenario = useMemo(() => {
-    const workspace = workspaces.find(w => w.id === workspaceId);
-    return workspace?.scenarios.find(s => s.id === scenarioId);
-  }, [workspaces, workspaceId, scenarioId]);
+    return currentWorkspace?.scenarios.find(s => s.id === scenarioId);
+  }, [currentWorkspace, scenarioId]);
 
   const nodeManager = useMemo(() => {
     return new NodeManager(currentScenario?.nodes || []);
@@ -97,27 +101,31 @@ export function useNodeManager(): NodeManagerHook {
       const scenarioNodes = nodeManager.getNodesByScenario(currentScenario.id);
 
       if (scenarioNodes.length > 0 && currentNodeIndex < scenarioNodes.length) {
-        const node = nodeManager.prepareNodeForDisplay(
-          scenarioNodes[currentNodeIndex].id,
+        // Get the current node from scenario nodes
+        const currentNodeId = scenarioNodes[currentNodeIndex].id;
+        
+        // Prepare the node for display
+        const preparedNode = nodeManager.prepareNodeForDisplay(
+          currentNodeId,
           contextItems
         );
 
-        setCurrentNode(node);
+        // Get the templateId directly from the scenario definition
+        // This ensures we're using the explicit templateId from your data structure
+        const currentTemplateId = (currentScenario.nodes[currentNodeIndex] as any).templateId || 
+                                 currentWorkspace?.templateSettings?.defaultFlowStepTemplate || 
+                                 'basic-step';
+
+        // Make sure to apply the templateId to the prepared node
+        const enhancedNode = {
+          ...preparedNode,
+          templateId: currentTemplateId
+        };
+
+        setCurrentNode(enhancedNode);
       }
     }
-  }, [currentScenario, currentNodeIndex, contextItems, nodeManager]);
-
-  // Debug logging
-  useEffect(() => {
-    console.log('Current Flow State:', {
-      workspaces,
-      workspaceId,
-      scenarioId,
-      currentNodeIndex,
-      currentNode,
-      contextItems
-    });
-  }, [workspaces, workspaceId, scenarioId, currentNodeIndex, currentNode, contextItems]);
+  }, [currentScenario, currentNodeIndex, contextItems, nodeManager, currentWorkspace]);
 
   // Execute a node with user input
   const executeNode = (userInput: string): NodeExecutionResult | null => {
@@ -189,7 +197,8 @@ export function useNodeManager(): NodeManagerHook {
     nodeId: currentNode?.id,
     currentNodeIndex,
     currentNodeLabel: currentNode?.label,
-    contextItems
+    contextItems,
+    templateId: currentNode?.templateId
   };
 
   return {

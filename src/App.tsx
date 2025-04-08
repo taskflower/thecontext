@@ -1,33 +1,39 @@
 // src/App.tsx
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { WorkspaceList } from './components/WorkspaceList';
-import { ScenarioList } from './components/ScenarioList';
-import { FlowView } from './components/FlowView';
+
+// Views focused only on display without editing capabilities
+import { WorkspaceView } from './views/WorkspaceView';
+import { ScenarioView } from './views/ScenarioView';
+import { FlowView } from './views/FlowView';
 
 const App: React.FC = () => {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50 p-4">
-        <div className="container mx-auto">
-          <Routes>
-            {/* Home route showing all workspaces */}
-            <Route path="/" element={<WorkspaceList />} />
-            
-            {/* Workspace route showing scenarios for a specific workspace */}
-            <Route path="/:workspace" element={<ScenarioList />} />
-            
-            {/* Scenario route showing flow for a specific scenario */}
-            <Route path="/:workspace/:scenario" element={<FlowView />} />
-            
-            {/* Node route showing a specific node in a flow */}
-            <Route path="/:workspace/:scenario/:node" element={<FlowView />} />
-            
-            {/* Redirect unknown paths to home */}
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
+      <Suspense fallback={
+        <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-lg text-gray-600">Ładowanie aplikacji...</p>
+          </div>
         </div>
-      </div>
+      }>
+        <Routes>
+          {/* Strona główna wyświetlająca wszystkie workspaces */}
+          <Route path="/" element={<WorkspaceView />} />
+          
+          {/* Workspace wyświetlający scenariusze dla wybranego workspace */}
+          <Route path="/:workspace" element={<ScenarioView />} />
+          
+          {/* Scenariusz wyświetlający flow dla wybranego scenariusza */}
+          <Route path="/:workspace/:scenario" element={<FlowView />} />
+          
+          {/* Węzeł wyświetlający konkretny node w flow */}
+          <Route path="/:workspace/:scenario/:node" element={<FlowView />} />
+          
+          {/* Przekierowanie nieznanych ścieżek do strony głównej */}
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </Suspense>
     </Router>
   );
 };
