@@ -1,16 +1,25 @@
 // src/components/WorkspaceList.tsx
 import React, { useState } from 'react';
 import { useAppStore } from '../lib/store';
+import { useNavigate } from 'react-router-dom';
 
 export const WorkspaceList: React.FC = () => {
   const { workspaces, createWorkspace, selectWorkspace } = useAppStore();
   const [newWorkspaceName, setNewWorkspaceName] = useState('');
+  const navigate = useNavigate();
 
   const handleCreate = () => {
     if (newWorkspaceName.trim()) {
       createWorkspace(newWorkspaceName);
       setNewWorkspaceName('');
+      // Po utworzeniu workspace'u przekierowujemy do sekcji scenariuszy
+      navigate('/scenarios');
     }
+  };
+
+  const handleSelect = (workspaceId: string) => {
+    selectWorkspace(workspaceId);
+    navigate('/scenarios');
   };
 
   return (
@@ -37,7 +46,7 @@ export const WorkspaceList: React.FC = () => {
         {workspaces.map(workspace => (
           <div 
             key={workspace.id} 
-            onClick={() => selectWorkspace(workspace.id)}
+            onClick={() => handleSelect(workspace.id)}
             className="bg-white p-4 rounded shadow cursor-pointer hover:bg-gray-100"
           >
             <h2 className="font-semibold">{workspace.name}</h2>

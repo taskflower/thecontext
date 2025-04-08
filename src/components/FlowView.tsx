@@ -1,7 +1,8 @@
 // src/components/FlowView.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAppStore } from '../lib/store';
 import { useNodeManager } from '../hooks/useNodeManager';
+import { useNavigate } from 'react-router-dom';
 
 export const FlowView: React.FC = () => {
   const { 
@@ -12,15 +13,21 @@ export const FlowView: React.FC = () => {
     nextNode,
     prevNode 
   } = useAppStore();
-
-  const { 
-    currentNode, 
-    executeNode 
-  } = useNodeManager();
-
+  const { currentNode, executeNode } = useNodeManager();
   const [userInput, setUserInput] = useState('');
+  const navigate = useNavigate();
 
-  // Debug logging
+  // Obliczenie aktualnego scenariusza
+  const currentScenario = useMemo(() => {
+    const workspace = workspaces.find(w => w.id === selectedWorkspace);
+    return workspace?.scenarios.find(s => s.id === selectedScenario);
+  }, [workspaces, selectedWorkspace, selectedScenario]);
+
+  // Sprawdzenie, czy jesteśmy na ostatnim kroku
+  const isLastNode = currentScenario 
+    ? currentNodeIndex === currentScenario.nodes.length - 1 
+    : false;
+
   useEffect(() => {
     console.log('Current Flow State:', {
       workspaces,
@@ -34,12 +41,17 @@ export const FlowView: React.FC = () => {
   const handleSubmit = () => {
     if (currentNode) {
       executeNode(userInput);
-      nextNode();
+      if (!isLastNode) {
+        nextNode();
+      } else {
+        // Akcja po zakończeniu flow – przykładowo przekierowanie do listy scenariuszy
+        alert('Flow zakończony!');
+        navigate('/scenarios');
+      }
       setUserInput('');
     }
   };
 
-  // Detailed loading state
   if (!selectedWorkspace) return <div>No workspace selected</div>;
   if (!selectedScenario) return <div>No scenario selected</div>;
   if (!currentNode) return <div>No current node available</div>;
@@ -47,9 +59,7 @@ export const FlowView: React.FC = () => {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">
-          Flow: {currentNode.label}
-        </h1>
+        <h1 className="text-2xl font-bold">Flow: {currentNode.label}</h1>
         <button 
           onClick={() => window.history.back()}
           className="text-sm text-gray-600"
@@ -60,9 +70,7 @@ export const FlowView: React.FC = () => {
 
       <div className="bg-white p-6 rounded shadow">
         <div className="mb-4">
-          <h2 className="text-lg font-semibold">
-            Assistant Message
-          </h2>
+          <h2 className="text-lg font-semibold">Assistant Message</h2>
           <p className="text-gray-600">
             {currentNode.assistantMessage || 'No assistant message'}
           </p>
@@ -88,11 +96,10 @@ export const FlowView: React.FC = () => {
             onClick={handleSubmit}
             className="bg-blue-500 text-white px-4 py-2 rounded"
           >
-            Next
+            {isLastNode ? 'Zakończ' : 'Next'}
           </button>
         </div>
 
-        {/* Debug Information */}
         <div className="mt-4 p-2 bg-gray-100 rounded">
           <h3 className="font-bold">Debug Info:</h3>
           <pre className="text-xs overflow-auto">
