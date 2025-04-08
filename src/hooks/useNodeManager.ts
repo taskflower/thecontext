@@ -6,12 +6,10 @@ import { NodeData, ContextItem, NodeExecutionResult } from "../../raw_modules/no
 import { useAppStore } from "../lib/store";
 import { useNavigate, useParams } from 'react-router-dom';
 
-// Lokalny interfejs rozszerzający NodeData z dodatkiem templateId
 interface EnhancedNodeData extends NodeData {
   templateId?: string;
 }
 
-// Zaktualizowany interfejs dla zwracanego obiektu z hooka
 interface NodeManagerHook {
   // Node data
   nodeManager: NodeManager;

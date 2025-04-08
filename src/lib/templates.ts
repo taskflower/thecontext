@@ -5,11 +5,8 @@ import {
   FlowStepTemplate 
 } from 'template-registry-module';
 
-// Tworzenie rejestru szablonów
 export const templateRegistry = createTemplateRegistry();
 
-
-// Eksport funkcji dla łatwiejszego dostępu do szablonów
 export const getLayoutComponent = (id: string) => 
   templateRegistry.getLayout(id)?.component;
 
@@ -25,5 +22,4 @@ export const getFlowStepForNodeType = (nodeType: string) =>
 export const getWidgetsByCategory = (category: 'scenario' | 'workspace' | 'flow') => 
   templateRegistry.getWidgetsByCategory(category);
 
-// Typy eksportowane z modułu dla lepszej typizacji
 export type { LayoutTemplate, WidgetTemplate, FlowStepTemplate };

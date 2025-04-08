@@ -2,11 +2,10 @@
 import { create } from "zustand";
 import { NodeData, Scenario } from "../../raw_modules/nodes-module/src";
 
-// Definicja typu Workspace
 export interface TemplateSettings {
-  layoutTemplate: string;  // ID szablonu layoutu
-  scenarioWidgetTemplate: string;  // ID szablonu widgetu scenariusza
-  defaultFlowStepTemplate: string;  // ID domyślnego szablonu kroku
+  layoutTemplate: string;
+  scenarioWidgetTemplate: string;
+  defaultFlowStepTemplate: string;
 }
 
 export interface Workspace {
