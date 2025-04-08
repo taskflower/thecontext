@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/hooks/useNodeManager.ts
 import { useState, useEffect, useMemo } from "react";
-import { NodeManager } from "../../raw_modules/nodes-module/src";
-import { NodeData, ContextItem, NodeExecutionResult } from "../../raw_modules/nodes-module/src";
+import { NodeManager } from "../../raw_modules/revertcontext-nodes-module/src";
+import { NodeData, ContextItem, NodeExecutionResult } from "../../raw_modules/revertcontext-nodes-module/src";
 import { useAppStore } from "../lib/store";
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -92,7 +92,7 @@ export function useNodeManager(): NodeManagerHook {
   // Handle specific node navigation if node param is present
   useEffect(() => {
     if (nodeParam && currentScenario) {
-      const nodeIndex = currentScenario.nodes.findIndex(n => n.id === nodeParam);
+      const nodeIndex = currentScenario.nodes.findIndex((n: NodeData) => n.id === nodeParam);
       if (nodeIndex !== -1) {
         setNodeIndex(nodeIndex);
       }

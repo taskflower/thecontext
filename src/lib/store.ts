@@ -1,6 +1,6 @@
 // src/lib/store.ts
 import { create } from "zustand";
-import { NodeData, Scenario } from "../../raw_modules/nodes-module/src";
+import { NodeData, Scenario } from "../../raw_modules/revertcontext-nodes-module/src";
 
 export interface TemplateSettings {
   layoutTemplate: string;
