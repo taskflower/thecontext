@@ -1,12 +1,13 @@
-// components/scenarios/ScenariosList.tsx
-import React from "react";
-import ScenarioItem from "./ScenarioItem";
+import React from 'react';
 import useStore from "@/store";
+import { ContextInfoPlugin } from '@/plugins/ContextInfoPlugin';
+import ScenarioItem from './ScenarioItem';
 
 const ScenariosList: React.FC = () => {
-  const workspace = useStore((state) => state.getWorkspace());
-  const createScenario = useStore((state) => state.createScenario);
-  const navigateBack = useStore((state) => state.navigateBack);
+  const contextItems = useStore(state => state.contextItems);
+  const workspaces = useStore(state => state.workspaces);
+  const createScenario = useStore(state => state.createScenario);
+  const navigateBack = useStore(state => state.navigateBack);
 
   const handleCreate = () => {
     const name = prompt("Nazwa scenariusza:");
@@ -17,6 +18,9 @@ const ScenariosList: React.FC = () => {
 
   return (
     <div className="p-6">
+      {/* Renderowanie pluginu informacji o kontekście */}
+      {ContextInfoPlugin.renderContextSummary(contextItems)}
+
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
           <button 
@@ -25,7 +29,9 @@ const ScenariosList: React.FC = () => {
           >
             ← Powrót
           </button>
-          <h2 className="text-xl font-semibold">{workspace?.name || "Scenariusze"}</h2>
+          <h2 className="text-xl font-semibold">
+            {workspaces.find(w => w.id === useStore.getState().selectedIds.workspace)?.name || "Scenariusze"}
+          </h2>
         </div>
         <button 
           onClick={handleCreate}
@@ -35,11 +41,15 @@ const ScenariosList: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {workspace?.scenarios.map((scenario) => (
-          <ScenarioItem key={scenario.id} scenario={scenario} />
-        ))}
+        {workspaces
+          .find(w => w.id === useStore.getState().selectedIds.workspace)
+          ?.scenarios.map((scenario) => (
+            <ScenarioItem key={scenario.id} scenario={scenario} />
+          ))}
 
-        {!workspace?.scenarios.length && (
+        {!workspaces
+          .find(w => w.id === useStore.getState().selectedIds.workspace)
+          ?.scenarios.length && (
           <div className="text-[hsl(var(--muted-foreground))] text-sm italic py-2">
             Brak scenariuszy
           </div>

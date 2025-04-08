@@ -8,6 +8,20 @@ export interface Position {
   y: number;
 }
 
+// Definicja pól formularza dla pluginów
+export interface FormFieldDefinition {
+  type: 'text' | 'number' | 'select' | 'multiline' | 'url';
+  name: string;
+  label: string;
+  required?: boolean;
+  options?: { value: string; label: string }[];
+  validation?: {
+    min?: number;
+    max?: number;
+    pattern?: string;
+  };
+}
+
 export interface Node {
   id: string;
   scenarioId: string;
@@ -23,6 +37,18 @@ export interface Node {
   pluginData?: Record<string, any>;
   createdAt?: Date;
   updatedAt?: Date;
+  
+  // Nowe pola pluginów
+  pluginType?: 'url-input' | 'form' | 'custom';
+  pluginConfig?: {
+    inputType?: string;
+    placeholder?: string;
+    validation?: {
+      pattern?: string;
+      required?: boolean;
+    };
+    formFields?: FormFieldDefinition[];
+  };
 }
 
 export interface Scenario {
@@ -51,6 +77,14 @@ export interface FlowState {
   userInput: string;
 }
 
+// Interfejs pluginu
+export interface Plugin {
+  id: string;
+  name: string;
+  type: 'node-transformer' | 'ui-extension' | 'context-modifier';
+  handler: (data: any) => any;
+}
+
 // Typy dla poszczególnych slice'ów storeu
 export interface UIState {
   view: 'workspaces' | 'scenarios' | 'flow' | 'nodeEditor' | 'contextEditor';
@@ -77,6 +111,11 @@ export interface FlowExecutionState {
 export interface ContextState {
   contextItems: ContextItem[];
   contextForm: ContextItem[] | null;
+}
+
+// Stan pluginów
+export interface PluginState {
+  registeredPlugins: Plugin[];
 }
 
 // Akcje UI
@@ -124,13 +163,23 @@ export interface ContextActions {
   updateContextForm: (items: ContextItem[]) => void;
 }
 
+// Akcje pluginów
+// w pliku src/store/types.ts
+
+export interface PluginActions {
+  registerPlugin: (plugin: Plugin) => void;
+  applyNodePlugins: (node: Node) => Node;
+  validateNodePlugin: (node: Node) => { isValid: boolean; errors?: string[] };
+}
+
 // Pełen stan aplikacji
 export interface AppState extends 
   UIState, 
   WorkspaceState, 
   NodeState, 
   FlowExecutionState, 
-  ContextState {
+  ContextState,
+  PluginState {
   // Wspólne pola
   nodeManager: NodeManager;
 }
@@ -141,4 +190,5 @@ export type AppStore = AppState &
   WorkspaceActions & 
   NodeActions & 
   FlowActions & 
-  ContextActions;
+  ContextActions & 
+  PluginActions;

@@ -4,6 +4,10 @@ import useStore from "../../store";
 import { Node, Scenario } from "../../store/types";
 import NodesList from "../nodes/NodesList";
 import ContextSection from "../context/ContextSection";
+import FlowInput from "./FlowInput";
+import { FlowHeader, FlowNavigationControls } from "./flowComponents";
+
+
 
 const FlowView: React.FC = () => {
   // Pobieramy minimalne niezbędne dane ze store
@@ -22,9 +26,6 @@ const FlowView: React.FC = () => {
 
   // Pobieramy funkcje tylko te, które są potrzebne
   const updateFlowInput = useStore((state) => state.updateFlowInput);
-  const nextStep = useStore((state) => state.nextStep);
-  const prevStep = useStore((state) => state.prevStep);
-  const finishFlow = useStore((state) => state.finishFlow);
   const createNode = useStore((state) => state.createNode);
   const prepareCurrentNode = useStore((state) => state.prepareCurrentNode);
 
@@ -103,30 +104,19 @@ const FlowView: React.FC = () => {
     );
   }
 
-  const isLastStep = flowState.currentIndex === nodes.length - 1;
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
       <div className="md:col-span-2">
-        <div className="flex items-center gap-2 mb-4">
-          <button 
-            onClick={navigateBack}
-            className="text-[hsl(var(--primary))] hover:opacity-80 text-sm font-medium"
-          >
-            ← Powrót
-          </button>
-          <h1 className="text-2xl font-semibold">{scenario?.name}</h1>
-        </div>
+        {/* Nagłówek z nawigacją */}
+        <FlowHeader 
+          scenarioName={scenario?.name || "Flow"} 
+          currentNodeIndex={flowState.currentIndex}
+          totalNodes={nodes.length}
+          currentNode={currentFlowNode}
+          onBack={navigateBack}
+        />
 
         <div className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-sm">
-          {/* Informacje o kroku */}
-          <div className="flex justify-between items-center mb-6 text-sm text-[hsl(var(--muted-foreground))]">
-            <span>
-              Krok {flowState.currentIndex + 1} z {nodes.length}
-            </span>
-            <span>{currentFlowNode.label}</span>
-          </div>
-
           {/* Wiadomość asystenta */}
           <div className="mb-6">
             <h3 className="text-sm font-medium mb-2">Wiadomość asystenta:</h3>
@@ -137,67 +127,18 @@ const FlowView: React.FC = () => {
             </div>
           </div>
 
-          {/* Input użytkownika */}
-          <div className="mb-6">
-            <h3 className="text-sm font-medium mb-2">Odpowiedź:</h3>
-            <textarea
-              value={flowState.userInput}
-              onChange={(e) => updateFlowInput(e.target.value)}
-              placeholder="Wpisz swoją odpowiedź..."
-              className="w-full p-3 border border-[hsl(var(--input))] rounded-md focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))]"
-              rows={4}
-            />
-
-            {currentFlowNode.contextKey && (
-              <div className="mt-2 text-xs text-[hsl(var(--muted-foreground))]">
-                Odpowiedź zapisana w:{" "}
-                <code className="bg-[hsl(var(--muted))] px-1.5 py-0.5 rounded text-xs">
-                  {currentFlowNode.contextKey}
-                </code>
-                {currentFlowNode.contextJsonPath && (
-                  <span>
-                    {" "}
-                    (ścieżka:{" "}
-                    <code className="bg-[hsl(var(--muted))] px-1.5 py-0.5 rounded text-xs">
-                      {currentFlowNode.contextJsonPath}
-                    </code>
-                    )
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
+          {/* Input użytkownika - komponent dynamiczny */}
+          <FlowInput 
+            node={currentFlowNode}
+            value={flowState.userInput}
+            onChange={updateFlowInput}
+          />
 
           {/* Przyciski nawigacyjne */}
-          <div className="flex justify-between">
-            <button
-              onClick={prevStep}
-              disabled={flowState.currentIndex === 0}
-              className={`inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors px-4 py-2
-                ${flowState.currentIndex === 0
-                  ? "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] cursor-not-allowed"
-                  : "bg-[hsl(var(--secondary))] text-[hsl(var(--secondary-foreground))] hover:bg-opacity-80"
-                }`}
-            >
-              ← Wstecz
-            </button>
-
-            {isLastStep ? (
-              <button
-                onClick={finishFlow}
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] transition-colors hover:bg-opacity-90 px-4 py-2"
-              >
-                Zakończ
-              </button>
-            ) : (
-              <button
-                onClick={nextStep}
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] transition-colors hover:bg-opacity-90 px-4 py-2"
-              >
-                Dalej →
-              </button>
-            )}
-          </div>
+          <FlowNavigationControls 
+            currentIndex={flowState.currentIndex}
+            totalNodes={nodes.length}
+          />
         </div>
       </div>
 
