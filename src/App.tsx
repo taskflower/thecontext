@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { WorkspaceView } from './views/WorkspaceView';
 import { ScenarioView } from './views/ScenarioView';
 import { FlowView } from './views/FlowView';
+import { LoginView } from './views/LoginView';
 
 const App: React.FC = () => {
   return (
@@ -18,19 +19,11 @@ const App: React.FC = () => {
         </div>
       }>
         <Routes>
-          {/* Strona główna wyświetlająca wszystkie workspaces */}
           <Route path="/" element={<WorkspaceView />} />
-          
-          {/* Workspace wyświetlający scenariusze dla wybranego workspace */}
+          <Route path="/login" element={<LoginView />} />
           <Route path="/:workspace" element={<ScenarioView />} />
-          
-          {/* Scenariusz wyświetlający flow dla wybranego scenariusza */}
           <Route path="/:workspace/:scenario" element={<FlowView />} />
-          
-          {/* Węzeł wyświetlający konkretny node w flow */}
           <Route path="/:workspace/:scenario/:node" element={<FlowView />} />
-          
-          {/* Przekierowanie nieznanych ścieżek do strony głównej */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Suspense>
