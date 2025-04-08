@@ -1,4 +1,5 @@
 // src/templates/newyork/layouts/MainLayout.tsx
+import UserDropdown from '@/auth/UserDropdown';
 import React from 'react';
 import { LayoutProps } from 'template-registry-module';
 
@@ -19,6 +20,7 @@ const MainLayout: React.FC<LayoutProps> = ({
               <a href="/" className="px-3 py-2 text-sm font-medium hover:text-gray-300">Dashboard</a>
               <a href="#" className="px-3 py-2 text-sm font-medium hover:text-gray-300">Templates</a>
               <a href="#" className="px-3 py-2 text-sm font-medium hover:text-gray-300">Settings</a>
+              <UserDropdown />
             </nav>
           </div>
         </div>

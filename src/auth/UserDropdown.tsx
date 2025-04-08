@@ -1,4 +1,4 @@
-// src/components/UserDropdown.tsx
+// src/auth/UserDropdown.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 

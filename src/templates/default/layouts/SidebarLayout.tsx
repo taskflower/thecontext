@@ -1,7 +1,7 @@
 // src/templates/layouts/SidebarLayout.tsx
 import React from 'react';
-import { LayoutProps } from 'template-registry-module';  // Fix the import path
-
+import { LayoutProps } from 'template-registry-module';
+import UserDropdown from '@/auth/UserDropdown';  // Import UserDropdown
 
 const SidebarLayout: React.FC<LayoutProps> = ({ 
   children, 
@@ -12,13 +12,18 @@ const SidebarLayout: React.FC<LayoutProps> = ({
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <div className="w-64 bg-gray-800 text-white p-4">
-        <h1 className="text-xl font-bold mb-6">Flow Builder</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-xl font-bold">Flow Builder</h1>
+          <UserDropdown />
+        </div>
+        
         <nav className="space-y-2">
           <a href="/" className="block py-2 px-4 rounded hover:bg-gray-700">Workspaces</a>
           <a href="#" className="block py-2 px-4 rounded hover:bg-gray-700">Templates</a>
           <a href="#" className="block py-2 px-4 rounded hover:bg-gray-700">Settings</a>
         </nav>
       </div>
+      
       <div className="flex-1 p-6">
         {title && (
           <div className="flex justify-between items-center mb-4">
