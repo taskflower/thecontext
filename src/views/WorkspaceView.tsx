@@ -2,7 +2,8 @@
 import React, {  Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
-import { templateRegistry } from '../lib/templateRegistry';
+import { templateRegistry } from '@/lib/templates';
+
 
 export const WorkspaceView: React.FC = () => {
   const { workspaces } = useAppStore();

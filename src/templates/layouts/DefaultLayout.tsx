@@ -1,6 +1,6 @@
 // src/templates/layouts/DefaultLayout.tsx
 import React from 'react';
-import { LayoutProps } from '../../lib/templateRegistry';  // Fix the import path
+import { LayoutProps } from 'template-registry-module';  // Zaktualizowany import
 
 const DefaultLayout: React.FC<LayoutProps> = ({ 
   children, 

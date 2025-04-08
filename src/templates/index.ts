@@ -1,16 +1,10 @@
 // src/templates/index.ts
-// Główny plik eksportujący wszystkie typy szablonów
+// Główny plik eksportujący wszystkie szablony
 
-// Importy układów
+// Eksport z podmodułów
 export * from './layouts';
-
-// Importy widgetów
 export * from './widgets';
-
-// Importy kroków przepływu
 export * from './flowSteps';
 
-// Eksportowanie typów wspólnych (jeśli są potrzebne)
-export interface CommonTemplateProps {
-  // Wspólne właściwości szablonów, jeśli takie są
-}
+// Teraz importujemy rejestr szablonów z nowego modułu
+// Logika rejestru przeniesiona do src/lib/templates.ts

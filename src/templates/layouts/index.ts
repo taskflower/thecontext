@@ -1,25 +1,23 @@
 // src/templates/layouts/index.ts
 import { lazy } from 'react';
+import { LayoutTemplate } from 'template-registry-module';
 
+// Eksport komponentów layoutów dla łatwiejszego importu
+export const DefaultLayout = lazy(() => import('./DefaultLayout'));
+export const SidebarLayout = lazy(() => import('./SidebarLayout'));
 
-// Definiujemy layouty z lazy loading
-export const layouts = {
-  default: {
+// Mapowanie layoutów gotowe do rejestracji
+export const layouts: LayoutTemplate[] = [
+  {
     id: 'default',
     name: 'Default Layout',
-    component: lazy(() => import('./DefaultLayout'))
+    component: DefaultLayout
   },
-  sidebar: {
+  {
     id: 'sidebar',
     name: 'Sidebar Layout',
-    component: lazy(() => import('./SidebarLayout'))
+    component: SidebarLayout
   }
-};
+];
 
-// Eksportuj typy (opcjonalnie)
-export type LayoutType = keyof typeof layouts;
-
-// Funkcja pomocnicza do pobrania komponentu układu
-export function getLayoutComponent(id: string) {
-  return layouts[id as LayoutType]?.component || layouts.default.component;
-}
+// To teraz przeniesione do src/lib/templates.ts

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/templates/widgets/CardListWidget.tsx
 import React from 'react';
-import { WidgetProps } from '../../lib/templateRegistry';
+import { WidgetProps } from 'template-registry-module';  // Zaktualizowany import
 
 const CardListWidget: React.FC<WidgetProps> = ({ 
   data = [], 

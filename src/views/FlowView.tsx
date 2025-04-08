@@ -1,9 +1,9 @@
 // src/views/FlowView.tsx
 import React, { Suspense } from 'react';
-import {  useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
 import { useNodeManager } from '../hooks/useNodeManager';
-import { templateRegistry } from '../lib/templateRegistry';
+import { templateRegistry } from '../lib/templates'; // Zaktualizowany import
 
 export const FlowView: React.FC = () => {
   const { workspace: workspaceId } = useParams<{ workspace: string }>();

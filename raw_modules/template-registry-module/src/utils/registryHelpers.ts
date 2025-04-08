@@ -60,4 +60,4 @@ import {
     normalizedPath = normalizedPath.replace(/\.[^/.]+$/, '');
     
     return normalizedPath;
-  }
+  } 

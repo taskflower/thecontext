@@ -1,40 +1,32 @@
 // src/templates/flowSteps/index.ts
 import { lazy } from 'react';
+import { FlowStepTemplate } from 'template-registry-module';
 
+// Eksport komponentów kroków przepływu dla łatwiejszego importu
+export const BasicStepTemplate = lazy(() => import('./BasicStepTemplate'));
+export const LlmQueryTemplate = lazy(() => import('./LlmQueryTemplate'));
+export const FormInputTemplate = lazy(() => import('./FormInputTemplate'));
 
-// Definiujemy kroki przepływu z lazy loading
-export const flowSteps = {
-  'basic-step': {
+// Mapowanie kroków przepływu gotowe do rejestracji
+export const flowSteps: FlowStepTemplate[] = [
+  {
     id: 'basic-step',
     name: 'Basic Step',
     compatibleNodeTypes: ['default', 'input'],
-    component: lazy(() => import('./BasicStepTemplate'))
+    component: BasicStepTemplate
   },
-  'llm-query': {
+  {
     id: 'llm-query',
     name: 'LLM Query',
     compatibleNodeTypes: ['llm'],
-    component: lazy(() => import('./LlmQueryTemplate'))
+    component: LlmQueryTemplate
   },
-  'form-step': {
+  {
     id: 'form-step',
     name: 'Form Input',
     compatibleNodeTypes: ['form'],
-    component: lazy(() => import('./FormInputTemplate'))
+    component: FormInputTemplate
   }
-};
+];
 
-// Eksportuj typy (opcjonalnie)
-export type FlowStepType = keyof typeof flowSteps;
-
-// Funkcja pomocnicza do pobrania komponentu kroku przepływu
-export function getFlowStepComponent(id: string) {
-  return flowSteps[id as FlowStepType]?.component || flowSteps['basic-step'].component;
-}
-
-// Funkcja do znalezienia komponentu na podstawie typu węzła
-export function getFlowStepForNodeType(nodeType: string) {
-  return Object.values(flowSteps).find(
-    step => step.compatibleNodeTypes.includes(nodeType)
-  ) || flowSteps['basic-step'];
-}
+// To teraz przeniesione do src/lib/templates.ts
