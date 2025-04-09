@@ -17,6 +17,7 @@ const LessonSummary: React.FC<ExtendedFlowStepProps> = ({
   isLastNode,
   contextItems = []
 }) => {
+  console.log("LessonSummary props:", { node, contextItems });
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { getToken, user } = useAuth();
