@@ -14,6 +14,7 @@ const ContextDisplayStepTemplate: React.FC<ExtendedFlowStepProps> = ({
   isLastNode,
   contextItems = []
 }) => {
+  console.log("ContextDisplayStepTemplate contextItems type:", typeof contextItems, contextItems);
   const handleContinue = () => {
     // Przekazujemy pustą wartość, bo nie aktualizujemy kontekstu
     onSubmit("");

@@ -2,12 +2,21 @@
 import React, { useState } from "react";
 import { FlowStepProps } from "template-registry-module";
 
-const BasicStepTemplate: React.FC<FlowStepProps> = ({
+// Rozszerzamy interfejs FlowStepProps lokalnie, aby obsługiwał Record<string, any>
+interface ExtendedFlowStepProps extends Omit<FlowStepProps, 'contextItems'> {
+  node: any;
+  onSubmit: (value: string) => void;
+  onPrevious: () => void;
+  isLastNode: boolean;
+  contextItems?: Record<string, any> | any[];
+}
+
+const BasicStepTemplate: React.FC<ExtendedFlowStepProps> = ({
   node,
   onSubmit,
   onPrevious,
   isLastNode,
-  contextItems = [],
+  contextItems = {},
 }) => {
   const [userInput, setUserInput] = useState("");
   const [showContext, setShowContext] = useState(false);

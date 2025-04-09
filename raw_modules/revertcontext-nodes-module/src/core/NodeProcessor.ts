@@ -52,6 +52,7 @@ export class NodeProcessor {
         userInput,
         node.contextJsonPath
       );
+   console.log("Updating context:", node.contextKey, typeof userInput, userInput);
       
       return {
         node: node.toJSON(),

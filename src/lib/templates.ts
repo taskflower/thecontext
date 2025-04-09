@@ -1,6 +1,5 @@
 // src/lib/templates.ts
 import { 
-  createTemplateRegistry,
   LayoutTemplate,
   WidgetTemplate,
   FlowStepTemplate,

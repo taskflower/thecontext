@@ -31,7 +31,7 @@ export interface FlowStepProps {
   /**
    * Elementy kontekstu dostępne dla kroku
    */
-  contextItems?: any[];
+  contextItems?: Record<string, any>;
 }
 
 /**
