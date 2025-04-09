@@ -1,9 +1,68 @@
+// src/templates/default/index.ts
 import { 
   createTemplateRegistry, 
   WidgetCategory,
 } from 'template-registry-module';
 import { lazy } from 'react';
+import { NodeData, Scenario } from '../../../raw_modules/revertcontext-nodes-module/src';
 
+// Typy specyficzne dla tego modułu
+interface TemplateSettings {
+  layoutTemplate: string;
+  scenarioWidgetTemplate: string;
+  defaultFlowStepTemplate: string;
+}
+
+interface Workspace {
+  id: string;
+  name: string;
+  scenarios: Scenario[];
+  templateSettings: TemplateSettings;
+}
+
+// Dane inicjalizacyjne dla tego szablonu
+const defaultWorkspaceData: Workspace = (() => {
+  const initialNode: NodeData = {
+    id: "node-1",
+    scenarioId: "scenario-1",
+    label: "Welcome",
+    assistantMessage: "Hello! What is your name?",
+    contextKey: "userName",
+    templateId: "basic-step"
+  };
+  
+  const secondNode: NodeData = {
+    id: "node-2",
+    scenarioId: "scenario-1",
+    label: "Greeting",
+    assistantMessage: "Nice to meet you, {{userName}}! How can I help you today?",
+    contextKey: "userRequest",
+    templateId: "llm-query",
+    includeSystemMessage: true,
+    initialUserMessage: "I need some help with creating an account"
+  };
+
+  const initialScenario: Scenario = {
+    id: "scenario-1",
+    name: "First Scenario",
+    description: "A simple introduction scenario",
+    nodes: [initialNode, secondNode],
+    systemMessage: "Jesteś pomocnym asystentem. Bądź zwięzły i przyjazny w swoich odpowiedziach."
+  };
+
+  return {
+    id: "workspace-1",
+    name: "Default Workspace",
+    scenarios: [initialScenario],
+    templateSettings: {
+      layoutTemplate: "default",
+      scenarioWidgetTemplate: "card-list",
+      defaultFlowStepTemplate: "basic-step"
+    }
+  };
+})();
+
+// Funkcja rejestrująca szablony
 export function registerDefaultTemplates(templateRegistry: ReturnType<typeof createTemplateRegistry>) {
   // Layouty
   const defaultLayouts = [
@@ -61,4 +120,11 @@ export function registerDefaultTemplates(templateRegistry: ReturnType<typeof cre
   defaultLayouts.forEach(layout => templateRegistry.registerLayout(layout));
   defaultWidgets.forEach(widget => templateRegistry.registerWidget(widget));
   defaultFlowSteps.forEach(flowStep => templateRegistry.registerFlowStep(flowStep));
+}
+
+// Eksport danych inicjalizacyjnych
+export function getDefaultTemplateData() {
+  return {
+    workspace: defaultWorkspaceData
+  };
 }

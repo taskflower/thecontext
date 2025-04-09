@@ -1,14 +1,33 @@
+// src/templates/index.ts
 import { createTemplateRegistry } from 'template-registry-module';
-import { registerDefaultTemplates } from './default';
-import { registerNewYorkTemplates } from './newyork';
+import { registerDefaultTemplates, getDefaultTemplateData } from './default';
+import { registerNewYorkTemplates, getNewYorkTemplateData } from './newyork';
+import { useAppStore } from '../lib/store';
 
 // Tworzenie rejestru szablonów
 export const templateRegistry = createTemplateRegistry();
 
-// Rejestracja wszystkich szablonów
+// Rejestracja wszystkich szablonów i inicjalizacja store
 export function initializeTemplates() {
+  // Rejestracja szablonów
   registerDefaultTemplates(templateRegistry);
   registerNewYorkTemplates(templateRegistry);
+  
+  // Pobranie danych inicjalizacyjnych z szablonów
+  const defaultData = getDefaultTemplateData();
+  const newyorkData = getNewYorkTemplateData();
+  
+  // Połączenie danych i inicjalizacja store
+  const initialWorkspaces = [
+    defaultData.workspace,
+    newyorkData.workspace
+  ];
+  
+  // Inicjalizacja store z danymi z szablonów
+  const { setInitialWorkspaces } = useAppStore.getState();
+  setInitialWorkspaces(initialWorkspaces);
+  
+  console.log('Templates initialized and store populated with workspaces:', initialWorkspaces.length);
 }
 
 // Eksport funkcji pomocniczych
