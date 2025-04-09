@@ -1,12 +1,9 @@
 // src/templates/flowSteps/FormInputTemplate.tsx
 import React, { useState, useEffect } from 'react';
-import { ContextItem } from '../../../../raw_modules/context-manager-module/src/types/ContextTypes';
 import { FlowStepProps } from 'template-registry-module';
 
 // Rozszerzony interfejs FlowStepProps, który uwzględnia kontekst
-interface ExtendedFlowStepProps extends FlowStepProps {
-  contextItems?: ContextItem[] | Record<string, any>;
-}
+
 
 // Definicja interfejsu dla pola formularza
 interface FormField {
@@ -17,7 +14,7 @@ interface FormField {
   options?: string[]; // Dla pól typu select
 }
 
-const FormInputTemplate: React.FC<ExtendedFlowStepProps> = ({ 
+const FormInputTemplate: React.FC<FlowStepProps> = ({ 
   node, 
   onSubmit, 
   onPrevious, 
