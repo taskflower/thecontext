@@ -31,19 +31,19 @@ export class DefaultTemplate extends BaseTemplate {
       {
         id: 'card-list',
         name: 'Card List',
-        category: 'scenario',
+        category: 'scenario' as WidgetCategory,
         component: lazy(() => import('./widgets/CardListWidget'))
       },
       {
         id: 'table-list',
         name: 'Table List',
-        category: 'scenario',
+        category: 'scenario' as WidgetCategory,
         component: lazy(() => import('./widgets/TableListWidget'))
       },
       {
         id: 'context-display',
         name: 'Context Display',
-        category: 'context',
+        category: 'flow' as WidgetCategory,
         component: lazy(() => import('./widgets/ContextDisplayWidget'))
       }
     ];

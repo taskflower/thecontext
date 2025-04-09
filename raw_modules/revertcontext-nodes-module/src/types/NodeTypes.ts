@@ -38,6 +38,7 @@ export interface Position {
       label: string;
       type: string;
       required: boolean;
+      options?: string[];
     }>;
     [key: string]: any;
   }
