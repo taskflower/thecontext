@@ -25,8 +25,8 @@ export class SimpleTemplate extends BaseTemplate {
       {
         id: 'simple-context-display',
         name: 'Simple Context Display',
-        category: 'context',
-        component: lazy(() => import('./widgets/SimpleContextWidget'))
+        category: 'flow',
+        component: lazy(() => import('./widgets/SimpleContextWidget')) as any
       }
     ];
 
@@ -36,13 +36,13 @@ export class SimpleTemplate extends BaseTemplate {
         id: 'basic-step',
         name: 'Basic Step',
         compatibleNodeTypes: ['default', 'input'],
-        component: lazy(() => import('../default/flowSteps/BasicStepTemplate'))
+        component: lazy(() => import('../default/flowSteps/BasicStepTemplate')) as any
       },
       {
         id: 'form-step',
         name: 'Form Input',
         compatibleNodeTypes: ['form'],
-        component: lazy(() => import('../default/flowSteps/FormInputTemplate'))
+        component: lazy(() => import('../default/flowSteps/FormInputTemplate')) as any
       }
     ];
 
@@ -53,8 +53,8 @@ export class SimpleTemplate extends BaseTemplate {
       version: this.version,
       author: this.author,
       layouts,
-      widgets,
-      flowSteps
+      widgets: widgets as any,
+      flowSteps: flowSteps as any
     };
   }
 
@@ -80,10 +80,10 @@ export class SimpleTemplate extends BaseTemplate {
       contextKey: "userProfile",
       templateId: "form-step",
       formFields: [
-        { name: "lastName", label: "Nazwisko", type: "text", required: true },
-        { name: "age", label: "Wiek", type: "number", required: true },
-        { name: "preferences.notifications", label: "Powiadomienia", type: "select", required: true, 
-          options: ["tak", "nie"] }
+        { name: "lastName", label: "Nazwisko", type: "text", required: true } as any,
+        { name: "age", label: "Wiek", type: "number", required: true } as any,
+        { name: "preferences.notifications", label: "Powiadomienia", type: "select", required: true,
+          options: ["tak", "nie"] as string[] } as any
       ]
     };
 
@@ -106,9 +106,9 @@ export class SimpleTemplate extends BaseTemplate {
       contextKey: "userProfile",
       templateId: "form-step",
       formFields: [
-        { name: "preferences.color", label: "Preferowany kolor", type: "text", required: true },
-        { name: "preferences.size", label: "Rozmiar", type: "select", required: true, 
-          options: ["S", "M", "L", "XL"] }
+        { name: "preferences.color", label: "Preferowany kolor", type: "text", required: true } as any,
+        { name: "preferences.size", label: "Rozmiar", type: "select", required: true,
+          options: ["S", "M", "L", "XL"] as string[] } as any
       ]
     };
 

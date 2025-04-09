@@ -1,5 +1,5 @@
 // src/templates/baseTemplate.ts
-import { LayoutTemplate, WidgetTemplate, FlowStepTemplate, WidgetCategory } from '../../raw_modules/template-registry-module/src';
+import { LayoutTemplate, WidgetTemplate, FlowStepTemplate, WidgetCategory } from 'template-registry-module';
 
 /**
  * Base interface for all template configurations

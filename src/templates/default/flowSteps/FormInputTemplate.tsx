@@ -33,7 +33,7 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
     }
     
     // Jeśli nie, spróbuj pobrać schemat z kontekstu
-    if (node.formSchemaContextKey && Array.isArray(contextItems)) {
+    if (node.formSchemaContextKey && typeof contextItems === 'object' && contextItems !== null) {
       const schemaItem = contextItems.find(item => 
         item.id === node.formSchemaContextKey || item.title === node.formSchemaContextKey
       );

@@ -8,7 +8,7 @@ interface ExtendedFlowStepProps extends Omit<FlowStepProps, 'contextItems'> {
   onSubmit: (value: string) => void;
   onPrevious: () => void;
   isLastNode: boolean;
-  contextItems?: Record<string, any> | any[];
+  contextItems?: Record<string, any>;
 }
 
 const BasicStepTemplate: React.FC<ExtendedFlowStepProps> = ({
