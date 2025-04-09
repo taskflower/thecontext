@@ -1,12 +1,12 @@
 // src/templates/simple/widgets/SimpleContextWidget.tsx
 import React from 'react';
 import { WidgetProps } from 'template-registry-module';
-
-const SimpleContextWidget: React.FC<WidgetProps> = ({ 
-  data = {}
+ 
+const SimpleContextWidget: React.FC<WidgetProps> = ({
+  data
 }) => {
+  const contextData = data && typeof data === 'object' && !Array.isArray(data) ? data : {};
   // Zakładamy, że data to pojedynczy obiekt kontekstu (userProfile)
-  const contextData = data as Record<string, any>;
   
   // Funkcja pomocnicza do formatowania wartości
   const formatValue = (value: any): string => {
@@ -41,7 +41,7 @@ const SimpleContextWidget: React.FC<WidgetProps> = ({
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg border border-gray-200">
+    <div className="bg-white p-4 rounded-lg border border-gray-200" style={{ minHeight: '200px' }}>
       <h2 className="text-lg font-semibold mb-3 border-b pb-2">Aktualny Kontekst</h2>
       
       {Object.keys(contextData).length === 0 ? (

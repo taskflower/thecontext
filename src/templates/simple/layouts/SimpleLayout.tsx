@@ -1,12 +1,18 @@
 // src/templates/simple/layouts/SimpleLayout.tsx
 import React from 'react';
 import { LayoutProps } from 'template-registry-module';
+import SimpleContextWidget from '../widgets/SimpleContextWidget';
 
-const SimpleLayout: React.FC<LayoutProps> = ({ 
-  children, 
-  title, 
-  showBackButton, 
-  onBackClick 
+interface SimpleLayoutProps extends LayoutProps {
+  contextItems?: Record<string, any>;
+}
+ 
+const SimpleLayout: React.FC<SimpleLayoutProps> = ({
+  children,
+  title,
+  showBackButton,
+  onBackClick,
+  contextItems = {}
 }) => {
   return (
     <div className="min-h-screen bg-gray-50 p-4">
@@ -44,6 +50,10 @@ const SimpleLayout: React.FC<LayoutProps> = ({
         <div className="bg-white rounded-lg shadow-sm p-6">
           {children}
         </div>
+         {/* Context Widget Placeholder */}
+         <div className="mt-4">
+           <SimpleContextWidget data={contextItems} />
+         </div>
       </div>
     </div>
   );

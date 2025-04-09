@@ -101,13 +101,17 @@ export const FlowView: React.FC = () => {
     );
   }
 
+  // Pass contextItems to LayoutComponent
+  const layoutProps = {
+    title: `Flow: ${currentNode.label}`,
+    showBackButton: true,
+    onBackClick: handleGoToScenariosList,
+    contextItems: contextItems,
+  };
+
   return (
     <Suspense fallback={<div className="p-4">Loading template...</div>}>
-      <LayoutComponent 
-        title={`Flow: ${currentNode.label}`}
-        showBackButton={true}
-        onBackClick={handleGoToScenariosList}
-      >
+      <LayoutComponent {...layoutProps}>
         <div className="space-y-4">
           <FlowStepComponent
             node={currentNode}

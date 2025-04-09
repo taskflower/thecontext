@@ -117,7 +117,7 @@ export function useNodeManager(): NodeManagerHook {
   useEffect(() => {
     const newContext = contextManager.getContext();
     setCurrentContext(newContext);
-  }, [currentNode]); // Update when the node changes
+  }, [currentNode, contextManager]); // Update when the node changes
 
   // Update current node when scenario or node index changes
   useEffect(() => {
@@ -129,8 +129,8 @@ export function useNodeManager(): NodeManagerHook {
         const node = nodes[currentNodeIndex];
         
         // Prepare the node for display (process templates)
-        const nodeData = nodeManager.prepareNodeForDisplay(node.id);
         
+        const nodeData = node.id ? nodeManager.prepareNodeForDisplay(node.id) : null;
         if (nodeData) {
           setCurrentNode(nodeData);
         } else {
