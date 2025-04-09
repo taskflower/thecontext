@@ -1,7 +1,7 @@
 // src/templates/flowSteps/FormInputTemplate.tsx
 import React, { useState, useEffect } from 'react';
+import { ContextItem } from 'revertcontext-nodes-module';
 import { FlowStepProps } from 'template-registry-module';
-import { ContextItem } from '@/../raw_modules/revertcontext-nodes-module/src';
 
 // Rozszerzony interfejs FlowStepProps, który uwzględnia kontekst
 interface ExtendedFlowStepProps extends FlowStepProps {

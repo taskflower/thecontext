@@ -1,20 +1,32 @@
-// src/NodeManager.ts
-import { Node } from './models/Node';
-import { NodeCollection } from './models/NodeCollection';
-import { NodeProcessor } from './processors/NodeProcessor';
-import { ContextProcessor } from './processors/ContextProcessor';
-import { validateNode } from './utils/nodeValidators';
-import { NodeData, ContextItem, NodeExecutionResult, Position } from './types';
+// src/core/NodeManager.ts
+// Zarządzanie węzłami przepływu
 
+import { Node } from '../models/Node';
+import { NodeCollection } from '../models/NodeCollection';
+import { NodeProcessor } from './NodeProcessor';
+import { ContextService } from '../services/ContextService';
+import { PluginService } from '../services/PluginService';
+import { validateNode } from '../utils/nodeValidators';
+import { NodeData, NodeExecutionResult, Position } from '../types/NodeTypes';
+
+/**
+ * Główna klasa zarządzająca węzłami przepływu
+ */
 export class NodeManager {
   private nodes: NodeCollection;
   private nodeProcessor: NodeProcessor;
-  private contextProcessor: ContextProcessor;
+  private contextService: ContextService;
+  private pluginService?: PluginService;
 
-  constructor(initialNodes: NodeData[] = []) {
+  constructor(
+    contextService: ContextService,
+    initialNodes: NodeData[] = [],
+    pluginService?: PluginService
+  ) {
+    this.contextService = contextService;
+    this.pluginService = pluginService;
     this.nodes = new NodeCollection(initialNodes);
-    this.nodeProcessor = new NodeProcessor();
-    this.contextProcessor = new ContextProcessor();
+    this.nodeProcessor = new NodeProcessor(contextService, pluginService);
   }
 
   /**
@@ -54,7 +66,7 @@ export class NodeManager {
   }
 
   /**
-   * Zmienia pozycję węzła
+   * Aktualizuje pozycję węzła
    */
   updateNodePosition(nodeId: string, position: Position): Node | undefined {
     return this.updateNode(nodeId, { position });
@@ -65,23 +77,22 @@ export class NodeManager {
    */
   executeNode(
     nodeId: string, 
-    userInput: string | undefined, 
-    contextItems: ContextItem[] = []
+    userInput: string | undefined
   ): NodeExecutionResult | null {
     const node = this.getNode(nodeId);
     if (!node) return null;
     
-    return this.nodeProcessor.executeNode(node, userInput, contextItems);
+    return this.nodeProcessor.executeNode(node, userInput);
   }
 
   /**
    * Przygotowuje węzeł do wyświetlenia
    */
-  prepareNodeForDisplay(nodeId: string, contextItems: ContextItem[] = []): NodeData | null {
+  prepareNodeForDisplay(nodeId: string): NodeData | null {
     const node = this.getNode(nodeId);
     if (!node) return null;
     
-    return this.nodeProcessor.prepareNodeForDisplay(node, contextItems);
+    return this.nodeProcessor.prepareNodeForDisplay(node);
   }
 
   /**
@@ -93,7 +104,7 @@ export class NodeManager {
         validateNode(nodeData);
         this.nodes.add(nodeData);
       } catch (error) {
-        console.error(`Error importing node ${nodeData.id}:`, error);
+        console.error(`Błąd importowania węzła ${nodeData.id}:`, error);
       }
     });
   }
@@ -115,7 +126,7 @@ export class NodeManager {
   /**
    * Przetwarza szablon z zmiennymi kontekstowymi
    */
-  processTemplate(template: string, contextItems: ContextItem[] = []): string {
-    return this.contextProcessor.processTemplate(template, contextItems);
+  processTemplate(template: string): string {
+    return this.contextService.processTemplate(template);
   }
 }

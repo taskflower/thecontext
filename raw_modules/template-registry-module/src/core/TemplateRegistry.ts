@@ -1,22 +1,25 @@
+// src/core/TemplateRegistry.ts
+// Główna klasa rejestru szablonów
+
 import { 
     LayoutTemplate, 
     WidgetTemplate, 
     FlowStepTemplate, 
     WidgetCategory 
-  } from './types';
+  } from '../types';
   
   import {
     validateLayoutTemplate,
     validateWidgetTemplate,
     validateFlowStepTemplate,
-  } from './utils/TemplateValidators';
+  } from '../utils/TemplateValidators';
   
   import {
     getDefaultLayoutTemplate,
     getDefaultWidgetTemplate,
     getDefaultFlowStepTemplate,
     findCompatibleFlowStepTemplate
-  } from './utils/registryHelpers';
+  } from '../utils/registryHelpers';
   
   /**
    * Główna klasa rejestru szablonów
@@ -29,11 +32,6 @@ import {
     private flowSteps: Map<string, FlowStepTemplate> = new Map();
   
     /**
-     * Tworzy nową instancję rejestru szablonów
-     */
-    constructor() {}
-  
-    /**
      * Rejestruje nowy szablon layoutu
      */
     registerLayout(template: LayoutTemplate): TemplateRegistry {
@@ -41,7 +39,7 @@ import {
         validateLayoutTemplate(template);
         this.layouts.set(template.id, template);
       } catch (error) {
-        console.error(`Error registering layout template: ${(error as Error).message}`);
+        console.error(`Błąd rejestracji szablonu layoutu: ${(error as Error).message}`);
       }
       return this;
     }
@@ -62,7 +60,7 @@ import {
         validateWidgetTemplate(template);
         this.widgets.set(template.id, template);
       } catch (error) {
-        console.error(`Error registering widget template: ${(error as Error).message}`);
+        console.error(`Błąd rejestracji szablonu widgetu: ${(error as Error).message}`);
       }
       return this;
     }
@@ -83,7 +81,7 @@ import {
         validateFlowStepTemplate(template);
         this.flowSteps.set(template.id, template);
       } catch (error) {
-        console.error(`Error registering flow step template: ${(error as Error).message}`);
+        console.error(`Błąd rejestracji szablonu kroku przepływu: ${(error as Error).message}`);
       }
       return this;
     }
@@ -105,7 +103,7 @@ import {
       if (!template) {
         const defaultTemplate = getDefaultLayoutTemplate(this.getAllLayouts());
         if (defaultTemplate) {
-          console.warn(`Layout template not found for id: ${id}, using default`);
+          console.warn(`Nie znaleziono szablonu layoutu dla id: ${id}, używam domyślnego`);
           return defaultTemplate;
         }
       }
@@ -161,7 +159,7 @@ import {
       if (!template) {
         const defaultTemplate = getDefaultFlowStepTemplate(this.getAllFlowSteps());
         if (defaultTemplate) {
-          console.warn(`Flow step template not found for id: ${id}, using default`);
+          console.warn(`Nie znaleziono szablonu kroku przepływu dla id: ${id}, używam domyślnego`);
           return defaultTemplate;
         }
       }
@@ -178,7 +176,7 @@ import {
       if (!template) {
         const defaultTemplate = getDefaultFlowStepTemplate(this.getAllFlowSteps());
         if (defaultTemplate) {
-          console.warn(`Compatible flow step not found for node type: ${nodeType}, using default`);
+          console.warn(`Nie znaleziono kompatybilnego szablonu dla typu węzła: ${nodeType}, używam domyślnego`);
           return defaultTemplate;
         }
       }
@@ -225,8 +223,8 @@ import {
   }
   
   /**
-   * Tworzy i eksportuje pojedynczą instancję rejestru szablonów (singleton)
+   * Tworzy nową instancję rejestru szablonów
    */
-  export const createTemplateRegistry = (): TemplateRegistry => {
+  export function createTemplateRegistry(): TemplateRegistry {
     return new TemplateRegistry();
-  };
+  }

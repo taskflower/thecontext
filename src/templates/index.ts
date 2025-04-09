@@ -1,46 +1,19 @@
-// src/templates/index.ts (aktualizacja)
+// src/templates/index.ts
 import { createTemplateRegistry } from 'template-registry-module';
 import { registerDefaultTemplates, getDefaultTemplateData } from './default';
-import { registerNewYorkTemplates, getNewYorkTemplateData } from './newyork';
 import { useAppStore } from '../lib/store';
 
-// Tworzenie rejestru szablonów
+// Create and export template registry
 export const templateRegistry = createTemplateRegistry();
 
-// Rejestracja wszystkich szablonów i inicjalizacja store
+/**
+ * Initialize all templates and set initial application data
+ */
 export function initializeTemplates() {
-  // Rejestracja szablonów
+  // Register all templates
   registerDefaultTemplates(templateRegistry);
-  registerNewYorkTemplates(templateRegistry);
-
   
-  // Pobranie danych inicjalizacyjnych z szablonów
-  const defaultData = getDefaultTemplateData();
-  const newyorkData = getNewYorkTemplateData();
-
-  
-  // Połączenie danych i inicjalizacja store
-  const initialWorkspaces = [
-    defaultData.workspace,
-    newyorkData.workspace,
-  ];
-  
-  // Inicjalizacja store z danymi z szablonów
-  const { setInitialWorkspaces } = useAppStore.getState();
-  setInitialWorkspaces(initialWorkspaces);
-  
-  console.log('Templates initialized and store populated with workspaces:', initialWorkspaces.length);
+  // Initialize app data from template data
+  const { workspace } = getDefaultTemplateData();
+  useAppStore.getState().setInitialWorkspaces([workspace]);
 }
-
-// Eksport funkcji pomocniczych (bez zmian)
-export const getLayoutComponent = (id: string) => 
-  templateRegistry.getLayout(id)?.component;
-
-export const getWidgetComponent = (id: string) => 
-  templateRegistry.getWidget(id)?.component;
-
-export const getFlowStepComponent = (id: string) => 
-  templateRegistry.getFlowStep(id)?.component;
-
-export const getWidgetsByCategory = (category: 'scenario' | 'workspace' | 'flow') => 
-  templateRegistry.getWidgetsByCategory(category);

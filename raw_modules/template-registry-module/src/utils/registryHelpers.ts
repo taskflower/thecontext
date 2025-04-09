@@ -1,3 +1,6 @@
+// src/utils/registryHelpers.ts
+// Narzędzia pomocnicze rejestru
+
 import { 
     LayoutTemplate, 
     WidgetTemplate, 
@@ -6,7 +9,7 @@ import {
   } from '../types';
   
   /**
-   * Pobiera domyślny szablonów layoutu
+   * Pobiera domyślny szablon layoutu
    */
   export function getDefaultLayoutTemplate(templates: LayoutTemplate[]): LayoutTemplate | undefined {
     return templates.find(template => template.id === 'default');
@@ -60,4 +63,4 @@ import {
     normalizedPath = normalizedPath.replace(/\.[^/.]+$/, '');
     
     return normalizedPath;
-  } 
+  }

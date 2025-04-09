@@ -1,12 +1,16 @@
+// src/lib/templates.ts
 import { 
-  createTemplateRegistry, 
-  LayoutTemplate, 
-  WidgetTemplate, 
-  FlowStepTemplate 
-} from 'template-registry-module';
+  createTemplateRegistry,
+  LayoutTemplate,
+  WidgetTemplate,
+  FlowStepTemplate,
+  WidgetCategory
+} from '../../raw_modules/template-registry-module/src';
 
+// Create a singleton template registry
 export const templateRegistry = createTemplateRegistry();
 
+// Helper functions to get components from the registry
 export const getLayoutComponent = (id: string) => 
   templateRegistry.getLayout(id)?.component;
 
@@ -19,7 +23,8 @@ export const getFlowStepComponent = (id: string) =>
 export const getFlowStepForNodeType = (nodeType: string) => 
   templateRegistry.getFlowStepForNodeType(nodeType);
 
-export const getWidgetsByCategory = (category: 'scenario' | 'workspace' | 'flow') => 
+export const getWidgetsByCategory = (category: WidgetCategory) => 
   templateRegistry.getWidgetsByCategory(category);
 
-export type { LayoutTemplate, WidgetTemplate, FlowStepTemplate };
+// Export template types
+export type { LayoutTemplate, WidgetTemplate, FlowStepTemplate, WidgetCategory };

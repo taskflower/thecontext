@@ -1,12 +1,7 @@
-// Eksport wszystkich typów z jednego miejsca
+// src/types/index.ts
+// Eksport wszystkich typów
+
+export * from './BaseTemplate';
 export * from './LayoutTemplate';
 export * from './WidgetTemplate';
 export * from './FlowStepTemplate';
-
-/**
- * Wspólne właściwości dla wszystkich szablonów
- */
-export interface BaseTemplate {
-  id: string;
-  name: string;
-}

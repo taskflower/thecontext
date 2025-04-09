@@ -1,6 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/utils/nodeTransformers.ts
-import { NodeData } from '../types';
+// Transformacje węzłów
+
+import { NodeData } from '../types/NodeTypes';
 
 /**
  * Konwertuje dane węzła do formatu kompatybilnego z React Flow
@@ -18,7 +19,10 @@ export function nodeToReactFlowNode(nodeData: NodeData): any {
       contextJsonPath: nodeData.contextJsonPath,
       pluginKey: nodeData.pluginKey,
       pluginData: nodeData.pluginData,
-      scenarioId: nodeData.scenarioId
+      scenarioId: nodeData.scenarioId,
+      templateId: nodeData.templateId,
+      formFields: nodeData.formFields,
+      includeSystemMessage: nodeData.includeSystemMessage
     }
   };
 }
@@ -39,6 +43,9 @@ export function reactFlowNodeToNode(rfNode: any): NodeData {
     contextKey: rfNode.data.contextKey,
     contextJsonPath: rfNode.data.contextJsonPath,
     pluginKey: rfNode.data.pluginKey,
-    pluginData: rfNode.data.pluginData
+    pluginData: rfNode.data.pluginData,
+    templateId: rfNode.data.templateId,
+    formFields: rfNode.data.formFields,
+    includeSystemMessage: rfNode.data.includeSystemMessage
   };
 }

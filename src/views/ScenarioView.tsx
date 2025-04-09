@@ -2,7 +2,7 @@
 import React, { useEffect, Suspense } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
-import { templateRegistry } from '../templates';
+import { templateRegistry } from '../lib/templates';
 
 export const ScenarioView: React.FC = () => {
   const { workspace: workspaceId } = useParams<{ workspace: string }>();

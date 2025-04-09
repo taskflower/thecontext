@@ -1,13 +1,11 @@
+// src/index.ts
+// Główny punkt wejściowy eksportujący API modułu
+
 // Eksport głównej klasy TemplateRegistry
-export { TemplateRegistry, createTemplateRegistry } from './TemplateRegistry';
+export { TemplateRegistry, createTemplateRegistry } from './core/TemplateRegistry';
 
 // Eksport wszystkich typów
 export * from './types';
-
-// Eksport wszystkich potrzebnych interfejsów
-export { LayoutProps, LayoutTemplate } from './types/LayoutTemplate';
-export { WidgetProps, WidgetTemplate, WidgetCategory } from './types/WidgetTemplate';
-export { FlowStepProps, FlowStepTemplate } from './types/FlowStepTemplate';
 
 // Eksport walidatorów i helperów
 export { 

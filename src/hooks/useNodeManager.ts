@@ -1,44 +1,40 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/hooks/useNodeManager.ts
 import { useState, useEffect, useMemo } from "react";
-import { NodeManager, ContextItem, NodeExecutionResult, NodeData, Scenario } from "../../raw_modules/revertcontext-nodes-module/src";
-import { useAppStore } from "../lib/store";
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAppStore } from "../lib/store";
+import { contextManager } from "./useContextManager";
+
+// Import from the new module structure
+import { NodeManager } from "../../raw_modules/revertcontext-nodes-module/src/core/NodeManager";
+import { DefaultContextService } from "../../raw_modules/revertcontext-nodes-module/src/services/DefaultContextService";
+import { DefaultPluginService } from "../../raw_modules/revertcontext-nodes-module/src/services/PluginService";
+import { NodeData } from "../../raw_modules/revertcontext-nodes-module/src/types/NodeTypes";
+
+interface Scenario {
+  id: string;
+  name: string;
+  description: string;
+  nodes: NodeData[];
+  systemMessage?: string;
+}
 
 interface NodeManagerHook {
-  // Node data
   nodeManager: NodeManager;
   currentNode: NodeData | null;
   currentScenario: Scenario | null;
   isLastNode: boolean;
-  
-  // Context management
-  contextItems: ContextItem[];
-  
-  // Navigation handlers
+  contextItems: Record<string, any>;
   handleGoToScenariosList: () => void;
   handlePreviousNode: () => void;
   handleNodeExecution: (userInput: string) => void;
-  
-  // System message/node toggles
   updateScenarioSystemMessage: (systemMessage: string) => void;
   toggleNodeSystemMessage: (includeSystemMessage: boolean) => void;
-  
-  // Debug info
-  debugInfo: {
-    workspaceId: string | undefined;
-    scenarioId: string | undefined;
-    nodeId: string | undefined;
-    currentNodeIndex: number;
-    currentNodeLabel: string | undefined;
-    contextItems: ContextItem[];
-    templateId?: string;
-    systemMessage?: string;
-    includeSystemMessage?: boolean;
-    initialUserMessage?: string;
-  };
+  debugInfo: Record<string, any>;
 }
 
+/**
+ * Hook for managing nodes using the NodeManager module
+ */
 export function useNodeManager(): NodeManagerHook {
   const { 
     workspace: workspaceId, 
@@ -60,7 +56,11 @@ export function useNodeManager(): NodeManagerHook {
     updateNodeIncludeSystemMessage
   } = useAppStore();
   
-  const [contextItems, setContextItems] = useState<ContextItem[]>([]);
+  // Use context directly from ContextManager
+  const [currentContext, setCurrentContext] = useState<Record<string, any>>(
+    contextManager.getContext()
+  );
+  
   const [currentNode, setCurrentNode] = useState<NodeData | null>(null);
 
   // Set the selected workspace and scenario based on URL params
@@ -82,9 +82,21 @@ export function useNodeManager(): NodeManagerHook {
     return currentWorkspace?.scenarios.find(s => s.id === scenarioId) || null;
   }, [currentWorkspace, scenarioId]);
 
+  // Create a context service for the node manager
+  const contextService = useMemo(() => {
+    return new DefaultContextService(contextManager);
+  }, []);
+
+  // Create a plugin service for the node manager
+  const pluginService = useMemo(() => {
+    return new DefaultPluginService();
+  }, []);
+
+  // Create the node manager with initial nodes and services
   const nodeManager = useMemo(() => {
-    return new NodeManager(currentScenario?.nodes || []);
-  }, [currentScenario?.nodes]);
+    if (!currentScenario) return new NodeManager(contextService, [], pluginService);
+    return new NodeManager(contextService, currentScenario.nodes, pluginService);
+  }, [currentScenario, contextService, pluginService]);
 
   // Check if we're on the last node
   const isLastNode = currentScenario 
@@ -101,84 +113,42 @@ export function useNodeManager(): NodeManagerHook {
     }
   }, [nodeParam, currentScenario, setNodeIndex]);
 
+  // Update context state when ContextManager changes
+  useEffect(() => {
+    const newContext = contextManager.getContext();
+    setCurrentContext(newContext);
+  }, [currentNode]); // Update when the node changes
+
   // Update current node when scenario or node index changes
   useEffect(() => {
     if (currentScenario && currentNodeIndex !== undefined) {
-      const scenarioNodes = nodeManager.getNodesByScenario(currentScenario.id);
+      const nodes = currentScenario.nodes;
 
-      if (scenarioNodes.length > 0 && currentNodeIndex < scenarioNodes.length) {
+      if (nodes.length > 0 && currentNodeIndex < nodes.length) {
         // Get the current node from scenario nodes
-        const currentNodeId = scenarioNodes[currentNodeIndex].id;
+        const node = nodes[currentNodeIndex];
         
-        // Prepare the node for display
-        const preparedNode = nodeManager.prepareNodeForDisplay(
-          currentNodeId,
-          contextItems
-        );
-
-        // Get node details from original scenario definition for additional properties
-        const originalNodeData = currentScenario.nodes[currentNodeIndex];
+        // Prepare the node for display (process templates)
+        const nodeData = nodeManager.prepareNodeForDisplay(node.id);
         
-        if (preparedNode) {
-          const nodeWithTemplate: NodeData = {
-            ...preparedNode,
-            templateId: (originalNodeData as any).templateId || 
-                       currentWorkspace?.templateSettings?.defaultFlowStepTemplate || 
-                       'basic-step',
-            includeSystemMessage: (originalNodeData as any).includeSystemMessage,
-            initialUserMessage: (originalNodeData as any).initialUserMessage
-          };
-          
-          setCurrentNode(nodeWithTemplate);
+        if (nodeData) {
+          setCurrentNode(nodeData);
+        } else {
+          setCurrentNode(node);
         }
       }
     }
-  }, [currentScenario, currentNodeIndex, contextItems, nodeManager, currentWorkspace]);
+  }, [currentScenario, currentNodeIndex, nodeManager]);
 
-  // Execute a node with user input
-  const executeNode = (userInput: string): NodeExecutionResult | null => {
-    if (!currentNode) return null;
-
-    if (currentNode.id) {
-      const result = nodeManager.executeNode(
-        currentNode.id,
-        userInput,
-        contextItems
-      );
-
-      return result;
-    }
-    
-    return null;
-  };
-
-  // Navigation handlers
-  const handleGoToScenariosList = () => {
-    if (workspaceId) {
-      navigate(`/${workspaceId}`);
-    } else {
-      navigate('/');
-    }
-  };
-
-  const handlePreviousNode = () => {
-    if (currentNodeIndex > 0 && currentScenario) {
-      prevNode();
-      
-      // Update URL to previous node
-      const prevNodeId = currentScenario.nodes[currentNodeIndex - 1].id;
-      navigate(`/${workspaceId}/${scenarioId}/${prevNodeId}`);
-    }
-  };
-
+  // Handle node execution
   const handleNodeExecution = (userInput: string) => {
-    if (currentNode) {
+    if (currentNode && currentNode.id) {
       // Execute the node and get the result
-      const result = executeNode(userInput);
+      const result = nodeManager.executeNode(currentNode.id, userInput);
       
-      // If the context was updated, update our context state
+      // Update context if needed
       if (result && result.contextUpdated) {
-        setContextItems(result.updatedContext);
+        setCurrentContext(result.updatedContext);
       }
       
       if (!isLastNode) {
@@ -195,6 +165,25 @@ export function useNodeManager(): NodeManagerHook {
         alert('Flow completed!');
         navigate(`/${workspaceId}`);
       }
+    }
+  };
+  
+  // Navigation handlers
+  const handleGoToScenariosList = () => {
+    if (workspaceId) {
+      navigate(`/${workspaceId}`);
+    } else {
+      navigate('/');
+    }
+  };
+
+  const handlePreviousNode = () => {
+    if (currentNodeIndex > 0 && currentScenario) {
+      prevNode();
+      
+      // Update URL to previous node
+      const prevNodeId = currentScenario.nodes[currentNodeIndex - 1].id;
+      navigate(`/${workspaceId}/${scenarioId}/${prevNodeId}`);
     }
   };
   
@@ -219,7 +208,7 @@ export function useNodeManager(): NodeManagerHook {
     nodeId: currentNode?.id,
     currentNodeIndex,
     currentNodeLabel: currentNode?.label,
-    contextItems,
+    context: currentContext,
     templateId: currentNode?.templateId,
     systemMessage: currentScenario?.systemMessage,
     includeSystemMessage: currentNode?.includeSystemMessage,
@@ -231,7 +220,7 @@ export function useNodeManager(): NodeManagerHook {
     currentNode,
     currentScenario,
     isLastNode,
-    contextItems,
+    contextItems: currentContext,
     handleGoToScenariosList,
     handlePreviousNode,
     handleNodeExecution,

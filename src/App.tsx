@@ -1,14 +1,26 @@
 // src/App.tsx
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-
-// Views focused only on display without editing capabilities
+// Import views
 import { WorkspaceView } from './views/WorkspaceView';
 import { ScenarioView } from './views/ScenarioView';
 import { FlowView } from './views/FlowView';
 import { LoginView } from './views/LoginView';
+// Import context initialization
+import { useAppStore } from './lib/store';
+import { initializeContext } from './lib/contextSingleton';
 
 const App: React.FC = () => {
+  const { workspaces } = useAppStore();
+  
+  // Initialize context when app loads
+  useEffect(() => {
+    // If we have workspaces with initialContext, initialize the context manager
+    if (workspaces.length > 0 && workspaces[0].initialContext) {
+      initializeContext(workspaces[0].initialContext);
+    }
+  }, [workspaces]);
+
   return (
     <Router>
       <Suspense fallback={

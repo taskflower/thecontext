@@ -2,20 +2,20 @@
 import React, { Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
-import { templateRegistry } from '../templates';
+import { templateRegistry } from '../lib/templates';
 
 export const WorkspaceView: React.FC = () => {
   const { workspaces } = useAppStore();
   const navigate = useNavigate();
 
-  // Używamy domyślnego szablonu layoutu dla widoku workspace
+  // Use default layout template for workspace view
   const LayoutComponent = templateRegistry.getLayout('default')?.component;
   
   if (!LayoutComponent) {
     return <div className="p-4">Default layout template not found</div>;
   }
   
-  // Używamy domyślnego szablonu widgetu dla widoku workspace
+  // Use default widget template for workspace view
   const WidgetComponent = templateRegistry.getWidget('card-list')?.component;
   
   if (!WidgetComponent) {

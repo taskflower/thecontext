@@ -3,11 +3,20 @@ import React, { Suspense } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
 import { useNodeManager } from '../hooks/useNodeManager';
-import { templateRegistry } from '../templates';
-import { FlowStepProps } from 'template-registry-module';
-import { Scenario } from '../../raw_modules/revertcontext-nodes-module/src';
+import { templateRegistry } from '../lib/templates';
+import { FlowStepProps } from '../../raw_modules/template-registry-module/src/types/FlowStepTemplate';
+import { NodeData } from '../../raw_modules/revertcontext-nodes-module/src/types/NodeTypes';
 
-// Rozszerzamy interfejs FlowStepProps o pole scenario
+// Interface for a scenario
+interface Scenario {
+  id: string;
+  name: string;
+  description: string;
+  nodes: NodeData[];
+  systemMessage?: string;
+}
+
+// Extended props for flow step components
 interface ExtendedFlowStepProps extends FlowStepProps {
   scenario?: Scenario;
 }
@@ -20,6 +29,7 @@ export const FlowView: React.FC = () => {
     currentNode,
     currentScenario,
     isLastNode,
+    contextItems,
     handleGoToScenariosList,
     handlePreviousNode,
     handleNodeExecution,
@@ -69,12 +79,12 @@ export const FlowView: React.FC = () => {
           <div className="space-y-4">
             {React.createElement(compatibleComponent, {
               node: currentNode,
-              // @ts-ignore - ignorowanie błędu TypeScript, ponieważ wiemy, że komponent obsługuje scenario
+              // @ts-ignore - ignoring TypeScript error since we know the component handles scenario
               scenario: currentScenario,
               onSubmit: handleNodeExecution,
               onPrevious: handlePreviousNode,
               isLastNode,
-              contextItems: debugInfo.contextItems,
+              contextItems,
             } as ExtendedFlowStepProps)}
             
             <div className="mt-8 p-4 bg-gray-100 rounded-lg">
@@ -99,15 +109,14 @@ export const FlowView: React.FC = () => {
         onBackClick={handleGoToScenariosList}
       >
         <div className="space-y-4">
-          {/* Używamy typu ExtendedFlowStepProps z @ts-ignore dla prop scenario */}
           <FlowStepComponent
             node={currentNode}
-            // @ts-ignore - ignorowanie błędu TypeScript, ponieważ wiemy, że komponent obsługuje scenario
+            // @ts-ignore - ignoring TypeScript error since we know the component handles scenario
             scenario={currentScenario}
             onSubmit={handleNodeExecution}
             onPrevious={handlePreviousNode}
             isLastNode={isLastNode}
-            contextItems={debugInfo.contextItems}
+            contextItems={contextItems}
           />
 
           <div className="mt-8 p-4 bg-gray-100 rounded-lg">

@@ -1,5 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// src/types/WidgetTemplate.ts
+// Typy szablonów widgetów
+
 import { ComponentType } from 'react';
+import { BaseTemplate } from './BaseTemplate';
 
 /**
  * Kategorie widgetów
@@ -34,17 +37,7 @@ export interface WidgetProps {
 /**
  * Interfejs definiujący szablon widgetu
  */
-export interface WidgetTemplate {
-  /**
-   * Unikalny identyfikator widgetu
-   */
-  id: string;
-  
-  /**
-   * Nazwa wyświetlana widgetu
-   */
-  name: string;
-  
+export interface WidgetTemplate extends BaseTemplate {
   /**
    * Kategoria widgetu
    */

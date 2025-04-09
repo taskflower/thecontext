@@ -2,9 +2,9 @@
 import { 
   createTemplateRegistry, 
   WidgetCategory,
-} from 'template-registry-module';
+} from '../../../raw_modules/template-registry-module/src';
 import { lazy } from 'react';
-import { NodeData, Scenario, ContextItem } from '../../../raw_modules/revertcontext-nodes-module/src';
+import { NodeData } from '../../../raw_modules/revertcontext-nodes-module/src/types/NodeTypes';
 
 // Typy specyficzne dla tego modułu
 interface TemplateSettings {
@@ -14,53 +14,44 @@ interface TemplateSettings {
   showContextWidget?: boolean;
 }
 
+// Define Scenario type
+interface Scenario {
+  id: string;
+  name: string;
+  description: string;
+  nodes: NodeData[];
+  systemMessage?: string;
+  edges?: any[];
+}
+
 interface Workspace {
   id: string;
   name: string;
   scenarios: Scenario[];
   templateSettings: TemplateSettings;
-  contextItems?: ContextItem[]; // Dodane pole dla kontekstu na poziomie workspace
+  initialContext?: Record<string, any>; // Changed from contextItems to initialContext
 }
 
-// Przykładowe dane kontekstu
-const initialContextItems: ContextItem[] = [
-  {
-    id: 'userProfile',
-    title: 'User Profile',
-    content: JSON.stringify({
-      firstName: '',
-      lastName: '',
-      email: '',
-      preferences: {
-        notifications: true,
-        theme: 'light'
-      }
-    }),
-    contentType: 'application/json',
-    updatedAt: new Date()
+// Przykładowe dane kontekstu początkowego
+const initialContext: Record<string, any> = {
+  userProfile: {
+    firstName: '',
+    lastName: '',
+    email: '',
+    preferences: {
+      notifications: true,
+      theme: 'light'
+    }
   },
-  {
-    id: 'conversationHistory',
-    title: 'Conversation History',
-    content: JSON.stringify([]),
-    contentType: 'application/json',
-    updatedAt: new Date()
-  },
-  // Dodany schemat formularza do kontekstu
-  {
-    id: 'formSchemas',
-    title: 'Form Schemas',
-    content: JSON.stringify({
-      userPreferences: [
-        { name: "lastName", label: "Last Name", type: "text", required: true },
-        { name: "preferences.theme", label: "Preferred Theme", type: "select", required: true, 
-          options: ["light", "dark", "system"] }
-      ]
-    }),
-    contentType: 'application/json',
-    updatedAt: new Date()
+  conversationHistory: [],
+  formSchemas: {
+    userPreferences: [
+      { name: "lastName", label: "Last Name", type: "text", required: true },
+      { name: "preferences.theme", label: "Preferred Theme", type: "select", required: true, 
+        options: ["light", "dark", "system"] }
+    ]
   }
-];
+};
 
 // Dane inicjalizacyjne dla tego szablonu
 const defaultWorkspaceData: Workspace = (() => {
@@ -94,14 +85,11 @@ const defaultWorkspaceData: Workspace = (() => {
     assistantMessage: "Just a few more questions, {{userProfile.firstName}}. Please fill out your preferences:",
     contextKey: "userProfile",
     templateId: "form-step",
-    // Zamiast bezpośrednio definiować formFields, używamy klucza do schematu w kontekście
-    formSchemaContextKey: "formSchemas.userPreferences"
-    // Usunięte:
-    // formFields: [
-    //   { name: "lastName", label: "Last Name", type: "text", required: true },
-    //   { name: "preferences.theme", label: "Preferred Theme", type: "select", required: true, 
-    //     options: ["light", "dark", "system"] }
-    // ]
+    // Use formFields directly now
+    formFields: [
+      { name: "lastName", label: "Last Name", type: "text", required: true },
+      { name: "preferences.theme", label: "Preferred Theme", type: "select", required: true }
+    ]
   };
   
   // Czwarty węzeł - rozmowa z AI
@@ -180,7 +168,7 @@ const defaultWorkspaceData: Workspace = (() => {
       defaultFlowStepTemplate: "basic-step",
       showContextWidget: true
     },
-    contextItems: initialContextItems
+    initialContext // Use the initial context object
   };
 })();
 

@@ -1,7 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/models/Node.ts
-import { NodeData, Position } from '../types';
+// Klasa węzła przepływu
 
+import { NodeData, Position } from '../types/NodeTypes';
+
+/**
+ * Reprezentuje pojedynczy węzeł w przepływie aplikacji
+ */
 export class Node implements NodeData {
   id: string;
   scenarioId: string;
@@ -17,6 +21,14 @@ export class Node implements NodeData {
   pluginData?: Record<string, any>;
   createdAt: Date;
   updatedAt: Date;
+  includeSystemMessage?: boolean;
+  templateId?: string;
+  formFields?: Array<{
+    name: string;
+    label: string;
+    type: string;
+    required: boolean;
+  }>;
 
   constructor(data: NodeData) {
     this.id = data.id || `node-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
@@ -31,10 +43,16 @@ export class Node implements NodeData {
     this.contextJsonPath = data.contextJsonPath;
     this.pluginKey = data.pluginKey;
     this.pluginData = data.pluginData;
+    this.includeSystemMessage = data.includeSystemMessage;
+    this.templateId = data.templateId;
+    this.formFields = data.formFields;
     this.createdAt = data.createdAt ? new Date(data.createdAt) : new Date();
     this.updatedAt = data.updatedAt ? new Date(data.updatedAt) : new Date();
   }
 
+  /**
+   * Aktualizuje dane węzła
+   */
   update(data: Partial<NodeData>): Node {
     Object.assign(this, {
       ...data,
@@ -43,6 +61,9 @@ export class Node implements NodeData {
     return this;
   }
 
+  /**
+   * Konwertuje węzeł do JSON
+   */
   toJSON(): NodeData {
     return {
       id: this.id,
@@ -57,11 +78,17 @@ export class Node implements NodeData {
       contextJsonPath: this.contextJsonPath,
       pluginKey: this.pluginKey,
       pluginData: this.pluginData,
+      includeSystemMessage: this.includeSystemMessage,
+      templateId: this.templateId,
+      formFields: this.formFields,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     };
   }
 
+  /**
+   * Tworzy kopię węzła
+   */
   clone(): Node {
     return new Node(this.toJSON());
   }

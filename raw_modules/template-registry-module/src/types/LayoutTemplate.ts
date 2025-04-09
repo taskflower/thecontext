@@ -1,4 +1,8 @@
+// src/types/LayoutTemplate.ts
+// Typy szablonów układu
+
 import { ComponentType } from 'react';
+import { BaseTemplate } from './BaseTemplate';
 
 /**
  * Props dla komponentów layout
@@ -28,17 +32,7 @@ export interface LayoutProps {
 /**
  * Interfejs definiujący szablon layoutu
  */
-export interface LayoutTemplate {
-  /**
-   * Unikalny identyfikator szablonu
-   */
-  id: string;
-  
-  /**
-   * Nazwa wyświetlana szablonu
-   */
-  name: string;
-  
+export interface LayoutTemplate extends BaseTemplate {
   /**
    * Komponent React implementujący szablon layoutu
    */

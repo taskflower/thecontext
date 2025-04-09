@@ -1,6 +1,11 @@
 // src/utils/nodeValidators.ts
-import { NodeData } from '../types';
+// Walidacja węzłów
 
+import { NodeData } from '../types/NodeTypes';
+
+/**
+ * Klasa błędów walidacji węzłów
+ */
 export class NodeValidationError extends Error {
   constructor(message: string) {
     super(message);
@@ -8,14 +13,17 @@ export class NodeValidationError extends Error {
   }
 }
 
+/**
+ * Waliduje dane węzła
+ */
 export function validateNode(nodeData: NodeData): boolean {
-  // Sprawdź wymagane pola
+  // Sprawdzenie wymaganych pól
   if (!nodeData.scenarioId) {
-    throw new NodeValidationError('Node must have a scenarioId');
+    throw new NodeValidationError('Węzeł musi mieć przypisany scenarioId');
   }
   
   if (!nodeData.label) {
-    throw new NodeValidationError('Node must have a label');
+    throw new NodeValidationError('Węzeł musi mieć etykietę');
   }
   
   // Walidacja pozycji
@@ -24,18 +32,18 @@ export function validateNode(nodeData: NodeData): boolean {
         nodeData.position === null ||
         typeof nodeData.position.x !== 'number' ||
         typeof nodeData.position.y !== 'number') {
-      throw new NodeValidationError('Node position must be an object with x and y coordinates');
+      throw new NodeValidationError('Pozycja węzła musi być obiektem z współrzędnymi x i y');
     }
   }
   
   // Walidacja pluginData
   if (nodeData.pluginKey && !nodeData.pluginData) {
-    throw new NodeValidationError('Node with pluginKey must have pluginData');
+    throw new NodeValidationError('Węzeł z kluczem pluginu musi mieć dane pluginu');
   }
   
   // Walidacja ścieżki kontekstu
   if (nodeData.contextJsonPath && !nodeData.contextKey) {
-    throw new NodeValidationError('Node with contextJsonPath must have contextKey');
+    throw new NodeValidationError('Węzeł z contextJsonPath musi mieć contextKey');
   }
   
   return true;

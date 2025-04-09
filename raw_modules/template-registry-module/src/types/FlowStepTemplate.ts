@@ -1,5 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// src/types/FlowStepTemplate.ts
+// Typy szablonów kroków przepływu
+
 import { ComponentType } from 'react';
+import { BaseTemplate } from './BaseTemplate';
 
 /**
  * Props dla komponentów kroków przepływu
@@ -34,17 +37,7 @@ export interface FlowStepProps {
 /**
  * Interfejs definiujący szablon kroku przepływu
  */
-export interface FlowStepTemplate {
-  /**
-   * Unikalny identyfikator szablonu
-   */
-  id: string;
-  
-  /**
-   * Nazwa wyświetlana szablonu
-   */
-  name: string;
-  
+export interface FlowStepTemplate extends BaseTemplate {
   /**
    * Komponent React implementujący szablon kroku przepływu
    */

@@ -1,11 +1,22 @@
 // src/lib/store.ts
 import { create } from "zustand";
-import { NodeData, Scenario } from "../../raw_modules/revertcontext-nodes-module/src";
+import { NodeData } from "../../raw_modules/revertcontext-nodes-module/src/types/NodeTypes";
 
 export interface TemplateSettings {
   layoutTemplate: string;
   scenarioWidgetTemplate: string;
   defaultFlowStepTemplate: string;
+  showContextWidget?: boolean;
+}
+
+// Interface for a scenario
+export interface Scenario {
+  id: string;
+  name: string;
+  description: string;
+  nodes: NodeData[];
+  systemMessage?: string;
+  edges?: any[];
 }
 
 export interface Workspace {
@@ -13,6 +24,7 @@ export interface Workspace {
   name: string;
   scenarios: Scenario[];
   templateSettings: TemplateSettings;
+  initialContext?: Record<string, any>; // Change from contextItems to initialContext
 }
 
 interface AppState {
@@ -23,10 +35,10 @@ interface AppState {
 }
 
 interface AppActions {
-  // Akcja do inicjalizacji danych z szablonów
+  // Action to initialize workspaces from templates
   setInitialWorkspaces: (workspaces: Workspace[]) => void;
   
-  // Pozostałe akcje
+  // Other actions
   selectWorkspace: (workspaceId: string) => void;
   selectScenario: (scenarioId: string) => void;
   nextNode: () => void;
@@ -37,17 +49,17 @@ interface AppActions {
 }
 
 export const useAppStore = create<AppState & AppActions>((set, get) => ({
-  // Stan początkowy - pusta lista workspaces
+  // Initial state - empty workspaces list
   workspaces: [],
   selectedWorkspace: undefined,
   selectedScenario: undefined,
   currentNodeIndex: 0,
 
-  // Akcja do inicjalizacji workspaces z danych szablonów
+  // Action to initialize workspaces from template data
   setInitialWorkspaces: (workspaces) => {
     set({ 
       workspaces,
-      // Automatycznie wybierz pierwszy workspace i scenariusz, jeśli są dostępne
+      // Automatically select first workspace and scenario if available
       selectedWorkspace: workspaces.length > 0 ? workspaces[0].id : undefined,
       selectedScenario: workspaces.length > 0 && workspaces[0].scenarios.length > 0 
         ? workspaces[0].scenarios[0].id 
@@ -90,7 +102,7 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
     set({ currentNodeIndex: index });
   },
   
-  // Aktualizacja wiadomości systemowej dla scenariusza
+  // Update system message for a scenario
   updateScenarioSystemMessage: (workspaceId, scenarioId, systemMessage) => {
     set((state) => {
       const newWorkspaces = [...state.workspaces];
@@ -101,17 +113,17 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
         const scenarioIndex = workspace.scenarios.findIndex(s => s.id === scenarioId);
         
         if (scenarioIndex !== -1) {
-          // Tworzymy nową kopię scenariusza z zaktualizowaną wiadomością systemową
+          // Create a new copy of the scenario with updated system message
           const updatedScenario = {
             ...workspace.scenarios[scenarioIndex],
             systemMessage
           };
           
-          // Aktualizujemy scenariusz w tablicy
+          // Update scenario in the array
           const updatedScenarios = [...workspace.scenarios];
           updatedScenarios[scenarioIndex] = updatedScenario;
           
-          // Aktualizujemy workspace
+          // Update workspace
           newWorkspaces[workspaceIndex] = {
             ...workspace,
             scenarios: updatedScenarios
@@ -123,7 +135,7 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
     });
   },
   
-  // Aktualizacja flagi includeSystemMessage dla węzła
+  // Update includeSystemMessage flag for a node
   updateNodeIncludeSystemMessage: (workspaceId, scenarioId, nodeId, includeSystemMessage) => {
     set((state) => {
       const newWorkspaces = [...state.workspaces];
@@ -138,27 +150,27 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
           const nodeIndex = scenario.nodes.findIndex(n => n.id === nodeId);
           
           if (nodeIndex !== -1) {
-            // Tworzymy nową kopię węzła z zaktualizowaną flagą
+            // Create a new copy of the node with updated flag
             const updatedNode = {
               ...scenario.nodes[nodeIndex],
               includeSystemMessage
             };
             
-            // Aktualizujemy węzeł w tablicy
+            // Update node in the array
             const updatedNodes = [...scenario.nodes];
             updatedNodes[nodeIndex] = updatedNode;
             
-            // Aktualizujemy scenariusz
+            // Update scenario
             const updatedScenario = {
               ...scenario,
               nodes: updatedNodes
             };
             
-            // Aktualizujemy tablicę scenariuszy
+            // Update scenarios array
             const updatedScenarios = [...workspace.scenarios];
             updatedScenarios[scenarioIndex] = updatedScenario;
             
-            // Aktualizujemy workspace
+            // Update workspace
             newWorkspaces[workspaceIndex] = {
               ...workspace,
               scenarios: updatedScenarios

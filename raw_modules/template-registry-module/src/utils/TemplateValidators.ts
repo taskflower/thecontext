@@ -1,4 +1,9 @@
-import { LayoutTemplate, WidgetTemplate, FlowStepTemplate } from '../types';
+// src/utils/TemplateValidators.ts
+// Walidacja szablonów
+
+import { LayoutTemplate } from '../types/LayoutTemplate';
+import { WidgetTemplate } from '../types/WidgetTemplate';
+import { FlowStepTemplate } from '../types/FlowStepTemplate';
 
 /**
  * Klasa błędu walidacji szablonu
@@ -15,15 +20,15 @@ export class TemplateValidationError extends Error {
  */
 export function validateLayoutTemplate(template: LayoutTemplate): boolean {
   if (!template.id) {
-    throw new TemplateValidationError('Layout template must have an id');
+    throw new TemplateValidationError('Szablon layoutu musi mieć ID');
   }
   
   if (!template.name) {
-    throw new TemplateValidationError('Layout template must have a name');
+    throw new TemplateValidationError('Szablon layoutu musi mieć nazwę');
   }
   
   if (!template.component) {
-    throw new TemplateValidationError('Layout template must have a component');
+    throw new TemplateValidationError('Szablon layoutu musi mieć komponent');
   }
   
   return true;
@@ -34,20 +39,20 @@ export function validateLayoutTemplate(template: LayoutTemplate): boolean {
  */
 export function validateWidgetTemplate(template: WidgetTemplate): boolean {
   if (!template.id) {
-    throw new TemplateValidationError('Widget template must have an id');
+    throw new TemplateValidationError('Szablon widgetu musi mieć ID');
   }
   
   if (!template.name) {
-    throw new TemplateValidationError('Widget template must have a name');
+    throw new TemplateValidationError('Szablon widgetu musi mieć nazwę');
   }
   
   if (!template.component) {
-    throw new TemplateValidationError('Widget template must have a component');
+    throw new TemplateValidationError('Szablon widgetu musi mieć komponent');
   }
   
   const validCategories = ['scenario', 'workspace', 'flow'];
   if (!template.category || !validCategories.includes(template.category)) {
-    throw new TemplateValidationError(`Widget template must have a valid category: ${validCategories.join(', ')}`);
+    throw new TemplateValidationError(`Szablon widgetu musi mieć prawidłową kategorię: ${validCategories.join(', ')}`);
   }
   
   return true;
@@ -58,19 +63,19 @@ export function validateWidgetTemplate(template: WidgetTemplate): boolean {
  */
 export function validateFlowStepTemplate(template: FlowStepTemplate): boolean {
   if (!template.id) {
-    throw new TemplateValidationError('Flow step template must have an id');
+    throw new TemplateValidationError('Szablon kroku przepływu musi mieć ID');
   }
   
   if (!template.name) {
-    throw new TemplateValidationError('Flow step template must have a name');
+    throw new TemplateValidationError('Szablon kroku przepływu musi mieć nazwę');
   }
   
   if (!template.component) {
-    throw new TemplateValidationError('Flow step template must have a component');
+    throw new TemplateValidationError('Szablon kroku przepływu musi mieć komponent');
   }
   
   if (!template.compatibleNodeTypes || !Array.isArray(template.compatibleNodeTypes) || template.compatibleNodeTypes.length === 0) {
-    throw new TemplateValidationError('Flow step template must have at least one compatible node type');
+    throw new TemplateValidationError('Szablon kroku przepływu musi mieć co najmniej jeden kompatybilny typ węzła');
   }
   
   return true;
