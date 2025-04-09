@@ -4,7 +4,7 @@ import { LayoutProps } from 'template-registry-module';
 import SimpleContextWidget from '../widgets/SimpleContextWidget';
 
 interface SimpleLayoutProps extends LayoutProps {
-  contextItems?: Record<string, any>;
+  contextItems?: [string, any][];
 }
  
 const SimpleLayout: React.FC<SimpleLayoutProps> = ({
@@ -12,7 +12,7 @@ const SimpleLayout: React.FC<SimpleLayoutProps> = ({
   title,
   showBackButton,
   onBackClick,
-  contextItems = {}
+  contextItems = []
 }) => {
   return (
     <div className="min-h-screen bg-gray-50 p-4">

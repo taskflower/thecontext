@@ -1,25 +1,36 @@
 // src/templates/simple/widgets/SimpleContextWidget.tsx
 import React from 'react';
 import { WidgetProps } from 'template-registry-module';
- 
+
+import { contextManager } from '@/lib/contextSingleton';
+
+interface PropertyType {
+  type: string;
+}
+
 const SimpleContextWidget: React.FC<WidgetProps> = ({
   data
 }) => {
-  const contextData = data && typeof data === 'object' && !Array.isArray(data) ? data : {};
-  // Zakładamy, że data to pojedynczy obiekt kontekstu (userProfile)
-  
+  console.log('data:', data);
+  const schemaManager = contextManager.schemaManager;
+  const schema = schemaManager ? schemaManager.getSchema('userProfileSchema') : null;
+
+  console.log('schema:', schema);
+  console.log('schema.schema:', schema?.schema);
+  console.log('schema.schema.userProfile:', schema?.schema?.userProfile);
+
   // Funkcja pomocnicza do formatowania wartości
   const formatValue = (value: any): string => {
     if (value === null || value === undefined) return '-';
     if (typeof value === 'object') return JSON.stringify(value, null, 2);
     return String(value);
   };
-  
+
   // Funkcja rekurencyjna do renderowania zagnieżdżonych obiektów
   const renderNestedObject = (obj: Record<string, any>, prefix = '') => {
     return Object.entries(obj).map(([key, value]) => {
       const fullKey = prefix ? `${prefix}.${key}` : key;
-      
+
       if (value !== null && typeof value === 'object') {
         return (
           <div key={fullKey} className="mt-2">
@@ -30,7 +41,7 @@ const SimpleContextWidget: React.FC<WidgetProps> = ({
           </div>
         );
       }
-      
+
       return (
         <div key={fullKey} className="py-1 flex">
           <span className="text-gray-600 w-1/3">{key}:</span>
@@ -43,24 +54,18 @@ const SimpleContextWidget: React.FC<WidgetProps> = ({
   return (
     <div className="bg-white p-4 rounded-lg border border-gray-200" style={{ minHeight: '200px' }}>
       <h2 className="text-lg font-semibold mb-3 border-b pb-2">Aktualny Kontekst</h2>
-      
-      {Object.keys(contextData).length === 0 ? (
-        <p className="text-gray-500 italic">Brak danych kontekstowych.</p>
-      ) : (
+
+      {schema && schema.schema && schema.schema.userProfile && schema.schema.userProfile.properties ? (
         <div className="space-y-2">
-          {Object.entries(contextData).map(([key, value]) => (
+          {Object.entries(schema.schema.userProfile.properties).map(([key, property]: [string, any]) => (
             <div key={key} className="bg-gray-50 p-3 rounded">
               <h3 className="font-medium text-blue-700 mb-2">{key}</h3>
-              {typeof value === 'object' && value !== null ? (
-                <div className="text-sm">
-                  {renderNestedObject(value)}
-                </div>
-              ) : (
-                <div className="text-sm">{formatValue(value)}</div>
-              )}
+              <div className="text-sm">{property && property.type}</div>
             </div>
           ))}
         </div>
+      ) : (
+        <p className="text-gray-500 italic">Brak schematu kontekstowego.</p>
       )}
     </div>
   );

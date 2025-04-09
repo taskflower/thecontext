@@ -23,7 +23,7 @@ interface NodeManagerHook {
   currentNode: NodeData | null;
   currentScenario: Scenario | null;
   isLastNode: boolean;
-  contextItems: Record<string, any>;
+  contextItems: [string, any][];
   handleGoToScenariosList: () => void;
   handlePreviousNode: () => void;
   handleNodeExecution: (userInput: string) => void;
@@ -220,7 +220,7 @@ export function useNodeManager(): NodeManagerHook {
     currentNode,
     currentScenario,
     isLastNode,
-    contextItems: currentContext,
+    contextItems: Object.entries(currentContext),
     handleGoToScenariosList,
     handlePreviousNode,
     handleNodeExecution,
