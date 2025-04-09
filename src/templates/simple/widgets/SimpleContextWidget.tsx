@@ -3,16 +3,13 @@ import React from 'react';
 import { WidgetProps } from 'template-registry-module';
 
 import { contextManager } from '@/lib/contextSingleton';
-
-interface PropertyType {
-  type: string;
-}
+import { ContextManager } from 'raw_modules/context-manager-module/src/core/ContextManager';
 
 const SimpleContextWidget: React.FC<WidgetProps> = ({
   data
 }) => {
   console.log('data:', data);
-  const schemaManager = contextManager.schemaManager;
+  const schemaManager = (contextManager as ContextManager).schemaManager;
   const schema = schemaManager ? schemaManager.getSchema('userProfileSchema') : null;
 
   console.log('schema:', schema);

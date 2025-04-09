@@ -6,8 +6,16 @@ import { ContextUpdateResult } from '../types/ContextTypes';
 /**
  * Zarządza kontekstem aplikacji
  */
+import { ContextSchemaManager } from './ContextSchemaManager';
+import { DefaultContextValidator } from '../core/ContextValidator';
+
 export class ContextManager {
   private context: Record<string, any> = {};
+  public schemaManager: ContextSchemaManager;
+
+  constructor() {
+    this.schemaManager = new ContextSchemaManager(new DefaultContextValidator());
+  }
   
   /**
    * Ustawia cały kontekst
