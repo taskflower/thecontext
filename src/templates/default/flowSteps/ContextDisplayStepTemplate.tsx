@@ -4,7 +4,7 @@ import { FlowStepProps } from 'template-registry-module';
 import { ContextItem } from '@/../raw_modules/revertcontext-nodes-module/src';
 
 interface ExtendedFlowStepProps extends FlowStepProps {
-  contextItems?: ContextItem[];
+  contextItems?: ContextItem[] | Record<string, any>;
 }
 
 const ContextDisplayStepTemplate: React.FC<ExtendedFlowStepProps> = ({ 
@@ -19,6 +19,30 @@ const ContextDisplayStepTemplate: React.FC<ExtendedFlowStepProps> = ({
     onSubmit("");
   };
 
+  // Format context data for display
+  const getFormattedContextData = () => {
+    // If contextItems is an array of ContextItem objects
+    if (Array.isArray(contextItems)) {
+      return contextItems.map((item) => ({
+        id: item.id,
+        title: item.title || item.id,
+        contentType: item.contentType || 'text/plain',
+        content: formatContextData(item),
+        updatedAt: item.updatedAt
+      }));
+    } 
+    // If contextItems is an object (Record<string, any>)
+    else {
+      return Object.entries(contextItems).map(([key, value]) => ({
+        id: key,
+        title: key,
+        contentType: typeof value === 'object' ? 'application/json' : 'text/plain',
+        content: typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value),
+        updatedAt: null
+      }));
+    }
+  };
+
   const formatContextData = (item: ContextItem) => {
     try {
       if (item.contentType === 'application/json') {
@@ -30,6 +54,8 @@ const ContextDisplayStepTemplate: React.FC<ExtendedFlowStepProps> = ({
       return item.content;
     }
   };
+
+  const formattedItems = getFormattedContextData();
 
   return (
     <div className="space-y-6">
@@ -48,19 +74,19 @@ const ContextDisplayStepTemplate: React.FC<ExtendedFlowStepProps> = ({
         </h3>
         
         <div className="space-y-4">
-          {contextItems.length === 0 ? (
+          {formattedItems.length === 0 ? (
             <p className="text-gray-500 italic">No context data was collected during this flow.</p>
           ) : (
-            contextItems.map((item) => (
+            formattedItems.map((item) => (
               <div key={item.id} className="bg-gray-50 p-3 rounded">
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium text-blue-700">{item.title || item.id}</h4>
+                  <h4 className="font-medium text-blue-700">{item.title}</h4>
                   <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                    {item.contentType || 'text/plain'}
+                    {item.contentType}
                   </span>
                 </div>
                 <pre className="bg-white p-3 rounded border border-gray-200 text-sm overflow-x-auto">
-                  {formatContextData(item)}
+                  {item.content}
                 </pre>
                 {item.updatedAt && (
                   <div className="text-xs text-gray-500 mt-1">

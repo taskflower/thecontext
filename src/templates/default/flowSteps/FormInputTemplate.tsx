@@ -1,11 +1,11 @@
 // src/templates/flowSteps/FormInputTemplate.tsx
 import React, { useState, useEffect } from 'react';
-import { ContextItem } from 'revertcontext-nodes-module';
+import { ContextItem } from '../../../../raw_modules/context-manager-module/src/types/ContextTypes';
 import { FlowStepProps } from 'template-registry-module';
 
 // Rozszerzony interfejs FlowStepProps, który uwzględnia kontekst
 interface ExtendedFlowStepProps extends FlowStepProps {
-  contextItems?: ContextItem[];
+  contextItems?: ContextItem[] | Record<string, any>;
 }
 
 // Definicja interfejsu dla pola formularza
@@ -36,7 +36,7 @@ const FormInputTemplate: React.FC<ExtendedFlowStepProps> = ({
     }
     
     // Jeśli nie, spróbuj pobrać schemat z kontekstu
-    if (node.formSchemaContextKey) {
+    if (node.formSchemaContextKey && Array.isArray(contextItems)) {
       const schemaItem = contextItems.find(item => 
         item.id === node.formSchemaContextKey || item.title === node.formSchemaContextKey
       );
@@ -136,7 +136,11 @@ const FormInputTemplate: React.FC<ExtendedFlowStepProps> = ({
       {process.env.NODE_ENV === 'development' && (
         <div className="bg-gray-100 p-2 text-xs rounded">
           <p>Debug - Context Items:</p>
-          <pre>{JSON.stringify(contextItems.map(item => ({ id: item.id, content: item.content?.substring(0, 50) })), null, 2)}</pre>
+          {Array.isArray(contextItems) ? (
+            <pre>{JSON.stringify(contextItems.map(item => ({ id: item.id, content: item.content?.substring(0, 50) })), null, 2)}</pre>
+          ) : (
+            <pre>{JSON.stringify(contextItems, null, 2)}</pre>
+          )}
           <p>Form Schema:</p>
           <pre>{JSON.stringify(formSchema, null, 2)}</pre>
           <p>Form Values:</p>
