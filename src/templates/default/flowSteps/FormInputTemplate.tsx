@@ -67,9 +67,42 @@ const FormInputTemplate: React.FC<ExtendedFlowStepProps> = ({
   };
 
   const handleSubmit = () => {
-    // Convert form values to JSON string
-    onSubmit(JSON.stringify(formValues));
+    // Process the form values to handle nested paths
+    const processedValues = processFormValuesForContext(formValues);
+    
+    // Submit the processed values
+    onSubmit(JSON.stringify(processedValues));
     setFormValues({});
+  };
+
+  // Function to process form values and handle nested paths (e.g., preferences.theme)
+  const processFormValuesForContext = (values: Record<string, string>) => {
+    const result: Record<string, any> = {};
+    
+    Object.entries(values).forEach(([key, value]) => {
+      if (key.includes('.')) {
+        // Handle nested path (e.g., preferences.theme)
+        const parts = key.split('.');
+        let current = result;
+        
+        // Create nested object structure
+        for (let i = 0; i < parts.length - 1; i++) {
+          const part = parts[i];
+          if (!current[part]) {
+            current[part] = {};
+          }
+          current = current[part];
+        }
+        
+        // Set the value at the deepest level
+        current[parts[parts.length - 1]] = value;
+      } else {
+        // Simple key-value pair
+        result[key] = value;
+      }
+    });
+    
+    return result;
   };
 
   const isFormValid = () => {
@@ -145,6 +178,8 @@ const FormInputTemplate: React.FC<ExtendedFlowStepProps> = ({
           <pre>{JSON.stringify(formSchema, null, 2)}</pre>
           <p>Form Values:</p>
           <pre>{JSON.stringify(formValues, null, 2)}</pre>
+          <p>Processed Form Values:</p>
+          <pre>{JSON.stringify(processFormValuesForContext(formValues), null, 2)}</pre>
         </div>
       )}
 
