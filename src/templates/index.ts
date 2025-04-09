@@ -2,7 +2,6 @@
 import { createTemplateRegistry } from 'template-registry-module';
 import { registerDefaultTemplates, getDefaultTemplateData } from './default';
 import { registerNewYorkTemplates, getNewYorkTemplateData } from './newyork';
-import { registerDuolingoTemplates, getDuolingoTemplateData } from './duolingo';
 import { useAppStore } from '../lib/store';
 
 // Tworzenie rejestru szablonów
@@ -13,18 +12,17 @@ export function initializeTemplates() {
   // Rejestracja szablonów
   registerDefaultTemplates(templateRegistry);
   registerNewYorkTemplates(templateRegistry);
-  registerDuolingoTemplates(templateRegistry); // Dodana rejestracja szablonu Duolingo
+
   
   // Pobranie danych inicjalizacyjnych z szablonów
   const defaultData = getDefaultTemplateData();
   const newyorkData = getNewYorkTemplateData();
-  const duolingoData = getDuolingoTemplateData(); // Dodane pobranie danych Duolingo
+
   
   // Połączenie danych i inicjalizacja store
   const initialWorkspaces = [
     defaultData.workspace,
     newyorkData.workspace,
-    duolingoData.workspace  // Dodany workspace Duolingo
   ];
   
   // Inicjalizacja store z danymi z szablonów
