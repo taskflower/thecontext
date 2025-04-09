@@ -8,13 +8,10 @@ import { ContextManager } from 'raw_modules/context-manager-module/src/core/Cont
 const SimpleContextWidget: React.FC<WidgetProps> = ({
   data
 }) => {
-  console.log('data:', data);
+  const currentContext = contextManager.getContext();
+  // Pobierz schemat kontekstu
   const schemaManager = (contextManager as ContextManager).schemaManager;
   const schema = schemaManager ? schemaManager.getSchema('userProfileSchema') : null;
-
-  console.log('schema:', schema);
-  console.log('schema.schema:', schema?.schema);
-  console.log('schema.schema.userProfile:', schema?.schema?.userProfile);
 
   // Funkcja pomocnicza do formatowania wartości
   const formatValue = (value: any): string => {
@@ -52,17 +49,35 @@ const SimpleContextWidget: React.FC<WidgetProps> = ({
     <div className="bg-white p-4 rounded-lg border border-gray-200" style={{ minHeight: '200px' }}>
       <h2 className="text-lg font-semibold mb-3 border-b pb-2">Aktualny Kontekst</h2>
 
-      {schema && schema.schema && schema.schema.userProfile && schema.schema.userProfile.properties ? (
-        <div className="space-y-2">
-          {Object.entries(schema.schema.userProfile.properties).map(([key, property]: [string, any]) => (
-            <div key={key} className="bg-gray-50 p-3 rounded">
-              <h3 className="font-medium text-blue-700 mb-2">{key}</h3>
-              <div className="text-sm">{property && property.type}</div>
-            </div>
-          ))}
+      {/* Wyświetl aktualny kontekst */}
+      <div className="mb-4">
+        <h3 className="font-medium text-blue-700 mb-2">Wartości kontekstu:</h3>
+        {currentContext && currentContext.userProfile ? (
+          <div className="bg-gray-50 p-3 rounded">
+            {renderNestedObject(currentContext.userProfile)}
+          </div>
+        ) : (
+          <p className="text-gray-500 italic">Kontekst jest pusty.</p>
+        )}
+      </div>
+
+      {/* Wyświetl schemat kontekstu (opcjonalnie) */}
+      {schema && (
+        <div className="mt-4">
+          <h3 className="font-medium text-blue-700 mb-2">Schemat kontekstu:</h3>
+          <div className="bg-gray-50 p-3 rounded text-sm">
+            {schema.schema && schema.schema.userProfile && schema.schema.userProfile.properties && (
+              <ul className="list-disc list-inside">
+                {Object.entries(schema.schema.userProfile.properties).map(([key, prop]: [string, any]) => (
+                  <li key={key} className="mb-1">
+                    <span className="font-semibold">{key}</span>: {prop.type}
+                    {prop.description && <span className="text-gray-500 ml-1">({prop.description})</span>}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
-      ) : (
-        <p className="text-gray-500 italic">Brak schematu kontekstowego.</p>
       )}
     </div>
   );
