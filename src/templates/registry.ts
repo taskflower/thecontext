@@ -30,8 +30,8 @@ export function registerTemplate(template: BaseTemplate): void {
   );
   
   // Register flow steps
-  config.flowSteps.forEach(flowStep => 
-    templateRegistry.registerFlowStep(flowStep)
+  config.flowSteps.forEach(flowStep =>
+    templateRegistry.registerFlowStep(flowStep as any)
   );
 }
 
