@@ -1,9 +1,10 @@
 // src/templates/default/widgets/ContextDisplayWidget.tsx
 import React from 'react';
 import { WidgetProps } from 'template-registry-module';
-import { ContextItem } from '@/../raw_modules/revertcontext-nodes-module/src';
+import { ContextItem } from '@/../raw_modules/context-manager-module/src/types/ContextTypes';
 
 interface ContextDisplayWidgetProps extends WidgetProps {
+  title?: string;
   contextItems?: ContextItem[];
 }
 
