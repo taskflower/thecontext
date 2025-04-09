@@ -18,8 +18,11 @@ const BasicStepTemplate: React.FC<ExtendedFlowStepProps> = ({
   isLastNode,
   contextItems = {},
 }) => {
+  console.log("contextItems:", contextItems);
   const [userInput, setUserInput] = useState("");
   const [showContext, setShowContext] = useState(false);
+  console.log("showContext:", showContext);
+  console.log("setShowContext:", setShowContext);
 
   const handleSubmit = () => {
     onSubmit(userInput);
