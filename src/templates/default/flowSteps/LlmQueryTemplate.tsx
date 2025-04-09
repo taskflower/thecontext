@@ -1,190 +1,192 @@
 // src/templates/flowSteps/LlmQueryTemplate.tsx
-import React, { useState, useEffect } from 'react';
-import { FlowStepProps } from 'template-registry-module';
-import { useAuth } from '@/hooks/useAuth';
-import { NodeData, Scenario, ContextItem } from '@/../raw_modules/revertcontext-nodes-module/src';
+import React, { useState, useEffect } from "react";
+import { FlowStepProps } from "template-registry-module";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  NodeData,
+  Scenario,
+  ContextItem,
+} from "@/../raw_modules/revertcontext-nodes-module/src";
 
-// Rozszerzony interfejs dla FlowStepProps, który uwzględnia scenario i rozszerzony node
-interface ExtendedFlowStepProps extends Omit<FlowStepProps, 'node'> {
+// Extended interface for FlowStepProps that includes scenario and extended node
+interface ExtendedFlowStepProps extends Omit<FlowStepProps, "node"> {
   node: NodeData;
   scenario?: Scenario;
   contextItems?: ContextItem[];
 }
 
-const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({ 
-  node, 
+const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
+  node,
   scenario,
-  onSubmit, 
-  onPrevious, 
+  onSubmit,
+  onPrevious,
   isLastNode,
-  contextItems = []
+  contextItems = [],
 }) => {
-  const [userInput, setUserInput] = useState('');
+  const [userInput, setUserInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [debugInfo, setDebugInfo] = useState<string | null>(null);
-  const { getToken, user } = useAuth();
-  
-  useEffect(() => {
-    // Sprawdź na początku, czy mamy token i użytkownika
-    const checkAuth = async () => {
-      const token = await getToken();
-      setDebugInfo(`Token dostępny: ${!!token}, User dostępny: ${!!user}, User ID: ${user?.uid || 'brak'}`);
-    };
-    
-    checkAuth();
-  }, [getToken, user]);
+  const { user, jwtToken } = useAuth(); // Use jwtToken directly instead of getToken()
+
+  // We only need to check auth status once when the component mounts
+  // We no longer need to continuously check or store debug info about the token
 
   const sendMessageToGemini = async (message: string) => {
     try {
       setIsLoading(true);
       setError(null);
-      
-      // Pobierz aktualny token JWT
-      const token = await getToken();
-      
-      if (!token) {
-        throw new Error('Token autoryzacyjny niedostępny. Zaloguj się ponownie.');
+
+      // Use the existing jwtToken from useAuth() instead of calling getToken() every time
+      if (!jwtToken) {
+        throw new Error(
+          "Authorization token unavailable. Please log in again."
+        );
       }
-      
+
       if (!user) {
-        throw new Error('Użytkownik nie jest zalogowany. Zaloguj się ponownie.');
+        throw new Error("User is not logged in. Please log in again.");
       }
-      
-      // Przygotuj wiadomości do wysłania zgodnie z wymaganą kolejnością
+
+      // Prepare messages to send in the required order
       const messages = [];
-      
-      // 1. Dodaj wiadomość systemową, jeśli węzeł ma ustawioną flagę includeSystemMessage
-      // i scenariusz ma zdefiniowaną wiadomość systemową
+
+      // 1. Add system message if the node has includeSystemMessage flag set
+      // and scenario has a defined system message
       if (node.includeSystemMessage && scenario?.systemMessage) {
         messages.push({
           role: "system",
-          content: scenario.systemMessage
+          content: scenario.systemMessage,
         });
       }
-      
-      // 2. Sprawdź, czy mamy initial user message
+
+      // 2. Check if we have initial user message
       if (node.initialUserMessage) {
-        // Jeśli mamy initialUserMessage, użyj jej jako pierwszej wiadomości użytkownika
+        // If we have initialUserMessage, use it as the first user message
         console.log("Using initialUserMessage:", node.initialUserMessage);
         messages.push({
           role: "user",
-          content: node.initialUserMessage
+          content: node.initialUserMessage,
         });
-        
-        // Jeśli mamy też wiadomość asystenta, dodaj ją po initialUserMessage
-        if (node.assistantMessage && node.assistantMessage.trim() !== '') {
+
+        // If we also have an assistant message, add it after initialUserMessage
+        if (node.assistantMessage && node.assistantMessage.trim() !== "") {
           messages.push({
             role: "assistant",
-            content: node.assistantMessage
+            content: node.assistantMessage,
           });
         }
       } else {
-        // Jeśli nie mamy initialUserMessage
+        // If we don't have initialUserMessage
         console.log("No initialUserMessage present");
-        
-        // NIE dodajemy żadnej początkowej wiadomości - zgodnie z wymaganiami
-        // Konwersacja zaczyna się bezpośrednio od aktualnej wiadomości użytkownika
-        // W takim wypadku nie dodajemy wcześniejszego kontekstu, nawet jeśli assistantMessage istnieje
+
+        // We DON'T add any initial message - according to requirements
+        // The conversation starts directly with the current user message
+        // In this case, we don't add previous context, even if assistantMessage exists
       }
-      
-      // 3. Dodaj bieżącą wiadomość użytkownika
+
+      // 3. Add the current user message
       messages.push({
         role: "user",
-        content: message
+        content: message,
       });
-      
+
       console.log("Prepared messages:", messages);
-      
-      // Format danych według wymaganej struktury
+
+      // Format data according to the required structure
       const payload = {
         messages: messages,
-        userId: user.uid
+        userId: user.uid,
       };
-      
-      setDebugInfo(`Wysyłanie do: ${import.meta.env.VITE_API_URL}/api/v1/services/gemini/chat/completion`);
-      
-      // Wysyłanie żądania do Gemini API z tokenem JWT w nagłówku Authorization
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/services/gemini/chat/completion`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload),
-      });
-      
+
+      // Send request to Gemini API with JWT token in Authorization header
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_API_URL
+        }/api/v1/services/gemini/chat/completion`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${jwtToken}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("Błąd odpowiedzi:", errorText);
-        
+        console.error("Response error:", errorText);
+
         try {
           const errorData = JSON.parse(errorText);
           throw new Error(
-            errorData.error?.message || 
-            `Żądanie API zakończone błędem: ${response.status}`
+            errorData.error?.message ||
+              `API request failed with error: ${response.status}`
           );
         } catch (e) {
-          // Jeśli nie możemy sparsować JSON, użyj surowego tekstu
-          throw new Error(`Żądanie API zakończone błędem: ${response.status} - ${errorText.substring(0, 100)}...`);
+          // If we can't parse JSON, use raw text
+          throw new Error(
+            `API request failed with error: ${
+              response.status
+            } - ${errorText.substring(0, 100)}...`
+          );
         }
       }
-      
+
       const responseData = await response.json();
-      console.log("Dane odpowiedzi:", responseData);
-      
-      // Przekaż zarówno wejście użytkownika, jak i odpowiedź AI do handlera onSubmit
-      onSubmit(JSON.stringify({
-        userInput: message,
-        aiResponse: responseData
-      }));
-      
-      // Wyczyść pole wprowadzania
-      setUserInput('');
+      console.log("Response data:", responseData);
+
+      // Pass both user input and AI response to the onSubmit handler
+      onSubmit(
+        JSON.stringify({
+          userInput: message,
+          aiResponse: responseData,
+        })
+      );
+
+      // Clear input field
+      setUserInput("");
     } catch (err) {
-      console.error('Pełny błąd:', err);
-      setError(err instanceof Error ? err.message : 'Wystąpił nieznany błąd');
+      console.error("Full error:", err);
+      setError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleSubmit = () => {
-    if (userInput.trim() === '') return;
+    if (userInput.trim() === "") return;
     sendMessageToGemini(userInput);
   };
 
   return (
     <div className="space-y-4">
-      <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-        <div className="flex items-start space-x-3">
-          <div className="bg-blue-100 p-2 rounded-full">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-            </svg>
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold mb-2">Asystent AI</h2>
-            <p className="text-gray-700">
-              {node.assistantMessage || 'W czym mogę pomóc?'}
-            </p>
-          </div>
-        </div>
-      </div>
-
       {node.includeSystemMessage && scenario?.systemMessage && (
         <div className="bg-amber-50 p-3 rounded-lg border border-amber-100">
           <div className="flex items-start space-x-3">
             <div className="bg-amber-100 p-2 rounded-full">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-amber-500"
+              >
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
               </svg>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-amber-800 mb-1">System Message</h3>
-              <p className="text-xs text-amber-700">
-                {scenario.systemMessage}
-              </p>
+              <h3 className="text-sm font-medium text-amber-800 mb-1">
+                System Message
+              </h3>
+              <p className="text-xs text-amber-700">{scenario.systemMessage}</p>
             </div>
           </div>
         </div>
@@ -194,13 +196,26 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
         <div className="bg-green-50 p-3 rounded-lg border border-green-100">
           <div className="flex items-start space-x-3">
             <div className="bg-green-100 p-2 rounded-full">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-green-500"
+              >
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-green-800 mb-1">Initial User Message</h3>
+              <h3 className="text-sm font-medium text-green-800 mb-1">
+                Initial User Message
+              </h3>
               <p className="text-xs text-green-700">
                 {node.initialUserMessage}
               </p>
@@ -209,49 +224,86 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
         </div>
       )}
 
-      {debugInfo && (
-        <div className="bg-gray-100 p-2 text-xs text-gray-800 rounded border border-gray-200">
-          <p>Debug: {debugInfo}</p>
+      <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+        <div className="flex items-start space-x-3">
+          <div className="bg-blue-100 p-2 rounded-full">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-blue-500"
+            >
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold mb-2">AI Assistant</h2>
+            <p className="text-gray-700">
+              {node.assistantMessage || "How can I help you?"}
+            </p>
+          </div>
         </div>
-      )}
+      </div>
 
       <div className="space-y-2">
-        <textarea 
+        <textarea
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}
           className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           rows={4}
-          placeholder="Zapytaj asystenta AI..."
+          placeholder="Ask the AI assistant..."
         />
 
         {error && (
           <div className="text-red-500 text-sm p-2 bg-red-50 rounded">
-            Błąd: {error}
+            Error: {error}
           </div>
         )}
 
         <div className="flex justify-between items-center">
-          <button 
+          <button
             onClick={onPrevious}
             className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded disabled:opacity-50"
           >
-            Wstecz
+            Back
           </button>
-          <button 
+          <button
             onClick={handleSubmit}
-            disabled={isLoading || userInput.trim() === ''}
+            disabled={isLoading || userInput.trim() === ""}
             className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded flex items-center space-x-2 disabled:bg-blue-300"
           >
             {isLoading ? (
               <>
-                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="animate-spin h-4 w-4 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
-                <span>Przetwarzanie...</span>
+                <span>Processing...</span>
               </>
             ) : (
-              <span>{isLastNode ? 'Zakończ' : 'Wyślij i Kontynuuj'}</span>
+              <span>{isLastNode ? "Finish" : "Send and Continue"}</span>
             )}
           </button>
         </div>
