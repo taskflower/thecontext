@@ -8,7 +8,9 @@ import {
 } from '../../raw_modules/template-registry-module/src';
 
 // Create a singleton template registry
-export const templateRegistry = createTemplateRegistry();
+import { templateRegistry as importedTemplateRegistry } from '../templates';
+
+export const templateRegistry = importedTemplateRegistry;
 
 // Helper functions to get components from the registry
 export const getLayoutComponent = (id: string) => 
