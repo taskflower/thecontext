@@ -1,10 +1,10 @@
 // src/templates/default/flowSteps/ContextDisplayStepTemplate.tsx
 import React from 'react';
 import { FlowStepProps } from 'template-registry-module';
-import { ContextItem } from '@/../raw_modules/revertcontext-nodes-module/src';
+import { ContextItem } from '@/../raw_modules/context-manager-module/src/types/ContextTypes';
 
 interface ExtendedFlowStepProps extends FlowStepProps {
-  contextItems?: ContextItem[] | Record<string, any>;
+  contextItems?: any[] | undefined;
 }
 
 const ContextDisplayStepTemplate: React.FC<ExtendedFlowStepProps> = ({ 
