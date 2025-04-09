@@ -35,6 +35,7 @@ interface NodeManagerHook {
     templateId?: string;
     systemMessage?: string;
     includeSystemMessage?: boolean;
+    initialUserMessage?: string;
   };
 }
 
@@ -124,7 +125,8 @@ export function useNodeManager(): NodeManagerHook {
             templateId: (originalNodeData as any).templateId || 
                        currentWorkspace?.templateSettings?.defaultFlowStepTemplate || 
                        'basic-step',
-            includeSystemMessage: (originalNodeData as any).includeSystemMessage
+            includeSystemMessage: (originalNodeData as any).includeSystemMessage,
+            initialUserMessage: (originalNodeData as any).initialUserMessage
           };
           
           setCurrentNode(nodeWithTemplate);
@@ -220,7 +222,8 @@ export function useNodeManager(): NodeManagerHook {
     contextItems,
     templateId: currentNode?.templateId,
     systemMessage: currentScenario?.systemMessage,
-    includeSystemMessage: currentNode?.includeSystemMessage
+    includeSystemMessage: currentNode?.includeSystemMessage,
+    initialUserMessage: currentNode?.initialUserMessage
   };
 
   return {

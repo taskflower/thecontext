@@ -4,6 +4,13 @@ import { useParams } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
 import { useNodeManager } from '../hooks/useNodeManager';
 import { templateRegistry } from '../templates';
+import { FlowStepProps } from 'template-registry-module';
+import { Scenario } from '../../raw_modules/revertcontext-nodes-module/src';
+
+// Rozszerzamy interfejs FlowStepProps o pole scenario
+interface ExtendedFlowStepProps extends FlowStepProps {
+  scenario?: Scenario;
+}
 
 export const FlowView: React.FC = () => {
   const { workspace: workspaceId } = useParams<{ workspace: string }>();
@@ -11,6 +18,7 @@ export const FlowView: React.FC = () => {
 
   const {
     currentNode,
+    currentScenario,
     isLastNode,
     handleGoToScenariosList,
     handlePreviousNode,
@@ -61,11 +69,13 @@ export const FlowView: React.FC = () => {
           <div className="space-y-4">
             {React.createElement(compatibleComponent, {
               node: currentNode,
+              // @ts-ignore - ignorowanie błędu TypeScript, ponieważ wiemy, że komponent obsługuje scenario
+              scenario: currentScenario,
               onSubmit: handleNodeExecution,
               onPrevious: handlePreviousNode,
               isLastNode,
               contextItems: debugInfo.contextItems,
-            })}
+            } as ExtendedFlowStepProps)}
             
             <div className="mt-8 p-4 bg-gray-100 rounded-lg">
               <details>
@@ -89,8 +99,11 @@ export const FlowView: React.FC = () => {
         onBackClick={handleGoToScenariosList}
       >
         <div className="space-y-4">
+          {/* Używamy typu ExtendedFlowStepProps z @ts-ignore dla prop scenario */}
           <FlowStepComponent
             node={currentNode}
+            // @ts-ignore - ignorowanie błędu TypeScript, ponieważ wiemy, że komponent obsługuje scenario
+            scenario={currentScenario}
             onSubmit={handleNodeExecution}
             onPrevious={handlePreviousNode}
             isLastNode={isLastNode}

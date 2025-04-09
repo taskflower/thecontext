@@ -50,7 +50,8 @@ const createDefaultWorkspace = (): Workspace => {
     assistantMessage: "Nice to meet you, {{userName}}! How can I help you today?",
     contextKey: "userRequest",
     templateId: "llm-query",
-    includeSystemMessage: true  // Ten węzeł będzie korzystał z wiadomości systemowej
+    includeSystemMessage: true,  // Ten węzeł będzie korzystał z wiadomości systemowej
+    initialUserMessage: "I need some help with creating an account" // Dodana initialUserMessage
   };
 
   const initialScenario: Scenario = {
@@ -91,7 +92,8 @@ const createNewYorkWorkspace = (): Workspace => {
     assistantMessage: "Great to meet you, {{userName}}. What brings you here today?",
     contextKey: "userNeed",
     templateId: "newyork-ai",
-    includeSystemMessage: true  // Ten węzeł będzie korzystał z wiadomości systemowej
+    includeSystemMessage: true,  // Ten węzeł będzie korzystał z wiadomości systemowej
+    initialUserMessage: "I'm looking for recommendations in the city" // Dodana initialUserMessage
   };
   
   const thirdNode: NodeData = {
@@ -131,7 +133,8 @@ const createNewYorkWorkspace = (): Workspace => {
         assistantMessage: "On a scale of 1-10, how would you rate your experience with us?",
         contextKey: "userRating",
         templateId: "newyork-form",
-        includeSystemMessage: true  // Ten węzeł będzie korzystał z wiadomości systemowej
+        includeSystemMessage: true,  // Ten węzeł będzie korzystał z wiadomości systemowej
+        initialUserMessage: "I'd like to provide my feedback" // Dodana initialUserMessage
       }
     ],
     systemMessage: "You are a survey bot collecting feedback. Be neutral, objective, and don't make assumptions based on ratings."

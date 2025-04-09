@@ -63,20 +63,29 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
         });
       }
       
-      // 2. Dodaj poprzednie wiadomości użytkownika i asystenta (jeśli istnieją)
-      // Najpierw musi być wiadomość użytkownika, jeśli asystent już wcześniej odpowiedział
-      if (node.assistantMessage && node.assistantMessage.trim() !== '') {
-        // Dodaj fikcyjne zapytanie użytkownika, które mogło prowadzić do tej odpowiedzi asystenta
+      // 2. Sprawdź, czy mamy initial user message
+      if (node.initialUserMessage) {
+        // Jeśli mamy initialUserMessage, użyj jej jako pierwszej wiadomości użytkownika
+        console.log("Using initialUserMessage:", node.initialUserMessage);
         messages.push({
           role: "user",
-          content: "Previous question"
+          content: node.initialUserMessage
         });
         
-        // Dodaj wiadomość asystenta
-        messages.push({
-          role: "assistant",
-          content: node.assistantMessage
-        });
+        // Jeśli mamy też wiadomość asystenta, dodaj ją po initialUserMessage
+        if (node.assistantMessage && node.assistantMessage.trim() !== '') {
+          messages.push({
+            role: "assistant",
+            content: node.assistantMessage
+          });
+        }
+      } else {
+        // Jeśli nie mamy initialUserMessage
+        console.log("No initialUserMessage present");
+        
+        // NIE dodajemy żadnej początkowej wiadomości - zgodnie z wymaganiami
+        // Konwersacja zaczyna się bezpośrednio od aktualnej wiadomości użytkownika
+        // W takim wypadku nie dodajemy wcześniejszego kontekstu, nawet jeśli assistantMessage istnieje
       }
       
       // 3. Dodaj bieżącą wiadomość użytkownika
@@ -175,6 +184,25 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
               <h3 className="text-sm font-medium text-amber-800 mb-1">System Message</h3>
               <p className="text-xs text-amber-700">
                 {scenario.systemMessage}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {node.initialUserMessage && (
+        <div className="bg-green-50 p-3 rounded-lg border border-green-100">
+          <div className="flex items-start space-x-3">
+            <div className="bg-green-100 p-2 rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-green-800 mb-1">Initial User Message</h3>
+              <p className="text-xs text-green-700">
+                {node.initialUserMessage}
               </p>
             </div>
           </div>
