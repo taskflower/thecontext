@@ -13,7 +13,7 @@ export interface NodeData {
   scenarioId: string;
   type?: string;
   label: string;
-  description?: string;
+  description?: string; 
   position?: Position;
   assistantMessage?: string;
   userPrompt?: string;

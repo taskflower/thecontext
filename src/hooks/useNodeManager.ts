@@ -2,19 +2,16 @@
 // src/hooks/useNodeManager.ts
 import { useState, useEffect, useMemo } from "react";
 import { NodeManager } from "../../raw_modules/revertcontext-nodes-module/src";
-import { NodeData, ContextItem, NodeExecutionResult } from "../../raw_modules/revertcontext-nodes-module/src";
+import { ContextItem, NodeExecutionResult } from "../../raw_modules/revertcontext-nodes-module/src";
 import { useAppStore } from "../lib/store";
 import { useNavigate, useParams } from 'react-router-dom';
 
-interface EnhancedNodeData extends NodeData {
-  templateId?: string;
-}
 
 interface NodeManagerHook {
   // Node data
   nodeManager: NodeManager;
   currentNode: EnhancedNodeData | null;
-  currentScenario: any | null;
+  currentScenario: EnhancedScenario | null;
   isLastNode: boolean;
   
   // Context management
@@ -25,6 +22,10 @@ interface NodeManagerHook {
   handlePreviousNode: () => void;
   handleNodeExecution: (userInput: string) => void;
   
+  // System message/node toggles
+  updateScenarioSystemMessage: (systemMessage: string) => void;
+  toggleNodeSystemMessage: (includeSystemMessage: boolean) => void;
+  
   // Debug info
   debugInfo: {
     workspaceId: string | undefined;
@@ -34,6 +35,8 @@ interface NodeManagerHook {
     currentNodeLabel: string | undefined;
     contextItems: ContextItem[];
     templateId?: string;
+    systemMessage?: string;
+    includeSystemMessage?: boolean;
   };
 }
 
@@ -53,12 +56,12 @@ export function useNodeManager(): NodeManagerHook {
     currentNodeIndex,
     nextNode,
     prevNode,
-    setNodeIndex
+    setNodeIndex,
+    updateScenarioSystemMessage: updateSystemMessage,
+    updateNodeIncludeSystemMessage
   } = useAppStore();
   
   const [contextItems, setContextItems] = useState<ContextItem[]>([]);
-
-  // Używamy EnhancedNodeData zamiast NodeData dla currentNode
   const [currentNode, setCurrentNode] = useState<EnhancedNodeData | null>(null);
 
   // Set the selected workspace and scenario based on URL params
@@ -77,7 +80,7 @@ export function useNodeManager(): NodeManagerHook {
   }, [workspaces, workspaceId]);
 
   const currentScenario = useMemo(() => {
-    return currentWorkspace?.scenarios.find(s => s.id === scenarioId);
+    return currentWorkspace?.scenarios.find(s => s.id === scenarioId) || null;
   }, [currentWorkspace, scenarioId]);
 
   const nodeManager = useMemo(() => {
@@ -92,7 +95,7 @@ export function useNodeManager(): NodeManagerHook {
   // Handle specific node navigation if node param is present
   useEffect(() => {
     if (nodeParam && currentScenario) {
-      const nodeIndex = currentScenario.nodes.findIndex((n: NodeData) => n.id === nodeParam);
+      const nodeIndex = currentScenario.nodes.findIndex((n: EnhancedNodeData) => n.id === nodeParam);
       if (nodeIndex !== -1) {
         setNodeIndex(nodeIndex);
       }
@@ -114,17 +117,16 @@ export function useNodeManager(): NodeManagerHook {
           contextItems
         );
 
-        // Get the templateId directly from the scenario definition
-        const currentTemplateId = (currentScenario.nodes[currentNodeIndex] as any).templateId || 
-                               currentWorkspace?.templateSettings?.defaultFlowStepTemplate || 
-                               'basic-step';
-
-        // Używamy spread operatora aby zachować właściwości i dodać templateId
+        // Get node details from original scenario definition for additional properties
+        const originalNodeData = currentScenario.nodes[currentNodeIndex];
+        
         if (preparedNode) {
-          // Tworzymy obiekt EnhancedNodeData
           const enhancedNode: EnhancedNodeData = {
             ...preparedNode,
-            templateId: currentTemplateId
+            templateId: (originalNodeData as any).templateId || 
+                       currentWorkspace?.templateSettings?.defaultFlowStepTemplate || 
+                       'basic-step',
+            includeSystemMessage: (originalNodeData as any).includeSystemMessage
           };
           
           setCurrentNode(enhancedNode);
@@ -195,6 +197,20 @@ export function useNodeManager(): NodeManagerHook {
       }
     }
   };
+  
+  // System message handlers
+  const updateScenarioSystemMessage = (systemMessage: string) => {
+    if (workspaceId && scenarioId) {
+      updateSystemMessage(workspaceId, scenarioId, systemMessage);
+    }
+  };
+  
+  // Toggle system message inclusion for current node
+  const toggleNodeSystemMessage = (includeSystemMessage: boolean) => {
+    if (workspaceId && scenarioId && currentNode?.id) {
+      updateNodeIncludeSystemMessage(workspaceId, scenarioId, currentNode.id, includeSystemMessage);
+    }
+  };
 
   // Prepare debug info
   const debugInfo = {
@@ -204,7 +220,9 @@ export function useNodeManager(): NodeManagerHook {
     currentNodeIndex,
     currentNodeLabel: currentNode?.label,
     contextItems,
-    templateId: currentNode?.templateId
+    templateId: currentNode?.templateId,
+    systemMessage: currentScenario?.systemMessage,
+    includeSystemMessage: currentNode?.includeSystemMessage
   };
 
   return {
@@ -216,6 +234,8 @@ export function useNodeManager(): NodeManagerHook {
     handleGoToScenariosList,
     handlePreviousNode,
     handleNodeExecution,
+    updateScenarioSystemMessage,
+    toggleNodeSystemMessage,
     debugInfo
   };
 }

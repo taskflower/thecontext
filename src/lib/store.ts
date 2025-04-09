@@ -1,6 +1,7 @@
 // src/lib/store.ts
 import { create } from "zustand";
-import { NodeData, Scenario } from "../../raw_modules/revertcontext-nodes-module/src";
+import { EnhancedNodeData } from "../types/node";
+import { EnhancedScenario } from "../types/scenario";
 
 export interface TemplateSettings {
   layoutTemplate: string;
@@ -11,7 +12,7 @@ export interface TemplateSettings {
 export interface Workspace {
   id: string;
   name: string;
-  scenarios: Scenario[];
+  scenarios: EnhancedScenario[];
   templateSettings: TemplateSettings;
 }
 
@@ -28,11 +29,13 @@ interface AppActions {
   nextNode: () => void;
   prevNode: () => void;
   setNodeIndex: (index: number) => void;
+  updateScenarioSystemMessage: (workspaceId: string, scenarioId: string, systemMessage: string) => void;
+  updateNodeIncludeSystemMessage: (workspaceId: string, scenarioId: string, nodeId: string, includeSystemMessage: boolean) => void;
 }
 
 // Tworzenie domyślnego workspace z ustawieniami szablonów
 const createDefaultWorkspace = (): Workspace => {
-  const initialNode: NodeData = {
+  const initialNode: EnhancedNodeData = {
     id: "node-1",
     scenarioId: "scenario-1",
     label: "Welcome",
@@ -41,20 +44,22 @@ const createDefaultWorkspace = (): Workspace => {
     templateId: "basic-step"
   };
   
-  const secondNode: NodeData = {
+  const secondNode: EnhancedNodeData = {
     id: "node-2",
     scenarioId: "scenario-1",
     label: "Greeting",
     assistantMessage: "Nice to meet you, {{userName}}! How can I help you today?",
     contextKey: "userRequest",
-    templateId: "llm-query"
+    templateId: "llm-query",
+    includeSystemMessage: true  // Ten węzeł będzie korzystał z wiadomości systemowej
   };
 
-  const initialScenario: Scenario = {
+  const initialScenario: EnhancedScenario = {
     id: "scenario-1",
     name: "First Scenario",
     description: "A simple introduction scenario",
     nodes: [initialNode, secondNode],
+    systemMessage: "Jesteś pomocnym asystentem. Bądź zwięzły i przyjazny w swoich odpowiedziach."
   };
 
   return {
@@ -71,7 +76,7 @@ const createDefaultWorkspace = (): Workspace => {
 
 // Tworzenie workspace z szablonami New York Style
 const createNewYorkWorkspace = (): Workspace => {
-  const initialNode: NodeData = {
+  const initialNode: EnhancedNodeData = {
     id: "nyc-node-1",
     scenarioId: "nyc-scenario-1",
     label: "Introduction",
@@ -80,16 +85,17 @@ const createNewYorkWorkspace = (): Workspace => {
     templateId: "newyork-standard"
   };
   
-  const secondNode: NodeData = {
+  const secondNode: EnhancedNodeData = {
     id: "nyc-node-2",
     scenarioId: "nyc-scenario-1",
     label: "Question",
     assistantMessage: "Great to meet you, {{userName}}. What brings you here today?",
     contextKey: "userNeed",
-    templateId: "newyork-ai"
+    templateId: "newyork-ai",
+    includeSystemMessage: true  // Ten węzeł będzie korzystał z wiadomości systemowej
   };
   
-  const thirdNode: NodeData = {
+  const thirdNode: EnhancedNodeData = {
     id: "nyc-node-3",
     scenarioId: "nyc-scenario-1",
     label: "Feedback",
@@ -98,14 +104,15 @@ const createNewYorkWorkspace = (): Workspace => {
     templateId: "newyork-standard"
   };
 
-  const initialScenario: Scenario = {
+  const initialScenario: EnhancedScenario = {
     id: "nyc-scenario-1",
     name: "New York Experience",
     description: "A sleek, modern user interaction flow",
     nodes: [initialNode, secondNode, thirdNode],
+    systemMessage: "You are a sophisticated New York style concierge. Speak with an air of urban sophistication, be direct but helpful, and use occasional NYC references."
   };
   
-  const secondScenario: Scenario = {
+  const secondScenario: EnhancedScenario = {
     id: "nyc-scenario-2",
     name: "Quick Survey",
     description: "A brief customer feedback collection",
@@ -124,9 +131,11 @@ const createNewYorkWorkspace = (): Workspace => {
         label: "Rating Question",
         assistantMessage: "On a scale of 1-10, how would you rate your experience with us?",
         contextKey: "userRating",
-        templateId: "newyork-form"
+        templateId: "newyork-form",
+        includeSystemMessage: true  // Ten węzeł będzie korzystał z wiadomości systemowej
       }
-    ]
+    ],
+    systemMessage: "You are a survey bot collecting feedback. Be neutral, objective, and don't make assumptions based on ratings."
   };
 
   return {
@@ -181,4 +190,85 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   setNodeIndex: (index) => {
     set({ currentNodeIndex: index });
   },
+  
+  // Aktualizacja wiadomości systemowej dla scenariusza
+  updateScenarioSystemMessage: (workspaceId, scenarioId, systemMessage) => {
+    set((state) => {
+      const newWorkspaces = [...state.workspaces];
+      const workspaceIndex = newWorkspaces.findIndex(w => w.id === workspaceId);
+      
+      if (workspaceIndex !== -1) {
+        const workspace = newWorkspaces[workspaceIndex];
+        const scenarioIndex = workspace.scenarios.findIndex(s => s.id === scenarioId);
+        
+        if (scenarioIndex !== -1) {
+          // Tworzymy nową kopię scenariusza z zaktualizowaną wiadomością systemową
+          const updatedScenario = {
+            ...workspace.scenarios[scenarioIndex],
+            systemMessage
+          };
+          
+          // Aktualizujemy scenariusz w tablicy
+          const updatedScenarios = [...workspace.scenarios];
+          updatedScenarios[scenarioIndex] = updatedScenario;
+          
+          // Aktualizujemy workspace
+          newWorkspaces[workspaceIndex] = {
+            ...workspace,
+            scenarios: updatedScenarios
+          };
+        }
+      }
+      
+      return { workspaces: newWorkspaces };
+    });
+  },
+  
+  // Aktualizacja flagi includeSystemMessage dla węzła
+  updateNodeIncludeSystemMessage: (workspaceId, scenarioId, nodeId, includeSystemMessage) => {
+    set((state) => {
+      const newWorkspaces = [...state.workspaces];
+      const workspaceIndex = newWorkspaces.findIndex(w => w.id === workspaceId);
+      
+      if (workspaceIndex !== -1) {
+        const workspace = newWorkspaces[workspaceIndex];
+        const scenarioIndex = workspace.scenarios.findIndex(s => s.id === scenarioId);
+        
+        if (scenarioIndex !== -1) {
+          const scenario = workspace.scenarios[scenarioIndex];
+          const nodeIndex = scenario.nodes.findIndex(n => n.id === nodeId);
+          
+          if (nodeIndex !== -1) {
+            // Tworzymy nową kopię węzła z zaktualizowaną flagą
+            const updatedNode = {
+              ...scenario.nodes[nodeIndex],
+              includeSystemMessage
+            };
+            
+            // Aktualizujemy węzeł w tablicy
+            const updatedNodes = [...scenario.nodes];
+            updatedNodes[nodeIndex] = updatedNode;
+            
+            // Aktualizujemy scenariusz
+            const updatedScenario = {
+              ...scenario,
+              nodes: updatedNodes
+            };
+            
+            // Aktualizujemy tablicę scenariuszy
+            const updatedScenarios = [...workspace.scenarios];
+            updatedScenarios[scenarioIndex] = updatedScenario;
+            
+            // Aktualizujemy workspace
+            newWorkspaces[workspaceIndex] = {
+              ...workspace,
+              scenarios: updatedScenarios
+            };
+          }
+        }
+      }
+      
+      return { workspaces: newWorkspaces };
+    });
+  }
 }));

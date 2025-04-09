@@ -67,7 +67,7 @@ export const UserDropdown: React.FC = () => {
         <div className="text-left ">
           <div>{user.displayName || user.email}</div>
           <div className="text-xs">
-            Tokens: {user.tokens?.toLocaleString() || 0}
+            Tokens: {user.availableTokens?.toLocaleString() || 0}
           </div>
         </div>
       </button>
@@ -80,7 +80,7 @@ export const UserDropdown: React.FC = () => {
             </p>
             <p className="text-sm text-gray-500 truncate">{user.email}</p>
             <p className="text-sm text-gray-500">
-              Tokens: {user.tokens?.toLocaleString() || 0}
+              Tokens: {user.availableTokens?.toLocaleString() || 0}
             </p>
           </div>
 
