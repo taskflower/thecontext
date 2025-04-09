@@ -2,11 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { FlowStepProps } from 'template-registry-module';
 import { useAuth } from '@/hooks/useAuth';
+import { NodeData, Scenario, ContextItem } from '@/../raw_modules/revertcontext-nodes-module/src';
 
 // Rozszerzony interfejs dla FlowStepProps, który uwzględnia scenario i rozszerzony node
 interface ExtendedFlowStepProps extends Omit<FlowStepProps, 'node'> {
-  node: EnhancedNodeData;
-  scenario?: EnhancedScenario;
+  node: NodeData;
+  scenario?: Scenario;
+  contextItems?: ContextItem[];
 }
 
 const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({ 

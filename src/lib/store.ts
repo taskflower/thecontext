@@ -1,7 +1,6 @@
 // src/lib/store.ts
 import { create } from "zustand";
-import { EnhancedNodeData } from "../types/node";
-import { EnhancedScenario } from "../types/scenario";
+import { NodeData, Scenario } from "../../raw_modules/revertcontext-nodes-module/src"; // Updated import source
 
 export interface TemplateSettings {
   layoutTemplate: string;
@@ -12,7 +11,7 @@ export interface TemplateSettings {
 export interface Workspace {
   id: string;
   name: string;
-  scenarios: EnhancedScenario[];
+  scenarios: Scenario[];
   templateSettings: TemplateSettings;
 }
 
@@ -35,7 +34,7 @@ interface AppActions {
 
 // Tworzenie domyślnego workspace z ustawieniami szablonów
 const createDefaultWorkspace = (): Workspace => {
-  const initialNode: EnhancedNodeData = {
+  const initialNode: NodeData = {
     id: "node-1",
     scenarioId: "scenario-1",
     label: "Welcome",
@@ -44,7 +43,7 @@ const createDefaultWorkspace = (): Workspace => {
     templateId: "basic-step"
   };
   
-  const secondNode: EnhancedNodeData = {
+  const secondNode: NodeData = {
     id: "node-2",
     scenarioId: "scenario-1",
     label: "Greeting",
@@ -54,7 +53,7 @@ const createDefaultWorkspace = (): Workspace => {
     includeSystemMessage: true  // Ten węzeł będzie korzystał z wiadomości systemowej
   };
 
-  const initialScenario: EnhancedScenario = {
+  const initialScenario: Scenario = {
     id: "scenario-1",
     name: "First Scenario",
     description: "A simple introduction scenario",
@@ -76,7 +75,7 @@ const createDefaultWorkspace = (): Workspace => {
 
 // Tworzenie workspace z szablonami New York Style
 const createNewYorkWorkspace = (): Workspace => {
-  const initialNode: EnhancedNodeData = {
+  const initialNode: NodeData = {
     id: "nyc-node-1",
     scenarioId: "nyc-scenario-1",
     label: "Introduction",
@@ -85,7 +84,7 @@ const createNewYorkWorkspace = (): Workspace => {
     templateId: "newyork-standard"
   };
   
-  const secondNode: EnhancedNodeData = {
+  const secondNode: NodeData = {
     id: "nyc-node-2",
     scenarioId: "nyc-scenario-1",
     label: "Question",
@@ -95,7 +94,7 @@ const createNewYorkWorkspace = (): Workspace => {
     includeSystemMessage: true  // Ten węzeł będzie korzystał z wiadomości systemowej
   };
   
-  const thirdNode: EnhancedNodeData = {
+  const thirdNode: NodeData = {
     id: "nyc-node-3",
     scenarioId: "nyc-scenario-1",
     label: "Feedback",
@@ -104,7 +103,7 @@ const createNewYorkWorkspace = (): Workspace => {
     templateId: "newyork-standard"
   };
 
-  const initialScenario: EnhancedScenario = {
+  const initialScenario: Scenario = {
     id: "nyc-scenario-1",
     name: "New York Experience",
     description: "A sleek, modern user interaction flow",
@@ -112,7 +111,7 @@ const createNewYorkWorkspace = (): Workspace => {
     systemMessage: "You are a sophisticated New York style concierge. Speak with an air of urban sophistication, be direct but helpful, and use occasional NYC references."
   };
   
-  const secondScenario: EnhancedScenario = {
+  const secondScenario: Scenario = {
     id: "nyc-scenario-2",
     name: "Quick Survey",
     description: "A brief customer feedback collection",

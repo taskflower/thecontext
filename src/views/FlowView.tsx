@@ -11,9 +11,7 @@ export const FlowView: React.FC = () => {
 
   const {
     currentNode,
-    currentScenario,
     isLastNode,
-    contextItems,
     handleGoToScenariosList,
     handlePreviousNode,
     handleNodeExecution,
@@ -63,11 +61,10 @@ export const FlowView: React.FC = () => {
           <div className="space-y-4">
             {React.createElement(compatibleComponent, {
               node: currentNode,
-              scenario: currentScenario,  // Przekazujemy też informacje o scenariuszu
               onSubmit: handleNodeExecution,
               onPrevious: handlePreviousNode,
               isLastNode,
-              contextItems,
+              contextItems: debugInfo.contextItems,
             })}
             
             <div className="mt-8 p-4 bg-gray-100 rounded-lg">
@@ -94,11 +91,10 @@ export const FlowView: React.FC = () => {
         <div className="space-y-4">
           <FlowStepComponent
             node={currentNode}
-            scenario={currentScenario}  // Przekazujemy też informacje o scenariuszu
             onSubmit={handleNodeExecution}
             onPrevious={handlePreviousNode}
             isLastNode={isLastNode}
-            contextItems={contextItems}
+            contextItems={debugInfo.contextItems}
           />
 
           <div className="mt-8 p-4 bg-gray-100 rounded-lg">

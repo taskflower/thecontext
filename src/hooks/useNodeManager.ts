@@ -1,17 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/hooks/useNodeManager.ts
 import { useState, useEffect, useMemo } from "react";
-import { NodeManager } from "../../raw_modules/revertcontext-nodes-module/src";
-import { ContextItem, NodeExecutionResult } from "../../raw_modules/revertcontext-nodes-module/src";
+import { NodeManager, ContextItem, NodeExecutionResult, NodeData, Scenario } from "../../raw_modules/revertcontext-nodes-module/src";
 import { useAppStore } from "../lib/store";
 import { useNavigate, useParams } from 'react-router-dom';
-
 
 interface NodeManagerHook {
   // Node data
   nodeManager: NodeManager;
-  currentNode: EnhancedNodeData | null;
-  currentScenario: EnhancedScenario | null;
+  currentNode: NodeData | null;
+  currentScenario: Scenario | null;
   isLastNode: boolean;
   
   // Context management
@@ -62,7 +60,7 @@ export function useNodeManager(): NodeManagerHook {
   } = useAppStore();
   
   const [contextItems, setContextItems] = useState<ContextItem[]>([]);
-  const [currentNode, setCurrentNode] = useState<EnhancedNodeData | null>(null);
+  const [currentNode, setCurrentNode] = useState<NodeData | null>(null);
 
   // Set the selected workspace and scenario based on URL params
   useEffect(() => {
@@ -95,7 +93,7 @@ export function useNodeManager(): NodeManagerHook {
   // Handle specific node navigation if node param is present
   useEffect(() => {
     if (nodeParam && currentScenario) {
-      const nodeIndex = currentScenario.nodes.findIndex((n: EnhancedNodeData) => n.id === nodeParam);
+      const nodeIndex = currentScenario.nodes.findIndex((n: NodeData) => n.id === nodeParam);
       if (nodeIndex !== -1) {
         setNodeIndex(nodeIndex);
       }
@@ -121,7 +119,7 @@ export function useNodeManager(): NodeManagerHook {
         const originalNodeData = currentScenario.nodes[currentNodeIndex];
         
         if (preparedNode) {
-          const enhancedNode: EnhancedNodeData = {
+          const nodeWithTemplate: NodeData = {
             ...preparedNode,
             templateId: (originalNodeData as any).templateId || 
                        currentWorkspace?.templateSettings?.defaultFlowStepTemplate || 
@@ -129,7 +127,7 @@ export function useNodeManager(): NodeManagerHook {
             includeSystemMessage: (originalNodeData as any).includeSystemMessage
           };
           
-          setCurrentNode(enhancedNode);
+          setCurrentNode(nodeWithTemplate);
         }
       }
     }

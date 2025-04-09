@@ -1,7 +1,5 @@
+// raw_modules/revertcontext-nodes-module/src/types.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// raw_modules/nodes-module/src/types.ts
-
-// Istniejące eksporty (np. NodeData, ContextItem, itd.)
 
 export interface Position {
   x: number;
@@ -16,6 +14,7 @@ export interface NodeData {
   description?: string; 
   position?: Position;
   assistantMessage?: string;
+  initialUserMessage?: string;
   userPrompt?: string;
   contextKey?: string;
   contextJsonPath?: string;
@@ -23,6 +22,17 @@ export interface NodeData {
   pluginData?: Record<string, any>;
   createdAt?: Date;
   updatedAt?: Date;
+  // System message flag
+  includeSystemMessage?: boolean;
+  // Template ID for UI rendering
+  templateId?: string;
+  // Form fields for form-type nodes
+  formFields?: Array<{
+    name: string;
+    label: string;
+    type: string;
+    required: boolean;
+  }>;
   [key: string]: any;
 }
 
@@ -54,12 +64,14 @@ export interface NodeStoreAdapter {
   deleteNode(nodeId: string): Promise<boolean>;
 }
 
-// Dodajemy interfejs Scenario
+// Rozszerzony interfejs Scenario z systemMessage
 export interface Scenario {
   id: string;
   name: string;
   description: string;
   nodes: NodeData[];
-  // Opcjonalnie możesz dodać inne pola, np. edges, jeżeli są używane
+  // System message for LLM interactions
+  systemMessage?: string;
+  // Optional edges for graph representation
   edges?: any[];
 }
