@@ -5,15 +5,13 @@ import { NodeData } from '../../../raw_modules/revertcontext-nodes-module/src/ty
 
 export class SimpleTemplate extends BaseTemplate {
   readonly id = 'simple';
-  readonly name = 'Simple Template';
-  readonly description = 'A minimal template with basic and form steps updating the same context';
+  readonly name = 'Architectural Template';
+  readonly description = 'A minimalist template with strong typography and architectural style';
   readonly version = '1.0.0';
   readonly author = 'Template Creator';
 
   constructor() {
     super();
-    // Inicjalizacja początkowego kontekstu - można to zrobić tutaj,
-    // ale bardziej sensownie jest to robić przy ładowaniu workspace'a
   }
 
   getConfig(): BaseTemplateConfig {
@@ -21,7 +19,7 @@ export class SimpleTemplate extends BaseTemplate {
     const layouts = [
       {
         id: 'simple-layout',
-        name: 'Simple Layout',
+        name: 'Architectural Layout',
         component: lazy(() => import('./layouts/SimpleLayout'))
       }
     ];
@@ -30,7 +28,7 @@ export class SimpleTemplate extends BaseTemplate {
     const widgets = [
       {
         id: 'simple-context-display',
-        name: 'Simple Context Display',
+        name: 'Context Display',
         category: 'flow',
         component: lazy(() => import('./widgets/SimpleContextWidget')) as any
       }
@@ -93,7 +91,7 @@ export class SimpleTemplate extends BaseTemplate {
       ]
     };
 
-    // Scenariusz 2 - Preferencje produktu (korzysta z tych samych danych kontekstowych)
+    // Scenariusz 2 - Preferencje produktu
     const productNode: NodeData = {
       id: "node-3",
       scenarioId: "scenario-2",
@@ -183,8 +181,8 @@ Dziękujemy za wypełnienie wszystkich informacji!`,
     // Zwracamy dane przestrzeni roboczej
     return {
       id: "simple-workspace",
-      name: "Prosty Szablon",
-      description: "Wspólny kontekst między scenariuszami",
+      name: "Architectural Template",
+      description: "Minimalist design with strong typography",
       scenarios: [userScenario, productScenario, summaryScenario],
       templateSettings: {
         layoutTemplate: "simple-layout",

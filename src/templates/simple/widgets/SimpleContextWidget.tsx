@@ -1,23 +1,22 @@
 // src/templates/simple/widgets/SimpleContextWidget.tsx
 import React from 'react';
-import { WidgetProps } from '@/views/types'; // Zmieniamy import na lokalny
+import { WidgetProps } from '@/views/types';
 import { useContextStore } from '@/lib/contextStore';
 
 const SimpleContextWidget: React.FC<WidgetProps> = () => {
-  // Pobieramy kontekst bezpośrednio z Zustand
   const context = useContextStore(state => state.context);
   const userProfile = context.userProfile || {};
   
-  // Funkcja do renderowania obiektu
+  // Improved rendering function with architectural style
   const renderObject = (obj: any) => {
     if (!obj || typeof obj !== 'object') return null;
     
     return Object.entries(obj).map(([key, value]) => {
       if (value !== null && typeof value === 'object') {
         return (
-          <div key={key} className="mt-2">
-            <h4 className="font-medium text-gray-700">{key}:</h4>
-            <div className="pl-4">
+          <div key={key} className="mt-6">
+            <h4 className="font-medium uppercase text-xs tracking-widest text-gray-900 border-b border-gray-200 pb-2">{key}</h4>
+            <div className="pl-4 mt-2">
               {renderObject(value)}
             </div>
           </div>
@@ -25,10 +24,10 @@ const SimpleContextWidget: React.FC<WidgetProps> = () => {
       }
       
       return (
-        <div key={key} className="py-1 flex">
-          <span className="text-gray-600 w-1/3">{key}:</span>
-          <span className="text-gray-900 w-2/3">
-            {value ? String(value) : '-'}
+        <div key={key} className="py-3 flex border-b border-gray-100">
+          <span className="text-gray-500 w-1/3 uppercase text-xs tracking-widest font-medium">{key}</span>
+          <span className="text-gray-900 w-2/3 font-light">
+            {value ? String(value) : '—'}
           </span>
         </div>
       );
@@ -36,19 +35,22 @@ const SimpleContextWidget: React.FC<WidgetProps> = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
-      <h2 className="text-lg font-bold mb-3">Kontekst Aplikacji</h2>
+    <div className="border-t-2 border-black pt-8">
+      <h2 className="text-xl uppercase tracking-wide font-light mb-6 flex items-center">
+        <span className="w-8 h-px bg-black mr-4"></span>
+        Kontekst Aplikacji
+      </h2>
       
-      <div className="bg-gray-50 p-4 rounded">
+      <div className="bg-white rounded p-1">
         {Object.keys(userProfile).length > 0 ? (
           renderObject(userProfile)
         ) : (
-          <p className="text-gray-500 italic">Kontekst jest pusty</p>
+          <p className="text-gray-400 italic font-light">Kontekst jest pusty</p>
         )}
       </div>
       
-      <div className="mt-3 text-sm text-gray-500">
-        Ten kontekst jest współdzielony między scenariuszami
+      <div className="mt-6 text-xs uppercase tracking-widest text-gray-400">
+        Współdzielony kontekst
       </div>
     </div>
   );

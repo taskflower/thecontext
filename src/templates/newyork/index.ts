@@ -17,7 +17,7 @@ interface Scenario {
 export class NewYorkTemplate extends BaseTemplate {
   readonly id = 'newyork';
   readonly name = 'New York Template';
-  readonly description = 'A sleek, modern design with dark accents';
+  readonly description = 'A sleek, modern design with light, elegant aesthetics';
   readonly version = '1.0.0';
   readonly author = 'Design Team';
 
@@ -164,7 +164,7 @@ export class NewYorkTemplate extends BaseTemplate {
         layoutTemplate: "newyork-main",
         scenarioWidgetTemplate: "newyork-card",
         defaultFlowStepTemplate: "newyork-standard",
-        theme: 'dark'
+        theme: 'light'  // Changed from 'dark' to 'light' to match our new lighter style
       },
       initialContext: {
         userName: '',

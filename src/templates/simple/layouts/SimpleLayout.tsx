@@ -1,6 +1,6 @@
 // src/templates/simple/layouts/SimpleLayout.tsx
 import React from 'react';
-import { LayoutProps } from '@/views/types'; // Zmieniamy import na lokalny
+import { LayoutProps } from '@/views/types';
 import SimpleContextWidget from '../widgets/SimpleContextWidget';
 
 interface SimpleLayoutProps extends LayoutProps {
@@ -15,18 +15,13 @@ const SimpleLayout: React.FC<SimpleLayoutProps> = ({
   contextItems = []
 }) => {
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="container mx-auto max-w-3xl">
-        {/* Prosty nagłówek z tytułem */}
-        <header className="mb-4">
-          {title && <h1 className="text-2xl font-bold text-center">{title}</h1>}
-        </header>
-
-        {/* Przycisk powrotu */}
+    <div className="min-h-screen bg-white p-6">
+      <div className="container mx-auto max-w-4xl">
+        {/* Back button with minimal style */}
         {showBackButton && (
           <button
             onClick={onBackClick}
-            className="text-sm text-gray-600 hover:text-gray-800 mb-4 flex items-center"
+            className="text-xs uppercase tracking-widest font-medium text-gray-500 hover:text-black mb-8 flex items-center transition-colors"
           >
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
@@ -35,25 +30,31 @@ const SimpleLayout: React.FC<SimpleLayoutProps> = ({
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="currentColor" 
-              strokeWidth="2" 
+              strokeWidth="1" 
               strokeLinecap="round" 
               strokeLinejoin="round" 
-              className="mr-1"
+              className="mr-2"
             >
               <path d="M19 12H5M12 19l-7-7 7-7"/>
             </svg>
-            Wróć
+            WRÓĆ
           </button>
         )}
 
-        {/* Główna zawartość */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        {/* Architectural magazine inspired header */}
+        <header className="mb-10 border-b border-black pb-4">
+          {title && <h1 className="text-3xl font-light uppercase tracking-wide">{title}</h1>}
+        </header>
+
+        {/* Main content with minimal border */}
+        <div className="border-l-2 border-black pl-6 mb-12">
           {children}
         </div>
-         {/* Context Widget Placeholder */}
-         <div className="mt-4">
-           <SimpleContextWidget data={contextItems} />
-         </div>
+         
+        {/* Context Widget with architectural style */}
+        <div className="mt-12">
+          <SimpleContextWidget data={contextItems} />
+        </div>
       </div>
     </div>
   );

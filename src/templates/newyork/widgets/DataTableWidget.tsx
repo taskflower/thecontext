@@ -12,8 +12,8 @@ const DataTableWidget: React.FC<WidgetProps> = ({
     : ['name', 'description'];
 
   return (
-    <div className="overflow-hidden rounded-lg border border-gray-200 shadow-sm">
-      <table className="min-w-full divide-y divide-gray-200">
+    <div className="overflow-hidden rounded-lg border border-gray-100 shadow-sm">
+      <table className="min-w-full divide-y divide-gray-100">
         <thead className="bg-gray-50">
           <tr>
             {columns.map(column => (
@@ -30,7 +30,7 @@ const DataTableWidget: React.FC<WidgetProps> = ({
             </th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="bg-white divide-y divide-gray-100">
           {data.map((item: any) => (
             <tr 
               key={item.id}
@@ -50,7 +50,7 @@ const DataTableWidget: React.FC<WidgetProps> = ({
               ))}
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <button 
-                  className="text-black hover:text-gray-700 transition-colors"
+                  className="p-1 rounded-full text-gray-400 hover:text-black hover:bg-gray-50 transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
                     onSelect && onSelect(item.id);
@@ -58,15 +58,16 @@ const DataTableWidget: React.FC<WidgetProps> = ({
                 >
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
-                    className="h-5 w-5" 
-                    viewBox="0 0 20 20" 
-                    fill="currentColor"
+                    width="16" 
+                    height="16" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
                   >
-                    <path 
-                      fillRule="evenodd" 
-                      d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" 
-                      clipRule="evenodd" 
-                    />
+                    <path d="M9 18l6-6-6-6"/>
                   </svg>
                 </button>
               </td>

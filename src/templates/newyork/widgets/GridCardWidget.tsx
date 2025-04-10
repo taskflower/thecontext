@@ -12,15 +12,18 @@ const GridCardWidget: React.FC<WidgetProps> = ({
         <div 
           key={item.id} 
           onClick={() => onSelect && onSelect(item.id)}
-          className="group cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
+          className="group cursor-pointer transition-all duration-200"
         >
-          <div className="bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-            <div className="p-1 bg-gradient-to-r from-gray-900 to-black">
-              <div className="h-1"></div>
+          <div className="bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden hover:shadow transition-shadow">
+            {/* Slim top indicator instead of gradient bar */}
+            <div className="flex items-center space-x-1 p-3 pb-0">
+              <div className="h-1 w-6 bg-gray-200 rounded"></div>
+              <div className="h-1 w-12 bg-black rounded"></div>
+              <div className="h-1 w-6 bg-gray-200 rounded"></div>
             </div>
             
             <div className="p-5">
-              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-black">
+              <h3 className="text-lg font-medium text-gray-900">
                 {item.name}
               </h3>
               
@@ -32,23 +35,32 @@ const GridCardWidget: React.FC<WidgetProps> = ({
               
               <div className="mt-4 flex justify-between items-center">
                 {item.count !== undefined && (
-                  <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-md">
+                  <span className="text-xs text-gray-500">
                     {item.count} {item.countLabel || 'items'}
                   </span>
                 )}
                 
-                <svg 
-                  className="h-5 w-5 text-gray-400 group-hover:text-black transition-colors"
-                  xmlns="http://www.w3.org/2000/svg" 
-                  viewBox="0 0 20 20" 
-                  fill="currentColor"
+                <button 
+                  className="p-1 rounded-full text-gray-400 hover:text-black hover:bg-gray-50 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelect && onSelect(item.id);
+                  }}
                 >
-                  <path 
-                    fillRule="evenodd" 
-                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" 
-                    clipRule="evenodd" 
-                  />
-                </svg>
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width="16" 
+                    height="16" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  >
+                    <path d="M9 18l6-6-6-6"/>
+                  </svg>
+                </button>
               </div>
             </div>
           </div>

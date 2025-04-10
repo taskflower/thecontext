@@ -1,6 +1,6 @@
 // src/templates/default/flowSteps/FormInputTemplate.tsx
 import { useContextStore } from "@/lib/contextStore";
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { FlowStepProps } from "template-registry-module";
 
 const FormInputTemplate: React.FC<FlowStepProps> = ({
@@ -20,6 +20,20 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
   const assistantMessage = node.assistantMessage
     ? processTemplate(node.assistantMessage)
     : "";
+
+  // Funkcja sprawdzająca, czy wszystkie wymagane pola są wypełnione
+  const areRequiredFieldsFilled = useCallback(() => {
+    if (!node.formFields) return true;
+    
+    return node.formFields.every(field => {
+      if (field.required) {
+        const value = formData[field.name];
+        // Sprawdź, czy wartość istnieje i nie jest pusta
+        return value !== undefined && value !== "" && value !== null;
+      }
+      return true;
+    });
+  }, [node.formFields, formData]);
 
   // Obsługa zmian pól formularza
   const handleChange = (name: string, value: any) => {
@@ -149,10 +163,11 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
             Wstecz
           </button>
 
-          {/* Przycisk zatwierdzenia */}
+          {/* Przycisk zatwierdzenia - poprawiony z walidacją */}
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-md"
+            disabled={!areRequiredFieldsFilled()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md disabled:bg-blue-300 disabled:cursor-not-allowed"
           >
             {isLastNode ? "Zakończ" : "Dalej"}
           </button>
