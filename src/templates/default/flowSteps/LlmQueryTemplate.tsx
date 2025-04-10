@@ -87,17 +87,14 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
       if (schema) {
         // Sprawdź, czy schema to string czy obiekt
         if (typeof schema === 'string') {
-          setSystemPrompt(schema);
           setSchemaForUserMessage(schema);
         } else if (schema.systemPrompt) {
           // Jeśli obiekt, pobierz systemPrompt
-          setSystemPrompt(schema.systemPrompt);
           setSchemaForUserMessage(schema.systemPrompt);
         } else {
           // Jeśli to zwykły obiekt bez property systemPrompt, konwertuj go na string
           try {
             const schemaString = JSON.stringify(schema, null, 2);
-            setSystemPrompt(schemaString);
             setSchemaForUserMessage(schemaString);
           } catch (error) {
             console.error("Nie udało się skonwertować schematu na string:", error);
@@ -107,14 +104,9 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
     }
   }, [attrs, getContextPath]);
 
-  // Przygotuj ostateczną wiadomość systemową (z szablonu lub schema)
-  // Jeśli istnieje systemPrompt (schemat LLM) i systemMessage, połącz je
+  // Przygotuj ostateczną wiadomość systemową (tylko z szablonu, bez schematu)
   let effectiveSystemMessage = "";
-  if (scenario?.systemMessage && systemPrompt) {
-    effectiveSystemMessage = `${scenario.systemMessage}\n\n${systemPrompt}`;
-  } else if (systemPrompt) {
-    effectiveSystemMessage = systemPrompt;
-  } else if (scenario?.systemMessage) {
+  if (scenario?.systemMessage) {
     effectiveSystemMessage = scenario.systemMessage;
   }
 

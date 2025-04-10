@@ -111,12 +111,12 @@ export class DefaultTemplate extends BaseTemplate {
           attrs: {
             llmSchemaPath: "llmSchemas.webAnalysing",
             includeSystemMessage: true,
-            initialUserMessage: "Przeanalizuj adres www {{userProfile.www}}",
+            initialUserMessage: "Przeanalizuj adres www {{userProfile.www}}. Odpowiedź wyslij jako obiekt JSON zgodnie ze schematem:",
           },
         },
       ],
       systemMessage:
-        "Jesteś w roli twórcy strategii marketingowej. Używamy języka polskiego. Odpowiedź wyslij jako obiekt JSON zgodnie ze schematem:",
+        "Jesteś w roli twórcy strategii marketingowej. Używamy języka polskiego.",
     };
 
     // Dane początkowe kontekstu
