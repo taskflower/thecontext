@@ -1,13 +1,11 @@
 // src/templates/flowSteps/LlmQueryTemplate.tsx
 import React, { useState, useEffect } from "react";
 import { FlowStepProps } from "template-registry-module";
-import {
-  NodeData,
-  Scenario,
-} from "@/../raw_modules/revertcontext-nodes-module/src";
+
 import { useAppStore } from "@/lib/store";
 import { useChat } from "@/hooks/useChat";
 import { messagesStyles } from "../resources/messagesStyles";
+import { NodeData, Scenario } from "@/views/types";
 
 // Rozszerzony interfejs dla FlowStepProps, który uwzględnia scenario i rozszerzony node
 interface ExtendedFlowStepProps extends Omit<FlowStepProps, "node"> {
@@ -70,6 +68,7 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
 }) => {
   const [userInput, setUserInput] = useState("");
   const [systemPrompt, setSystemPrompt] = useState<string>("");
+  const [schemaForUserMessage, setSchemaForUserMessage] = useState<string>("");
   const processTemplate = useAppStore((state) => state.processTemplate);
   const getContextPath = useAppStore((state) => state.getContextPath);
 
@@ -89,14 +88,17 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
         // Sprawdź, czy schema to string czy obiekt
         if (typeof schema === 'string') {
           setSystemPrompt(schema);
+          setSchemaForUserMessage(schema);
         } else if (schema.systemPrompt) {
           // Jeśli obiekt, pobierz systemPrompt
           setSystemPrompt(schema.systemPrompt);
+          setSchemaForUserMessage(schema.systemPrompt);
         } else {
           // Jeśli to zwykły obiekt bez property systemPrompt, konwertuj go na string
           try {
             const schemaString = JSON.stringify(schema, null, 2);
             setSystemPrompt(schemaString);
+            setSchemaForUserMessage(schemaString);
           } catch (error) {
             console.error("Nie udało się skonwertować schematu na string:", error);
           }
@@ -116,13 +118,21 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
     effectiveSystemMessage = scenario.systemMessage;
   }
 
+  // Przygotuj wiadomość użytkownika z dodanym schematem
+  let effectiveUserMessage = "";
+  if (attrs.initialUserMessage && schemaForUserMessage) {
+    effectiveUserMessage = `${processTemplate(attrs.initialUserMessage)}\n\n${schemaForUserMessage}`;
+  } else if (attrs.initialUserMessage) {
+    effectiveUserMessage = processTemplate(attrs.initialUserMessage);
+  } else if (schemaForUserMessage) {
+    effectiveUserMessage = schemaForUserMessage;
+  }
+
   // Używamy hooka useChat
   const { sendMessage, isLoading, error, debugInfo } = useChat({
     includeSystemMessage: attrs.includeSystemMessage || false,
     systemMessage: effectiveSystemMessage,
-    initialUserMessage: attrs.initialUserMessage
-      ? processTemplate(attrs.initialUserMessage)
-      : "",
+    initialUserMessage: effectiveUserMessage,
     assistantMessage: processedAssistantMessage || "",
     contextPath: node.contextPath || "",
     onDataSaved: (data) => {
@@ -151,11 +161,12 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
         />
       )}
 
-      {attrs.initialUserMessage && (
+      {/* Wyświetl wiadomość użytkownika tylko jeśli istnieje */}
+      {effectiveUserMessage && (
         <InfoBadge
           type="user"
           title="Initial User Message"
-          content={processTemplate(attrs.initialUserMessage)}
+          content={effectiveUserMessage}
         />
       )}
 
