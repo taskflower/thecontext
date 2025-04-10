@@ -12,8 +12,6 @@ export interface Workspace {
   initialContext: Record<string, any>;
 }
 
-
-
 interface AppState {
   // Podstawowe dane o workspaces
   workspaces: Workspace[];
