@@ -15,64 +15,93 @@ export function useNodeManager() {
   const [currentNodeIndex, setCurrentNodeIndex] = useState(0);
   const currentWorkspace = getCurrentWorkspace();
   const currentScenario = getCurrentScenario();
+  
+  // Get nodes safely, with fallback to empty array
   const nodes = currentScenario?.nodes || [];
-  const currentNode = nodes[currentNodeIndex];
+  
+  // Get current node or undefined if not available
+  const currentNode = nodes.length > currentNodeIndex ? nodes[currentNodeIndex] : undefined;
+  
+  // Check if we're on the last node
   const isLastNode = currentNodeIndex === nodes.length - 1;
 
-  // Ustawienie aktywnego workspace’a w contextStore – tylko raz gdy się zmieni
+  // Logging for debugging
+  useEffect(() => {
+    console.log("[useNodeManager] State:", {
+      currentWorkspaceId: currentWorkspace?.id,
+      currentScenarioId: currentScenario?.id,
+      nodesCount: nodes.length,
+      currentNodeIndex,
+      currentNodeId: currentNode?.id
+    });
+  }, [currentWorkspace, currentScenario, nodes, currentNodeIndex, currentNode]);
+
+  // Set active workspace in contextStore when it changes
   useEffect(() => {
     if (currentWorkspace?.id) {
-      console.log("[useNodeManager] Ustawianie aktywnego workspace:", currentWorkspace.id);
+      console.log("[useNodeManager] Setting active workspace:", currentWorkspace.id);
       setActiveWorkspace(currentWorkspace.id);
     }
   }, [currentWorkspace?.id, setActiveWorkspace]);
 
-  // Resetowanie indeksu node'a przy zmianie scenariusza
+  // Reset node index when scenario changes
   useEffect(() => {
-    console.log("[useNodeManager] Zmiana scenariusza, resetowanie indeksu node'a");
+    console.log("[useNodeManager] Scenario changed, resetting node index");
     setCurrentNodeIndex(0);
   }, [currentScenario?.id]);
 
-  // Pobranie aktualnego kontekstu jako tablica wpisów
+  // Get current context entries
   const contextItems = Object.entries(context || {});
 
-  // Obsługa powrotu do listy scenariuszy
+  // Go back to scenarios list
   const handleGoToScenariosList = () => {
     if (currentWorkspace) {
-      console.log("[useNodeManager] Przejście do listy scenariuszy");
+      console.log("[useNodeManager] Navigating to scenarios list");
       navigate(`/${currentWorkspace.id}`);
+    } else {
+      console.log("[useNodeManager] No workspace, navigating to root");
+      navigate('/');
     }
   };
 
+  // Go to previous node or scenarios list
   const handlePreviousNode = () => {
     if (currentNodeIndex > 0) {
-      console.log("[useNodeManager] Przejście do poprzedniego node'a");
+      console.log("[useNodeManager] Moving to previous node:", currentNodeIndex - 1);
       setCurrentNodeIndex(currentNodeIndex - 1);
     } else {
       handleGoToScenariosList();
     }
   };
 
+  // Handle node execution with context updates
   const handleNodeExecution = (value: any) => {
-    if (!currentNode) return;
+    if (!currentNode) {
+      console.warn("[useNodeManager] Cannot execute node: no current node");
+      return;
+    }
     
-    console.log("[useNodeManager] Wykonywanie node'a:", currentNode.type, "wartość:", value);
+    console.log("[useNodeManager] Executing node:", currentNode.type, "value:", value);
 
-    if (
-      (currentNode.type === "input" || !currentNode.type) &&
-      currentNode.contextKey &&
-      currentNode.contextJsonPath
-    ) {
-      console.log(`[useNodeManager] Aktualizacja ścieżki kontekstu ${currentNode.contextKey}.${currentNode.contextJsonPath}`);
+    // Handle basic input nodes
+    if ((currentNode.type === "input" || !currentNode.type) && 
+        currentNode.contextKey && 
+        currentNode.contextJsonPath) {
+      console.log(`[useNodeManager] Updating context path ${currentNode.contextKey}.${currentNode.contextJsonPath}`);
       updateContextPath(
         currentNode.contextKey,
         currentNode.contextJsonPath,
         value
       );
-    } else if (currentNode.type === "form" && currentNode.contextKey) {
-      console.log("[useNodeManager] Aktualizacja formularza dla klucza:", currentNode.contextKey);
+    } 
+    // Handle form nodes
+    else if (currentNode.type === "form" && currentNode.contextKey) {
+      console.log("[useNodeManager] Updating form data for key:", currentNode.contextKey);
       if (typeof value === 'object') {
+        // Get existing context data for this key
         const formData = { ...(context[currentNode.contextKey] || {}) };
+        
+        // Update values from form
         Object.entries(value).forEach(([fieldPath, fieldValue]) => {
           const setPath = (obj: any, path: string, val: any) => {
             const keys = path.split('.');
@@ -87,30 +116,36 @@ export function useNodeManager() {
             const lastKey = keys[keys.length - 1];
             current[lastKey] = val;
           };
-          console.log(`[useNodeManager] Ustawianie pola ${fieldPath}:`, fieldValue);
+          console.log(`[useNodeManager] Setting field ${fieldPath}:`, fieldValue);
           setPath(formData, fieldPath, fieldValue);
         });
+        
+        // Update context with new form data
         updateContext(currentNode.contextKey, formData);
       } else {
-        console.warn("[useNodeManager] Nieoczekiwany format danych formularza:", value);
+        console.warn("[useNodeManager] Unexpected form data format:", value);
       }
-    } else if (currentNode.contextKey) {
-      console.log("[useNodeManager] Aktualizacja całego klucza kontekstu:", currentNode.contextKey);
+    } 
+    // Handle other node types
+    else if (currentNode.contextKey) {
+      console.log("[useNodeManager] Updating context key:", currentNode.contextKey);
       updateContext(currentNode.contextKey, value);
     }
 
+    // Handle navigation
     if (isLastNode) {
-      console.log("[useNodeManager] Ostatni node osiągnięty, powrót do listy scenariuszy");
+      console.log("[useNodeManager] Last node reached, returning to scenarios list");
       handleGoToScenariosList();
     } else {
-      console.log("[useNodeManager] Przejście do następnego node'a");
+      console.log("[useNodeManager] Moving to next node:", currentNodeIndex + 1);
       setCurrentNodeIndex(currentNodeIndex + 1);
     }
   };
 
+  // Debugging info
   const debugInfo = {
-    currentWorkspace: currentWorkspace?.id,
-    currentScenario: currentScenario?.id,
+    currentWorkspaceId: currentWorkspace?.id,
+    currentScenarioId: currentScenario?.id,
     currentNodeIndex,
     nodeCount: nodes.length,
     currentNodeId: currentNode?.id,

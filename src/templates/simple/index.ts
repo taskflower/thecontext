@@ -24,7 +24,15 @@ export class SimpleTemplate extends BaseTemplate {
           component: React.lazy(() => import('./layouts/SimpleLayout'))
         }
       ],
-      widgets: [],
+      widgets: [
+        // Dodajemy widgety, które były brakujące
+        {
+          id: 'simple-card',
+          name: 'Simple Card',
+          category: 'scenario',
+          component: React.lazy(() => import('../default/widgets/CardListWidget')) // Używamy widgetu z domyślnego szablonu
+        }
+      ],
       flowSteps: [
         {
           id: 'basic-step',
@@ -72,7 +80,7 @@ export class SimpleTemplate extends BaseTemplate {
       ],
       templateSettings: {
         layoutTemplate: 'simple-layout',
-        scenarioWidgetTemplate: '',
+        scenarioWidgetTemplate: 'simple-card', // Ustawienie widgetu, który dodaliśmy wyżej
         defaultFlowStepTemplate: 'basic-step',
         showContextWidget: true,
         theme: 'light'
