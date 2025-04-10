@@ -1,172 +1,35 @@
-import React, { useState, useCallback, useEffect } from "react";
-import { FormField,FlowStepProps } from "@/views/types";
-import { useAppStore } from "@/lib/store";
+import React from "react";
+import { FlowStepProps } from "@/views/types";
+import { useFormInput } from "@/hooks/useFormInput";
 
-// Definicja interfejsu dla atrybutów formularza
-interface FormInputAttrs {
-  formSchemaPath?: string; // Ścieżka do schematu formularza w kontekście
-  [key: string]: any;
-}
 
 const FormInputTemplate: React.FC<FlowStepProps> = ({
   node,
   onSubmit,
   onPrevious,
   isLastNode,
-  contextItems = [],
 }) => {
-  // Stan formularza
-  const [formData, setFormData] = useState<Record<string, any>>({});
-  const [formFields, setFormFields] = useState<FormField[]>([]);
-  
-  // Wyciągamy attrs z node (z typowaniem)
-  const attrs = node.attrs as FormInputAttrs;
+  const {
+    formData,
+    formFields,
+    processedAssistantMessage,
+    handleChange,
+    handleSubmit,
+    areRequiredFieldsFilled,
+  } = useFormInput({ node });
 
-  // Pobieramy funkcje kontekstu z AppStore
-  const processTemplate = useAppStore((state) => state.processTemplate);
-  const updateContext = useAppStore((state) => state.updateContext);
-  const getContextPath = useAppStore((state) => state.getContextPath);
-  const getContext = useAppStore((state) => state.getContext);
-  const updateByContextPath = useAppStore((state) => state.updateByContextPath);
-
-  // Załaduj schemat formularza
-  useEffect(() => {
-    if (attrs?.formSchemaPath) {
-      const schema = getContextPath(attrs.formSchemaPath);
-      if (schema && Array.isArray(schema)) {
-        setFormFields(schema);
-        console.log("Załadowano schemat formularza:", schema);
-      }
-    }
-  }, [attrs, getContextPath]);
-
-  // Przetwarzamy wiadomość asystenta z zmiennymi kontekstowymi
-  const assistantMessage = node.assistantMessage
-    ? processTemplate(node.assistantMessage)
-    : "";
-
-  // Funkcja sprawdzająca, czy wszystkie wymagane pola są wypełnione
-  const areRequiredFieldsFilled = useCallback(() => {
-    if (!formFields.length) return true;
-    
-    return formFields.every(field => {
-      if (field.required) {
-        const value = formData[field.name];
-        return value !== undefined && value !== "" && value !== null;
-      }
-      return true;
-    });
-  }, [formFields, formData]);
-
-  // Obsługa zmian pól formularza
-  const handleChange = (name: string, value: any) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  // Handle form submission with onSubmit callback
+  const onFormSubmit = (e: React.FormEvent) => {
+    const data = handleSubmit(e);
+    onSubmit(data);
   };
 
-  // Obsługa zatwierdzenia formularza
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Nowa logika obsługująca contextPath
-    if (node.contextPath && formFields.length > 0) {
-      // Pobieramy główny klucz kontekstu z contextPath
-      const contextKey = node.contextPath.split('.')[0];
-      
-      // Pobierz aktualny kontekst
-      let contextData = getContext();
-      const profileData = contextData[contextKey] || {};
-      
-      // Tworzę kopię, żeby nie modyfikować oryginalnego obiektu
-      const updatedProfile = {...profileData};
-      
-      console.log("Aktualny kontekst przed aktualizacją:", updatedProfile);
-      console.log("Dane formularza:", formData);
-      
-      // Aktualizuj dane z formularza
-      formFields.forEach(field => {
-        const value = formData[field.name];
-        if (value !== undefined) {
-          if (field.name.includes('.')) {
-            // Obsługa pól zagnieżdżonych
-            const parts = field.name.split('.');
-            let current = updatedProfile;
-            
-            for (let i = 0; i < parts.length - 1; i++) {
-              const part = parts[i];
-              // Inicjalizacja obiektu, jeśli nie istnieje
-              if (!current[part]) {
-                current[part] = {};
-              }
-              current = current[part];
-            }
-            current[parts[parts.length - 1]] = value;
-          } else {
-            // Pola niezagnieżdżone
-            updatedProfile[field.name] = value;
-          }
-        }
-      });
-      
-      console.log("Zaktualizowany kontekst:", updatedProfile);
-      
-      // Aktualizacja całego obiektu w kontekście
-      updateContext(contextKey, updatedProfile);
-    }
-    // Obsługa starszego sposobu z contextKey
-    else if (node.contextKey && formFields.length > 0) {
-      // Pobierz aktualny kontekst
-      let contextData = getContext();
-      const userProfileData = contextData[node.contextKey] || {};
-      
-      // Tworzę kopię, żeby nie modyfikować oryginalnego obiektu
-      const updatedUserProfile = {...userProfileData};
-      
-      console.log("Aktualny kontekst przed aktualizacją:", updatedUserProfile);
-      console.log("Dane formularza:", formData);
-      
-      // Aktualizuj dane z formularza
-      formFields.forEach(field => {
-        const value = formData[field.name];
-        if (value !== undefined) {
-          if (field.name.includes('.')) {
-            // Obsługa pól zagnieżdżonych
-            const parts = field.name.split('.');
-            let current = updatedUserProfile;
-            
-            for (let i = 0; i < parts.length - 1; i++) {
-              const part = parts[i];
-              // Inicjalizacja obiektu, jeśli nie istnieje
-              if (!current[part]) {
-                current[part] = {};
-              }
-              current = current[part];
-            }
-            current[parts[parts.length - 1]] = value;
-          } else {
-            // Pola niezagnieżdżone
-            updatedUserProfile[field.name] = value;
-          }
-        }
-      });
-      
-      console.log("Zaktualizowany kontekst:", updatedUserProfile);
-      
-      // Aktualizacja całego obiektu w kontekście
-      updateContext(node.contextKey, updatedUserProfile);
-    }
-
-    onSubmit(formData);
-  };
-
-  // Renderuj pola formularza
+  // Render form fields
   const renderFormFields = () => {
     if (!formFields.length) return null;
 
     return formFields.map((field) => {
-      // Domyślny input tekstowy
+      // Default text input
       if (field.type === "text" || !field.type) {
         return (
           <div key={field.name} className="mb-4">
@@ -186,7 +49,7 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
         );
       }
 
-      // Input numeryczny
+      // Number input
       if (field.type === "number") {
         return (
           <div key={field.name} className="mb-4">
@@ -238,17 +101,17 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Wiadomość asystenta */}
+      {/* Assistant message */}
       <div className="bg-blue-50 p-4 rounded-lg">
-        <p className="whitespace-pre-line">{assistantMessage}</p>
+        <p className="whitespace-pre-line">{processedAssistantMessage}</p>
       </div>
 
-      {/* Formularz */}
-      <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Form */}
+      <form onSubmit={onFormSubmit} className="space-y-4">
         {renderFormFields()}
 
         <div className="flex justify-between">
-          {/* Przycisk powrotu */}
+          {/* Back button */}
           <button
             type="button"
             onClick={onPrevious}
@@ -257,7 +120,7 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
             Wstecz
           </button>
 
-          {/* Przycisk zatwierdzenia z walidacją */}
+          {/* Submit button with validation */}
           <button
             type="submit"
             disabled={!areRequiredFieldsFilled()}

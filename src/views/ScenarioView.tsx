@@ -8,50 +8,48 @@ export const ScenarioView: React.FC = () => {
   const { workspace: workspaceId } = useParams<{ workspace: string }>();
   const navigate = useNavigate();
   
-  // Pobierz dane workspace'a
-  const { workspaces, selectWorkspace } = useAppStore();
+  // Get workspace data and context
+  const { workspaces, selectWorkspace, getCurrentWorkspace } = useAppStore();
   
-  // Ustawienie aktywnego workspace'a i inicjalizacja kontekstu
+  // Set active workspace and initialize context
   useEffect(() => {
     if (workspaceId) {
-      console.log("[ScenarioView] Inicjalizacja workspace:", workspaceId);
-      
-      // Ustaw aktywny workspace w store aplikacji (teraz również inicjalizuje kontekst)
+      console.log("[ScenarioView] Initializing workspace:", workspaceId);
       selectWorkspace(workspaceId);
     }
   }, [workspaceId, selectWorkspace]);
   
-  const currentWorkspace = workspaces.find(w => w.id === workspaceId);
+  const currentWorkspace = getCurrentWorkspace();
   
-  // Obsługa powrotu
+  // Handle return
   const handleBack = () => navigate('/');
   
-  // Obsługa wyboru scenariusza
+  // Handle scenario selection
   const handleSelectScenario = (scenarioId: string) => {
     navigate(`/${workspaceId}/${scenarioId}`);
   };
   
-  // Jeśli nie ma workspace'a
+  // If workspace not found
   if (!currentWorkspace) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="bg-white p-6 rounded-lg shadow-md max-w-md">
-          <h2 className="text-xl font-bold text-red-600 mb-2">Workspace nie znaleziony</h2>
+          <h2 className="text-xl font-bold text-red-600 mb-2">Workspace not found</h2>
           <p className="text-gray-600 mb-4">
-            Nie można znaleźć workspace o ID: <span className="font-mono">{workspaceId}</span>
+            Cannot find workspace with ID: <span className="font-mono">{workspaceId}</span>
           </p>
           <button 
             onClick={handleBack}
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
-            Powrót do listy workspace'ów
+            Return to workspace list
           </button>
         </div>
       </div>
     );
   }
   
-  // Pobierz layout
+  // Get layout component
   const LayoutComponent = getLayoutComponent(
     currentWorkspace.templateSettings.layoutTemplate
   );
@@ -60,34 +58,51 @@ export const ScenarioView: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="bg-white p-6 rounded-lg shadow-md max-w-md">
-          <h2 className="text-xl font-bold text-red-600 mb-2">Layout nie znaleziony</h2>
+          <h2 className="text-xl font-bold text-red-600 mb-2">Layout not found</h2>
           <p className="text-gray-600 mb-4">
-            Nie można znaleźć layoutu: <span className="font-mono">{currentWorkspace.templateSettings.layoutTemplate}</span>
+            Cannot find layout: <span className="font-mono">{currentWorkspace.templateSettings.layoutTemplate}</span>
           </p>
           <button 
             onClick={handleBack}
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
-            Powrót do listy workspace'ów
+            Return to workspace list
           </button>
         </div>
       </div>
     );
   }
   
-  // Pobierz widget scenariuszy
+  // Get scenario widget
   const widgetId = currentWorkspace.templateSettings.scenarioWidgetTemplate;
   const ScenarioWidget = getWidgetComponent(widgetId);
   
-
+  // Sprawdzenie czy widget jest typem context-widget
+  const isContextWidget = widgetId === 'context-widget';
   
-  // Jeśli nie ma widgetu, próbujemy użyć domyślnego widgetu card-list
+  // Jeśli to widget kontekstowy, ustaw odpowiednie atrybuty dla widgetu
+  const contextWidgetAttrs = isContextWidget ? {
+    fields: [
+      { label: "Imię", contextPath: "userProfile.firstName" },
+      { label: "Nazwisko", contextPath: "userProfile.lastName" },
+      { label: "Email", contextPath: "userProfile.email" },
+      { label: "Język", contextPath: "userProfile.preferences.language" },
+      { label: "Ostatnia aktywność", contextPath: "userProfile.lastActivity" }
+    ],
+    title: "Dane Użytkownika",
+    theme: "architectural"
+  } : {};
+  
+  // Jeśli potrzebujemy wyświetlić również listę scenariuszy
+  const CardListWidget = getWidgetComponent('simple-card');
+  
+  // If widget not found, try using default card-list widget
   if (!ScenarioWidget) {
-    console.warn(`[ScenarioView] Widget nie znaleziony: ${widgetId}, próba użycia card-list`);
+    console.warn(`[ScenarioView] Widget not found: ${widgetId}, trying to use card-list`);
     const DefaultWidget = getWidgetComponent('card-list');
     
     if (DefaultWidget) {
-      // Użyj domyślnego widgetu, jeśli jest dostępny
+      // Use default widget if available
       return (
         <LayoutComponent 
           title={currentWorkspace.name}
@@ -96,22 +111,21 @@ export const ScenarioView: React.FC = () => {
         >
           <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
             <p className="text-yellow-700 text-sm">
-              <strong>Uwaga:</strong> Widget <span className="font-mono">{widgetId}</span> nie jest dostępny. 
-              Używam domyślnego widgetu.
+              <strong>Warning:</strong> Widget <span className="font-mono">{widgetId}</span> is not available. 
+              Using default widget.
             </p>
           </div>
           
           <DefaultWidget
             data={currentWorkspace.scenarios}
             onSelect={handleSelectScenario}
+            attrs={{}} // Pass empty attrs object to avoid undefined props
           />
-          
-        
         </LayoutComponent>
       );
     }
     
-    // Jeśli nawet domyślny widget nie jest dostępny, pokaż błąd
+    // If even default widget is not available, show error
     return (
       <LayoutComponent 
         title={currentWorkspace.name}
@@ -119,12 +133,12 @@ export const ScenarioView: React.FC = () => {
         onBackClick={handleBack}
       >
         <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-          <h3 className="text-lg font-semibold text-red-700 mb-2">Widget nie znaleziony</h3>
+          <h3 className="text-lg font-semibold text-red-700 mb-2">Widget not found</h3>
           <p className="text-red-600 mb-3">
-            Nie można znaleźć widgetu <span className="font-mono">{widgetId}</span> ani widgetu domyślnego.
+            Cannot find widget <span className="font-mono">{widgetId}</span> or default widget.
           </p>
           
-          <h4 className="font-medium mb-2">Lista scenariuszy:</h4>
+          <h4 className="font-medium mb-2">Scenario list:</h4>
           <ul className="bg-white p-3 border border-gray-200 rounded">
             {currentWorkspace.scenarios.map(scenario => (
               <li key={scenario.id} className="mb-2">
@@ -141,13 +155,41 @@ export const ScenarioView: React.FC = () => {
             ))}
           </ul>
         </div>
-        
- 
       </LayoutComponent>
     );
   }
   
-  // Renderuj widgety w layoucie
+  // Gdy mamy context-widget, wyświetl również listę scenariuszy
+  if (isContextWidget && CardListWidget) {
+    return (
+      <LayoutComponent 
+        title={currentWorkspace.name}
+        showBackButton={true}
+        onBackClick={handleBack}
+      >
+        <div className="space-y-8">
+          {/* Widget kontekstowy */}
+          <div className="mb-6">
+            <ScenarioWidget
+              attrs={contextWidgetAttrs}
+            />
+          </div>
+          
+          {/* Lista scenariuszy */}
+          <div>
+            <h2 className="text-xl font-medium mb-4">Dostępne scenariusze</h2>
+            <CardListWidget
+              data={currentWorkspace.scenarios}
+              onSelect={handleSelectScenario}
+              attrs={{}}
+            />
+          </div>
+        </div>
+      </LayoutComponent>
+    );
+  }
+  
+  // Standardowe wyświetlenie widgetu
   return (
     <LayoutComponent 
       title={currentWorkspace.name}
@@ -157,9 +199,8 @@ export const ScenarioView: React.FC = () => {
       <ScenarioWidget
         data={currentWorkspace.scenarios}
         onSelect={handleSelectScenario}
+        attrs={isContextWidget ? contextWidgetAttrs : {}}
       />
-      
-     
     </LayoutComponent>
   );
 };

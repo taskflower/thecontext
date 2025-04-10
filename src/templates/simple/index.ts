@@ -25,17 +25,17 @@ export class SimpleTemplate extends BaseTemplate {
         }
       ],
       widgets: [
-        // Dodajemy widgety
+        // Use a component that matches the WidgetProps interface
         {
           id: 'simple-card',
           name: 'Simple Card',
           category: 'scenario',
-          component: React.lazy(() => import('../default/widgets/CardListWidget'))
+          component: React.lazy(() => import('./widgets/SimpleCardWidget')) as any // Type assertion to avoid compatibility issues
         },
         {
           id: 'context-widget',
           name: 'Context Display',
-          category: 'workspace',
+          category: 'scenario', // Zmienione z 'workspace' na 'scenario' aby widget był dostępny w widoku scenariusza
           component: React.lazy(() => import('./widgets/SimpleContextWidget'))
         }
       ],
@@ -51,7 +51,7 @@ export class SimpleTemplate extends BaseTemplate {
   }
 
   getDefaultWorkspaceData(): BaseWorkspaceData {
-    // Używamy nowego pola contextPath zamiast contextKey + contextJsonPath
+    // Using new contextPath field instead of contextKey + contextJsonPath
     const node1: NodeData = {
       id: 'node-1',
       scenarioId: 'scenario-1',
@@ -110,11 +110,11 @@ export class SimpleTemplate extends BaseTemplate {
       ],
       templateSettings: {
         layoutTemplate: 'simple-layout',
-        scenarioWidgetTemplate: 'simple-card',
+        scenarioWidgetTemplate: 'context-widget', // Zmienione z 'simple-card' na 'context-widget'
         defaultFlowStepTemplate: 'basic-step',
         theme: 'light'
       },
-      // Rozszerzony kontekst początkowy
+      // Extended initial context
       initialContext: {
         userProfile: {
           firstName: '',

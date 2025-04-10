@@ -1,87 +1,163 @@
 // src/templates/newyork/flowSteps/MultiFieldForm.tsx
-import React, { useState } from 'react';
-import { FlowStepProps } from 'template-registry-module';
+import React, { useState, useEffect, useCallback } from 'react';
+import { FormField, FlowStepProps } from "@/views/types";
+import { useAppStore } from "@/lib/store";
 
-// Definicja interfejsu dla pola formularza
-interface FormField {
-  name: string;
-  label: string;
-  type: string;
-  required: boolean;
-  placeholder?: string;
-  options?: { value: string; label: string }[];
+interface FormInputAttrs {
+  formSchemaPath?: string;
+  [key: string]: any;
 }
 
-const MultiFieldForm: React.FC<FlowStepProps> = ({ 
-  node, 
-  onSubmit, 
-  onPrevious, 
-  isLastNode 
+const MultiFieldForm: React.FC<FlowStepProps> = ({
+  node,
+  onSubmit,
+  onPrevious,
+  isLastNode
 }) => {
-  const [formValues, setFormValues] = useState<Record<string, string>>({});
-  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
+  // State for form data and fields
+  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [formFields, setFormFields] = useState<FormField[]>([]);
   
-  // Parse form fields from node config or use defaults
-  const formFields = (node.formFields || [
-    { name: 'name', label: 'Full Name', type: 'text', required: true, placeholder: 'Enter your full name' },
-    { name: 'email', label: 'Email Address', type: 'email', required: true, placeholder: 'your@email.com' },
-    { name: 'rating', label: 'Rating', type: 'select', required: true, options: [
-      { value: '', label: 'Select a rating' },
-      { value: '1', label: '1 - Poor' },
-      { value: '2', label: '2 - Below Average' },
-      { value: '3', label: '3 - Average' },
-      { value: '4', label: '4 - Good' },
-      { value: '5', label: '5 - Excellent' }
-    ]},
-    { name: 'feedback', label: 'Additional Feedback', type: 'textarea', required: false, placeholder: 'Share your thoughts...' }
-  ]) as FormField[];
+  // Extract attrs from node (with typing)
+  const attrs = node.attrs as FormInputAttrs;
 
-  const handleChange = (name: string, value: string) => {
-    setFormValues(prev => ({ ...prev, [name]: value }));
-    setTouchedFields(prev => ({ ...prev, [name]: true }));
-  };
+  // Get context functions from AppStore
+  const processTemplate = useAppStore((state) => state.processTemplate);
+  const updateContext = useAppStore((state) => state.updateContext);
+  const getContextPath = useAppStore((state) => state.getContextPath);
+  const getContext = useAppStore((state) => state.getContext);
+  const updateByContextPath = useAppStore((state) => state.updateByContextPath);
 
-  const handleBlur = (name: string) => {
-    setTouchedFields(prev => ({ ...prev, [name]: true }));
-  };
-
-  const handleSubmit = () => {
-    // Mark all fields as touched
-    const allTouched = formFields.reduce((acc, field) => {
-      acc[field.name] = true;
-      return acc;
-    }, {} as Record<string, boolean>);
-    
-    setTouchedFields(allTouched);
-    
-    // Check if form is valid
-    if (isFormValid()) {
-      // Convert form values to JSON string
-      onSubmit(JSON.stringify(formValues));
-      setFormValues({});
-      setTouchedFields({});
-    }
-  };
-
-  const getFieldError = (field: FormField): string => {
-    if (!touchedFields[field.name]) return '';
-    
-    if (field.required && (!formValues[field.name] || formValues[field.name].trim() === '')) {
-      return `${field.label} is required`;
-    }
-    
-    if (field.type === 'email' && formValues[field.name]?.trim()) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formValues[field.name])) {
-        return 'Please enter a valid email address';
+  // Load form schema
+  useEffect(() => {
+    if (attrs?.formSchemaPath) {
+      const schema = getContextPath(attrs.formSchemaPath);
+      if (schema && Array.isArray(schema)) {
+        setFormFields(schema);
+        console.log("Załadowano schemat formularza:", schema);
       }
     }
+  }, [attrs, getContextPath]);
+
+  // Process assistant message with context variables
+  const assistantMessage = node.assistantMessage
+    ? processTemplate(node.assistantMessage)
+    : "";
+
+  // Function to check if all required fields are filled
+  const areRequiredFieldsFilled = useCallback(() => {
+    if (!formFields.length) return true;
     
-    return '';
+    return formFields.every(field => {
+      if (field.required) {
+        const value = formData[field.name];
+        return value !== undefined && value !== "" && value !== null;
+      }
+      return true;
+    });
+  }, [formFields, formData]);
+
+  // Handle form field changes
+  const handleChange = (name: string, value: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const isFormValid = () => {
-    return formFields.every(field => !getFieldError(field));
+  // Handle form submission
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // New logic handling contextPath
+    if (node.contextPath && formFields.length > 0) {
+      // Get main context key from contextPath
+      const contextKey = node.contextPath.split('.')[0];
+      
+      // Get current context
+      let contextData = getContext();
+      const profileData = contextData[contextKey] || {};
+      
+      // Create a copy to avoid modifying the original object
+      const updatedProfile = {...profileData};
+      
+      console.log("Aktualny kontekst przed aktualizacją:", updatedProfile);
+      console.log("Dane formularza:", formData);
+      
+      // Update data from the form
+      formFields.forEach(field => {
+        const value = formData[field.name];
+        if (value !== undefined) {
+          if (field.name.includes('.')) {
+            // Handle nested fields
+            const parts = field.name.split('.');
+            let current = updatedProfile;
+            
+            for (let i = 0; i < parts.length - 1; i++) {
+              const part = parts[i];
+              // Initialize object if it doesn't exist
+              if (!current[part]) {
+                current[part] = {};
+              }
+              current = current[part];
+            }
+            current[parts[parts.length - 1]] = value;
+          } else {
+            // Non-nested fields
+            updatedProfile[field.name] = value;
+          }
+        }
+      });
+      
+      console.log("Zaktualizowany kontekst:", updatedProfile);
+      
+      // Update the entire object in context
+      updateContext(contextKey, updatedProfile);
+    }
+    // Handle older method with contextKey
+    else if (node.contextKey && formFields.length > 0) {
+      // Get current context
+      let contextData = getContext();
+      const userProfileData = contextData[node.contextKey] || {};
+      
+      // Create a copy to avoid modifying the original object
+      const updatedUserProfile = {...userProfileData};
+      
+      console.log("Aktualny kontekst przed aktualizacją:", updatedUserProfile);
+      console.log("Dane formularza:", formData);
+      
+      // Update data from the form
+      formFields.forEach(field => {
+        const value = formData[field.name];
+        if (value !== undefined) {
+          if (field.name.includes('.')) {
+            // Handle nested fields
+            const parts = field.name.split('.');
+            let current = updatedUserProfile;
+            
+            for (let i = 0; i < parts.length - 1; i++) {
+              const part = parts[i];
+              // Initialize object if it doesn't exist
+              if (!current[part]) {
+                current[part] = {};
+              }
+              current = current[part];
+            }
+            current[parts[parts.length - 1]] = value;
+          } else {
+            // Non-nested fields
+            updatedUserProfile[field.name] = value;
+          }
+        }
+      });
+      
+      console.log("Zaktualizowany kontekst:", updatedUserProfile);
+      
+      // Update the entire object in context
+      updateContext(node.contextKey, updatedUserProfile);
+    }
+
+    onSubmit(formData);
   };
 
   return (
@@ -93,95 +169,74 @@ const MultiFieldForm: React.FC<FlowStepProps> = ({
         <div className="h-1 w-12 bg-black rounded"></div>
       </div>
       
-      {/* Form header */}
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-900">
-          {node.title || 'Please complete the form'}
-        </h2>
-        {node.assistantMessage && (
-          <p className="mt-2 text-gray-600">
-            {node.assistantMessage}
-          </p>
-        )}
+      {/* Wiadomość asystenta */}
+      <div className="bg-blue-50 p-4 rounded-lg">
+        <p className="whitespace-pre-line">{assistantMessage}</p>
       </div>
       
       {/* Form fields */}
-      <div className="space-y-6 mb-8">
-        {formFields.map((field: FormField) => {
-          const error = getFieldError(field);
-          
-          return (
-            <div key={field.name} className="space-y-1">
-              <label className="block text-sm font-medium text-gray-700">
-                {field.label} {field.required && <span className="text-red-500">*</span>}
-              </label>
-              
-              {field.type === 'textarea' ? (
-                <textarea
-                  name={field.name}
-                  value={formValues[field.name] || ''}
-                  onChange={(e) => handleChange(field.name, e.target.value)}
-                  onBlur={() => handleBlur(field.name)}
-                  placeholder={field.placeholder}
-                  className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-black focus:border-transparent transition-colors ${
-                    error ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                  }`}
-                  rows={4}
-                />
-              ) : field.type === 'select' ? (
+      <form onSubmit={handleSubmit} className="space-y-6 mb-8">
+        {formFields.map((field) => {
+         if (field.type === 'select' && field.options) {
+            return (
+              <div key={field.name} className="space-y-1">
+                <label className="block text-sm font-medium text-gray-700">
+                  {field.label} {field.required && <span className="text-red-500">*</span>}
+                </label>
                 <select
                   name={field.name}
-                  value={formValues[field.name] || ''}
+                  value={formData[field.name] || ''}
                   onChange={(e) => handleChange(field.name, e.target.value)}
-                  onBlur={() => handleBlur(field.name)}
-                  className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-black focus:border-transparent transition-colors ${
-                    error ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                  }`}
+                  className="w-full p-3 border rounded-md focus:ring-2 focus:ring-black focus:border-transparent transition-colors border-gray-300"
+                  required={field.required}
                 >
-                  {field.options?.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
+                  <option value="">Wybierz...</option>
+                  {field.options.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
                     </option>
                   ))}
                 </select>
-              ) : (
+              </div>
+            );
+          } else {
+            return (
+              <div key={field.name} className="space-y-1">
+                <label className="block text-sm font-medium text-gray-700">
+                  {field.label} {field.required && <span className="text-red-500">*</span>}
+                </label>
                 <input
-                  type={field.type}
+                  type={field.type || 'text'}
                   name={field.name}
-                  value={formValues[field.name] || ''}
-                  onChange={(e) => handleChange(field.name, e.target.value)}
-                  onBlur={() => handleBlur(field.name)}
-                  placeholder={field.placeholder}
-                  className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-black focus:border-transparent transition-colors ${
-                    error ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                  }`}
+                  value={formData[field.name] || ''}
+                  onChange={(e) => handleChange(field.name, field.type === 'number' ? Number(e.target.value) : e.target.value)}
+                  className="w-full p-3 border rounded-md focus:ring-2 focus:ring-black focus:border-transparent transition-colors border-gray-300"
+                  required={field.required}
                 />
-              )}
-              
-              {error && (
-                <p className="text-sm text-red-600">{error}</p>
-              )}
-            </div>
-          );
+              </div>
+            );
+          }
         })}
-      </div>
-      
-      {/* Action buttons */}
-      <div className="flex justify-between">
-        <button
-          onClick={onPrevious}
-          className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-        >
-          Back
-        </button>
         
-        <button
-          onClick={handleSubmit}
-          className="px-6 py-2 bg-black text-white rounded-md text-sm font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLastNode ? 'Submit' : 'Continue'}
-        </button>
-      </div>
+        {/* Action buttons */}
+        <div className="flex justify-between">
+          <button
+            type="button"
+            onClick={onPrevious}
+            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Back
+          </button>
+          
+          <button
+            type="submit"
+            disabled={!areRequiredFieldsFilled()}
+            className="px-6 py-2 bg-black text-white rounded-md text-sm font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLastNode ? 'Submit' : 'Continue'}
+          </button>
+        </div>
+      </form>
     </div>
   );
 };

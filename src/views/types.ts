@@ -51,3 +51,9 @@ export interface FlowStepProps {
   isLastNode: boolean;
   contextItems?: any[];
 }
+
+export interface WidgetProps {
+  data?: any;
+  onSelect?: (id: string) => void;
+  attrs?: Record<string, any>;
+}
