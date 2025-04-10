@@ -1,4 +1,3 @@
-// src/templates/newyork/widgets/DataTableWidget.tsx
 import React from 'react';
 import { WidgetProps } from 'template-registry-module';
 
@@ -10,6 +9,75 @@ const DataTableWidget: React.FC<WidgetProps> = ({
   const columns = data.length > 0 
     ? Object.keys(data[0]).filter(key => key !== 'id') 
     : ['name', 'description'];
+
+  // Function to render object values as badges
+  const renderCellContent = (item: any, column: string) => {
+    if (column === 'name') {
+      const name = item[column];
+      return (
+        <div className="font-medium text-gray-900 truncate max-w-xs" title={name}>
+          {name}
+        </div>
+      );
+    } else if (typeof item[column] === 'object' && item[column] !== null) {
+      // For arrays, render each item as a badge
+      if (Array.isArray(item[column])) {
+        return (
+          <div className="flex flex-wrap gap-1">
+            {item[column].map((node: any, index: number) => (
+              <span 
+                key={index} 
+                className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700"
+                title={typeof node === 'object' && node !== null && node.name ? node.name : ''}
+              >
+                {typeof node === 'object' && node !== null && node.name 
+                  ? node.name.length > 15 ? `${node.name.substring(0, 15)}...` : node.name
+                  : typeof node === 'string' 
+                    ? node.length > 15 ? `${node.substring(0, 15)}...` : node
+                    : `Item ${index + 1}`}
+              </span>
+            ))}
+          </div>
+        );
+      }
+      // For single objects, check if they have a name property
+      else if (item[column].name) {
+        const name = item[column].name;
+        return (
+          <span 
+            className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700"
+            title={name}
+          >
+            {name.length > 15 ? `${name.substring(0, 15)}...` : name}
+          </span>
+        );
+      }
+      // Fallback to showing keys
+      else {
+        return (
+          <div className="flex flex-wrap gap-1">
+            {Object.keys(item[column]).map((key, index) => (
+              <span 
+                key={index} 
+                className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600"
+              >
+                {key}
+              </span>
+            ))}
+          </div>
+        );
+      }
+    } else if (typeof item[column] === 'string') {
+      const text = item[column];
+      return (
+        <div className="truncate max-w-xs" title={text}>
+          {text}
+        </div>
+      );
+    } else {
+      return item[column];
+    }
+  };
 
   return (
     <div className="overflow-hidden rounded-lg border border-gray-100 shadow-sm">
@@ -39,13 +107,7 @@ const DataTableWidget: React.FC<WidgetProps> = ({
             >
               {columns.map(column => (
                 <td key={`${item.id}-${column}`} className="px-6 py-4 whitespace-nowrap">
-                  {column === 'name' ? (
-                    <div className="font-medium text-gray-900">{item[column]}</div>
-                  ) : typeof item[column] === 'object' ? (
-                    JSON.stringify(item[column])
-                  ) : (
-                    item[column]
-                  )}
+                  {renderCellContent(item, column)}
                 </td>
               ))}
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

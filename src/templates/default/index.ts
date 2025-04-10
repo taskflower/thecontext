@@ -40,12 +40,7 @@ export class DefaultTemplate extends BaseTemplate {
         category: 'scenario' as WidgetCategory,
         component: lazy(() => import('./widgets/TableListWidget'))
       },
-      {
-        id: 'context-display',
-        name: 'Context Display',
-        category: 'flow' as WidgetCategory,
-        component: lazy(() => import('./widgets/ContextDisplayWidget'))
-      }
+     
     ];
 
     // Flow steps
@@ -68,12 +63,7 @@ export class DefaultTemplate extends BaseTemplate {
         compatibleNodeTypes: ['form'],
         component: lazy(() => import('./flowSteps/FormInputTemplate'))
       },
-      {
-        id: 'context-display-step',
-        name: 'Context Display Step',
-        compatibleNodeTypes: ['summary'],
-        component: lazy(() => import('./flowSteps/ContextDisplayStepTemplate'))
-      }
+    
     ];
 
     return {
@@ -135,21 +125,14 @@ export class DefaultTemplate extends BaseTemplate {
       initialUserMessage: "I'd like to learn more about your services"
     };
     
-    const contextDisplayNode: NodeData = {
-      id: "node-5",
-      scenarioId: "scenario-1",
-      label: "Context Summary",
-      assistantMessage: "Thank you for completing this flow. Here's a summary of the collected information:",
-      templateId: "context-display-step",
-      type: "summary"
-    };
+   
 
     // Create an initial scenario
     const initialScenario: Scenario = {
       id: "scenario-1",
       name: "User Onboarding",
       description: "Collect user information and preferences",
-      nodes: [welcomeNode, emailNode, preferencesNode, aiNode, contextDisplayNode],
+      nodes: [welcomeNode, emailNode, preferencesNode, aiNode],
       systemMessage: "You are a helpful assistant for a software company. Be concise and friendly in your responses."
     };
 
@@ -177,14 +160,7 @@ export class DefaultTemplate extends BaseTemplate {
           contextJsonPath: "age",
           templateId: "basic-step"
         },
-        {
-          id: "demo-node-3",
-          scenarioId: "scenario-2",
-          label: "Context Display",
-          assistantMessage: "Here's what we know about you so far:",
-          templateId: "context-display-step",
-          type: "summary"
-        }
+     
       ],
       systemMessage: "Educational demo for context usage"
     };

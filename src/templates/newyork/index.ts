@@ -161,8 +161,8 @@ export class NewYorkTemplate extends BaseTemplate {
       description: "A modern workspace with sleek templates",
       scenarios: [initialScenario, secondScenario],
       templateSettings: {
-        layoutTemplate: "newyork-main",
-        scenarioWidgetTemplate: "newyork-card",
+        layoutTemplate: "newyork-dashboard",
+        scenarioWidgetTemplate: "newyork-table",
         defaultFlowStepTemplate: "newyork-standard",
         theme: 'light'  // Changed from 'dark' to 'light' to match our new lighter style
       },
