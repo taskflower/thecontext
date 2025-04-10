@@ -1,7 +1,13 @@
 // src/templates/simple/layouts/SimpleLayout.tsx
 import React from 'react';
-import { LayoutProps } from '@/views/types';
-import SimpleContextWidget from '../widgets/SimpleContextWidget';
+
+// Dodajmy definicję LayoutProps bezpośrednio tutaj aby uniknąć problemu TypeScript
+interface LayoutProps {
+  children: React.ReactNode;
+  title?: string;
+  showBackButton?: boolean;
+  onBackClick?: () => void;
+}
 
 interface SimpleLayoutProps extends LayoutProps {
   contextItems?: [string, any][];
@@ -51,13 +57,12 @@ const SimpleLayout: React.FC<SimpleLayoutProps> = ({
           {children}
         </div>
          
-        {/* Context Widget with architectural style */}
-        <div className="mt-12">
-          <SimpleContextWidget data={contextItems} />
-        </div>
+       
       </div>
     </div>
   );
 };
+
+
 
 export default SimpleLayout;

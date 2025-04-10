@@ -25,12 +25,18 @@ export class SimpleTemplate extends BaseTemplate {
         }
       ],
       widgets: [
-        // Dodajemy widgety, które były brakujące
+        // Dodajemy widgety
         {
           id: 'simple-card',
           name: 'Simple Card',
           category: 'scenario',
-          component: React.lazy(() => import('../default/widgets/CardListWidget')) // Używamy widgetu z domyślnego szablonu
+          component: React.lazy(() => import('../default/widgets/CardListWidget'))
+        },
+        {
+          id: 'context-widget',
+          name: 'Context Display',
+          category: 'workspace',
+          component: React.lazy(() => import('./widgets/SimpleContextWidget'))
         }
       ],
       flowSteps: [
@@ -45,26 +51,50 @@ export class SimpleTemplate extends BaseTemplate {
   }
 
   getDefaultWorkspaceData(): BaseWorkspaceData {
+    // Używamy nowego pola contextPath zamiast contextKey + contextJsonPath
     const node1: NodeData = {
       id: 'node-1',
       scenarioId: 'scenario-1',
       type: 'input',
       label: 'Wprowadź imię',
       assistantMessage: 'Jak masz na imię?',
-      contextKey: 'userProfile',
-      contextJsonPath: 'firstName',
+      contextPath: 'userProfile.firstName',
       templateId: 'basic-step'
     };
+    
     const node2: NodeData = {
       id: 'node-2',
       scenarioId: 'scenario-1',
       type: 'input',
       label: 'Wprowadź nazwisko',
       assistantMessage: 'Jakie jest Twoje nazwisko?',
-      contextKey: 'userProfile',
-      contextJsonPath: 'lastName',
+      contextPath: 'userProfile.lastName',
       templateId: 'basic-step'
     };
+    
+    const node3: NodeData = {
+      id: 'node-3',
+      scenarioId: 'scenario-1',
+      type: 'input',
+      label: 'Adres email',
+      assistantMessage: 'Podaj swój adres email:',
+      contextPath: 'userProfile.email',
+      templateId: 'basic-step'
+    };
+    
+    const node4: NodeData = {
+      id: 'node-4',
+      scenarioId: 'scenario-1',
+      type: 'form',
+      label: 'Preferencje',
+      assistantMessage: 'Wybierz swoje preferencje:',
+      contextPath: 'userProfile.preferences',
+      templateId: 'form-step',
+      attrs: {
+        formSchemaPath: "formSchemas.preferencesForm"
+      }
+    };
+    
     return {
       id: 'simple-workspace',
       name: 'Simple Workspace',
@@ -74,20 +104,42 @@ export class SimpleTemplate extends BaseTemplate {
           id: 'scenario-1',
           name: 'Dane użytkownika',
           description: 'Pobieranie danych użytkownika',
-          nodes: [node1, node2],
-          systemMessage: ''
+          nodes: [node1, node2, node3, node4],
+          systemMessage: 'Zbieramy dane użytkownika do konfiguracji aplikacji.'
         }
       ],
       templateSettings: {
         layoutTemplate: 'simple-layout',
-        scenarioWidgetTemplate: 'simple-card', // Ustawienie widgetu, który dodaliśmy wyżej
+        scenarioWidgetTemplate: 'simple-card',
         defaultFlowStepTemplate: 'basic-step',
         theme: 'light'
       },
+      // Rozszerzony kontekst początkowy
       initialContext: {
         userProfile: {
           firstName: '',
-          lastName: ''
+          lastName: '',
+          email: '',
+          lastActivity: new Date().toISOString(),
+          accountType: 'standard',
+          preferences: {
+            theme: 'light',
+            notifications: true,
+            language: 'pl'
+          }
+        },
+        currentStep: 0,
+        completedSteps: 0,
+        conversationHistory: [],
+        formSchemas: {
+          preferencesForm: [
+            { name: "theme", label: "Motyw interfejsu", type: "select", required: true, 
+              options: ["light", "dark", "system"] },
+            { name: "notifications", label: "Powiadomienia", type: "select", required: true,
+              options: ["true", "false"] },
+            { name: "language", label: "Język", type: "select", required: true,
+              options: ["pl", "en", "de", "fr"] }
+          ]
         }
       }
     };
