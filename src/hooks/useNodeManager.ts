@@ -5,43 +5,32 @@ import { useAppStore } from "../lib/store";
 
 export function useNodeManager() {
   const navigate = useNavigate();
-  const { 
-    getCurrentWorkspace, 
+  const {
+    getCurrentWorkspace,
     getCurrentScenario,
     getContext,
     updateContext,
     updateContextPath,
-    updateByContextPath  // New function
+    updateByContextPath, // New function
   } = useAppStore();
-  
+
   const [currentNodeIndex, setCurrentNodeIndex] = useState(0);
   const currentWorkspace = getCurrentWorkspace();
   const currentScenario = getCurrentScenario();
   const context = getContext();
-  
+
   // Get nodes safely, with fallback to empty array
   const nodes = currentScenario?.nodes || [];
-  
+
   // Get current node or undefined if not available
-  const currentNode = nodes.length > currentNodeIndex ? nodes[currentNodeIndex] : undefined;
-  
+  const currentNode =
+    nodes.length > currentNodeIndex ? nodes[currentNodeIndex] : undefined;
+
   // Check if we're on the last node
   const isLastNode = currentNodeIndex === nodes.length - 1;
 
-  // Logging for debugging
-  useEffect(() => {
-    console.log("[useNodeManager] State:", {
-      currentWorkspaceId: currentWorkspace?.id,
-      currentScenarioId: currentScenario?.id,
-      nodesCount: nodes.length,
-      currentNodeIndex,
-      currentNodeId: currentNode?.id
-    });
-  }, [currentWorkspace, currentScenario, nodes, currentNodeIndex, currentNode]);
-
   // Reset node index when scenario changes
   useEffect(() => {
-    console.log("[useNodeManager] Scenario changed, resetting node index");
     setCurrentNodeIndex(0);
   }, [currentScenario?.id]);
 
@@ -51,18 +40,15 @@ export function useNodeManager() {
   // Go back to scenarios list
   const handleGoToScenariosList = () => {
     if (currentWorkspace) {
-      console.log("[useNodeManager] Navigating to scenarios list");
       navigate(`/${currentWorkspace.id}`);
     } else {
-      console.log("[useNodeManager] No workspace, navigating to root");
-      navigate('/');
+      navigate("/");
     }
   };
 
   // Go to previous node or scenarios list
   const handlePreviousNode = () => {
     if (currentNodeIndex > 0) {
-      console.log("[useNodeManager] Moving to previous node:", currentNodeIndex - 1);
       setCurrentNodeIndex(currentNodeIndex - 1);
     } else {
       handleGoToScenariosList();
@@ -75,51 +61,45 @@ export function useNodeManager() {
       console.warn("[useNodeManager] Cannot execute node: no current node");
       return;
     }
-    
-    console.log("[useNodeManager] Executing node:", currentNode.type, "value:", value);
 
-    // ENHANCED CONTEXT HANDLING
-    
     // New approach: using contextPath
     if (currentNode.contextPath) {
-      console.log(`[useNodeManager] Using new contextPath: ${currentNode.contextPath}`);
-      
       // Handle form data separately (because it's a complex object)
-      if ((currentNode.type === "form" || currentNode.templateId === "form-step") && 
-          typeof value === 'object') {
-        
+      if (
+        (currentNode.type === "form" ||
+          currentNode.templateId === "form-step") &&
+        typeof value === "object"
+      ) {
         // Get the base context key (part before first dot or the whole contextPath)
-        const contextKey = currentNode.contextPath.split('.')[0];
-        
+        const contextKey = currentNode.contextPath.split(".")[0];
+
         // Get existing data for this context key
         const existingData = context[contextKey] || {};
         const formData = { ...existingData };
-        
+
         // Update values from form
         Object.entries(value).forEach(([fieldPath, fieldValue]) => {
           const setNestedPath = (obj: any, path: string, val: any) => {
-            const keys = path.split('.');
+            const keys = path.split(".");
             let current = obj;
-            
+
             for (let i = 0; i < keys.length - 1; i++) {
               const key = keys[i];
-              if (typeof current[key] !== 'object' || current[key] === null) {
+              if (typeof current[key] !== "object" || current[key] === null) {
                 current[key] = {};
               }
               current = current[key];
             }
-            
+
             const lastKey = keys[keys.length - 1];
             current[lastKey] = val;
           };
-          
-          console.log(`[useNodeManager] Setting form field ${fieldPath}:`, fieldValue);
+
           setNestedPath(formData, fieldPath, fieldValue);
         });
-        
-        console.log("[useNodeManager] Updated form data:", formData);
+
         updateContext(contextKey, formData);
-      } 
+      }
       // Simple value - use the new helper function
       else {
         updateByContextPath(currentNode.contextPath, value);
@@ -127,37 +107,36 @@ export function useNodeManager() {
     }
     // Legacy approach: using contextKey and contextJsonPath
     else if (currentNode.contextKey) {
-      console.log(`[useNodeManager] Using legacy contextKey: ${currentNode.contextKey}`);
-      
       // Handle basic input nodes with contextJsonPath
-      if ((currentNode.type === "input" || !currentNode.type) && 
-          currentNode.contextKey && 
-          currentNode.contextJsonPath) {
-        
-        console.log(`[useNodeManager] Updating context path ${currentNode.contextKey}.${currentNode.contextJsonPath}`);
+      if (
+        (currentNode.type === "input" || !currentNode.type) &&
+        currentNode.contextKey &&
+        currentNode.contextJsonPath
+      ) {
         updateContextPath(
           currentNode.contextKey,
           currentNode.contextJsonPath,
           value
         );
-      } 
+      }
       // Handle form nodes
-      else if ((currentNode.type === "form" || currentNode.templateId === "form-step")) {
-        console.log("[useNodeManager] Updating form data for key:", currentNode.contextKey);
-        
-        if (typeof value === 'object') {
+      else if (
+        currentNode.type === "form" ||
+        currentNode.templateId === "form-step"
+      ) {
+        if (typeof value === "object") {
           // Get existing context data for this key
           const existingContextData = context[currentNode.contextKey] || {};
           const formData = { ...existingContextData };
-          
+
           // Update values from form
           Object.entries(value).forEach(([fieldPath, fieldValue]) => {
             const setPath = (obj: any, path: string, val: any) => {
-              const keys = path.split('.');
+              const keys = path.split(".");
               let current = obj;
               for (let i = 0; i < keys.length - 1; i++) {
                 const key = keys[i];
-                if (typeof current[key] !== 'object' || current[key] === null) {
+                if (typeof current[key] !== "object" || current[key] === null) {
                   current[key] = {};
                 }
                 current = current[key];
@@ -165,31 +144,27 @@ export function useNodeManager() {
               const lastKey = keys[keys.length - 1];
               current[lastKey] = val;
             };
-            
-            console.log(`[useNodeManager] Setting field ${fieldPath}:`, fieldValue);
+
             setPath(formData, fieldPath, fieldValue);
           });
-          
+
           // Update context with new form data
-          console.log("[useNodeManager] Updated form data:", formData);
+
           updateContext(currentNode.contextKey, formData);
         } else {
           console.warn("[useNodeManager] Unexpected form data format:", value);
         }
-      } 
+      }
       // Handle other node types with contextKey only
       else {
-        console.log("[useNodeManager] Updating context key:", currentNode.contextKey);
         updateContext(currentNode.contextKey, value);
       }
     }
 
     // Handle navigation
     if (isLastNode) {
-      console.log("[useNodeManager] Last node reached, returning to scenarios list");
       handleGoToScenariosList();
     } else {
-      console.log("[useNodeManager] Moving to next node:", currentNodeIndex + 1);
       setCurrentNodeIndex(currentNodeIndex + 1);
     }
   };
@@ -201,7 +176,7 @@ export function useNodeManager() {
     currentNodeIndex,
     nodeCount: nodes.length,
     currentNodeId: currentNode?.id,
-    context
+    context,
   };
 
   return {
@@ -212,6 +187,6 @@ export function useNodeManager() {
     handlePreviousNode,
     handleNodeExecution,
     debugInfo,
-    contextItems
+    contextItems,
   };
 }
