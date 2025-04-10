@@ -1,197 +1,88 @@
 // src/templates/simple/index.ts
-import { lazy } from 'react';
-import { BaseTemplate, BaseTemplateConfig, BaseWorkspaceData, Scenario } from '../baseTemplate';
-import { NodeData } from '../../../raw_modules/revertcontext-nodes-module/src/types/NodeTypes';
+import React from 'react';
+import { BaseTemplate, BaseTemplateConfig, BaseWorkspaceData } from "../baseTemplate";
+import { NodeData } from "../../views/types";
 
 export class SimpleTemplate extends BaseTemplate {
   readonly id = 'simple';
-  readonly name = 'Architectural Template';
-  readonly description = 'A minimalist template with strong typography and architectural style';
+  readonly name = 'Simple Template';
+  readonly description = 'Prosty szablon do demonstracji';
   readonly version = '1.0.0';
-  readonly author = 'Template Creator';
-
-  constructor() {
-    super();
-  }
+  readonly author = 'Developer';
 
   getConfig(): BaseTemplateConfig {
-    // Layouts - tylko jeden prosty layout
-    const layouts = [
-      {
-        id: 'simple-layout',
-        name: 'Architectural Layout',
-        component: lazy(() => import('./layouts/SimpleLayout'))
-      }
-    ];
-
-    // Widgets - prosty widget do wyświetlania kontekstu
-    const widgets = [
-      {
-        id: 'simple-context-display',
-        name: 'Context Display',
-        category: 'flow',
-        component: lazy(() => import('./widgets/SimpleContextWidget')) as any
-      }
-    ];
-
-    // Flow steps
-    const flowSteps = [
-      {
-        id: 'basic-step',
-        name: 'Basic Step',
-        compatibleNodeTypes: ['default', 'input'],
-        component: lazy(() => import('../default/flowSteps/BasicStepTemplate')) as any
-      },
-      {
-        id: 'form-step',
-        name: 'Form Input',
-        compatibleNodeTypes: ['form'],
-        component: lazy(() => import('../default/flowSteps/FormInputTemplate')) as any
-      }
-    ];
-
     return {
       id: this.id,
       name: this.name,
       description: this.description,
       version: this.version,
       author: this.author,
-      layouts,
-      widgets: widgets as any,
-      flowSteps: flowSteps as any
+      layouts: [
+        {
+          id: 'simple-layout',
+          name: 'Simple Layout',
+          component: React.lazy(() => import('./layouts/SimpleLayout'))
+        }
+      ],
+      widgets: [],
+      flowSteps: [
+        {
+          id: 'basic-step',
+          name: 'Basic Step',
+          compatibleNodeTypes: ['default', 'input'],
+          component: React.lazy(() => import('@/templates/default/flowSteps/BasicStepTemplate'))
+        }
+      ]
     };
   }
 
   getDefaultWorkspaceData(): BaseWorkspaceData {
-    // Scenariusz 1 - Dane użytkownika
-    const nameNode: NodeData = {
-      id: "node-1",
-      scenarioId: "scenario-1",
-      type: "input",
-      label: "Imię",
-      assistantMessage: "Witaj! Jak masz na imię?",
-      contextKey: "userProfile",
-      contextJsonPath: "firstName",
-      templateId: "basic-step"
+    const node1: NodeData = {
+      id: 'node-1',
+      scenarioId: 'scenario-1',
+      type: 'input',
+      label: 'Wprowadź imię',
+      assistantMessage: 'Jak masz na imię?',
+      contextKey: 'userProfile',
+      contextJsonPath: 'firstName',
+      templateId: 'basic-step'
     };
-    
-    const userFormNode: NodeData = {
-      id: "node-2",
-      scenarioId: "scenario-1",
-      type: "form",
-      label: "Więcej informacji",
-      assistantMessage: "Cześć {{userProfile.firstName}}! Prosimy o więcej informacji:",
-      contextKey: "userProfile",
-      templateId: "form-step",
-      formFields: [
-        { name: "lastName", label: "Nazwisko", type: "text", required: true } as any,
-        { name: "age", label: "Wiek", type: "number", required: true } as any,
-        { name: "preferences.notifications", label: "Powiadomienia", type: "select", required: true,
-          options: ["tak", "nie"] as string[] } as any
-      ]
+    const node2: NodeData = {
+      id: 'node-2',
+      scenarioId: 'scenario-1',
+      type: 'input',
+      label: 'Wprowadź nazwisko',
+      assistantMessage: 'Jakie jest Twoje nazwisko?',
+      contextKey: 'userProfile',
+      contextJsonPath: 'lastName',
+      templateId: 'basic-step'
     };
-
-    // Scenariusz 2 - Preferencje produktu
-    const productNode: NodeData = {
-      id: "node-3",
-      scenarioId: "scenario-2",
-      type: "input",
-      label: "Produkt",
-      assistantMessage: "Witaj {{userProfile.firstName}} {{userProfile.lastName}}! Jaki produkt Cię interesuje?",
-      contextKey: "userProfile",
-      contextJsonPath: "interestedProduct",
-      templateId: "basic-step"
-    };
-    
-    const preferencesNode: NodeData = {
-      id: "node-4",
-      scenarioId: "scenario-2",
-      type: "form",
-      label: "Szczegóły produktu",
-      assistantMessage: "Dziękujemy {{userProfile.firstName}}! Podaj więcej szczegółów o produkcie {{userProfile.interestedProduct}}:",
-      contextKey: "userProfile",
-      templateId: "form-step",
-      formFields: [
-        { name: "preferences.color", label: "Preferowany kolor", type: "text", required: true } as any,
-        { name: "preferences.size", label: "Rozmiar", type: "select", required: true,
-          options: ["S", "M", "L", "XL"] as string[] } as any
-      ]
-    };
-
-    // Scenariusz 3 - Podsumowanie
-    const summaryNode: NodeData = {
-      id: "node-5",
-      scenarioId: "scenario-3",
-      type: "default",
-      label: "Podsumowanie",
-      assistantMessage: `Podsumowanie danych:
-      
-Imię: {{userProfile.firstName}}
-Nazwisko: {{userProfile.lastName}}
-Wiek: {{userProfile.age}}
-Produkt: {{userProfile.interestedProduct}}
-Powiadomienia: {{userProfile.preferences.notifications}}
-Kolor: {{userProfile.preferences.color}}
-Rozmiar: {{userProfile.preferences.size}}
-
-Dziękujemy za wypełnienie wszystkich informacji!`,
-      templateId: "basic-step"
-    };
-
-    // Tworzymy scenariusze
-    const userScenario: Scenario = {
-      id: "scenario-1",
-      name: "Dane Użytkownika",
-      description: "Zbierz podstawowe informacje o użytkowniku",
-      nodes: [nameNode, userFormNode],
-      systemMessage: "Zbierz dane użytkownika"
-    };
-
-    const productScenario: Scenario = {
-      id: "scenario-2",
-      name: "Preferencje Produktu",
-      description: "Zbierz preferencje dot. produktu",
-      nodes: [productNode, preferencesNode],
-      systemMessage: "Zbierz dane o preferencjach produktu"
-    };
-
-    const summaryScenario: Scenario = {
-      id: "scenario-3",
-      name: "Podsumowanie",
-      description: "Wyświetl podsumowanie wszystkich zebranych danych",
-      nodes: [summaryNode],
-      systemMessage: "Podsumuj zebrane dane"
-    };
-
-    // Początkowy kontekst
-    const initialContext: Record<string, any> = {
-      userProfile: {
-        firstName: '',
-        lastName: '',
-        age: null,
-        interestedProduct: '',
-        preferences: {
-          notifications: 'tak',
-          color: '',
-          size: ''
-        }
-      }
-    };
-
-    // Zwracamy dane przestrzeni roboczej
     return {
-      id: "simple-workspace",
-      name: "Architectural Template",
-      description: "Minimalist design with strong typography",
-      scenarios: [userScenario, productScenario, summaryScenario],
+      id: 'simple-workspace',
+      name: 'Simple Workspace',
+      description: 'Przykładowa przestrzeń z prostym szablonem',
+      scenarios: [
+        {
+          id: 'scenario-1',
+          name: 'Dane użytkownika',
+          description: 'Pobieranie danych użytkownika',
+          nodes: [node1, node2],
+          systemMessage: ''
+        }
+      ],
       templateSettings: {
-        layoutTemplate: "simple-layout",
-        scenarioWidgetTemplate: "card-list", 
-        defaultFlowStepTemplate: "basic-step",
+        layoutTemplate: 'simple-layout',
+        scenarioWidgetTemplate: '',
+        defaultFlowStepTemplate: 'basic-step',
         showContextWidget: true,
         theme: 'light'
       },
-      initialContext
+      initialContext: {
+        userProfile: {
+          firstName: '',
+          lastName: ''
+        }
+      }
     };
   }
 }
