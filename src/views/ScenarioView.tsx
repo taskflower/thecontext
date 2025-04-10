@@ -1,15 +1,30 @@
 // src/views/ScenarioView.tsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/lib/store';
 import { getLayoutComponent, getWidgetComponent } from '../lib/templates';
+import { useContextStore } from '../lib/contextStore';
 
 export const ScenarioView: React.FC = () => {
   const { workspace: workspaceId } = useParams<{ workspace: string }>();
   const navigate = useNavigate();
   
   // Pobierz dane workspace'a
-  const { workspaces } = useAppStore();
+  const { workspaces, selectWorkspace } = useAppStore();
+  const { setActiveWorkspace } = useContextStore();
+  
+  // Ustawienie aktywnego workspace'a i inicjalizacja kontekstu
+  useEffect(() => {
+    if (workspaceId) {
+      // Ustaw aktywny workspace w store aplikacji
+      selectWorkspace(workspaceId);
+      
+      // Ustaw aktywny workspace w contextStore
+      // To automatycznie zainicjuje kontekst z initialContext, jeśli jest potrzebne
+      setActiveWorkspace(workspaceId);
+    }
+  }, [workspaceId, selectWorkspace, setActiveWorkspace]);
+  
   const currentWorkspace = workspaces.find(w => w.id === workspaceId);
   
   // Obsługa powrotu

@@ -1,22 +1,7 @@
 // src/templates/default/flowSteps/BasicStepTemplate.tsx
 import React, { useState } from 'react';
 import { FlowStepProps } from 'template-registry-module';
-
-// Add a processTemplate function if it's missing
-function processTemplate(template: string, context: Record<string, any>) {
-  // Simple implementation of template processing
-  return template.replace(/\{\{([^}]+)\}\}/g, (match, path) => {
-    const keys = path.trim().split('.');
-    let value = context;
-    
-    for (const key of keys) {
-      if (value === undefined || value === null) return '';
-      value = value[key];
-    }
-    
-    return value !== undefined && value !== null ? String(value) : '';
-  });
-}
+import { useContextStore } from '@/lib/contextStore';
 
 const BasicStepTemplate: React.FC<FlowStepProps> = ({
   node,
@@ -25,10 +10,12 @@ const BasicStepTemplate: React.FC<FlowStepProps> = ({
   isLastNode
 }) => {
   const [userInput, setUserInput] = useState('');
-  const context = {}; // You might need to get this from your context store
+  
+  // Używamy useContextStore do przetwarzania szablonów
+  const processTemplate = useContextStore(state => state.processTemplate);
 
-  // Process the template message
-  const processedMessage = processTemplate(node.assistantMessage || '', context);
+  // Przetwarzamy wiadomość asystenta z kontekstem
+  const processedMessage = node.assistantMessage ? processTemplate(node.assistantMessage) : '';
 
   const handleSubmit = () => {
     if (!userInput.trim()) return;
@@ -39,7 +26,7 @@ const BasicStepTemplate: React.FC<FlowStepProps> = ({
   return (
     <div className="space-y-4">
       <div className="p-4 bg-gray-100 rounded-lg">
-        <p>{processedMessage}</p>
+        <p className="whitespace-pre-line">{processedMessage}</p>
       </div>
       
       <div>

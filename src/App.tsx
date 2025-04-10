@@ -6,24 +6,18 @@ import { ScenarioView } from './views/ScenarioView';
 import { FlowView } from './views/FlowView';
 import { LoginView } from './views/LoginView';
 import { useAppStore } from './lib/store';
-import { useContextStore } from './lib/contextStore';
 import { initializeTemplates } from './templates';
 
 const App: React.FC = () => {
   const { workspaces } = useAppStore();
-  const { setContext } = useContextStore();
   
   // Inicjalizacja szablonów przy pierwszym renderowaniu
   useEffect(() => {
     initializeTemplates();
   }, []);
   
-  // Inicjalizacja kontekstu gdy załadują się workspaces
-  useEffect(() => {
-    if (workspaces.length > 0 && workspaces[0].initialContext) {
-      setContext(workspaces[0].initialContext);
-    }
-  }, [workspaces, setContext]);
+  // Nie inicjalizujemy kontekstu workspaces tutaj - zostanie to zrobione
+  // w poszczególnych widokach podczas przełączania workspace'ów
 
   return (
     <Router>

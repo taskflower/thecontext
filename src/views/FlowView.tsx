@@ -1,10 +1,11 @@
 // src/views/FlowView.tsx
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAppStore } from "../lib/store";
-import { getLayoutComponent, getFlowStepComponent } from "../lib/templates";
+import { getLayoutComponent, getFlowStepComponent, getFlowStepForNodeType } from "../lib/templates";
 import { useContextStore } from "../lib/contextStore";
-import { DebugPanel } from "../components/DebugPanel"; // Import komponentu debuggera
+import { DebugPanel } from "../components/DebugPanel";
+import { useNodeManager } from "../hooks/useNodeManager"; // Dodajemy hook useNodeManager
 
 export const FlowView: React.FC = () => {
   const { workspace: workspaceId, scenario: scenarioId } = useParams<{
@@ -15,69 +16,70 @@ export const FlowView: React.FC = () => {
 
   // Pobierz dane z Zustand store
   const { workspaces, selectWorkspace, selectScenario } = useAppStore();
-
-  // Stan dla aktualnego indeksu kroku
-  const [currentNodeIndex, setCurrentNodeIndex] = useState(0);
-
+  const { setActiveWorkspace } = useContextStore(); // Dostęp tylko do setActiveWorkspace
+  
+  console.log("FlowView mounted with params:", { workspaceId, scenarioId });
+  
+  // Sprawdźmy dostępne workspaces
+  console.log("Available workspaces:", workspaces.map(w => ({ 
+    id: w.id, 
+    hasInitialContext: !!w.initialContext,
+    initialContextKeys: w.initialContext ? Object.keys(w.initialContext) : []
+  })));
+  
   // Ustaw aktywny workspace i scenariusz
   useEffect(() => {
+    console.log("FlowView useEffect triggered with:", { workspaceId, scenarioId });
+    
     if (workspaceId) {
+      console.log("Selecting workspace:", workspaceId);
       selectWorkspace(workspaceId);
+      
+      // Sprawdź czy workspace ma initialContext
+      const workspace = workspaces.find(w => w.id === workspaceId);
+      console.log("Found workspace:", workspace ? {
+        id: workspace.id,
+        hasInitialContext: !!workspace.initialContext,
+        initialContextKeys: workspace.initialContext ? Object.keys(workspace.initialContext) : []
+      } : "none");
+      
+      // Ustaw aktywny workspace w contextStore
+      console.log("Setting active workspace in contextStore:", workspaceId);
+      setActiveWorkspace(workspaceId);
     }
 
     if (scenarioId) {
+      console.log("Selecting scenario:", scenarioId);
       selectScenario(scenarioId);
     }
-  }, [workspaceId, scenarioId, selectWorkspace, selectScenario]);
+  }, [workspaceId, scenarioId, selectWorkspace, selectScenario, setActiveWorkspace, workspaces]);
 
-  // Znajdź aktualny workspace i scenariusz
-  const currentWorkspace = workspaces.find((w) => w.id === workspaceId);
-  const currentScenario = currentWorkspace?.scenarios.find(
-    (s) => s.id === scenarioId
-  );
+  // Używamy hooka useNodeManager zamiast powielać logikę
+  const {
+    currentNode,
+    currentScenario,
+    isLastNode,
+    handleGoToScenariosList,
+    handlePreviousNode,
+    handleNodeExecution,
+    debugInfo,
+    contextItems
+  } = useNodeManager();
 
-  // Pobierz tablicę wszystkich nodeów dla scenariusza
-  const nodes = currentScenario?.nodes || [];
-
-  // Znajdź aktualny node bazując na indeksie
-  const currentNode = nodes[currentNodeIndex];
-
-  // Sprawdź czy to ostatni krok
-  const isLastNode = currentNodeIndex === nodes.length - 1;
-
-  // Handler powrotu do listy scenariuszy
-  const handleBack = () => {
-    navigate(`/${workspaceId}`);
-  };
-
-  // Handler przejścia do poprzedniego kroku
-  const handlePrevious = () => {
-    if (currentNodeIndex > 0) {
-      setCurrentNodeIndex(currentNodeIndex - 1);
-    } else {
-      // Jeśli jesteśmy już na pierwszym kroku, wróć do listy scenariuszy
-      handleBack();
-    }
-  };
-
-  // Obsługa przejścia do następnego kroku
-  const handleNodeExecution = (value: any) => {
-    console.log("Node executed with value:", value);
-
-    // Tutaj byłaby logika zapisywania danych z kroku
-    // np. updateContext(currentNode.contextKey, value);
-
-    if (isLastNode) {
-      // Jeśli to ostatni krok, wróć do listy scenariuszy
-      handleBack();
-    } else {
-      // Przejdź do następnego kroku
-      setCurrentNodeIndex((prevIndex) => prevIndex + 1);
-    }
-  };
+  console.log("useNodeManager result:", {
+    hasCurrentNode: !!currentNode,
+    hasCurrentScenario: !!currentScenario,
+    isLastNode,
+    contextItemsCount: contextItems ? contextItems.length : 0
+  });
+  
+  if (debugInfo) {
+    console.log("Debug info:", debugInfo);
+  }
 
   // Jeśli nie mamy danych, wyświetl komunikat ładowania
   if (!currentNode || !currentScenario) {
+    console.log("No current node or scenario, showing loading");
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
         <div className="text-center">
@@ -87,29 +89,51 @@ export const FlowView: React.FC = () => {
     );
   }
 
-  // Pobierz komponent kroku flow
-  const FlowStepComponent = getFlowStepComponent(
-    currentNode.templateId || "basic-step"
-  );
+  // Znajdź aktualny workspace
+  const currentWorkspace = workspaces.find(w => w.id === workspaceId);
+  console.log("Current workspace:", currentWorkspace ? {
+    id: currentWorkspace.id,
+    hasInitialContext: !!currentWorkspace.initialContext,
+    templateSettings: currentWorkspace.templateSettings
+  } : "none");
+
+  // Pobierz komponent kroku flow na podstawie typu node'a lub templateId
+  let FlowStepComponent;
+  if (currentNode.templateId) {
+    // Jeśli node ma określony templateId, użyj go
+    console.log("Getting FlowStepComponent by templateId:", currentNode.templateId);
+    FlowStepComponent = getFlowStepComponent(currentNode.templateId);
+  } else {
+    // W przeciwnym razie spróbuj znaleźć komponent na podstawie typu
+    console.log("Getting FlowStepComponent by node type:", currentNode.type);
+    FlowStepComponent = getFlowStepForNodeType(currentNode.type)?.component;
+  }
+
+  console.log("Found FlowStepComponent:", !!FlowStepComponent);
 
   // Jeśli nie znaleziono komponentu
   if (!FlowStepComponent) {
+    console.log("No FlowStepComponent found, showing error");
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-lg text-gray-600">Flow step template not found</p>
+          <p className="text-lg text-gray-600">Flow step template not found for type: {currentNode.type} and templateId: {currentNode.templateId}</p>
         </div>
       </div>
     );
   }
 
   // Pobierz komponent layoutu
+  console.log("Getting layout component for template:", currentWorkspace?.templateSettings.layoutTemplate || "default");
   const LayoutComponent = getLayoutComponent(
     currentWorkspace?.templateSettings.layoutTemplate || "default"
   );
 
+  console.log("Found LayoutComponent:", !!LayoutComponent);
+
   // Jeśli nie znaleziono layoutu
   if (!LayoutComponent) {
+    console.log("No LayoutComponent found, showing error");
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
         <div className="text-center">
@@ -119,30 +143,28 @@ export const FlowView: React.FC = () => {
     );
   }
 
+  console.log("Rendering flow view with components");
+  
   // Renderuj layout z komponentem flow step
   return (
     <>
       <LayoutComponent
         title={currentNode.label}
         showBackButton={true}
-        onBackClick={handlePrevious}
+        onBackClick={handlePreviousNode}
       >
         <FlowStepComponent
           node={currentNode}
           onSubmit={handleNodeExecution}
-          onPrevious={handlePrevious}
+          onPrevious={handlePreviousNode}
           isLastNode={isLastNode}
+          contextItems={contextItems} // Przekazujemy contextItems do komponentu
         />
       </LayoutComponent>
 
       {/* Debugger - wydzielony do osobnego komponentu */}
       <DebugPanel 
-        nodeData={{
-          currentNodeIndex,
-          totalNodes: nodes.length,
-          isLastNode,
-          currentNodeId: currentNode.id,
-        }}
+        nodeData={debugInfo}
       />
     </>
   );
