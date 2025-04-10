@@ -1,4 +1,3 @@
-// src/hooks/useNodeManager.ts
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "../lib/store";
@@ -89,11 +88,12 @@ export function useNodeManager() {
       );
     } 
     // Handle form nodes
-    else if (currentNode.type === "form" && currentNode.contextKey) {
+    else if ((currentNode.type === "form" || currentNode.templateId === "form-step") && currentNode.contextKey) {
       console.log("[useNodeManager] Updating form data for key:", currentNode.contextKey);
       if (typeof value === 'object') {
         // Get existing context data for this key
-        const formData = { ...(context[currentNode.contextKey] || {}) };
+        const existingContextData = context[currentNode.contextKey] || {};
+        const formData = { ...existingContextData };
         
         // Update values from form
         Object.entries(value).forEach(([fieldPath, fieldValue]) => {
@@ -115,6 +115,7 @@ export function useNodeManager() {
         });
         
         // Update context with new form data
+        console.log("[useNodeManager] Updated form data:", formData);
         updateContext(currentNode.contextKey, formData);
       } else {
         console.warn("[useNodeManager] Unexpected form data format:", value);
