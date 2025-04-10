@@ -1,4 +1,7 @@
 // src/templates/default/flowSteps/FlowSummaryTemplate.tsx
+import React from 'react';
+import { FlowStepProps } from 'template-registry-module';
+import { useAppStore } from '@/lib/store';
 
 interface ContextItem {
   id: string;
@@ -7,19 +10,27 @@ interface ContextItem {
   content: any;
   updatedAt?: any;
 }
-import React from 'react';
-import { FlowStepProps } from 'template-registry-module';
 
 interface ExtendedFlowStepProps extends FlowStepProps {
-  contextItems?: ContextItem[];
   onRestart?: () => void;
 }
 
 const FlowSummaryTemplate: React.FC<ExtendedFlowStepProps> = ({ 
   onPrevious, 
-  contextItems = [],
   onRestart
 }) => {
+  // Pobieramy kontekst bezpośrednio z AppStore
+  const context = useAppStore(state => state.getContext());
+  
+  // Formatujemy kontekst do wyświetlenia
+  const contextItems = Object.entries(context).map(([key, value]) => ({
+    id: key,
+    title: key,
+    contentType: typeof value === 'object' ? 'application/json' : 'text/plain',
+    content: typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value),
+    updatedAt: null
+  }));
+
   const formatContextData = (item: ContextItem) => {
     try {
       if (item.contentType === 'application/json') {
@@ -29,14 +40,6 @@ const FlowSummaryTemplate: React.FC<ExtendedFlowStepProps> = ({
       return item.content;
     } catch (e) {
       return item.content;
-    }
-    
-    interface ContextItem {
-      id: string;
-      title?: string;
-      contentType?: string;
-      content: any;
-      updatedAt?: any;
     }
   };
 
@@ -54,35 +57,6 @@ const FlowSummaryTemplate: React.FC<ExtendedFlowStepProps> = ({
             <h2 className="text-xl font-semibold text-green-800">Flow Completed Successfully!</h2>
             <p className="text-green-700">Your conversation flow has been completed. Here's a summary of the collected information.</p>
           </div>
-        </div>
-      </div>
-
-      <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-        <h3 className="text-lg font-semibold mb-4 text-gray-800 border-b pb-2">Collected Context Data</h3>
-        
-        <div className="space-y-4">
-          {contextItems.length === 0 ? (
-            <p className="text-gray-500 italic">No context data was collected during this flow.</p>
-          ) : (
-            contextItems.map((item) => (
-              <div key={item.id} className="bg-gray-50 p-3 rounded">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium text-blue-700">{item.title || item.id}</h4>
-                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                    {item.contentType || 'text/plain'}
-                  </span>
-                </div>
-                <pre className="bg-white p-3 rounded border border-gray-200 text-sm overflow-x-auto">
-                  {formatContextData(item)}
-                </pre>
-                {item.updatedAt && (
-                  <div className="text-xs text-gray-500 mt-1">
-                    Last updated: {new Date(item.updatedAt).toLocaleString()}
-                  </div>
-                )}
-              </div>
-            ))
-          )}
         </div>
       </div>
 

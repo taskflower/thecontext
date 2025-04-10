@@ -3,7 +3,6 @@ import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/lib/store';
 import { getLayoutComponent, getWidgetComponent } from '../lib/templates';
-import { useContextStore } from '../lib/contextStore';
 
 export const ScenarioView: React.FC = () => {
   const { workspace: workspaceId } = useParams<{ workspace: string }>();
@@ -11,21 +10,16 @@ export const ScenarioView: React.FC = () => {
   
   // Pobierz dane workspace'a
   const { workspaces, selectWorkspace } = useAppStore();
-  const { setActiveWorkspace } = useContextStore();
   
   // Ustawienie aktywnego workspace'a i inicjalizacja kontekstu
   useEffect(() => {
     if (workspaceId) {
       console.log("[ScenarioView] Inicjalizacja workspace:", workspaceId);
       
-      // Ustaw aktywny workspace w store aplikacji
+      // Ustaw aktywny workspace w store aplikacji (teraz również inicjalizuje kontekst)
       selectWorkspace(workspaceId);
-      
-      // Ustaw aktywny workspace w contextStore
-      // To automatycznie zainicjuje kontekst z initialContext, jeśli jest potrzebne
-      setActiveWorkspace(workspaceId);
     }
-  }, [workspaceId, selectWorkspace, setActiveWorkspace]);
+  }, [workspaceId, selectWorkspace]);
   
   const currentWorkspace = workspaces.find(w => w.id === workspaceId);
   
@@ -85,6 +79,10 @@ export const ScenarioView: React.FC = () => {
   const widgetId = currentWorkspace.templateSettings.scenarioWidgetTemplate;
   const ScenarioWidget = getWidgetComponent(widgetId);
   
+  // Dodaj widget kontekstu, jeśli jest włączony w ustawieniach szablonu
+  const showContextWidget = currentWorkspace.templateSettings.showContextWidget;
+  const ContextWidget = showContextWidget ? getWidgetComponent('context-display') : null;
+  
   // Jeśli nie ma widgetu, próbujemy użyć domyślnego widgetu card-list
   if (!ScenarioWidget) {
     console.warn(`[ScenarioView] Widget nie znaleziony: ${widgetId}, próba użycia card-list`);
@@ -109,6 +107,16 @@ export const ScenarioView: React.FC = () => {
             data={currentWorkspace.scenarios}
             onSelect={handleSelectScenario}
           />
+          
+          {/* Wyświetl widget kontekstu, jeśli jest włączony */}
+          {ContextWidget && (
+            <div className="mt-6">
+              <ContextWidget 
+                title="Workspace Context"
+                onSelect={() => {}}
+              />
+            </div>
+          )}
         </LayoutComponent>
       );
     }
@@ -143,6 +151,16 @@ export const ScenarioView: React.FC = () => {
             ))}
           </ul>
         </div>
+        
+        {/* Wyświetl widget kontekstu, jeśli jest włączony */}
+        {ContextWidget && (
+          <div className="mt-6">
+            <ContextWidget 
+              title="Workspace Context"
+              onSelect={() => {}}
+            />
+          </div>
+        )}
       </LayoutComponent>
     );
   }
@@ -158,6 +176,16 @@ export const ScenarioView: React.FC = () => {
         data={currentWorkspace.scenarios}
         onSelect={handleSelectScenario}
       />
+      
+      {/* Wyświetl widget kontekstu, jeśli jest włączony */}
+      {ContextWidget && (
+        <div className="mt-6">
+          <ContextWidget 
+            title="Workspace Context"
+            onSelect={() => {}}
+          />
+        </div>
+      )}
     </LayoutComponent>
   );
 };

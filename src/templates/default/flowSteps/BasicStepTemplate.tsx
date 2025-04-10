@@ -1,7 +1,7 @@
 // src/templates/default/flowSteps/BasicStepTemplate.tsx
 import React, { useState } from 'react';
 import { FlowStepProps } from 'template-registry-module';
-import { useContextStore } from '@/lib/contextStore';
+import { useAppStore } from '@/lib/store';
 
 const BasicStepTemplate: React.FC<FlowStepProps> = ({
   node,
@@ -11,8 +11,8 @@ const BasicStepTemplate: React.FC<FlowStepProps> = ({
 }) => {
   const [userInput, setUserInput] = useState('');
   
-  // Używamy useContextStore do przetwarzania szablonów
-  const processTemplate = useContextStore(state => state.processTemplate);
+  // Używamy useAppStore zamiast useContextStore
+  const processTemplate = useAppStore(state => state.processTemplate);
 
   // Przetwarzamy wiadomość asystenta z kontekstem
   const processedMessage = node.assistantMessage ? processTemplate(node.assistantMessage) : '';

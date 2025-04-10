@@ -11,33 +11,205 @@ export interface Workspace {
   initialContext: Record<string, any>;
 }
 
+// Funkcje pomocnicze do operacji na ścieżkach w kontekście
+function getValueByPath(obj: Record<string, any>, path: string): any {
+  const keys = path.split(".");
+  return keys.reduce((acc, key) => acc && acc[key], obj);
+}
+
+function setValueByPath(obj: Record<string, any>, path: string, value: any): Record<string, any> {
+  const keys = path.split(".");
+  let newObj = { ...obj };
+  let current = newObj;
+  for (let i = 0; i < keys.length - 1; i++) {
+    const key = keys[i];
+    current[key] = current[key] ? { ...current[key] } : {};
+    current = current[key];
+  }
+  current[keys[keys.length - 1]] = value;
+  return newObj;
+}
+
 interface AppState {
+  // Podstawowe dane o workspaces
   workspaces: Workspace[];
   currentWorkspaceId: string | null;
   currentScenarioId: string | null;
+
+  // Konteksty dla poszczególnych workspaces
+  contexts: Record<string, Record<string, any>>;
   
+  // Funkcje do zarządzania workspaces i scenariuszami
   setInitialWorkspaces: (workspaces: Workspace[]) => void;
   selectWorkspace: (id: string) => void;
   selectScenario: (id: string) => void;
   
+  // Funkcje pomocnicze do pobierania aktualnych danych
   getCurrentWorkspace: () => Workspace | undefined;
   getCurrentScenario: () => Scenario | undefined;
+  
+  // Funkcje do zarządzania kontekstem
+  updateContext: (key: string, value: any) => void;
+  updateContextPath: (key: string, jsonPath: string, value: any) => void;
+  processTemplate: (template: string) => string;
+  getContext: () => Record<string, any>;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
+  // Podstawowy stan
   workspaces: [],
   currentWorkspaceId: null,
   currentScenarioId: null,
-  setInitialWorkspaces: (workspaces) => set({ workspaces }),
-  selectWorkspace: (id) => set({ currentWorkspaceId: id }),
+  contexts: {},
+  
+  // Inicjalizacja workspaces
+  setInitialWorkspaces: (workspaces) => {
+    // Inicjalizujemy konteksty dla wszystkich workspaces
+    const contexts: Record<string, Record<string, any>> = {};
+    
+    workspaces.forEach(workspace => {
+      if (workspace.initialContext) {
+        // Tworzymy głęboką kopię initialContext
+        contexts[workspace.id] = JSON.parse(JSON.stringify(workspace.initialContext));
+        console.log("[AppStore] Initialized context for workspace:", workspace.id);
+      } else {
+        contexts[workspace.id] = {};
+      }
+    });
+    
+    set({ 
+      workspaces,
+      contexts
+    });
+    
+    console.log("[AppStore] Initial workspaces set:", workspaces.length);
+    
+    // Jeśli mamy workspaces, wybieramy pierwszy jako domyślny
+    if (workspaces.length > 0) {
+      get().selectWorkspace(workspaces[0].id);
+    }
+  },
+  
+  // Wybór workspace'a
+  selectWorkspace: (id) => {
+    const { contexts, workspaces } = get();
+    
+    // Sprawdzamy czy kontekst dla tego workspace'a istnieje
+    if (!contexts[id]) {
+      // Jeśli nie, inicjalizujemy go z initialContext workspace'a
+      const workspace = workspaces.find(w => w.id === id);
+      
+      if (workspace && workspace.initialContext) {
+        const initialContextCopy = JSON.parse(JSON.stringify(workspace.initialContext));
+        set(state => ({
+          contexts: {
+            ...state.contexts,
+            [id]: initialContextCopy
+          }
+        }));
+        console.log("[AppStore] Context initialized for workspace:", id);
+      } else {
+        // Jeśli nie ma initialContext, tworzymy pusty obiekt
+        set(state => ({
+          contexts: {
+            ...state.contexts,
+            [id]: {}
+          }
+        }));
+      }
+    }
+    
+    set({ currentWorkspaceId: id, currentScenarioId: null });
+    console.log("[AppStore] Selected workspace:", id);
+  },
+  
+  // Wybór scenariusza
   selectScenario: (id) => set({ currentScenarioId: id }),
+  
+  // Pobieranie aktualnego workspace'a
   getCurrentWorkspace: () => {
     const { workspaces, currentWorkspaceId } = get();
     return workspaces.find(w => w.id === currentWorkspaceId);
   },
+  
+  // Pobieranie aktualnego scenariusza
   getCurrentScenario: () => {
     const workspace = get().getCurrentWorkspace();
     if (!workspace) return undefined;
     return workspace.scenarios.find(s => s.id === get().currentScenarioId);
+  },
+  
+  // Aktualizacja całego klucza kontekstu
+  updateContext: (key, value) => {
+    const { currentWorkspaceId, contexts } = get();
+    if (!currentWorkspaceId) {
+      console.warn("[AppStore] No active workspace, updateContext skipped.");
+      return;
+    }
+    
+    const currentContext = contexts[currentWorkspaceId] || {};
+    set({
+      contexts: {
+        ...contexts,
+        [currentWorkspaceId]: {
+          ...currentContext,
+          [key]: value
+        }
+      }
+    });
+    console.log("[AppStore] Context updated for key:", key);
+  },
+  
+  // Aktualizacja konkretnej ścieżki w kontekście
+  updateContextPath: (key, jsonPath, value) => {
+    const { currentWorkspaceId, contexts } = get();
+    if (!currentWorkspaceId) {
+      console.warn("[AppStore] No active workspace, updateContextPath skipped.");
+      return;
+    }
+    
+    const currentContext = contexts[currentWorkspaceId] || {};
+    const keyData = currentContext[key] ? { ...currentContext[key] } : {};
+    const updatedKeyData = setValueByPath(keyData, jsonPath, value);
+    
+    set({
+      contexts: {
+        ...contexts,
+        [currentWorkspaceId]: {
+          ...currentContext,
+          [key]: updatedKeyData
+        }
+      }
+    });
+    console.log("[AppStore] Context path updated for:", key, jsonPath);
+  },
+  
+  // Przetwarzanie szablonów z wartościami z kontekstu
+  processTemplate: (template: string) => {
+    if (!template) return "";
+    
+    const { currentWorkspaceId, contexts } = get();
+    if (!currentWorkspaceId) return template;
+    
+    const context = contexts[currentWorkspaceId] || {};
+    return template.replace(/\{\{([^}]+)\}\}/g, (match, path) => {
+      const [key, ...pathParts] = path.trim().split(".");
+      if (pathParts.length === 0) {
+        const value = context[key];
+        return value !== undefined ? String(value) : match;
+      } else {
+        const jsonPath = pathParts.join(".");
+        const keyData = context[key];
+        if (!keyData) return match;
+        const value = getValueByPath(keyData, jsonPath);
+        return value !== undefined ? String(value) : match;
+      }
+    });
+  },
+  
+  // Getter dla aktualnego kontekstu
+  getContext: () => {
+    const { currentWorkspaceId, contexts } = get();
+    return currentWorkspaceId ? (contexts[currentWorkspaceId] || {}) : {};
   }
 }));

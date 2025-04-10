@@ -1,16 +1,9 @@
 // src/templates/flowSteps/LlmQueryTemplate.tsx
-
-interface ContextItem {
-  id: string;
-  title?: string;
-  contentType?: string;
-  content: any;
-  updatedAt?: any;
-}
 import React, { useState, useEffect } from 'react';
 import { FlowStepProps } from 'template-registry-module';
 import { useAuth } from '@/hooks/useAuth';
 import { NodeData, Scenario } from '@/../raw_modules/revertcontext-nodes-module/src';
+import { useAppStore } from '@/lib/store';
 
 // Rozszerzony interfejs dla FlowStepProps, który uwzględnia scenario i rozszerzony node
 interface ExtendedFlowStepProps extends Omit<FlowStepProps, 'node'> {
@@ -19,19 +12,32 @@ interface ExtendedFlowStepProps extends Omit<FlowStepProps, 'node'> {
   contextItems?: ContextItem[];
 }
 
+interface ContextItem {
+  id: string;
+  title?: string;
+  contentType?: string;
+  content: any;
+  updatedAt?: any;
+}
+
 const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({ 
   node, 
   scenario,
   onSubmit, 
   onPrevious, 
   isLastNode,
-  // contextItems = []
 }) => {
   const [userInput, setUserInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const { getToken, user } = useAuth();
+  const processTemplate = useAppStore(state => state.processTemplate);
+  
+  // Przetwarzamy wiadomość asystenta używając funkcji z AppStore
+  const processedAssistantMessage = node.assistantMessage 
+    ? processTemplate(node.assistantMessage) 
+    : 'W czym mogę pomóc?';
   
   useEffect(() => {
     // Sprawdź na początku, czy mamy token i użytkownika
@@ -174,7 +180,7 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
           <div>
             <h2 className="text-lg font-semibold mb-2">Asystent AI</h2>
             <p className="text-gray-700">
-              {node.assistantMessage || 'W czym mogę pomóc?'}
+              {processedAssistantMessage}
             </p>
           </div>
         </div>

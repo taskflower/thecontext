@@ -2,19 +2,21 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "../lib/store";
-import { useContextStore } from "../lib/contextStore";
 
 export function useNodeManager() {
   const navigate = useNavigate();
-  const { getCurrentWorkspace, getCurrentScenario } = useAppStore();
-  const context = useContextStore(state => state.context);
-  const updateContext = useContextStore(state => state.updateContext);
-  const updateContextPath = useContextStore(state => state.updateContextPath);
-  const setActiveWorkspace = useContextStore(state => state.setActiveWorkspace);
-
+  const { 
+    getCurrentWorkspace, 
+    getCurrentScenario,
+    getContext,
+    updateContext,
+    updateContextPath
+  } = useAppStore();
+  
   const [currentNodeIndex, setCurrentNodeIndex] = useState(0);
   const currentWorkspace = getCurrentWorkspace();
   const currentScenario = getCurrentScenario();
+  const context = getContext();
   
   // Get nodes safely, with fallback to empty array
   const nodes = currentScenario?.nodes || [];
@@ -35,14 +37,6 @@ export function useNodeManager() {
       currentNodeId: currentNode?.id
     });
   }, [currentWorkspace, currentScenario, nodes, currentNodeIndex, currentNode]);
-
-  // Set active workspace in contextStore when it changes
-  useEffect(() => {
-    if (currentWorkspace?.id) {
-      console.log("[useNodeManager] Setting active workspace:", currentWorkspace.id);
-      setActiveWorkspace(currentWorkspace.id);
-    }
-  }, [currentWorkspace?.id, setActiveWorkspace]);
 
   // Reset node index when scenario changes
   useEffect(() => {

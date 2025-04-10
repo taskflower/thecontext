@@ -4,7 +4,6 @@ import { useParams } from "react-router-dom";
 import { useAppStore } from "../lib/store";
 import { getLayoutComponent, getFlowStepComponent, getFlowStepForNodeType } from "../lib/templates";
 import { useNodeManager } from "../hooks/useNodeManager";
-import { useContextStore } from "../lib/contextStore";
 import DebugPanel from "@/components/DebugPanel";
 
 const FlowView: React.FC = () => {
@@ -13,7 +12,6 @@ const FlowView: React.FC = () => {
   
   // Get store actions and state
   const { getCurrentWorkspace, getCurrentScenario, selectWorkspace, selectScenario } = useAppStore();
-  const { setActiveWorkspace } = useContextStore();
   
   // Set up the workspace and scenario based on URL parameters
   useEffect(() => {
@@ -21,15 +19,14 @@ const FlowView: React.FC = () => {
     
     if (workspace) {
       console.log("[FlowView] Selecting workspace:", workspace);
-      selectWorkspace(workspace);
-      setActiveWorkspace(workspace);
+      selectWorkspace(workspace); // selectWorkspace now also initializes context
     }
     
     if (scenario) {
       console.log("[FlowView] Selecting scenario:", scenario);
       selectScenario(scenario);
     }
-  }, [workspace, scenario, selectWorkspace, selectScenario, setActiveWorkspace]);
+  }, [workspace, scenario, selectWorkspace, selectScenario]);
   
   // Get current data from store
   const currentWorkspace = getCurrentWorkspace();

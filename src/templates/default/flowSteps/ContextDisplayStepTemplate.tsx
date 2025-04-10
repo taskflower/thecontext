@@ -1,6 +1,7 @@
 // src/templates/default/flowSteps/ContextDisplayStepTemplate.tsx
 import React from 'react';
 import { FlowStepProps } from 'template-registry-module';
+import { useAppStore } from '@/lib/store';
 
 interface ExtendedFlowStepProps extends FlowStepProps {
   contextItems?: any[] | undefined;
@@ -18,10 +19,13 @@ const ContextDisplayStepTemplate: React.FC<ExtendedFlowStepProps> = ({
   node, 
   onSubmit, 
   onPrevious, 
-  isLastNode,
-  contextItems = []
+  isLastNode 
 }) => {
-  console.log("ContextDisplayStepTemplate contextItems type:", typeof contextItems, contextItems);
+  // Pobieramy kontekst bezpośrednio z AppStore
+  const context = useAppStore(state => state.getContext());
+  
+  console.log("ContextDisplayStepTemplate context:", context);
+  
   const handleContinue = () => {
     // Przekazujemy pustą wartość, bo nie aktualizujemy kontekstu
     onSubmit("");
@@ -29,38 +33,14 @@ const ContextDisplayStepTemplate: React.FC<ExtendedFlowStepProps> = ({
 
   // Format context data for display
   const getFormattedContextData = () => {
-    // If contextItems is an array of ContextItem objects
-    if (Array.isArray(contextItems)) {
-      return contextItems.map((item) => ({
-        id: item.id,
-        title: item.title || item.id,
-        contentType: item.contentType || 'text/plain',
-        content: formatContextData(item),
-        updatedAt: item.updatedAt
-      }));
-    } 
-    // If contextItems is an object (Record<string, any>)
-    else {
-      return Object.entries(contextItems).map(([key, value]) => ({
-        id: key,
-        title: key,
-        contentType: typeof value === 'object' ? 'application/json' : 'text/plain',
-        content: typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value),
-        updatedAt: null
-      }));
-    }
-  };
-
-  const formatContextData = (item: ContextItem) => {
-    try {
-      if (item.contentType === 'application/json') {
-        const parsed = JSON.parse(item.content);
-        return JSON.stringify(parsed, null, 2);
-      }
-      return item.content;
-    } catch (e) {
-      return item.content;
-    }
+    // Formatujemy dane kontekstu do wyświetlenia
+    return Object.entries(context).map(([key, value]) => ({
+      id: key,
+      title: key,
+      contentType: typeof value === 'object' ? 'application/json' : 'text/plain',
+      content: typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value),
+      updatedAt: null
+    }));
   };
 
   const formattedItems = getFormattedContextData();
@@ -111,7 +91,7 @@ const ContextDisplayStepTemplate: React.FC<ExtendedFlowStepProps> = ({
       <div className="flex items-center space-x-2 text-sm text-gray-600">
         <button 
           onClick={() => {
-            const data = JSON.stringify(contextItems, null, 2);
+            const data = JSON.stringify(context, null, 2);
             const blob = new Blob([data], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');

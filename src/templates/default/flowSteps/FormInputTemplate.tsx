@@ -1,7 +1,7 @@
 // src/templates/default/flowSteps/FormInputTemplate.tsx
-import { useContextStore } from "@/lib/contextStore";
 import React, { useState, useCallback } from "react";
 import { FlowStepProps } from "template-registry-module";
+import { useAppStore } from "@/lib/store";
 
 const FormInputTemplate: React.FC<FlowStepProps> = ({
   node,
@@ -12,9 +12,9 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
   // Stan formularza
   const [formData, setFormData] = useState<Record<string, any>>({});
 
-  // Pobieramy funkcje kontekstu z Zustand
-  const processTemplate = useContextStore((state) => state.processTemplate);
-  const updateContextPath = useContextStore((state) => state.updateContextPath);
+  // Pobieramy funkcje kontekstu z AppStore zamiast useContextStore
+  const processTemplate = useAppStore((state) => state.processTemplate);
+  const updateContextPath = useAppStore((state) => state.updateContextPath);
 
   // Przetwarzamy wiadomość asystenta z zmiennymi kontekstowymi
   const assistantMessage = node.assistantMessage
