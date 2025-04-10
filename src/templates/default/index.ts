@@ -1,70 +1,72 @@
 // src/templates/default/index.ts
-import { lazy } from 'react';
-import { BaseTemplate, BaseTemplateConfig, BaseWorkspaceData, Scenario } from '../baseTemplate';
-import { WidgetCategory } from '@/lib/templates';
-import { NodeData } from '@/views/types';
+import { lazy } from "react";
+import {
+  BaseTemplate,
+  BaseTemplateConfig,
+  BaseWorkspaceData,
+  Scenario,
+} from "../baseTemplate";
+import { WidgetCategory } from "@/lib/templates";
 
 
 export class DefaultTemplate extends BaseTemplate {
-  readonly id = 'default';
-  readonly name = 'Default Template';
-  readonly description = 'The standard template with a clean, modern design';
-  readonly version = '1.0.0';
-  readonly author = 'Application Team';
+  readonly id = "default";
+  readonly name = "Default Template";
+  readonly description = "The standard template with a clean, modern design";
+  readonly version = "1.0.0";
+  readonly author = "Application Team";
 
   getConfig(): BaseTemplateConfig {
     // Layouts
     const layouts = [
       {
-        id: 'default',
-        name: 'Default Layout',
-        component: lazy(() => import('./layouts/DefaultLayout'))
+        id: "default",
+        name: "Default Layout",
+        component: lazy(() => import("./layouts/DefaultLayout")),
       },
       {
-        id: 'sidebar',
-        name: 'Sidebar Layout',
-        component: lazy(() => import('./layouts/SidebarLayout'))
-      }
+        id: "sidebar",
+        name: "Sidebar Layout",
+        component: lazy(() => import("./layouts/SidebarLayout")),
+      },
     ];
 
     // Widgets
     const widgets = [
       {
-        id: 'card-list',
-        name: 'Card List',
-        category: 'scenario' as WidgetCategory,
-        component: lazy(() => import('./widgets/CardListWidget'))
+        id: "card-list",
+        name: "Card List",
+        category: "scenario" as WidgetCategory,
+        component: lazy(() => import("./widgets/CardListWidget")),
       },
       {
-        id: 'table-list',
-        name: 'Table List',
-        category: 'scenario' as WidgetCategory,
-        component: lazy(() => import('./widgets/TableListWidget'))
+        id: "table-list",
+        name: "Table List",
+        category: "scenario" as WidgetCategory,
+        component: lazy(() => import("./widgets/TableListWidget")),
       },
-     
     ];
 
     // Flow steps
     const flowSteps = [
       {
-        id: 'basic-step',
-        name: 'Basic Step',
-        compatibleNodeTypes: ['default', 'input'],
-        component: lazy(() => import('./flowSteps/BasicStepTemplate'))
+        id: "basic-step",
+        name: "Basic Step",
+        compatibleNodeTypes: ["default", "input"],
+        component: lazy(() => import("./flowSteps/BasicStepTemplate")),
       },
       {
-        id: 'llm-query',
-        name: 'LLM Query',
-        compatibleNodeTypes: ['llm'],
-        component: lazy(() => import('./flowSteps/LlmQueryTemplate'))
+        id: "llm-query",
+        name: "LLM Query",
+        compatibleNodeTypes: ["llm"],
+        component: lazy(() => import("./flowSteps/LlmQueryTemplate")),
       },
       {
-        id: 'form-step',
-        name: 'Form Input',
-        compatibleNodeTypes: ['form'],
-        component: lazy(() => import('./flowSteps/FormInputTemplate'))
+        id: "form-step",
+        name: "Form Input",
+        compatibleNodeTypes: ["form"],
+        component: lazy(() => import("./flowSteps/FormInputTemplate")),
       },
-    
     ];
 
     return {
@@ -75,117 +77,89 @@ export class DefaultTemplate extends BaseTemplate {
       author: this.author,
       layouts,
       widgets,
-      flowSteps
+      flowSteps,
     };
   }
 
-// Updated section from src/templates/default/index.ts
-getDefaultWorkspaceData(): BaseWorkspaceData {
-  // Create example nodes for a starter scenario using the new contextPath approach
-  const welcomeNode: NodeData = {
-    id: "node-1",
-    scenarioId: "scenario-1",
-    label: "Welcome",
-    assistantMessage: "Hello! To get started, what's your name?",
-    contextPath: "userProfile.firstName",
-    templateId: "basic-step"
-  };
-  
-  const emailNode: NodeData = {
-    id: "node-2",
-    scenarioId: "scenario-1",
-    label: "Email Collection",
-    assistantMessage: "Thanks {{userProfile.firstName}}! What's your email address?",
-    contextPath: "userProfile.email",
-    templateId: "basic-step"
-  };
-  
-  const preferencesNode: NodeData = {
-    id: "node-3",
-    scenarioId: "scenario-1",
-    label: "User Preferences",
-    assistantMessage: "Just a few more questions, {{userProfile.firstName}}. Please fill out your preferences:",
-    contextPath: "userProfile", // For form nodes, we just need the base object
-    templateId: "form-step",
-    attrs: {
-      formSchemaPath: "formSchemas.userPreferences"
-    }
-  };
+  getDefaultWorkspaceData(): BaseWorkspaceData {
+    // Scenariusz analizy marketingowej strony www
+    const marketingScenario: Scenario = {
+      id: "scenario-1",
+      name: "Analiza Marketingowa WWW",
+      description: "Analiza strony internetowej pod kątem marketingowym",
+      nodes: [
+        {
+          id: "form-node-1",
+          scenarioId: "scenario-1",
+          label: "Adres WWW",
+          assistantMessage:
+            "Witaj! Podaj adres strony internetowej do analizy marketingowej:",
+          contextPath: "userProfile",
+          templateId: "form-step",
+          attrs: {
+            formSchemaPath: "formSchemas.websiteForm",
+          },
+        },
+        {
+          id: "ai-analysis-node",
+          scenarioId: "scenario-1",
+          label: "Analiza AI",
+          assistantMessage:
+            "Dziękuję! Przeanalizuję stronę {{userProfile.www}}, dostarczajac odpowiednio sformatowaną odpowiedź.",
+          contextPath: "conversationHistory",
+          templateId: "llm-query",
+          attrs: {
+            llmSchemaPath: "llmSchemas.webAnalysing",
+            includeSystemMessage: true,
+            initialUserMessage: "Przeanalizuj adres www {{userProfile.www}}",
+          },
+        },
+      ],
+      systemMessage:
+        "Jesteś w roli twórcy strategii marketingowej. Używamy języka polskiego.",
+    };
 
-  // Create an initial scenario
-  const initialScenario: Scenario = {
-    id: "scenario-1",
-    name: "User Onboarding",
-    description: "Collect user information and preferences",
-    nodes: [welcomeNode, emailNode, preferencesNode],
-    systemMessage: "You are a helpful assistant for a software company. Be concise and friendly in your responses."
-  };
-
-  // Create a demo scenario with the LLM component moved to the second step
-  const contextDemoScenario: Scenario = {
-    id: "scenario-2",
-    name: "Context Demo",
-    description: "Demonstrates how context works between nodes",
-    nodes: [
-      {
-        id: "demo-node-1",
-        scenarioId: "scenario-2",
-        label: "Enter Name",
-        assistantMessage: "HEj podar adres www do przeanalizowania",
-        contextPath: "userProfile.www",
-        templateId: "basic-step"
+    // Dane początkowe kontekstu
+    const initialContext: Record<string, any> = {
+      userProfile: {
+        www: "",
       },
-      {
-        id: "demo-node-2",
-        scenarioId: "scenario-2",
-        label: "AI Conversation", // Changed from "Enter Age" to "AI Conversation"
-        assistantMessage: "Potwierdzam adrres do kampani to{{userProfile.www}} opiszę go zgodnie ze schematem odpowiedzi!",
-        contextPath: "conversationHistory",
-        templateId: "llm-query",
-        attrs: {
-          formSchemaPath: "llmSchemas.webAlalysing",
-          includeSystemMessage: true,
-          initialUserMessage: "Przeanalizuj adres www {{userProfile.www}}"
-        }
-      }
-    ],
-    systemMessage: "Jestes w roli twóry strategii marketingowej. Użuwamy języka polskiego"
-  };
+      conversationHistory: [],
+      formSchemas: {
+        websiteForm: [
+          {
+            name: "www",
+            label: "Adres strony WWW",
+            type: "text",
+            required: true,
+          },
+        ],
+      },
+      llmSchemas: {
+        webAnalysing: {
+            ogólny_opis: "Główne funkcje i typ strony",
+            branża:"Nazwa najbardziej pasujęcej branży",
+            grupa_docelowa: "Do kogo skierowana jest strona",
+            mocne_strony: ["lista kluczowych stron"],
+            słabe_strony: ["lista słabych stron"],
+            sugestie_marketingowe: "Jak poprawić konwersję",
+        },
+      },
+    };
 
-  // Create initial context data
-  const initialContext: Record<string, any> = {
-    userProfile: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      preferences: {
-        notifications: true,
-        theme: 'light'
-      }
-    },
-    conversationHistory: [],
-    formSchemas: {
-      userPreferences: [
-        { name: "lastName", label: "Last Name", type: "text", required: true },
-        { name: "preferences.theme", label: "Preferred Theme", type: "select", required: true, 
-          options: ["light", "dark", "system"] }
-      ]
-    }
-  };
-
-  // Return the workspace data
-  return {
-    id: "workspace-1",
-    name: "Default Workspace",
-    description: "A standard workspace with basic templates",
-    scenarios: [initialScenario, contextDemoScenario],
-    templateSettings: {
-      layoutTemplate: "default",
-      scenarioWidgetTemplate: "card-list",
-      defaultFlowStepTemplate: "basic-step",
-      theme: 'light'
-    },
-    initialContext
-  };
-}
+    // Zwrócenie danych workspace
+    return {
+      id: "workspace-1",
+      name: "Analiza Marketingowa",
+      description: "Workspace do analizy marketingowej stron internetowych",
+      scenarios: [marketingScenario],
+      templateSettings: {
+        layoutTemplate: "default",
+        scenarioWidgetTemplate: "card-list",
+        defaultFlowStepTemplate: "basic-step",
+        theme: "light",
+      },
+      initialContext,
+    };
+  }
 }

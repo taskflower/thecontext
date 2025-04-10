@@ -1,13 +1,16 @@
 // src/templates/flowSteps/LlmQueryTemplate.tsx
-import React, { useState } from 'react';
-import { FlowStepProps } from 'template-registry-module';
-import { NodeData, Scenario } from '@/../raw_modules/revertcontext-nodes-module/src';
-import { useAppStore } from '@/lib/store';
-import { useChat } from '@/hooks/useChat';
-import { MessageSquare, Shield, User, Info } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { FlowStepProps } from "template-registry-module";
+import {
+  NodeData,
+  Scenario,
+} from "@/../raw_modules/revertcontext-nodes-module/src";
+import { useAppStore } from "@/lib/store";
+import { useChat } from "@/hooks/useChat";
+import { messagesStyles } from "../resources/messagesStyles";
 
 // Rozszerzony interfejs dla FlowStepProps, który uwzględnia scenario i rozszerzony node
-interface ExtendedFlowStepProps extends Omit<FlowStepProps, 'node'> {
+interface ExtendedFlowStepProps extends Omit<FlowStepProps, "node"> {
   node: NodeData;
   scenario?: Scenario;
   contextItems?: ContextItem[];
@@ -22,50 +25,27 @@ interface ContextItem {
 }
 
 interface InfoBadgeProps {
-  type: 'assistant' | 'system' | 'user' | 'debug';
+  type: "assistant" | "system" | "user" | "debug";
   title: string;
   content: string;
   className?: string;
 }
 
-const InfoBadge: React.FC<InfoBadgeProps> = ({ type, title, content, className = '' }) => {
-  const styles = {
-    assistant: {
-      container: 'bg-blue-50 border-blue-100',
-      iconBg: 'bg-blue-100',
-      iconColor: 'text-blue-500',
-      titleColor: 'text-lg font-semibold mb-2',
-      textColor: 'text-gray-700',
-      icon: <MessageSquare size={20} />
-    },
-    system: {
-      container: 'bg-amber-50 border-amber-100',
-      iconBg: 'bg-amber-100',
-      iconColor: 'text-amber-500',
-      titleColor: 'text-sm font-medium text-amber-800 mb-1',
-      textColor: 'text-xs text-amber-700',
-      icon: <Shield size={20} />
-    },
-    user: {
-      container: 'bg-green-50 border-green-100',
-      iconBg: 'bg-green-100',
-      iconColor: 'text-green-500',
-      titleColor: 'text-sm font-medium text-green-800 mb-1',
-      textColor: 'text-xs text-green-700',
-      icon: <User size={20} />
-    },
-    debug: {
-      container: 'bg-gray-100 border-gray-200',
-      iconBg: 'bg-gray-200',
-      iconColor: 'text-gray-500',
-      titleColor: 'text-sm font-medium text-gray-800 mb-1',
-      textColor: 'text-xs text-gray-800',
-      icon: <Info size={20} />
-    }
-  };
+interface LlmQueryAttrs {
+  llmSchemaPath?: string;
+  includeSystemMessage?: boolean;
+  initialUserMessage?: string;
+  [key: string]: any;
+}
 
-  const style = styles[type];
-  
+const InfoBadge: React.FC<InfoBadgeProps> = ({
+  type,
+  title,
+  content,
+  className = "",
+}) => {
+  const style = messagesStyles[type];
+
   return (
     <div className={`p-3 rounded-lg border ${style.container} ${className}`}>
       <div className="flex items-start space-x-3">
@@ -81,83 +61,94 @@ const InfoBadge: React.FC<InfoBadgeProps> = ({ type, title, content, className =
   );
 };
 
-const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({ 
-  node, 
+const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
+  node,
   scenario,
-  onSubmit, 
-  onPrevious, 
+  onSubmit,
+  onPrevious,
   isLastNode,
 }) => {
-  const [userInput, setUserInput] = useState('');
-  const processTemplate = useAppStore(state => state.processTemplate);
-  
+  const [userInput, setUserInput] = useState("");
+  const [systemPrompt, setSystemPrompt] = useState<string>("");
+  const processTemplate = useAppStore((state) => state.processTemplate);
+  const getContextPath = useAppStore((state) => state.getContextPath);
+
+  // Bezpieczne typowanie dla node.attrs
+  const attrs = (node.attrs as LlmQueryAttrs) || {};
+
   // Przetwarzamy wiadomość asystenta używając funkcji z AppStore
-  const processedAssistantMessage = node.assistantMessage 
-    ? processTemplate(node.assistantMessage) 
-    : 'W czym mogę pomóc?';
-  
-  // Używamy nowego hooka
-  const { 
-    sendMessage, 
-    isLoading, 
-    error, 
-    debugInfo 
-  } = useChat({
-    includeSystemMessage: node.includeSystemMessage || false,
-    systemMessage: scenario?.systemMessage || '',
-    initialUserMessage: node.initialUserMessage || '',
-    assistantMessage: node.assistantMessage || '',
-    contextPath: node.contextPath || '',
+  const processedAssistantMessage = node.assistantMessage
+    ? processTemplate(node.assistantMessage)
+    : "W czym mogę pomóc?";
+
+  // Pobierz schemat LLM, jeśli jest dostępny
+  useEffect(() => {
+    if (attrs?.llmSchemaPath) {
+      const schema = getContextPath(attrs.llmSchemaPath);
+      if (schema && schema.systemPrompt) {
+        setSystemPrompt(schema.systemPrompt);
+      }
+    }
+  }, [attrs, getContextPath]);
+
+  // Przygotuj ostateczną wiadomość systemową (z szablonu lub schema)
+  const effectiveSystemMessage = systemPrompt || scenario?.systemMessage || "";
+
+  // Używamy hooka useChat
+  const { sendMessage, isLoading, error, debugInfo } = useChat({
+    includeSystemMessage: attrs.includeSystemMessage || false,
+    systemMessage: effectiveSystemMessage,
+    initialUserMessage: attrs.initialUserMessage
+      ? processTemplate(attrs.initialUserMessage)
+      : "",
+    assistantMessage: processedAssistantMessage,
+    contextPath: node.contextPath || "",
     onDataSaved: (data) => {
       if (node.contextKey) {
         onSubmit(data);
       } else {
         onSubmit(data);
       }
-      setUserInput('');
-    }
+      setUserInput("");
+    },
   });
 
   const handleSubmit = () => {
-    if (userInput.trim() === '') return;
+    if (userInput.trim() === "") return;
     sendMessage(userInput);
   };
 
   return (
     <div className="space-y-4">
-      <InfoBadge 
+      {attrs.includeSystemMessage && effectiveSystemMessage && (
+        <InfoBadge
+          type="system"
+          title="System Message"
+          content={effectiveSystemMessage}
+        />
+      )}
+
+      {attrs.initialUserMessage && (
+        <InfoBadge
+          type="user"
+          title="Initial User Message"
+          content={processTemplate(attrs.initialUserMessage)}
+        />
+      )}
+
+      <InfoBadge
         type="assistant"
         title="Asystent AI"
         content={processedAssistantMessage}
         className="p-4"
       />
 
-      {node.includeSystemMessage && scenario?.systemMessage && (
-        <InfoBadge 
-          type="system"
-          title="System Message"
-          content={scenario.systemMessage}
-        />
-      )}
-
-      {node.initialUserMessage && (
-        <InfoBadge 
-          type="user"
-          title="Initial User Message"
-          content={node.initialUserMessage}
-        />
-      )}
-
       {debugInfo && (
-        <InfoBadge 
-          type="debug"
-          title="Debug"
-          content={debugInfo}
-        />
+        <InfoBadge type="debug" title="Debug" content={debugInfo} />
       )}
 
       <div className="space-y-2">
-        <textarea 
+        <textarea
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}
           className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -172,27 +163,43 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
         )}
 
         <div className="flex justify-between items-center">
-          <button 
+          <button
             onClick={onPrevious}
             className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded disabled:opacity-50"
           >
             Wstecz
           </button>
-          <button 
+          <button
             onClick={handleSubmit}
-            disabled={isLoading || userInput.trim() === ''}
+            disabled={isLoading || userInput.trim() === ""}
             className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded flex items-center space-x-2 disabled:bg-blue-300"
           >
             {isLoading ? (
               <>
-                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="animate-spin h-4 w-4 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
                 <span>Przetwarzanie...</span>
               </>
             ) : (
-              <span>{isLastNode ? 'Zakończ' : 'Wyślij i Kontynuuj'}</span>
+              <span>{isLastNode ? "Zakończ" : "Wyślij i Kontynuuj"}</span>
             )}
           </button>
         </div>
