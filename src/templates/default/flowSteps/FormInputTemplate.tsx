@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { FlowStepProps, FormField } from "@/views/types";
+import { FormField,FlowStepProps } from "@/views/types";
 import { useAppStore } from "@/lib/store";
 
 // Definicja interfejsu dla atrybutów formularza
@@ -27,6 +27,7 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
   const updateContext = useAppStore((state) => state.updateContext);
   const getContextPath = useAppStore((state) => state.getContextPath);
   const getContext = useAppStore((state) => state.getContext);
+  const updateByContextPath = useAppStore((state) => state.updateByContextPath);
 
   // Załaduj schemat formularza
   useEffect(() => {
@@ -69,7 +70,53 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (node.contextKey && formFields.length > 0) {
+    // Nowa logika obsługująca contextPath
+    if (node.contextPath && formFields.length > 0) {
+      // Pobieramy główny klucz kontekstu z contextPath
+      const contextKey = node.contextPath.split('.')[0];
+      
+      // Pobierz aktualny kontekst
+      let contextData = getContext();
+      const profileData = contextData[contextKey] || {};
+      
+      // Tworzę kopię, żeby nie modyfikować oryginalnego obiektu
+      const updatedProfile = {...profileData};
+      
+      console.log("Aktualny kontekst przed aktualizacją:", updatedProfile);
+      console.log("Dane formularza:", formData);
+      
+      // Aktualizuj dane z formularza
+      formFields.forEach(field => {
+        const value = formData[field.name];
+        if (value !== undefined) {
+          if (field.name.includes('.')) {
+            // Obsługa pól zagnieżdżonych
+            const parts = field.name.split('.');
+            let current = updatedProfile;
+            
+            for (let i = 0; i < parts.length - 1; i++) {
+              const part = parts[i];
+              // Inicjalizacja obiektu, jeśli nie istnieje
+              if (!current[part]) {
+                current[part] = {};
+              }
+              current = current[part];
+            }
+            current[parts[parts.length - 1]] = value;
+          } else {
+            // Pola niezagnieżdżone
+            updatedProfile[field.name] = value;
+          }
+        }
+      });
+      
+      console.log("Zaktualizowany kontekst:", updatedProfile);
+      
+      // Aktualizacja całego obiektu w kontekście
+      updateContext(contextKey, updatedProfile);
+    }
+    // Obsługa starszego sposobu z contextKey
+    else if (node.contextKey && formFields.length > 0) {
       // Pobierz aktualny kontekst
       let contextData = getContext();
       const userProfileData = contextData[node.contextKey] || {};

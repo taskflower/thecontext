@@ -33,6 +33,7 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const { getToken, user } = useAuth();
   const processTemplate = useAppStore(state => state.processTemplate);
+  const updateByContextPath = useAppStore(state => state.updateByContextPath);
   
   // Przetwarzamy wiadomość asystenta używając funkcji z AppStore
   const processedAssistantMessage = node.assistantMessage 
@@ -147,11 +148,26 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
       const responseData = await response.json();
       console.log("Dane odpowiedzi:", responseData);
       
-      // Przekaż zarówno wejście użytkownika, jak i odpowiedź AI do handlera onSubmit
-      onSubmit(JSON.stringify({
+      // Przygotuj dane do zapisania w kontekście
+      const conversationData = {
         userInput: message,
         aiResponse: responseData
-      }));
+      };
+      
+      // Użyj nowej funkcji contextPath jeśli jest dostępna
+      if (node.contextPath) {
+        console.log(`Zapisywanie danych do contextPath: ${node.contextPath}`);
+        updateByContextPath(node.contextPath, JSON.stringify(conversationData));
+      }
+      // Alternatywnie, użyj contextKey dla wstecznej kompatybilności
+      else if (node.contextKey) {
+        console.log(`Zapisywanie danych do contextKey: ${node.contextKey}`);
+        onSubmit(JSON.stringify(conversationData));
+      }
+      else {
+        // Bez zapisywania kontekstu
+        onSubmit(JSON.stringify(conversationData));
+      }
       
       // Wyczyść pole wprowadzania
       setUserInput('');

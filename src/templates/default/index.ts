@@ -79,127 +79,121 @@ export class DefaultTemplate extends BaseTemplate {
     };
   }
 
-  getDefaultWorkspaceData(): BaseWorkspaceData {
-    // Create example nodes for a starter scenario
-    const welcomeNode: NodeData = {
-      id: "node-1",
-      scenarioId: "scenario-1",
-      label: "Welcome",
-      assistantMessage: "Hello! To get started, what's your name?",
-      contextKey: "userProfile",
-      contextJsonPath: "firstName",
-      templateId: "basic-step"
-    };
-    
-    const emailNode: NodeData = {
-      id: "node-2",
-      scenarioId: "scenario-1",
-      label: "Email Collection",
-      assistantMessage: "Thanks {{userProfile.firstName}}! What's your email address?",
-      contextKey: "userProfile",
-      contextJsonPath: "email",
-      templateId: "basic-step"
-    };
-    
-    const preferencesNode: NodeData = {
-      id: "node-3",
-      scenarioId: "scenario-1",
-      label: "User Preferences",
-      assistantMessage: "Just a few more questions, {{userProfile.firstName}}. Please fill out your preferences:",
-      contextKey: "userProfile",
-      templateId: "form-step",
-      attrs: {
-        formSchemaPath: "formSchemas.userPreferences"
-      }
-    };
-    
-    const aiNode: NodeData = {
-      id: "node-4",
-      scenarioId: "scenario-1",
-      label: "AI Conversation",
-      assistantMessage: "Great! {{userProfile.firstName}} {{userProfile.lastName}}, how can I help you today?",
-      contextKey: "conversationHistory",
-      templateId: "llm-query",
-      attrs: {
-        includeSystemMessage: true,
-        initialUserMessage: "I'd like to learn more about your services"
-      }
-    };
-    
-   
+// Updated section from src/templates/default/index.ts
+getDefaultWorkspaceData(): BaseWorkspaceData {
+  // Create example nodes for a starter scenario using the new contextPath approach
+  const welcomeNode: NodeData = {
+    id: "node-1",
+    scenarioId: "scenario-1",
+    label: "Welcome",
+    assistantMessage: "Hello! To get started, what's your name?",
+    contextPath: "userProfile.firstName",
+    templateId: "basic-step"
+  };
+  
+  const emailNode: NodeData = {
+    id: "node-2",
+    scenarioId: "scenario-1",
+    label: "Email Collection",
+    assistantMessage: "Thanks {{userProfile.firstName}}! What's your email address?",
+    contextPath: "userProfile.email",
+    templateId: "basic-step"
+  };
+  
+  const preferencesNode: NodeData = {
+    id: "node-3",
+    scenarioId: "scenario-1",
+    label: "User Preferences",
+    assistantMessage: "Just a few more questions, {{userProfile.firstName}}. Please fill out your preferences:",
+    contextPath: "userProfile", // For form nodes, we just need the base object
+    templateId: "form-step",
+    attrs: {
+      formSchemaPath: "formSchemas.userPreferences"
+    }
+  };
+  
+  const aiNode: NodeData = {
+    id: "node-4",
+    scenarioId: "scenario-1",
+    label: "AI Conversation",
+    assistantMessage: "Great! {{userProfile.firstName}} {{userProfile.lastName}}, how can I help you today?",
+    contextPath: "conversationHistory",
+    templateId: "llm-query",
+    attrs: {
+      includeSystemMessage: true,
+      initialUserMessage: "I'd like to learn more about your services"
+    }
+  };
 
-    // Create an initial scenario
-    const initialScenario: Scenario = {
-      id: "scenario-1",
-      name: "User Onboarding",
-      description: "Collect user information and preferences",
-      nodes: [welcomeNode, emailNode, preferencesNode, aiNode],
-      systemMessage: "You are a helpful assistant for a software company. Be concise and friendly in your responses."
-    };
+  // Create an initial scenario
+  const initialScenario: Scenario = {
+    id: "scenario-1",
+    name: "User Onboarding",
+    description: "Collect user information and preferences",
+    nodes: [welcomeNode, emailNode, preferencesNode, aiNode],
+    systemMessage: "You are a helpful assistant for a software company. Be concise and friendly in your responses."
+  };
 
-    // Create a demo scenario
-    const contextDemoScenario: Scenario = {
-      id: "scenario-2",
-      name: "Context Demo",
-      description: "Demonstrates how context works between nodes",
-      nodes: [
-        {
-          id: "demo-node-1",
-          scenarioId: "scenario-2",
-          label: "Enter Name",
-          assistantMessage: "This demo shows how context works. Please enter your name:",
-          contextKey: "userProfile",
-          contextJsonPath: "firstName",
-          templateId: "basic-step"
-        },
-        {
-          id: "demo-node-2",
-          scenarioId: "scenario-2",
-          label: "Enter Age",
-          assistantMessage: "Hello {{userProfile.firstName}}! Please enter your age:",
-          contextKey: "userProfile",
-          contextJsonPath: "age",
-          templateId: "basic-step"
-        },
-     
-      ],
-      systemMessage: "Educational demo for context usage"
-    };
-
-    // Create initial context data
-    const initialContext: Record<string, any> = {
-      userProfile: {
-        firstName: '',
-        lastName: '',
-        email: '',
-        preferences: {
-          notifications: true,
-          theme: 'light'
-        }
+  // Create a demo scenario
+  const contextDemoScenario: Scenario = {
+    id: "scenario-2",
+    name: "Context Demo",
+    description: "Demonstrates how context works between nodes",
+    nodes: [
+      {
+        id: "demo-node-1",
+        scenarioId: "scenario-2",
+        label: "Enter Name",
+        assistantMessage: "This demo shows how context works. Please enter your name:",
+        contextPath: "userProfile.firstName",
+        templateId: "basic-step"
       },
-      conversationHistory: [],
-      formSchemas: {
-        userPreferences: [
-          { name: "lastName", label: "Last Name", type: "text", required: true },
-          { name: "preferences.theme", label: "Preferred Theme", type: "select", required: true, 
-            options: ["light", "dark", "system"] }
-        ]
+      {
+        id: "demo-node-2",
+        scenarioId: "scenario-2",
+        label: "Enter Age",
+        assistantMessage: "Hello {{userProfile.firstName}}! Please enter your age:",
+        contextPath: "userProfile.age",
+        templateId: "basic-step"
       }
-    };
+    ],
+    systemMessage: "Educational demo for context usage"
+  };
 
-    // Return the workspace data
-    return {
-      id: "workspace-1",
-      name: "Default Workspace",
-      description: "A standard workspace with basic templates",
-      scenarios: [initialScenario, contextDemoScenario],
-      templateSettings: {
-        layoutTemplate: "default",
-        scenarioWidgetTemplate: "card-list",
-        defaultFlowStepTemplate: "basic-step",
+  // Create initial context data
+  const initialContext: Record<string, any> = {
+    userProfile: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      preferences: {
+        notifications: true,
         theme: 'light'
-      },
-      initialContext
-    };
-  }
+      }
+    },
+    conversationHistory: [],
+    formSchemas: {
+      userPreferences: [
+        { name: "lastName", label: "Last Name", type: "text", required: true },
+        { name: "preferences.theme", label: "Preferred Theme", type: "select", required: true, 
+          options: ["light", "dark", "system"] }
+      ]
+    }
+  };
+
+  // Return the workspace data
+  return {
+    id: "workspace-1",
+    name: "Default Workspace",
+    description: "A standard workspace with basic templates",
+    scenarios: [initialScenario, contextDemoScenario],
+    templateSettings: {
+      layoutTemplate: "default",
+      scenarioWidgetTemplate: "card-list",
+      defaultFlowStepTemplate: "basic-step",
+      theme: 'light'
+    },
+    initialContext
+  };
+}
 }

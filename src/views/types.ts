@@ -1,64 +1,53 @@
-// src/types/index.ts
-import { ReactNode } from 'react';
-
+// src/views/types.ts
 export interface NodeData {
   id: string;
   scenarioId: string;
-  type?: string;
   label: string;
   assistantMessage?: string;
+  
+  // New field replacing contextKey and contextJsonPath
+  contextPath?: string; // Format: "userProfile" or "userProfile.email" or "userProfile.preferences.theme"
+  
+  // Legacy fields (kept for backward compatibility)
   contextKey?: string;
   contextJsonPath?: string;
-  templateId?: string;
-  attrs?: {
-    [key: string]: any;
-  };
+  
+  templateId: string;
+  type?: string;
+  attrs?: Record<string, any>;
+  initialUserMessage?: string;
+  includeSystemMessage?: boolean;
 }
 
 export interface FormField {
   name: string;
   label: string;
-  type: string;
-  required: boolean;
+  type?: string;
+  required?: boolean;
   options?: string[];
-  [key: string]: any;
-}
-
-export interface Scenario {
-  id: string;
-  name: string;
-  description?: string;
-  nodes: NodeData[];
-  systemMessage?: string;
 }
 
 export interface TemplateSettings {
   layoutTemplate: string;
   scenarioWidgetTemplate: string;
   defaultFlowStepTemplate: string;
-  theme?: string;
+  theme?: 'light' | 'dark' | 'system';
+  customStyles?: Record<string, string>;
 }
 
-// Dodajemy typy, które wcześniej były w module template-registry-module
-export interface LayoutProps {
-  children?: ReactNode;
-  title?: string;
-  showBackButton?: boolean;
-  onBackClick?: () => void;
-  [key: string]: any;
-}
-
-export interface WidgetProps {
-  data?: any;
-  onSelect?: (id: string) => void;
-  [key: string]: any;
+export interface Scenario {
+  id: string;
+  name: string;
+  description: string;
+  nodes: NodeData[];
+  systemMessage?: string;
+  edges?: any[];
 }
 
 export interface FlowStepProps {
-  node: any;
+  node: NodeData;
   onSubmit: (value: any) => void;
-  onPrevious?: () => void;
-  isLastNode?: boolean;
-  contextItems?: [string, any][];
-  [key: string]: any;
+  onPrevious: () => void;
+  isLastNode: boolean;
+  contextItems?: any[];
 }

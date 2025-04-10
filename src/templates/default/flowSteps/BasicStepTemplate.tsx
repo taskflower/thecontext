@@ -11,7 +11,7 @@ const BasicStepTemplate: React.FC<FlowStepProps> = ({
 }) => {
   const [userInput, setUserInput] = useState('');
   
-  // Używamy useAppStore zamiast useContextStore
+  // Używamy useAppStore 
   const processTemplate = useAppStore(state => state.processTemplate);
 
   // Przetwarzamy wiadomość asystenta z kontekstem

@@ -1,3 +1,4 @@
+// src/hooks/useNodeManager.ts
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "../lib/store";
@@ -9,7 +10,8 @@ export function useNodeManager() {
     getCurrentScenario,
     getContext,
     updateContext,
-    updateContextPath
+    updateContextPath,
+    updateByContextPath  // New function
   } = useAppStore();
   
   const [currentNodeIndex, setCurrentNodeIndex] = useState(0);
@@ -76,30 +78,29 @@ export function useNodeManager() {
     
     console.log("[useNodeManager] Executing node:", currentNode.type, "value:", value);
 
-    // Handle basic input nodes
-    if ((currentNode.type === "input" || !currentNode.type) && 
-        currentNode.contextKey && 
-        currentNode.contextJsonPath) {
-      console.log(`[useNodeManager] Updating context path ${currentNode.contextKey}.${currentNode.contextJsonPath}`);
-      updateContextPath(
-        currentNode.contextKey,
-        currentNode.contextJsonPath,
-        value
-      );
-    } 
-    // Handle form nodes
-    else if ((currentNode.type === "form" || currentNode.templateId === "form-step") && currentNode.contextKey) {
-      console.log("[useNodeManager] Updating form data for key:", currentNode.contextKey);
-      if (typeof value === 'object') {
-        // Get existing context data for this key
-        const existingContextData = context[currentNode.contextKey] || {};
-        const formData = { ...existingContextData };
+    // ENHANCED CONTEXT HANDLING
+    
+    // New approach: using contextPath
+    if (currentNode.contextPath) {
+      console.log(`[useNodeManager] Using new contextPath: ${currentNode.contextPath}`);
+      
+      // Handle form data separately (because it's a complex object)
+      if ((currentNode.type === "form" || currentNode.templateId === "form-step") && 
+          typeof value === 'object') {
+        
+        // Get the base context key (part before first dot or the whole contextPath)
+        const contextKey = currentNode.contextPath.split('.')[0];
+        
+        // Get existing data for this context key
+        const existingData = context[contextKey] || {};
+        const formData = { ...existingData };
         
         // Update values from form
         Object.entries(value).forEach(([fieldPath, fieldValue]) => {
-          const setPath = (obj: any, path: string, val: any) => {
+          const setNestedPath = (obj: any, path: string, val: any) => {
             const keys = path.split('.');
             let current = obj;
+            
             for (let i = 0; i < keys.length - 1; i++) {
               const key = keys[i];
               if (typeof current[key] !== 'object' || current[key] === null) {
@@ -107,24 +108,80 @@ export function useNodeManager() {
               }
               current = current[key];
             }
+            
             const lastKey = keys[keys.length - 1];
             current[lastKey] = val;
           };
-          console.log(`[useNodeManager] Setting field ${fieldPath}:`, fieldValue);
-          setPath(formData, fieldPath, fieldValue);
+          
+          console.log(`[useNodeManager] Setting form field ${fieldPath}:`, fieldValue);
+          setNestedPath(formData, fieldPath, fieldValue);
         });
         
-        // Update context with new form data
         console.log("[useNodeManager] Updated form data:", formData);
-        updateContext(currentNode.contextKey, formData);
-      } else {
-        console.warn("[useNodeManager] Unexpected form data format:", value);
+        updateContext(contextKey, formData);
+      } 
+      // Simple value - use the new helper function
+      else {
+        updateByContextPath(currentNode.contextPath, value);
       }
-    } 
-    // Handle other node types
+    }
+    // Legacy approach: using contextKey and contextJsonPath
     else if (currentNode.contextKey) {
-      console.log("[useNodeManager] Updating context key:", currentNode.contextKey);
-      updateContext(currentNode.contextKey, value);
+      console.log(`[useNodeManager] Using legacy contextKey: ${currentNode.contextKey}`);
+      
+      // Handle basic input nodes with contextJsonPath
+      if ((currentNode.type === "input" || !currentNode.type) && 
+          currentNode.contextKey && 
+          currentNode.contextJsonPath) {
+        
+        console.log(`[useNodeManager] Updating context path ${currentNode.contextKey}.${currentNode.contextJsonPath}`);
+        updateContextPath(
+          currentNode.contextKey,
+          currentNode.contextJsonPath,
+          value
+        );
+      } 
+      // Handle form nodes
+      else if ((currentNode.type === "form" || currentNode.templateId === "form-step")) {
+        console.log("[useNodeManager] Updating form data for key:", currentNode.contextKey);
+        
+        if (typeof value === 'object') {
+          // Get existing context data for this key
+          const existingContextData = context[currentNode.contextKey] || {};
+          const formData = { ...existingContextData };
+          
+          // Update values from form
+          Object.entries(value).forEach(([fieldPath, fieldValue]) => {
+            const setPath = (obj: any, path: string, val: any) => {
+              const keys = path.split('.');
+              let current = obj;
+              for (let i = 0; i < keys.length - 1; i++) {
+                const key = keys[i];
+                if (typeof current[key] !== 'object' || current[key] === null) {
+                  current[key] = {};
+                }
+                current = current[key];
+              }
+              const lastKey = keys[keys.length - 1];
+              current[lastKey] = val;
+            };
+            
+            console.log(`[useNodeManager] Setting field ${fieldPath}:`, fieldValue);
+            setPath(formData, fieldPath, fieldValue);
+          });
+          
+          // Update context with new form data
+          console.log("[useNodeManager] Updated form data:", formData);
+          updateContext(currentNode.contextKey, formData);
+        } else {
+          console.warn("[useNodeManager] Unexpected form data format:", value);
+        }
+      } 
+      // Handle other node types with contextKey only
+      else {
+        console.log("[useNodeManager] Updating context key:", currentNode.contextKey);
+        updateContext(currentNode.contextKey, value);
+      }
     }
 
     // Handle navigation

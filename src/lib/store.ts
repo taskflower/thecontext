@@ -51,9 +51,10 @@ interface AppState {
   // Funkcje do zarządzania kontekstem
   updateContext: (key: string, value: any) => void;
   updateContextPath: (key: string, jsonPath: string, value: any) => void;
+  updateByContextPath: (contextPath: string, value: any) => void; // Nowa funkcja
   processTemplate: (template: string) => string;
   getContext: () => Record<string, any>;
-  getContextPath: (path: string) => any; // Dodana nowa funkcja
+  getContextPath: (path: string) => any;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -183,6 +184,28 @@ export const useAppStore = create<AppState>((set, get) => ({
       }
     });
     console.log("[AppStore] Context path updated for:", key, jsonPath);
+  },
+  
+  // Nowa funkcja - aktualizacja kontekstu za pomocą pojedynczej ścieżki
+  updateByContextPath: (contextPath, value) => {
+    if (!contextPath) {
+      console.warn("[AppStore] Empty contextPath, update skipped.");
+      return;
+    }
+    
+    const parts = contextPath.split('.');
+    const key = parts[0];
+    
+    if (parts.length === 1) {
+      // Przypadek prosty - aktualizacja całego klucza
+      get().updateContext(key, value);
+    } else {
+      // Przypadek złożony - aktualizacja zagnieżdżonej ścieżki
+      const jsonPath = parts.slice(1).join('.');
+      get().updateContextPath(key, jsonPath, value);
+    }
+    
+    console.log("[AppStore] Context updated via contextPath:", contextPath);
   },
   
   // Przetwarzanie szablonów z wartościami z kontekstu
