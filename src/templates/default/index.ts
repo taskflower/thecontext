@@ -1,8 +1,9 @@
 // src/templates/default/index.ts
 import { lazy } from 'react';
-import { WidgetCategory } from '../../../raw_modules/template-registry-module/src/types/WidgetTemplate';
 import { BaseTemplate, BaseTemplateConfig, BaseWorkspaceData, Scenario } from '../baseTemplate';
-import { NodeData } from '../../../raw_modules/revertcontext-nodes-module/src/types/NodeTypes';
+import { WidgetCategory } from '@/lib/templates';
+import { NodeData } from '@/views/types';
+
 
 export class DefaultTemplate extends BaseTemplate {
   readonly id = 'default';
