@@ -1,85 +1,92 @@
 // src/hooks/useNodeManager.ts
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAppStore } from '../lib/store';
-import { useContextStore } from '../lib/contextStore';
-z
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAppStore } from "../lib/store";
+import { useContextStore } from "../lib/contextStore";
 
+// Helper function to set a value at a nested path in an object
+function setPath(obj: Record<string, any>, path: string, value: any): void {
+  const keys = path.split('.');
+  let current = obj;
+  
+  // Navigate through all keys except the last one
+  for (let i = 0; i < keys.length - 1; i++) {
+    const key = keys[i];
+    
+    // If the key doesn't exist or isn't an object, create a new one
+    if (typeof current[key] !== 'object' || current[key] === null) {
+      current[key] = {};
+    }
+    
+    current = current[key];
+  }
+  
+  // Set the value at the last key
+  const lastKey = keys[keys.length - 1];
+  current[lastKey] = value;
+}
 
 export function useNodeManager() {
   const navigate = useNavigate();
   const { getCurrentWorkspace, getCurrentScenario } = useAppStore();
   const { updateContext, updateContextPath } = useContextStore();
-  
-  // Stan lokalny dla aktualnego indeksu węzła
+
   const [currentNodeIndex, setCurrentNodeIndex] = useState(0);
-  
-  // Pobieramy bieżący scenariusz i workspace
   const currentWorkspace = getCurrentWorkspace();
   const currentScenario = getCurrentScenario();
-  
-  // Pobieramy węzły scenariusza
   const nodes = currentScenario?.nodes || [];
-  
-  // Aktualny węzeł na podstawie indeksu
   const currentNode = nodes[currentNodeIndex];
-  
-  // Sprawdzamy czy to ostatni węzeł
   const isLastNode = currentNodeIndex === nodes.length - 1;
-  
-  // Efekt do resetowania indeksu przy zmianie scenariusza
+
   useEffect(() => {
     setCurrentNodeIndex(0);
   }, [currentScenario?.id]);
-  
-  // Kontekst aplikacji jako pary klucz-wartość (dla widoków)
-  const context = useContextStore(state => state.context);
+
+  const context = useContextStore((state) => state.context);
   const contextItems = Object.entries(context);
-  
+
   // Obsługa powrotu do listy scenariuszy
   const handleGoToScenariosList = () => {
     if (currentWorkspace) {
       navigate(`/${currentWorkspace.id}`);
     }
   };
-  
-  // Obsługa przejścia do poprzedniego węzła
+
   const handlePreviousNode = () => {
     if (currentNodeIndex > 0) {
       setCurrentNodeIndex(currentNodeIndex - 1);
     }
   };
-  
-  // Obsługa wykonania węzła (przesłania danych i przejścia dalej)
+
   const handleNodeExecution = (value: any) => {
     if (!currentNode) return;
-    
-    // Aktualizujemy kontekst na podstawie typu węzła
-    if (currentNode.type === 'input' && currentNode.contextKey && currentNode.contextJsonPath) {
-      // Dla węzłów wejściowych - aktualizujemy pojedynczą wartość
-      updateContextPath(currentNode.contextKey, currentNode.contextJsonPath, value);
-    } else if (currentNode.type === 'form' && currentNode.contextKey) {
-      // Dla węzłów formularza - aktualizujemy wiele wartości
+
+    if (
+      currentNode.type === "input" &&
+      currentNode.contextKey &&
+      currentNode.contextJsonPath
+    ) {
+      updateContextPath(
+        currentNode.contextKey,
+        currentNode.contextJsonPath,
+        value
+      );
+    } else if (currentNode.type === "form" && currentNode.contextKey) {
+      // For form type nodes, update multiple fields in the context
       const keyData = { ...context[currentNode.contextKey] };
-      
-      // Aktualizujemy każdą wartość z formularza
       Object.entries(value).forEach(([fieldPath, fieldValue]) => {
         setPath(keyData, fieldPath, fieldValue);
       });
-      
-      // Aktualizujemy cały obiekt kontekstu
       updateContext(currentNode.contextKey, keyData);
     }
-    
-    // Jeśli to ostatni węzeł, wracamy do listy scenariuszy
+
     if (isLastNode) {
       handleGoToScenariosList();
     } else {
-      // W przeciwnym razie przechodzimy do następnego węzła
       setCurrentNodeIndex(currentNodeIndex + 1);
     }
   };
-  
+
   // Debug info dla deweloperów
   const debugInfo = {
     currentWorkspace: currentWorkspace?.id,
@@ -87,9 +94,9 @@ export function useNodeManager() {
     currentNodeIndex,
     nodeCount: nodes.length,
     currentNodeId: currentNode?.id,
-    context
+    context,
   };
-  
+
   return {
     currentNode,
     currentScenario,
@@ -98,10 +105,6 @@ export function useNodeManager() {
     handlePreviousNode,
     handleNodeExecution,
     debugInfo,
-    contextItems
+    contextItems,
   };
-}
-
-function setPath(keyData: any, fieldPath: string, fieldValue: unknown) {
-    throw new Error('Function not implemented.');
 }

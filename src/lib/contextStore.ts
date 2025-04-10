@@ -56,6 +56,7 @@ interface ContextState {
   setContext: (context: Record<string, any>) => void;
   updateContext: (key: string, value: any) => void;
   updateContextPath: (key: string, jsonPath: string, value: any) => void;
+  processTemplate: (template: string) => string;
   
   // Gettery
   getContextValue: (key: string) => any;
@@ -95,5 +96,29 @@ export const useContextStore = create<ContextState>((set, get) => ({
     const keyData = get().context[key];
     if (!keyData) return undefined;
     return getValueByPath(keyData, jsonPath);
+  },
+  
+  // Przetwarza szablon, zastępując zmienne w formacie {{key.path}} wartościami z kontekstu
+  processTemplate: (template) => {
+    if (!template) return '';
+    
+    // Regexp do wyszukiwania zmiennych w formacie {{nazwa.ścieżka}}
+    const variableRegex = /\{\{([^}]+)\}\}/g;
+    
+    return template.replace(variableRegex, (match, path) => {
+      // Sprawdzamy, czy ścieżka zawiera kropkę (oznacza to zagnieżdżoną ścieżkę)
+      const [key, ...pathParts] = path.trim().split('.');
+      
+      if (pathParts.length === 0) {
+        // Jeśli nie ma zagnieżdżenia, pobieramy wartość bezpośrednio
+        const value = get().getContextValue(key);
+        return value !== undefined ? String(value) : match;
+      } else {
+        // Jeśli jest zagnieżdżenie, używamy getContextPathValue
+        const jsonPath = pathParts.join('.');
+        const value = get().getContextPathValue(key, jsonPath);
+        return value !== undefined ? String(value) : match;
+      }
+    });
   }
 }));

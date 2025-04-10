@@ -1,10 +1,11 @@
 // src/templates/index.ts
-import { useAppStore } from '../lib/store';
+
 import { templateRegistry, registerTemplate } from './registry';
 import { DefaultTemplate } from './default';
 import { NewYorkTemplate } from './newyork';
 import { SimpleTemplate } from './simple';
-import { Workspace } from '../lib/store';
+import { useAppStore, Workspace } from '@/lib/store';
+
 
 // Export template registry for use elsewhere
 export { templateRegistry };

@@ -1,6 +1,7 @@
 // src/lib/store.ts
+import { Scenario, TemplateSettings } from '@/views/types';
 import { create } from 'zustand';
-import { TemplateSettings, Scenario, NodeData } from '../types';
+
 
 export interface Workspace {
   id: string;

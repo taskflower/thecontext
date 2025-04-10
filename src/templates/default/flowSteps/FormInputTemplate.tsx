@@ -1,7 +1,8 @@
 // src/templates/default/flowSteps/FormInputTemplate.tsx
+import { useContextStore } from '@/lib/contextStore';
 import React, { useState } from 'react';
 import { FlowStepProps } from 'template-registry-module';
-import { useContextStore } from '../../../lib/contextStore';
+
 
 const FormInputTemplate: React.FC<FlowStepProps> = ({
   node,
@@ -14,7 +15,7 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
   
   // Pobieramy funkcje kontekstu z Zustand
   const processTemplate = useContextStore(state => state.processTemplate);
-  const updateContext = useContextStore(state => state.updateContext);
+  const updateContextPath = useContextStore(state => state.updateContextPath);
   
   // Przetwarzamy wiadomość asystenta z zmiennymi kontekstowymi
   const assistantMessage = node.assistantMessage 
@@ -39,18 +40,18 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
       node.formFields.forEach(field => {
         // Jeśli pole ma wartość
         if (formData[field.name] !== undefined) {
-          // Aktualizuj kontekst
-          updateContext(
+          // Aktualizuj kontekst za pomocą updateContextPath
+          updateContextPath(
             node.contextKey as string, 
-            formData[field.name], 
-            field.name
+            field.name, // Używamy nazwy pola jako ścieżki JSON
+            formData[field.name]
           );
         }
       });
     }
     
     // Wywołaj callback z danymi formularza
-    onSubmit(JSON.stringify(formData));
+    onSubmit(formData);
   };
   
   // Renderuj pola formularza
