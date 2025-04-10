@@ -6,6 +6,7 @@ import { getLayoutComponent, getFlowStepComponent, getFlowStepForNodeType } from
 import { useContextStore } from "../lib/contextStore";
 import { DebugPanel } from "../components/DebugPanel";
 import { useNodeManager } from "../hooks/useNodeManager"; // Dodajemy hook useNodeManager
+import ContextDebugger from "@/components/ContextDebugger";
 
 export const FlowView: React.FC = () => {
   const { workspace: workspaceId, scenario: scenarioId } = useParams<{
@@ -59,7 +60,6 @@ export const FlowView: React.FC = () => {
     currentNode,
     currentScenario,
     isLastNode,
-    handleGoToScenariosList,
     handlePreviousNode,
     handleNodeExecution,
     debugInfo,
@@ -166,6 +166,7 @@ export const FlowView: React.FC = () => {
       <DebugPanel 
         nodeData={debugInfo}
       />
+      <ContextDebugger/>
     </>
   );
 };

@@ -1,35 +1,16 @@
-// src/hooks/useNodeManager.ts
+// src/hooks/useNodeManager.ts (poprawiona wersja)
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "../lib/store";
 import { useContextStore } from "../lib/contextStore";
 
-// Helper function to set a value at a nested path in an object
-function setPath(obj: Record<string, any>, path: string, value: any): void {
-  const keys = path.split('.');
-  let current = obj;
-  
-  // Navigate through all keys except the last one
-  for (let i = 0; i < keys.length - 1; i++) {
-    const key = keys[i];
-    
-    // If the key doesn't exist or isn't an object, create a new one
-    if (typeof current[key] !== 'object' || current[key] === null) {
-      current[key] = {};
-    }
-    
-    current = current[key];
-  }
-  
-  // Set the value at the last key
-  const lastKey = keys[keys.length - 1];
-  current[lastKey] = value;
-}
-
 export function useNodeManager() {
   const navigate = useNavigate();
   const { getCurrentWorkspace, getCurrentScenario } = useAppStore();
-  const { updateContext, updateContextPath, context, setActiveWorkspace } = useContextStore();
+  const context = useContextStore(state => state.context);
+  const updateContext = useContextStore(state => state.updateContext);
+  const updateContextPath = useContextStore(state => state.updateContextPath);
+  const setActiveWorkspace = useContextStore(state => state.setActiveWorkspace);
 
   const [currentNodeIndex, setCurrentNodeIndex] = useState(0);
   const currentWorkspace = getCurrentWorkspace();
@@ -41,12 +22,14 @@ export function useNodeManager() {
   // Ustawienie aktywnego workspace'a w contextStore, gdy się zmieni
   useEffect(() => {
     if (currentWorkspace?.id) {
+      console.log("[useNodeManager] Ustawianie aktywnego workspace:", currentWorkspace.id);
       setActiveWorkspace(currentWorkspace.id);
     }
   }, [currentWorkspace?.id, setActiveWorkspace]);
 
   // Resetowanie indeksu node'a, gdy zmieni się scenariusz
   useEffect(() => {
+    console.log("[useNodeManager] Zmiana scenariusza, resetowanie indeksu node'a");
     setCurrentNodeIndex(0);
   }, [currentScenario?.id]);
 
@@ -56,12 +39,14 @@ export function useNodeManager() {
   // Obsługa powrotu do listy scenariuszy
   const handleGoToScenariosList = () => {
     if (currentWorkspace) {
+      console.log("[useNodeManager] Przejście do listy scenariuszy");
       navigate(`/${currentWorkspace.id}`);
     }
   };
 
   const handlePreviousNode = () => {
     if (currentNodeIndex > 0) {
+      console.log("[useNodeManager] Przejście do poprzedniego node'a");
       setCurrentNodeIndex(currentNodeIndex - 1);
     } else {
       handleGoToScenariosList();
@@ -71,17 +56,20 @@ export function useNodeManager() {
   const handleNodeExecution = (value: any) => {
     if (!currentNode) return;
     
-    console.log("Executing node with type:", currentNode.type, "value:", value);
-    console.log("Current node context key:", currentNode.contextKey, "contextJsonPath:", currentNode.contextJsonPath);
+    console.log("[useNodeManager] Wykonywanie node'a typu:", currentNode.type, "wartość:", value);
+    console.log("[useNodeManager] Dane node'a:", {
+      contextKey: currentNode.contextKey,
+      contextJsonPath: currentNode.contextJsonPath
+    });
 
     // Aktualizacja kontekstu w zależności od typu node'a
     if (
-      currentNode.type === "input" &&
+      (currentNode.type === "input" || !currentNode.type) &&
       currentNode.contextKey &&
       currentNode.contextJsonPath
     ) {
       // Dla node'ów typu input - aktualizujemy konkretną ścieżkę
-      console.log(`Updating context path ${currentNode.contextKey}.${currentNode.contextJsonPath} with value:`, value);
+      console.log(`[useNodeManager] Aktualizacja ścieżki kontekstu ${currentNode.contextKey}.${currentNode.contextJsonPath}`);
       updateContextPath(
         currentNode.contextKey,
         currentNode.contextJsonPath,
@@ -89,33 +77,60 @@ export function useNodeManager() {
       );
     } else if (currentNode.type === "form" && currentNode.contextKey) {
       // Dla node'ów typu form - aktualizujemy wiele pól
-      const keyData = { ...(context[currentNode.contextKey] || {}) };
-      console.log("Form update - current keyData:", keyData);
+      console.log("[useNodeManager] Aktualizacja pól formularza dla klucza:", currentNode.contextKey);
       
-      Object.entries(value).forEach(([fieldPath, fieldValue]) => {
-        console.log(`Setting path ${fieldPath} to:`, fieldValue);
-        setPath(keyData, fieldPath, fieldValue);
-      });
-      
-      console.log("Updating context with new keyData:", keyData);
-      updateContext(currentNode.contextKey, keyData);
+      // W przypadku formularza wartość powinna być obiektem z polami
+      if (typeof value === 'object') {
+        const formData = { ...(context[currentNode.contextKey] || {}) };
+        
+        // Aktualizuj poszczególne pola formularza
+        Object.entries(value).forEach(([fieldPath, fieldValue]) => {
+          // Helper function to set value at a nested path
+          const setPath = (obj: any, path: string, val: any) => {
+            const keys = path.split('.');
+            let current = obj;
+            
+            // Navigate through all keys except the last one
+            for (let i = 0; i < keys.length - 1; i++) {
+              const key = keys[i];
+              if (typeof current[key] !== 'object' || current[key] === null) {
+                current[key] = {};
+              }
+              current = current[key];
+            }
+            
+            // Set the value at the last key
+            const lastKey = keys[keys.length - 1];
+            current[lastKey] = val;
+          };
+          
+          console.log(`[useNodeManager] Ustawianie pola formularza ${fieldPath}:`, fieldValue);
+          setPath(formData, fieldPath, fieldValue);
+        });
+        
+        // Aktualizuj cały klucz kontekstu z zaktualizowanymi danymi formularza
+        console.log("[useNodeManager] Aktualizacja całego klucza kontekstu:", currentNode.contextKey);
+        updateContext(currentNode.contextKey, formData);
+      } else {
+        console.warn("[useNodeManager] Nieoczekiwany format danych formularza:", value);
+      }
     } else if (currentNode.contextKey) {
       // Dla innych typów node'ów, jeśli mają contextKey - aktualizujemy cały klucz
-      console.log(`Updating entire context key ${currentNode.contextKey} with:`, value);
+      console.log("[useNodeManager] Aktualizacja klucza kontekstu:", currentNode.contextKey);
       updateContext(currentNode.contextKey, value);
     }
 
     // Przejście do następnego kroku lub zakończenie flow
     if (isLastNode) {
-      console.log("Last node reached, going to scenarios list");
+      console.log("[useNodeManager] Ostatni node osiągnięty, przejście do listy scenariuszy");
       handleGoToScenariosList();
     } else {
-      console.log("Moving to next node");
+      console.log("[useNodeManager] Przejście do następnego node'a");
       setCurrentNodeIndex(currentNodeIndex + 1);
     }
   };
 
-  // Debug info dla deweloperów
+  // Debug info
   const debugInfo = {
     currentWorkspace: currentWorkspace?.id,
     currentScenario: currentScenario?.id,

@@ -1,6 +1,7 @@
 // src/components/DebugPanel.tsx
 import React, { useState } from "react";
 import { useContextStore } from "../lib/contextStore";
+import { NodeData } from "@/views/types";
 
 interface DebugPanelProps {
   nodeData?: {
@@ -11,7 +12,7 @@ interface DebugPanelProps {
   };
 }
 
-export const DebugPanel: React.FC<DebugPanelProps> = ({ nodeData }) => {
+export const DebugPanel: React.FC<DebugPanelProps> = ({ nodeData }:NodeData) => {
   const [isOpen, setIsOpen] = useState(false);
   const context = useContextStore((state) => state.context);
   
