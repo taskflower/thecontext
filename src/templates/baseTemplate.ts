@@ -22,7 +22,6 @@ export interface BaseTemplateSettings {
   layoutTemplate: string;
   scenarioWidgetTemplate: string;
   defaultFlowStepTemplate: string;
-  showContextWidget?: boolean;
   theme?: 'light' | 'dark' | 'system';
   customStyles?: Record<string, string>;
 }

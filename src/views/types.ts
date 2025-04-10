@@ -35,7 +35,6 @@ export interface TemplateSettings {
   layoutTemplate: string;
   scenarioWidgetTemplate: string;
   defaultFlowStepTemplate: string;
-  showContextWidget?: boolean;
   theme?: string;
 }
 

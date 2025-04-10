@@ -220,7 +220,6 @@ export class DefaultTemplate extends BaseTemplate {
         layoutTemplate: "default",
         scenarioWidgetTemplate: "card-list",
         defaultFlowStepTemplate: "basic-step",
-        showContextWidget: true,
         theme: 'light'
       },
       initialContext

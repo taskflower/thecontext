@@ -82,7 +82,6 @@ export class SimpleTemplate extends BaseTemplate {
         layoutTemplate: 'simple-layout',
         scenarioWidgetTemplate: 'simple-card', // Ustawienie widgetu, który dodaliśmy wyżej
         defaultFlowStepTemplate: 'basic-step',
-        showContextWidget: true,
         theme: 'light'
       },
       initialContext: {

@@ -79,9 +79,7 @@ export const ScenarioView: React.FC = () => {
   const widgetId = currentWorkspace.templateSettings.scenarioWidgetTemplate;
   const ScenarioWidget = getWidgetComponent(widgetId);
   
-  // Dodaj widget kontekstu, jeśli jest włączony w ustawieniach szablonu
-  const showContextWidget = currentWorkspace.templateSettings.showContextWidget;
-  const ContextWidget = showContextWidget ? getWidgetComponent('context-display') : null;
+
   
   // Jeśli nie ma widgetu, próbujemy użyć domyślnego widgetu card-list
   if (!ScenarioWidget) {
@@ -108,15 +106,7 @@ export const ScenarioView: React.FC = () => {
             onSelect={handleSelectScenario}
           />
           
-          {/* Wyświetl widget kontekstu, jeśli jest włączony */}
-          {ContextWidget && (
-            <div className="mt-6">
-              <ContextWidget 
-                title="Workspace Context"
-                onSelect={() => {}}
-              />
-            </div>
-          )}
+        
         </LayoutComponent>
       );
     }
@@ -152,15 +142,7 @@ export const ScenarioView: React.FC = () => {
           </ul>
         </div>
         
-        {/* Wyświetl widget kontekstu, jeśli jest włączony */}
-        {ContextWidget && (
-          <div className="mt-6">
-            <ContextWidget 
-              title="Workspace Context"
-              onSelect={() => {}}
-            />
-          </div>
-        )}
+ 
       </LayoutComponent>
     );
   }
@@ -177,15 +159,7 @@ export const ScenarioView: React.FC = () => {
         onSelect={handleSelectScenario}
       />
       
-      {/* Wyświetl widget kontekstu, jeśli jest włączony */}
-      {ContextWidget && (
-        <div className="mt-6">
-          <ContextWidget 
-            title="Workspace Context"
-            onSelect={() => {}}
-          />
-        </div>
-      )}
+     
     </LayoutComponent>
   );
 };
