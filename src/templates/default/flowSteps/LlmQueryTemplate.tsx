@@ -1,9 +1,10 @@
 // src/templates/flowSteps/LlmQueryTemplate.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FlowStepProps } from 'template-registry-module';
-import { useAuth } from '@/hooks/useAuth';
 import { NodeData, Scenario } from '@/../raw_modules/revertcontext-nodes-module/src';
 import { useAppStore } from '@/lib/store';
+import { useChat } from '@/hooks/useChat';
+import { MessageSquare, Shield, User, Info } from 'lucide-react';
 
 // Rozszerzony interfejs dla FlowStepProps, który uwzględnia scenario i rozszerzony node
 interface ExtendedFlowStepProps extends Omit<FlowStepProps, 'node'> {
@@ -20,6 +21,66 @@ interface ContextItem {
   updatedAt?: any;
 }
 
+interface InfoBadgeProps {
+  type: 'assistant' | 'system' | 'user' | 'debug';
+  title: string;
+  content: string;
+  className?: string;
+}
+
+const InfoBadge: React.FC<InfoBadgeProps> = ({ type, title, content, className = '' }) => {
+  const styles = {
+    assistant: {
+      container: 'bg-blue-50 border-blue-100',
+      iconBg: 'bg-blue-100',
+      iconColor: 'text-blue-500',
+      titleColor: 'text-lg font-semibold mb-2',
+      textColor: 'text-gray-700',
+      icon: <MessageSquare size={20} />
+    },
+    system: {
+      container: 'bg-amber-50 border-amber-100',
+      iconBg: 'bg-amber-100',
+      iconColor: 'text-amber-500',
+      titleColor: 'text-sm font-medium text-amber-800 mb-1',
+      textColor: 'text-xs text-amber-700',
+      icon: <Shield size={20} />
+    },
+    user: {
+      container: 'bg-green-50 border-green-100',
+      iconBg: 'bg-green-100',
+      iconColor: 'text-green-500',
+      titleColor: 'text-sm font-medium text-green-800 mb-1',
+      textColor: 'text-xs text-green-700',
+      icon: <User size={20} />
+    },
+    debug: {
+      container: 'bg-gray-100 border-gray-200',
+      iconBg: 'bg-gray-200',
+      iconColor: 'text-gray-500',
+      titleColor: 'text-sm font-medium text-gray-800 mb-1',
+      textColor: 'text-xs text-gray-800',
+      icon: <Info size={20} />
+    }
+  };
+
+  const style = styles[type];
+  
+  return (
+    <div className={`p-3 rounded-lg border ${style.container} ${className}`}>
+      <div className="flex items-start space-x-3">
+        <div className={`p-2 rounded-full ${style.iconBg}`}>
+          <div className={style.iconColor}>{style.icon}</div>
+        </div>
+        <div>
+          <h3 className={style.titleColor}>{title}</h3>
+          <p className={style.textColor}>{content}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({ 
   node, 
   scenario,
@@ -28,221 +89,71 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
   isLastNode,
 }) => {
   const [userInput, setUserInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [debugInfo, setDebugInfo] = useState<string | null>(null);
-  const { getToken, user } = useAuth();
   const processTemplate = useAppStore(state => state.processTemplate);
-  const updateByContextPath = useAppStore(state => state.updateByContextPath);
   
   // Przetwarzamy wiadomość asystenta używając funkcji z AppStore
   const processedAssistantMessage = node.assistantMessage 
     ? processTemplate(node.assistantMessage) 
     : 'W czym mogę pomóc?';
   
-  useEffect(() => {
-    // Sprawdź na początku, czy mamy token i użytkownika
-    const checkAuth = async () => {
-      const token = await getToken();
-      setDebugInfo(`Token dostępny: ${!!token}, User dostępny: ${!!user}, User ID: ${user?.uid || 'brak'}`);
-    };
-    
-    checkAuth();
-  }, [getToken, user]);
-
-  const sendMessageToGemini = async (message: string) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      // Pobierz aktualny token JWT
-      const token = await getToken();
-      
-      if (!token) {
-        throw new Error('Token autoryzacyjny niedostępny. Zaloguj się ponownie.');
-      }
-      
-      if (!user) {
-        throw new Error('Użytkownik nie jest zalogowany. Zaloguj się ponownie.');
-      }
-      
-      // Przygotuj wiadomości do wysłania zgodnie z wymaganą kolejnością
-      const messages = [];
-      
-      // 1. Dodaj wiadomość systemową, jeśli węzeł ma ustawioną flagę includeSystemMessage
-      // i scenariusz ma zdefiniowaną wiadomość systemową
-      if (node.includeSystemMessage && scenario?.systemMessage) {
-        messages.push({
-          role: "system",
-          content: scenario.systemMessage
-        });
-      }
-      
-      // 2. Sprawdź, czy mamy initial user message
-      if (node.initialUserMessage) {
-        // Jeśli mamy initialUserMessage, użyj jej jako pierwszej wiadomości użytkownika
-        console.log("Using initialUserMessage:", node.initialUserMessage);
-        messages.push({
-          role: "user",
-          content: node.initialUserMessage
-        });
-        
-        // Jeśli mamy też wiadomość asystenta, dodaj ją po initialUserMessage
-        if (node.assistantMessage && node.assistantMessage.trim() !== '') {
-          messages.push({
-            role: "assistant",
-            content: node.assistantMessage
-          });
-        }
+  // Używamy nowego hooka
+  const { 
+    sendMessage, 
+    isLoading, 
+    error, 
+    debugInfo 
+  } = useChat({
+    includeSystemMessage: node.includeSystemMessage || false,
+    systemMessage: scenario?.systemMessage || '',
+    initialUserMessage: node.initialUserMessage || '',
+    assistantMessage: node.assistantMessage || '',
+    contextPath: node.contextPath || '',
+    onDataSaved: (data) => {
+      if (node.contextKey) {
+        onSubmit(data);
       } else {
-        // Jeśli nie mamy initialUserMessage
-        console.log("No initialUserMessage present");
-        
-        // NIE dodajemy żadnej początkowej wiadomości - zgodnie z wymaganiami
-        // Konwersacja zaczyna się bezpośrednio od aktualnej wiadomości użytkownika
-        // W takim wypadku nie dodajemy wcześniejszego kontekstu, nawet jeśli assistantMessage istnieje
+        onSubmit(data);
       }
-      
-      // 3. Dodaj bieżącą wiadomość użytkownika
-      messages.push({
-        role: "user",
-        content: message
-      });
-      
-      console.log("Prepared messages:", messages);
-      
-      // Format danych według wymaganej struktury
-      const payload = {
-        messages: messages,
-        userId: user.uid
-      };
-      
-      setDebugInfo(`Wysyłanie do: ${import.meta.env.VITE_API_URL}/api/v1/services/gemini/chat/completion`);
-      
-      // Wysyłanie żądania do Gemini API z tokenem JWT w nagłówku Authorization
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/services/gemini/chat/completion`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload),
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Błąd odpowiedzi:", errorText);
-        
-        try {
-          const errorData = JSON.parse(errorText);
-          throw new Error(
-            errorData.error?.message || 
-            `Żądanie API zakończone błędem: ${response.status}`
-          );
-        } catch (e) {
-          // Jeśli nie możemy sparsować JSON, użyj surowego tekstu
-          throw new Error(`Żądanie API zakończone błędem: ${response.status} - ${errorText.substring(0, 100)}...`);
-        }
-      }
-      
-      const responseData = await response.json();
-      console.log("Dane odpowiedzi:", responseData);
-      
-      // Przygotuj dane do zapisania w kontekście
-      const conversationData = {
-        userInput: message,
-        aiResponse: responseData
-      };
-      
-      // Użyj nowej funkcji contextPath jeśli jest dostępna
-      if (node.contextPath) {
-        console.log(`Zapisywanie danych do contextPath: ${node.contextPath}`);
-        updateByContextPath(node.contextPath, JSON.stringify(conversationData));
-      }
-      // Alternatywnie, użyj contextKey dla wstecznej kompatybilności
-      else if (node.contextKey) {
-        console.log(`Zapisywanie danych do contextKey: ${node.contextKey}`);
-        onSubmit(JSON.stringify(conversationData));
-      }
-      else {
-        // Bez zapisywania kontekstu
-        onSubmit(JSON.stringify(conversationData));
-      }
-      
-      // Wyczyść pole wprowadzania
       setUserInput('');
-    } catch (err) {
-      console.error('Pełny błąd:', err);
-      setError(err instanceof Error ? err.message : 'Wystąpił nieznany błąd');
-    } finally {
-      setIsLoading(false);
     }
-  };
+  });
 
   const handleSubmit = () => {
     if (userInput.trim() === '') return;
-    sendMessageToGemini(userInput);
+    sendMessage(userInput);
   };
 
   return (
     <div className="space-y-4">
-      <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-        <div className="flex items-start space-x-3">
-          <div className="bg-blue-100 p-2 rounded-full">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-            </svg>
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold mb-2">Asystent AI</h2>
-            <p className="text-gray-700">
-              {processedAssistantMessage}
-            </p>
-          </div>
-        </div>
-      </div>
+      <InfoBadge 
+        type="assistant"
+        title="Asystent AI"
+        content={processedAssistantMessage}
+        className="p-4"
+      />
 
       {node.includeSystemMessage && scenario?.systemMessage && (
-        <div className="bg-amber-50 p-3 rounded-lg border border-amber-100">
-          <div className="flex items-start space-x-3">
-            <div className="bg-amber-100 p-2 rounded-full">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-              </svg>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-amber-800 mb-1">System Message</h3>
-              <p className="text-xs text-amber-700">
-                {scenario.systemMessage}
-              </p>
-            </div>
-          </div>
-        </div>
+        <InfoBadge 
+          type="system"
+          title="System Message"
+          content={scenario.systemMessage}
+        />
       )}
 
       {node.initialUserMessage && (
-        <div className="bg-green-50 p-3 rounded-lg border border-green-100">
-          <div className="flex items-start space-x-3">
-            <div className="bg-green-100 p-2 rounded-full">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-green-800 mb-1">Initial User Message</h3>
-              <p className="text-xs text-green-700">
-                {node.initialUserMessage}
-              </p>
-            </div>
-          </div>
-        </div>
+        <InfoBadge 
+          type="user"
+          title="Initial User Message"
+          content={node.initialUserMessage}
+        />
       )}
 
       {debugInfo && (
-        <div className="bg-gray-100 p-2 text-xs text-gray-800 rounded border border-gray-200">
-          <p>Debug: {debugInfo}</p>
-        </div>
+        <InfoBadge 
+          type="debug"
+          title="Debug"
+          content={debugInfo}
+        />
       )}
 
       <div className="space-y-2">
