@@ -18,7 +18,7 @@ export const ScenarioView: React.FC = () => {
     }
   }, [workspaceId, selectWorkspace]);
 
-  const currentWorkspace = getCurrentWorkspace();
+  const currentWorkspace:any = getCurrentWorkspace();
 
   // Handle return
   const handleBack = () => navigate("/");
@@ -80,18 +80,15 @@ export const ScenarioView: React.FC = () => {
     );
   }
 
-  // Get scenario widget
+  // Get main widget and supporting widgets
   const widgetId = currentWorkspace.templateSettings.scenarioWidgetTemplate;
   const ScenarioWidget = getWidgetComponent(widgetId);
-
-  // Sprawdzenie czy widget jest typem context-widget
-  const isContextWidget = widgetId === "context-widget";
-
-  // Jeśli to widget kontekstowy, ustaw odpowiednie atrybuty dla widgetu
-  const contextWidgetAttrs = isContextWidget ? {} : {};
-
-  // Jeśli potrzebujemy wyświetlić również listę scenariuszy
-  const CardListWidget = getWidgetComponent("simple-card");
+  
+  // Check if this workspace should display a companion list widget based on configuration
+  // Using existing template settings rather than inventing new properties
+  const showCompanionList = currentWorkspace.templateSettings.hasCompanionList;
+  const companionListWidgetId = "simple-card"; // Default widget for companion list
+  const CompanionListWidget = showCompanionList ? getWidgetComponent(companionListWidgetId) : null;
 
   // If widget not found, try using default card-list widget
   if (!ScenarioWidget) {
@@ -143,7 +140,7 @@ export const ScenarioView: React.FC = () => {
 
           <h4 className="font-medium mb-2">Scenario list:</h4>
           <ul className="bg-white p-3 border border-gray-200 rounded">
-            {currentWorkspace.scenarios.map((scenario) => (
+            {currentWorkspace.scenarios.map((scenario:any) => (
               <li key={scenario.id} className="mb-2">
                 <button
                   onClick={() => handleSelectScenario(scenario.id)}
@@ -164,8 +161,8 @@ export const ScenarioView: React.FC = () => {
     );
   }
 
-  // Gdy mamy context-widget, wyświetl również listę scenariuszy
-  if (isContextWidget && CardListWidget) {
+  // Display both a custom widget and scenarios list if configured
+  if (showCompanionList && CompanionListWidget) {
     return (
       <LayoutComponent
         title={currentWorkspace.name}
@@ -173,15 +170,15 @@ export const ScenarioView: React.FC = () => {
         onBackClick={handleBack}
       >
         <div className="space-y-8">
-          {/* Widget kontekstowy */}
+          {/* Main widget */}
           <div className="mb-6">
-            <ScenarioWidget attrs={contextWidgetAttrs} />
+            <ScenarioWidget attrs={{}} />
           </div>
 
-          {/* Lista scenariuszy */}
+          {/* Scenarios list */}
           <div>
-            <h2 className="text-xl font-medium mb-4">Dostępne scenariusze</h2>
-            <CardListWidget
+            <h2 className="text-xl font-medium mb-4">Available Scenarios</h2>
+            <CompanionListWidget
               data={currentWorkspace.scenarios}
               onSelect={handleSelectScenario}
               attrs={{}}
@@ -192,7 +189,7 @@ export const ScenarioView: React.FC = () => {
     );
   }
 
-  // Standardowe wyświetlenie widgetu
+  // Standard widget display
   return (
     <LayoutComponent
       title={currentWorkspace.name}
@@ -202,7 +199,7 @@ export const ScenarioView: React.FC = () => {
       <ScenarioWidget
         data={currentWorkspace.scenarios}
         onSelect={handleSelectScenario}
-        attrs={isContextWidget ? contextWidgetAttrs : {}}
+        attrs={{}}
       />
     </LayoutComponent>
   );

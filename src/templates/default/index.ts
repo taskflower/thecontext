@@ -111,30 +111,17 @@ getDefaultWorkspaceData(): BaseWorkspaceData {
       formSchemaPath: "formSchemas.userPreferences"
     }
   };
-  
-  const aiNode: NodeData = {
-    id: "node-4",
-    scenarioId: "scenario-1",
-    label: "AI Conversation",
-    assistantMessage: "Great! {{userProfile.firstName}} {{userProfile.lastName}}, how can I help you today?",
-    contextPath: "conversationHistory",
-    templateId: "llm-query",
-    attrs: {
-      includeSystemMessage: true,
-      initialUserMessage: "I'd like to learn more about your services"
-    }
-  };
 
   // Create an initial scenario
   const initialScenario: Scenario = {
     id: "scenario-1",
     name: "User Onboarding",
     description: "Collect user information and preferences",
-    nodes: [welcomeNode, emailNode, preferencesNode, aiNode],
+    nodes: [welcomeNode, emailNode, preferencesNode],
     systemMessage: "You are a helpful assistant for a software company. Be concise and friendly in your responses."
   };
 
-  // Create a demo scenario
+  // Create a demo scenario with the LLM component moved to the second step
   const contextDemoScenario: Scenario = {
     id: "scenario-2",
     name: "Context Demo",
@@ -151,10 +138,14 @@ getDefaultWorkspaceData(): BaseWorkspaceData {
       {
         id: "demo-node-2",
         scenarioId: "scenario-2",
-        label: "Enter Age",
-        assistantMessage: "Hello {{userProfile.firstName}}! Please enter your age:",
-        contextPath: "userProfile.age",
-        templateId: "basic-step"
+        label: "AI Conversation", // Changed from "Enter Age" to "AI Conversation"
+        assistantMessage: "Great! {{userProfile.firstName}}, how can I help you today?",
+        contextPath: "conversationHistory",
+        templateId: "llm-query",
+        attrs: {
+          includeSystemMessage: true,
+          initialUserMessage: "I'd like to learn more about your services"
+        }
       }
     ],
     systemMessage: "Educational demo for context usage"
