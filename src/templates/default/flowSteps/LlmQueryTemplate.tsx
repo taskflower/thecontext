@@ -1,8 +1,16 @@
 // src/templates/flowSteps/LlmQueryTemplate.tsx
+
+interface ContextItem {
+  id: string;
+  title?: string;
+  contentType?: string;
+  content: any;
+  updatedAt?: any;
+}
 import React, { useState, useEffect } from 'react';
 import { FlowStepProps } from 'template-registry-module';
 import { useAuth } from '@/hooks/useAuth';
-import { NodeData, Scenario, ContextItem } from '@/../raw_modules/revertcontext-nodes-module/src';
+import { NodeData, Scenario } from '@/../raw_modules/revertcontext-nodes-module/src';
 
 // Rozszerzony interfejs dla FlowStepProps, który uwzględnia scenario i rozszerzony node
 interface ExtendedFlowStepProps extends Omit<FlowStepProps, 'node'> {
@@ -17,7 +25,7 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
   onSubmit, 
   onPrevious, 
   isLastNode,
-  contextItems = []
+  // contextItems = []
 }) => {
   const [userInput, setUserInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);

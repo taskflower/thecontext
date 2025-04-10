@@ -1,25 +1,29 @@
 // src/App.tsx
 import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-// Import views
 import { WorkspaceView } from './views/WorkspaceView';
 import { ScenarioView } from './views/ScenarioView';
 import { FlowView } from './views/FlowView';
 import { LoginView } from './views/LoginView';
-// Import context initialization
 import { useAppStore } from './lib/store';
-import { initializeContext } from './lib/contextSingleton';
+import { useContextStore } from './lib/contextStore';
+import { initializeTemplates } from './templates';
 
 const App: React.FC = () => {
   const { workspaces } = useAppStore();
+  const { setContext } = useContextStore();
   
-  // Initialize context when app loads
+  // Inicjalizacja szablonów przy pierwszym renderowaniu
   useEffect(() => {
-    // If we have workspaces with initialContext, initialize the context manager
+    initializeTemplates();
+  }, []);
+  
+  // Inicjalizacja kontekstu gdy załadują się workspaces
+  useEffect(() => {
     if (workspaces.length > 0 && workspaces[0].initialContext) {
-      initializeContext(workspaces[0].initialContext);
+      setContext(workspaces[0].initialContext);
     }
-  }, [workspaces]);
+  }, [workspaces, setContext]);
 
   return (
     <Router>
@@ -35,7 +39,6 @@ const App: React.FC = () => {
           <Route path="/login" element={<LoginView />} />
           <Route path="/:workspace" element={<ScenarioView />} />
           <Route path="/:workspace/:scenario" element={<FlowView />} />
-          <Route path="/:workspace/:scenario/:node" element={<FlowView />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Suspense>

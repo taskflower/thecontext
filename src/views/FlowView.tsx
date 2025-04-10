@@ -1,138 +1,90 @@
 // src/views/FlowView.tsx
-import React, { Suspense } from 'react';
-import { useParams } from 'react-router-dom';
+import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
-import { useNodeManager } from '../hooks/useNodeManager';
-import { templateRegistry } from '../lib/templates';
-import { FlowStepProps } from '../../raw_modules/template-registry-module/src/types/FlowStepTemplate';
-import { NodeData } from '../../raw_modules/revertcontext-nodes-module/src/types/NodeTypes';
-
-// Interface for a scenario
-interface Scenario {
-  id: string;
-  name: string;
-  description: string;
-  nodes: NodeData[];
-  systemMessage?: string;
-}
-
-// Extended props for flow step components
-interface ExtendedFlowStepProps extends FlowStepProps {
-  scenario?: Scenario;
-}
+import { getLayoutComponent, getFlowStepComponent } from '../lib/templates';
 
 export const FlowView: React.FC = () => {
-  const { workspace: workspaceId } = useParams<{ workspace: string }>();
+  const { workspace: workspaceId, scenario: scenarioId } = useParams<{ workspace: string; scenario: string }>();
+  const navigate = useNavigate();
+  
+  // Pobierz dane z Zustand store
   const { workspaces } = useAppStore();
-
-  const {
-    currentNode,
-    currentScenario,
-    isLastNode,
-    contextItems,
-    handleGoToScenariosList,
-    handlePreviousNode,
-    handleNodeExecution,
-    debugInfo,
-  } = useNodeManager();
-
-  // Find current workspace
+  
+  // Znajdź aktualny workspace i scenariusz
   const currentWorkspace = workspaces.find(w => w.id === workspaceId);
-
-  if (!currentWorkspace) {
-    return <div className="p-4">Workspace not found</div>;
-  }
-
-  // Get layout template for this workspace
-  const layoutTemplateId = currentWorkspace.templateSettings.layoutTemplate;
-  const LayoutComponent = templateRegistry.getLayout(layoutTemplateId)?.component;
-
-  if (!LayoutComponent) {
-    return <div className="p-4">Layout template not found: {layoutTemplateId}</div>;
-  }
-
-  if (!debugInfo.workspaceId) return <div className="p-4">No workspace selected</div>;
-  if (!debugInfo.scenarioId) return <div className="p-4">No scenario selected</div>;
-  if (!currentNode) return <div className="p-4">No current node available</div>;
-
-  // Get appropriate flow step template for this node
-  // First try to use the node's specific template, if defined
-  const nodeTemplateId = currentNode.templateId || currentWorkspace.templateSettings.defaultFlowStepTemplate;
-  const FlowStepComponent = templateRegistry.getFlowStep(nodeTemplateId)?.component;
-
-  if (!FlowStepComponent) {
-    // If not found, try to find a compatible template for the node type
-    const nodeType = currentNode.type || 'default';
-    const compatibleComponent = templateRegistry.getFlowStepForNodeType(nodeType)?.component;
-    
-    if (!compatibleComponent) {
-      return <div className="p-4">Flow step template not found: {nodeTemplateId}</div>;
-    }
-    
+  const currentScenario = currentWorkspace?.scenarios.find(s => s.id === scenarioId);
+  
+  // Znajdź pierwszy node w scenariuszu
+  const currentNode = currentScenario?.nodes?.[0];
+  
+  // Handler powrotu do listy scenariuszy
+  const handleBack = () => {
+    navigate(`/${workspaceId}`);
+  };
+  
+  // Obsługa przejścia do następnego kroku
+  const handleNodeExecution = (value: any) => {
+    // Tutaj byłaby logika przejścia do następnego kroku
+    console.log('Node executed with value:', value);
+  };
+  
+  // Jeśli nie mamy danych, wyświetl komunikat ładowania
+  if (!currentNode || !currentScenario) {
     return (
-      <Suspense fallback={<div className="p-4">Loading template...</div>}>
-        <LayoutComponent 
-          title={`Flow: ${currentNode.label}`}
-          showBackButton={true}
-          onBackClick={handleGoToScenariosList}
-        >
-          <div className="space-y-4">
-            {React.createElement(compatibleComponent, {
-              node: currentNode,
-              // @ts-ignore - ignoring TypeScript error since we know the component handles scenario
-              scenario: currentScenario,
-              onSubmit: handleNodeExecution,
-              onPrevious: handlePreviousNode,
-              isLastNode,
-              contextItems,
-            } as ExtendedFlowStepProps)}
-            
-            <div className="mt-8 p-4 bg-gray-100 rounded-lg">
-              <details>
-                <summary className="cursor-pointer font-medium text-gray-700">Debug Information</summary>
-                <pre className="mt-2 text-xs overflow-auto p-2 bg-white rounded">
-                  {JSON.stringify(debugInfo, null, 2)}
-                </pre>
-              </details>
-            </div>
-          </div>
-        </LayoutComponent>
-      </Suspense>
+      <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg text-gray-600">Loading node data...</p>
+        </div>
+      </div>
     );
   }
-
-  // Pass contextItems to LayoutComponent
-  const layoutProps = {
-    title: `Flow: ${currentNode.label}`,
-    showBackButton: true,
-    onBackClick: handleGoToScenariosList,
-    contextItems: contextItems,
-  };
-
-  return (
-    <Suspense fallback={<div className="p-4">Loading template...</div>}>
-      <LayoutComponent {...layoutProps}>
-        <div className="space-y-4">
-          <FlowStepComponent
-            node={currentNode}
-            // @ts-ignore - ignoring TypeScript error since we know the component handles scenario
-            scenario={currentScenario}
-            onSubmit={handleNodeExecution}
-            onPrevious={handlePreviousNode}
-            isLastNode={isLastNode}
-            contextItems={contextItems}
-          />
-
-          <div className="mt-8 p-4 bg-gray-100 rounded-lg">
-            <details>
-              <summary className="cursor-pointer font-medium text-gray-700">Debug Information</summary>
-              <pre className="mt-2 text-xs overflow-auto p-2 bg-white rounded">
-                {JSON.stringify(debugInfo, null, 2)}
-              </pre>
-            </details>
-          </div>
+  
+  // Pobierz komponent kroku flow
+  const FlowStepComponent = getFlowStepComponent(currentNode.templateId || 'basic-step');
+  
+  // Jeśli nie znaleziono komponentu
+  if (!FlowStepComponent) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg text-gray-600">Flow step template not found</p>
         </div>
-      </LayoutComponent>
-    </Suspense>
+      </div>
+    );
+  }
+  
+  // Pobierz komponent layoutu
+  const LayoutComponent = getLayoutComponent(
+    currentWorkspace?.templateSettings.layoutTemplate || 'default'
+  );
+  
+  // Jeśli nie znaleziono layoutu
+  if (!LayoutComponent) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg text-gray-600">Layout template not found</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // Renderuj layout z komponentem flow step
+  return (
+    <LayoutComponent
+      title={currentNode.label}
+      showBackButton={true}
+      onBackClick={handleBack}
+    >
+      <FlowStepComponent
+        node={currentNode}
+        onSubmit={handleNodeExecution}
+        onPrevious={handleBack}
+        isLastNode={false}
+      />
+    </LayoutComponent>
   );
 };
+
+export default FlowView;

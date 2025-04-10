@@ -1,6 +1,6 @@
 // src/templates/simple/layouts/SimpleLayout.tsx
 import React from 'react';
-import { LayoutProps } from 'template-registry-module';
+import { LayoutProps } from '@/views/types'; // Zmieniamy import na lokalny
 import SimpleContextWidget from '../widgets/SimpleContextWidget';
 
 interface SimpleLayoutProps extends LayoutProps {

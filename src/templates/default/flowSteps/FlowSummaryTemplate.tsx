@@ -1,7 +1,14 @@
 // src/templates/default/flowSteps/FlowSummaryTemplate.tsx
+
+interface ContextItem {
+  id: string;
+  title?: string;
+  contentType?: string;
+  content: any;
+  updatedAt?: any;
+}
 import React from 'react';
 import { FlowStepProps } from 'template-registry-module';
-import { ContextItem } from '@/../raw_modules/context-manager-module/src/types/ContextTypes';
 
 interface ExtendedFlowStepProps extends FlowStepProps {
   contextItems?: ContextItem[];
@@ -22,6 +29,14 @@ const FlowSummaryTemplate: React.FC<ExtendedFlowStepProps> = ({
       return item.content;
     } catch (e) {
       return item.content;
+    }
+    
+    interface ContextItem {
+      id: string;
+      title?: string;
+      contentType?: string;
+      content: any;
+      updatedAt?: any;
     }
   };
 

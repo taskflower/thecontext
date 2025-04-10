@@ -2,7 +2,6 @@
 import { lazy } from 'react';
 import { BaseTemplate, BaseTemplateConfig, BaseWorkspaceData, Scenario } from '../baseTemplate';
 import { NodeData } from '../../../raw_modules/revertcontext-nodes-module/src/types/NodeTypes';
-import { contextManager } from '../../lib/contextSingleton';
 
 export class SimpleTemplate extends BaseTemplate {
   readonly id = 'simple';
@@ -13,81 +12,8 @@ export class SimpleTemplate extends BaseTemplate {
 
   constructor() {
     super();
-    // Rejestracja schematu kontekstu podczas inicjalizacji szablonu
-    this.registerContextSchema();
-  }
-
-  // Metoda do rejestracji schematu kontekstu
-  private registerContextSchema() {
-    // Tworzenie schematu dla kontekstu userProfile
-    const userProfileSchema = {
-      id: 'userProfileSchema',
-      title: 'Profil Użytkownika',
-      schema: {
-        userProfile: {
-          type: 'object',
-          properties: {
-            firstName: {
-              type: 'string',
-              description: 'Imię użytkownika'
-            },
-            lastName: {
-              type: 'string',
-              description: 'Nazwisko użytkownika'
-            },
-            age: {
-              type: 'number',
-              description: 'Wiek użytkownika'
-            },
-            interestedProduct: {
-              type: 'string',
-              description: 'Produkt, którym jest zainteresowany użytkownik'
-            },
-            preferences: {
-              type: 'object',
-              properties: {
-                notifications: {
-                  type: 'string',
-                  description: 'Czy użytkownik chce otrzymywać powiadomienia',
-                  enum: ['tak', 'nie']
-                },
-                color: {
-                  type: 'string',
-                  description: 'Preferowany kolor'
-                },
-                size: {
-                  type: 'string',
-                  description: 'Preferowany rozmiar',
-                  enum: ['S', 'M', 'L', 'XL']
-                }
-              }
-            }
-          }
-        }
-      },
-      required: ['userProfile']
-    };
-
-    // Rejestracja schematu w schemaManager
-    contextManager.schemaManager.registerSchema(userProfileSchema);
-    
-    // Inicjalizacja kontekstu z domyślnymi wartościami
-    const defaultContext = contextManager.schemaManager.createEmptyContext('userProfileSchema');
-    
-    // Ustawiamy początkowe wartości
-    contextManager.setContext({
-      userProfile: {
-        firstName: '',
-        lastName: '',
-        age: null,
-        interestedProduct: '',
-        preferences: {
-          notifications: 'tak',
-          color: '',
-          size: ''
-        }
-      }
-    });
+    // Inicjalizacja początkowego kontekstu - można to zrobić tutaj,
+    // ale bardziej sensownie jest to robić przy ładowaniu workspace'a
   }
 
   getConfig(): BaseTemplateConfig {
@@ -110,7 +36,7 @@ export class SimpleTemplate extends BaseTemplate {
       }
     ];
 
-    // Flow steps - BasicStep i FormStep
+    // Flow steps
     const flowSteps = [
       {
         id: 'basic-step',
@@ -194,7 +120,7 @@ export class SimpleTemplate extends BaseTemplate {
       ]
     };
 
-    // Scenariusz 3 - Podsumowanie (wyświetla wszystkie zebrane dane)
+    // Scenariusz 3 - Podsumowanie
     const summaryNode: NodeData = {
       id: "node-5",
       scenarioId: "scenario-3",
@@ -262,7 +188,7 @@ Dziękujemy za wypełnienie wszystkich informacji!`,
       scenarios: [userScenario, productScenario, summaryScenario],
       templateSettings: {
         layoutTemplate: "simple-layout",
-        scenarioWidgetTemplate: "card-list", // używamy domyślnego widgetu do scenariuszy
+        scenarioWidgetTemplate: "card-list", 
         defaultFlowStepTemplate: "basic-step",
         showContextWidget: true,
         theme: 'light'
