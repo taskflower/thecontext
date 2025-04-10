@@ -104,8 +104,8 @@ export class DefaultTemplate extends BaseTemplate {
           id: "ai-analysis-node",
           scenarioId: "scenario-1",
           label: "Analiza AI",
-          assistantMessage:
-            "Dziękuję! Przeanalizuję stronę {{userProfile.www}}, dostarczajac odpowiednio sformatowaną odpowiedź.",
+          // assistantMessage:
+          //   "Dziękuję! Przeanalizuję stronę {{userProfile.www}}, dostarczajac odpowiednio sformatowaną odpowiedź.",
           contextPath: "conversationHistory",
           templateId: "llm-query",
           attrs: {
@@ -116,7 +116,7 @@ export class DefaultTemplate extends BaseTemplate {
         },
       ],
       systemMessage:
-        "Jesteś w roli twórcy strategii marketingowej. Używamy języka polskiego.",
+        "Jesteś w roli twórcy strategii marketingowej. Używamy języka polskiego. Odpowiedź wyslij jako obiekt JSON zgodnie ze schematem:",
     };
 
     // Dane początkowe kontekstu

@@ -76,23 +76,45 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
   // Bezpieczne typowanie dla node.attrs
   const attrs = (node.attrs as LlmQueryAttrs) || {};
 
-  // Przetwarzamy wiadomość asystenta używając funkcji z AppStore
+  // Przetwarzamy wiadomość asystenta używając funkcji z AppStore tylko jeśli istnieje
   const processedAssistantMessage = node.assistantMessage
     ? processTemplate(node.assistantMessage)
-    : "W czym mogę pomóc?";
+    : null;
 
   // Pobierz schemat LLM, jeśli jest dostępny
   useEffect(() => {
     if (attrs?.llmSchemaPath) {
       const schema = getContextPath(attrs.llmSchemaPath);
-      if (schema && schema.systemPrompt) {
-        setSystemPrompt(schema.systemPrompt);
+      if (schema) {
+        // Sprawdź, czy schema to string czy obiekt
+        if (typeof schema === 'string') {
+          setSystemPrompt(schema);
+        } else if (schema.systemPrompt) {
+          // Jeśli obiekt, pobierz systemPrompt
+          setSystemPrompt(schema.systemPrompt);
+        } else {
+          // Jeśli to zwykły obiekt bez property systemPrompt, konwertuj go na string
+          try {
+            const schemaString = JSON.stringify(schema, null, 2);
+            setSystemPrompt(schemaString);
+          } catch (error) {
+            console.error("Nie udało się skonwertować schematu na string:", error);
+          }
+        }
       }
     }
   }, [attrs, getContextPath]);
 
   // Przygotuj ostateczną wiadomość systemową (z szablonu lub schema)
-  const effectiveSystemMessage = systemPrompt || scenario?.systemMessage || "";
+  // Jeśli istnieje systemPrompt (schemat LLM) i systemMessage, połącz je
+  let effectiveSystemMessage = "";
+  if (scenario?.systemMessage && systemPrompt) {
+    effectiveSystemMessage = `${scenario.systemMessage}\n\n${systemPrompt}`;
+  } else if (systemPrompt) {
+    effectiveSystemMessage = systemPrompt;
+  } else if (scenario?.systemMessage) {
+    effectiveSystemMessage = scenario.systemMessage;
+  }
 
   // Używamy hooka useChat
   const { sendMessage, isLoading, error, debugInfo } = useChat({
@@ -101,7 +123,7 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
     initialUserMessage: attrs.initialUserMessage
       ? processTemplate(attrs.initialUserMessage)
       : "",
-    assistantMessage: processedAssistantMessage,
+    assistantMessage: processedAssistantMessage || "",
     contextPath: node.contextPath || "",
     onDataSaved: (data) => {
       if (node.contextKey) {
@@ -120,6 +142,7 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
 
   return (
     <div className="space-y-4">
+      {/* Wyświetl wiadomość systemową tylko jeśli includeSystemMessage=true i wiadomość istnieje */}
       {attrs.includeSystemMessage && effectiveSystemMessage && (
         <InfoBadge
           type="system"
@@ -136,12 +159,15 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
         />
       )}
 
-      <InfoBadge
-        type="assistant"
-        title="Asystent AI"
-        content={processedAssistantMessage}
-        className="p-4"
-      />
+      {/* Wyświetl wiadomość asystenta tylko jeśli istnieje */}
+      {processedAssistantMessage && (
+        <InfoBadge
+          type="assistant"
+          title="Asystent AI"
+          content={processedAssistantMessage}
+          className="p-4"
+        />
+      )}
 
       {debugInfo && (
         <InfoBadge type="debug" title="Debug" content={debugInfo} />
