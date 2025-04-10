@@ -1,6 +1,7 @@
 // src/lib/store.ts
 import { create } from 'zustand';
 import { Scenario, TemplateSettings } from '../views/types';
+import { getValueByPath, setValueByPath } from './byPath';
 
 export interface Workspace {
   id: string;
@@ -11,24 +12,7 @@ export interface Workspace {
   initialContext: Record<string, any>;
 }
 
-// Funkcje pomocnicze do operacji na ścieżkach w kontekście
-function getValueByPath(obj: Record<string, any>, path: string): any {
-  const keys = path.split(".");
-  return keys.reduce((acc, key) => acc && acc[key], obj);
-}
 
-function setValueByPath(obj: Record<string, any>, path: string, value: any): Record<string, any> {
-  const keys = path.split(".");
-  let newObj = { ...obj };
-  let current = newObj;
-  for (let i = 0; i < keys.length - 1; i++) {
-    const key = keys[i];
-    current[key] = current[key] ? { ...current[key] } : {};
-    current = current[key];
-  }
-  current[keys[keys.length - 1]] = value;
-  return newObj;
-}
 
 interface AppState {
   // Podstawowe dane o workspaces
@@ -73,7 +57,6 @@ export const useAppStore = create<AppState>((set, get) => ({
       if (workspace.initialContext) {
         // Tworzymy głęboką kopię initialContext
         contexts[workspace.id] = JSON.parse(JSON.stringify(workspace.initialContext));
-        console.log("[AppStore] Initialized context for workspace:", workspace.id);
       } else {
         contexts[workspace.id] = {};
       }
@@ -109,7 +92,6 @@ export const useAppStore = create<AppState>((set, get) => ({
             [id]: initialContextCopy
           }
         }));
-        console.log("[AppStore] Context initialized for workspace:", id);
       } else {
         // Jeśli nie ma initialContext, tworzymy pusty obiekt
         set(state => ({
@@ -122,7 +104,6 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
     
     set({ currentWorkspaceId: id, currentScenarioId: null });
-    console.log("[AppStore] Selected workspace:", id);
   },
   
   // Wybór scenariusza
@@ -145,7 +126,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   updateContext: (key, value) => {
     const { currentWorkspaceId, contexts } = get();
     if (!currentWorkspaceId) {
-      console.warn("[AppStore] No active workspace, updateContext skipped.");
       return;
     }
     
@@ -159,14 +139,12 @@ export const useAppStore = create<AppState>((set, get) => ({
         }
       }
     });
-    console.log("[AppStore] Context updated for key:", key);
   },
   
   // Aktualizacja konkretnej ścieżki w kontekście
   updateContextPath: (key, jsonPath, value) => {
     const { currentWorkspaceId, contexts } = get();
     if (!currentWorkspaceId) {
-      console.warn("[AppStore] No active workspace, updateContextPath skipped.");
       return;
     }
     
@@ -183,13 +161,11 @@ export const useAppStore = create<AppState>((set, get) => ({
         }
       }
     });
-    console.log("[AppStore] Context path updated for:", key, jsonPath);
   },
   
   // Nowa funkcja - aktualizacja kontekstu za pomocą pojedynczej ścieżki
   updateByContextPath: (contextPath, value) => {
     if (!contextPath) {
-      console.warn("[AppStore] Empty contextPath, update skipped.");
       return;
     }
     
@@ -204,8 +180,6 @@ export const useAppStore = create<AppState>((set, get) => ({
       const jsonPath = parts.slice(1).join('.');
       get().updateContextPath(key, jsonPath, value);
     }
-    
-    console.log("[AppStore] Context updated via contextPath:", contextPath);
   },
   
   // Przetwarzanie szablonów z wartościami z kontekstu
