@@ -1,14 +1,16 @@
-import React, { useState, useRef, useEffect } from "react";
+// src/components/UserDropdown.tsx
+import React, { useState, useRef, useEffect, memo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 
-export const UserDropdown: React.FC = () => {
+// Using memo to prevent unnecessary re-renders
+export const UserDropdown: React.FC = memo(() => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Handle click outside of dropdown to close it
+  // Handle click outside to close dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -28,7 +30,10 @@ export const UserDropdown: React.FC = () => {
   // If not logged in, show login button
   if (!user) {
     return (
-      <button onClick={() => navigate("/login")} className="btn btn-primary">
+      <button 
+        onClick={() => navigate("/login")} 
+        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+      >
         Login
       </button>
     );
@@ -36,6 +41,7 @@ export const UserDropdown: React.FC = () => {
 
   const handleLogout = async () => {
     try {
+      setIsOpen(false); // Close dropdown first
       await logout();
       navigate("/login");
     } catch (error) {
@@ -43,37 +49,29 @@ export const UserDropdown: React.FC = () => {
     }
   };
 
-  const toggleDropdown = () => {
-    setIsOpen((prev) => !prev);
-  };
-
   return (
     <div className="relative" ref={dropdownRef}>
       <button
-        onClick={toggleDropdown}
+        onClick={() => setIsOpen(prev => !prev)}
         className="flex items-center space-x-2 focus:outline-none"
+        aria-expanded={isOpen}
+        aria-haspopup="true"
       >
-        {user.photoURL ? (
-          <img
-            src={user.photoURL}
-            alt="User profile"
-            className="w-8 h-8 rounded-full"
-          />
-        ) : (
-          <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center  ">
+       
+          <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-700 font-medium">
             {user.displayName ? user.displayName[0].toUpperCase() : "U"}
           </div>
-        )}
-        <div className="text-left ">
-          <div>{user.displayName || user.email}</div>
-          <div className="text-xs">
+       
+        <div className="text-left">
+          <div className="font-medium">{user.displayName || user.email}</div>
+          <div className="text-xs text-gray-600">
             Tokens: {user.availableTokens?.toLocaleString() || 0}
           </div>
         </div>
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 origin-top-right bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+        <div className="absolute right-0 mt-2 w-56 origin-top-right bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
           <div className="px-4 py-3">
             <p className="text-sm font-medium text-gray-900">
               {user.displayName || "User"}
@@ -96,6 +94,6 @@ export const UserDropdown: React.FC = () => {
       )}
     </div>
   );
-};
+});
 
 export default UserDropdown;
