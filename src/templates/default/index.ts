@@ -131,24 +131,25 @@ getDefaultWorkspaceData(): BaseWorkspaceData {
         id: "demo-node-1",
         scenarioId: "scenario-2",
         label: "Enter Name",
-        assistantMessage: "This demo shows how context works. Please enter your name:",
-        contextPath: "userProfile.firstName",
+        assistantMessage: "HEj podar adres www do przeanalizowania",
+        contextPath: "userProfile.www",
         templateId: "basic-step"
       },
       {
         id: "demo-node-2",
         scenarioId: "scenario-2",
         label: "AI Conversation", // Changed from "Enter Age" to "AI Conversation"
-        assistantMessage: "Great! {{userProfile.firstName}}, how can I help you today?",
+        assistantMessage: "Potwierdzam adrres do kampani to{{userProfile.www}} opiszę go zgodnie ze schematem odpowiedzi!",
         contextPath: "conversationHistory",
         templateId: "llm-query",
         attrs: {
+          formSchemaPath: "llmSchemas.webAlalysing",
           includeSystemMessage: true,
-          initialUserMessage: "I'd like to learn more about your services"
+          initialUserMessage: "Przeanalizuj adres www {{userProfile.www}}"
         }
       }
     ],
-    systemMessage: "Educational demo for context usage"
+    systemMessage: "Jestes w roli twóry strategii marketingowej. Użuwamy języka polskiego"
   };
 
   // Create initial context data

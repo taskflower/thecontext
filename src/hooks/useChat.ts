@@ -70,7 +70,6 @@ export const useChat = ({
       // 2. Sprawdź, czy mamy initial user message
       if (initialUserMessage) {
         // Jeśli mamy initialUserMessage, użyj jej jako pierwszej wiadomości użytkownika
-        console.log("Using initialUserMessage:", initialUserMessage);
         messages.push({
           role: "user",
           content: initialUserMessage
@@ -90,9 +89,6 @@ export const useChat = ({
         role: "user",
         content: message
       });
-      
-      console.log("Prepared messages:", messages);
-      
       // Format danych według wymaganej struktury
       const payload = {
         messages: messages,
