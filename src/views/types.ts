@@ -4,14 +4,15 @@ import { ReactNode } from 'react';
 export interface NodeData {
   id: string;
   scenarioId: string;
-  type: string;
+  type?: string;
   label: string;
   assistantMessage?: string;
   contextKey?: string;
   contextJsonPath?: string;
   templateId?: string;
-  formFields?: FormField[];
-  [key: string]: any;
+  attrs?: {
+    [key: string]: any;
+  };
 }
 
 export interface FormField {

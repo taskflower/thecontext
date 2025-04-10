@@ -53,6 +53,7 @@ interface AppState {
   updateContextPath: (key: string, jsonPath: string, value: any) => void;
   processTemplate: (template: string) => string;
   getContext: () => Record<string, any>;
+  getContextPath: (path: string) => any; // Dodana nowa funkcja
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -211,5 +212,22 @@ export const useAppStore = create<AppState>((set, get) => ({
   getContext: () => {
     const { currentWorkspaceId, contexts } = get();
     return currentWorkspaceId ? (contexts[currentWorkspaceId] || {}) : {};
+  },
+  
+  // Getter dla wartości w ścieżce kontekstu
+  getContextPath: (path: string) => {
+    const context = get().getContext();
+    if (!context) return undefined;
+    
+    // Rozdzielamy ścieżkę na części
+    const parts = path.split('.');
+    
+    // Jeśli mamy tylko jeden element, zwracamy bezpośrednio z kontekstu
+    if (parts.length === 1) {
+      return context[parts[0]];
+    }
+    
+    // W przeciwnym razie używamy getValueByPath
+    return getValueByPath(context, path);
   }
 }));

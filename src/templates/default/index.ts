@@ -108,11 +108,9 @@ export class DefaultTemplate extends BaseTemplate {
       assistantMessage: "Just a few more questions, {{userProfile.firstName}}. Please fill out your preferences:",
       contextKey: "userProfile",
       templateId: "form-step",
-      formFields: [
-        { name: "lastName", label: "Last Name", type: "text", required: true },
-        { name: "preferences.theme", label: "Preferred Theme", type: "select", required: true, 
-          options: ["light", "dark", "system"] }
-      ]
+      attrs: {
+        formSchemaPath: "formSchemas.userPreferences"
+      }
     };
     
     const aiNode: NodeData = {
@@ -122,8 +120,10 @@ export class DefaultTemplate extends BaseTemplate {
       assistantMessage: "Great! {{userProfile.firstName}} {{userProfile.lastName}}, how can I help you today?",
       contextKey: "conversationHistory",
       templateId: "llm-query",
-      includeSystemMessage: true,
-      initialUserMessage: "I'd like to learn more about your services"
+      attrs: {
+        includeSystemMessage: true,
+        initialUserMessage: "I'd like to learn more about your services"
+      }
     };
     
    

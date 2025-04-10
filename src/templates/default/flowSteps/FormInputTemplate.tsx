@@ -1,20 +1,41 @@
-// src/templates/default/flowSteps/FormInputTemplate.tsx
-import React, { useState, useCallback } from "react";
-import { FlowStepProps } from "template-registry-module";
+import React, { useState, useCallback, useEffect } from "react";
+import { FlowStepProps, FormField } from "@/views/types";
 import { useAppStore } from "@/lib/store";
+
+// Definicja interfejsu dla atrybutów formularza
+interface FormInputAttrs {
+  formSchemaPath?: string; // Ścieżka do schematu formularza w kontekście
+  [key: string]: any;
+}
 
 const FormInputTemplate: React.FC<FlowStepProps> = ({
   node,
   onSubmit,
   onPrevious,
   isLastNode,
+  contextItems = [],
 }) => {
   // Stan formularza
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const [formFields, setFormFields] = useState<FormField[]>([]);
+  
+  // Wyciągamy attrs z node (z typowaniem)
+  const attrs = node.attrs as FormInputAttrs;
 
-  // Pobieramy funkcje kontekstu z AppStore zamiast useContextStore
+  // Pobieramy funkcje kontekstu z AppStore
   const processTemplate = useAppStore((state) => state.processTemplate);
   const updateContextPath = useAppStore((state) => state.updateContextPath);
+  const getContextPath = useAppStore((state) => state.getContextPath);
+
+  // Ładujemy schemat formularza z kontekstu, jeśli attrs.formSchemaPath jest podane
+  useEffect(() => {
+    if (attrs?.formSchemaPath) {
+      const schema = getContextPath(attrs.formSchemaPath);
+      if (schema && Array.isArray(schema)) {
+        setFormFields(schema);
+      }
+    }
+  }, [node, attrs, getContextPath]);
 
   // Przetwarzamy wiadomość asystenta z zmiennymi kontekstowymi
   const assistantMessage = node.assistantMessage
@@ -23,17 +44,16 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
 
   // Funkcja sprawdzająca, czy wszystkie wymagane pola są wypełnione
   const areRequiredFieldsFilled = useCallback(() => {
-    if (!node.formFields) return true;
+    if (!formFields.length) return true;
     
-    return node.formFields.every(field => {
+    return formFields.every(field => {
       if (field.required) {
         const value = formData[field.name];
-        // Sprawdź, czy wartość istnieje i nie jest pusta
         return value !== undefined && value !== "" && value !== null;
       }
       return true;
     });
-  }, [node.formFields, formData]);
+  }, [formFields, formData]);
 
   // Obsługa zmian pól formularza
   const handleChange = (name: string, value: any) => {
@@ -48,12 +68,12 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
     e.preventDefault();
 
     // Jeśli węzeł ma klucz kontekstu, aktualizuj kontekst
-    if (node.contextKey && node.formFields) {
+    if (node.contextKey && formFields.length > 0) {
       // Dla każdego pola formularza
-      node.formFields.forEach((field) => {
+      formFields.forEach((field) => {
         // Jeśli pole ma wartość
         if (formData[field.name] !== undefined) {
-          // Aktualizuj kontekst za pomocą updateContextPath
+          // Obsługa zagnieżdżonych ścieżek (np. "preferences.theme")
           updateContextPath(
             node.contextKey as string,
             field.name, // Używamy nazwy pola jako ścieżki JSON
@@ -69,9 +89,9 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
 
   // Renderuj pola formularza
   const renderFormFields = () => {
-    if (!node.formFields) return null;
+    if (!formFields.length) return null;
 
-    return node.formFields.map((field) => {
+    return formFields.map((field) => {
       // Domyślny input tekstowy
       if (field.type === "text" || !field.type) {
         return (
@@ -112,7 +132,7 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
         );
       }
 
-      // Dropdown
+      // Dropdown select
       if (field.type === "select" && field.options) {
         return (
           <div key={field.name} className="mb-4">
@@ -163,7 +183,7 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
             Wstecz
           </button>
 
-          {/* Przycisk zatwierdzenia - poprawiony z walidacją */}
+          {/* Przycisk zatwierdzenia z walidacją */}
           <button
             type="submit"
             disabled={!areRequiredFieldsFilled()}
