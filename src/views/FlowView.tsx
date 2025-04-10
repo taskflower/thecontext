@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAppStore } from "../lib/store";
 import { getLayoutComponent, getFlowStepComponent } from "../lib/templates";
+import { useContextStore } from "../lib/contextStore";
+import { DebugPanel } from "../components/DebugPanel"; // Import komponentu debuggera
 
 export const FlowView: React.FC = () => {
   const { workspace: workspaceId, scenario: scenarioId } = useParams<{
@@ -133,26 +135,15 @@ export const FlowView: React.FC = () => {
         />
       </LayoutComponent>
 
-      {/* Opcjonalny debugger - możesz usunąć w wersji produkcyjnej */}
-      {process.env.NODE_ENV !== "production" && (
-        <div className="p-3 fixed left-0 w-full bottom-0 border-t text-xs text-gray-500 border-zinc-300">
-          <details>
-            <summary className="cursor-pointer">Debug Info</summary>
-            <pre className="mt-2 p-2 bg-gray-100 rounded overflow-auto">
-              {JSON.stringify(
-                {
-                  currentNodeIndex,
-                  totalNodes: nodes.length,
-                  isLastNode,
-                  currentNodeId: currentNode.id,
-                },
-                null,
-                2
-              )}
-            </pre>
-          </details>
-        </div>
-      )}
+      {/* Debugger - wydzielony do osobnego komponentu */}
+      <DebugPanel 
+        nodeData={{
+          currentNodeIndex,
+          totalNodes: nodes.length,
+          isLastNode,
+          currentNodeId: currentNode.id,
+        }}
+      />
     </>
   );
 };
