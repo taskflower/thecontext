@@ -129,7 +129,6 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
   isLastNode,
 }) => {
   const [userInput, setUserInput] = useState("");
-  const [systemPrompt, setSystemPrompt] = useState<string>("");
   const [schemaForUserMessage, setSchemaForUserMessage] = useState<string>("");
   const [schemaObject, setSchemaObject] = useState<any>(null);
   const [autoStarted, setAutoStarted] = useState<boolean>(false);
