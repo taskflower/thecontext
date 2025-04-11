@@ -61,9 +61,19 @@ const FbApiIntegrationTemplate: React.FC<FlowStepProps> = ({
   const processTemplate = useAppStore((state) => state.processTemplate);
   const getContextPath = useAppStore((state) => state.getContextPath);
 
-  // Get data from previous scenario
+  // Get data from previous steps
   const fbCampaign = getContextPath("fbCampaign") || {};
   const webAnalysis = getContextPath("primaryWebAnalysing") || {};
+
+  // Get campaign settings - check both top level and nested settings
+  const settings = {
+    cel: fbCampaign.cel || fbCampaign.settings?.cel,
+    budżet: fbCampaign.budżet || fbCampaign.settings?.budżet,
+    czas_trwania: fbCampaign.czas_trwania || fbCampaign.settings?.czas_trwania
+  };
+
+  // Get campaign content
+  const content = fbCampaign.content || {};
 
   // Process the assistant message
   const processedMessage = node.assistantMessage
@@ -108,7 +118,7 @@ const FbApiIntegrationTemplate: React.FC<FlowStepProps> = ({
         },
         body: JSON.stringify({
           name: `Kampania - ${webAnalysis.branża || 'Marketing'}`,
-          objective: mapCampaignObjective(fbCampaign.settings?.cel),
+          objective: mapCampaignObjective(settings.cel),
           status: 'PAUSED',
           special_ad_categories: []
         })
@@ -121,7 +131,7 @@ const FbApiIntegrationTemplate: React.FC<FlowStepProps> = ({
       const mockApiResponse = {
         id: `mockCampaignId_${Date.now()}`,
         name: `Kampania - ${webAnalysis.branża || 'Marketing'}`,
-        objective: mapCampaignObjective(fbCampaign.settings?.cel),
+        objective: mapCampaignObjective(settings.cel),
         status: "PAUSED",
         created_time: new Date().toISOString(),
       };
@@ -168,24 +178,32 @@ const FbApiIntegrationTemplate: React.FC<FlowStepProps> = ({
             </div>
             <div>
               <p className="font-medium">Cel kampanii:</p>
-              <p className="text-gray-700">{fbCampaign.settings?.cel || "-"}</p>
+              <p className="text-gray-700">{settings.cel || "-"}</p>
             </div>
             <div>
               <p className="font-medium">Budżet:</p>
               <p className="text-gray-700">
-                {fbCampaign.settings?.budżet || 0} PLN dziennie
+                {settings.budżet || 0} PLN dziennie
               </p>
             </div>
             <div className="col-span-2">
               <p className="font-medium">Tytuł reklamy:</p>
-              <p className="text-gray-700">{fbCampaign.content?.tytuł_reklamy || "-"}</p>
+              <p className="text-gray-700">{content.tytuł_reklamy || "-"}</p>
             </div>
             <div className="col-span-2">
               <p className="font-medium">Opis reklamy:</p>
-              <p className="text-gray-700">{fbCampaign.content?.opis_reklamy || "-"}</p>
+              <p className="text-gray-700">{content.opis_reklamy || "-"}</p>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Debug info - remove in production */}
+      <div className="p-3 bg-yellow-50 text-xs text-yellow-800 rounded border border-yellow-200">
+        <p className="font-semibold">Debug Info:</p>
+        <p>Settings found: cel={settings.cel}, budżet={settings.budżet}, czas_trwania={settings.czas_trwania}</p>
+        <p>Content available: {Object.keys(content).length > 0 ? 'Yes' : 'No'}</p>
+        <p>Raw fbCampaign: {JSON.stringify({cel: fbCampaign.cel, budżet: fbCampaign.budżet, czas_trwania: fbCampaign.czas_trwania})}</p>
       </div>
 
       {/* Facebook API Integration Form */}

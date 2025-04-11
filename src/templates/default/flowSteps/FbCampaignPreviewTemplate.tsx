@@ -10,39 +10,48 @@ const FbCampaignPreviewTemplate: React.FC<FlowStepProps> = ({
   isLastNode,
 }) => {
   const processTemplate = useAppStore((state) => state.processTemplate);
+  const getContextPath = useAppStore((state) => state.getContextPath);
 
-  // Przetwarzamy wiadomość asystenta z kontekstem
+  // Process assistant message with context variables
   const processedMessage = node.assistantMessage
     ? processTemplate(node.assistantMessage)
     : '';
 
-  // Pobieramy dane z kontekstu dla kampanii
-  const fbCampaign = useAppStore((state) => {
-    const contextPath = node.contextPath || "";
-    return state.getContextPath(contextPath) || {};
-  });
-
-  // Pobieramy analizę strony
-  const webAnalysis = useAppStore((state) => 
-    state.getContextPath("primaryWebAnalysing") || {});
+  // Get campaign data from context
+  // We need to get the full fbCampaign object with all its properties
+  const fbCampaign = getContextPath("fbCampaign") || {};
+  
+  // Get content from fbCampaign.content
+  const content = fbCampaign.content || {};
+  
+  // In this case, settings might be either in fbCampaign.settings or at the top level of fbCampaign
+  // We'll check both locations
+  const settings = {
+    cel: fbCampaign.cel || fbCampaign.settings?.cel,
+    budżet: fbCampaign.budżet || fbCampaign.settings?.budżet,
+    czas_trwania: fbCampaign.czas_trwania || fbCampaign.settings?.czas_trwania
+  };
+  
+  // Get web analysis data
+  const webAnalysis = getContextPath("primaryWebAnalysing") || {};
 
   const handleSubmit = () => {
-    // Wysyłamy kompletne dane kampanii do następnego kroku
+    // Send complete campaign data to next step
     onSubmit(fbCampaign);
   };
 
   return (
     <div className="space-y-6">
-      {/* Wiadomość asystenta */}
+      {/* Assistant message */}
       {processedMessage && (
         <div className="p-4 bg-blue-50 rounded-lg">
           <p className="whitespace-pre-line">{processedMessage}</p>
         </div>
       )}
 
-      {/* Podgląd reklamy Facebook */}
+      {/* Facebook Ad Preview */}
       <div className="border rounded-lg overflow-hidden shadow-md">
-        {/* Nagłówek */}
+        {/* Header */}
         <div className="bg-blue-600 p-3 flex items-center">
           <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center text-blue-600 font-bold mr-2">
             f
@@ -53,26 +62,26 @@ const FbCampaignPreviewTemplate: React.FC<FlowStepProps> = ({
           </div>
         </div>
 
-        {/* Treść reklamy */}
+        {/* Ad content */}
         <div className="p-4 bg-white">
-          {fbCampaign.content && (
+          {content && (
             <>
-              <h3 className="font-bold text-lg mb-2">{fbCampaign.content.tytuł_reklamy}</h3>
-              <p className="text-gray-700 mb-4">{fbCampaign.content.opis_reklamy}</p>
+              <h3 className="font-bold text-lg mb-2">{content.tytuł_reklamy || 'Ad Title'}</h3>
+              <p className="text-gray-700 mb-4">{content.opis_reklamy || 'Ad description will appear here.'}</p>
               
               <div className="h-40 bg-gray-200 flex items-center justify-center mb-4 rounded">
-                <p className="text-gray-500">{fbCampaign.content.sugestie_graficzne}</p>
+                <p className="text-gray-500">{content.sugestie_graficzne || 'Creative suggestion placeholder'}</p>
               </div>
               
               <button className="bg-blue-600 text-white px-4 py-2 rounded w-full">
-                {fbCampaign.content.call_to_action}
+                {content.call_to_action || 'Learn More'}
               </button>
             </>
           )}
         </div>
       </div>
 
-      {/* Podsumowanie ustawień kampanii */}
+      {/* Campaign settings summary */}
       <div className="bg-gray-50 p-4 rounded-lg">
         <h3 className="font-semibold mb-2">Ustawienia kampanii:</h3>
         <div className="grid grid-cols-2 gap-2 text-sm">
@@ -80,32 +89,41 @@ const FbCampaignPreviewTemplate: React.FC<FlowStepProps> = ({
           <div className="font-medium">{webAnalysis.www || '-'}</div>
           
           <div>Cel kampanii:</div>
-          <div className="font-medium">{fbCampaign.settings?.cel || '-'}</div>
+          <div className="font-medium">{settings.cel || '-'}</div>
           
           <div>Budżet:</div>
-          <div className="font-medium">{fbCampaign.settings?.budżet || 0} PLN</div>
+          <div className="font-medium">{settings.budżet || 0} PLN</div>
           
           <div>Czas trwania:</div>
-          <div className="font-medium">{fbCampaign.settings?.czas_trwania || 0} dni</div>
+          <div className="font-medium">{settings.czas_trwania || 0} dni</div>
           
           <div>Grupa docelowa:</div>
           <div className="font-medium">
-            {fbCampaign.content?.grupa_docelowa ? (
+            {content.grupa_docelowa ? (
               <>
-                {fbCampaign.content.grupa_docelowa.płeć}, 
-                {fbCampaign.content.grupa_docelowa.wiek_od}-{fbCampaign.content.grupa_docelowa.wiek_do} lat
+                {content.grupa_docelowa.płeć || '-'}, 
+                {content.grupa_docelowa.wiek_od || '-'}-{content.grupa_docelowa.wiek_do || '-'} lat
               </>
             ) : '-'}
           </div>
           
           <div>Zainteresowania:</div>
           <div className="font-medium">
-            {fbCampaign.content?.grupa_docelowa?.zainteresowania?.join(", ") || '-'}
+            {content.grupa_docelowa?.zainteresowania?.join(", ") || '-'}
           </div>
         </div>
       </div>
 
-      {/* Przyciski nawigacji */}
+      {/* Debug information - can be removed in production */}
+      <div className="p-3 bg-yellow-50 text-xs text-yellow-800 rounded border border-yellow-200">
+        <p className="font-semibold">Debug Info:</p>
+        <p>Context path: {node.contextPath}</p>
+        <p>Settings found: cel={settings.cel}, budżet={settings.budżet}, czas_trwania={settings.czas_trwania}</p>
+        <p>Content available: {Object.keys(content).length > 0 ? 'Yes' : 'No'}</p>
+        <p>Raw fbCampaign: {JSON.stringify({cel: fbCampaign.cel, budżet: fbCampaign.budżet, czas_trwania: fbCampaign.czas_trwania})}</p>
+      </div>
+
+      {/* Navigation buttons */}
       <div className="flex justify-between pt-4">
         <button
           onClick={onPrevious}
