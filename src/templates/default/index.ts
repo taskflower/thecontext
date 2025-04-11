@@ -67,12 +67,25 @@ export class DefaultTemplate extends BaseTemplate {
         compatibleNodeTypes: ["form"],
         component: lazy(() => import("./flowSteps/FormInputTemplate")),
       },
-      // New registration for the Facebook Campaign Preview Template
+      // Facebook Campaign Preview Template
       {
         id: "fb-campaign-preview",
         name: "Facebook Campaign Preview",
         compatibleNodeTypes: ["preview", "default"],
         component: lazy(() => import("./flowSteps/FbCampaignPreviewTemplate")),
+      },
+      // New templates for Facebook Marketing API integration
+      {
+        id: "fb-api-integration",
+        name: "Facebook API Integration",
+        compatibleNodeTypes: ["api", "default"],
+        component: lazy(() => import("./flowSteps/FbApiIntegrationTemplate")),
+      },
+      {
+        id: "fb-campaign-stats",
+        name: "Facebook Campaign Stats",
+        compatibleNodeTypes: ["stats", "default"],
+        component: lazy(() => import("./flowSteps/FbCampaignStatsTemplate")),
       }
     ];
 
@@ -89,7 +102,7 @@ export class DefaultTemplate extends BaseTemplate {
   }
 
   getDefaultWorkspaceData(): BaseWorkspaceData {
-    // Scenariusz analizy marketingowej strony www
+    // Scenariusz 1: Analiza marketingowa strony www
     const marketingScenario: Scenario = {
       id: "scenario-1",
       name: "Analiza Marketingowa WWW i Kampania Facebook",
@@ -122,7 +135,7 @@ export class DefaultTemplate extends BaseTemplate {
           },
         },
         
-        // New nodes for Facebook campaign
+        // Nodes for Facebook campaign
         {
           id: "fb-campaign-settings-node",
           scenarioId: "scenario-1",
@@ -160,6 +173,67 @@ export class DefaultTemplate extends BaseTemplate {
         "Jesteś w roli twórcy strategii marketingowej. Używamy języka polskiego.",
     };
 
+    // Scenariusz 2: Implementacja kampanii Facebook poprzez API
+    const fbApiScenario: Scenario = {
+      id: "scenario-2",
+      name: "Implementacja i Monitoring Kampanii Facebook API",
+      description: "Wdrożenie przygotowanej kampanii przez Facebook Marketing API i analiza wyników",
+      nodes: [
+        
+        {
+          id: "fb-api-integration-node",
+          scenarioId: "scenario-2",
+          label: "Integracja z Facebook API",
+          assistantMessage: 
+            "Teraz zaimplementujemy przygotowaną wcześniej kampanię za pomocą Facebook Marketing API. " +
+            "Wymagane są dane uwierzytelniające: token dostępu do API oraz ID konta reklamowego. " +
+            "Wprowadź poniższe dane, aby kontynuować:",
+          contextPath: "fbCampaignApi",
+          templateId: "fb-api-integration",
+        },
+        {
+          id: "campaign-optimizations-node",
+          scenarioId: "scenario-2",
+          label: "Optymalizacje Kampanii",
+          assistantMessage: 
+            "Na podstawie danych z implementacji kampanii możemy zaproponować kilka optymalizacji. " +
+            "Wybierz, które z poniższych optymalizacji chcesz zastosować:",
+          contextPath: "fbCampaignOptimizations",
+          templateId: "form-step",
+          attrs: {
+            formSchemaPath: "formSchemas.fbCampaignOptimizations",
+          },
+        },
+        {
+          id: "campaign-stats-node",
+          scenarioId: "scenario-2",
+          label: "Statystyki Kampanii",
+          assistantMessage: 
+            "Oto statystyki Twojej kampanii reklamowej. Możesz analizować wyniki dla różnych okresów czasowych " +
+            "i sprawdzić kluczowe wskaźniki efektywności.",
+          contextPath: "fbCampaignStats",
+          templateId: "fb-campaign-stats",
+        },
+        {
+          id: "campaign-summary-node",
+          scenarioId: "scenario-2",
+          label: "Podsumowanie Kampanii",
+          contextPath: "fbCampaignSummary",
+          templateId: "llm-query",
+          attrs: {
+            autoStart: true,
+            includeSystemMessage: true,
+            initialUserMessage: 
+              "Przygotuj podsumowanie kampanii Facebook na podstawie analizy statystyk. " +
+              "Uwzględnij wskaźniki efektywności kampanii z okresu {{fbCampaignStats.timeframe}}, " +
+              "a także zastosowane optymalizacje. Przedstaw wnioski i rekomendacje na przyszłość."
+          }
+        }
+      ],
+      systemMessage: 
+        "Jesteś ekspertem ds. marketingu internetowego ze specjalizacją w kampaniach Facebook Ads. Używamy języka polskiego."
+    };
+
     // Dane początkowe kontekstu
     const initialContext: Record<string, any> = {
       primaryWebAnalysing: {
@@ -169,6 +243,9 @@ export class DefaultTemplate extends BaseTemplate {
         settings: {},
         content: {}
       },
+      fbCampaignApi: {},
+      fbCampaignStats: {},
+      fbCampaignOptimizations: {},
       formSchemas: {
         websiteForm: [
           {
@@ -204,12 +281,42 @@ export class DefaultTemplate extends BaseTemplate {
             type: "number",
             required: true
           }
+        ],
+        fbCampaignOptimizations: [
+          {
+            name: "zwiększBudżet",
+            label: "Zwiększ dzienny budżet o 20%",
+            type: "select",
+            required: true,
+            options: ["Tak", "Nie"]
+          },
+          {
+            name: "rozszerzTargetowanie",
+            label: "Rozszerz targetowanie o dodatkowe grupy demograficzne",
+            type: "select",
+            required: true,
+            options: ["Tak", "Nie"]
+          },
+          {
+            name: "zmieńCTA",
+            label: "Zmodyfikuj przycisk CTA",
+            type: "select",
+            required: true,
+            options: ["Tak", "Nie"]
+          },
+          {
+            name: "optymalizacjaStawek",
+            label: "Włącz automatyczną optymalizację stawek",
+            type: "select",
+            required: true,
+            options: ["Tak", "Nie"]
+          }
         ]
       },
       llmSchemas: {
         webAnalysing: {
             ogólny_opis: "Główne funkcje i typ strony",
-            branża: "Nazwa najbardziej pasujęcej branży",
+            branża: "Nazwa najbardziej pasującej branży",
             grupa_docelowa: "Do kogo skierowana jest strona",
             mocne_strony: ["lista kluczowych stron"],
             słabe_strony: ["lista słabych stron"],
@@ -233,9 +340,9 @@ export class DefaultTemplate extends BaseTemplate {
     // Zwrócenie danych workspace
     return {
       id: "workspace-1",
-      name: "Analiza Marketingowa",
-      description: "Workspace do analizy marketingowej stron internetowych",
-      scenarios: [marketingScenario],
+      name: "Marketing Facebook",
+      description: "Workspace do analizy marketingowej stron internetowych i wdrażania kampanii Facebook",
+      scenarios: [marketingScenario, fbApiScenario], // Dodajemy drugi scenariusz
       templateSettings: {
         layoutTemplate: "default",
         scenarioWidgetTemplate: "card-list",
