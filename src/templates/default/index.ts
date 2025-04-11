@@ -67,6 +67,13 @@ export class DefaultTemplate extends BaseTemplate {
         compatibleNodeTypes: ["form"],
         component: lazy(() => import("./flowSteps/FormInputTemplate")),
       },
+      // New registration for the Facebook Campaign Preview Template
+      {
+        id: "fb-campaign-preview",
+        name: "Facebook Campaign Preview",
+        compatibleNodeTypes: ["preview", "default"],
+        component: lazy(() => import("./flowSteps/FbCampaignPreviewTemplate")),
+      }
     ];
 
     return {
@@ -85,9 +92,10 @@ export class DefaultTemplate extends BaseTemplate {
     // Scenariusz analizy marketingowej strony www
     const marketingScenario: Scenario = {
       id: "scenario-1",
-      name: "Analiza Marketingowa WWW",
-      description: "Analiza strony internetowej pod kątem marketingowym",
+      name: "Analiza Marketingowa WWW i Kampania Facebook",
+      description: "Analiza strony internetowej pod kątem marketingowym i przygotowanie kampanii Facebook",
       nodes: [
+        // Existing nodes - untouched
         {
           id: "form-node-1",
           scenarioId: "scenario-1",
@@ -104,17 +112,49 @@ export class DefaultTemplate extends BaseTemplate {
           id: "ai-analysis-node",
           scenarioId: "scenario-1",
           label: "Analiza AI",
-          // assistantMessage:
-          //   "Dziękuję! Przeanalizuję stronę {{primaryWebAnalysing.www}}, dostarczajac odpowiednio sformatowaną odpowiedź.",
           contextPath: "primaryWebAnalysing",
           templateId: "llm-query",
           attrs: {
-            autoStart:true,   
+            autoStart: true,   
             llmSchemaPath: "llmSchemas.webAnalysing",
             includeSystemMessage: true,
             initialUserMessage: "Przeanalizuj adres www {{primaryWebAnalysing.www}}. Odpowiedź wyslij jako obiekt JSON zgodnie ze schematem:",
           },
         },
+        
+        // New nodes for Facebook campaign
+        {
+          id: "fb-campaign-settings-node",
+          scenarioId: "scenario-1",
+          label: "Ustawienia Kampanii Facebook",
+          assistantMessage: "Teraz przygotujmy kampanię reklamową na Facebook. Proszę uzupełnić podstawowe ustawienia kampanii:",
+          contextPath: "fbCampaign.settings",
+          templateId: "form-step",
+          attrs: {
+            formSchemaPath: "formSchemas.fbCampaignSettings",
+          },
+        },
+        {
+          id: "fb-campaign-ai-content-node",
+          scenarioId: "scenario-1",
+          label: "Przygotowanie treści kampanii",
+          contextPath: "fbCampaign.content",
+          templateId: "llm-query",
+          attrs: {
+            autoStart: true,
+            llmSchemaPath: "llmSchemas.fbCampaignContent",
+            includeSystemMessage: true,
+            initialUserMessage: "Na podstawie analizy strony {{primaryWebAnalysing.www}} oraz ustawień kampanii (cel: {{fbCampaign.settings.cel}}, budżet: {{fbCampaign.settings.budżet}} PLN, czas trwania: {{fbCampaign.settings.czas_trwania}} dni), przygotuj treść reklamy na Facebook. Odpowiedź wyślij jako obiekt JSON zgodnie ze schematem:",
+          },
+        },
+        {
+          id: "fb-campaign-preview-node",
+          scenarioId: "scenario-1",
+          label: "Podgląd Kampanii Facebook",
+          assistantMessage: "Oto podgląd Twojej kampanii reklamowej na Facebook. Możesz zaakceptować lub wrócić do poprzednich kroków, aby wprowadzić zmiany.",
+          contextPath: "fbCampaign",
+          templateId: "fb-campaign-preview",
+        }
       ],
       systemMessage:
         "Jesteś w roli twórcy strategii marketingowej. Używamy języka polskiego.",
@@ -125,7 +165,10 @@ export class DefaultTemplate extends BaseTemplate {
       primaryWebAnalysing: {
         www: "",
       },
-      primaryWebAnalysing: [],
+      fbCampaign: {
+        settings: {},
+        content: {}
+      },
       formSchemas: {
         websiteForm: [
           {
@@ -135,16 +178,55 @@ export class DefaultTemplate extends BaseTemplate {
             required: true,
           },
         ],
+        fbCampaignSettings: [
+          {
+            name: "cel",
+            label: "Cel kampanii",
+            type: "select",
+            required: true,
+            options: [
+              "Świadomość marki",
+              "Ruch na stronie",
+              "Konwersje",
+              "Instalacje aplikacji",
+              "Pozyskiwanie leadów"
+            ]
+          },
+          {
+            name: "budżet",
+            label: "Dzienny budżet (PLN)",
+            type: "number",
+            required: true
+          },
+          {
+            name: "czas_trwania",
+            label: "Czas trwania kampanii (dni)",
+            type: "number",
+            required: true
+          }
+        ]
       },
       llmSchemas: {
         webAnalysing: {
             ogólny_opis: "Główne funkcje i typ strony",
-            branża:"Nazwa najbardziej pasujęcej branży",
+            branża: "Nazwa najbardziej pasujęcej branży",
             grupa_docelowa: "Do kogo skierowana jest strona",
             mocne_strony: ["lista kluczowych stron"],
             słabe_strony: ["lista słabych stron"],
             sugestie_marketingowe: "Jak poprawić konwersję",
         },
+        fbCampaignContent: {
+            tytuł_reklamy: "Krótki, chwytliwy tytuł reklamy",
+            opis_reklamy: "Tekst reklamy zgodny z celem kampanii",
+            call_to_action: "Tekst przycisku CTA",
+            sugestie_graficzne: "Opis grafiki która powinna być użyta w reklamie",
+            grupa_docelowa: {
+                płeć: "Kobiety, Mężczyźni lub Wszyscy",
+                wiek_od: "Dolna granica wieku grupy docelowej",
+                wiek_do: "Górna granica wieku grupy docelowej",
+                zainteresowania: ["lista zainteresowań"]
+            }
+        }
       },
     };
 
