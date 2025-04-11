@@ -33,7 +33,7 @@ interface LlmQueryAttrs {
   llmSchemaPath?: string;
   includeSystemMessage?: boolean;
   initialUserMessage?: string;
-  autoStart?: boolean; // Dodana nowa opcja autoStart
+  autoStart?: boolean;
   [key: string]: any;
 }
 
@@ -60,6 +60,67 @@ const InfoBadge: React.FC<InfoBadgeProps> = ({
   );
 };
 
+// Funkcja pomocnicza do ekstrakcji JSON z odpowiedzi markdown
+const extractJsonFromMarkdown = (content: string): any | null => {
+  try {
+    // Sprawdź czy tekst zawiera JSON w bloku kodu markdown
+    const jsonRegex = /```(?:json)?\s*(\{[\s\S]*?\})\s*```/;
+    const match = content.match(jsonRegex);
+    
+    if (match && match[1]) {
+      // Wyodrębnij JSON ze znalezionego dopasowania
+      return JSON.parse(match[1]);
+    }
+    
+    // Sprawdź czy tekst to już JSON (bez bloków kodu markdown)
+    if (content.trim().startsWith('{') && content.trim().endsWith('}')) {
+      return JSON.parse(content);
+    }
+    
+    // Jeśli nie znaleziono JSON, zwróć null
+    return null;
+  } catch (error) {
+    console.error('Błąd parsowania JSON:', error);
+    return null;
+  }
+};
+
+// Funkcja do sprawdzania zgodności danych ze schematem
+const validateAgainstSchema = (data: any, schema: any): boolean => {
+  if (!schema || !data) return false;
+  
+  // Walidacja podstawowa - sprawdź, czy wszystkie klucze ze schematu są obecne w danych
+  // Ta implementacja może być rozszerzona zależnie od potrzeb
+  const schemaKeys = Object.keys(schema);
+  
+  for (const key of schemaKeys) {
+    if (!(key in data)) {
+      console.warn(`Walidacja schematu: klucz '${key}' brakuje w danych`);
+      return false;
+    }
+    
+    // Sprawdź typy dla prostych typów danych
+    const schemaValue = schema[key];
+    const dataValue = data[key];
+    
+    // Rekurencyjna walidacja dla zagnieżdżonych obiektów
+    if (
+      typeof schemaValue === 'object' && 
+      schemaValue !== null && 
+      !Array.isArray(schemaValue) &&
+      typeof dataValue === 'object' && 
+      dataValue !== null && 
+      !Array.isArray(dataValue)
+    ) {
+      if (!validateAgainstSchema(dataValue, schemaValue)) {
+        return false;
+      }
+    }
+  }
+  
+  return true;
+};
+
 const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
   node,
   scenario,
@@ -70,9 +131,12 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
   const [userInput, setUserInput] = useState("");
   const [systemPrompt, setSystemPrompt] = useState<string>("");
   const [schemaForUserMessage, setSchemaForUserMessage] = useState<string>("");
-  const [autoStarted, setAutoStarted] = useState<boolean>(false); // Flaga do śledzenia czy automatyczne wysłanie już się wykonało
+  const [schemaObject, setSchemaObject] = useState<any>(null);
+  const [autoStarted, setAutoStarted] = useState<boolean>(false);
+  const [responseData, setResponseData] = useState<any>(null);
   const processTemplate = useAppStore((state) => state.processTemplate);
   const getContextPath = useAppStore((state) => state.getContextPath);
+  const updateByContextPath = useAppStore((state) => state.updateByContextPath);
 
   // Bezpieczne typowanie dla node.attrs
   const attrs = (node.attrs as LlmQueryAttrs) || {};
@@ -87,6 +151,9 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
     if (attrs?.llmSchemaPath) {
       const schema = getContextPath(attrs.llmSchemaPath);
       if (schema) {
+        // Przechowaj obiekt schematu do późniejszej walidacji
+        setSchemaObject(schema);
+        
         // Sprawdź, czy schema to string czy obiekt
         if (typeof schema === 'string') {
           setSchemaForUserMessage(schema);
@@ -122,21 +189,81 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
     effectiveUserMessage = schemaForUserMessage;
   }
 
+  // Funkcja przetwarzająca i zapisująca odpowiedź
+  const processAndSaveResponse = (data: string) => {
+    try {
+      // Parsowanie danych odpowiedzi
+      const parsedData = JSON.parse(data);
+      console.log("Odebrano dane z API:", parsedData);
+      
+      // Upewnij się, że otrzymaliśmy poprawną odpowiedź
+      if (parsedData.userInput && parsedData.aiResponse) {
+        // Wyodrębnij właściwą treść odpowiedzi
+        const responseContent = parsedData.aiResponse.data?.message?.content;
+        
+        if (responseContent) {
+          setResponseData(responseContent);
+          
+          // Sprawdź, czy odpowiedź zawiera JSON
+          const extractedJson = extractJsonFromMarkdown(responseContent);
+          
+          // Określ, co zapisać do kontekstu
+          let dataToSave: string | object = responseContent;
+          
+          if (extractedJson && schemaObject) {
+            // Jeśli mamy JSON i schemat, sprawdź zgodność
+            console.log("Sprawdzam zgodność ze schematem:", extractedJson);
+            const isValid = validateAgainstSchema(extractedJson, schemaObject);
+            
+            if (isValid) {
+              console.log("JSON zgodny ze schematem, zapisuję obiekt");
+              dataToSave = extractedJson;
+            } else {
+              console.warn("JSON nie jest zgodny ze schematem, zapisuję jako tekst");
+            }
+          } else if (extractedJson) {
+            // Jeśli mamy JSON bez schematu, zapisz jako obiekt
+            console.log("Wykryto JSON, zapisuję jako obiekt");
+            dataToSave = extractedJson;
+          } else {
+            // Zapisz jako tekst
+            console.log("Zapisuję odpowiedź jako tekst");
+          }
+          
+          // Zapisz do kontekstu
+          if (node.contextPath) {
+            console.log(`Zapisywanie do ścieżki kontekstu: ${node.contextPath}`, dataToSave);
+            
+            // Zapisz jako obiekt lub string, zależnie od typu danych
+            if (typeof dataToSave === 'object') {
+              updateByContextPath(node.contextPath, dataToSave);
+            } else {
+              updateByContextPath(node.contextPath, dataToSave);
+            }
+          }
+          
+          // Wywołaj onSubmit
+          onSubmit(dataToSave);
+        }
+      }
+    } catch (error) {
+      console.error("Błąd przetwarzania odpowiedzi:", error);
+      // W przypadku błędu, zapisz oryginalną odpowiedź jako string
+      if (node.contextPath) {
+        updateByContextPath(node.contextPath, data);
+      }
+      onSubmit(data);
+    }
+  };
+
   // Używamy hooka useChat
   const { sendMessage, isLoading, error, debugInfo } = useChat({
     includeSystemMessage: attrs.includeSystemMessage || false,
     systemMessage: effectiveSystemMessage,
     initialUserMessage: effectiveUserMessage,
     assistantMessage: processedAssistantMessage || "",
-    contextPath: node.contextPath || "",
-    onDataSaved: (data) => {
-      if (node.contextKey) {
-        onSubmit(data);
-      } else {
-        onSubmit(data);
-      }
-      setUserInput("");
-    },
+    contextPath: "",  // Nie używamy wbudowanego zapisu kontekstu z useChat
+    onDataSaved: processAndSaveResponse,
   });
 
   // Efekt do automatycznego uruchamiania zapytania LLM
@@ -180,6 +307,16 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
           type="assistant"
           title="Asystent AI"
           content={processedAssistantMessage}
+          className="p-4"
+        />
+      )}
+
+      {/* Wyświetl odpowiedź, jeśli jest dostępna */}
+      {responseData && (
+        <InfoBadge
+          type="assistant"
+          title="Odpowiedź AI"
+          content={responseData}
           className="p-4"
         />
       )}

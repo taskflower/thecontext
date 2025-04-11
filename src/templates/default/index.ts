@@ -94,7 +94,7 @@ export class DefaultTemplate extends BaseTemplate {
           label: "Adres WWW",
           assistantMessage:
             "Witaj! Podaj adres strony internetowej do analizy marketingowej:",
-          contextPath: "userProfile",
+          contextPath: "primaryWebAnalysing",
           templateId: "form-step",
           attrs: {
             formSchemaPath: "formSchemas.websiteForm",
@@ -105,14 +105,14 @@ export class DefaultTemplate extends BaseTemplate {
           scenarioId: "scenario-1",
           label: "Analiza AI",
           // assistantMessage:
-          //   "Dziękuję! Przeanalizuję stronę {{userProfile.www}}, dostarczajac odpowiednio sformatowaną odpowiedź.",
-          contextPath: "conversationHistory",
+          //   "Dziękuję! Przeanalizuję stronę {{primaryWebAnalysing.www}}, dostarczajac odpowiednio sformatowaną odpowiedź.",
+          contextPath: "primaryWebAnalysing",
           templateId: "llm-query",
           attrs: {
-            autoStart:true,
+            autoStart:true,   
             llmSchemaPath: "llmSchemas.webAnalysing",
             includeSystemMessage: true,
-            initialUserMessage: "Przeanalizuj adres www {{userProfile.www}}. Odpowiedź wyslij jako obiekt JSON zgodnie ze schematem:",
+            initialUserMessage: "Przeanalizuj adres www {{primaryWebAnalysing.www}}. Odpowiedź wyslij jako obiekt JSON zgodnie ze schematem:",
           },
         },
       ],
@@ -122,10 +122,10 @@ export class DefaultTemplate extends BaseTemplate {
 
     // Dane początkowe kontekstu
     const initialContext: Record<string, any> = {
-      userProfile: {
+      primaryWebAnalysing: {
         www: "",
       },
-      conversationHistory: [],
+      primaryWebAnalysing: [],
       formSchemas: {
         websiteForm: [
           {
