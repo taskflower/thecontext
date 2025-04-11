@@ -33,6 +33,7 @@ interface LlmQueryAttrs {
   llmSchemaPath?: string;
   includeSystemMessage?: boolean;
   initialUserMessage?: string;
+  autoStart?: boolean; // Dodana nowa opcja autoStart
   [key: string]: any;
 }
 
@@ -69,6 +70,7 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
   const [userInput, setUserInput] = useState("");
   const [systemPrompt, setSystemPrompt] = useState<string>("");
   const [schemaForUserMessage, setSchemaForUserMessage] = useState<string>("");
+  const [autoStarted, setAutoStarted] = useState<boolean>(false); // Flaga do śledzenia czy automatyczne wysłanie już się wykonało
   const processTemplate = useAppStore((state) => state.processTemplate);
   const getContextPath = useAppStore((state) => state.getContextPath);
 
@@ -136,6 +138,16 @@ const LlmQueryTemplate: React.FC<ExtendedFlowStepProps> = ({
       setUserInput("");
     },
   });
+
+  // Efekt do automatycznego uruchamiania zapytania LLM
+  useEffect(() => {
+    // Sprawdź czy powinniśmy automatycznie uruchomić zapytanie
+    if (attrs.autoStart === true && effectiveUserMessage && !autoStarted && !isLoading) {
+      setAutoStarted(true); // Ustaw flagę, aby zapobiec wielokrotnemu wywołaniu
+      console.log("Automatyczne uruchamianie zapytania LLM");
+      sendMessage(effectiveUserMessage);
+    }
+  }, [attrs.autoStart, effectiveUserMessage, autoStarted, isLoading, sendMessage]);
 
   const handleSubmit = () => {
     if (userInput.trim() === "") return;
