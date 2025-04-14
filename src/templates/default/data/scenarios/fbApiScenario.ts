@@ -44,7 +44,10 @@ export function getFbApiScenario(): Scenario {
       {
         id: "campaign-summary-node",
         scenarioId: "scenario-2",
-        label: "Podsumowanie Kampanii",
+        label: "Przygotowanie Analizy",
+        assistantMessage: 
+          "Na podstawie zgromadzonych danych przygotowuję analizę kampanii. " +
+          "Proszę czekać...",
         contextPath: "fbCampaignSummary",
         templateId: "llm-query",
         attrs: {
@@ -55,6 +58,16 @@ export function getFbApiScenario(): Scenario {
             "Uwzględnij wskaźniki efektywności kampanii z okresu {{fbCampaignStats.timeframe}}, " +
             "a także zastosowane optymalizacje. Przedstaw wnioski i rekomendacje na przyszłość."
         }
+      },
+      {
+        id: "final-summary-node",
+        scenarioId: "scenario-2",
+        label: "Podsumowanie Kampanii",
+        assistantMessage: 
+          "Oto kompleksowe podsumowanie Twojej kampanii Facebook. " +
+          "Analizujemy wyniki, wpływ zastosowanych optymalizacji oraz przedstawiamy rekomendacje na przyszłość.",
+        contextPath: "fbCampaignFinal",
+        templateId: "fb-campaign-summary",
       }
     ],
     systemMessage: 

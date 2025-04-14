@@ -40,6 +40,13 @@ export function getFlowStepsConfig() {
       name: "Facebook Campaign Stats",
       compatibleNodeTypes: ["stats", "default"],
       component: lazy(() => import("../flowSteps/FbCampaignStatsTemplate")),
+    },
+    // New Summary Template
+    {
+      id: "fb-campaign-summary",
+      name: "Facebook Campaign Summary",
+      compatibleNodeTypes: ["summary", "default"],
+      component: lazy(() => import("../flowSteps/FbCampaignSummaryTemplate")),
     }
   ];
 }

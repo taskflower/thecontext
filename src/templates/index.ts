@@ -1,31 +1,24 @@
 // src/templates/index.ts
 import { templateRegistry } from "./registry";
 import { DefaultTemplate } from "./default";
-import { NewYorkTemplate } from "./newyork";
-import { SimpleTemplate } from "./simple";
+import { EducationTemplate } from "./education";  // Importujemy nowy szablon edukacyjny
 import { useAppStore, Workspace } from "../lib/store";
 
 export { templateRegistry };
 
 export function initializeTemplates() {
-  console.log("Initializing templates...");
 
   // Tworzymy instancje szablonów
   const defaultTemplate = new DefaultTemplate();
-  const newyorkTemplate = new NewYorkTemplate();
-  const simpleTemplate = new SimpleTemplate();
+  const educationTemplate = new EducationTemplate();  // Tworzymy instancję szablonu edukacyjnego
 
   // Rejestracja szablonów
   registerTemplate(defaultTemplate);
-  registerTemplate(newyorkTemplate);
-  registerTemplate(simpleTemplate);
+  registerTemplate(educationTemplate);  // Rejestrujemy nowy szablon
 
-  console.log("Templates registered");
-
-  // Pobieramy dane workspace’ów z szablonów
+  // Pobieramy dane workspace'ów z szablonów
   const defaultWorkspace = defaultTemplate.getDefaultWorkspaceData();
-  const newyorkWorkspace = newyorkTemplate.getDefaultWorkspaceData();
-  const simpleWorkspace = simpleTemplate.getDefaultWorkspaceData();
+  const educationWorkspace = educationTemplate.getDefaultWorkspaceData();  // Pobieramy dane workspace'a edukacyjnego
 
   const workspaces: Workspace[] = [
     {
@@ -35,20 +28,14 @@ export function initializeTemplates() {
       templateSettings: defaultWorkspace.templateSettings,
       initialContext: defaultWorkspace.initialContext || {}
     },
+    // Dodajemy workspace edukacyjny
     {
-      id: newyorkWorkspace.id,
-      name: newyorkWorkspace.name,
-      scenarios: newyorkWorkspace.scenarios || [],
-      templateSettings: newyorkWorkspace.templateSettings,
-      initialContext: newyorkWorkspace.initialContext || {}
+      id: educationWorkspace.id,
+      name: educationWorkspace.name,
+      scenarios: educationWorkspace.scenarios || [],
+      templateSettings: educationWorkspace.templateSettings,
+      initialContext: educationWorkspace.initialContext || {}
     },
-    {
-      id: simpleWorkspace.id,
-      name: simpleWorkspace.name,
-      scenarios: simpleWorkspace.scenarios || [],
-      templateSettings: simpleWorkspace.templateSettings,
-      initialContext: simpleWorkspace.initialContext || {}
-    }
   ];
 
   if (workspaces.length > 0) {
