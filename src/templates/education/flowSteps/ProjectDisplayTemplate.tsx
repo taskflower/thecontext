@@ -2,6 +2,9 @@
 import React, { useState } from 'react';
 import { FlowStepProps } from 'template-registry-module';
 import { useAppStore } from '@/lib/store';
+import { useIndexedDB } from '@/hooks/useIndexedDB';
+import SafeContent from '../resources/SafeContent';
+
 
 const ProjectDisplayTemplate: React.FC<FlowStepProps> = ({
   node,
@@ -10,12 +13,18 @@ const ProjectDisplayTemplate: React.FC<FlowStepProps> = ({
   isLastNode
 }) => {
   const [activeTab, setActiveTab] = useState('opis');
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  
   const processTemplate = useAppStore(state => state.processTemplate);
   const getContextPath = useAppStore(state => state.getContextPath);
+
+  // Hook do obsługi IndexedDB
+  const { saveItem } = useIndexedDB();
 
   // Pobierz wygenerowany projekt
   const projectContent = getContextPath('generatedContent') || {};
   const projectSettings = getContextPath('projectWork') || {};
+  const learningSession = getContextPath('learningSession') || {};
   
   // Przetwórz wiadomość asystenta
   const processedMessage = node.assistantMessage 
@@ -29,6 +38,69 @@ const ProjectDisplayTemplate: React.FC<FlowStepProps> = ({
     });
   };
 
+  // Funkcja zapisująca projekt do IndexedDB
+  const handleSaveProject = async () => {
+    const title = projectContent.tytul_projektu;
+    if (!projectContent || !title) {
+      setSaveStatus('error');
+      return;
+    }
+    
+    try {
+      setSaveStatus('saving');
+      
+      // Generuj unikalny identyfikator
+      const projectType = projectSettings.projectType || 'projekt';
+      const subject = learningSession.subject || 'przedmiot';
+      const id = `project_${subject}_${projectType}`.replace(/\s+/g, '_').toLowerCase();
+      
+      await saveItem({
+        id,
+        type: 'project',
+        title: typeof title === 'string' ? title : 'Projekt edukacyjny',
+        content: {
+          projectContent,
+          projectSettings,
+          learningSession,
+          savedAt: new Date().toISOString()
+        }
+      });
+      
+      setSaveStatus('saved');
+      
+      // Reset statusu po 3 sekundach
+      setTimeout(() => {
+        setSaveStatus('idle');
+      }, 3000);
+    } catch (error) {
+      console.error('Błąd podczas zapisywania projektu:', error);
+      setSaveStatus('error');
+    }
+  };
+
+  // Renderuj bezpieczną listę elementów
+  const renderSafeList = (items: any[], renderItem?: (item: any, index: number) => React.ReactNode) => {
+    if (!Array.isArray(items) || items.length === 0) {
+      return <p className="text-gray-500 italic">Brak danych</p>;
+    }
+    
+    return (
+      <div className="space-y-2">
+        {items.map((item, index) => {
+          if (renderItem) {
+            return renderItem(item, index);
+          }
+          
+          return (
+            <div key={index}>
+              <SafeContent content={item} />
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   // Funkcja renderująca zawartość aktywnej zakładki
   const renderActiveTab = () => {
     switch(activeTab) {
@@ -36,7 +108,9 @@ const ProjectDisplayTemplate: React.FC<FlowStepProps> = ({
         return (
           <div className="space-y-3">
             <h3 className="font-semibold text-lg">Opis projektu</h3>
-            <p className="whitespace-pre-line">{projectContent.opis}</p>
+            <div className="whitespace-pre-line">
+              <SafeContent content={projectContent.opis} />
+            </div>
           </div>
         );
       case 'cele':
@@ -46,7 +120,7 @@ const ProjectDisplayTemplate: React.FC<FlowStepProps> = ({
             {Array.isArray(projectContent.cele) ? (
               <ul className="list-disc pl-5 space-y-1">
                 {projectContent.cele.map((cel, index) => (
-                  <li key={index}>{cel}</li>
+                  <li key={index}><SafeContent content={cel} /></li>
                 ))}
               </ul>
             ) : (
@@ -66,7 +140,7 @@ const ProjectDisplayTemplate: React.FC<FlowStepProps> = ({
                       {index + 1}
                     </div>
                     <div className="flex-1">
-                      <p>{etap}</p>
+                      <SafeContent content={etap} />
                     </div>
                   </div>
                 ))}
@@ -84,7 +158,7 @@ const ProjectDisplayTemplate: React.FC<FlowStepProps> = ({
               <div className="space-y-2">
                 {projectContent.wskazowki.map((wskazowka, index) => (
                   <div key={index} className="bg-yellow-50 p-3 rounded-lg border-l-4 border-yellow-400">
-                    <p>{wskazowka}</p>
+                    <SafeContent content={wskazowka} />
                   </div>
                 ))}
               </div>
@@ -110,7 +184,7 @@ const ProjectDisplayTemplate: React.FC<FlowStepProps> = ({
                     {projectContent.kryteria_oceny.map((kryterium, index) => (
                       <tr key={index}>
                         <td className="px-4 py-2 whitespace-nowrap">{index + 1}</td>
-                        <td className="px-4 py-2">{kryterium}</td>
+                        <td className="px-4 py-2"><SafeContent content={kryterium} /></td>
                       </tr>
                     ))}
                   </tbody>
@@ -128,7 +202,7 @@ const ProjectDisplayTemplate: React.FC<FlowStepProps> = ({
             {Array.isArray(projectContent.materialy_dodatkowe) ? (
               <ul className="list-disc pl-5 space-y-1">
                 {projectContent.materialy_dodatkowe.map((material, index) => (
-                  <li key={index}>{material}</li>
+                  <li key={index}><SafeContent content={material} /></li>
                 ))}
               </ul>
             ) : (
@@ -139,6 +213,47 @@ const ProjectDisplayTemplate: React.FC<FlowStepProps> = ({
       default:
         return <p>Wybierz zakładkę.</p>;
     }
+  };
+
+  // Renderuj przycisk zapisu z odpowiednim statusem
+  const renderSaveButton = () => {
+    // Style przycisku w zależności od statusu
+    const getButtonStyle = () => {
+      switch(saveStatus) {
+        case 'saving':
+          return 'bg-yellow-500 text-white';
+        case 'saved':
+          return 'bg-green-500 text-white';
+        case 'error':
+          return 'bg-red-500 text-white';
+        default:
+          return 'bg-indigo-600 hover:bg-indigo-700 text-white';
+      }
+    };
+
+    // Tekst przycisku w zależności od statusu
+    const getButtonText = () => {
+      switch(saveStatus) {
+        case 'saving':
+          return 'Zapisywanie...';
+        case 'saved':
+          return 'Zapisano!';
+        case 'error':
+          return 'Błąd zapisu';
+        default:
+          return 'Zapisz projekt';
+      }
+    };
+
+    return (
+      <button
+        onClick={handleSaveProject}
+        disabled={saveStatus === 'saving' || saveStatus === 'saved'}
+        className={`px-4 py-2 rounded ${getButtonStyle()} transition-colors duration-300`}
+      >
+        {getButtonText()}
+      </button>
+    );
   };
 
   return (
@@ -152,13 +267,15 @@ const ProjectDisplayTemplate: React.FC<FlowStepProps> = ({
       
       {/* Nagłówek projektu */}
       <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 rounded-lg text-white">
-        <h2 className="text-xl font-bold">{projectContent.tytul_projektu || 'Projekt edukacyjny'}</h2>
+        <h2 className="text-xl font-bold">
+          <SafeContent content={projectContent.tytul_projektu || 'Projekt edukacyjny'} />
+        </h2>
         <div className="flex space-x-3 mt-2 text-sm">
           <div className="bg-white/20 px-2 py-1 rounded-full">
-            {projectSettings.projectType || 'Projekt'}
+            <SafeContent content={projectSettings.projectType || 'Projekt'} />
           </div>
           <div className="bg-white/20 px-2 py-1 rounded-full">
-            {projectSettings.deadlineWeeks || 2} tygodnie
+            <SafeContent content={`${projectSettings.deadlineWeeks || 2} tygodnie`} />
           </div>
         </div>
       </div>
@@ -217,12 +334,16 @@ const ProjectDisplayTemplate: React.FC<FlowStepProps> = ({
           Wstecz
         </button>
         
-        <button
-          onClick={handleSubmit}
-          className="px-4 py-2 bg-blue-500 text-white rounded"
-        >
-          {isLastNode ? 'Zakończ' : 'Kontynuuj'}
-        </button>
+        <div className="flex space-x-3">
+          {renderSaveButton()}
+          
+          <button
+            onClick={handleSubmit}
+            className="px-4 py-2 bg-blue-500 text-white rounded"
+          >
+            {isLastNode ? 'Zakończ' : 'Kontynuuj'}
+          </button>
+        </div>
       </div>
     </div>
   );
