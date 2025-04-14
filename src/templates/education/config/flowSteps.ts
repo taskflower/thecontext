@@ -22,22 +22,16 @@ export function getFlowStepsConfig() {
       component: lazy(() => import("../../default/flowSteps/LlmQueryTemplate")),
     },
     {
-      id: "lesson-display",
-      name: "Wyświetlanie Lekcji",
-      compatibleNodeTypes: ["lesson", "default"],
-      component: lazy(() => import("../flowSteps/LessonDisplayTemplate")),
+      id: "content-display",
+      name: "Wyświetlanie Treści",
+      compatibleNodeTypes: ["lesson", "project", "default"],
+      component: lazy(() => import("../flowSteps/ContentDisplayFlowStep")),
     },
     {
       id: "quiz-interaction",
       name: "Interakcja z Quizem",
       compatibleNodeTypes: ["quiz", "default"],
       component: lazy(() => import("../flowSteps/QuizInteractionTemplate")),
-    },
-    {
-      id: "project-display",
-      name: "Wyświetlanie Projektu",
-      compatibleNodeTypes: ["project", "default"],
-      component: lazy(() => import("../flowSteps/ProjectDisplayTemplate")),
     }
   ];
 }

@@ -41,7 +41,7 @@ export function getLearningScenario(): Scenario {
         assistantMessage: 
           "Oto przygotowana lekcja na temat: {{learningSession.topic}}. Możesz ją przeglądać i interaktywnie się uczyć.",
         contextPath: "learningSession",
-        templateId: "lesson-display",
+        templateId: "content-display",
       },
       {
         id: "user-notes-node",
