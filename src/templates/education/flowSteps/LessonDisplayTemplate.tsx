@@ -1,9 +1,28 @@
 // src/templates/education/flowSteps/LessonDisplayTemplate.tsx
 import React, { useState } from 'react';
 import { FlowStepProps } from 'template-registry-module';
+
+// Define the payload type for onSubmit
+interface SubmitPayload {
+  completed?: boolean;
+  timestamp?: string;
+  accepted?: boolean;
+  score?: {
+    correct: number;
+    total: number;
+    percentage: number;
+  };
+  userAnswers?: Record<number, string>;
+  completedAt?: string;
+}
+
+// Extended props type with correct onSubmit signature
+interface ExtendedFlowStepProps extends Omit<FlowStepProps, 'onSubmit'> {
+  onSubmit: (payload: SubmitPayload) => void;
+}
 import { useAppStore } from '@/lib/store';
 
-const LessonDisplayTemplate: React.FC<FlowStepProps> = ({
+const LessonDisplayTemplate: React.FC<ExtendedFlowStepProps> = ({
   node,
   onSubmit,
   onPrevious,
@@ -37,7 +56,7 @@ const LessonDisplayTemplate: React.FC<FlowStepProps> = ({
             <h3 className="font-semibold text-lg">Cele nauczania</h3>
             {Array.isArray(lessonContent.cele_nauczania) ? (
               <ul className="list-disc pl-5 space-y-1">
-                {lessonContent.cele_nauczania.map((cel, index) => (
+                {lessonContent.cele_nauczania.map((cel: string, index: number) => (
                   <li key={index}>{cel}</li>
                 ))}
               </ul>
@@ -59,7 +78,7 @@ const LessonDisplayTemplate: React.FC<FlowStepProps> = ({
             <h3 className="font-semibold text-lg">Kluczowe pojęcia</h3>
             {Array.isArray(lessonContent.kluczowe_pojecia) ? (
               <div className="space-y-2">
-                {lessonContent.kluczowe_pojecia.map((pojecie, index) => (
+                {lessonContent.kluczowe_pojecia.map((pojecie: any, index: number) => (
                   <div key={index} className="bg-blue-50 p-3 rounded-lg">
                     {typeof pojecie === 'string' ? (
                       pojecie
@@ -92,10 +111,16 @@ const LessonDisplayTemplate: React.FC<FlowStepProps> = ({
             <h3 className="font-semibold text-lg">Przykłady</h3>
             {Array.isArray(lessonContent.przyklady) ? (
               <div className="space-y-3">
-                {lessonContent.przyklady.map((przyklad, index) => (
+                {lessonContent.przyklady.map((przyklad: any, index: number) => (
                   <div key={index} className="bg-green-50 p-3 rounded-lg border-l-4 border-green-500">
                     <p className="font-medium">Przykład {index + 1}</p>
-                    <p>{przyklad}</p>
+                    {typeof przyklad === 'string' ? (
+                      <p>{przyklad}</p>
+                    ) : przyklad && typeof przyklad === 'object' && 'przyklad' in przyklad ? (
+                      <p>{przyklad.przyklad}</p>
+                    ) : (
+                      <p>{JSON.stringify(przyklad)}</p>
+                    )}
                   </div>
                 ))}
               </div>
@@ -110,7 +135,7 @@ const LessonDisplayTemplate: React.FC<FlowStepProps> = ({
             <h3 className="font-semibold text-lg">Ćwiczenia</h3>
             {Array.isArray(lessonContent.interaktywne_cwiczenia) ? (
               <div className="space-y-3">
-                {lessonContent.interaktywne_cwiczenia.map((cwiczenie, index) => (
+                {lessonContent.interaktywne_cwiczenia.map((cwiczenie: string, index: number) => (
                   <div key={index} className="bg-yellow-50 p-3 rounded-lg">
                     <p className="font-medium">Ćwiczenie {index + 1}</p>
                     <p>{cwiczenie}</p>
