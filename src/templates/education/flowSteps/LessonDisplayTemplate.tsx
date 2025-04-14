@@ -61,7 +61,16 @@ const LessonDisplayTemplate: React.FC<FlowStepProps> = ({
               <div className="space-y-2">
                 {lessonContent.kluczowe_pojecia.map((pojecie, index) => (
                   <div key={index} className="bg-blue-50 p-3 rounded-lg">
-                    {pojecie}
+                    {typeof pojecie === 'string' ? (
+                      pojecie
+                    ) : pojecie && typeof pojecie === 'object' && 'nazwa' in pojecie && 'definicja' in pojecie ? (
+                      <>
+                        <div className="font-medium">{pojecie.nazwa}</div>
+                        <div>{pojecie.definicja}</div>
+                      </>
+                    ) : (
+                      JSON.stringify(pojecie)
+                    )}
                   </div>
                 ))}
               </div>
