@@ -30,6 +30,7 @@ export const LlmQueryTemplate: React.FC<FlowStepProps> = ({
   const autoStart = attrs.autoStart === true;
   const includeSystemMessage = attrs.includeSystemMessage === true;
   const systemMessageContent = currentScenario?.systemMessage || '';
+  const initialUserMessage = attrs.initialUserMessage || '';
 
   // Wykorzystanie rozszerzonego hooka useChat z całą logiką biznesową
   const { 
@@ -42,7 +43,7 @@ export const LlmQueryTemplate: React.FC<FlowStepProps> = ({
   } = useChat({
     includeSystemMessage,
     systemMessage: systemMessageContent,
-    initialUserMessage: node.initialUserMessage || '',
+    initialUserMessage,
     assistantMessage: node.assistantMessage || '',
     contextPath: node.contextPath,
     llmSchemaPath: attrs.llmSchemaPath,
@@ -62,9 +63,20 @@ export const LlmQueryTemplate: React.FC<FlowStepProps> = ({
     sendMessage(userInput);
   };
 
+  console.log(attrs);
+  
+
   // Render the component (tylko UI)
   return (
     <div className="p-4 space-y-4 bg-white shadow rounded-lg">
+      {/* Initial User Message Display */}
+      {initialUserMessage && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded">
+          <h3 className="text-sm font-medium text-blue-800 mb-1">Wiadomość początkowa:</h3>
+          <p className="text-gray-800 whitespace-pre-wrap">{initialUserMessage}</p>
+        </div>
+      )}
+      
       {/* Assistant message */}
       {processedAssistantMessage && (
         <div className="mb-4 p-3 bg-gray-100 rounded">
