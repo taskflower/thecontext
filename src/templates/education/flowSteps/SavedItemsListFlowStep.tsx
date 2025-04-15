@@ -139,20 +139,30 @@ const SavedItemsListFlowStep: React.FC<FlowStepProps> = ({
     if (selectedItem && selectedItem.content) {
       // Update context paths based on the selected item
       if (selectedItem.content.content) {
+        // Load the complete content document exactly as it was originally generated
         updateByContextPath('generatedContent', selectedItem.content.content);
       }
       
       if (selectedItem.content.context) {
+        // Restore the original context data
         updateByContextPath('learningSession', selectedItem.content.context);
       }
 
       // Additional contexts for specific types
-      if (selectedItem.type === 'quiz' && selectedItem.content.quizResults) {
-        updateByContextPath('quizResults', selectedItem.content.quizResults);
+      if (selectedItem.type === 'quiz' && selectedItem.content.quizContent) {
+        // For quizzes, just load the quiz content structure without answers
+        // This is important for preview mode - we don't need user answers
+        updateByContextPath('quizContent', selectedItem.content.quizContent);
+        
+        // Clear any existing quiz results to ensure preview mode
+        updateByContextPath('quizResults', null);
       } else if (selectedItem.type === 'project' && selectedItem.content.projectWork) {
         updateByContextPath('projectWork', selectedItem.content.projectWork);
       }
     }
+    
+    // Add flag to indicate we're in preview mode
+    updateByContextPath('previewMode', true);
     
     onSubmit({
       selectedItem,
