@@ -177,11 +177,38 @@ const SavedItemsListFlowStep: React.FC<FlowStepProps> = ({
       }
 
       // 4. Kontekst specyficzny dla typów zawartości
-      if (item.type === 'quiz' && item.content.quizContent) {
-        updateByContextPath('quizContent', item.content.quizContent);
-        // Wyczyść wyniki quizu, aby można było go ponownie wykonać
-        updateByContextPath('quizResults', null);
-      } else if (item.type === 'project' && item.content.projectWork) {
+      if (item.type === 'quiz') {
+        console.log('WAŻNE: Ładuję zapisany quiz (nie wyniki) do wyświetlenia', item);
+        
+        // KLUCZOWE: Quiz jest treścią, tak jak lekcja czy projekt
+        // Quiz MUSI być zapisany w generatedContent, a nie w quizContent
+        if (item.content && item.content.content) {
+          // Quiz jest zapisany w standardowym formacie dla treści
+          console.log('Znaleziono quiz w standardowym formacie content', item.content.content);
+          
+          // 1. Zapisz do generatedContent (tak jak lekcje i projekty)
+          updateByContextPath('generatedContent', item.content.content);
+          
+          // 2. Dodatkowo zapisz do quizContent dla kompatybilności z szablonem quizu
+          updateByContextPath('quizContent', item.content.content);
+          
+          // 3. Zawsze czyścimy wyniki, aby quiz można było ponownie wykonać  
+          updateByContextPath('quizResults', null);
+        } 
+        // Dla kompatybilności ze starym formatem zapisu
+        else if (item.content.quizContent) {
+          console.log('Znaleziono quiz w starym formacie (quizContent)', item.content.quizContent);
+          
+          // Zapisz do obydwu miejsc
+          updateByContextPath('generatedContent', item.content.quizContent);
+          updateByContextPath('quizContent', item.content.quizContent);
+          updateByContextPath('quizResults', null);
+        } else {
+          console.error('BŁĄD: Quiz nie ma zawartości', item);
+        }
+      } 
+      // Obsługa projektów
+      else if (item.type === 'project' && item.content.projectWork) {
         updateByContextPath('projectWork', item.content.projectWork);
       }
       

@@ -124,9 +124,10 @@ const QuizInteractionTemplate: React.FC<FlowStepProps> = ({
     }
   };
 
-  // Funkcja zapisująca quiz do IndexedDB
+  // Funkcja zapisująca quiz do IndexedDB - QUIZ JEST TREŚCIĄ, JAK LEKCJA CZY PROJEKT
   const handleSaveQuiz = async () => {
     if (!quizContent || !quizContent.tytul_quizu) {
+      console.error('Brak treści quizu do zapisania');
       setSaveStatus('error');
       return;
     }
@@ -135,23 +136,39 @@ const QuizInteractionTemplate: React.FC<FlowStepProps> = ({
       setSaveStatus('saving');
       
       // Generuj unikalny identyfikator
-      const id = `quiz_${learningSession.subject}_${learningSession.topic}`.replace(/\s+/g, '_').toLowerCase();
+      const id = `quiz_${learningSession.subject || ''}_${learningSession.topic || ''}`.replace(/\s+/g, '_').toLowerCase();
       
-      const score = calculateScore();
+      console.log('Zapisuję QUIZ do bazy - kompletny quiz, nie wyniki', {
+        quizContent,
+        learningSession
+      });
       
+      // ZAPAMIETAJ: Quiz jest TREŚCIĄ (content), a nie wynikami!
+      // Zapisujemy dokładnie jak lekcje i projekty - w formacie:
+      // { id, type, title, content: { content, context, additionalContext, savedAt } }
       await saveItem({
         id,
         type: 'quiz',
         title: quizContent.tytul_quizu || 'Quiz',
         content: {
-          quizContent,
-          learningSession,
-          userAnswers,
-          score,
-          completedAt: new Date().toISOString()
+          // KLUCZOWE: Quiz jest treścią, to pole przechowuje pełną strukturę quizu
+          content: quizContent,
+          
+          // Kontekst tworzenia quizu
+          context: learningSession,
+          
+          // Dodatkowy kontekst - informacje o quizie
+          additionalContext: {
+            poziom_trudnosci: quizContent.poziom_trudnosci,
+            pytania: shuffledQuestions.length
+          },
+          
+          // Znacznik czasu zapisu
+          savedAt: new Date().toISOString()
         }
       });
       
+      console.log('SUKCES: Zapisano quiz jako ZAWARTOŚĆ (nie wyniki)');
       setSaveStatus('saved');
       
       // Reset statusu po 3 sekundach

@@ -268,6 +268,7 @@ const ContentDisplayFlowStep: React.FC<FlowStepProps> = ({
       case 'etapy':
       case 'wskazowki':
       case 'materialy':
+      case 'pytania': // Dodano obsługę pytań quizu
         // List-type content
         return (
           <div className="space-y-3">
@@ -313,6 +314,35 @@ const ContentDisplayFlowStep: React.FC<FlowStepProps> = ({
             ) : (
               <p className="text-gray-500 italic">Brak kryteriów oceny</p>
             )}
+          </div>
+        );
+        
+      case 'info':
+        // Specjalna obsługa dla info w quizach
+        return (
+          <div className="space-y-3">
+            <h3 className="font-semibold text-lg">{tabs.find(t => t.id === activeTab)?.label}</h3>
+            <div className="p-4 bg-indigo-50 rounded-lg">
+              <div className="font-medium mb-2">Poziom trudności:</div>
+              <div className="whitespace-pre-line">
+                <SafeContent content={tabContent} />
+              </div>
+
+              {/* Dodatkowe informacje o quizie */}
+              {content.tytul_quizu && (
+                <div className="mt-3">
+                  <div className="font-medium mb-1">Tytuł quizu:</div>
+                  <div><SafeContent content={content.tytul_quizu} /></div>
+                </div>
+              )}
+              
+              {content.pytania && Array.isArray(content.pytania) && (
+                <div className="mt-3">
+                  <div className="font-medium mb-1">Liczba pytań:</div>
+                  <div>{content.pytania.length}</div>
+                </div>
+              )}
+            </div>
           </div>
         );
         

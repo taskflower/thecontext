@@ -33,6 +33,10 @@ export interface TabConfig {
       { id: 'wskazowki', label: 'Wskazówki' },
       { id: 'ocena', label: 'Kryteria oceny' },
       { id: 'materialy', label: 'Materiały' }
+    ],
+    quiz: [
+      { id: 'info', label: 'Informacje' },
+      { id: 'pytania', label: 'Pytania' } 
     ]
   };
   
@@ -59,6 +63,13 @@ export interface TabConfig {
         ocena: 'kryteria_oceny',
         materialy: 'materialy_dodatkowe'
       }
+    },
+    quiz: {
+      title: 'tytul_quizu',
+      tabs: {
+        info: 'poziom_trudnosci',
+        pytania: 'pytania'
+      }
     }
   };
   
@@ -72,6 +83,11 @@ export interface TabConfig {
       background: 'from-indigo-500 to-purple-600',
       saveType: 'project',
       idPrefix: 'project'
+    },
+    quiz: {
+      background: 'from-purple-500 to-indigo-600',
+      saveType: 'quiz',
+      idPrefix: 'quiz'
     }
   };
   
@@ -81,6 +97,8 @@ export interface TabConfig {
       case 'przyklady': return 'bg-green-50 border-l-4 border-green-500';
       case 'cwiczenia': return 'bg-yellow-50';
       case 'wskazowki': return 'bg-yellow-50 border-l-4 border-yellow-400';
+      case 'pytania': return 'bg-purple-50 border-l-4 border-purple-400';
+      case 'info': return 'bg-indigo-50';
       default: return 'bg-gray-50';
     }
   };
