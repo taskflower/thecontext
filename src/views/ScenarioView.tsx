@@ -193,9 +193,24 @@ export const ScenarioView: React.FC = () => {
   return (
     <LayoutComponent
       title={currentWorkspace.name}
-      showBackButton={true}
+      showBackButton={currentWorkspace?.templateSettings?.layoutTemplate?.includes('edu') ? false : true}
       onBackClick={handleBack}
     >
+      {/* Add custom back for education template */}
+      {currentWorkspace?.templateSettings?.layoutTemplate?.includes('edu') && (
+        <div className="mb-6">
+          <button
+            onClick={handleBack}
+            className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 flex items-center"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Powrót do obszarów nauki
+          </button>
+        </div>
+      )}
+      
       <ScenarioWidget
         data={currentWorkspace.scenarios}
         onSelect={handleSelectScenario}

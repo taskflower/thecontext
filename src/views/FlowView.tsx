@@ -36,9 +36,9 @@ const FlowView: React.FC = () => {
     }
   }, [workspace, scenario, selectWorkspace, selectScenario]);
 
-  // Get current data from store
+  // Get workspace from store
   const currentWorkspace = getCurrentWorkspace();
-  const currentScenario = getCurrentScenario();
+  // Note: currentScenario will be used from useNodeManager below
 
   // Use the node manager to handle flow logic
   const {
@@ -46,7 +46,9 @@ const FlowView: React.FC = () => {
     isLastNode,
     handlePreviousNode,
     handleNodeExecution,
+    handleGoToScenariosList,
     contextItems,
+    currentScenario,
   } = useNodeManager();
 
   // If data is not yet loaded, show loading state
@@ -94,9 +96,25 @@ const FlowView: React.FC = () => {
     <>
       <LayoutComponent
         title={currentNode.label}
-        showBackButton
-        onBackClick={handlePreviousNode}
+        showBackButton={false} // No back button in educational template
       >
+        {/* Add navigation buttons at top for education template */}
+        {currentWorkspace?.templateSettings?.layoutTemplate?.includes('edu') && (
+          <div className="mb-4">
+            {isLastNode ? (
+              <button
+                onClick={handleGoToScenariosList}
+                className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
+              >
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Powrót do listy lekcji
+              </button>
+            ) : null}
+          </div>
+        )}
+        
         <FlowStepComponent
           node={currentNode}
           onSubmit={handleNodeExecution}
