@@ -1,7 +1,12 @@
 // Funkcje pomocnicze do operacji na ścieżkach w kontekście
 export function getValueByPath(obj: Record<string, any>, path: string): any {
+  if (!obj || !path) return null;
+  
   const keys = path.split(".");
-  return keys.reduce((acc, key) => acc && acc[key], obj);
+  return keys.reduce((acc, key) => {
+    if (acc === null || acc === undefined) return null;
+    return acc[key];
+  }, obj);
 }
 
 export function setValueByPath(
@@ -9,6 +14,8 @@ export function setValueByPath(
   path: string,
   value: any
 ): Record<string, any> {
+  if (!obj || !path) return obj;
+  
   const keys = path.split(".");
   let newObj = { ...obj };
   let current = newObj;
@@ -19,4 +26,20 @@ export function setValueByPath(
   }
   current[keys[keys.length - 1]] = value;
   return newObj;
+}
+
+// Sprawdza czy ścieżka istnieje w obiekcie
+export function pathExists(obj: Record<string, any>, path: string): boolean {
+  if (!obj || !path) return false;
+  
+  const value = getValueByPath(obj, path);
+  return value !== undefined && value !== null;
+}
+
+// Normalizuje ścieżkę - usuwa puste elementy
+export function normalizePath(path: string): string {
+  if (!path) return '';
+  return path.split('.')
+    .filter(part => part.trim() !== '')
+    .join('.');
 }

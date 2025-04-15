@@ -90,7 +90,21 @@ export const useChat = ({
     if (!llmSchemaPath) return null;
     
     try {
-      const schema = getContextPath(llmSchemaPath);
+      // Najpierw spróbuj bezpośrednio ze ścieżki
+      let schema = getContextPath(llmSchemaPath);
+      
+      // Jeśli nie znaleziono, spróbuj dodać prefix llmSchemas
+      if (!schema && !llmSchemaPath.startsWith('llmSchemas.')) {
+        const fullPath = `llmSchemas.${llmSchemaPath}`;
+        console.log(`[useChat] Trying alternative schema path: ${fullPath}`);
+        schema = getContextPath(fullPath);
+      }
+      
+      if (!schema) {
+        console.warn(`[useChat] Schema not found at path: ${llmSchemaPath}`);
+        return null;
+      }
+      
       return schema ? JSON.stringify(schema, null, 2) : null;
     } catch (err) {
       console.error(`[useChat] Error retrieving schema from ${llmSchemaPath}:`, err);

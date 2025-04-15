@@ -51,6 +51,19 @@ export const useFormInput = ({ node }: UseFormInputProps): UseFormInputReturn =>
       if (schema && Array.isArray(schema)) {
         setFormFields(schema);
         console.log("Loaded form schema:", schema);
+      } else {
+        console.warn(`Form schema not found or invalid at path: ${attrs.formSchemaPath}`);
+        
+        // Try to load schema from formSchemas namespace if direct path fails
+        if (!attrs.formSchemaPath.startsWith('formSchemas.')) {
+          const fullPath = `formSchemas.${attrs.formSchemaPath}`;
+          const altSchema = getContextPath(fullPath);
+          
+          if (altSchema && Array.isArray(altSchema)) {
+            setFormFields(altSchema);
+            console.log("Loaded form schema from formSchemas namespace:", altSchema);
+          }
+        }
       }
     }
   }, [attrs, getContextPath]);

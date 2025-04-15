@@ -204,18 +204,30 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   
   // Getter dla aktualnego kontekstu
-  getContext: () => {
+  // Może być wywołany bez parametrów (zwraca cały kontekst) 
+  // lub z parametrem ścieżki (zwraca wartość pod określoną ścieżką)
+  getContext: (path?: string) => {
     const { currentWorkspaceId, contexts } = get();
-    return currentWorkspaceId ? (contexts[currentWorkspaceId] || {}) : {};
+    const context = currentWorkspaceId ? (contexts[currentWorkspaceId] || {}) : {};
+    
+    // Jeśli ścieżka nie jest podana, zwróć cały kontekst
+    if (!path) return context;
+    
+    // W przeciwnym razie wywołaj getContextPath
+    return get().getContextPath(path);
   },
   
   // Getter dla wartości w ścieżce kontekstu
   getContextPath: (path: string) => {
     const context = get().getContext();
-    if (!context) return undefined;
+    if (!context || !path) return undefined;
+    
+    // Normalizujemy ścieżkę
+    const normalizedPath = path.trim();
+    if (!normalizedPath) return undefined;
     
     // Rozdzielamy ścieżkę na części
-    const parts = path.split('.');
+    const parts = normalizedPath.split('.');
     
     // Jeśli mamy tylko jeden element, zwracamy bezpośrednio z kontekstu
     if (parts.length === 1) {
@@ -223,6 +235,42 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
     
     // W przeciwnym razie używamy getValueByPath
-    return getValueByPath(context, path);
+    return getValueByPath(context, normalizedPath);
+  },
+  
+  // Sprawdza czy ścieżka istnieje w kontekście
+  hasContextPath: (path: string) => {
+    if (!path) return false;
+    
+    const value = get().getContextPath(path);
+    return value !== undefined && value !== null;
+  },
+  
+  // Pobiera schemat z kontekstu, odpowiedni dla typu komponentu
+  getSchemaForType: (type: string, schemaPath: string) => {
+    if (!type || !schemaPath) return null;
+    
+    // Mapuj typy komponentów na namespace schematu
+    let schemaNamespace = '';
+    if (type === 'form') {
+      schemaNamespace = 'formSchemas';
+    } else if (type === 'llm') {
+      schemaNamespace = 'llmSchemas';
+    } else {
+      return null; // Nieobsługiwany typ schematu
+    }
+    
+    // Pobierz schemat z kontekstu
+    const schema = get().getContextPath(`${schemaNamespace}.${schemaPath}`);
+    if (!schema) {
+      console.warn(`Schema not found for ${type}: ${schemaPath}`);
+      return null;
+    }
+    
+    return {
+      type,
+      path: schemaPath,
+      schema
+    };
   }
 }));
