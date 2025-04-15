@@ -8,16 +8,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `yarn preview` - Preview production build
 - `yarn type-check` - Run TypeScript type checking
 - `yarn lint` - Run ESLint
+- `yarn test` - Run all tests
+- `yarn test src/path/to/test.tsx` - Run a single test file
 
 ## Code Style Guidelines
-- **Imports**: Group imports by type (React, third-party, local)
-- **TypeScript**: Strict mode enabled, use proper type annotations for all variables and functions
-- **Components**: Use functional React components with TypeScript interfaces for props
-- **Naming**: PascalCase for components, camelCase for functions/variables, interfaces with `I` prefix
-- **File Structure**: Components in separate files, hooks in `hooks/` directory
-- **Error Handling**: Use error boundaries for React components, try/catch for async operations
+- **Imports**: Group by type (React, third-party, local) with a blank line between groups
+- **TypeScript**: Use strict typing with interfaces prefixed with `I` (e.g., `IProps`)
+- **Components**: Prefer functional React components with explicit prop interfaces
+- **Naming**: PascalCase for components/interfaces, camelCase for functions/variables
+- **File Structure**: Templates organized by domains (default, education, gamifyEdu)
+- **Error Handling**: Use error boundaries in React, try/catch for async operations
 - **State Management**: Zustand for global state, React hooks for local state
-- **Paths**: Use absolute imports with `@/` alias
-- **Comments**: Use JSDoc for functions, include purpose descriptions for complex logic
+- **Paths**: Use absolute imports with `@/` alias (e.g., `import { x } from @/components`)
+- **Comments**: Use JSDoc for functions, explain complex logic with inline comments
 
 Always run `yarn type-check` and `yarn lint` before submitting changes.

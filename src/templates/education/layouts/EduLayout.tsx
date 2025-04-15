@@ -11,9 +11,10 @@ const EduLayout: React.FC<LayoutProps> = ({
   showBackButton, 
   onBackClick 
 }) => {
-  // Get context to check if we're in preview mode
+  // Nie używamy już flagi previewMode
   const getContextPath = useAppStore(state => state.getContextPath);
-  const previewMode = getContextPath('previewMode') === true;
+  // Tryb podglądu nie jest już potrzebny, gdy dane są identyczne
+  const previewMode = false;
   
   // Get auth state
   const { user, loading } = useAuth();

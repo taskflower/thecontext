@@ -113,10 +113,11 @@ const SavedItemsListFlowStep: React.FC<FlowStepProps> = ({
     ? processTemplate(node.assistantMessage) 
     : '';
 
-  // Handle item selection - optimized to avoid unnecessary renders
-  const handleSelectItem = (item: SavedItem) => {
-    // If selecting the same item, do nothing to avoid unnecessary renders
+  // Handle item selection - teraz natychmiast ładuje dane i przechodzi do podglądu
+  const handleSelectItem = async (item: SavedItem) => {
+    // If selecting the same item, just submit to continue
     if (selectedItem && selectedItem.id === item.id) {
+      handleSubmit();
       return;
     }
     
@@ -125,6 +126,44 @@ const SavedItemsListFlowStep: React.FC<FlowStepProps> = ({
     // Używamy updateByContextPath zamiast setContextPath
     if (node.contextPath) {
       updateByContextPath('savedItems.selectedItem', item);
+    }
+    
+    // Natychmiast ładujemy dane i przechodzimy do podglądu
+    if (item && item.content) {
+      // 1. Załaduj oryginalną zawartość
+      if (item.content.content) {
+        updateByContextPath('generatedContent', item.content.content);
+      }
+      
+      // 2. Załaduj oryginalny kontekst sesji uczenia
+      if (item.content.context) {
+        updateByContextPath('learningSession', item.content.context);
+      }
+      
+      // 3. Załaduj dodatkowy kontekst jeśli istnieje
+      if (item.content.additionalContext) {
+        // Aktualizacja każdego klucza z additionalContext osobno
+        Object.entries(item.content.additionalContext).forEach(([key, value]) => {
+          updateByContextPath(key, value);
+        });
+      }
+
+      // 4. Kontekst specyficzny dla typów zawartości
+      if (item.type === 'quiz' && item.content.quizContent) {
+        updateByContextPath('quizContent', item.content.quizContent);
+        // Wyczyść wyniki quizu, aby można było go ponownie wykonać
+        updateByContextPath('quizResults', null);
+      } else if (item.type === 'project' && item.content.projectWork) {
+        updateByContextPath('projectWork', item.content.projectWork);
+      }
+      
+      // Małe opóźnienie, aby kontekst zdążył się zaktualizować
+      setTimeout(() => {
+        onSubmit({
+          selectedItem: item,
+          timestamp: new Date().toISOString()
+        });
+      }, 100);
     }
   };
 
@@ -137,32 +176,39 @@ const SavedItemsListFlowStep: React.FC<FlowStepProps> = ({
     
     // Now update the full context with the selected item's data
     if (selectedItem && selectedItem.content) {
-      // Update context paths based on the selected item
+      // Całkowite wyczyszczenie i odtworzenie całej struktury danych
+      
+      // 1. Załaduj oryginalną zawartość dokładnie w tym samym formacie, 
+      // jak była wygenerowana
       if (selectedItem.content.content) {
-        // Load the complete content document exactly as it was originally generated
         updateByContextPath('generatedContent', selectedItem.content.content);
       }
       
+      // 2. Załaduj oryginalny kontekst sesji uczenia
       if (selectedItem.content.context) {
-        // Restore the original context data
         updateByContextPath('learningSession', selectedItem.content.context);
       }
+      
+      // 3. Załaduj dodatkowy kontekst jeśli istnieje
+      if (selectedItem.content.additionalContext) {
+        // Aktualizacja każdego klucza z additionalContext osobno
+        Object.entries(selectedItem.content.additionalContext).forEach(([key, value]) => {
+          updateByContextPath(key, value);
+        });
+      }
 
-      // Additional contexts for specific types
+      // 4. Kontekst specyficzny dla typów zawartości
       if (selectedItem.type === 'quiz' && selectedItem.content.quizContent) {
-        // For quizzes, just load the quiz content structure without answers
-        // This is important for preview mode - we don't need user answers
         updateByContextPath('quizContent', selectedItem.content.quizContent);
-        
-        // Clear any existing quiz results to ensure preview mode
+        // Wyczyść wyniki quizu, aby można było go ponownie wykonać
         updateByContextPath('quizResults', null);
       } else if (selectedItem.type === 'project' && selectedItem.content.projectWork) {
         updateByContextPath('projectWork', selectedItem.content.projectWork);
       }
     }
     
-    // Add flag to indicate we're in preview mode
-    updateByContextPath('previewMode', true);
+    // Zawartość będzie wyświetlana dokładnie tak samo jak po wygenerowaniu
+    // bez potrzeby używania specjalnego trybu podglądu
     
     onSubmit({
       selectedItem,
@@ -335,7 +381,7 @@ const SavedItemsListFlowStep: React.FC<FlowStepProps> = ({
                 {filteredItems.map((item) => (
                   <tr 
                     key={item.id} 
-                    className={`${selectedItem?.id === item.id ? 'bg-blue-50' : 'hover:bg-gray-50'} cursor-pointer transition-colors duration-150`}
+                    className={`${selectedItem?.id === item.id ? 'bg-blue-50' : 'hover:bg-gray-50'} cursor-pointer transition-colors duration-150 hover:shadow`}
                     onClick={() => handleSelectItem(item)}
                   >
                     <td className="px-4 py-3 whitespace-nowrap">
@@ -356,15 +402,9 @@ const SavedItemsListFlowStep: React.FC<FlowStepProps> = ({
                       {formatDate(item.content?.savedAt)}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSelectItem(item);
-                        }}
-                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-150"
-                      >
-                        Wybierz
-                      </button>
+                      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg transition-colors duration-150">
+                        Kliknij, aby otworzyć
+                      </span>
                     </td>
                   </tr>
                 ))}
@@ -396,16 +436,10 @@ const SavedItemsListFlowStep: React.FC<FlowStepProps> = ({
                   </span>
                 </div>
                 <h3 className="mt-2 text-lg font-medium text-gray-900 line-clamp-2">{item.title}</h3>
-                <div className="mt-auto pt-3 flex justify-end">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleSelectItem(item);
-                    }}
-                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-150"
-                  >
-                    Wybierz
-                  </button>
+                <div className="mt-auto pt-3 flex justify-center">
+                  <span className="w-full text-center px-3 py-2 bg-blue-100 text-blue-700 rounded-lg transition-colors duration-150">
+                    Kliknij, aby otworzyć
+                  </span>
                 </div>
               </div>
             ))}
@@ -422,13 +456,18 @@ const SavedItemsListFlowStep: React.FC<FlowStepProps> = ({
           Wstecz
         </button>
         
-        <button
-          onClick={handleSubmit}
-          disabled={!selectedItem}
-          className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-300"
-        >
-          {isLastNode ? 'Zakończ' : 'Wyświetl szczegóły'}
-        </button>
+        {/* 
+          Nie potrzebujemy już przycisku "Wyświetl szczegóły", 
+          ponieważ kliknięcie na element listy natychmiast prowadzi do podglądu
+        */}
+        {selectedItem && isLastNode && (
+          <button
+            onClick={() => handleSubmit()}
+            className="px-4 py-2 bg-blue-500 text-white rounded"
+          >
+            Zakończ
+          </button>
+        )}
       </div>
     </div>
   );

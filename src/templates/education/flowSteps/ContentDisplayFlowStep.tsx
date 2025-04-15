@@ -73,7 +73,8 @@ const ContentDisplayFlowStep: React.FC<FlowStepProps> = ({
         .replace(/\s+/g, '_')
         .toLowerCase();
       
-      await saveItem({
+      // Przygotowanie danych do zapisania
+      const itemToSave = {
         id,
         type: ui.saveType,
         title: String(title || 'Content'),
@@ -83,7 +84,19 @@ const ContentDisplayFlowStep: React.FC<FlowStepProps> = ({
           additionalContext,
           savedAt: new Date().toISOString()
         }
-      });
+      };
+      
+      // Dodanie specyficznych danych dla różnych typów zawartości
+      const quizContent = getContextPath('quizContent');
+      const projectWork = getContextPath('projectWork');
+      
+      if (ui.saveType === 'quiz' && quizContent) {
+        itemToSave.content.quizContent = quizContent;
+      } else if (ui.saveType === 'project' && projectWork) {
+        itemToSave.content.projectWork = projectWork;
+      }
+      
+      await saveItem(itemToSave);
       
       setSaveStatus('saved');
       
