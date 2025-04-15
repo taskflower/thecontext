@@ -3,6 +3,7 @@ import { BaseWorkspaceData } from "../../baseTemplate";
 import { getLearningScenario } from "./scenarios/learningScenario";
 import { getQuizScenario } from "./scenarios/quizScenario";
 import { getProjectScenario } from "./scenarios/projectScenario";
+import { getSavedItemsScenario } from "./scenarios/savedItemsScenario";
 import { getInitialContext } from "./initialContext";
 
 export function getEducationWorkspaceData(): BaseWorkspaceData {
@@ -13,7 +14,8 @@ export function getEducationWorkspaceData(): BaseWorkspaceData {
     scenarios: [
       getLearningScenario(),
       getQuizScenario(),
-      getProjectScenario()
+      getProjectScenario(),
+      getSavedItemsScenario()
     ],
     templateSettings: {
       layoutTemplate: "default",

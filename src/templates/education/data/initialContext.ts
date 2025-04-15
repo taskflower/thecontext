@@ -13,6 +13,10 @@ export function getInitialContext() {
     quizResults: {},
     userNotes: {},
     projectWork: {},
+    savedItems: {
+      selectedItem: null,
+      filter: null
+    },
     formSchemas: getFormSchemas(),
     llmSchemas: getLlmSchemas()
   };

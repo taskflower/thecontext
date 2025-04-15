@@ -32,6 +32,12 @@ export function getFlowStepsConfig() {
       name: "Interakcja z Quizem",
       compatibleNodeTypes: ["quiz", "default"],
       component: lazy(() => import("../flowSteps/QuizInteractionTemplate")),
+    },
+    {
+      id: "saved-items-list",
+      name: "Lista Zapisanych Elementów",
+      compatibleNodeTypes: ["storage", "default"],
+      component: lazy(() => import("../flowSteps/SavedItemsListFlowStep")),
     }
   ];
 }
