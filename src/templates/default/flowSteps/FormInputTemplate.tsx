@@ -9,6 +9,26 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
   onPrevious,
   isLastNode,
 }) => {
+  // Get the node attributes
+  const attrs = node?.attrs || {};
+  const formSchemaPath = attrs.formSchemaPath;
+  
+  // Convert formSchemaPath to schemaPath if needed
+  let schemaPath = attrs.schemaPath;
+  if (!schemaPath && formSchemaPath && formSchemaPath.startsWith('schemas.form.')) {
+    // Already using new format, just copy it
+    schemaPath = formSchemaPath;
+  }
+  
+  // Prepare the node with schemaPath if available
+  const enhancedNode = {
+    ...node,
+    attrs: {
+      ...attrs,
+      schemaPath: schemaPath
+    }
+  };
+  
   const {
     formData,
     formFields,
@@ -16,7 +36,7 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
     handleChange,
     handleSubmit,
     areRequiredFieldsFilled,
-  } = useFormInput({ node });
+  } = useFormInput({ node: enhancedNode });
 
   // Handle form submission with onSubmit callback
   const onFormSubmit = (e: React.FormEvent) => {

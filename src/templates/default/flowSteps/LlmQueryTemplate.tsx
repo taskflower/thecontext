@@ -67,6 +67,7 @@ export const LlmQueryTemplate: React.FC<FlowStepProps> = ({
   const includeSystemMessage = attrs.includeSystemMessage === true;
   const systemMessageContent = currentScenario?.systemMessage || '';
   const initialUserMessage = attrs.initialUserMessage || '';
+  const schemaPath = attrs.schemaPath || '';  // New schema path format
 
   // Wykorzystanie rozszerzonego hooka useChat z całą logiką biznesową
   const { 
@@ -82,7 +83,8 @@ export const LlmQueryTemplate: React.FC<FlowStepProps> = ({
     initialUserMessage,
     assistantMessage: node.assistantMessage || '',
     contextPath: node.contextPath,
-    llmSchemaPath: attrs.llmSchemaPath,
+    llmSchemaPath: attrs.llmSchemaPath, // Legacy support
+    schemaPath: schemaPath,             // New schema path format
     autoStart,
     onDataSaved: (data) => {
       console.log("[LlmQueryTemplate] Data saved callback:", data);

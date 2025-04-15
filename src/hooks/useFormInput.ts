@@ -4,6 +4,7 @@ import { useAppStore } from "@/lib/store";
 
 interface FormInputAttrs {
   formSchemaPath?: string;
+  schemaPath?: string;  // New path format
   [key: string]: any;
 }
 
@@ -46,13 +47,35 @@ export const useFormInput = ({ node }: UseFormInputProps): UseFormInputReturn =>
 
   // Load form schema
   useEffect(() => {
+    // First try new schema path format if provided
+    if (attrs?.schemaPath) {
+      let schemaPath = attrs.schemaPath;
+      
+      // Ensure schemas prefix is present
+      if (!schemaPath.startsWith('schemas.form.')) {
+        schemaPath = schemaPath.startsWith('schemas.') 
+          ? schemaPath 
+          : `schemas.form.${schemaPath}`;
+      }
+      
+      const schema = getContextPath(schemaPath);
+      if (schema && Array.isArray(schema)) {
+        setFormFields(schema);
+        console.log("Loaded form schema using new path:", schemaPath);
+        return;
+      } else {
+        console.warn(`Form schema not found using new path: ${schemaPath}`);
+      }
+    }
+    
+    // Fall back to old formSchemaPath if no schemaPath or it failed
     if (attrs?.formSchemaPath) {
       const schema = getContextPath(attrs.formSchemaPath);
       if (schema && Array.isArray(schema)) {
         setFormFields(schema);
-        console.log("Loaded form schema:", schema);
+        console.log("Loaded form schema using legacy path:", attrs.formSchemaPath);
       } else {
-        console.warn(`Form schema not found or invalid at path: ${attrs.formSchemaPath}`);
+        console.warn(`Form schema not found at legacy path: ${attrs.formSchemaPath}`);
         
         // Try to load schema from formSchemas namespace if direct path fails
         if (!attrs.formSchemaPath.startsWith('formSchemas.')) {
@@ -61,7 +84,9 @@ export const useFormInput = ({ node }: UseFormInputProps): UseFormInputReturn =>
           
           if (altSchema && Array.isArray(altSchema)) {
             setFormFields(altSchema);
-            console.log("Loaded form schema from formSchemas namespace:", altSchema);
+            console.log("Loaded form schema from formSchemas namespace:", fullPath);
+          } else {
+            console.error("Failed to load form schema from any path");
           }
         }
       }

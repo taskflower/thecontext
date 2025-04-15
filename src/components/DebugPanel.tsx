@@ -38,112 +38,196 @@ const DebugPanel: React.FC = () => {
   const getStepSchema = (step: any) => {
     if (!step) return null;
     
-    // Najpierw sprawdź czy to jest krok LLM na podstawie templateId
+    // Check for new schema path format first (for LLM)
+    if (step.templateId === 'llm-query' && step.attrs?.schemaPath) {
+      const schemaPath = step.attrs.schemaPath;
+      let resolvedPath = schemaPath;
+      
+      // Ensure path has schemas.llm. prefix
+      if (!resolvedPath.startsWith('schemas.llm.')) {
+        resolvedPath = resolvedPath.startsWith('schemas.') 
+          ? resolvedPath 
+          : `schemas.llm.${resolvedPath}`;
+      }
+      
+      // Try to get schema
+      const schema = getContextValue(resolvedPath);
+      
+      if (schema) {
+        console.log(`[DebugPanel] Found LLM schema using new path: ${resolvedPath}`, schema);
+        return {
+          type: 'llm',
+          path: resolvedPath,
+          schema: schema
+        };
+      } else {
+        console.warn(`[DebugPanel] LLM schema not found at new path: ${resolvedPath}`);
+      }
+    }
+    
+    // Check for new schema path format (for Forms)
+    if ((step.templateId === 'form-step' || step.type === 'form') && step.attrs?.schemaPath) {
+      const schemaPath = step.attrs.schemaPath;
+      let resolvedPath = schemaPath;
+      
+      // Ensure path has schemas.form. prefix
+      if (!resolvedPath.startsWith('schemas.form.')) {
+        resolvedPath = resolvedPath.startsWith('schemas.') 
+          ? resolvedPath 
+          : `schemas.form.${resolvedPath}`;
+      }
+      
+      // Try to get schema
+      const schema = getContextValue(resolvedPath);
+      
+      if (schema) {
+        console.log(`[DebugPanel] Found form schema using new path: ${resolvedPath}`, schema);
+        return {
+          type: 'form',
+          path: resolvedPath,
+          schema: schema
+        };
+      } else {
+        console.warn(`[DebugPanel] Form schema not found at new path: ${resolvedPath}`);
+      }
+    }
+    
+    // Fall back to legacy paths for LLM
     if (step.templateId === 'llm-query' && step.attrs?.llmSchemaPath) {
       const schemaPath = step.attrs.llmSchemaPath;
-      let fullPath = schemaPath;
       
-      // Jeśli ścieżka nie zaczyna się od 'llmSchemas.', dodaj prefix
+      // Try directly with the provided path first (might be already using schemas.llm format)
+      const directSchema = getContextValue(schemaPath);
+      if (directSchema) {
+        console.log(`[DebugPanel] Found LLM schema directly at: ${schemaPath}`);
+        return {
+          type: 'llm',
+          path: schemaPath,
+          schema: directSchema
+        };
+      }
+      
+      // Try with llmSchemas prefix if not found directly
       if (!schemaPath.startsWith('llmSchemas.')) {
-        fullPath = `llmSchemas.${schemaPath}`;
-      }
-      
-      // Spróbuj pobrać schemat
-      const schema = getContextValue(fullPath);
-      
-      if (schema) {
-        console.log(`[DebugPanel] Found LLM schema for path: ${fullPath}`, schema);
-      } else {
-        console.warn(`[DebugPanel] LLM schema not found for path: ${fullPath}`);
-        
-        // Sprawdź, czy schemat jest bezpośrednio w ścieżce (bez prefiksu)
-        const directSchema = getContextValue(schemaPath);
-        if (directSchema) {
-          console.log(`[DebugPanel] Found LLM schema directly at: ${schemaPath}`);
-          return {
-            type: 'llm',
-            path: schemaPath,
-            schema: directSchema
-          };
-        }
-      }
-      
-      return {
-        type: 'llm',
-        path: schemaPath,
-        schema: schema
-      };
-    }
-    
-    // Dla formularzy (sprawdź templateId lub typ)
-    if ((step.templateId === 'form-step' || step.type === 'form') && step.attrs?.formSchemaPath) {
-      const schemaPath = step.attrs.formSchemaPath;
-      let fullPath = schemaPath;
-      
-      // Jeśli ścieżka nie zaczyna się od 'formSchemas.', dodaj prefix
-      if (!schemaPath.startsWith('formSchemas.')) {
-        fullPath = `formSchemas.${schemaPath}`;
-      }
-      
-      // Spróbuj pobrać schemat
-      const schema = getContextValue(fullPath);
-      
-      if (schema) {
-        console.log(`[DebugPanel] Found form schema for path: ${fullPath}`, schema);
-      } else {
-        console.warn(`[DebugPanel] Form schema not found for path: ${fullPath}`);
-        
-        // Sprawdź, czy schemat jest bezpośrednio w ścieżce (bez prefiksu)
-        const directSchema = getContextValue(schemaPath);
-        if (directSchema) {
-          console.log(`[DebugPanel] Found form schema directly at: ${schemaPath}`);
-          return {
-            type: 'form',
-            path: schemaPath,
-            schema: directSchema
-          };
-        }
-      }
-      
-      return {
-        type: 'form',
-        path: schemaPath,
-        schema: schema
-      };
-    }
-    
-    // Sprawdź wszystkie możliwe przypadki, jeśli zwykłe warunki nie pasują
-    console.log(`[DebugPanel] Inspecting step for schemas:`, step);
-    
-    // Sprawdź, czy jest to krok LLM który nie używa standardowej ścieżki llmSchemaPath
-    if (step.templateId === 'llm-query' || step.label?.includes('AI') || step.label?.includes('Analiza')) {
-      console.log(`[DebugPanel] Detected potential LLM step without explicit schema path`);
-      
-      // Sprawdź, czy możemy znaleźć schemat na podstawie contextPath
-      const contextPath = step.contextPath;
-      if (contextPath) {
-        // Sprawdź najpierw schemat o tej samej nazwie co ścieżka kontekstu
-        const potentialSchemaPath = `llmSchemas.${contextPath.split('.').pop()}`;
-        const schema = getContextValue(potentialSchemaPath);
+        const legacyPath = `llmSchemas.${schemaPath}`;
+        const schema = getContextValue(legacyPath);
         
         if (schema) {
-          console.log(`[DebugPanel] Found matching LLM schema at: ${potentialSchemaPath}`);
+          console.log(`[DebugPanel] Found LLM schema using legacy path: ${legacyPath}`, schema);
           return {
             type: 'llm',
-            path: potentialSchemaPath,
+            path: legacyPath,
             schema: schema
           };
         }
+      }
+      
+      console.warn(`[DebugPanel] LLM schema not found for legacy path: ${schemaPath}`);
+      return {
+        type: 'llm',
+        path: schemaPath,
+        schema: null
+      };
+    }
+    
+    // Fall back to legacy paths for Forms
+    if ((step.templateId === 'form-step' || step.type === 'form') && step.attrs?.formSchemaPath) {
+      const schemaPath = step.attrs.formSchemaPath;
+      
+      // Try directly with the provided path first (might be already using schemas.form format)
+      const directSchema = getContextValue(schemaPath);
+      if (directSchema) {
+        console.log(`[DebugPanel] Found form schema directly at: ${schemaPath}`);
+        return {
+          type: 'form',
+          path: schemaPath,
+          schema: directSchema
+        };
+      }
+      
+      // Try with formSchemas prefix if not found directly
+      if (!schemaPath.startsWith('formSchemas.')) {
+        const legacyPath = `formSchemas.${schemaPath}`;
+        const schema = getContextValue(legacyPath);
         
-        // Przeszukaj wszystkie dostępne schematy LLM
-        const allLlmSchemas = getContextValue('llmSchemas');
-        if (allLlmSchemas && typeof allLlmSchemas === 'object') {
-          console.log(`[DebugPanel] Checking all available LLM schemas`);
+        if (schema) {
+          console.log(`[DebugPanel] Found form schema using legacy path: ${legacyPath}`, schema);
+          return {
+            type: 'form',
+            path: legacyPath,
+            schema: schema
+          };
+        }
+      }
+      
+      console.warn(`[DebugPanel] Form schema not found for legacy path: ${schemaPath}`);
+      return {
+        type: 'form',
+        path: schemaPath,
+        schema: null
+      };
+    }
+    
+    // Check for advanced schema detection if we haven't found anything yet
+    console.log(`[DebugPanel] Performing advanced schema detection for:`, step);
+    
+    // Detect LLM steps without explicit schema paths
+    if (step.templateId === 'llm-query' || step.label?.includes('AI') || step.label?.includes('Analiza')) {
+      console.log(`[DebugPanel] Detected potential LLM step without explicit schema path`);
+      
+      // Try to find schema based on context path
+      const contextPath = step.contextPath;
+      if (contextPath) {
+        const contextKey = contextPath.split('.').pop();
+        
+        // First try schemas.llm.* repository (new format)
+        const newFormatSchema = getContextValue(`schemas.llm.${contextKey}`);
+        if (newFormatSchema) {
+          console.log(`[DebugPanel] Found matching LLM schema in new repository: schemas.llm.${contextKey}`);
+          return {
+            type: 'llm',
+            path: `schemas.llm.${contextKey}`,
+            schema: newFormatSchema
+          };
+        }
+        
+        // Check all schemas in the new centralized repository
+        const allSchemas = getContextValue('schemas.llm');
+        if (allSchemas && typeof allSchemas === 'object') {
+          console.log(`[DebugPanel] Checking all available LLM schemas in new repository`);
           
-          for (const [schemaName, schemaValue] of Object.entries(allLlmSchemas)) {
-            // Sprawdź, czy nazwa schematu jest zawarta w ścieżce kontekstu
+          for (const [schemaName, schemaValue] of Object.entries(allSchemas)) {
+            // Check if schema name is contained in the context path
             if (contextPath.toLowerCase().includes(schemaName.toLowerCase())) {
-              console.log(`[DebugPanel] Found potential matching LLM schema: ${schemaName}`);
+              console.log(`[DebugPanel] Found matching LLM schema in new repository: ${schemaName}`);
+              return {
+                type: 'llm',
+                path: `schemas.llm.${schemaName}`,
+                schema: schemaValue
+              };
+            }
+          }
+        }
+        
+        // Fall back to legacy llmSchemas repository
+        const legacySchema = getContextValue(`llmSchemas.${contextKey}`);
+        if (legacySchema) {
+          console.log(`[DebugPanel] Found matching LLM schema in legacy repository: llmSchemas.${contextKey}`);
+          return {
+            type: 'llm',
+            path: `llmSchemas.${contextKey}`,
+            schema: legacySchema
+          };
+        }
+        
+        // Check all schemas in legacy repository
+        const allLegacySchemas = getContextValue('llmSchemas');
+        if (allLegacySchemas && typeof allLegacySchemas === 'object') {
+          console.log(`[DebugPanel] Checking all available LLM schemas in legacy repository`);
+          
+          for (const [schemaName, schemaValue] of Object.entries(allLegacySchemas)) {
+            if (contextPath.toLowerCase().includes(schemaName.toLowerCase())) {
+              console.log(`[DebugPanel] Found matching LLM schema in legacy repository: ${schemaName}`);
               return {
                 type: 'llm',
                 path: `llmSchemas.${schemaName}`,

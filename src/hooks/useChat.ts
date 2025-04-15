@@ -15,7 +15,8 @@ export interface UseChatProps {
   initialUserMessage?: string;
   assistantMessage?: string;
   contextPath?: string;
-  llmSchemaPath?: string;
+  llmSchemaPath?: string;  // Legacy format
+  schemaPath?: string;     // New format (schemas.llm.*)
   autoStart?: boolean;
   onDataSaved?: (data: any) => void;
 }
@@ -39,6 +40,7 @@ export const useChat = ({
   assistantMessage = '',
   contextPath = '',
   llmSchemaPath = '',
+  schemaPath = '',
   autoStart = false,
   onDataSaved
 }: UseChatProps): UseChatReturn => {
@@ -61,8 +63,8 @@ export const useChat = ({
     getContext: state.getContext
   }));
 
-  // Sprawdź, czy mamy schemat JSON
-  const hasSchema = !!llmSchemaPath;
+  // Sprawdź, czy mamy schemat JSON (either new or legacy path)
+  const hasSchema = !!(schemaPath || llmSchemaPath);
 
   // Wykorzystanie nowego hooka do przetwarzania odpowiedzi
   const { 
@@ -87,30 +89,59 @@ export const useChat = ({
 
   // Pobierz schemat odpowiedzi
   const getResponseSchema = useCallback(() => {
-    if (!llmSchemaPath) return null;
-    
-    try {
-      // Najpierw spróbuj bezpośrednio ze ścieżki
-      let schema = getContextPath(llmSchemaPath);
-      
-      // Jeśli nie znaleziono, spróbuj dodać prefix llmSchemas
-      if (!schema && !llmSchemaPath.startsWith('llmSchemas.')) {
-        const fullPath = `llmSchemas.${llmSchemaPath}`;
-        console.log(`[useChat] Trying alternative schema path: ${fullPath}`);
-        schema = getContextPath(fullPath);
+    // Try new schema path format first
+    if (schemaPath) {
+      try {
+        let resolvedPath = schemaPath;
+        
+        // Ensure we have the proper prefix
+        if (!resolvedPath.startsWith('schemas.llm.')) {
+          resolvedPath = resolvedPath.startsWith('schemas.') 
+            ? resolvedPath 
+            : `schemas.llm.${resolvedPath}`;
+        }
+        
+        console.log(`[useChat] Trying new schema path: ${resolvedPath}`);
+        const schema = getContextPath(resolvedPath);
+        
+        if (schema) {
+          console.log(`[useChat] Found schema at new path: ${resolvedPath}`);
+          return JSON.stringify(schema, null, 2);
+        } else {
+          console.warn(`[useChat] Schema not found at new path: ${resolvedPath}`);
+        }
+      } catch (err) {
+        console.error(`[useChat] Error retrieving schema from ${schemaPath}:`, err);
       }
-      
-      if (!schema) {
-        console.warn(`[useChat] Schema not found at path: ${llmSchemaPath}`);
-        return null;
-      }
-      
-      return schema ? JSON.stringify(schema, null, 2) : null;
-    } catch (err) {
-      console.error(`[useChat] Error retrieving schema from ${llmSchemaPath}:`, err);
-      return null;
     }
-  }, [llmSchemaPath, getContextPath]);
+    
+    // Fall back to legacy path if no new path or it failed
+    if (llmSchemaPath) {
+      try {
+        // Najpierw spróbuj bezpośrednio ze ścieżki
+        let schema = getContextPath(llmSchemaPath);
+        
+        // Jeśli nie znaleziono, spróbuj dodać prefix llmSchemas
+        if (!schema && !llmSchemaPath.startsWith('llmSchemas.')) {
+          const fullPath = `llmSchemas.${llmSchemaPath}`;
+          console.log(`[useChat] Trying alternative legacy path: ${fullPath}`);
+          schema = getContextPath(fullPath);
+        }
+        
+        if (!schema) {
+          console.warn(`[useChat] Schema not found at legacy path: ${llmSchemaPath}`);
+          return null;
+        }
+        
+        console.log(`[useChat] Found schema at legacy path`);
+        return schema ? JSON.stringify(schema, null, 2) : null;
+      } catch (err) {
+        console.error(`[useChat] Error retrieving schema from legacy path ${llmSchemaPath}:`, err);
+      }
+    }
+    
+    return null;
+  }, [schemaPath, llmSchemaPath, getContextPath]);
 
   // Przetwórz wiadomości szablonowe
   useEffect(() => {

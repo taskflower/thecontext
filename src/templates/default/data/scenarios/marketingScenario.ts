@@ -7,68 +7,106 @@ export function getMarketingScenario(): Scenario {
     name: "Analiza Marketingowa WWW i Kampania Facebook",
     description: "Analiza strony internetowej pod kątem marketingowym i przygotowanie kampanii Facebook",
     nodes: [
-      // Existing nodes - untouched
+      // Krok 1: Pobieranie adresu strony WWW
       {
-        id: "form-node-1",
+        id: "website-url-form",
         scenarioId: "scenario-1",
-        label: "Adres WWW",
-        assistantMessage:
-          "Witaj! Podaj adres strony internetowej do analizy marketingowej:",
-        contextPath: "primaryWebAnalysing",
+        label: "Adres strony WWW",
+        assistantMessage: "Witaj! Podaj adres strony internetowej do analizy marketingowej:",
+        contextPath: "web.url",
         templateId: "form-step",
         attrs: {
-          formSchemaPath: "formSchemas.websiteForm",
+          formSchemaPath: "schemas.form.website",
         },
+        metadata: {
+          description: "Pobiera od użytkownika adres strony do analizy"
+        }
       },
+      
+      // Krok 2: Analiza strony przez AI
       {
-        id: "ai-analysis-node",
+        id: "website-ai-analysis",
         scenarioId: "scenario-1",
         label: "Analiza AI",
-        contextPath: "primaryWebAnalysing",
+        contextPath: "web.analysis",
         templateId: "llm-query",
         attrs: {
           autoStart: true,   
-          llmSchemaPath: "llmSchemas.webAnalysing",
+          llmSchemaPath: "schemas.llm.webAnalysis",
           includeSystemMessage: true,
-          initialUserMessage: "Przeanalizuj adres www {{primaryWebAnalysing.www}}. Odpowiedź wyslij jako obiekt JSON zgodnie ze schematem:",
+          initialUserMessage: "Przeanalizuj adres WWW {{web.url.url}}. Przygotuj kompleksową analizę marketingową tej strony. Odpowiedź wyślij jako obiekt JSON zgodnie ze schematem:",
         },
+        metadata: {
+          description: "Analizuje stronę internetową przy użyciu AI i generuje raport"
+        }
       },
       
-      // Nodes for Facebook campaign
+      // Krok 3: Ustawienia kampanii Facebook
       {
-        id: "fb-campaign-settings-node",
+        id: "campaign-settings-form",
         scenarioId: "scenario-1",
-        label: "Ustawienia Kampanii Facebook",
+        label: "Ustawienia kampanii",
         assistantMessage: "Teraz przygotujmy kampanię reklamową na Facebook. Proszę uzupełnić podstawowe ustawienia kampanii:",
-        contextPath: "fbCampaign.settings",
+        contextPath: "campaign.settings",
         templateId: "form-step",
         attrs: {
-          formSchemaPath: "formSchemas.fbCampaignSettings",
+          formSchemaPath: "schemas.form.campaignSettings",
         },
+        metadata: {
+          description: "Zbiera podstawowe parametry kampanii reklamowej"
+        }
       },
+      
+      // Krok 4: Generowanie treści kampanii przez AI
       {
-        id: "fb-campaign-ai-content-node",
+        id: "campaign-content-generation",
         scenarioId: "scenario-1",
-        label: "Przygotowanie treści kampanii",
-        contextPath: "fbCampaign.content",
+        label: "Treść kampanii",
+        contextPath: "campaign.content",
         templateId: "llm-query",
         attrs: {
           autoStart: true,
-          llmSchemaPath: "llmSchemas.fbCampaignContent",
+          llmSchemaPath: "schemas.llm.campaignContent",
           includeSystemMessage: true,
-          initialUserMessage: "Na podstawie analizy strony {{primaryWebAnalysing.www}} oraz ustawień kampanii (cel: {{fbCampaign.settings.cel}}, budżet: {{fbCampaign.settings.budżet}} PLN, czas trwania: {{fbCampaign.settings.czas_trwania}} dni), przygotuj treść reklamy na Facebook. Odpowiedź wyślij jako obiekt JSON zgodnie ze schematem:",
+          initialUserMessage: "Na podstawie analizy strony {{web.url.url}} i jej wyników ({{web.analysis.general_description}}, branża: {{web.analysis.industry}}, grupa docelowa: {{web.analysis.target_audience}}) oraz ustawień kampanii (cel: {{campaign.settings.goal}}, budżet: {{campaign.settings.budget}} PLN, czas trwania: {{campaign.settings.duration}} dni), przygotuj treść reklamy na Facebook. Odpowiedź wyślij jako obiekt JSON zgodnie ze schematem:",
         },
+        metadata: {
+          description: "Generuje optymalne treści reklamowe na podstawie analizy i parametrów"
+        }
       },
+      
+      // Krok 5: Podsumowanie kampanii
       {
-        id: "fb-campaign-preview-node",
+        id: "campaign-summary",
         scenarioId: "scenario-1",
-        label: "Podgląd Kampanii Facebook",
-        assistantMessage: "Oto podgląd Twojej kampanii reklamowej na Facebook. Możesz zaakceptować lub wrócić do poprzednich kroków, aby wprowadzić zmiany.",
-        contextPath: "fbCampaign",
+        label: "Podsumowanie kampanii",
+        contextPath: "campaign.summary",
+        templateId: "llm-query",
+        attrs: {
+          autoStart: true,
+          llmSchemaPath: "schemas.llm.campaignSummary",
+          includeSystemMessage: true,
+          initialUserMessage: "Przygotuj podsumowanie kampanii reklamowej dla strony {{web.url.url}}. Uwzględnij analizę strony, ustawienia kampanii (cel: {{campaign.settings.goal}}, budżet: {{campaign.settings.budget}} PLN) oraz wygenerowane treści kampanii. Odpowiedź wyślij jako obiekt JSON zgodnie ze schematem:",
+        },
+        metadata: {
+          description: "Tworzy kompleksowe podsumowanie i prognozę efektów kampanii"
+        }
+      },
+      
+      // Krok 6: Wizualny podgląd kampanii
+      {
+        id: "campaign-preview",
+        scenarioId: "scenario-1",
+        label: "Podgląd kampanii",
+        assistantMessage: "Oto podgląd Twojej kampanii reklamowej na Facebook. Przeanalizuj wszystkie elementy kampanii i sprawdź, czy wszystko jest zgodne z Twoimi oczekiwaniami.",
+        contextPath: "campaign",
         templateId: "fb-campaign-preview",
+        metadata: {
+          description: "Wyświetla wizualny podgląd całej kampanii reklamowej"
+        }
       }
     ],
     systemMessage:
-      "Jesteś w roli twórcy strategii marketingowej. Używamy języka polskiego."
+      "Jesteś doświadczonym specjalistą ds. marketingu internetowego ze specjalizacją w reklamach Facebook. Używamy języka polskiego. Twoje analizy są zawsze oparte na najlepszych praktykach marketingowych."
   };
 }

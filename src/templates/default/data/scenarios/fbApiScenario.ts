@@ -7,70 +7,96 @@ export function getFbApiScenario(): Scenario {
     name: "Implementacja i Monitoring Kampanii Facebook API",
     description: "Wdrożenie przygotowanej kampanii przez Facebook Marketing API i analiza wyników",
     nodes: [
+      // Krok 1: Integracja z API
       {
-        id: "fb-api-integration-node",
+        id: "campaign-api-integration",
         scenarioId: "scenario-2",
-        label: "Integracja z Facebook API",
+        label: "Integracja z API",
         assistantMessage: 
           "Teraz zaimplementujemy przygotowaną wcześniej kampanię za pomocą Facebook Marketing API. " +
-          "Wymagane są dane uwierzytelniające: token dostępu do API oraz ID konta reklamowego. " +
-          "Wprowadź poniższe dane, aby kontynuować:",
-        contextPath: "fbCampaignApi",
+          "Wymagane są dane uwierzytelniające: token dostępu do API oraz ID konta reklamowego.",
+        contextPath: "campaign.api",
         templateId: "fb-api-integration",
+        metadata: {
+          description: "Łączy się z Facebook Marketing API i wdraża kampanię"
+        }
       },
+      
+      // Krok 2: Optymalizacje kampanii
       {
-        id: "campaign-optimizations-node",
+        id: "campaign-optimizations",
         scenarioId: "scenario-2",
-        label: "Optymalizacje Kampanii",
+        label: "Optymalizacje",
         assistantMessage: 
           "Na podstawie danych z implementacji kampanii możemy zaproponować kilka optymalizacji. " +
           "Wybierz, które z poniższych optymalizacji chcesz zastosować:",
-        contextPath: "fbCampaignOptimizations",
+        contextPath: "campaign.optimizations",
         templateId: "form-step",
         attrs: {
-          formSchemaPath: "formSchemas.fbCampaignOptimizations",
+          formSchemaPath: "schemas.form.campaignOptimizations",
         },
+        metadata: {
+          description: "Pozwala wybrać optymalizacje dla kampanii reklamowej"
+        }
       },
+      
+      // Krok 3: Statystyki kampanii
       {
-        id: "campaign-stats-node",
+        id: "campaign-statistics",
         scenarioId: "scenario-2",
-        label: "Statystyki Kampanii",
+        label: "Statystyki",
         assistantMessage: 
           "Oto statystyki Twojej kampanii reklamowej. Możesz analizować wyniki dla różnych okresów czasowych " +
           "i sprawdzić kluczowe wskaźniki efektywności.",
-        contextPath: "fbCampaignStats",
+        contextPath: "campaign.stats",
         templateId: "fb-campaign-stats",
+        metadata: {
+          description: "Wyświetla aktualne statystyki kampanii z różnych okresów"
+        }
       },
+      
+      // Krok 4: Analiza AI
       {
-        id: "campaign-summary-node",
+        id: "campaign-analysis",
         scenarioId: "scenario-2",
-        label: "Przygotowanie Analizy",
+        label: "Analiza AI",
         assistantMessage: 
-          "Na podstawie zgromadzonych danych przygotowuję analizę kampanii. " +
+          "Na podstawie zgromadzonych danych przygotowuję kompleksową analizę kampanii. " +
           "Proszę czekać...",
-        contextPath: "fbCampaignSummary",
+        contextPath: "campaign.summary",
         templateId: "llm-query",
         attrs: {
           autoStart: true,
           includeSystemMessage: true,
+          llmSchemaPath: "schemas.llm.campaignSummary",
           initialUserMessage: 
-            "Przygotuj podsumowanie kampanii Facebook na podstawie analizy statystyk. " +
-            "Uwzględnij wskaźniki efektywności kampanii z okresu {{fbCampaignStats.timeframe}}, " +
-            "a także zastosowane optymalizacje. Przedstaw wnioski i rekomendacje na przyszłość."
+            "Przygotuj podsumowanie kampanii Facebook na podstawie statystyk. " +
+            "Uwzględnij wskaźniki efektywności kampanii z okresu {{campaign.stats.timeframe}}, " +
+            "a także zastosowane optymalizacje: {{campaign.optimizations.increaseBudget}}, " +
+            "{{campaign.optimizations.expandTargeting}}, {{campaign.optimizations.changeCta}}. " +
+            "Przedstaw wnioski i rekomendacje na przyszłość."
+        },
+        metadata: {
+          description: "Analizuje kampanię przy użyciu AI i generuje rekomendacje"
         }
       },
+      
+      // Krok 5: Wizualizacja podsumowania
       {
-        id: "final-summary-node",
+        id: "campaign-summary-visualization",
         scenarioId: "scenario-2",
-        label: "Podsumowanie Kampanii",
+        label: "Podsumowanie",
         assistantMessage: 
           "Oto kompleksowe podsumowanie Twojej kampanii Facebook. " +
           "Analizujemy wyniki, wpływ zastosowanych optymalizacji oraz przedstawiamy rekomendacje na przyszłość.",
-        contextPath: "fbCampaignFinal",
+        contextPath: "campaign",
         templateId: "fb-campaign-summary",
+        metadata: {
+          description: "Wizualizuje kompleksowe podsumowanie kampanii i jej wyników"
+        }
       }
     ],
     systemMessage: 
-      "Jesteś ekspertem ds. marketingu internetowego ze specjalizacją w kampaniach Facebook Ads. Używamy języka polskiego."
+      "Jesteś ekspertem ds. marketingu internetowego ze specjalizacją w kampaniach Facebook Ads. Używamy języka polskiego. Potrafisz szczegółowo analizować dane kampanii i rekomendować optymalizacje dla najlepszych wyników."
   };
 }
