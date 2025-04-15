@@ -50,6 +50,9 @@ const QuizInteractionTemplate: React.FC<FlowStepProps> = ({
       const shuffled = [...originalQuestions];
       setShuffledQuestions(shuffled);
       
+      // Dla kompatybilności ze starymi odwołaniami
+      console.log('Initializing shuffledQuestions with length:', shuffled.length);
+      
       // Przygotowanie pomieszanych odpowiedzi dla każdego pytania
       const answersMap: Record<number, string[]> = {};
       
@@ -198,6 +201,9 @@ const QuizInteractionTemplate: React.FC<FlowStepProps> = ({
 
   // Obsługa renderowania pytania
   const renderQuestion = () => {
+    // Dla kompatybilności ze starym kodem
+    const questions = shuffledQuestions;
+    
     if (!shuffledQuestions.length) {
       return <p className="text-gray-500 italic">Brak dostępnych pytań</p>;
     }
@@ -262,7 +268,7 @@ const QuizInteractionTemplate: React.FC<FlowStepProps> = ({
       <div className="space-y-4">
         <div className="flex justify-between">
           <span className="text-sm font-medium text-gray-500">
-            Pytanie {currentQuestion + 1} z {questions.length}
+            Pytanie {currentQuestion + 1} z {shuffledQuestions.length}
           </span>
           
           <span className="text-sm font-medium text-gray-500">
