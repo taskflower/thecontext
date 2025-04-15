@@ -1,5 +1,5 @@
 // src/templates/education/flowSteps/ContentDisplayFlowStep.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FlowStepProps } from 'template-registry-module';
 import { useAppStore } from '@/lib/store';
 import { useIndexedDB } from '@/hooks/useIndexedDB';
@@ -17,19 +17,97 @@ const ContentDisplayFlowStep: React.FC<FlowStepProps> = ({
   onPrevious,
   isLastNode
 }) => {
-  // Extract content type and data paths from node attributes
-  const contentType = node.attrs?.contentType || 'lesson'; // 'lesson' or 'project'
-  const contentPath = node.attrs?.contentPath || 'generatedContent';
-  const contextPath = node.attrs?.contextPath || 'learningSession';
-  const additionalContextPath = node.attrs?.additionalContextPath;
-  
   // Get store functions
   const processTemplate = useAppStore(state => state.processTemplate);
   const getContextPath = useAppStore(state => state.getContextPath);
   const { saveItem } = useIndexedDB();
   
+  // Extract content type and data paths from node attributes
+  let contentType = node.attrs?.contentType || 'lesson'; // 'lesson' or 'project'
+  
+  // Konwersja wartości z handlebarów, które mogą przychodzić jako string 
+  // z template markupem, np. "{{savedItems.selectedItem.type}}"
+  if (typeof contentType === 'string' && contentType.includes('{{')) {
+    console.log('ContentType contains handlebars, processing:', contentType);
+    contentType = processTemplate(contentType) || 'lesson';
+    console.log('After processing:', contentType);
+  }
+  
+  // Dodatkowo sprawdź na podstawie wyselekcjonowanego elementu
+  const selectedItem = getContextPath('savedItems.selectedItem');
+  if (selectedItem && selectedItem.type) {
+    contentType = selectedItem.type;
+    console.log('ContentType from selectedItem:', contentType);
+  }
+  
+  // Logowanie dla diagnostyki
+  console.log('Using contentType:', contentType);
+  
+  const contentPath = node.attrs?.contentPath || 'generatedContent';
+  const contextPath = node.attrs?.contextPath || 'learningSession';
+  const additionalContextPath = node.attrs?.additionalContextPath;
+  
+  // Helper function to normalize content data
+  const normalizeContent = (rawContent: any, type: string) => {
+    if (!rawContent) return {};
+    
+    const normalized = {...rawContent};
+    
+    // Dla projektów sprawdź czy klucze są w poprawnym formacie
+    if (type === 'project') {
+      // Mapuj różne możliwe klucze na standardowe klucze projektu
+      const keyMappings: Record<string, string> = {
+        // Tytuł
+        'tytul': 'tytul_projektu',
+        'tytuł': 'tytul_projektu',
+        'title': 'tytul_projektu',
+        
+        // Opis
+        'opis_projektu': 'opis',
+        'description': 'opis',
+        
+        // Cele
+        'cele_nauczania': 'cele',
+        'cele_projektu': 'cele',
+        'goals': 'cele',
+        
+        // Etapy
+        'etapy_realizacji': 'etapy',
+        'phases': 'etapy',
+        'steps': 'etapy',
+        
+        // Wskazówki
+        'tips': 'wskazowki',
+        
+        // Kryteria oceny
+        'kryteria': 'kryteria_oceny',
+        'evaluation': 'kryteria_oceny',
+        
+        // Materiały
+        'materialy': 'materialy_dodatkowe',
+        'resources': 'materialy_dodatkowe'
+      };
+      
+      // Przepisz klucze jeśli istnieją
+      Object.entries(keyMappings).forEach(([source, target]) => {
+        if (normalized[source] !== undefined && normalized[target] === undefined) {
+          console.log(`Mapping project key from ${source} to ${target}`);
+          normalized[target] = normalized[source];
+        }
+      });
+      
+      // Sprawdź czy mamy podstawowe klucze
+      if (!normalized.tytul_projektu && normalized.tytul) {
+        normalized.tytul_projektu = normalized.tytul;
+      }
+    }
+    
+    return normalized;
+  };
+  
   // Get content and context data
-  const content = getContextPath(contentPath) || {};
+  const rawContent = getContextPath(contentPath) || {};
+  const content = normalizeContent(rawContent, contentType);
   const context = getContextPath(contextPath) || {};
   const additionalContext = additionalContextPath 
     ? getContextPath(additionalContextPath) || {}
@@ -40,14 +118,45 @@ const ContentDisplayFlowStep: React.FC<FlowStepProps> = ({
   const fields = contentFields[contentType] || contentFields.lesson;
   const ui = uiSettings[contentType] || uiSettings.lesson;
   
+  // Dodatkowe logowanie
+  console.log('Content configuration:', {
+    contentType,
+    tabs,
+    tabsFromConfig: tabConfigs[contentType],
+    fields,
+    fieldsFromConfig: contentFields[contentType],
+    ui,
+    uiFromConfig: uiSettings[contentType]
+  });
+  
   // Component state
   const [activeTab, setActiveTab] = useState<string>(tabs[0]?.id || '');
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  
+  // Effect to update active tab when content type changes
+  useEffect(() => {
+    // Upewnij się, że activeTab jest zgodny z dostępnymi zakładkami dla danego typu
+    if (tabs.length > 0 && !tabs.some(tab => tab.id === activeTab)) {
+      console.log(`Active tab ${activeTab} not found in tabs for ${contentType}, resetting to ${tabs[0]?.id}`);
+      setActiveTab(tabs[0]?.id || '');
+    }
+  }, [contentType, tabs, activeTab]);
   
   // Process the assistant message
   const processedMessage = node.assistantMessage 
     ? processTemplate(node.assistantMessage) 
     : '';
+    
+  // Debug data - wyświetl w konsoli dane potrzebne do debugowania
+  if (contentType === 'project') {
+    console.log('ContentDisplayFlowStep - Project data:', {
+      contentType,
+      content,
+      context,
+      additionalContext,
+      projectWork: getContextPath('projectWork')
+    });
+  }
 
   // Handle completion
   const handleSubmit = () => {
@@ -92,8 +201,40 @@ const ContentDisplayFlowStep: React.FC<FlowStepProps> = ({
       
       if (ui.saveType === 'quiz' && quizContent) {
         itemToSave.content.quizContent = quizContent;
-      } else if (ui.saveType === 'project' && projectWork) {
-        itemToSave.content.projectWork = projectWork;
+      } else if (ui.saveType === 'project') {
+        // Dla projektów, zawsze zapisuj dane projektWork niezależnie czy istnieją
+        // Synchronizuj z additionalContext w razie potrzeby
+        const projectWorkData = projectWork || {};
+        
+        // Jeśli nie mamy danych w projectWork, ale mamy w additionalContext, użyj ich
+        if (additionalContext) {
+          if (!projectWorkData.projectType && additionalContext.projectType) {
+            projectWorkData.projectType = additionalContext.projectType;
+          }
+          if (!projectWorkData.deadlineWeeks && additionalContext.deadlineWeeks) {
+            projectWorkData.deadlineWeeks = additionalContext.deadlineWeeks;
+          }
+        }
+        
+        // Upewnij się, że mamy podstawowe wartości
+        if (!projectWorkData.projectType) {
+          projectWorkData.projectType = 'Projekt';
+        }
+        if (!projectWorkData.deadlineWeeks) {
+          projectWorkData.deadlineWeeks = 2;
+        }
+        
+        // Zapisz do itemToSave
+        itemToSave.content.projectWork = projectWorkData;
+        
+        // Synchronizuj także z additionalContext dla kompatybilności wstecznej
+        itemToSave.content.additionalContext = {
+          ...additionalContext,
+          projectType: projectWorkData.projectType,
+          deadlineWeeks: projectWorkData.deadlineWeeks
+        };
+        
+        console.log('Saving project with data:', projectWorkData);
       }
       
       await saveItem(itemToSave);
@@ -110,9 +251,13 @@ const ContentDisplayFlowStep: React.FC<FlowStepProps> = ({
   // Render tab content
   const renderTabContent = () => {
     const fieldKey = fields.tabs[activeTab as keyof typeof fields.tabs];
-    if (!fieldKey) return <p>Tab content not configured.</p>;
+    if (!fieldKey) {
+      console.error(`Tab ${activeTab} not found in fields.tabs:`, fields.tabs);
+      return <p>Tab content not configured.</p>;
+    }
     
     const tabContent = content[fieldKey];
+    console.log(`Rendering tab ${activeTab} with fieldKey ${fieldKey}, content:`, tabContent);
     
     // Handle different content based on tab and content type
     switch (activeTab) {
@@ -211,8 +356,50 @@ const ContentDisplayFlowStep: React.FC<FlowStepProps> = ({
     );
   };
 
+  // Debug function
+  const debugAllData = () => {
+    console.log('======= DEBUG ALL DATA =======');
+    console.log('Content Type:', contentType);
+    console.log('Content:', content);
+    console.log('Raw Content:', rawContent);
+    console.log('Context:', context);
+    console.log('Additional Context:', additionalContext);
+    console.log('ProjectWork:', getContextPath('projectWork'));
+    console.log('Tabs Configuration:', tabs);
+    console.log('Fields Configuration:', fields);
+    console.log('UI Configuration:', ui);
+    console.log('Active Tab:', activeTab);
+    console.log('==============================');
+    
+    // Pokaż wszystkie stany dla ułatwienia debugowania
+    const allState = {
+      context: getContextPath(),
+      contentType,
+      content,
+      rawContent,
+      additionalContext,
+      projectWork: getContextPath('projectWork'),
+      tabs,
+      fields,
+      activeTab
+    };
+    
+    alert('Debug data printed to console. Check browser console.');
+    console.table(allState);
+  };
+  
   return (
     <div className="space-y-4">
+      {/* Debug button */}
+      <div className="text-right">
+        <button 
+          onClick={debugAllData}
+          className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded"
+        >
+          Debug
+        </button>
+      </div>
+      
       {/* Assistant message */}
       {processedMessage && (
         <div className="p-4 bg-blue-50 rounded-lg">
@@ -227,13 +414,26 @@ const ContentDisplayFlowStep: React.FC<FlowStepProps> = ({
         </h2>
         
         {/* Additional info for projects */}
-        {contentType === 'project' && additionalContext && (
+        {contentType === 'project' && (
           <div className="flex space-x-3 mt-2 text-sm">
             <div className="bg-white/20 px-2 py-1 rounded-full">
-              <SafeContent content={additionalContext.projectType || 'Projekt'} />
+              {/* Najpierw sprawdź projectWork, potem additionalContext jako fallback */}
+              <SafeContent 
+                content={
+                  (getContextPath('projectWork.projectType')) || 
+                  (additionalContext && additionalContext.projectType) || 
+                  'Projekt'
+                } 
+              />
             </div>
             <div className="bg-white/20 px-2 py-1 rounded-full">
-              <SafeContent content={`${additionalContext.deadlineWeeks || 2} tygodnie`} />
+              <SafeContent 
+                content={`${
+                  (getContextPath('projectWork.deadlineWeeks')) || 
+                  (additionalContext && additionalContext.deadlineWeeks) || 
+                  2
+                } tygodnie`} 
+              />
             </div>
           </div>
         )}

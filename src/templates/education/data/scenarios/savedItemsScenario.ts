@@ -30,8 +30,13 @@ export function getSavedItemsScenario(): Scenario {
         templateId: "content-display",
         attrs: {
           contentPath: "generatedContent",
+          // Jawnie określamy typ zawartości na podstawie wybranego elementu
           contentType: "{{savedItems.selectedItem.type}}",
-          additionalContextPath: "savedItems.selectedItem.content.additionalContext"
+          // Dodatkowe dane kontekstowe
+          additionalContextPath: "savedItems.selectedItem.content.additionalContext",
+          // Dla projektów upewniamy się, że przekazujemy odpowiedni kontekst
+          projectTypeKey: "projectWork.projectType",
+          deadlineWeeksKey: "projectWork.deadlineWeeks"
         },
       }
     ],

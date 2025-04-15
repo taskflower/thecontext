@@ -147,6 +147,34 @@ const SavedItemsListFlowStep: React.FC<FlowStepProps> = ({
           updateByContextPath(key, value);
         });
       }
+      
+      // 3b. Dla projektów upewnij się, że mamy te same informacje w additionalContext i projectWork
+      if (item.type === 'project') {
+        console.log('Loading project, ensuring projectWork is set properly');
+        // Upewnij się, że mamy projectWork nawet jeśli nie było zapisane (starsze wersje)
+        const projectWork = item.content.projectWork || {};
+        
+        // Synchronizuj z additionalContext dla kompatybilności
+        if (item.content.additionalContext) {
+          if (item.content.additionalContext.projectType) {
+            projectWork.projectType = item.content.additionalContext.projectType;
+          }
+          if (item.content.additionalContext.deadlineWeeks) {
+            projectWork.deadlineWeeks = item.content.additionalContext.deadlineWeeks;
+          }
+        }
+        
+        // Upewnij się, że projectWork ma podstawowe wartości
+        if (!projectWork.projectType) {
+          projectWork.projectType = 'Projekt';
+        }
+        if (!projectWork.deadlineWeeks) {
+          projectWork.deadlineWeeks = 2;
+        }
+        
+        // Zapisz projectWork do kontekstu
+        updateByContextPath('projectWork', projectWork);
+      }
 
       // 4. Kontekst specyficzny dla typów zawartości
       if (item.type === 'quiz' && item.content.quizContent) {

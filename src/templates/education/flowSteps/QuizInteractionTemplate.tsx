@@ -1,5 +1,5 @@
 // src/templates/education/flowSteps/QuizInteractionTemplate.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FlowStepProps } from 'template-registry-module';
 import { useAppStore } from '@/lib/store';
 import { useIndexedDB } from '@/hooks/useIndexedDB';
@@ -17,6 +17,8 @@ const QuizInteractionTemplate: React.FC<FlowStepProps> = ({
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
   const [showResults, setShowResults] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [shuffledQuestions, setShuffledQuestions] = useState<any[]>([]);
+  const [shuffledAnswers, setShuffledAnswers] = useState<Record<number, string[]>>({});
 
   // Pobierz store i dane kontekstowe
   const processTemplate = useAppStore(state => state.processTemplate);
@@ -27,9 +29,59 @@ const QuizInteractionTemplate: React.FC<FlowStepProps> = ({
 
   // Pobierz wygenerowany quiz
   const quizContent = getContextPath('generatedContent') || {};
-  const questions = Array.isArray(quizContent.pytania) ? quizContent.pytania : [];
+  const originalQuestions = Array.isArray(quizContent.pytania) ? quizContent.pytania : [];
   const includeExplanations = getContextPath('quizResults.includeExplanations') === 'Tak';
   const learningSession = getContextPath('learningSession') || {};
+  
+  // Funkcja do mieszania tablicy
+  const shuffleArray = <T extends unknown>(array: T[]): T[] => {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+  };
+  
+  // Inicjalizacja pomieszanych pytań i odpowiedzi
+  useEffect(() => {
+    if (originalQuestions.length > 0 && shuffledQuestions.length === 0) {
+      // Mieszamy pytania tylko jeśli jeszcze nie zostały pomieszane
+      const shuffled = [...originalQuestions];
+      setShuffledQuestions(shuffled);
+      
+      // Przygotowanie pomieszanych odpowiedzi dla każdego pytania
+      const answersMap: Record<number, string[]> = {};
+      
+      shuffled.forEach((question, index) => {
+        if (question && typeof question === 'object') {
+          const correctAnswer = question.poprawna_odpowiedz;
+          let options: string[] = [];
+          
+          if (Array.isArray(question.odpowiedzi)) {
+            options = question.odpowiedzi.map((a:any) => typeof a === 'string' ? a : String(a));
+            
+            // Sprawdź czy poprawna odpowiedź znajduje się wśród opcji
+            if (correctAnswer && !options.includes(correctAnswer)) {
+              options.push(correctAnswer);
+            }
+            
+            // Usuń puste odpowiedzi
+            options = options.filter(a => a && a.trim() !== '');
+          } else if (correctAnswer) {
+            options = [correctAnswer, 'Inna odpowiedź'];
+          }
+          
+          // Mieszamy odpowiedzi
+          if (options.length > 0) {
+            answersMap[index] = shuffleArray(options);
+          }
+        }
+      });
+      
+      setShuffledAnswers(answersMap);
+    }
+  }, [originalQuestions, shuffledQuestions.length]);
   
   // Przetwórz wiadomość asystenta
   const processedMessage = node.assistantMessage 
@@ -38,9 +90,9 @@ const QuizInteractionTemplate: React.FC<FlowStepProps> = ({
 
   // Oblicz wynik quizu
   const calculateScore = () => {
-    if (!questions.length) return { correct: 0, total: 0, percentage: 0 };
+    if (!shuffledQuestions.length) return { correct: 0, total: 0, percentage: 0 };
     
-    const correctAnswers = questions.filter((q: any, index: number) => {
+    const correctAnswers = shuffledQuestions.filter((q: any, index: number) => {
       const userAnswer = userAnswers[index];
       const correctAnswer = q && typeof q === 'object' ? q.poprawna_odpowiedz : null;
       return userAnswer === correctAnswer;
@@ -48,8 +100,8 @@ const QuizInteractionTemplate: React.FC<FlowStepProps> = ({
     
     return {
       correct: correctAnswers,
-      total: questions.length,
-      percentage: Math.round((correctAnswers / questions.length) * 100)
+      total: shuffledQuestions.length,
+      percentage: Math.round((correctAnswers / shuffledQuestions.length) * 100)
     };
   };
 
@@ -119,7 +171,7 @@ const QuizInteractionTemplate: React.FC<FlowStepProps> = ({
 
   // Obsługa nawigacji między pytaniami
   const goToNextQuestion = () => {
-    if (currentQuestion < questions.length - 1) {
+    if (currentQuestion < shuffledQuestions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     }
   };
@@ -146,11 +198,11 @@ const QuizInteractionTemplate: React.FC<FlowStepProps> = ({
 
   // Obsługa renderowania pytania
   const renderQuestion = () => {
-    if (!questions.length) {
+    if (!shuffledQuestions.length) {
       return <p className="text-gray-500 italic">Brak dostępnych pytań</p>;
     }
 
-    const question = questions[currentQuestion];
+    const question = shuffledQuestions[currentQuestion];
     if (!question || typeof question !== 'object') {
       return <p className="text-gray-500 italic">Nieprawidłowy format pytania</p>;
     }
@@ -164,14 +216,46 @@ const QuizInteractionTemplate: React.FC<FlowStepProps> = ({
     const isCorrect = showResults && userAnswer === correctAnswer;
     const isIncorrect = showResults && userAnswer && userAnswer !== correctAnswer;
 
-    // Bezpieczne pobieranie odpowiedzi
-    let answers: string[] = [];
-    if (question.odpowiedzi) {
-      if (Array.isArray(question.odpowiedzi)) {
-        answers = question.odpowiedzi.map((a:any) => typeof a === 'string' ? a : String(a));
-      } else {
-        console.warn('Odpowiedzi nie są tablicą:', question.odpowiedzi);
+    // Użyj pomieszanych odpowiedzi przygotowanych wcześniej
+    let answers: string[] = shuffledAnswers[currentQuestion] || [];
+    
+    // Awaryjne generowanie odpowiedzi, jeśli z jakiegoś powodu nie mamy ich w stanie
+    if (answers.length === 0) {
+      if (question.odpowiedzi) {
+        if (Array.isArray(question.odpowiedzi)) {
+          // Upewnij się, że wszystkie odpowiedzi są stringami
+          answers = question.odpowiedzi.map((a:any) => typeof a === 'string' ? a : String(a));
+          
+          // Sprawdź czy poprawna odpowiedź znajduje się wśród opcji
+          if (correctAnswer && !answers.includes(correctAnswer)) {
+            console.warn('Poprawna odpowiedź nie znajduje się na liście odpowiedzi, dodaję ją');
+            answers.push(correctAnswer);
+          }
+          
+          // Usuń puste odpowiedzi
+          answers = answers.filter(a => a && a.trim() !== '');
+        } else if (typeof question.odpowiedzi === 'string') {
+          // W przypadku gdy odpowiedzi to pojedynczy string, próbuj podzielić po przecinkach
+          answers = question.odpowiedzi.split(',').map(a => a.trim());
+          console.warn('Odpowiedzi były stringiem, przekształcono na tablicę:', answers);
+        }
+      } 
+      
+      // Jeśli nadal nie mamy odpowiedzi, ale mamy poprawną odpowiedź
+      if (answers.length === 0 && correctAnswer) {
+        answers = [correctAnswer];
+        // Dodajemy fałszywą odpowiedź, jeśli mamy tylko poprawną
+        if (questionType === 'wielokrotny wybór' || questionType === 'Wybór') {
+          answers.push('Inna odpowiedź');
+        }
+        console.warn('Brak odpowiedzi, wygenerowano podstawowe opcje');
       }
+      
+      // Uaktualnij shuffledAnswers, aby zachować spójność
+      setShuffledAnswers({
+        ...shuffledAnswers,
+        [currentQuestion]: answers
+      });
     }
 
     return (
@@ -325,7 +409,7 @@ const QuizInteractionTemplate: React.FC<FlowStepProps> = ({
           </button>
           
           <div className="flex space-x-1">
-            {questions.map((_, idx:any) => (
+            {shuffledQuestions.map((_, idx:any) => (
               <div 
                 key={idx}
                 onClick={() => setCurrentQuestion(idx)}
@@ -342,7 +426,7 @@ const QuizInteractionTemplate: React.FC<FlowStepProps> = ({
           
           <button
             onClick={goToNextQuestion}
-            disabled={currentQuestion === questions.length - 1}
+            disabled={currentQuestion === shuffledQuestions.length - 1}
             className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
           >
             Następne
@@ -364,7 +448,7 @@ const QuizInteractionTemplate: React.FC<FlowStepProps> = ({
           
           <button
             onClick={handleSubmitQuiz}
-            disabled={Object.keys(userAnswers).length < questions.length && !showResults}
+            disabled={Object.keys(userAnswers).length < shuffledQuestions.length && !showResults}
             className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-300"
           >
             {showResults ? (isLastNode ? 'Zakończ' : 'Kontynuuj') : 'Sprawdź wyniki'}
