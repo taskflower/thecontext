@@ -25,7 +25,7 @@ const DebugPanel: React.FC = () => {
   const issues = ContextValidator.validateScenario(currentScenario, flowSteps);
 
   return (
-    <div className="text-xs fixed bottom-4 right-4 z-50 flex flex-row items-end space-x-4 left-4 top-0">
+    <div className="text-xs fixed bottom-4 right-4 z-50 flex flex-row items-end space-x-4  top-0">
       {/* Step details - additional window */}
       {isOpen && selectedStep !== null && (
         <StepDetails 

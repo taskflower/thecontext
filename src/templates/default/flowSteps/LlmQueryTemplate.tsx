@@ -49,6 +49,7 @@ export const LlmQueryTemplate: React.FC<FlowStepProps> = ({
   node,
   onSubmit,
   onPrevious,
+  isLastNode,
 }) => {
   // Input validation
   if (!node) {
@@ -198,6 +199,16 @@ export const LlmQueryTemplate: React.FC<FlowStepProps> = ({
         >
           Wstecz
         </Button>
+        
+        {!autoStart && (
+          <Button
+            onClick={handleSubmit}
+            disabled={isLoading || isStreaming || !userInput.trim()}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            {isLastNode ? "Zakończ" : "Dalej"}
+          </Button>
+        )}
       </div>
     </div>
   );
