@@ -34,7 +34,7 @@ export function getMarketingScenario(): Scenario {
           autoStart: true,   
           llmSchemaPath: "schemas.llm.webAnalysis",
           includeSystemMessage: true,
-          initialUserMessage: "Przeanalizuj adres WWW {{web.url.url}}. Przygotuj kompleksową analizę marketingową tej strony. Odpowiedź wyślij jako obiekt JSON zgodnie ze schematem:",
+          initialUserMessage: "Przeanalizuj adres WWW {{web.url}}. Przygotuj kompleksową analizę marketingową tej strony. Odpowiedź wyślij jako obiekt JSON zgodnie ze schematem:",
         },
         metadata: {
           description: "Analizuje stronę internetową przy użyciu AI i generuje raport"
@@ -68,7 +68,7 @@ export function getMarketingScenario(): Scenario {
           autoStart: true,
           llmSchemaPath: "schemas.llm.campaignContent",
           includeSystemMessage: true,
-          initialUserMessage: "Na podstawie analizy strony {{web.url.url}} i jej wyników ({{web.analysis.general_description}}, branża: {{web.analysis.industry}}, grupa docelowa: {{web.analysis.target_audience}}) oraz ustawień kampanii (cel: {{campaign.settings.goal}}, budżet: {{campaign.settings.budget}} PLN, czas trwania: {{campaign.settings.duration}} dni), przygotuj treść reklamy na Facebook. Odpowiedź wyślij jako obiekt JSON zgodnie ze schematem:",
+          initialUserMessage: "Na podstawie analizy strony {{web.url}} i jej wyników ({{web.analysis.general_description}}, branża: {{web.analysis.industry}}, grupa docelowa: {{web.analysis.target_audience}}) oraz ustawień kampanii (cel: {{campaign.settings.goal}}, budżet: {{campaign.settings.budget}} PLN, czas trwania: {{campaign.settings.duration}} dni), przygotuj treść reklamy na Facebook. Odpowiedź wyślij jako obiekt JSON zgodnie ze schematem:",
         },
         metadata: {
           description: "Generuje optymalne treści reklamowe na podstawie analizy i parametrów"
@@ -86,7 +86,7 @@ export function getMarketingScenario(): Scenario {
           autoStart: true,
           llmSchemaPath: "schemas.llm.campaignSummary",
           includeSystemMessage: true,
-          initialUserMessage: "Przygotuj podsumowanie kampanii reklamowej dla strony {{web.url.url}}. Uwzględnij analizę strony, ustawienia kampanii (cel: {{campaign.settings.goal}}, budżet: {{campaign.settings.budget}} PLN) oraz wygenerowane treści kampanii. Odpowiedź wyślij jako obiekt JSON zgodnie ze schematem:",
+          initialUserMessage: "Przygotuj podsumowanie kampanii reklamowej dla strony {{web.url}}. Uwzględnij analizę strony, ustawienia kampanii (cel: {{campaign.settings.goal}}, budżet: {{campaign.settings.budget}} PLN) oraz wygenerowane treści kampanii. Odpowiedź wyślij jako obiekt JSON zgodnie ze schematem:",
         },
         metadata: {
           description: "Tworzy kompleksowe podsumowanie i prognozę efektów kampanii"
