@@ -23,9 +23,9 @@ const StepDetails: React.FC<StepDetailsProps> = ({ step, onClose }) => {
   const schemaInfo = getStepSchema(step);
 
   return (
-    <div className="bg-white shadow-lg border border-gray-300 rounded-lg p-4 mb-2 w-[500px] max-h-[calc(100vh-100px)] overflow-auto">
+    <div className="bg-white shadow-lg border border-gray-300 rounded-lg p-4 mb-2 w-2/3 max-h-[calc(100vh-100px)] overflow-auto">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="font-bold text-lg">{step.label || `Krok ${step.id}`}</h3>
+        <h3 className="font-bold">{step.label || `Krok ${step.id}`}</h3>
         <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
           &times;
         </button>
@@ -35,8 +35,8 @@ const StepDetails: React.FC<StepDetailsProps> = ({ step, onClose }) => {
       <div className="space-y-4">
         {/* Sekcja atrybutów */}
         <div>
-          <div className="text-xs font-medium mb-1">Atrybuty:</div>
-          <div className="bg-white border border-gray-200 rounded p-2 text-xs">
+          <div className=" font-medium mb-1">Atrybuty:</div>
+          <div className="bg-white border border-gray-200 rounded p-2 ">
             <table className="w-full">
               <tbody>
                 {step.attrs &&
@@ -68,8 +68,8 @@ const StepDetails: React.FC<StepDetailsProps> = ({ step, onClose }) => {
         {/* Sekcja wiadomości */}
         {step.assistantMessage && (
           <div>
-            <div className="text-xs font-medium mb-1">Wiadomość asystenta:</div>
-            <div className="bg-gray-50 p-2 rounded text-xs whitespace-pre-wrap">
+            <div className=" font-medium mb-1">Wiadomość asystenta:</div>
+            <div className="bg-gray-50 p-2 rounded  whitespace-pre-wrap">
               {step.assistantMessage}
             </div>
           </div>
@@ -77,14 +77,14 @@ const StepDetails: React.FC<StepDetailsProps> = ({ step, onClose }) => {
 
         {step.attrs?.initialUserMessage && (
           <div>
-            <div className="text-xs font-medium mb-1">
+            <div className=" font-medium mb-1">
               Wiadomość początkowa:
             </div>
             <TemplateVariablesChecker
                 template={step.attrs.initialUserMessage}
                 getContextPath={getContextPath}
               />
-            <div className="bg-gray-50 p-2 rounded text-xs whitespace-pre-wrap">
+            <div className="bg-gray-50 p-2 rounded  whitespace-pre-wrap">
               
             
               {step.attrs.initialUserMessage}
@@ -136,14 +136,14 @@ const TemplateVariablesChecker: React.FC<{
 
   if (missingVars.length === 0) {
     return (
-      <div className="mt-2 p-1 bg-green-50 text-green-700 text-xs rounded">
+      <div className="mt-2 p-1 bg-green-50 text-green-700  rounded">
         ✓ Wszystkie zmienne szablonu są dostępne w kontekście
       </div>
     );
   }
 
   return (
-    <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 text-xs rounded">
+    <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200  rounded">
       <p className="font-medium text-yellow-700 mb-1">
         ⚠️ Brakujące zmienne szablonu:
       </p>
@@ -183,10 +183,10 @@ const renderSchema = (schemaInfo: any) => {
 
   if (type === "form" && Array.isArray(schema)) {
     return (
-      <div className="bg-white border border-gray-200 rounded p-2 text-xs">
+      <div className="bg-white border border-gray-200 rounded p-2 ">
         <div className="flex justify-between items-center mb-1">
           <div className="font-medium">Pola formularza:</div>
-          <div className="text-xs text-blue-500">{path}</div>
+          <div className=" text-blue-500">{path}</div>
         </div>
         <table className="w-full">
           <thead className="bg-gray-50">
@@ -212,10 +212,10 @@ const renderSchema = (schemaInfo: any) => {
 
   if (type === "llm") {
     return (
-      <div className="bg-white border border-gray-200 rounded p-2 text-xs">
+      <div className="bg-white border border-gray-200 rounded p-2 ">
         <div className="flex justify-between items-center mb-1">
           <div className="font-medium">Schemat AI (dane wejsciowe):</div>
-          <div className="text-xs text-blue-500">{path}</div>
+          <div className=" text-blue-500">{path}</div>
         </div>
         <pre className="bg-gray-50 p-2 rounded overflow-x-auto text-[10px]">
           {JSON.stringify(schema, null, 2)}
@@ -263,10 +263,10 @@ const renderOutput = (step: any, getContextPath: (path: string) => any) => {
   // Renderuj dane w zależności od typu kroku
   if (step.templateId === "llm-query") {
     return (
-      <div className="bg-white border border-gray-200 rounded p-2 text-xs">
+      <div className="bg-white border border-gray-200 rounded p-2 ">
         <div className="flex justify-between items-center mb-1">
           <div className="font-medium">Dane wyjściowe AI:</div>
-          <div className="text-xs text-blue-500">{contextPath}</div>
+          <div className=" text-blue-500">{contextPath}</div>
         </div>
         <pre className="bg-purple-50 p-2 rounded overflow-x-auto max-h-[200px] text-[10px]">
           {JSON.stringify(data, null, 2)}
@@ -277,10 +277,10 @@ const renderOutput = (step: any, getContextPath: (path: string) => any) => {
 
   if (step.templateId === "form-step") {
     return (
-      <div className="bg-white border border-gray-200 rounded p-2 text-xs">
+      <div className="bg-white border border-gray-200 rounded p-2 ">
         <div className="flex justify-between items-center mb-1">
           <div className="font-medium">Dane z formularza:</div>
-          <div className="text-xs text-blue-500">{contextPath}</div>
+          <div className=" text-blue-500">{contextPath}</div>
         </div>
         <pre className="bg-green-50 p-2 rounded overflow-x-auto max-h-[200px] text-[10px]">
           {JSON.stringify(data, null, 2)}
@@ -291,10 +291,10 @@ const renderOutput = (step: any, getContextPath: (path: string) => any) => {
 
   // Domyślny sposób renderowania dla innych typów kroków
   return (
-    <div className="bg-white border border-gray-200 rounded p-2 text-xs">
+    <div className="bg-white border border-gray-200 rounded p-2 ">
       <div className="flex justify-between items-center mb-1">
         <div className="font-medium">Dane wyjściowe:</div>
-        <div className="text-xs text-blue-500">{contextPath}</div>
+        <div className=" text-blue-500">{contextPath}</div>
       </div>
       <pre className="bg-gray-50 p-2 rounded overflow-x-auto max-h-[200px] text-[10px]">
         {JSON.stringify(data, null, 2)}

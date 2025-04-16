@@ -50,20 +50,20 @@ const FlowStepsList: React.FC<FlowStepsListProps> = ({
               onClick={() => onSelectStep(index)}
             >
               <div className="flex items-center mb-1">
-                <div className="text-xl mr-2">{icon}</div>
+                <div className="mr-2">{icon}</div>
                 <div className="font-medium">
                   {step.label || `Krok ${index + 1}`}
                 </div>
-                <div className="ml-auto text-xs px-2 py-0.5 bg-gray-100 rounded-full">
+                <div className="ml-auto px-2 py-0.5 bg-gray-100 rounded-full">
                   {getTypeLabel(stepType)}
                 </div>
               </div>
 
-              <div className="text-xs text-gray-600">
+              <div className="text-gray-600">
                 {getStepDescription(step)}
               </div>
 
-              <div className="text-xs text-gray-500 mt-1">
+              <div className="text-gray-500 mt-1">
                 Ścieżka:{" "}
                 <code className="bg-gray-100 px-1 rounded font-mono">
                   {step.contextPath || "brak"}
@@ -72,7 +72,7 @@ const FlowStepsList: React.FC<FlowStepsListProps> = ({
               
               {/* Wyświetla ostrzeżenie jeśli wykryto brakujące dane kontekstowe */}
               {missingContextData && (
-                <div className="mt-2 text-xs text-yellow-600 bg-yellow-100 p-1 rounded">
+                <div className="mt-2 text-yellow-600 bg-yellow-100 p-1 rounded">
                   <span className="font-bold">⚠️ Uwaga:</span> {missingContextData}
                 </div>
               )}
