@@ -34,7 +34,7 @@ export class ContextValidator {
     // Zbierz wszystkie ścieżki kontekstowe generowane przez kroki
     flowSteps.forEach(step => {
       if (step.contextPath) {
-        contextPaths.add(step.contextPath);
+        contextPaths.add(step.contextPath.split('.')[0]); // Dodajemy tylko główną część ścieżki
       }
     });
     
@@ -51,7 +51,7 @@ export class ContextValidator {
       }
       
       // Sprawdź ogólnie brakujące dane wejściowe
-      this.validateStepInputs(step, index, issues, contextPaths);
+      this.validateStepInputs(step, index, issues, contextPaths, flowSteps);
     });
     
     return issues;
@@ -99,6 +99,7 @@ export class ContextValidator {
     if (step.attrs?.initialUserMessage) {
       const initialMsg = step.attrs.initialUserMessage;
       const templateVars = initialMsg.match(/\{\{([^}]+)\}\}/g) || [];
+      let missingVars: string[] = [];
       
       templateVars.forEach(variable => {
         const path = variable.replace(/\{\{|\}\}/g, '').trim();
@@ -106,12 +107,32 @@ export class ContextValidator {
         
         if (value === undefined || value === null) {
           issues.push(`Krok ${index + 1} (${step.label || 'LLM'}): Brakująca zmienna kontekstowa: ${path}`);
+          missingVars.push(path);
         }
       });
       
       // Sprawdź dodatkowo czy auto-starting LLM ma wszystkie potrzebne dane
-      if (step.attrs.autoStart === true && templateVars.length > 0 && issues.length > 0) {
-        issues.push(`Krok ${index + 1} (${step.label || 'LLM'}): Auto-start może nie działać z powodu brakujących zmiennych`);
+      if (step.attrs.autoStart === true && templateVars.length > 0 && missingVars.length > 0) {
+        issues.push(`Krok ${index + 1} (${step.label || 'LLM'}): Auto-start nie zadziała z powodu brakujących zmiennych: ${missingVars.join(', ')}`);
+      }
+    }
+    
+    // Sprawdź dodatkowo wymagane dane dla auto-startu
+    if (step.attrs?.autoStart === true) {
+      // Jeśli nie ma wiadomości początkowej lub jest pusta, to auto-start wymaga ścieżki primaryWebAnalysing
+      if (!step.attrs?.initialUserMessage || step.attrs.initialUserMessage.trim() === '') {
+        const webContext = getContextPath('primaryWebAnalysing');
+        if (!webContext || !webContext.www) {
+          issues.push(`Krok ${index + 1} (${step.label || 'LLM'}): Auto-start wymaga kontekstu 'primaryWebAnalysing.www', który jest niedostępny`);
+        }
+      }
+      
+      // Sprawdź stan kontekstu pod ścieżką kroku - czy już istnieją dane
+      if (step.contextPath) {
+        const stepData = getContextPath(step.contextPath);
+        if (stepData && Object.keys(stepData).length > 0) {
+          issues.push(`Krok ${index + 1} (${step.label || 'LLM'}): Auto-start może nie być potrzebny - dane już istnieją pod ścieżką ${step.contextPath}`);
+        }
       }
     }
   }
@@ -134,7 +155,9 @@ export class ContextValidator {
       if (step.attrs?.schemaPath) {
         let resolvedPath = step.attrs.schemaPath;
         if (!resolvedPath.startsWith("schemas.form.")) {
-          resolvedPath = `schemas.form.${resolvedPath}`;
+          resolvedPath = resolvedPath.startsWith("schemas.")
+            ? resolvedPath
+            : `schemas.form.${resolvedPath}`;
         }
         schema = getContextPath(resolvedPath);
       }
@@ -152,6 +175,58 @@ export class ContextValidator {
         issues.push(`Krok ${index + 1} (${step.label || 'Formularz'}): Nie znaleziono schematu formularza pod ścieżką ${schemaPath}`);
       }
     }
+    
+    // Sprawdź czy wartości domyślne formularza są dostępne w kontekście
+    if (step.contextPath) {
+      const contextValue = getContextPath(step.contextPath);
+      
+      // Jeśli dane już istnieją w kontekście, sprawdź czy zawierają wszystkie pola wymagane
+      if (contextValue && typeof contextValue === 'object') {
+        // Próba pobrania schematu formularza z wszystkich możliwych miejsc
+        let formSchema: any[] = [];
+        const possibleSchemaPath = step.attrs?.schemaPath || step.attrs?.formSchemaPath;
+        
+        if (possibleSchemaPath) {
+          // Sprawdź różne formaty ścieżek
+          const paths = [
+            possibleSchemaPath,
+            `schemas.form.${possibleSchemaPath}`,
+            `formSchemas.${possibleSchemaPath}`
+          ];
+          
+          for (const path of paths) {
+            const schema = getContextPath(path);
+            if (schema && Array.isArray(schema)) {
+              formSchema = schema;
+              break;
+            }
+          }
+        }
+        
+        // Jeśli znaleziono schemat, sprawdź czy wszystkie wymagane pola mają wartości
+        if (formSchema.length > 0) {
+          const missingRequiredFields = formSchema
+            .filter(field => field.required)
+            .filter(field => {
+              const fieldPath = field.name.split('.');
+              let current = contextValue;
+              
+              // Sprawdź zagnieżdżone ścieżki
+              for (const key of fieldPath) {
+                if (current === undefined || current === null) return true;
+                current = current[key];
+              }
+              
+              return current === undefined || current === null || current === '';
+            })
+            .map(field => field.name);
+          
+          if (missingRequiredFields.length > 0) {
+            issues.push(`Krok ${index + 1} (${step.label || 'Formularz'}): Brakuje wartości dla wymaganych pól: ${missingRequiredFields.join(', ')}`);
+          }
+        }
+      }
+    }
   }
   
   /**
@@ -161,7 +236,8 @@ export class ContextValidator {
     step: any, 
     index: number, 
     issues: string[],
-    contextPaths: Set<string>
+    contextPaths: Set<string>,
+    flowSteps: any[] // Dodany parametr flowSteps
   ): void {
     // Sprawdź czy wiadomość asystenta zawiera zmienne szablonowe
     if (step.assistantMessage) {
@@ -169,12 +245,35 @@ export class ContextValidator {
       
       templateVars.forEach(variable => {
         const path = variable.replace(/\{\{|\}\}/g, '').trim();
+        const rootPath = path.split('.')[0];
         
         // Sprawdź czy ścieżka jest generowana przez jakikolwiek wcześniejszy krok
-        if (!contextPaths.has(path.split('.')[0])) {
-          issues.push(`Krok ${index + 1} (${step.label || 'Step'}): Wiadomość asystenta używa ścieżki "${path}", która nie jest generowana przez żaden krok`);
+        if (!contextPaths.has(rootPath)) {
+          issues.push(`Krok ${index + 1} (${step.label || 'Step'}): Wiadomość asystenta używa ścieżki "${path}", której część główna "${rootPath}" nie jest generowana przez żaden krok`);
         }
       });
+    }
+    
+    // Sprawdź czy jest ustawiona ścieżka kontekstowa dla kroku
+    if (!step.contextPath && !step.contextKey) {
+      issues.push(`Krok ${index + 1} (${step.label || 'Step'}): Brak zdefiniowanej ścieżki kontekstowej (contextPath lub contextKey)`);
+    }
+    
+    // Dodatkowe sprawdzenie dla kroków z auto-startem
+    if (step.templateId === "llm-query" && step.attrs?.autoStart === true) {
+      // Sprawdź czy kolejny krok istnieje
+      if (index < flowSteps.length - 1) {
+        const nextStep = flowSteps[index + 1];
+        
+        // Sprawdź czy wiadomość asystenta w następnym kroku zawiera odwołania do danych tego kroku
+        if (nextStep.assistantMessage) {
+          const rootContextKey = step.contextPath ? step.contextPath.split('.')[0] : step.contextKey;
+          
+          if (rootContextKey && nextStep.assistantMessage.includes(`{{${rootContextKey}`)) {
+            issues.push(`Krok ${index + 2} (${nextStep.label || 'Step'}): Ten krok może nie mieć dostępu do danych z poprzedniego kroku z auto-startem (${step.label || 'LLM'})`);
+          }
+        }
+      }
     }
   }
 }

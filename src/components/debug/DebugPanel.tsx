@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useAppStore } from "@/lib/store";
 import FlowStepsList from "./FlowStepsList";
 import StepDetails from "./StepDetails";
+import ContextViewer from "./ContextViewer";
 import { ContextValidator } from "./ContextValidator";
 
 /**
@@ -12,6 +13,7 @@ import { ContextValidator } from "./ContextValidator";
 const DebugPanel: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedStep, setSelectedStep] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<'steps' | 'context'>('steps');
 
   const { getCurrentScenario } = useAppStore();
   const currentScenario = getCurrentScenario();
@@ -34,7 +36,7 @@ const DebugPanel: React.FC = () => {
 
       {/* Główne okno debugera */}
       {isOpen && (
-        <div className="bg-white shadow-lg border border-gray-300 rounded-lg p-4 mb-2 w-[400px] max-h-[calc(100vh-100px)] overflow-auto">
+        <div className="bg-white shadow-lg border border-gray-300 rounded-lg p-4 mb-2 w-[500px] max-h-[calc(100vh-100px)] overflow-auto">
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-bold text-lg">Debuger szablonu</h3>
             {currentScenario && (
@@ -56,12 +58,42 @@ const DebugPanel: React.FC = () => {
             </div>
           )}
 
-          {/* Flow steps visualization */}
-          <FlowStepsList 
-            flowSteps={flowSteps} 
-            selectedStep={selectedStep}
-            onSelectStep={setSelectedStep}
-          />
+          {/* Tabs */}
+          <div className="flex border-b mb-4">
+            <button
+              onClick={() => setActiveTab('steps')}
+              className={`px-4 py-2 font-medium ${
+                activeTab === 'steps'
+                  ? 'text-blue-600 border-b-2 border-blue-500'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Kroki
+            </button>
+            <button
+              onClick={() => setActiveTab('context')}
+              className={`px-4 py-2 font-medium ${
+                activeTab === 'context'
+                  ? 'text-blue-600 border-b-2 border-blue-500'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Kontekst
+            </button>
+          </div>
+
+          {/* Active tab content */}
+          {activeTab === 'steps' && (
+            <FlowStepsList 
+              flowSteps={flowSteps} 
+              selectedStep={selectedStep}
+              onSelectStep={setSelectedStep}
+            />
+          )}
+
+          {activeTab === 'context' && (
+            <ContextViewer />
+          )}
         </div>
       )}
 

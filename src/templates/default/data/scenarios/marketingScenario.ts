@@ -69,26 +69,24 @@ export function getMarketingScenario(): Scenario {
           schemaPath: "schemas.llm.campaignContent",  // Użyto nowej ścieżki schematu
           includeSystemMessage: true,
           initialUserMessage: "Na podstawie analizy strony {{web.url}} i jej wyników ({{web.analysis.general_description}}, branża: {{web.analysis.industry}}, grupa docelowa: {{web.analysis.target_audience}}) oraz ustawień kampanii (cel: {{campaign.goal}}, budżet: {{campaign.budget}} PLN, czas trwania: {{campaign.duration}} dni), przygotuj treść reklamy na Facebook. Odpowiedź wyślij jako obiekt JSON zgodnie ze schematem:",
-          // Zmieniono ścieżki z campaign.settings.X na campaign.X, by pasowały do nowej struktury
         },
         metadata: {
           description: "Generuje optymalne treści reklamowe na podstawie analizy i parametrów"
         }
       },
       
-      // Krok 5: Podsumowanie kampanii
+      // Krok 5: Podsumowanie kampanii - UPROSZCZONA WIADOMOŚĆ
       {
         id: "campaign-summary",
         scenarioId: "scenario-1",
         label: "Podsumowanie kampanii",
         contextPath: "campaign.summary",
-        templateId: "llm-query",  // Używamy istniejącego komponentu
+        templateId: "llm-query",
         attrs: {
           autoStart: true,
-          schemaPath: "schemas.llm.campaignSummary",  // Użyto nowej ścieżki schematu
+          schemaPath: "schemas.llm.campaignSummary",
           includeSystemMessage: true,
-          initialUserMessage: "Przygotuj podsumowanie kampanii reklamowej dla strony {{web.url}}. Uwzględnij analizę strony, ustawienia kampanii (cel: {{campaign.goal}}, budżet: {{campaign.budget}} PLN) oraz wygenerowane treści kampanii. Odpowiedź wyślij jako obiekt JSON zgodnie ze schematem:",
-          // Zmieniono ścieżki z campaign.settings.X na campaign.X, by pasowały do nowej struktury
+          initialUserMessage: "Przygotuj podsumowanie kampanii reklamowej. Odpowiedź wyślij jako obiekt JSON zgodnie ze schematem:",
         },
         metadata: {
           description: "Tworzy kompleksowe podsumowanie i prognozę efektów kampanii"
