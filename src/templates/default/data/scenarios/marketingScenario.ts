@@ -13,10 +13,10 @@ export function getMarketingScenario(): Scenario {
         scenarioId: "scenario-1",
         label: "Adres strony WWW",
         assistantMessage: "Witaj! Podaj adres strony internetowej do analizy marketingowej:",
-        contextPath: "web.url",
+        contextPath: "web",  // Zmieniono z web.url na web, aby zapisać cały obiekt
         templateId: "form-step",
         attrs: {
-          formSchemaPath: "schemas.form.website",
+          schemaPath: "schemas.form.website",  // Poprawiono ścieżkę schematu
         },
         metadata: {
           description: "Pobiera od użytkownika adres strony do analizy"
@@ -29,10 +29,10 @@ export function getMarketingScenario(): Scenario {
         scenarioId: "scenario-1",
         label: "Analiza AI",
         contextPath: "web.analysis",
-        templateId: "llm-query",
+        templateId: "llm-query",  // Używamy istniejącego komponentu
         attrs: {
           autoStart: true,   
-          llmSchemaPath: "schemas.llm.webAnalysis",
+          schemaPath: "schemas.llm.webAnalysis",  // Użyto nowej ścieżki schematu
           includeSystemMessage: true,
           initialUserMessage: "Przeanalizuj adres WWW {{web.url}}. Przygotuj kompleksową analizę marketingową tej strony. Odpowiedź wyślij jako obiekt JSON zgodnie ze schematem:",
         },
@@ -47,10 +47,10 @@ export function getMarketingScenario(): Scenario {
         scenarioId: "scenario-1",
         label: "Ustawienia kampanii",
         assistantMessage: "Teraz przygotujmy kampanię reklamową na Facebook. Proszę uzupełnić podstawowe ustawienia kampanii:",
-        contextPath: "campaign.settings",
+        contextPath: "campaign",  // Zmieniono z campaign.settings na campaign, aby zapisać cały obiekt
         templateId: "form-step",
         attrs: {
-          formSchemaPath: "schemas.form.campaignSettings",
+          schemaPath: "schemas.form.campaignSettings",  // Poprawiono ścieżkę schematu
         },
         metadata: {
           description: "Zbiera podstawowe parametry kampanii reklamowej"
@@ -63,12 +63,13 @@ export function getMarketingScenario(): Scenario {
         scenarioId: "scenario-1",
         label: "Treść kampanii",
         contextPath: "campaign.content",
-        templateId: "llm-query",
+        templateId: "llm-query",  // Używamy istniejącego komponentu
         attrs: {
           autoStart: true,
-          llmSchemaPath: "schemas.llm.campaignContent",
+          schemaPath: "schemas.llm.campaignContent",  // Użyto nowej ścieżki schematu
           includeSystemMessage: true,
-          initialUserMessage: "Na podstawie analizy strony {{web.url}} i jej wyników ({{web.analysis.general_description}}, branża: {{web.analysis.industry}}, grupa docelowa: {{web.analysis.target_audience}}) oraz ustawień kampanii (cel: {{campaign.settings.goal}}, budżet: {{campaign.settings.budget}} PLN, czas trwania: {{campaign.settings.duration}} dni), przygotuj treść reklamy na Facebook. Odpowiedź wyślij jako obiekt JSON zgodnie ze schematem:",
+          initialUserMessage: "Na podstawie analizy strony {{web.url}} i jej wyników ({{web.analysis.general_description}}, branża: {{web.analysis.industry}}, grupa docelowa: {{web.analysis.target_audience}}) oraz ustawień kampanii (cel: {{campaign.goal}}, budżet: {{campaign.budget}} PLN, czas trwania: {{campaign.duration}} dni), przygotuj treść reklamy na Facebook. Odpowiedź wyślij jako obiekt JSON zgodnie ze schematem:",
+          // Zmieniono ścieżki z campaign.settings.X na campaign.X, by pasowały do nowej struktury
         },
         metadata: {
           description: "Generuje optymalne treści reklamowe na podstawie analizy i parametrów"
@@ -81,12 +82,13 @@ export function getMarketingScenario(): Scenario {
         scenarioId: "scenario-1",
         label: "Podsumowanie kampanii",
         contextPath: "campaign.summary",
-        templateId: "llm-query",
+        templateId: "llm-query",  // Używamy istniejącego komponentu
         attrs: {
           autoStart: true,
-          llmSchemaPath: "schemas.llm.campaignSummary",
+          schemaPath: "schemas.llm.campaignSummary",  // Użyto nowej ścieżki schematu
           includeSystemMessage: true,
-          initialUserMessage: "Przygotuj podsumowanie kampanii reklamowej dla strony {{web.url}}. Uwzględnij analizę strony, ustawienia kampanii (cel: {{campaign.settings.goal}}, budżet: {{campaign.settings.budget}} PLN) oraz wygenerowane treści kampanii. Odpowiedź wyślij jako obiekt JSON zgodnie ze schematem:",
+          initialUserMessage: "Przygotuj podsumowanie kampanii reklamowej dla strony {{web.url}}. Uwzględnij analizę strony, ustawienia kampanii (cel: {{campaign.goal}}, budżet: {{campaign.budget}} PLN) oraz wygenerowane treści kampanii. Odpowiedź wyślij jako obiekt JSON zgodnie ze schematem:",
+          // Zmieniono ścieżki z campaign.settings.X na campaign.X, by pasowały do nowej struktury
         },
         metadata: {
           description: "Tworzy kompleksowe podsumowanie i prognozę efektów kampanii"

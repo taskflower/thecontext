@@ -70,28 +70,70 @@ export const useFormInput = ({ node }: UseFormInputProps): UseFormInputReturn =>
     
     // Fall back to old formSchemaPath if no schemaPath or it failed
     if (attrs?.formSchemaPath) {
+      // Spróbuj najpierw bezpośrednio z ścieżką
       const schema = getContextPath(attrs.formSchemaPath);
       if (schema && Array.isArray(schema)) {
         setFormFields(schema);
         console.log("Loaded form schema using legacy path:", attrs.formSchemaPath);
-      } else {
-        console.warn(`Form schema not found at legacy path: ${attrs.formSchemaPath}`);
+        return;
+      }
+      
+      // Spróbuj dodać prefix schemas.form jeśli nie ma go jeszcze
+      if (!attrs.formSchemaPath.startsWith('schemas.')) {
+        const schemasFormPath = `schemas.form.${attrs.formSchemaPath}`;
+        const schemaWithPrefix = getContextPath(schemasFormPath);
         
-        // Try to load schema from formSchemas namespace if direct path fails
-        if (!attrs.formSchemaPath.startsWith('formSchemas.')) {
-          const fullPath = `formSchemas.${attrs.formSchemaPath}`;
-          const altSchema = getContextPath(fullPath);
-          
-          if (altSchema && Array.isArray(altSchema)) {
-            setFormFields(altSchema);
-            console.log("Loaded form schema from formSchemas namespace:", fullPath);
-          } else {
-            console.error("Failed to load form schema from any path");
-          }
+        if (schemaWithPrefix && Array.isArray(schemaWithPrefix)) {
+          setFormFields(schemaWithPrefix);
+          console.log("Loaded form schema with schemas.form prefix:", schemasFormPath);
+          return;
         }
       }
+      
+      // Spróbuj z prefiksem formSchemas jako ostatnią opcję
+      if (!attrs.formSchemaPath.startsWith('formSchemas.')) {
+        const fullPath = `formSchemas.${attrs.formSchemaPath}`;
+        const altSchema = getContextPath(fullPath);
+        
+        if (altSchema && Array.isArray(altSchema)) {
+          setFormFields(altSchema);
+          console.log("Loaded form schema from formSchemas namespace:", fullPath);
+          return;
+        }
+      }
+      
+      console.error("Failed to load form schema from any path", {
+        providedPath: attrs.formSchemaPath,
+        schemasFormPath: `schemas.form.${attrs.formSchemaPath}`,
+        formSchemasPath: `formSchemas.${attrs.formSchemaPath}`
+      });
     }
-  }, [attrs, getContextPath]);
+    
+    // Jeśli nic nie znaleziono, spróbuj użyć ścieżki kontekstowej
+    if (node.contextPath) {
+      const contextKey = node.contextPath.split('.')[0];
+      const possibleSchemaPath = `schemas.form.${contextKey}`;
+      const schemaByContext = getContextPath(possibleSchemaPath);
+      
+      if (schemaByContext && Array.isArray(schemaByContext)) {
+        setFormFields(schemaByContext);
+        console.log("Loaded form schema based on context path:", possibleSchemaPath);
+        return;
+      }
+      
+      // Sprawdź też starszy format
+      const legacySchemaPath = `formSchemas.${contextKey}`;
+      const legacySchemaByContext = getContextPath(legacySchemaPath);
+      
+      if (legacySchemaByContext && Array.isArray(legacySchemaByContext)) {
+        setFormFields(legacySchemaByContext);
+        console.log("Loaded form schema based on context path (legacy format):", legacySchemaPath);
+        return;
+      }
+    }
+    
+    console.warn("Could not find any valid form schema");
+  }, [attrs, getContextPath, node.contextPath]);
 
   // Check if all required fields are filled
   const areRequiredFieldsFilled = useCallback(() => {

@@ -33,7 +33,7 @@ export function getFbApiScenario(): Scenario {
         contextPath: "campaign.optimizations",
         templateId: "form-step",
         attrs: {
-          formSchemaPath: "schemas.form.campaignOptimizations",
+          schemaPath: "schemas.form.campaignOptimizations",  // Poprawiono ścieżkę schematu
         },
         metadata: {
           description: "Pozwala wybrać optymalizacje dla kampanii reklamowej"
@@ -64,11 +64,11 @@ export function getFbApiScenario(): Scenario {
           "Na podstawie zgromadzonych danych przygotowuję kompleksową analizę kampanii. " +
           "Proszę czekać...",
         contextPath: "campaign.summary",
-        templateId: "llm-query",
+        templateId: "llm-query-validator",
         attrs: {
           autoStart: true,
           includeSystemMessage: true,
-          llmSchemaPath: "schemas.llm.campaignSummary",
+          schemaPath: "schemas.llm.campaignSummary",  // Użyto nowej ścieżki schematu
           initialUserMessage: 
             "Przygotuj podsumowanie kampanii Facebook na podstawie statystyk. " +
             "Uwzględnij wskaźniki efektywności kampanii z okresu {{campaign.stats.timeframe}}, " +

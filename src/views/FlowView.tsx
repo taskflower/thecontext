@@ -8,7 +8,8 @@ import {
   getFlowStepForNodeType,
 } from "../lib/templates";
 import { useNodeManager } from "../hooks/useNodeManager";
-import DebugPanel from "@/components/DebugPanel";
+import DebugPanel from "@/components/debug";
+
 
 const FlowView: React.FC = () => {
   // Extract route parameters
