@@ -1,13 +1,15 @@
-// src/App.tsx
 import React, { Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import FlowView from "./views/FlowView";
-import ScenarioView from "./views/ScenarioView";
+
 
 import InitialDataProvider from "./InitialDataProvider";
 import { WorkspaceView } from "./views/WorkspaceView";
 import { LoginView } from "./views/LoginView";
 import { AuthProvider } from "./hooks/useAuth";
+
+import { ScenarioView } from "./views/ScenarioView";
+import ScenarioGenerator from "./components/ScenarioGenerator";
 
 const App: React.FC = () => {
   return (
@@ -17,6 +19,7 @@ const App: React.FC = () => {
           <Suspense fallback={<div>Loading...</div>}>
             <Routes>
               <Route path="/login" element={<LoginView />} />
+              <Route path="/generator" element={<ScenarioGenerator />} />
               <Route path="/" element={<WorkspaceView />} />
               <Route path="/:workspace" element={<ScenarioView />} />
               <Route path="/:workspace/:scenario" element={<FlowView />} />
