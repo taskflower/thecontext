@@ -1,89 +1,90 @@
 // src/templates/baseTemplate.ts
-import { LayoutTemplate, WidgetTemplate, FlowStepTemplate } from 'template-registry-module';
+import { ReactNode } from 'react';
 
 /**
- * Base interface for all template configurations
+ * Interfejs dla komponentu layoutu
  */
-export interface BaseTemplateConfig {
+export interface LayoutTemplate {
+  id: string;
+  name: string;
+  component: React.ComponentType<any>;
+}
+
+/**
+ * Interfejs dla komponentu widgetu
+ */
+export interface WidgetTemplate {
+  id: string;
+  name: string;
+  category: string;
+  component: React.ComponentType<any>;
+}
+
+/**
+ * Interfejs dla komponentu kroku przepływu
+ */
+export interface FlowStepTemplate {
+  id: string;
+  name: string;
+  compatibleNodeTypes: string[];
+  component: React.ComponentType<any>;
+}
+
+/**
+ * Interfejs kroku scenariusza
+ */
+export interface ScenarioStep {
+  id: string;
+  scenarioId: string;
+  label: string;
+  assistantMessage?: string;
+  contextPath?: string;
+  templateId: string;
+  type?: string;
+  attrs?: Record<string, any>;
+  initialUserMessage?: string;
+  includeSystemMessage?: boolean;
+}
+
+/**
+ * Interfejs scenariusza
+ */
+export interface Scenario {
+  id: string;
+  name: string;
+  description: string;
+  systemMessage?: string;
+  getSteps: () => ScenarioStep[];
+}
+
+/**
+ * Interfejs workspace'a
+ */
+export interface Workspace {
+  id: string;
+  name: string;
+  description?: string;
+  templateSettings: {
+    layoutTemplate: string;
+    scenarioWidgetTemplate: string;
+    defaultFlowStepTemplate: string;
+    theme?: 'light' | 'dark' | 'system';
+  };
+  getScenarios: () => Scenario[];
+  getInitialContext: () => Record<string, any>;
+}
+
+/**
+ * Interfejs szablonu
+ */
+export interface Template {
   id: string;
   name: string;
   description: string;
   version: string;
   author: string;
-  layouts: LayoutTemplate[];
-  widgets: WidgetTemplate[];
-  flowSteps: FlowStepTemplate[];
-}
-
-/**
- * Base interface for template settings that can be stored in a workspace
- */
-export interface BaseTemplateSettings {
-  layoutTemplate: string;
-  scenarioWidgetTemplate: string;
-  defaultFlowStepTemplate: string;
-  theme?: 'light' | 'dark' | 'system';
-  customStyles?: Record<string, string>;
-}
-
-// Interface for a scenario
-export interface Scenario {
-  id: string;
-  name: string;
-  description: string;
-  nodes: any[];
-  systemMessage?: string;
-  edges?: any[];
-}
-
-/**
- * Base interface for workspace data with template settings
- */
-export interface BaseWorkspaceData {
-  id: string;
-  name: string;
-  description?: string;
-  scenarios: Scenario[];
-  templateSettings: BaseTemplateSettings;
-  initialContext?: Record<string, any>;
-}
-
-/**
- * Base class for template registration
- */
-export abstract class BaseTemplate {
-  /**
-   * The unique identifier for this template
-   */
-  abstract readonly id: string;
-  
-  /**
-   * The human-readable name for this template
-   */
-  abstract readonly name: string;
-  
-  /**
-   * A short description of the template
-   */
-  abstract readonly description: string;
-  
-  /**
-   * The version of the template
-   */
-  abstract readonly version: string;
-  
-  /**
-   * The author of the template
-   */
-  abstract readonly author: string;
-
-  /**
-   * Get the template configuration
-   */
-  abstract getConfig(): BaseTemplateConfig;
-  
-  /**
-   * Get the default workspace data for this template
-   */
-  abstract getDefaultWorkspaceData(): BaseWorkspaceData;
+  getLayouts: () => LayoutTemplate[];
+  getWidgets: () => WidgetTemplate[];
+  getFlowSteps: () => FlowStepTemplate[];
+  getWorkspaces: () => Workspace[];
 }

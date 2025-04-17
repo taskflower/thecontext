@@ -1,5 +1,5 @@
 // src/templates/default/flowSteps/FbCampaignPreviewTemplate.tsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FlowStepProps } from "template-registry-module";
 import { useAppStore } from "@/lib/store";
 
@@ -11,33 +11,127 @@ const FbCampaignPreviewTemplate: React.FC<FlowStepProps> = ({
 }) => {
   const processTemplate = useAppStore((state) => state.processTemplate);
   const getContextPath = useAppStore((state) => state.getContextPath);
+  const getContext = useAppStore((state) => state.getContext);
+
+  // Stan lokalny do debugowania
+  const [debugInfo, setDebugInfo] = useState<any>({});
 
   // Process assistant message with context variables
   const processedMessage = node.assistantMessage
     ? processTemplate(node.assistantMessage)
     : '';
 
-  // Get campaign data from context
-  // We need to get the full fbCampaign object with all its properties
+  // Pobierz pełny kontekst do debugowania
+  useEffect(() => {
+    const fullContext = getContext();
+    setDebugInfo({
+      fullContext: JSON.stringify({
+        campaign: fullContext.campaign,
+        fbCampaign: fullContext.fbCampaign,
+        web: fullContext.web,
+        primaryWebAnalysing: fullContext.primaryWebAnalysing
+      }, null, 2)
+    });
+  }, [getContext]);
+
+  // Get campaign data from context - sprawdź obie możliwe lokalizacje
+  const campaign = getContextPath("campaign") || {};
   const fbCampaign = getContextPath("fbCampaign") || {};
   
-  // Get content from fbCampaign.content
-  const content = fbCampaign.content || {};
-  
-  // In this case, settings might be either in fbCampaign.settings or at the top level of fbCampaign
-  // We'll check both locations
-  const settings = {
-    cel: fbCampaign.cel || fbCampaign.settings?.cel,
-    budżet: fbCampaign.budżet || fbCampaign.settings?.budżet,
-    czas_trwania: fbCampaign.czas_trwania || fbCampaign.settings?.czas_trwania
+  // Połącz dane z obu możliwych źródeł, preferując dane z campaign (nowszy format)
+  const campaignData = {
+    ...fbCampaign,
+    ...campaign,
+    settings: {
+      ...(fbCampaign.settings || {}),
+      ...(campaign.settings || {}),
+      // Jeśli dane są na górnym poziomie w campaign, użyj ich
+      cel: campaign.goal || fbCampaign.cel || fbCampaign.settings?.cel,
+      budżet: campaign.budget || fbCampaign.budżet || fbCampaign.settings?.budżet,
+      czas_trwania: campaign.duration || fbCampaign.czas_trwania || fbCampaign.settings?.czas_trwania
+    },
+    content: {
+      ...(fbCampaign.content || {}),
+      ...(campaign.content || {}),
+      // Mapowanie między formatami
+      tytuł_reklamy: (campaign.content?.ad_title || fbCampaign.content?.tytuł_reklamy),
+      opis_reklamy: (campaign.content?.ad_text || fbCampaign.content?.opis_reklamy),
+      call_to_action: (campaign.content?.call_to_action || fbCampaign.content?.call_to_action),
+      sugestie_graficzne: (campaign.content?.visual_suggestions || fbCampaign.content?.sugestie_graficzne),
+      grupa_docelowa: {
+        ...(fbCampaign.content?.grupa_docelowa || {}),
+        ...(campaign.content?.target_audience || {}),
+        płeć: campaign.content?.target_audience?.gender || fbCampaign.content?.grupa_docelowa?.płeć,
+        wiek_od: campaign.content?.target_audience?.age_from || fbCampaign.content?.grupa_docelowa?.wiek_od,
+        wiek_do: campaign.content?.target_audience?.age_to || fbCampaign.content?.grupa_docelowa?.wiek_do,
+        zainteresowania: campaign.content?.target_audience?.interests || fbCampaign.content?.grupa_docelowa?.zainteresowania || []
+      }
+    }
   };
   
-  // Get web analysis data
-  const webAnalysis = getContextPath("primaryWebAnalysing") || {};
+  // Get web analysis data - sprawdź obie możliwe lokalizacje
+  const web = getContextPath("web") || {};
+  const primaryWebAnalysing = getContextPath("primaryWebAnalysing") || {};
+  
+  // Połącz dane analizy web
+  const webData = {
+    url: web.url || primaryWebAnalysing.www,
+    analysis: {
+      ...(web.analysis || {}),
+      industry: web.analysis?.industry || primaryWebAnalysing.branża,
+      target_audience: web.analysis?.target_audience || primaryWebAnalysing.grupa_docelowa
+    }
+  };
+
+  // Extract the data we need for display
+  const settings = campaignData.settings;
+  const content = campaignData.content;
 
   const handleSubmit = () => {
-    // Send complete campaign data to next step
-    onSubmit(fbCampaign);
+    // Przy wysyłaniu danych do następnego kroku, złącz dane w jeden spójny format
+    // i wyślij do obu ścieżek kontekstu dla kompatybilności
+    const combinedData = {
+      // Nowy format (campaign)
+      goal: settings.cel,
+      budget: settings.budżet,
+      duration: settings.czas_trwania,
+      content: {
+        ad_title: content.tytuł_reklamy,
+        ad_text: content.opis_reklamy,
+        call_to_action: content.call_to_action,
+        visual_suggestions: content.sugestie_graficzne,
+        target_audience: {
+          gender: content.grupa_docelowa?.płeć,
+          age_from: content.grupa_docelowa?.wiek_od,
+          age_to: content.grupa_docelowa?.wiek_do,
+          interests: content.grupa_docelowa?.zainteresowania
+        }
+      },
+      
+      // Stary format (fbCampaign) dla kompatybilności wstecznej
+      cel: settings.cel,
+      budżet: settings.budżet,
+      czas_trwania: settings.czas_trwania,
+      settings: {
+        cel: settings.cel,
+        budżet: settings.budżet,
+        czas_trwania: settings.czas_trwania
+      },
+      content: {
+        tytuł_reklamy: content.tytuł_reklamy,
+        opis_reklamy: content.opis_reklamy,
+        call_to_action: content.call_to_action,
+        sugestie_graficzne: content.sugestie_graficzne,
+        grupa_docelowa: {
+          płeć: content.grupa_docelowa?.płeć,
+          wiek_od: content.grupa_docelowa?.wiek_od,
+          wiek_do: content.grupa_docelowa?.wiek_do,
+          zainteresowania: content.grupa_docelowa?.zainteresowania
+        }
+      }
+    };
+    
+    onSubmit(combinedData);
   };
 
   return (
@@ -86,7 +180,7 @@ const FbCampaignPreviewTemplate: React.FC<FlowStepProps> = ({
         <h3 className="font-semibold mb-2">Ustawienia kampanii:</h3>
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div>Strona WWW:</div>
-          <div className="font-medium">{webAnalysis.www || '-'}</div>
+          <div className="font-medium">{webData.url || '-'}</div>
           
           <div>Cel kampanii:</div>
           <div className="font-medium">{settings.cel || '-'}</div>
@@ -114,13 +208,22 @@ const FbCampaignPreviewTemplate: React.FC<FlowStepProps> = ({
         </div>
       </div>
 
-      {/* Debug information - can be removed in production */}
+      {/* Debug information - można zostawić w wersji deweloperskiej */}
       <div className="p-3 bg-yellow-50 text-xs text-yellow-800 rounded border border-yellow-200">
         <p className="font-semibold">Debug Info:</p>
         <p>Context path: {node.contextPath}</p>
-        <p>Settings found: cel={settings.cel}, budżet={settings.budżet}, czas_trwania={settings.czas_trwania}</p>
-        <p>Content available: {Object.keys(content).length > 0 ? 'Yes' : 'No'}</p>
-        <p>Raw fbCampaign: {JSON.stringify({cel: fbCampaign.cel, budżet: fbCampaign.budżet, czas_trwania: fbCampaign.czas_trwania})}</p>
+        <p>settings.cel: {settings.cel}</p>
+        <p>settings.budżet: {settings.budżet}</p>
+        <p>settings.czas_trwania: {settings.czas_trwania}</p>
+        <p>content.tytuł_reklamy: {content.tytuł_reklamy}</p>
+        <p>content.opis_reklamy: {content.opis_reklamy}</p>
+        <p>content available: {Object.keys(content).length > 0 ? 'Yes' : 'No'}</p>
+        <details>
+          <summary>Pełny kontekst (kliknij, aby rozwinąć)</summary>
+          <pre className="whitespace-pre-wrap overflow-auto max-h-40 mt-2">
+            {debugInfo.fullContext}
+          </pre>
+        </details>
       </div>
 
       {/* Navigation buttons */}
