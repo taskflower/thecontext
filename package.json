@@ -21,6 +21,7 @@
     "recharts": "^2.15.2",
     "revertcontext-nodes-module": "1.0.5",
     "template-registry-module": "1.0.3",
+    "zod": "^3.24.2",
     "zustand": "^4.3.7"
   },
   "devDependencies": {

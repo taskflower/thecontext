@@ -117,6 +117,7 @@ const FlowView: React.FC = () => {
         )}
         
         <FlowStepComponent
+         key={currentNode.id} 
           node={currentNode}
           onSubmit={handleNodeExecution}
           onPrevious={handlePreviousNode}

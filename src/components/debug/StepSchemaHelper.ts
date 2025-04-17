@@ -28,10 +28,7 @@ export function getStepSchema(step: any) {
     const schema = getContextPath(resolvedPath);
 
     if (schema) {
-      console.log(
-        `[DebugPanel] Found LLM schema using new path: ${resolvedPath}`,
-        schema
-      );
+     
       return {
         type: "llm",
         path: resolvedPath,
@@ -63,10 +60,7 @@ export function getStepSchema(step: any) {
     const schema = getContextPath(resolvedPath);
 
     if (schema) {
-      console.log(
-        `[DebugPanel] Found form schema using new path: ${resolvedPath}`,
-        schema
-      );
+    
       return {
         type: "form",
         path: resolvedPath,
@@ -86,7 +80,7 @@ export function getStepSchema(step: any) {
     // Try directly with the provided path first (might be already using schemas.llm format)
     const directSchema = getContextPath(schemaPath);
     if (directSchema) {
-      console.log(`[DebugPanel] Found LLM schema directly at: ${schemaPath}`);
+   
       return {
         type: "llm",
         path: schemaPath,
@@ -100,10 +94,7 @@ export function getStepSchema(step: any) {
       const schema = getContextPath(legacyPath);
 
       if (schema) {
-        console.log(
-          `[DebugPanel] Found LLM schema using legacy path: ${legacyPath}`,
-          schema
-        );
+      
         return {
           type: "llm",
           path: legacyPath,
@@ -132,9 +123,7 @@ export function getStepSchema(step: any) {
     // Try directly with the provided path first (might be already using schemas.form format)
     const directSchema = getContextPath(schemaPath);
     if (directSchema) {
-      console.log(
-        `[DebugPanel] Found form schema directly at: ${schemaPath}`
-      );
+     
       return {
         type: "form",
         path: schemaPath,
@@ -148,10 +137,7 @@ export function getStepSchema(step: any) {
       const schema = getContextPath(legacyPath);
 
       if (schema) {
-        console.log(
-          `[DebugPanel] Found form schema using legacy path: ${legacyPath}`,
-          schema
-        );
+    
         return {
           type: "form",
           path: legacyPath,

@@ -169,14 +169,14 @@ const renderSchema = (schemaInfo: any) => {
     // Check if we might have a schema path but couldn't resolve it
     if (schemaInfo && schemaInfo.path) {
       return (
-        <div className="text-sm text-red-500 italic">
+        <div className=" text-red-500 italic">
           <span className="font-bold">Błąd:</span> Schemat nie znaleziony pod
           ścieżką: {schemaInfo.path}
         </div>
       );
     }
 
-    return <div className="text-sm text-gray-500 italic">Brak schematu</div>;
+    return <div className=" text-gray-500 italic">Brak schematu</div>;
   }
 
   const { type, path, schema } = schemaInfo;
@@ -225,7 +225,7 @@ const renderSchema = (schemaInfo: any) => {
   }
 
   return (
-    <div className="text-sm text-gray-500 italic">Nieznany typ schematu</div>
+    <div className=" text-gray-500 italic">Nieznany typ schematu</div>
   );
 };
 
@@ -236,7 +236,7 @@ const renderOutput = (step: any, getContextPath: (path: string) => any) => {
   const contextPath = step.contextPath;
   if (!contextPath)
     return (
-      <div className="text-sm text-gray-500 italic">
+      <div className=" text-gray-500 italic">
         Brak ścieżki kontekstu dla danych wyjściowych
       </div>
     );
@@ -244,7 +244,7 @@ const renderOutput = (step: any, getContextPath: (path: string) => any) => {
   const data = getContextPath(contextPath);
   if (!data)
     return (
-      <div className="text-sm text-gray-500 italic">
+      <div className=" text-gray-500 italic">
         Brak danych wyjściowych pod ścieżką {contextPath}
       </div>
     );
@@ -253,7 +253,7 @@ const renderOutput = (step: any, getContextPath: (path: string) => any) => {
   const isEmpty = typeof data === "object" && Object.keys(data).length === 0;
   if (isEmpty) {
     return (
-      <div className="text-sm text-orange-500 italic">
+      <div className=" text-orange-500 italic">
         Ścieżka {contextPath} istnieje, ale nie zawiera jeszcze danych
         wyjściowych
       </div>
