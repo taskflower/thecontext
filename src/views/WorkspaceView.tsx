@@ -1,23 +1,23 @@
-// src/views/WorkspaceView.tsx
-import React, { Suspense } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAppStore } from '../lib/store';
-import { templateRegistry } from '../lib/templates';
+// src/views/WorkspaceView.tsx - Improved Version
+import React, { Suspense } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAppStore } from "../lib/store";
+import { templateRegistry } from "../lib/templates";
 
 export const WorkspaceView: React.FC = () => {
   const { workspaces } = useAppStore();
   const navigate = useNavigate();
 
   // Use default layout template for workspace view
-  const LayoutComponent = templateRegistry.getLayout('default')?.component;
-  
+  const LayoutComponent = templateRegistry.getLayout("default")?.component;
+
   if (!LayoutComponent) {
     return <div className="p-4">Default layout template not found</div>;
   }
-  
+
   // Use default widget template for workspace view
-  const WidgetComponent = templateRegistry.getWidget('card-list')?.component;
-  
+  const WidgetComponent = templateRegistry.getWidget("card-list")?.component;
+
   if (!WidgetComponent) {
     return <div className="p-4">Default widget template not found</div>;
   }
@@ -28,27 +28,24 @@ export const WorkspaceView: React.FC = () => {
   };
 
   // Map workspaces to the format expected by the widget
-  const workspaceData = workspaces.map(workspace => ({
+  const workspaceData = workspaces.map((workspace) => ({
     id: workspace.id,
     name: workspace.name,
     description: `Template: ${workspace.templateSettings.layoutTemplate}`,
     count: workspace.scenarios.length,
-    countLabel: 'scenarios'
+    countLabel: "scenarios",
   }));
 
   return (
-    <Suspense fallback={<div className="p-4">Loading templates...</div>}>
-      <LayoutComponent title="Workspaces">
-        <div className="space-y-6">
-          <p className="text-gray-600 mb-4">
-            Select a workspace to view its scenarios. Each workspace uses different template styles.
-          </p>
-          
-          <WidgetComponent 
-            data={workspaceData}
-            onSelect={handleSelect}
-          />
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-slate-700 text-lg">Loading workspaces...</div>
         </div>
+      }
+    >
+      <LayoutComponent title="Workspaces">
+        <WidgetComponent data={workspaceData} onSelect={handleSelect} />
       </LayoutComponent>
     </Suspense>
   );

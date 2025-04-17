@@ -1,14 +1,22 @@
 // src/debug/tabs/ScenarioTab.jsx
-import React from "react";
+
 import { List, Settings } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const ScenarioTab = ({ currentScenario, currentWorkspace }) => {
+  const navigate = useNavigate();
   return (
     <div className="p-3 h-full overflow-auto">
-      <div className="mb-3">
+      <div className="mb-3 flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-800">
           Informacje o scenariuszu
         </h3>
+        <button
+            onClick={() => navigate('/generator')}
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300"
+          >
+            Generator scenariuszy
+          </button>
       </div>
 
       <div className="space-y-4">
@@ -108,6 +116,7 @@ export const ScenarioTab = ({ currentScenario, currentWorkspace }) => {
             <p>Brak aktywnego scenariusza</p>
           </div>
         )}
+        
       </div>
     </div>
   );

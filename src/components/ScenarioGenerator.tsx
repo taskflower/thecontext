@@ -102,7 +102,7 @@ const ScenarioGenerator: React.FC = () => {
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+          <div className="bg-white rounded-lg shadow-sm mb-6">
             <h2 className="text-xl font-semibold mb-4">Krok 1: Wybierz scenariusz bazowy</h2>
             
             {availableScenarios.length === 0 ? (

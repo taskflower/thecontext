@@ -31,7 +31,7 @@ export const ChangeTracker = ({ changes }) => {
         {type !== "added" && (
           <div className="ml-6 mt-1 p-2 bg-red-50 rounded border border-red-100 relative text-sm">
             <div className="absolute -left-4 top-2 w-2 h-2 bg-red-400 rounded-full"></div>
-            <span className="text-red-800 font-mono break-all overflow-auto block max-w-full">
+            <span className="text-red-800 font-mono break-all overflow-auto block max-w-full text-xs">
               {typeof oldValue === "object"
                 ? JSON.stringify(oldValue)
                 : String(oldValue)}
@@ -42,7 +42,7 @@ export const ChangeTracker = ({ changes }) => {
         {type !== "removed" && (
           <div className="ml-6 mt-1 p-2 bg-green-50 rounded border border-green-100 relative text-sm">
             <div className="absolute -left-4 top-2 w-2 h-2 bg-green-400 rounded-full"></div>
-            <span className="text-green-800 font-mono break-all overflow-auto block max-w-full">
+            <span className="text-green-800 font-mono break-all overflow-auto block max-w-full text-xs">
               {typeof newValue === "object"
                 ? JSON.stringify(newValue)
                 : String(newValue)}
