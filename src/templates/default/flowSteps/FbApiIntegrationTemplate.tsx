@@ -1,8 +1,8 @@
 // src/templates/default/flowSteps/FbApiIntegrationTemplate.tsx
 // Template do integracji z Facebook Marketing API
 import React, { useState, useEffect } from "react";
-import { FlowStepProps } from "template-registry-module";
 import { useAppStore } from "@/lib/store";
+import { FlowStepProps } from "@/views/types";
 
 // API Status Components
 const ApiStatusDisplay: React.FC<{

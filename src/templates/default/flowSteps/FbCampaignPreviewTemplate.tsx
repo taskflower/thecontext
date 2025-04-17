@@ -1,7 +1,7 @@
 // src/templates/default/flowSteps/FbCampaignPreviewTemplate.tsx
 import React, { useEffect, useState } from "react";
-import { FlowStepProps } from "template-registry-module";
 import { useAppStore } from "@/lib/store";
+import { FlowStepProps } from "@/views/types";
 
 const FbCampaignPreviewTemplate: React.FC<FlowStepProps> = ({
   node,
