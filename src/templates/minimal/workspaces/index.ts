@@ -23,6 +23,7 @@ export const workspaces: Workspace[] = [
             scenarioId: "scenario-business",
             label: "Dane finansowe",
             assistantMessage: "Podaj przychody i koszty projektu:",
+            contextPath: "collect-data", // Dodana ścieżka kontekstu
             templateId: "form-step",
             attrs: { schemaPath: "schemas.form.business" },
           },
@@ -31,6 +32,7 @@ export const workspaces: Workspace[] = [
             scenarioId: "scenario-business",
             label: "Raport ROI",
             assistantMessage: "Generuję raport ROI na podstawie danych...",
+            contextPath: "generate-report", // Dodana ścieżka kontekstu
             templateId: "llm-step",
             attrs: {
               autoStart: true,
@@ -40,6 +42,15 @@ export const workspaces: Workspace[] = [
               schemaPath: "schemas.llm.businessReport",
             },
           },
+          {
+            id: "show-summary",
+            scenarioId: "scenario-business",
+            label: "Podsumowanie",
+            assistantMessage: "Oto podsumowanie wyników analizy finansowej twojego projektu. Przeanalizowaliśmy wprowadzone dane i obliczony został zwrot z inwestycji (ROI).",
+            contextPath: "summary", // Dodana ścieżka kontekstu
+            templateId: "summary-step",
+            attrs: {}
+          }
         ],
       },
     ],
