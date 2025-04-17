@@ -8,7 +8,7 @@ import {
   getFlowStepForNodeType,
 } from "../lib/templates";
 import { useNodeManager } from "../hooks/useNodeManager";
-import DebugPanel from "@/components/debug";
+
 
 
 const FlowView: React.FC = () => {
@@ -126,7 +126,7 @@ const FlowView: React.FC = () => {
           scenario={currentScenario} // Pass the scenario for context
         />
       </LayoutComponent>
-      <DebugPanel />
+
     </>
   );
 };

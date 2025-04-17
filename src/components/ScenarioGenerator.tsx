@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
 import { useLlmService } from '../lib/scenarioGeneratorLLM';
 import { Scenario } from '../templates/baseTemplate';
-import { convertScenarioToTemplate, createNewScenario } from '../lib/scenarioGenerator';
+import { createNewScenario } from '../lib/scenarioGenerator';
 import { useAuth } from '../hooks/useAuth';
 
 /**
