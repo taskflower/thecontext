@@ -1,6 +1,5 @@
 // src/flowSteps/LlmQueryTemplate.tsx
 import React, { useState } from "react";
-import { FlowStepProps } from "template-registry-module";
 import { useLlmWithZod } from "@/hooks/useLLM";
 import { useAppStore } from "@/lib/store";
 import {
@@ -14,6 +13,7 @@ import {
   Send,
   Play,
 } from "lucide-react";
+import { FlowStepProps } from "@/views/types";
 
 // --- UI Components ---
 const LoadingSpinner: React.FC = () => (

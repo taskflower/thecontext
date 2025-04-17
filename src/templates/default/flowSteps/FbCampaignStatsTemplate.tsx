@@ -1,8 +1,8 @@
 // src/templates/default/flowSteps/FbCampaignStatsTemplate.tsx
 // Template do analizy statystyk kampanii Facebook
 import React, { useState } from "react";
-import { FlowStepProps } from "template-registry-module";
 import { useAppStore } from "@/lib/store";
+import { FlowStepProps } from "@/views/types";
 
 const FbCampaignStatsTemplate: React.FC<FlowStepProps> = ({
   node,

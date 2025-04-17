@@ -1,7 +1,8 @@
 // src/debug/tabs/LogsTab.jsx
-import React from "react";
+
 import { RefreshCw, Clock, Trash2 } from "lucide-react";
-import { ChangeTracker } from "../components/ChangeTracker";
+import ChangeTracker from "../components/ChangeTracker";
+
 
 export const LogsTab = ({ logEntries, setLogEntries, logContainerRef }) => {
   // Time formatting

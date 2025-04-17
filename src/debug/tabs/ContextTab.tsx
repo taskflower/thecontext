@@ -1,6 +1,6 @@
 // src/debug/tabs/ContextTab.jsx
-import React from "react";
-import { JsonTreeRenderer } from "../components/JsonTreeRenderer";
+
+import JsonTreeRenderer from "../components/JsonTreeRenderer";
 
 export const ContextTab = ({ context, expandedPaths, setExpandedPaths }) => {
   return (

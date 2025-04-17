@@ -2,7 +2,17 @@
 import { ReactNode } from 'react';
 
 /**
- * Interfejs dla komponentu layoutu
+ * Interface for layout component props
+ */
+export interface LayoutProps {
+  children: ReactNode;
+  title?: string;
+  showBackButton?: boolean;
+  onBackClick?: () => void;
+}
+
+/**
+ * Interface for layout template
  */
 export interface LayoutTemplate {
   id: string;
@@ -11,7 +21,7 @@ export interface LayoutTemplate {
 }
 
 /**
- * Interfejs dla komponentu widgetu
+ * Interface for widget component
  */
 export interface WidgetTemplate {
   id: string;
@@ -21,7 +31,17 @@ export interface WidgetTemplate {
 }
 
 /**
- * Interfejs dla komponentu kroku przepływu
+ * Interface for flow step component props
+ */
+export interface FlowStepProps {
+  node: any;
+  onSubmit: (data: any) => void;
+  onPrevious: () => void;
+  isLastNode?: boolean;
+}
+
+/**
+ * Interface for flow step template
  */
 export interface FlowStepTemplate {
   id: string;
@@ -31,7 +51,7 @@ export interface FlowStepTemplate {
 }
 
 /**
- * Interfejs kroku scenariusza
+ * Interface for scenario step
  */
 export interface ScenarioStep {
   id: string;
@@ -47,7 +67,7 @@ export interface ScenarioStep {
 }
 
 /**
- * Interfejs scenariusza
+ * Interface for scenario
  */
 export interface Scenario {
   id: string;
@@ -58,7 +78,7 @@ export interface Scenario {
 }
 
 /**
- * Interfejs workspace'a
+ * Interface for workspace
  */
 export interface Workspace {
   id: string;
@@ -75,7 +95,7 @@ export interface Workspace {
 }
 
 /**
- * Interfejs szablonu
+ * Interface for template
  */
 export interface Template {
   id: string;

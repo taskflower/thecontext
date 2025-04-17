@@ -1,7 +1,6 @@
 // src/templates/layouts/SidebarLayout.tsx
 import React from 'react';
-import { LayoutProps } from 'template-registry-module';
-import UserDropdown from '@/auth/UserDropdown';  // Import UserDropdown
+import UserDropdown from '@/auth/UserDropdown'; 
 
 const SidebarLayout: React.FC<LayoutProps> = ({ 
   children, 

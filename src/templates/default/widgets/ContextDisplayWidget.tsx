@@ -1,7 +1,7 @@
 // src/templates/default/widgets/ContextDisplayWidget.tsx
 import React from 'react';
-import { WidgetProps } from 'template-registry-module';
 import { useAppStore } from '@/lib/store';
+import { WidgetProps } from '@/views/types';
 
 interface ContextDisplayWidgetProps extends WidgetProps {
   title?: string;

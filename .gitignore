@@ -7,9 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-raw_modules/template-registry-module/dist
-raw_modules/template-registry-module/node_modules
-raw_modules/template-registry-module/package-lock.json
+
 node_modules
 dist
 dist-ssr

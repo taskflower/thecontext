@@ -1,8 +1,20 @@
 // src/templates/default/flowSteps/FbCampaignSummaryTemplate.tsx
 import React, { useMemo } from "react";
-import { FlowStepProps } from "template-registry-module";
+
 import { useAppStore } from "@/lib/store";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import { FlowStepProps } from "@/views/types";
 
 const FbCampaignSummaryTemplate: React.FC<FlowStepProps> = ({
   node,
@@ -16,7 +28,7 @@ const FbCampaignSummaryTemplate: React.FC<FlowStepProps> = ({
   // Process assistant message with context variables
   const processedMessage = node.assistantMessage
     ? processTemplate(node.assistantMessage)
-    : '';
+    : "";
 
   // Get campaign data from context
   const fbCampaign = getContextPath("fbCampaign") || {};
@@ -36,17 +48,23 @@ const FbCampaignSummaryTemplate: React.FC<FlowStepProps> = ({
       const day = index + 1;
       const date = new Date();
       date.setDate(date.getDate() - (daysCount - day));
-      
+
       // Create some variation for the chart data
-      const randomFactor = 0.7 + (Math.random() * 0.6);
+      const randomFactor = 0.7 + Math.random() * 0.6;
       const dayMultiplier = (day / daysCount) * 1.5; // Growth trend over time
-      
+
       return {
         day: `Dzień ${day}`,
-        date: date.toLocaleDateString('pl-PL'),
-        impressions: Math.round((stats.impressions / daysCount) * randomFactor * dayMultiplier),
-        clicks: Math.round((stats.clicks / daysCount) * randomFactor * dayMultiplier),
-        conversions: Math.round((stats.conversions / daysCount) * randomFactor * dayMultiplier),
+        date: date.toLocaleDateString("pl-PL"),
+        impressions: Math.round(
+          (stats.impressions / daysCount) * randomFactor * dayMultiplier
+        ),
+        clicks: Math.round(
+          (stats.clicks / daysCount) * randomFactor * dayMultiplier
+        ),
+        conversions: Math.round(
+          (stats.conversions / daysCount) * randomFactor * dayMultiplier
+        ),
         cost: Number(((stats.costSpent / daysCount) * randomFactor).toFixed(2)),
       };
     });
@@ -55,46 +73,68 @@ const FbCampaignSummaryTemplate: React.FC<FlowStepProps> = ({
   // Generate data for optimization impact chart
   const optimizationImpactData = useMemo(() => {
     if (!optimizations) return [];
-    
+
     const baseValue = 100;
     return [
       {
         name: "Wyświetlenia",
         "Bez optymalizacji": baseValue,
-        "Z optymalizacjami": optimizations.zwiększBudżet === "Tak" ? baseValue * 1.2 : 
-                             (optimizations.rozszerzTargetowanie === "Tak" ? baseValue * 1.15 : baseValue)
+        "Z optymalizacjami":
+          optimizations.zwiększBudżet === "Tak"
+            ? baseValue * 1.2
+            : optimizations.rozszerzTargetowanie === "Tak"
+            ? baseValue * 1.15
+            : baseValue,
       },
       {
         name: "Kliknięcia",
         "Bez optymalizacji": baseValue,
-        "Z optymalizacjami": optimizations.zmieńCTA === "Tak" ? baseValue * 1.25 : 
-                             (optimizations.optymalizacjaStawek === "Tak" ? baseValue * 1.18 : baseValue)
+        "Z optymalizacjami":
+          optimizations.zmieńCTA === "Tak"
+            ? baseValue * 1.25
+            : optimizations.optymalizacjaStawek === "Tak"
+            ? baseValue * 1.18
+            : baseValue,
       },
       {
         name: "Konwersje",
         "Bez optymalizacji": baseValue,
-        "Z optymalizacjami": (optimizations.zmieńCTA === "Tak" && optimizations.optymalizacjaStawek === "Tak") ? 
-                              baseValue * 1.3 : (optimizations.zmieńCTA === "Tak" ? baseValue * 1.2 : baseValue)
+        "Z optymalizacjami":
+          optimizations.zmieńCTA === "Tak" &&
+          optimizations.optymalizacjaStawek === "Tak"
+            ? baseValue * 1.3
+            : optimizations.zmieńCTA === "Tak"
+            ? baseValue * 1.2
+            : baseValue,
       },
       {
         name: "ROI",
         "Bez optymalizacji": baseValue,
-        "Z optymalizacjami": (optimizations.zwiększBudżet === "Tak" && optimizations.optymalizacjaStawek === "Tak") ? 
-                              baseValue * 1.35 : (optimizations.optymalizacjaStawek === "Tak" ? baseValue * 1.22 : baseValue)
-      }
+        "Z optymalizacjami":
+          optimizations.zwiększBudżet === "Tak" &&
+          optimizations.optymalizacjaStawek === "Tak"
+            ? baseValue * 1.35
+            : optimizations.optymalizacjaStawek === "Tak"
+            ? baseValue * 1.22
+            : baseValue,
+      },
     ];
   }, [optimizations]);
 
   // Format applied optimizations for display
   const appliedOptimizations = useMemo(() => {
     if (!optimizations) return [];
-    
+
     const list = [];
-    if (optimizations.zwiększBudżet === "Tak") list.push("Zwiększono dzienny budżet o 20%");
-    if (optimizations.rozszerzTargetowanie === "Tak") list.push("Rozszerzono targetowanie o dodatkowe grupy demograficzne");
-    if (optimizations.zmieńCTA === "Tak") list.push("Zmodyfikowano przycisk CTA");
-    if (optimizations.optymalizacjaStawek === "Tak") list.push("Włączono automatyczną optymalizację stawek");
-    
+    if (optimizations.zwiększBudżet === "Tak")
+      list.push("Zwiększono dzienny budżet o 20%");
+    if (optimizations.rozszerzTargetowanie === "Tak")
+      list.push("Rozszerzono targetowanie o dodatkowe grupy demograficzne");
+    if (optimizations.zmieńCTA === "Tak")
+      list.push("Zmodyfikowano przycisk CTA");
+    if (optimizations.optymalizacjaStawek === "Tak")
+      list.push("Włączono automatyczną optymalizację stawek");
+
     return list;
   }, [optimizations]);
 
@@ -102,7 +142,7 @@ const FbCampaignSummaryTemplate: React.FC<FlowStepProps> = ({
   const handleSubmit = () => {
     onSubmit({
       completed: true,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   };
 
@@ -110,7 +150,9 @@ const FbCampaignSummaryTemplate: React.FC<FlowStepProps> = ({
     <div className="space-y-6">
       {/* Header Section */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-6 rounded-lg text-white">
-        <h2 className="text-2xl font-bold mb-2">Podsumowanie kampanii Facebook</h2>
+        <h2 className="text-2xl font-bold mb-2">
+          Podsumowanie kampanii Facebook
+        </h2>
         <p className="text-blue-100">
           {fbCampaign.content?.tytuł_reklamy || "Kampania marketingowa"}
         </p>
@@ -119,7 +161,9 @@ const FbCampaignSummaryTemplate: React.FC<FlowStepProps> = ({
             f
           </div>
           <div>
-            <p className="font-medium">ID kampanii: {campaignApi.campaignApiResponse?.id || "N/A"}</p>
+            <p className="font-medium">
+              ID kampanii: {campaignApi.campaignApiResponse?.id || "N/A"}
+            </p>
             <p className="text-sm text-blue-200">
               Czas trwania: {fbCampaign.settings?.czas_trwania || "7"} dni
             </p>
@@ -132,11 +176,15 @@ const FbCampaignSummaryTemplate: React.FC<FlowStepProps> = ({
         {/* Left column - Summary text */}
         <div className="lg:col-span-1 space-y-4">
           <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold mb-3 text-gray-800">Podsumowanie kampanii</h3>
-            
-            {typeof campaignSummary === 'string' && campaignSummary ? (
+            <h3 className="text-lg font-semibold mb-3 text-gray-800">
+              Podsumowanie kampanii
+            </h3>
+
+            {typeof campaignSummary === "string" && campaignSummary ? (
               <div className="prose prose-sm max-w-none">
-                <p className="whitespace-pre-line text-gray-700">{campaignSummary}</p>
+                <p className="whitespace-pre-line text-gray-700">
+                  {campaignSummary}
+                </p>
               </div>
             ) : (
               <div className="bg-yellow-50 p-3 rounded-md">
@@ -149,8 +197,10 @@ const FbCampaignSummaryTemplate: React.FC<FlowStepProps> = ({
 
           {/* Applied optimizations */}
           <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold mb-3 text-gray-800">Zastosowane optymalizacje</h3>
-            
+            <h3 className="text-lg font-semibold mb-3 text-gray-800">
+              Zastosowane optymalizacje
+            </h3>
+
             {appliedOptimizations.length > 0 ? (
               <ul className="list-disc pl-5 space-y-1 text-gray-700">
                 {appliedOptimizations.map((opt, idx) => (
@@ -158,17 +208,21 @@ const FbCampaignSummaryTemplate: React.FC<FlowStepProps> = ({
                 ))}
               </ul>
             ) : (
-              <p className="text-gray-500 italic">Nie zastosowano optymalizacji</p>
+              <p className="text-gray-500 italic">
+                Nie zastosowano optymalizacji
+              </p>
             )}
           </div>
         </div>
-        
+
         {/* Right column - Charts */}
         <div className="lg:col-span-2 space-y-4">
           {/* Performance over time chart */}
           <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold mb-3 text-gray-800">Wydajność kampanii w czasie</h3>
-            
+            <h3 className="text-lg font-semibold mb-3 text-gray-800">
+              Wydajność kampanii w czasie
+            </h3>
+
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
@@ -207,11 +261,13 @@ const FbCampaignSummaryTemplate: React.FC<FlowStepProps> = ({
               </ResponsiveContainer>
             </div>
           </div>
-          
+
           {/* Optimization impact chart */}
           <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold mb-3 text-gray-800">Wpływ optymalizacji</h3>
-            
+            <h3 className="text-lg font-semibold mb-3 text-gray-800">
+              Wpływ optymalizacji
+            </h3>
+
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
@@ -239,23 +295,37 @@ const FbCampaignSummaryTemplate: React.FC<FlowStepProps> = ({
         {campaignStats.stats && (
           <>
             <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-              <h3 className="text-sm font-medium text-blue-700 mb-1">Wyświetlenia</h3>
-              <p className="text-2xl font-bold text-blue-900">{(campaignStats.stats.impressions || 0).toLocaleString()}</p>
+              <h3 className="text-sm font-medium text-blue-700 mb-1">
+                Wyświetlenia
+              </h3>
+              <p className="text-2xl font-bold text-blue-900">
+                {(campaignStats.stats.impressions || 0).toLocaleString()}
+              </p>
             </div>
-            
+
             <div className="bg-green-50 p-4 rounded-lg border border-green-100">
               <h3 className="text-sm font-medium text-green-700 mb-1">CTR</h3>
-              <p className="text-2xl font-bold text-green-900">{campaignStats.stats.ctr || 0}%</p>
+              <p className="text-2xl font-bold text-green-900">
+                {campaignStats.stats.ctr || 0}%
+              </p>
             </div>
-            
+
             <div className="bg-purple-50 p-4 rounded-lg border border-purple-100">
-              <h3 className="text-sm font-medium text-purple-700 mb-1">Konwersje</h3>
-              <p className="text-2xl font-bold text-purple-900">{(campaignStats.stats.conversions || 0).toLocaleString()}</p>
+              <h3 className="text-sm font-medium text-purple-700 mb-1">
+                Konwersje
+              </h3>
+              <p className="text-2xl font-bold text-purple-900">
+                {(campaignStats.stats.conversions || 0).toLocaleString()}
+              </p>
             </div>
-            
+
             <div className="bg-amber-50 p-4 rounded-lg border border-amber-100">
-              <h3 className="text-sm font-medium text-amber-700 mb-1">Wydatki</h3>
-              <p className="text-2xl font-bold text-amber-900">{(campaignStats.stats.costSpent || 0).toLocaleString()} PLN</p>
+              <h3 className="text-sm font-medium text-amber-700 mb-1">
+                Wydatki
+              </h3>
+              <p className="text-2xl font-bold text-amber-900">
+                {(campaignStats.stats.costSpent || 0).toLocaleString()} PLN
+              </p>
             </div>
           </>
         )}
@@ -263,13 +333,10 @@ const FbCampaignSummaryTemplate: React.FC<FlowStepProps> = ({
 
       {/* Navigation buttons */}
       <div className="flex justify-between pt-4 border-t border-gray-200">
-        <button
-          onClick={onPrevious}
-          className="px-4 py-2 bg-gray-200 rounded"
-        >
+        <button onClick={onPrevious} className="px-4 py-2 bg-gray-200 rounded">
           Wstecz
         </button>
-        
+
         <button
           onClick={handleSubmit}
           className="px-4 py-2 bg-blue-500 text-white rounded"

@@ -1,6 +1,5 @@
 // src/templates/layouts/DefaultLayout.tsx
 import React from 'react';
-import { LayoutProps } from 'template-registry-module';
 import UserDropdown from '@/auth/UserDropdown';  // Import UserDropdown
 
 const DefaultLayout: React.FC<LayoutProps> = ({ 

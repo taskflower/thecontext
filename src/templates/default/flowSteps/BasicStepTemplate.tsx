@@ -1,7 +1,7 @@
 // src/templates/default/flowSteps/BasicStepTemplate.tsx
 import React, { useState } from 'react';
-import { FlowStepProps } from 'template-registry-module';
 import { useAppStore } from '@/lib/store';
+import { FlowStepProps } from '@/views/types';
 
 const BasicStepTemplate: React.FC<FlowStepProps> = ({
   node,

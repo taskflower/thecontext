@@ -9,5 +9,6 @@ export function getLayoutsConfig(): LayoutTemplate[] {
       name: "Simple Layout",
       component: lazy(() => import("./SimpleLayout")),
     },
+   
   ];
 }
