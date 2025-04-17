@@ -16,5 +16,11 @@ export function getFlowStepsConfig(): FlowStepTemplate[] {
       compatibleNodeTypes: ["llm"],
       component: lazy(() => import("./LlmStepTemplate")),
     },
+    {
+      id: "summary-step",
+      name: "Summary Step",
+      compatibleNodeTypes: ["summary"],
+      component: lazy(() => import("./SummaryStepTemplate")),
+    },
   ];
 }
