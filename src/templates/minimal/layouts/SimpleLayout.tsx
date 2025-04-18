@@ -1,9 +1,8 @@
 // src/templates/minimal/layouts/SimpleLayout.tsx
-import React from "react";
 import { LayoutProps } from "../../baseTemplate";
 import { X } from "lucide-react";
 
-const SimpleLayout: React.FC<LayoutProps> = ({ children, title }) => (
+const SimpleLayout: React.FC<LayoutProps> = ({ children }) => (
   <div className="flex flex-col bg-white rounded-lg mx-auto w-full max-w-4xl h-full md:min-h-[95vh] md:max-h-[95vh]">
     {/* Header Section */}
     <div className="py-6 bg-white">
@@ -22,8 +21,8 @@ const SimpleLayout: React.FC<LayoutProps> = ({ children, title }) => (
           <br />
           Cię przez Twoją
           <br />
-          <span className="font-bold">{title || "pierwszą kampanię"}</span>
-        </h2>
+          <span className="font-bold">KAMPANIĘ</span>
+        </h2> 
       </div>
     </div>
 

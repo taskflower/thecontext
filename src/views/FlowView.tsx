@@ -9,24 +9,21 @@ import {
 } from "../lib/templates";
 import { useNodeManager } from "../hooks/useNodeManager";
 
-
-
 const FlowView: React.FC = () => {
-  // Extract route parameters
+  // Pobierz parametry z URL
   const { workspace, scenario } = useParams<{
     workspace: string;
     scenario: string;
   }>();
 
-  // Get store actions and state
+  // Pobierz funkcje ze store
   const {
     getCurrentWorkspace,
-    getCurrentScenario,
     selectWorkspace,
     selectScenario,
   } = useAppStore();
 
-  // Set up the workspace and scenario based on URL parameters
+  // Ustaw workspace i scenariusz na podstawie URL
   useEffect(() => {
     if (workspace) {
       selectWorkspace(workspace);
@@ -37,22 +34,20 @@ const FlowView: React.FC = () => {
     }
   }, [workspace, scenario, selectWorkspace, selectScenario]);
 
-  // Get workspace from store
+  // Pobierz aktualny workspace
   const currentWorkspace = getCurrentWorkspace();
-  // Note: currentScenario will be used from useNodeManager below
-
-  // Use the node manager to handle flow logic
+  
+  // Używamy node managera do obsługi logiki przepływu
   const {
     currentNode,
     isLastNode,
     handlePreviousNode,
     handleNodeExecution,
-    handleGoToScenariosList,
     contextItems,
     currentScenario,
   } = useNodeManager();
 
-  // If data is not yet loaded, show loading state
+  // Jeśli dane nie są jeszcze załadowane
   if (!currentWorkspace || !currentScenario) {
     return (
       <div className="min-h-screen p-4 flex items-center justify-center">
@@ -61,7 +56,7 @@ const FlowView: React.FC = () => {
     );
   }
 
-  // If current node is not available, show error state
+  // Jeśli nie ma aktualnego node'a
   if (!currentNode) {
     return (
       <div className="min-h-screen p-4 flex items-center justify-center">
@@ -70,12 +65,12 @@ const FlowView: React.FC = () => {
     );
   }
 
-  // Get layout component based on workspace settings
+  // Pobierz komponent layoutu na podstawie ustawień workspace'a
   const LayoutComponent = getLayoutComponent(
-    currentWorkspace.templateSettings.layoutTemplate
+    currentWorkspace.templateSettings?.layoutTemplate || "default"
   );
 
-  // Get flow step component based on node settings or type
+  // Pobierz komponent kroku na podstawie ustawień węzła
   let FlowStepComponent;
   if (currentNode.templateId) {
     FlowStepComponent = getFlowStepComponent(currentNode.templateId);
@@ -84,7 +79,7 @@ const FlowView: React.FC = () => {
     FlowStepComponent = flowStep?.component;
   }
 
-  // If components are missing, show error
+  // Jeśli brakuje komponentów, pokaż błąd
   if (!LayoutComponent) {
     return <div>Error: Layout component not found.</div>;
   }
@@ -93,41 +88,19 @@ const FlowView: React.FC = () => {
     return <div>Error: Flow step component not found.</div>;
   }
 
+  // Renderuj layout i komponent kroku
   return (
-    <>
-      <LayoutComponent
-        title={currentNode.label}
-       
-      >
-        {/* Add navigation buttons at top for education template */}
-        {currentWorkspace?.templateSettings?.layoutTemplate?.includes('edu') && (
-          <div className="mb-4">
-            {isLastNode ? (
-              <button
-                onClick={handleGoToScenariosList}
-                className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
-              >
-                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Powrót do listy lekcji
-              </button>
-            ) : null}
-          </div>
-        )}
-        
-        <FlowStepComponent
-         key={currentNode.id} 
-          node={currentNode}
-          onSubmit={handleNodeExecution}
-          onPrevious={handlePreviousNode}
-          isLastNode={isLastNode}
-          contextItems={contextItems}
-          scenario={currentScenario} // Pass the scenario for context
-        />
-      </LayoutComponent>
-
-    </>
+    <LayoutComponent>
+      <FlowStepComponent
+        key={currentNode.id}
+        node={currentNode}
+        onSubmit={handleNodeExecution}
+        onPrevious={handlePreviousNode}
+        isLastNode={isLastNode}
+        contextItems={contextItems}
+        scenario={currentScenario}
+      />
+    </LayoutComponent>
   );
 };
 

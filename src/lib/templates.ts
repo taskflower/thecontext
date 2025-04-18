@@ -1,26 +1,24 @@
 // src/lib/templates.ts
-
-
-// Create a singleton template registry
 import { templateRegistry as importedTemplateRegistry } from '../templates';
+import { LayoutTemplate, WidgetTemplate, FlowStepTemplate } from '../types';
 
 export const templateRegistry = importedTemplateRegistry;
 
-// Helper functions to get components from the registry
+// Zoptymalizowane funkcje pomocnicze
 export const getLayoutComponent = (id: string) => 
-  templateRegistry.getLayout(id)?.component;
+  id ? templateRegistry.getLayout(id)?.component : null;
 
 export const getWidgetComponent = (id: string) => 
-  templateRegistry.getWidget(id)?.component;
+  id ? templateRegistry.getWidget(id)?.component : null;
 
 export const getFlowStepComponent = (id: string) => 
-  templateRegistry.getFlowStep(id)?.component;
+  id ? templateRegistry.getFlowStep(id)?.component : null;
 
 export const getFlowStepForNodeType = (nodeType: string) => 
-  templateRegistry.getFlowStepForNodeType(nodeType);
+  nodeType ? templateRegistry.getFlowStepForNodeType(nodeType) : null;
 
-export const getWidgetsByCategory = (category: WidgetCategory) => 
-  templateRegistry.getWidgetsByCategory(category);
+export const getWidgetsByCategory = (category: string) => 
+  category ? templateRegistry.getWidgetsByCategory?.(category) || [] : [];
 
-// Export template types
-export type { LayoutTemplate, WidgetTemplate, FlowStepTemplate, WidgetCategory };
+// Eksport typów dla wygody
+export type { LayoutTemplate, WidgetTemplate, FlowStepTemplate };

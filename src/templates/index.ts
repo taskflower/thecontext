@@ -1,42 +1,35 @@
 // src/templates/index.ts
 import { templateRegistry } from "./registry";
-import { DefaultTemplate } from "./default";         // domyślny szablon dla layoutu i flow steps
-import { MinimalTemplate } from "./minimal";         // Twój minimalny szablon
+import { DefaultTemplate } from "./default";
+import { MinimalTemplate } from "./minimal";
 import { useAppStore } from "../lib/store";
-import { Workspace as StoreWorkspace } from "../lib/store";
+
 
 export { templateRegistry };
 
 export function initializeTemplates() {
-  // 1) Rejestrujemy layouty i kroki obu szablonów
+  // 1) Rejestrujemy komponenty szablonów
   const defaultTemplate = new DefaultTemplate();
   registerTemplate(defaultTemplate);
 
   const minimalTemplate = new MinimalTemplate();
   registerTemplate(minimalTemplate);
 
-  // 2) Łączymy workspace’y z obu szablonów
+  // 2) Pobieramy workspace'y
   const rawWorkspaces = [
     ...defaultTemplate.getWorkspaces(),
     ...minimalTemplate.getWorkspaces(),
   ];
 
-  // 3) Konwertujemy je na format store’a
-  const workspaces: StoreWorkspace[] = rawWorkspaces.map((w) => ({
+  // 3) Przygotowujemy dane do store'a
+  const workspaces = rawWorkspaces.map((w: any) => ({
     id: w.id,
     name: w.name,
-    icon:w.icon,
+    icon: w.icon,
     description: w.description,
-    scenarios: w.getScenarios().map((s) => ({
-      id: s.id,
-      name: s.name,
-      icon:s.icon,
-      description: s.description,
-      systemMessage: s.systemMessage,
-      nodes: s.getSteps(),
-    })),
+    scenarios: w.getScenarios ? w.getScenarios() : [],
     templateSettings: w.templateSettings,
-    initialContext: w.getInitialContext(),
+    initialContext: w.getInitialContext ? w.getInitialContext() : {},
   }));
 
   // 4) Ustawiamy w store
@@ -46,13 +39,22 @@ export function initializeTemplates() {
 }
 
 function registerTemplate(template: any) {
-  template.getLayouts().forEach((layout: any) => {
-    templateRegistry.registerLayout(layout);
-  });
-  template.getWidgets().forEach((widget: any) => {
-    templateRegistry.registerWidget(widget);
-  });
-  template.getFlowSteps().forEach((step: any) => {
-    templateRegistry.registerFlowStep(step);
-  });
+  // Rejestrujemy wszystkie komponenty szablonu
+  if (template.getLayouts) {
+    template.getLayouts().forEach((layout: any) => {
+      templateRegistry.registerLayout(layout);
+    });
+  }
+  
+  if (template.getWidgets) {
+    template.getWidgets().forEach((widget: any) => {
+      templateRegistry.registerWidget(widget);
+    });
+  }
+  
+  if (template.getFlowSteps) {
+    template.getFlowSteps().forEach((step: any) => {
+      templateRegistry.registerFlowStep(step);
+    });
+  }
 }

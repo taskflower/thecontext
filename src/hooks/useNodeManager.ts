@@ -1,192 +1,59 @@
 // src/hooks/useNodeManager.ts
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
 import { useAppStore } from "../lib/store";
+import { getValueByPath } from "../lib/byPath";
 
 export function useNodeManager() {
-  const navigate = useNavigate();
-  const {
-    getCurrentWorkspace,
-    getCurrentScenario,
-    getContext,
-    updateContext,
-    updateContextPath,
-    updateByContextPath, // New function
-  } = useAppStore();
+  const { getCurrentScenario, getContext, updateByContextPath } = useAppStore();
+  const scenario = getCurrentScenario();
+  const [idx, setIdx] = useState(0);
+  const [history, setHistory] = useState<number[]>([]);
 
-  const [currentNodeIndex, setCurrentNodeIndex] = useState(0);
-  const currentWorkspace = getCurrentWorkspace();
-  const currentScenario = getCurrentScenario();
-  const context = getContext();
+  const nodes = useMemo(() => {
+    if (!scenario) return [];
 
-  // Get nodes safely, with fallback to empty array
-  const nodes = currentScenario?.nodes || [];
+    return (scenario as any).nodes ?? (scenario as any).getSteps?.() ?? [];
+  }, [scenario]);
+  const node = nodes[idx];
+  const isLast = idx === nodes.length - 1;
 
-  // Get current node or undefined if not available
-  const currentNode =
-    nodes.length > currentNodeIndex ? nodes[currentNodeIndex] : undefined;
-
-  // Check if we're on the last node
-  const isLastNode = currentNodeIndex === nodes.length - 1;
-
-  // Reset node index when scenario changes
   useEffect(() => {
-    setCurrentNodeIndex(0);
-  }, [currentScenario?.id]);
+    setIdx(0);
+    setHistory([]);
+  }, [scenario?.id]);
 
-  // Get current context entries
-  const contextItems = Object.entries(context || {});
+  const contextItems = useMemo(() => {
+    const path = node?.contextPath;
+    if (!path) return [];
+    const ctx = getContext();
+    const val = getValueByPath(ctx, path);
+    return val !== undefined ? [[path, val]] : Object.entries(ctx);
+  }, [node, getContext]);
 
-  // Go back to scenarios list
-  const handleGoToScenariosList = () => {
-    if (currentWorkspace) {
-      navigate(`/${currentWorkspace.id}`);
-    } else {
-      navigate("/");
-    }
+  const handlePrevious = () => {
+    if (!history.length) return;
+    setHistory((h) => {
+      const prev = h[h.length - 1];
+      setIdx(prev);
+      return h.slice(0, -1);
+    });
   };
 
-  // Go to previous node or scenarios list
-  const handlePreviousNode = () => {
-    if (currentNodeIndex > 0) {
-      setCurrentNodeIndex(currentNodeIndex - 1);
-    } else {
-      handleGoToScenariosList();
+  const handleExecute = (data: any) => {
+    if (node?.contextPath != null && data !== undefined) {
+      updateByContextPath(node.contextPath, data);
     }
-  };
-
-  // Handle node execution with context updates
-  const handleNodeExecution = (value: any) => {
-    if (!currentNode) {
-      console.warn("[useNodeManager] Cannot execute node: no current node");
-      return;
-    }
-
-    // New approach: using contextPath
-    if (currentNode.contextPath) {
-      // Handle form data separately (because it's a complex object)
-      if (
-        (currentNode.type === "form" ||
-          currentNode.templateId === "form-step") &&
-        typeof value === "object"
-      ) {
-        // Get the base context key (part before first dot or the whole contextPath)
-        const contextKey = currentNode.contextPath.split(".")[0];
-
-        // Get existing data for this context key
-        const existingData = context[contextKey] || {};
-        const formData = { ...existingData };
-
-        // Update values from form
-        Object.entries(value).forEach(([fieldPath, fieldValue]) => {
-          const setNestedPath = (obj: any, path: string, val: any) => {
-            const keys = path.split(".");
-            let current = obj;
-
-            for (let i = 0; i < keys.length - 1; i++) {
-              const key = keys[i];
-              if (typeof current[key] !== "object" || current[key] === null) {
-                current[key] = {};
-              }
-              current = current[key];
-            }
-
-            const lastKey = keys[keys.length - 1];
-            current[lastKey] = val;
-          };
-
-          setNestedPath(formData, fieldPath, fieldValue);
-        });
-
-        updateContext(contextKey, formData);
-      }
-      // Simple value - use the new helper function
-      else {
-        updateByContextPath(currentNode.contextPath, value);
-      }
-    }
-    // Legacy approach: using contextKey and contextJsonPath
-    else if (currentNode.contextKey) {
-      // Handle basic input nodes with contextJsonPath
-      if (
-        (currentNode.type === "input" || !currentNode.type) &&
-        currentNode.contextKey &&
-        currentNode.contextJsonPath
-      ) {
-        updateContextPath(
-          currentNode.contextKey,
-          currentNode.contextJsonPath,
-          value
-        );
-      }
-      // Handle form nodes
-      else if (
-        currentNode.type === "form" ||
-        currentNode.templateId === "form-step"
-      ) {
-        if (typeof value === "object") {
-          // Get existing context data for this key
-          const existingContextData = context[currentNode.contextKey] || {};
-          const formData = { ...existingContextData };
-
-          // Update values from form
-          Object.entries(value).forEach(([fieldPath, fieldValue]) => {
-            const setPath = (obj: any, path: string, val: any) => {
-              const keys = path.split(".");
-              let current = obj;
-              for (let i = 0; i < keys.length - 1; i++) {
-                const key = keys[i];
-                if (typeof current[key] !== "object" || current[key] === null) {
-                  current[key] = {};
-                }
-                current = current[key];
-              }
-              const lastKey = keys[keys.length - 1];
-              current[lastKey] = val;
-            };
-
-            setPath(formData, fieldPath, fieldValue);
-          });
-
-          // Update context with new form data
-
-          updateContext(currentNode.contextKey, formData);
-        } else {
-          console.warn("[useNodeManager] Unexpected form data format:", value);
-        }
-      }
-      // Handle other node types with contextKey only
-      else {
-        updateContext(currentNode.contextKey, value);
-      }
-    }
-
-    // Handle navigation
-    if (isLastNode) {
-      handleGoToScenariosList();
-    } else {
-      setCurrentNodeIndex(currentNodeIndex + 1);
-    }
-  };
-
-  // Debugging info
-  const debugInfo = {
-    currentWorkspaceId: currentWorkspace?.id,
-    currentScenarioId: currentScenario?.id,
-    currentNodeIndex,
-    nodeCount: nodes.length,
-    currentNodeId: currentNode?.id,
-    context,
+    if (isLast) return;
+    setHistory((h) => [...h, idx]);
+    setIdx((i) => i + 1);
   };
 
   return {
-    currentNode,
-    currentScenario,
-    isLastNode,
-    handleGoToScenariosList,
-    handlePreviousNode,
-    handleNodeExecution,
-    debugInfo,
+    currentNode: node,
+    isLastNode: isLast,
+    handlePreviousNode: handlePrevious,
+    handleNodeExecution: handleExecute,
     contextItems,
+    currentScenario: scenario,
   };
 }

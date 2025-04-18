@@ -1,14 +1,14 @@
 // src/lib/store.ts
 import { create } from 'zustand';
-import { Scenario } from '../views/types';
 import { getValueByPath, setValueByPath } from './byPath';
-import { Workspace } from '@/templates/baseTemplate';
-
-
+import { 
+  Scenario, 
+  StoreWorkspace 
+} from '../types';
 
 interface AppState {
   // Podstawowe dane o workspaces
-  workspaces: Workspace[];
+  workspaces: StoreWorkspace[];
   currentWorkspaceId: string | null;
   currentScenarioId: string | null;
 
@@ -16,21 +16,23 @@ interface AppState {
   contexts: Record<string, Record<string, any>>;
   
   // Funkcje do zarządzania workspaces i scenariuszami
-  setInitialWorkspaces: (workspaces: Workspace[]) => void;
+  setInitialWorkspaces: (workspaces: StoreWorkspace[]) => void;
   selectWorkspace: (id: string) => void;
   selectScenario: (id: string) => void;
   
   // Funkcje pomocnicze do pobierania aktualnych danych
-  getCurrentWorkspace: () => Workspace | undefined;
+  getCurrentWorkspace: () => StoreWorkspace | undefined;
   getCurrentScenario: () => Scenario | undefined;
   
   // Funkcje do zarządzania kontekstem
   updateContext: (key: string, value: any) => void;
   updateContextPath: (key: string, jsonPath: string, value: any) => void;
-  updateByContextPath: (contextPath: string, value: any) => void; // Nowa funkcja
+  updateByContextPath: (contextPath: string, value: any) => void;
   processTemplate: (template: string) => string;
-  getContext: () => Record<string, any>;
+  getContext: (path?: string) => any;
   getContextPath: (path: string) => any;
+  hasContextPath: (path: string) => boolean;
+  getSchemaForType: (type: string, schemaPath: string) => any;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -111,7 +113,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   getCurrentScenario: () => {
     const workspace = get().getCurrentWorkspace();
     if (!workspace) return undefined;
-    return workspace.scenarios.find(s => s.id === get().currentScenarioId);
+    return workspace.scenarios.find((s: Scenario) => s.id === get().currentScenarioId);
   },
   
   // Aktualizacja całego klucza kontekstu
@@ -155,7 +157,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     });
   },
   
-  // Nowa funkcja - aktualizacja kontekstu za pomocą pojedynczej ścieżki
+  // Aktualizacja kontekstu za pomocą pojedynczej ścieżki
   updateByContextPath: (contextPath, value) => {
     if (!contextPath) {
       return;
@@ -198,8 +200,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   
   // Getter dla aktualnego kontekstu
-  // Może być wywołany bez parametrów (zwraca cały kontekst) 
-  // lub z parametrem ścieżki (zwraca wartość pod określoną ścieżką)
   getContext: (path?: string) => {
     const { currentWorkspaceId, contexts } = get();
     const context = currentWorkspaceId ? (contexts[currentWorkspaceId] || {}) : {};
