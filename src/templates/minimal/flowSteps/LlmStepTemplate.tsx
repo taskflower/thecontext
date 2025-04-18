@@ -23,7 +23,7 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({ node, onSubmit, onPrevious, 
   }, []);
 
   return (
-    <div className="p-6">
+    <div>
       <div className="mb-4">
         <h3 className="font-bold text-base text-gray-900">
           {node.label ? `Krok: ${node.label}` : 'Analiza AI'}

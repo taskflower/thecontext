@@ -1,26 +1,26 @@
-// src/views/WorkspaceView.tsx - Updated with Icons
+// src/views/WorkspaceView.tsx - Updated with consistent icon support
 import React, { Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "../lib/store";
-import { templateRegistry } from "../lib/templates";
-
+import { getWidgetComponent, getLayoutComponent } from "../lib/templates";
 
 export const WorkspaceView: React.FC = () => {
   const { workspaces } = useAppStore();
   const navigate = useNavigate();
 
-  // Use default layout template for workspace view
-  const LayoutComponent = templateRegistry.getLayout("default")?.component;
-
+  // Use default layout template
+  const LayoutComponent = getLayoutComponent("default");
   if (!LayoutComponent) {
     return <div className="p-4">Default layout template not found</div>;
   }
 
-  // Use default widget template for workspace view
-  const WidgetComponent = templateRegistry.getWidget("card-list")?.component;
-
+  // Prefer icon-card-list if available, fallback to card-list
+  let WidgetComponent = getWidgetComponent("icon-card-list");
   if (!WidgetComponent) {
-    return <div className="p-4">Default widget template not found</div>;
+    WidgetComponent = getWidgetComponent("card-list");
+    if (!WidgetComponent) {
+      return <div className="p-4">Default widget template not found</div>;
+    }
   }
 
   const handleSelect = (workspaceId: string) => {
@@ -28,14 +28,16 @@ export const WorkspaceView: React.FC = () => {
     navigate(`/${workspaceId}`);
   };
 
-  // Map workspaces to the format expected by the widget
+  // Map workspaces to the format expected by the widget - include icon
   const workspaceData = workspaces.map((workspace) => ({
     id: workspace.id,
     name: workspace.name,
-    description: `Template: ${workspace.templateSettings.layoutTemplate}`,
+    description:
+      workspace.description ||
+      `Template: ${workspace.templateSettings.layoutTemplate}`,
     count: workspace.scenarios.length,
     countLabel: "scenarios",
-    icon: workspace.icon || "general", // Dodajemy ikonę z workspace lub domyślną "general"
+    icon: workspace.icon, // Use icon from workspace or fallback to "briefcase"
   }));
 
   return (
@@ -46,8 +48,7 @@ export const WorkspaceView: React.FC = () => {
         </div>
       }
     >
-      <LayoutComponent title="Workspaces">
-        {/* Jeśli potrzeba, możemy dodać tutaj customowy header z ikoną */}
+      <LayoutComponent>
         <WidgetComponent data={workspaceData} onSelect={handleSelect} />
       </LayoutComponent>
     </Suspense>

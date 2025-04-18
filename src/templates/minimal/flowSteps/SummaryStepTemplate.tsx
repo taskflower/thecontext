@@ -20,7 +20,7 @@ const SummaryStepTemplate: React.FC<FlowStepProps> = ({ node, onSubmit, onPrevio
     : '';
   
   return (
-    <div className="p-6">
+    <div>
       <div className="mb-4">
         <h3 className="font-bold text-xl text-gray-900">Podsumowanie analizy biznesowej</h3>
       </div>

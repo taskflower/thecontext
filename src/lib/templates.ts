@@ -1,10 +1,5 @@
 // src/lib/templates.ts
-import { 
-  LayoutTemplate,
-  WidgetTemplate,
-  FlowStepTemplate,
-  WidgetCategory
-} from '../../raw_modules/template-registry-module/src';
+
 
 // Create a singleton template registry
 import { templateRegistry as importedTemplateRegistry } from '../templates';

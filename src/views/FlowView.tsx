@@ -97,7 +97,7 @@ const FlowView: React.FC = () => {
     <>
       <LayoutComponent
         title={currentNode.label}
-        showBackButton={false} // No back button in educational template
+       
       >
         {/* Add navigation buttons at top for education template */}
         {currentWorkspace?.templateSettings?.layoutTemplate?.includes('edu') && (

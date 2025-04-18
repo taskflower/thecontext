@@ -5,8 +5,6 @@ import UserDropdown from '@/auth/UserDropdown';
 const SidebarLayout: React.FC<LayoutProps> = ({ 
   children, 
   title, 
-  showBackButton, 
-  onBackClick 
 }) => {
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -27,14 +25,14 @@ const SidebarLayout: React.FC<LayoutProps> = ({
         {title && (
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold">{title}</h1>
-            {showBackButton && (
+           
               <button
                 onClick={onBackClick}
                 className="text-sm text-gray-600 hover:text-gray-800"
               >
                 Back
               </button>
-            )}
+            
           </div>
         )}
         <div className="bg-white rounded-lg shadow-sm p-6">

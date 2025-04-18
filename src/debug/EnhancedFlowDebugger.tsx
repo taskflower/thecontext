@@ -156,12 +156,12 @@ export const EnhancedFlowDebugger = () => {
   if (!isVisible) {
     return (
       <button
-        className="fixed right-3 top-3 z-50 px-3 py-1.5 rounded-md bg-blue-600 text-white font-medium flex items-center shadow-md hover:bg-blue-700 transition-colors"
+        className="fixed right-3 bottom-3 z-50 px-3 py-2 text-xs rounded-md bg-gray-600 text-white font-medium flex items-center shadow-md hover:bg-gray-700 transition-colors"
         onClick={toggleDebugger}
         title="Ctrl+Shift+D aby włączyć/wyłączyć debugger"
       >
         <Database className="w-4 h-4 mr-1.5" />
-        Pokaż Debugger
+        Debugger
       </button>
     );
   }

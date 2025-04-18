@@ -1,72 +1,63 @@
-// src/views/ScenarioView.tsx - Updated with Icons
-import React, { Suspense } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAppStore } from '../lib/store';
-import { getWidgetComponent, getLayoutComponent } from '../lib/templates';
-import { SubjectIcon } from '../components/SubjectIcon';
+// src/views/ScenarioView.tsx - Updated with enhanced icon support
+import React, { Suspense } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAppStore } from "../lib/store";
+import { getWidgetComponent, getLayoutComponent } from "../lib/templates";
+
 
 export const ScenarioView: React.FC = () => {
   const navigate = useNavigate();
   const { getCurrentWorkspace } = useAppStore();
   const currentWorkspace = getCurrentWorkspace();
-  
-  // Jeśli brak workspace, przekieruj do strony głównej
+
+  // Redirect to home if workspace not found
   if (!currentWorkspace) {
-    navigate('/');
+    navigate("/");
     return null;
   }
-  
+
   const { templateSettings, scenarios = [] } = currentWorkspace;
-  
-  // Pobierz komponent layoutu dla widoku
+
+  // Get layout component
   const LayoutComponent = getLayoutComponent(templateSettings.layoutTemplate);
   if (!LayoutComponent) {
     return <div className="p-4">Layout template not found</div>;
   }
-  
-  // Pobierz komponent widgetu dla scenariusza - zamiast przypisywać do stałej, użyjmy zmiennej
-  let WidgetComponent = getWidgetComponent(templateSettings.scenarioWidgetTemplate);
+
+  // Get widget component - use the one specified in template settings
+  let WidgetComponent = getWidgetComponent(
+    templateSettings.scenarioWidgetTemplate
+  );
   if (!WidgetComponent) {
-    // Jeśli nie znaleziono widgetu, użyj domyślnego (card-list)
-    WidgetComponent = getWidgetComponent('card-list');
+    // If widget not found, fallback to default
+    WidgetComponent = getWidgetComponent("card-list");
     if (!WidgetComponent) {
       return <div className="p-4">Default widget template not found</div>;
     }
   }
-  
-  // Obsługa wyboru scenariusza
+
+  // Handle scenario selection
   const handleSelectScenario = (scenarioId: string) => {
     navigate(`/${currentWorkspace.id}/${scenarioId}`);
   };
-  
-  // Przygotuj dane w formacie odpowiednim dla widgetu
-  const scenarioData = scenarios.map(scenario => ({
+
+// Przygotuj dane scenariuszy łącznie z ikonami
+const scenarioData = scenarios.map((scenario) => {
+  console.log("Scenario icon:", scenario.icon); // Dodaj log do debugowania
+  return {
     id: scenario.id,
     name: scenario.name,
     description: scenario.description,
-    count: scenario.nodes?.length || 0,
+    count: scenario.getSteps?.().length || 0, // Używaj metody getSteps jeśli istnieje
     countLabel: "steps",
-    icon: scenario.icon || "class" // Dodajemy ikonę ze scenariusza lub domyślną "class"
-  }));
-  
+    icon: scenario.icon || "default-icon", // Dodaj fallback dla ikony
+  };
+});
+
   return (
     <Suspense fallback={<div className="p-4">Loading...</div>}>
-      <LayoutComponent 
-        title={
-          <div className="flex items-center gap-2">
-            {currentWorkspace.icon && (
-              <SubjectIcon iconName={currentWorkspace.icon} size={24} className="text-slate-700" />
-            )}
-            <span>{currentWorkspace.name} - Scenarios</span>
-          </div>
-        }
-        showBackButton={true}
-        onBackClick={() => navigate('/')}
-      >
-        <WidgetComponent 
-          data={scenarioData} 
-          onSelect={handleSelectScenario} 
-        />
+      <LayoutComponent>
+        <WidgetComponent data={scenarioData} onSelect={handleSelectScenario} />
       </LayoutComponent>
     </Suspense>
   );

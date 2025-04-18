@@ -25,10 +25,12 @@ export function initializeTemplates() {
   const workspaces: StoreWorkspace[] = rawWorkspaces.map((w) => ({
     id: w.id,
     name: w.name,
+    icon:w.icon,
     description: w.description,
     scenarios: w.getScenarios().map((s) => ({
       id: s.id,
       name: s.name,
+      icon:s.icon,
       description: s.description,
       systemMessage: s.systemMessage,
       nodes: s.getSteps(),
