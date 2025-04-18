@@ -1,10 +1,12 @@
 // src/hooks/useNodeManager.ts
 import { useState, useEffect, useMemo } from "react";
-import { useAppStore } from "../lib/store";
 import { getValueByPath } from "../lib/byPath";
+import { useContextStore } from "./useContextStore";
+import { useWorkspaceStore } from "./useWorkspaceStore";
 
 export function useNodeManager() {
-  const { getCurrentScenario, getContext, updateByContextPath } = useAppStore();
+  const { getContext, updateByContextPath } = useContextStore();
+  const { getCurrentScenario } = useWorkspaceStore();
   const scenario = getCurrentScenario();
   const [idx, setIdx] = useState(0);
   const [history, setHistory] = useState<number[]>([]);

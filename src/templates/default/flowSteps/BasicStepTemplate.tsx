@@ -1,26 +1,26 @@
 // src/templates/default/flowSteps/BasicStepTemplate.tsx
-import React, { useState } from 'react';
-import { useAppStore } from '@/lib/store';
-import { FlowStepProps } from '@/views/types';
+import { useState } from "react";
+import { FlowStepProps } from "@/views/types";
+import { useContextStore } from "@/hooks/useContextStore";
 
 const BasicStepTemplate: React.FC<FlowStepProps> = ({
   node,
   onSubmit,
   onPrevious,
-  isLastNode
+  isLastNode,
 }) => {
-  const [userInput, setUserInput] = useState('');
-  
-  // Używamy useAppStore 
-  const processTemplate = useAppStore(state => state.processTemplate);
+  const [userInput, setUserInput] = useState("");
+  const processTemplate = useContextStore((state) => state.processTemplate);
 
   // Przetwarzamy wiadomość asystenta z kontekstem
-  const processedMessage = node.assistantMessage ? processTemplate(node.assistantMessage) : '';
+  const processedMessage = node.assistantMessage
+    ? processTemplate(node.assistantMessage)
+    : "";
 
   const handleSubmit = () => {
     if (!userInput.trim()) return;
     onSubmit(userInput);
-    setUserInput('');
+    setUserInput("");
   };
 
   return (
@@ -28,7 +28,7 @@ const BasicStepTemplate: React.FC<FlowStepProps> = ({
       <div className="p-4 bg-gray-100 rounded-lg">
         <p className="whitespace-pre-line">{processedMessage}</p>
       </div>
-      
+
       <div>
         <textarea
           value={userInput}
@@ -38,21 +38,18 @@ const BasicStepTemplate: React.FC<FlowStepProps> = ({
           placeholder="Type your response..."
         ></textarea>
       </div>
-      
+
       <div className="flex justify-between">
-        <button
-          onClick={onPrevious}
-          className="px-4 py-2 bg-gray-200 rounded"
-        >
+        <button onClick={onPrevious} className="px-4 py-2 bg-gray-200 rounded">
           Back
         </button>
-        
+
         <button
           onClick={handleSubmit}
           disabled={!userInput.trim()}
           className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-300"
         >
-          {isLastNode ? 'Finish' : 'Continue'}
+          {isLastNode ? "Finish" : "Continue"}
         </button>
       </div>
     </div>

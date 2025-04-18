@@ -1,243 +1,88 @@
-import { useState, useCallback, useEffect } from "react";
-import { useAppStore } from "@/lib/store";
+// src/hooks/useFormInput.ts
+import { useState, useEffect } from "react";
 import { FormField } from "@/types";
+import { useContextStore } from "./useContextStore";
+import { useWorkspaceStore } from "./useWorkspaceStore";
 
 interface FormInputAttrs {
-  formSchemaPath?: string;
-  schemaPath?: string;
-  [key: string]: any;
+  schemaPath?: string; // np. 'schemas.form.website'
 }
 
 interface UseFormInputProps {
   node: {
     attrs?: FormInputAttrs;
     assistantMessage?: string;
-    contextPath?: string;
-    contextKey?: string;
+    contextPath?: string; // np. 'web'
   };
 }
 
-interface UseFormInputReturn {
-  formData: Record<string, any>;
-  formFields: FormField[];
-  processedAssistantMessage: string;
-  handleChange: (name: string, value: any) => void;
-  handleSubmit: (e: React.FormEvent) => void;
-  areRequiredFieldsFilled: () => boolean;
-}
-
-export const useFormInput = ({
-  node,
-}: UseFormInputProps): UseFormInputReturn => {
-  // State
+/**
+ * Hook obsługujący formularze na podstawie schematu z kontekstu.
+ */
+export function useFormInput({ node }: UseFormInputProps) {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [formFields, setFormFields] = useState<FormField[]>([]);
 
-  // Get attrs from node with typing
-  const attrs = node.attrs as FormInputAttrs;
+  // Selektory store
+  const processTemplate = useContextStore((s) => s.processTemplate);
+  const updateByContextPath = useContextStore((s) => s.updateByContextPath);
+  const currentWorkspaceId = useWorkspaceStore((s) => s.currentWorkspaceId);
 
-  // Get context functions from AppStore
-  const processTemplate = useAppStore((state) => state.processTemplate);
-  const updateContext = useAppStore((state) => state.updateContext);
-  const getContextPath = useAppStore((state) => state.getContextPath);
-  const getContext = useAppStore((state) => state.getContext);
+  // Uzyskaj mapę formSchemas z aktualnego workspace
+  const contextSchemas = useContextStore(
+    (state) => state.contexts[currentWorkspaceId || ""]?.schemas?.form
+  );
 
-  // Process assistant message with context variables
+  const attrs = node.attrs || {};
   const processedAssistantMessage = node.assistantMessage
     ? processTemplate(node.assistantMessage)
     : "";
 
-  // Load form schema
+  // Gdy zmieni się kontekstowych schemat lub ścieżka, ustaw formFields
   useEffect(() => {
-    // First try new schema path format if provided
-    if (attrs?.schemaPath) {
-      let schemaPath = attrs.schemaPath;
-
-      // Ensure schemas prefix is present
-      if (!schemaPath.startsWith("schemas.form.")) {
-        schemaPath = schemaPath.startsWith("schemas.")
-          ? schemaPath
-          : `schemas.form.${schemaPath}`;
-      }
-
-      const schema = getContextPath(schemaPath);
-      if (schema && Array.isArray(schema)) {
-        setFormFields(schema);
-        return;
-      } else {
-        console.warn(`Form schema not found using new path: ${schemaPath}`);
-      }
+    if (!contextSchemas || !attrs.schemaPath) {
+      setFormFields([]);
+      return;
     }
-
-    // Fall back to old formSchemaPath if no schemaPath or it failed
-    if (attrs?.formSchemaPath) {
-      // Spróbuj najpierw bezpośrednio z ścieżką
-      const schema = getContextPath(attrs.formSchemaPath);
-      if (schema && Array.isArray(schema)) {
-        setFormFields(schema);
-
-        return;
-      }
-
-      // Spróbuj dodać prefix schemas.form jeśli nie ma go jeszcze
-      if (!attrs.formSchemaPath.startsWith("schemas.")) {
-        const schemasFormPath = `schemas.form.${attrs.formSchemaPath}`;
-        const schemaWithPrefix = getContextPath(schemasFormPath);
-
-        if (schemaWithPrefix && Array.isArray(schemaWithPrefix)) {
-          setFormFields(schemaWithPrefix);
-
-          return;
-        }
-      }
-
-      // Spróbuj z prefiksem formSchemas jako ostatnią opcję
-      if (!attrs.formSchemaPath.startsWith("formSchemas.")) {
-        const fullPath = `formSchemas.${attrs.formSchemaPath}`;
-        const altSchema = getContextPath(fullPath);
-
-        if (altSchema && Array.isArray(altSchema)) {
-          setFormFields(altSchema);
-          return;
-        }
-      }
-
-      console.error("Failed to load form schema from any path", {
-        providedPath: attrs.formSchemaPath,
-        schemasFormPath: `schemas.form.${attrs.formSchemaPath}`,
-        formSchemasPath: `formSchemas.${attrs.formSchemaPath}`,
-      });
+    // schemaPath ma postać 'schemas.form.website' -> wyciągnij 'website'
+    const key = attrs.schemaPath.replace(/^schemas\.form\./, "");
+    const fields = (contextSchemas as Record<string, FormField[]>)[key];
+    if (Array.isArray(fields)) {
+      setFormFields(fields);
+    } else {
+      console.warn("useFormInput: brak schematu dla", attrs.schemaPath);
+      setFormFields([]);
     }
+  }, [contextSchemas, attrs.schemaPath]);
 
-    // Jeśli nic nie znaleziono, spróbuj użyć ścieżki kontekstowej
-    if (node.contextPath) {
-      const contextKey = node.contextPath.split(".")[0];
-      const possibleSchemaPath = `schemas.form.${contextKey}`;
-      const schemaByContext = getContextPath(possibleSchemaPath);
-
-      if (schemaByContext && Array.isArray(schemaByContext)) {
-        setFormFields(schemaByContext);
-        return;
-      }
-
-      // Sprawdź też starszy format
-      const legacySchemaPath = `formSchemas.${contextKey}`;
-      const legacySchemaByContext = getContextPath(legacySchemaPath);
-
-      if (legacySchemaByContext && Array.isArray(legacySchemaByContext)) {
-        setFormFields(legacySchemaByContext);
-        return;
-      }
-    }
-
-    console.warn("Could not find any valid form schema");
-  }, [attrs, getContextPath, node.contextPath]);
-
-  // Check if all required fields are filled
-  const areRequiredFieldsFilled = useCallback(() => {
-    if (!formFields.length) return true;
-
-    return formFields.every((field) => {
-      if (field.required) {
-        const value = formData[field.name];
-        return value !== undefined && value !== "" && value !== null;
-      }
-      return true;
-    });
-  }, [formFields, formData]);
-
-  // Handle form field changes
+  /**
+   * Aktualizuje lokalny stan formData
+   */
   const handleChange = (name: string, value: any) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle form submission
+  /**
+   * Zapisuje wszystkie pola do kontekstu pod ścieżką node.contextPath
+   */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // New logic for handling contextPath
-    if (node.contextPath && formFields.length > 0) {
-      // Get main context key from contextPath
-      const contextKey = node.contextPath.split(".")[0];
-
-      // Get current context
-      let contextData = getContext();
-      const profileData = contextData[contextKey] || {};
-
-      // Create a copy to avoid modifying the original object
-      const updatedProfile = { ...profileData };
-
-      // Update data from form
-      formFields.forEach((field) => {
-        const value = formData[field.name];
-        if (value !== undefined) {
-          if (field.name.includes(".")) {
-            // Handle nested fields
-            const parts = field.name.split(".");
-            let current = updatedProfile;
-
-            for (let i = 0; i < parts.length - 1; i++) {
-              const part = parts[i];
-              // Initialize object if it doesn't exist
-              if (!current[part]) {
-                current[part] = {};
-              }
-              current = current[part];
-            }
-            current[parts[parts.length - 1]] = value;
-          } else {
-            // Non-nested fields
-            updatedProfile[field.name] = value;
-          }
-        }
+    if (node.contextPath) {
+      const basePath = node.contextPath;
+      Object.entries(formData).forEach(([key, value]) => {
+        updateByContextPath(`${basePath}.${key}`, value);
       });
-
-      // Update the entire object in context
-      updateContext(contextKey, updatedProfile);
     }
-    // Handle older method with contextKey
-    else if (node.contextKey && formFields.length > 0) {
-      // Get current context
-      let contextData = getContext();
-      const userProfileData = contextData[node.contextKey] || {};
-
-      // Create a copy to avoid modifying the original object
-      const updatedUserProfile = { ...userProfileData };
-
-      // Update data from form
-      formFields.forEach((field) => {
-        const value = formData[field.name];
-        if (value !== undefined) {
-          if (field.name.includes(".")) {
-            // Handle nested fields
-            const parts = field.name.split(".");
-            let current = updatedUserProfile;
-
-            for (let i = 0; i < parts.length - 1; i++) {
-              const part = parts[i];
-              // Initialize object if it doesn't exist
-              if (!current[part]) {
-                current[part] = {};
-              }
-              current = current[part];
-            }
-            current[parts[parts.length - 1]] = value;
-          } else {
-            // Non-nested fields
-            updatedUserProfile[field.name] = value;
-          }
-        }
-      });
-
-      // Update the entire object in context
-      updateContext(node.contextKey, updatedUserProfile);
-    }
-
     return formData;
   };
+
+  /**
+   * Sprawdza, czy wszystkie wymagane pola są wypełnione
+   */
+  const areRequiredFieldsFilled = () =>
+    formFields.every(
+      (f) => !f.required || (formData[f.name] !== undefined && formData[f.name] !== "")
+    );
 
   return {
     formData,
@@ -247,4 +92,7 @@ export const useFormInput = ({
     handleSubmit,
     areRequiredFieldsFilled,
   };
-};
+}
+
+
+

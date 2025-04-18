@@ -1,13 +1,13 @@
 // src/views/FlowView.tsx
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useAppStore } from "../lib/store";
 import {
   getLayoutComponent,
   getFlowStepComponent,
   getFlowStepForNodeType,
 } from "../lib/templates";
 import { useNodeManager } from "../hooks/useNodeManager";
+import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
 
 const FlowView: React.FC = () => {
   // Pobierz parametry z URL
@@ -21,7 +21,7 @@ const FlowView: React.FC = () => {
     getCurrentWorkspace,
     selectWorkspace,
     selectScenario,
-  } = useAppStore();
+  } = useWorkspaceStore();
 
   // Ustaw workspace i scenariusz na podstawie URL
   useEffect(() => {

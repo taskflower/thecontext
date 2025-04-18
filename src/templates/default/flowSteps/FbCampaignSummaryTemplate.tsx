@@ -1,7 +1,7 @@
 // src/templates/default/flowSteps/FbCampaignSummaryTemplate.tsx
-import React, { useMemo } from "react";
+import  { useMemo } from "react";
 
-import { useAppStore } from "@/lib/store";
+
 import {
   LineChart,
   Line,
@@ -15,6 +15,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { FlowStepProps } from "@/views/types";
+import { useContextStore } from "@/hooks/useContextStore";
 
 const FbCampaignSummaryTemplate: React.FC<FlowStepProps> = ({
   node,
@@ -22,8 +23,8 @@ const FbCampaignSummaryTemplate: React.FC<FlowStepProps> = ({
   onPrevious,
   isLastNode,
 }) => {
-  const processTemplate = useAppStore((state) => state.processTemplate);
-  const getContextPath = useAppStore((state) => state.getContextPath);
+  const processTemplate = useContextStore((state) => state.processTemplate);
+  const getContextPath = useContextStore((state) => state.getContextPath);
 
   // Process assistant message with context variables
   const processedMessage = node.assistantMessage

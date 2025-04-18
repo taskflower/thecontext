@@ -1,10 +1,11 @@
-import { useAppStore } from '@/lib/store';
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLlmService } from '../lib/scenarioGeneratorLLM';
 import { useAuth } from '@/hooks/useAuth';
 import { Scenario } from '@/types';
 import { createNewScenario } from '../lib/scenarioGenerator';
+import { useWorkspaceStore } from '@/hooks/useWorkspaceStore';
 
 
 /**
@@ -19,7 +20,7 @@ const ScenarioGenerator: React.FC = () => {
   const [generatedCode, setGeneratedCode] = useState('');
   
   const navigate = useNavigate();
-  const { getCurrentWorkspace } = useAppStore();
+  const { getCurrentWorkspace } = useWorkspaceStore();
   const currentWorkspace = getCurrentWorkspace();
   const llmService = useLlmService();
   const { user } = useAuth();

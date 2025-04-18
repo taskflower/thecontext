@@ -1,8 +1,8 @@
 // src/templates/default/flowSteps/FbCampaignStatsTemplate.tsx
 // Template do analizy statystyk kampanii Facebook
-import React, { useState } from "react";
-import { useAppStore } from "@/lib/store";
+import { useState } from "react";
 import { FlowStepProps } from "@/views/types";
+import { useContextStore } from "@/hooks/useContextStore";
 
 const FbCampaignStatsTemplate: React.FC<FlowStepProps> = ({
   node,
@@ -12,8 +12,8 @@ const FbCampaignStatsTemplate: React.FC<FlowStepProps> = ({
 }) => {
   const [timeframe, setTimeframe] = useState<"today" | "week" | "month">("week");
   
-  const processTemplate = useAppStore((state) => state.processTemplate);
-  const getContextPath = useAppStore((state) => state.getContextPath);
+  const processTemplate = useContextStore((state) => state.processTemplate);
+  const getContextPath = useContextStore((state) => state.getContextPath);
 
   // Get campaign data from context
   const fbCampaign = getContextPath("fbCampaign") || {};

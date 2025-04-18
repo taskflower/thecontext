@@ -1,20 +1,14 @@
 // src/templates/minimal/flowSteps/SummaryStepTemplate.tsx
 import React from "react";
 import { FlowStepProps } from "../../baseTemplate";
-import { useAppStore } from "@/lib/store";
+import { useContextStore } from "@/hooks/useContextStore";
+
 
 const SummaryStepTemplate: React.FC<FlowStepProps> = ({ node, onSubmit, onPrevious, isLastNode }) => {
-  // Pobieranie danych z kontekstu
-  const getContextPath = useAppStore((state) => state.getContextPath);
-  const processTemplate = useAppStore((state) => state.processTemplate);
-  
-  // Pobierz dane z formularza
+  const getContextPath = useContextStore((state) => state.getContextPath);
+  const processTemplate = useContextStore((state) => state.processTemplate);
   const financialData = getContextPath("collect-data") || {};
-  
-  // Pobierz dane z analizy AI
   const reportData = getContextPath("generate-report") || {};
-
-  // Process assistant message with context variables
   const processedMessage = node.assistantMessage
     ? processTemplate(node.assistantMessage)
     : '';

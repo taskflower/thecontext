@@ -2,13 +2,14 @@
 import React, { useEffect } from "react";
 import { FlowStepProps } from "../../baseTemplate";
 import { useLlmWithZod } from "@/hooks/useLLM";
-import { useAppStore } from "@/lib/store";
+import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
+
 
 const LlmStepTemplate: React.FC<FlowStepProps> = ({ node, onSubmit, onPrevious, isLastNode }) => {
   const { sendMessage, isLoading, error, responseData, processedAssistantMessage } =
     useLlmWithZod({
       assistantMessage: node.assistantMessage || "",
-      systemMessage: node.attrs?.includeSystemMessage ? useAppStore.getState().getCurrentScenario()?.systemMessage || "" : "",
+      systemMessage: node.attrs?.includeSystemMessage ? useWorkspaceStore.getState().getCurrentScenario()?.systemMessage || "" : "",
       initialUserMessage: node.attrs?.initialUserMessage || "",
       schemaPath: node.attrs?.schemaPath || "",
       contextPath: node.contextPath,

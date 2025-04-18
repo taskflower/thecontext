@@ -1,13 +1,15 @@
 // src/views/ScenarioView.tsx - Updated with enhanced icon support
 import React, { Suspense } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAppStore } from "../lib/store";
+
 import { getWidgetComponent, getLayoutComponent } from "../lib/templates";
+import { Scenario } from "@/types";
+import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
 
 
 export const ScenarioView: React.FC = () => {
   const navigate = useNavigate();
-  const { getCurrentWorkspace } = useAppStore();
+  const { getCurrentWorkspace } = useWorkspaceStore();
   const currentWorkspace = getCurrentWorkspace();
 
   // Redirect to home if workspace not found
@@ -42,7 +44,7 @@ export const ScenarioView: React.FC = () => {
   };
 
 // Przygotuj dane scenariuszy łącznie z ikonami
-const scenarioData = scenarios.map((scenario) => {
+const scenarioData = scenarios.map((scenario:Scenario) => {
   console.log("Scenario icon:", scenario.icon); // Dodaj log do debugowania
   return {
     id: scenario.id,

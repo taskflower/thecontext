@@ -2,12 +2,12 @@
 import { templateRegistry } from "./registry";
 import { DefaultTemplate } from "./default";
 import { MinimalTemplate } from "./minimal";
-import { useAppStore } from "../lib/store";
-
+import { Workspace } from "./baseTemplate";
 
 export { templateRegistry };
 
-export function initializeTemplates() {
+// Poprawiona funkcja zwracająca przygotowane workspace'y
+export function initializeTemplates(): Workspace[] {
   // 1) Rejestrujemy komponenty szablonów
   const defaultTemplate = new DefaultTemplate();
   registerTemplate(defaultTemplate);
@@ -21,21 +21,21 @@ export function initializeTemplates() {
     ...minimalTemplate.getWorkspaces(),
   ];
 
-  // 3) Przygotowujemy dane do store'a
-  const workspaces = rawWorkspaces.map((w: any) => ({
+  // 3) Przygotowujemy dane z pełnym kontekstem
+  const workspaces = rawWorkspaces.map((w) => ({
     id: w.id,
     name: w.name,
     icon: w.icon,
     description: w.description,
     scenarios: w.getScenarios ? w.getScenarios() : [],
     templateSettings: w.templateSettings,
-    initialContext: w.getInitialContext ? w.getInitialContext() : {},
+    getInitialContext: w.getInitialContext, // Przekazujemy funkcję, nie wywołujemy jej
   }));
 
-  // 4) Ustawiamy w store
-  const appStore = useAppStore.getState();
-  appStore.setInitialWorkspaces(workspaces);
-  console.log("Workspaces set in store:", workspaces.map((w) => w.id));
+  console.log("Prepared workspaces:", workspaces.map((w) => w.id));
+  
+  // Zwracamy przygotowane workspace'y do użycia w InitialDataProvider
+  return workspaces;
 }
 
 function registerTemplate(template: any) {

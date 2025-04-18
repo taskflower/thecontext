@@ -4,7 +4,8 @@ import { RefreshCw, Clock, List, Database, EyeOff } from "lucide-react";
 import ContextTab from "./tabs/ContextTab";
 import LogsTab from "./tabs/LogsTab";
 import ScenarioTab from "./tabs/ScenarioTab";
-import { useAppStore } from "@/lib/store";
+import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
+import { useContextStore } from "@/hooks/useContextStore";
 
 export const EnhancedFlowDebugger = () => {
   const [isVisible, setIsVisible] = useState(
@@ -14,7 +15,8 @@ export const EnhancedFlowDebugger = () => {
   const [logEntries, setLogEntries] = useState([]);
   const [activeTab, setActiveTab] = useState("context"); // 'context', 'logs', 'scenario'
   const [expandedPaths, setExpandedPaths] = useState({});
-  const { getContext, getCurrentScenario, getCurrentWorkspace } = useAppStore();
+  const { getCurrentScenario, getCurrentWorkspace } = useWorkspaceStore();
+  const { getContext } = useContextStore();
   const prevContextRef = useRef({});
   const logContainerRef = useRef(null);
   const currentScenario = getCurrentScenario();

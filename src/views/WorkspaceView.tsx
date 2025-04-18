@@ -1,11 +1,12 @@
 // src/views/WorkspaceView.tsx - Updated with consistent icon support
 import React, { Suspense } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAppStore } from "../lib/store";
+
 import { getWidgetComponent, getLayoutComponent } from "../lib/templates";
+import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
 
 export const WorkspaceView: React.FC = () => {
-  const { workspaces } = useAppStore();
+  const { workspaces } = useWorkspaceStore();
   const navigate = useNavigate();
 
   // Use default layout template

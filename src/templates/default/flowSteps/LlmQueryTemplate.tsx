@@ -1,7 +1,7 @@
 // src/flowSteps/LlmQueryTemplate.tsx
 import React, { useState } from "react";
-import { useLlmWithZod } from "@/hooks/useLLM";
-import { useAppStore } from "@/lib/store";
+import { useLLM } from "@/hooks/useLLM";
+
 import {
   Loader,
   Info,
@@ -14,6 +14,7 @@ import {
   Play,
 } from "lucide-react";
 import { FlowStepProps } from "@/views/types";
+import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
 
 // --- UI Components ---
 const LoadingSpinner: React.FC = () => (
@@ -78,7 +79,7 @@ export const LlmQueryTemplate: React.FC<FlowStepProps> = ({
   }
 
   const [userInput, setUserInput] = useState("");
-  const { getCurrentScenario } = useAppStore();
+  const { getCurrentScenario } = useWorkspaceStore();
 
   // --- Get config data from node and scenario ---
   const currentScenario = getCurrentScenario();
@@ -102,7 +103,7 @@ export const LlmQueryTemplate: React.FC<FlowStepProps> = ({
     processedAssistantMessage,
     schema,
     handleAutoStart,
-  } = useLlmWithZod({
+  } = useLLM({
     initialUserMessage: initialUserMessage,
     assistantMessage: node.assistantMessage || "",
     systemMessage: systemMessageContent,

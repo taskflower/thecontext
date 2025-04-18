@@ -1,7 +1,7 @@
 // src/templates/default/flowSteps/FbCampaignPreviewTemplate.tsx
 import React, { useEffect, useState } from "react";
-import { useAppStore } from "@/lib/store";
 import { FlowStepProps } from "@/views/types";
+import { useContextStore } from "@/hooks/useContextStore";
 
 const FbCampaignPreviewTemplate: React.FC<FlowStepProps> = ({
   node,
@@ -9,19 +9,14 @@ const FbCampaignPreviewTemplate: React.FC<FlowStepProps> = ({
   onPrevious,
   isLastNode,
 }) => {
-  const processTemplate = useAppStore((state) => state.processTemplate);
-  const getContextPath = useAppStore((state) => state.getContextPath);
-  const getContext = useAppStore((state) => state.getContext);
-
-  // Stan lokalny do debugowania
+  const processTemplate = useContextStore((state) => state.processTemplate);
+  const getContextPath = useContextStore((state) => state.getContextPath);
+  const getContext = useContextStore((state) => state.getContext);
   const [debugInfo, setDebugInfo] = useState<any>({});
-
-  // Process assistant message with context variables
   const processedMessage = node.assistantMessage
     ? processTemplate(node.assistantMessage)
     : '';
 
-  // Pobierz pełny kontekst do debugowania
   useEffect(() => {
     const fullContext = getContext();
     setDebugInfo({

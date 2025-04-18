@@ -1,8 +1,8 @@
 // src/templates/default/flowSteps/FbApiIntegrationTemplate.tsx
 // Template do integracji z Facebook Marketing API
-import React, { useState, useEffect } from "react";
-import { useAppStore } from "@/lib/store";
+import React, { useState } from "react";
 import { FlowStepProps } from "@/views/types";
+import { useContextStore } from "@/hooks/useContextStore";
 
 // API Status Components
 const ApiStatusDisplay: React.FC<{
@@ -58,8 +58,8 @@ const FbApiIntegrationTemplate: React.FC<FlowStepProps> = ({
   const [accessToken, setAccessToken] = useState<string>("");
   const [adAccountId, setAdAccountId] = useState<string>("");
 
-  const processTemplate = useAppStore((state) => state.processTemplate);
-  const getContextPath = useAppStore((state) => state.getContextPath);
+  const processTemplate = useContextStore((state) => state.processTemplate);
+  const getContextPath = useContextStore((state) => state.getContextPath);
 
   // Get data from previous steps
   const fbCampaign = getContextPath("fbCampaign") || {};
