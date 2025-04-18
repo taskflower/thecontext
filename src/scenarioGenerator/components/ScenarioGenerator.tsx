@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAppStore } from '../lib/store';
+import { useAppStore } from '../../lib/store';
 import { useLlmService } from '../lib/scenarioGeneratorLLM';
-import { Scenario } from '../templates/baseTemplate';
+import { Scenario } from '../../templates/baseTemplate';
 import { createNewScenario } from '../lib/scenarioGenerator';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../../hooks/useAuth';
 
 /**
  * Komponent do generowania nowych scenariuszy na podstawie istniejących

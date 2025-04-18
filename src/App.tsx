@@ -7,7 +7,7 @@ import { WorkspaceView } from './views/WorkspaceView';
 import { LoginView } from './views/LoginView';
 import { AuthProvider } from './hooks/useAuth';
 import { ScenarioView } from './views/ScenarioView';
-import ScenarioGenerator from './components/ScenarioGenerator';
+import ScenarioGenerator from './scenarioGenerator/components/ScenarioGenerator';
 import EnhancedFlowDebugger from './debug/EnhancedFlowDebugger';
 
 const AppWrapper = ({ children }: any) => (
