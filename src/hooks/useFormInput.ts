@@ -23,14 +23,13 @@ export function useFormInput({ node }: UseFormInputProps) {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [formFields, setFormFields] = useState<FormField[]>([]);
 
-  // Selektory store
+  
   const processTemplate = useContextStore((s) => s.processTemplate);
   const updateByContextPath = useContextStore((s) => s.updateByContextPath);
-  const currentWorkspaceId = useWorkspaceStore((s) => s.currentWorkspaceId);
+  const currWrkspId = useWorkspaceStore((s) => s.currentWorkspaceId);
 
-  // Uzyskaj mapę formSchemas z aktualnego workspace
   const contextSchemas = useContextStore(
-    (state) => state.contexts[currentWorkspaceId || ""]?.schemas?.form
+    (state) => state.contexts[currWrkspId || ""]?.schemas?.form
   );
 
   const attrs = node.attrs || {};
@@ -38,13 +37,11 @@ export function useFormInput({ node }: UseFormInputProps) {
     ? processTemplate(node.assistantMessage)
     : "";
 
-  // Gdy zmieni się kontekstowych schemat lub ścieżka, ustaw formFields
   useEffect(() => {
     if (!contextSchemas || !attrs.schemaPath) {
       setFormFields([]);
       return;
     }
-    // schemaPath ma postać 'schemas.form.website' -> wyciągnij 'website'
     const key = attrs.schemaPath.replace(/^schemas\.form\./, "");
     const fields = (contextSchemas as Record<string, FormField[]>)[key];
     if (Array.isArray(fields)) {

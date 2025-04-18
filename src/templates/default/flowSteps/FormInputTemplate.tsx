@@ -8,7 +8,7 @@ import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
 const FormInputTemplate: React.FC<FlowStepProps> = ({ node, onSubmit, onPrevious, isLastNode }) => {
   const attrs = node.attrs || {};
   // Dodane debugowanie kontekstu
-  const currentWorkspaceId = useWorkspaceStore(state => state.currentWorkspaceId);
+  const currWrkspId = useWorkspaceStore(state => state.currentWorkspaceId);
   const getContext = useContextStore(state => state.getContext);
   const contexts = useContextStore(state => state.contexts);
 
@@ -16,7 +16,7 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({ node, onSubmit, onPrevious
   useEffect(() => {
     console.log("Form Input Template - Node:", node);
     console.log("Node attrs:", attrs);
-    console.log("Current workspace ID:", currentWorkspaceId);
+    console.log("Current workspace ID:", currWrkspId);
     console.log("All contexts:", contexts);
     console.log("Current context:", getContext());
     
@@ -25,7 +25,7 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({ node, onSubmit, onPrevious
       const schemaData = getContext(attrs.schemaPath);
       console.log(`Schema at path ${attrs.schemaPath}:`, schemaData);
     }
-  }, [node, attrs, currentWorkspaceId]);
+  }, [node, attrs, currWrkspId]);
 
   // Przekaż node do hooka
   const { formData, formFields, processedAssistantMessage, handleChange, handleSubmit, areRequiredFieldsFilled } = useFormInput({ node });
@@ -39,7 +39,7 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({ node, onSubmit, onPrevious
         <div className="p-4 bg-yellow-100 text-yellow-800 rounded-md">
           <h3 className="font-bold">Debug Info:</h3>
           <p>No form fields found. Check schema path: {attrs.schemaPath}</p>
-          <p>Current workspace: {currentWorkspaceId}</p>
+          <p>Current workspace: {currWrkspId}</p>
           <p>Available contexts: {Object.keys(contexts).join(', ')}</p>
         </div>
       )}
