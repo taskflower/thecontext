@@ -1,5 +1,7 @@
 // src/utils/scenarioGenerator.ts
-import { Scenario, ScenarioStep } from '../templates/baseTemplate';
+
+import { Scenario } from "@/types";
+
 
 /**
  * Interfejs zawierający dane o scenariuszu do użycia przez LLM
@@ -30,7 +32,7 @@ export function convertScenarioToTemplate(scenario: Scenario): ScenarioTemplate 
     name: scenario.name,
     description: scenario.description,
     systemMessage: scenario.systemMessage,
-    steps: scenario.getSteps().map(step => ({
+    steps: scenario.getSteps().map((step: any) => ({
       id: step.id,
       label: step.label,
       assistantMessage: step.assistantMessage,

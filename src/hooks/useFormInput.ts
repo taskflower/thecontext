@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
-import { FormField } from "@/views/types";
 import { useAppStore } from "@/lib/store";
+import { FormField } from "@/types";
 
 interface FormInputAttrs {
   formSchemaPath?: string;

@@ -1,10 +1,11 @@
+import { useAppStore } from '@/lib/store';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAppStore } from '../../lib/store';
 import { useLlmService } from '../lib/scenarioGeneratorLLM';
-import { Scenario } from '../../templates/baseTemplate';
+import { useAuth } from '@/hooks/useAuth';
+import { Scenario } from '@/types';
 import { createNewScenario } from '../lib/scenarioGenerator';
-import { useAuth } from '../../hooks/useAuth';
+
 
 /**
  * Komponent do generowania nowych scenariuszy na podstawie istniejących
@@ -45,7 +46,7 @@ const ScenarioGenerator: React.FC = () => {
     
     try {
       // Znajdź wybrany scenariusz z listy
-      const templateScenarioFromStore = availableScenarios.find(s => s.id === selectedScenario);
+      const templateScenarioFromStore = availableScenarios.find((s:Scenario) => s.id === selectedScenario);
       
       if (!templateScenarioFromStore) {
         throw new Error('Nie znaleziono wybranego scenariusza');
@@ -57,7 +58,8 @@ const ScenarioGenerator: React.FC = () => {
         name: templateScenarioFromStore.name,
         description: templateScenarioFromStore.description,
         systemMessage: templateScenarioFromStore.systemMessage,
-        getSteps: () => templateScenarioFromStore.nodes || []
+        getSteps: () => templateScenarioFromStore.nodes || [],
+        nodes: []
       };
       
       // Połącz nazwę i opis, jeśli opis istnieje
@@ -117,9 +119,9 @@ const ScenarioGenerator: React.FC = () => {
                     className="w-full p-2 border rounded-md"
                   >
                     <option value="">Wybierz scenariusz...</option>
-                    {availableScenarios.map((scenario) => (
-                      <option key={scenario.id} value={scenario.id}>
-                        {scenario.name}
+                    {availableScenarios.map((s:Scenario) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
                       </option>
                     ))}
                   </select>
@@ -129,7 +131,7 @@ const ScenarioGenerator: React.FC = () => {
                   <div className="mb-4 p-3 bg-gray-50 rounded-md">
                     <h3 className="font-medium mb-2">Szczegóły scenariusza bazowego:</h3>
                     {(() => {
-                      const scenario = availableScenarios.find(s => s.id === selectedScenario);
+                      const scenario = availableScenarios.find((s:Scenario) => s.id === selectedScenario);
                       return scenario ? (
                         <div>
                           <p><span className="font-medium">Nazwa:</span> {scenario.name}</p>

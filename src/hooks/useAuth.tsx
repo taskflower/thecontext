@@ -8,7 +8,7 @@ import {
   GoogleAuthProvider 
 } from '@firebase/auth';
 import { doc, getDoc, setDoc } from '@firebase/firestore';
-import { auth, googleProvider, db } from '@/firebase/config';
+import { auth, googleProvider, db } from '@/_firebase/config';
 
 // Extended user interface with tokens
 interface UserWithTokens extends User {

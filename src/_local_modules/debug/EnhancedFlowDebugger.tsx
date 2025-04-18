@@ -1,21 +1,10 @@
 // src/debug/EnhancedFlowDebugger.jsx
 import { useState, useEffect, useRef } from "react";
-import { useAppStore } from "@/lib/store";
-import {
-
-  RefreshCw,
-  Clock,
-  List,
-  Database,
-  
-  EyeOff,
-
-} from "lucide-react";
+import { RefreshCw, Clock, List, Database, EyeOff } from "lucide-react";
 import ContextTab from "./tabs/ContextTab";
 import LogsTab from "./tabs/LogsTab";
 import ScenarioTab from "./tabs/ScenarioTab";
-
-
+import { useAppStore } from "@/lib/store";
 
 export const EnhancedFlowDebugger = () => {
   const [isVisible, setIsVisible] = useState(
@@ -82,7 +71,7 @@ export const EnhancedFlowDebugger = () => {
 
   // Keyboard shortcuts
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey) {
         if (e.key === "D" || e.key === "d") {
           e.preventDefault();
@@ -230,17 +219,24 @@ export const EnhancedFlowDebugger = () => {
       {/* Active tab content */}
       <div className="flex-grow overflow-hidden">
         {activeTab === "context" && (
-          <ContextTab context={context} expandedPaths={expandedPaths} setExpandedPaths={setExpandedPaths} />
+          <ContextTab
+            context={context}
+            expandedPaths={expandedPaths}
+            setExpandedPaths={setExpandedPaths}
+          />
         )}
         {activeTab === "logs" && (
-          <LogsTab 
-            logEntries={logEntries} 
-            setLogEntries={setLogEntries} 
-            logContainerRef={logContainerRef} 
+          <LogsTab
+            logEntries={logEntries}
+            setLogEntries={setLogEntries}
+            logContainerRef={logContainerRef}
           />
         )}
         {activeTab === "scenario" && (
-          <ScenarioTab currentScenario={currentScenario} currentWorkspace={currentWorkspace} />
+          <ScenarioTab
+            currentScenario={currentScenario}
+            currentWorkspace={currentWorkspace}
+          />
         )}
       </div>
 
