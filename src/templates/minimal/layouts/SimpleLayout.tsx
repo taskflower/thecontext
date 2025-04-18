@@ -6,7 +6,7 @@ import { X } from "lucide-react";
 const SimpleLayout: React.FC<LayoutProps> = ({ children, title }) => (
   <div className="flex flex-col bg-white rounded-lg mx-auto w-full max-w-4xl h-full md:min-h-[95vh] md:max-h-[95vh]">
     {/* Header Section */}
-    <div className="px-5 py-6 bg-white">
+    <div className="py-6 bg-white">
       <div className="w-full flex items-center justify-between">
         <div className="font-black text-xl tracking-tighter text-gray-900">
           WiseAds
@@ -28,7 +28,7 @@ const SimpleLayout: React.FC<LayoutProps> = ({ children, title }) => (
     </div>
 
     {/* Content Section */}
-    <div className="overflow-y-auto flex-1">{children}</div>
+    <div className="overflow-y-auto flex-1 flex flex-col justify-center">{children}</div>
   </div>
 );
 
