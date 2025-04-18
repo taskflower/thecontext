@@ -1,8 +1,9 @@
-// src/views/WorkspaceView.tsx - Improved Version
+// src/views/WorkspaceView.tsx - Updated with Icons
 import React, { Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "../lib/store";
 import { templateRegistry } from "../lib/templates";
+
 
 export const WorkspaceView: React.FC = () => {
   const { workspaces } = useAppStore();
@@ -34,6 +35,7 @@ export const WorkspaceView: React.FC = () => {
     description: `Template: ${workspace.templateSettings.layoutTemplate}`,
     count: workspace.scenarios.length,
     countLabel: "scenarios",
+    icon: workspace.icon || "general", // Dodajemy ikonę z workspace lub domyślną "general"
   }));
 
   return (
@@ -45,6 +47,7 @@ export const WorkspaceView: React.FC = () => {
       }
     >
       <LayoutComponent title="Workspaces">
+        {/* Jeśli potrzeba, możemy dodać tutaj customowy header z ikoną */}
         <WidgetComponent data={workspaceData} onSelect={handleSelect} />
       </LayoutComponent>
     </Suspense>

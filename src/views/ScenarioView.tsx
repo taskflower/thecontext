@@ -1,8 +1,9 @@
-// src/views/ScenarioView.tsx - Fixed Version
+// src/views/ScenarioView.tsx - Updated with Icons
 import React, { Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
 import { getWidgetComponent, getLayoutComponent } from '../lib/templates';
+import { SubjectIcon } from '../components/SubjectIcon';
 
 export const ScenarioView: React.FC = () => {
   const navigate = useNavigate();
@@ -44,13 +45,21 @@ export const ScenarioView: React.FC = () => {
     name: scenario.name,
     description: scenario.description,
     count: scenario.nodes?.length || 0,
-    countLabel: "steps"
+    countLabel: "steps",
+    icon: scenario.icon || "class" // Dodajemy ikonę ze scenariusza lub domyślną "class"
   }));
   
   return (
     <Suspense fallback={<div className="p-4">Loading...</div>}>
       <LayoutComponent 
-        title={`${currentWorkspace.name} - Scenarios`} 
+        title={
+          <div className="flex items-center gap-2">
+            {currentWorkspace.icon && (
+              <SubjectIcon iconName={currentWorkspace.icon} size={24} className="text-slate-700" />
+            )}
+            <span>{currentWorkspace.name} - Scenarios</span>
+          </div>
+        }
         showBackButton={true}
         onBackClick={() => navigate('/')}
       >

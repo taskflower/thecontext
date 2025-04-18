@@ -4,14 +4,9 @@ export interface NodeData {
   scenarioId: string;
   label: string;
   assistantMessage?: string;
-  
-  // New field replacing contextKey and contextJsonPath
   contextPath?: string; // Format: "userProfile" or "userProfile.email" or "userProfile.preferences.theme"
-  
-  // Legacy fields (kept for backward compatibility)
   contextKey?: string;
   contextJsonPath?: string;
-  
   templateId: string;
   type?: string;
   attrs?: Record<string, any>;
@@ -42,6 +37,7 @@ export interface Scenario {
   nodes: NodeData[];
   systemMessage?: string;
   edges?: any[];
+  icon?: string; // Nowe pole dla ikony
 }
 
 export interface FlowStepProps {

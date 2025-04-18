@@ -1,4 +1,5 @@
 // src/templates/baseTemplate.ts
+import { TemplateSettings } from '@/views/types';
 import { ReactNode } from 'react';
 
 /**
@@ -80,16 +81,15 @@ export interface Scenario {
 /**
  * Interface for workspace
  */
+
+
 export interface Workspace {
   id: string;
   name: string;
   description?: string;
-  templateSettings: {
-    layoutTemplate: string;
-    scenarioWidgetTemplate: string;
-    defaultFlowStepTemplate: string;
-    theme?: 'light' | 'dark' | 'system';
-  };
+  scenarios: Scenario[];
+  templateSettings: TemplateSettings;
+  initialContext: Record<string, any>;
   getScenarios: () => Scenario[];
   getInitialContext: () => Record<string, any>;
 }

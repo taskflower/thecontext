@@ -1,16 +1,10 @@
 // src/lib/store.ts
 import { create } from 'zustand';
-import { Scenario, TemplateSettings } from '../views/types';
+import { Scenario } from '../views/types';
 import { getValueByPath, setValueByPath } from './byPath';
+import { Workspace } from '@/templates/baseTemplate';
 
-export interface Workspace {
-  id: string;
-  name: string;
-  description?: string;
-  scenarios: Scenario[];
-  templateSettings: TemplateSettings;
-  initialContext: Record<string, any>;
-}
+
 
 interface AppState {
   // Podstawowe dane o workspaces
