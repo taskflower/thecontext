@@ -2,7 +2,7 @@
 import React, { Suspense, useEffect } from "react";
 import { useNavigate, Navigate, useParams } from "react-router-dom";
 
-import { getLayoutComponent, getWidgetComponent } from "../tpl/templates";
+import { getLayoutComponent, getWidgetComponent } from "../tpl";  // Zaktualizowana ścieżka importu
 import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
 import { Scenario, Workspace } from "@/types";
 

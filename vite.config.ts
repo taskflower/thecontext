@@ -1,16 +1,23 @@
-import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
 
 export default defineConfig({
-  plugins: [
-    react()
-  ],
+  plugins: [react()],
   resolve: {
     alias: {
-      "@": "/src",
+      "@": path.resolve(__dirname, "./src"),
     },
   },
   build: {
-    // Możesz dodać więcej opcji budowania, gdy będą potrzebne
-  }
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Tworzenie osobnych chunków dla szablonów
+          "template-default": ["./src/tpl/default/index.ts"],
+          "template-minimal": ["./src/tpl/minimal/index.ts"],
+        },
+      },
+    },
+  },
 });

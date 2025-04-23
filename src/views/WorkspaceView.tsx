@@ -1,7 +1,7 @@
 // src/views/ApplicationWorkspaceView.tsx
 import React, { useEffect, Suspense } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getLayoutComponent, getWidgetComponent } from "../tpl/templates";
+import { getLayoutComponent, getWidgetComponent } from "../tpl";  // Zaktualizowana ścieżka importu
 import { useApplicationStore } from "@/hooks/useApplicationStore";
 import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
 
@@ -32,7 +32,7 @@ interface Application {
   workspaces: Workspace[];
 }
 
-export const ApplicationWorkspaceView: React.FC = () => {
+export const WorkspaceView: React.FC = () => {
   const { applicationId } = useParams<{ applicationId: string }>();
   const { fetchApplicationById, getCurrentApplication, isLoading, error } =
     useApplicationStore();
@@ -175,4 +175,4 @@ export const ApplicationWorkspaceView: React.FC = () => {
   );
 };
 
-export default ApplicationWorkspaceView;
+export default WorkspaceView;

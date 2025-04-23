@@ -13,7 +13,7 @@ const FlowView = lazy(() => import("./views/FlowView"));
 const ScenarioView = lazy(() => import("./views/ScenarioView"));
 const LoginView = lazy(() => import("./views/LoginView"));
 const ApplicationView = lazy(() => import("./views/ApplicationView"));
-const ApplicationWorkspaceView = lazy(() => import("./views/ApplicationWorkspaceView"));
+const WorkspaceView = lazy(() => import("./views/WorkspaceView"));
 const AdminPanelView = lazy(() => import("./views/AdminPanelView"));
 
 // Providers and utilities
@@ -74,7 +74,7 @@ const App = () => (
               <Route path="/" element={<ApplicationView />} />
               
               {/* Wybór workspace w ramach aplikacji */}
-              <Route path="/app/:applicationId" element={<ApplicationWorkspaceView />} />
+              <Route path="/app/:applicationId" element={<WorkspaceView />} />
               
               {/* Wybór scenariusza w ramach aplikacji i workspace */}
               <Route path="/app/:application/:workspace" element={<ScenarioView />} />
