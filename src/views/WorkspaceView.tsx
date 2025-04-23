@@ -1,9 +1,11 @@
 // src/views/ApplicationWorkspaceView.tsx
 import React, { useEffect, Suspense } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getLayoutComponent, getWidgetComponent } from "../tpl";  // Zaktualizowana ścieżka importu
+import { getLayoutComponent, getWidgetComponent } from "../tpl";
 import { useApplicationStore } from "@/hooks/useApplicationStore";
 import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
+import { LoadingState } from "@/components/LoadingState";
+import SharedLoader from "@/components/SharedLoader";
 
 interface Workspace {
   id: string;
@@ -88,62 +90,29 @@ export const WorkspaceView: React.FC = () => {
     icon: workspace.icon || "briefcase",
   }));
 
-  // Use a single loading state for initial data fetch
-  // We want to show loading until we've either successfully loaded the application OR hit a definite error
-  const isInitialLoading = isLoading || (!currentApplication && !error);
-  
-  if (isInitialLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-slate-700 text-lg">Ładowanie aplikacji...</div>
-      </div>
-    );
-  }
+  // Fallback loader for Suspense
+  const fallbackLoader = <SharedLoader message="Ładowanie komponentów..." fullScreen={true} />;
 
-  // Show error only when we have a definite error and we're done loading
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-red-600 text-lg">
-          Błąd: {error}
-          <button
-            onClick={() => applicationId && fetchApplicationById(applicationId)}
-            className="ml-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Spróbuj ponownie
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // At this point, we know we're not loading and don't have an error
-  // If we still don't have currentApplication, it's truly not found
-  if (!currentApplication) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-red-600 text-lg">
-          Aplikacja o ID {applicationId} nie została znaleziona.
-          <button
-            onClick={() => navigate("/")}
-            className="ml-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Wróć do listy aplikacji
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // If we reach here, we have the application data
-  return (
-    <Suspense
-      fallback={
+  // Rendering when we have the application data
+  const renderContent = () => {
+    // If we don't have currentApplication, it's truly not found
+    if (!currentApplication) {
+      return (
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-slate-700 text-lg">Ładowanie komponentów...</div>
+          <div className="text-red-600 text-lg">
+            Aplikacja o ID {applicationId} nie została znaleziona.
+            <button
+              onClick={() => navigate("/")}
+              className="ml-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Wróć do listy aplikacji
+            </button>
+          </div>
         </div>
-      }
-    >
+      );
+    }
+
+    return (
       <LayoutComponent
         title={`Aplikacja: ${currentApplication.name}`}
         onBackClick={() => navigate("/")}
@@ -171,6 +140,20 @@ export const WorkspaceView: React.FC = () => {
           <WidgetComponent data={workspaceData} onSelect={handleSelect} />
         )}
       </LayoutComponent>
+    );
+  };
+
+  return (
+    <Suspense fallback={fallbackLoader}>
+      <LoadingState
+        isLoading={isLoading}
+        error={error}
+        loadingMessage="Ładowanie aplikacji..."
+        errorTitle="Błąd ładowania aplikacji"
+        onRetry={() => applicationId && fetchApplicationById(applicationId)}
+      >
+        {renderContent()}
+      </LoadingState>
     </Suspense>
   );
 };
