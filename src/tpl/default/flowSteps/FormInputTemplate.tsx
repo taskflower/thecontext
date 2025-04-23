@@ -25,12 +25,7 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
     ? processTemplate(node.assistantMessage)
     : "";
 
-  // Debugging logs
-  useEffect(() => {
-    console.log("Current workspace ID:", currWrkspId);
-    console.log("Context schemas:", contextSchemas);
-    console.log("Node attrs:", node.attrs);
-  }, [currWrkspId, contextSchemas, node.attrs]);
+ 
 
   // Load form fields based on schema path
   useEffect(() => {
@@ -41,11 +36,8 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
     }
 
     const schemaKey = node.attrs.schemaPath.replace(/^schemas\.form\./, "");
-    console.log("Schema key:", schemaKey);
-    
     const fields = contextSchemas[schemaKey];
-    console.log("Fields:", fields);
-    
+
     if (Array.isArray(fields)) {
       setFormFields(fields);
     } else {

@@ -16,38 +16,32 @@ export function useNodeManager() {
     if (!scenario) return [];
 
     // Pobierz węzły z odpowiedniego źródła
-    const unsortedNodes = (scenario as any).nodes ?? (scenario as any).getSteps?.() ?? [];
-    
+    const unsortedNodes =
+      (scenario as any).nodes ?? (scenario as any).getSteps?.() ?? [];
+
     // Sortuj węzły według pola order, jeśli istnieje
     const sortedNodes = [...unsortedNodes].sort((a, b) => {
       // Jeśli pole order istnieje w obu węzłach, sortuj według niego
       if (a.order !== undefined && b.order !== undefined) {
         return a.order - b.order;
       }
-      
+
       // Jeśli tylko jeden węzeł ma pole order, ten bez order idzie na koniec
       if (a.order !== undefined) return -1;
       if (b.order !== undefined) return 1;
-      
+
       // Jeśli żaden nie ma pola order, zachowaj oryginalną kolejność
       return 0;
     });
-    
-    console.log('Posortowane węzły:', sortedNodes.map(node => ({
-      id: node.id,
-      label: node.label,
-      order: node.order
-    })));
-    
+
     return sortedNodes;
   }, [scenario]);
-  
+
   const node = nodes[idx];
   const isLast = idx === nodes.length - 1;
 
   // Resetuj indeks i historię przy zmianie scenariusza
   useEffect(() => {
-    console.log('Zmiana scenariusza, resetowanie indeksu i historii:', scenario?.id);
     setIdx(0);
     setHistory([]);
   }, [scenario?.id]);
@@ -79,8 +73,6 @@ export function useNodeManager() {
     if (isLast) return;
     setHistory((h) => [...h, idx]);
     setIdx((i) => i + 1);
-    
-    console.log(`Wykonano węzeł ${node?.id} (${node?.label}), przechodzę do następnego`);
   };
 
   return {
