@@ -2,13 +2,18 @@
 import React from "react";
 import { FlowStepProps } from "@/types";
 import { useFormInput } from "@/hooks/useFormInput";
+import { useNavigate, useParams } from "react-router-dom";
 
 const FormStepTemplate: React.FC<FlowStepProps> = ({ 
   node, 
   onSubmit, 
   onPrevious, 
-  isLastNode 
+  isLastNode,
+  isFirstNode 
 }) => {
+  const navigate = useNavigate();
+  const { application, workspace } = useParams();
+  
   const {
     formData,
     formFields,
@@ -17,6 +22,41 @@ const FormStepTemplate: React.FC<FlowStepProps> = ({
     handleSubmit,
     areRequiredFieldsFilled,
   } = useFormInput({ node });
+
+  // Handle back navigation based on whether it's the first node
+  const handlePrevious = () => {
+    if (isFirstNode) {
+      // Navigate back to scenarios list
+      if (application && workspace) {
+        navigate(`/app/${application}/${workspace}`);
+      } else if (workspace) {
+        navigate(`/${workspace}`);
+      } else {
+        navigate('/');
+      }
+    } else {
+      // Use provided onPrevious handler
+      onPrevious();
+    }
+  };
+  
+  // Handle completion of the flow
+  const handleComplete = (data: any) => {
+    // Process form submission
+    const formData = handleSubmit(data as any);
+    
+    // Call onSubmit to save the data
+    onSubmit(formData);
+    
+    // If this is the last node, navigate back to scenarios
+    if (isLastNode) {
+      if (application && workspace) {
+        navigate(`/app/${application}/${workspace}`);
+      } else if (workspace) {
+        navigate(`/${workspace}`);
+      }
+    }
+  };
 
   return (
     <div className="my-4">
@@ -94,28 +134,38 @@ const FormStepTemplate: React.FC<FlowStepProps> = ({
                       )}
                     </div>
                   ) : null}
-                  
-                  {/* Submit button moved here to match example layout */}
-                  {field === formFields[formFields.length - 1] && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        const data = handleSubmit(e as any);
-                        onSubmit(data);
-                      }}
-                      disabled={!areRequiredFieldsFilled()}
-                      className={`px-5 py-3 rounded-md transition-colors text-base font-medium w-full ${
-                        areRequiredFieldsFilled()
-                          ? "bg-gray-900 text-white hover:bg-gray-800"
-                          : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                      }`}
-                    >
-                      Submit
-                    </button>
-                  )}
                 </div>
               </div>
             ))}
+            
+            {/* Navigation buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 mt-6">
+              {/* Back button (shown on all nodes) */}
+              <button
+                type="button"
+                onClick={handlePrevious}
+                className="px-5 py-3 rounded-md transition-colors text-base font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+              >
+                {isFirstNode ? "Anuluj" : "Wstecz"}
+              </button>
+              
+              {/* Submit/Next button */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  const data = handleSubmit(e as any);
+                  handleComplete(data);
+                }}
+                disabled={!areRequiredFieldsFilled()}
+                className={`px-5 py-3 rounded-md transition-colors text-base font-medium flex-grow ${
+                  areRequiredFieldsFilled()
+                    ? "bg-gray-900 text-white hover:bg-gray-800"
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                }`}
+              >
+                {isLastNode ? "Zakończ" : "Dalej"}
+              </button>
+            </div>
           </div>
         </div>
       </div>

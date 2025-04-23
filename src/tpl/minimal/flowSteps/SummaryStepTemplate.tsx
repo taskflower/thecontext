@@ -3,18 +3,22 @@ import React, { useEffect, useState } from "react";
 import { FlowStepProps } from "@/types";
 import { useContextStore } from "@/hooks/useContextStore";
 import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
+import { useNavigate, useParams } from "react-router-dom";
 
 const SummaryStepTemplate: React.FC<FlowStepProps> = ({
   node,
   onSubmit,
   onPrevious,
-  isLastNode
+  isLastNode,
+  isFirstNode
 }) => {
   const [summaryData, setSummaryData] = useState<Record<string, any>>({});
   const [summaryFields, setSummaryFields] = useState<any[]>([]);
   
   const contextStore = useContextStore();
   const currWrkspId = useWorkspaceStore((state) => state.currentWorkspaceId);
+  const navigate = useNavigate();
+  const { application, workspace } = useParams();
 
   const contextSchemas = contextStore.contexts && currWrkspId 
     ? contextStore.contexts[currWrkspId]?.schemas?.summary 
@@ -81,6 +85,39 @@ const SummaryStepTemplate: React.FC<FlowStepProps> = ({
 
     setSummaryData(data);
   }, [node.attrs?.dataPaths, contextStore.contexts, currWrkspId]);
+
+  // Handle back navigation based on whether it's the first node
+  const handlePrevious = () => {
+    if (isFirstNode) {
+      // Navigate back to scenarios list
+      if (application && workspace) {
+        navigate(`/app/${application}/${workspace}`);
+      } else if (workspace) {
+        navigate(`/${workspace}`);
+      } else {
+        navigate('/');
+      }
+    } else {
+      // Use provided onPrevious handler
+      onPrevious();
+    }
+  };
+
+  // Handle flow completion
+  const handleComplete = () => {
+    // Call onSubmit to save any data
+    onSubmit(summaryData);
+    
+    // If this is the last node (which it typically would be for summary), 
+    // navigate back to scenarios
+    if (isLastNode) {
+      if (application && workspace) {
+        navigate(`/app/${application}/${workspace}`);
+      } else if (workspace) {
+        navigate(`/${workspace}`);
+      }
+    }
+  };
 
   // Format value for display
   const formatValue = (value: any) => {
@@ -153,10 +190,19 @@ const SummaryStepTemplate: React.FC<FlowStepProps> = ({
             )}
           </div>
 
-          <div className="mt-6">
+          <div className="flex flex-col sm:flex-row gap-4 mt-6">
+            {/* Back button */}
             <button 
-              onClick={onSubmit}
-              className="px-5 py-3 rounded-md transition-colors text-base font-medium w-full bg-gray-900 text-white hover:bg-gray-800"
+              onClick={handlePrevious}
+              className="px-5 py-3 rounded-md transition-colors text-base font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+            >
+              {isFirstNode ? "Anuluj" : "Wstecz"}
+            </button>
+            
+            {/* Complete button */}
+            <button 
+              onClick={handleComplete}
+              className="px-5 py-3 rounded-md transition-colors text-base font-medium flex-grow bg-gray-900 text-white hover:bg-gray-800"
             >
               {isLastNode ? 'Zakończ' : 'Dalej'}
             </button>

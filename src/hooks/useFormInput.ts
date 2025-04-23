@@ -61,8 +61,12 @@ export function useFormInput({ node }: UseFormInputProps) {
   /**
    * Zapisuje wszystkie pola do kontekstu pod ścieżką node.contextPath
    */
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (e?: React.FormEvent | any) => {
+    // Only call preventDefault if e is a valid event object with preventDefault method
+    if (e && typeof e.preventDefault === 'function') {
+      e.preventDefault();
+    }
+    
     if (node.contextPath) {
       const basePath = node.contextPath;
       Object.entries(formData).forEach(([key, value]) => {

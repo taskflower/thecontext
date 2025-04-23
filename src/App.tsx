@@ -25,7 +25,7 @@ import ScenarioGenerator from "./_local_modules/scenarioGenerator/components/Sce
 import EnhancedFlowDebugger from "./_local_modules/debug/EnhancedFlowDebugger";
 import { AuthWrapper } from "./_auth/AuthWrapper";
 
-// Import SharedLoader dla spójnego wyglądu ładowania
+// Import SharedLoader for consistent loading appearance
 import SharedLoader from "./components/SharedLoader";
 
 const AppWrapper = ({ children }: { children: React.ReactNode }) => (
@@ -55,14 +55,14 @@ const App = () => (
             {/* Dev tools */}
             <Route path="/generator" element={<ScenarioGenerator />} />
             
-            {/* Admin Panel - oddzielna podstrona */}
+            {/* Admin Panel - separate subpage */}
             <Route path="/admin" element={
               <AuthWrapper>
                 <AdminPanelView />
               </AuthWrapper>
             } />
             
-            {/* Nowy przepływ z aplikacjami */}
+            {/* New flow with applications */}
             <Route
               element={
                 <InitialDataProvider>
@@ -70,19 +70,19 @@ const App = () => (
                 </InitialDataProvider>
               }
             >
-              {/* Strona główna - wybór aplikacji */}
+              {/* Home page - application selection */}
               <Route path="/" element={<ApplicationView />} />
               
-              {/* Wybór workspace w ramach aplikacji */}
+              {/* Workspace selection within application */}
               <Route path="/app/:applicationId" element={<WorkspaceView />} />
               
-              {/* Wybór scenariusza w ramach aplikacji i workspace */}
+              {/* Scenario selection within application and workspace */}
               <Route path="/app/:application/:workspace" element={<ScenarioView />} />
               
-              {/* Flow w ramach aplikacji, workspace i scenariusza */}
+              {/* Flow within application, workspace and scenario */}
               <Route path="/app/:application/:workspace/:scenario" element={<FlowView />} />
               
-              {/* Stary przepływ (kompatybilność wsteczna) */}
+              {/* Old flow (backward compatibility) */}
               <Route path="/:workspace" element={<ScenarioView />} />
               <Route path="/:workspace/:scenario" element={<FlowView />} />
               
