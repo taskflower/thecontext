@@ -1,0 +1,94 @@
+[
+    {
+      "name": "Business Analytics",
+      "description": "Analiza biznesowa i finansowa",
+      "workspaces": [
+        {
+          "id": "workspace-minimal", 
+          "name": "Demo Biznesowe",
+          "description": "Zbieranie danych i generowanie raportu AI",
+          "icon": "briefcase",
+          "scenarios": [
+            {
+              "id": "scenario-business",
+              "name": "Analiza finansowa",
+              "description": "Zbierz dane i wygeneruj raport ROI",
+              "icon": "calculator",
+              "systemMessage": "Jesteś asystentem finansowym.",
+              "nodes": [
+                {
+                  "id": "collect-data",
+                  "scenarioId": "scenario-business",
+                  "label": "Dane finansowe",
+                  "assistantMessage": "Podaj przychody i koszty projektu:",
+                  "contextPath": "collect-data",
+                  "templateId": "form-step",
+                  "order": 0,
+                  "attrs": { 
+                    "schemaPath": "schemas.form.business" 
+                  }
+                },
+                {
+                  "id": "generate-report",
+                  "scenarioId": "scenario-business",
+                  "label": "Raport ROI",
+                  "assistantMessage": "Generuję raport ROI na podstawie danych...",
+                  "contextPath": "generate-report",
+                  "templateId": "llm-step",
+                  "order": 1,
+                  "attrs": {
+                    "autoStart": true,
+                    "includeSystemMessage": true,
+                    "initialUserMessage": "Na podstawie danych: przychody={{collect-data.revenue}}, koszty={{collect-data.cost}} oblicz ROI i zaproponuj rekomendacje.",
+                    "schemaPath": "schemas.llm.businessReport"
+                  }
+                },
+                {
+                  "id": "show-summary",
+                  "scenarioId": "scenario-business",
+                  "label": "Podsumowanie",
+                  "assistantMessage": "Oto podsumowanie wyników analizy finansowej twojego projektu.",
+                  "contextPath": "summary",
+                  "templateId": "summary-step",
+                  "order": 2
+                }
+              ]
+            }
+          ],
+          "templateSettings": {
+            "layoutTemplate": "simple",
+            "scenarioWidgetTemplate": "card-list",
+            "defaultFlowStepTemplate": "form-step",
+            "theme": "light"
+          },
+          "initialContext": {
+            "schemas": {
+              "form": {
+                "business": [
+                  { 
+                    "name": "revenue", 
+                    "label": "Przychody (PLN)", 
+                    "type": "number", 
+                    "required": true 
+                  },
+                  { 
+                    "name": "cost", 
+                    "label": "Koszty (PLN)", 
+                    "type": "number", 
+                    "required": true 
+                  }
+                ]
+              },
+              "llm": {
+                "businessReport": {
+                  "roi": "Wartość ROI w procentach",
+                  "profitability": "Ocena opłacalności projektu",
+                  "recommendations": ["Lista rekomendacji"]
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]

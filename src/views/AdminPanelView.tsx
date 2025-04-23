@@ -2,42 +2,64 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/_npHooks/useAuth';
-import { seedFirestore } from '@/_firebase/seedFirestore';
+import { seedFirestoreFromData } from '@/_firebase/seedFirestore';
 import { useApplicationStore } from '@/hooks/useApplicationStore';
 import { LoadingState } from '@/components/LoadingState';
 import { getLayoutComponent } from '../tpl/templates';
 import SubjectIcon from '@/components/SubjectIcon';
+import { deleteDoc, doc, collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '@/_firebase/config';
 
-// Nowa funkcja do importu danych z JSON
-async function importDataFromJson(userId: string, jsonData: any) {
+// Funkcja do usuwania aplikacji
+async function deleteApplication(applicationId: string) {
   try {
-    console.log('Importowanie danych z pliku JSON...');
-    console.log('Struktura danych:', jsonData);
+    console.log(`Usuwanie aplikacji: ${applicationId}`);
     
-    // Tutaj można dodać logikę walidacji danych
-    if (!jsonData || !Array.isArray(jsonData)) {
-      throw new Error('Nieprawidłowy format danych. Oczekiwano tablicy aplikacji.');
+    // 1. Znajdź wszystkie workspaces należące do aplikacji
+    const workspacesRef = collection(db, 'workspaces');
+    const workspacesQuery = query(workspacesRef, where('applicationId', '==', applicationId));
+    const workspacesSnapshot = await getDocs(workspacesQuery);
+    
+    // 2. Dla każdego workspace, znajdź i usuń wszystkie scenariusze
+    for (const workspaceDoc of workspacesSnapshot.docs) {
+      const workspaceId = workspaceDoc.id;
+      
+      const scenariosRef = collection(db, 'scenarios');
+      const scenariosQuery = query(scenariosRef, where('workspaceId', '==', workspaceId));
+      const scenariosSnapshot = await getDocs(scenariosQuery);
+      
+      // 3. Dla każdego scenariusza, znajdź i usuń wszystkie węzły
+      for (const scenarioDoc of scenariosSnapshot.docs) {
+        const scenarioId = scenarioDoc.id;
+        
+        const nodesRef = collection(db, 'nodes');
+        const nodesQuery = query(nodesRef, where('scenarioId', '==', scenarioId));
+        const nodesSnapshot = await getDocs(nodesQuery);
+        
+        // Usuń wszystkie węzły
+        const nodeDeletePromises = nodesSnapshot.docs.map(doc => deleteDoc(doc.ref));
+        await Promise.all(nodeDeletePromises);
+        console.log(`Usunięto ${nodesSnapshot.size} węzłów dla scenariusza: ${scenarioId}`);
+        
+        // Usuń scenariusz
+        await deleteDoc(scenarioDoc.ref);
+        console.log(`Usunięto scenariusz: ${scenarioId}`);
+      }
+      
+      // Usuń workspace
+      await deleteDoc(workspaceDoc.ref);
+      console.log(`Usunięto workspace: ${workspaceId}`);
     }
     
-    // Wykorzystujemy istniejącą funkcję seedFirestore, ale z danymi z JSON
-    // Implementacja tej funkcji wymaga modyfikacji seedFirestore.ts
-    const result = await seedFirestoreFromData(userId, jsonData);
-    return result;
+    // Usuń aplikację
+    await deleteDoc(doc(db, 'applications', applicationId));
+    console.log(`Usunięto aplikację: ${applicationId}`);
+    
+    return true;
   } catch (error) {
-    console.error('Błąd podczas importu danych:', error);
+    console.error('Błąd podczas usuwania aplikacji:', error);
     throw error;
   }
-}
-
-// Ta funkcja będzie musiała być zaimplementowana w seedFirestore.ts
-async function seedFirestoreFromData(userId: string, appData: any[]) {
-  console.log('Funkcja seedFirestoreFromData powinna zostać zaimplementowana w seedFirestore.ts');
-  // Tymczasowo zwracamy puste ID
-  return {
-    applicationId: '',
-    workspaceId: '',
-    scenarioId: ''
-  };
 }
 
 const AdminPanelView: React.FC = () => {
@@ -46,39 +68,18 @@ const AdminPanelView: React.FC = () => {
   const { applications, fetchApplications, isLoading, error } = useApplicationStore();
   
   const [isSeedingData, setIsSeedingData] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [seedResult, setSeedResult] = useState<any>(null);
   const [operationError, setOperationError] = useState<string | null>(null);
   const [jsonFile, setJsonFile] = useState<File | null>(null);
   const [fileContent, setFileContent] = useState<any>(null);
   const [selectedApplication, setSelectedApplication] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   // Pobierz listę aplikacji przy ładowaniu strony
   useEffect(() => {
     fetchApplications();
   }, [fetchApplications]);
-
-  // Obsługa dodawania danych testowych
-  const handleSeedData = async () => {
-    if (!user) {
-      setOperationError('Musisz być zalogowany, aby dodać dane testowe');
-      return;
-    }
-
-    setIsSeedingData(true);
-    setOperationError(null);
-    setSeedResult(null);
-    
-    try {
-      const result = await seedFirestore(user.uid);
-      setSeedResult(result);
-      console.log('Dane testowe zostały dodane pomyślnie', result);
-    } catch (err) {
-      setOperationError('Wystąpił błąd podczas dodawania danych testowych');
-      console.error(err);
-    } finally {
-      setIsSeedingData(false);
-    }
-  };
 
   // Obsługa wyboru pliku JSON
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -122,15 +123,45 @@ const AdminPanelView: React.FC = () => {
     setSeedResult(null);
     
     try {
-      const result = await importDataFromJson(user.uid, fileContent);
+      const result = await seedFirestoreFromData(user.uid, fileContent);
       setSeedResult(result);
       console.log('Dane zostały zaimportowane pomyślnie', result);
+      // Odśwież listę aplikacji
+      fetchApplications();
     } catch (err) {
       setOperationError('Wystąpił błąd podczas importu danych');
       console.error(err);
     } finally {
       setIsSeedingData(false);
     }
+  };
+
+  // Obsługa usuwania aplikacji
+  const handleDeleteApplication = async (applicationId: string) => {
+    if (confirmDelete !== applicationId) {
+      setConfirmDelete(applicationId);
+      return;
+    }
+    
+    setIsDeleting(true);
+    setOperationError(null);
+    
+    try {
+      await deleteApplication(applicationId);
+      // Odśwież listę aplikacji
+      fetchApplications();
+      setConfirmDelete(null);
+    } catch (err) {
+      setOperationError('Wystąpił błąd podczas usuwania aplikacji');
+      console.error(err);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Anulowanie potwierdzenia usuwania
+  const cancelDelete = () => {
+    setConfirmDelete(null);
   };
 
   // Obsługa nawigacji po dodaniu danych
@@ -166,22 +197,6 @@ const AdminPanelView: React.FC = () => {
               className="px-4 py-2 bg-slate-600 text-white rounded hover:bg-slate-700"
             >
               Wróć do aplikacji
-            </button>
-          </div>
-          
-          {/* Sekcja dodawania przykładowych danych */}
-          <div className="mb-8 p-6 bg-white rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Dodaj przykładowe dane</h2>
-            <p className="mb-4 text-gray-600">
-              Kliknij poniższy przycisk, aby załadować przykładowe dane z mocków do bazy Firestore.
-            </p>
-            
-            <button 
-              onClick={handleSeedData}
-              disabled={isSeedingData || !user}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded disabled:opacity-50"
-            >
-              {isSeedingData ? 'Dodawanie danych...' : 'Dodaj przykładowe dane'}
             </button>
           </div>
           
@@ -258,7 +273,7 @@ const AdminPanelView: React.FC = () => {
             {applications.length === 0 ? (
               <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <p className="text-yellow-700">
-                  Brak aplikacji w bazie danych. Dodaj przykładowe dane lub zaimportuj z pliku JSON.
+                  Brak aplikacji w bazie danych. Zaimportuj dane z pliku JSON.
                 </p>
               </div>
             ) : (
@@ -266,12 +281,10 @@ const AdminPanelView: React.FC = () => {
                 {applications.map((app) => (
                   <div 
                     key={app.id} 
-                    className={`p-4 border rounded-lg cursor-pointer hover:bg-slate-50 transition-colors
-                      ${selectedApplication === app.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
-                    onClick={() => setSelectedApplication(app.id === selectedApplication ? null : app.id)}
+                    className={`p-4 border rounded-lg ${selectedApplication === app.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center">
+                      <div className="flex items-center cursor-pointer" onClick={() => setSelectedApplication(app.id === selectedApplication ? null : app.id)}>
                         <SubjectIcon iconName="briefcase" className="text-blue-500 mr-3" />
                         <div>
                           <h3 className="font-medium">{app.name}</h3>
@@ -281,14 +294,36 @@ const AdminPanelView: React.FC = () => {
                       
                       <div className="flex items-center space-x-2">
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/app/${app.id}`);
-                          }}
+                          onClick={() => navigate(`/app/${app.id}`)}
                           className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
                         >
                           Otwórz
                         </button>
+                        
+                        {confirmDelete === app.id ? (
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => handleDeleteApplication(app.id)}
+                              disabled={isDeleting}
+                              className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 disabled:opacity-50"
+                            >
+                              {isDeleting ? 'Usuwanie...' : 'Potwierdź'}
+                            </button>
+                            <button
+                              onClick={cancelDelete}
+                              className="px-3 py-1 bg-gray-300 text-gray-700 text-sm rounded hover:bg-gray-400"
+                            >
+                              Anuluj
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => handleDeleteApplication(app.id)}
+                            className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600"
+                          >
+                            Usuń
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
