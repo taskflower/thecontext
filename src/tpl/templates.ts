@@ -33,7 +33,7 @@ const flowStepImports = {
   "summary-step": lazy(
     () => import("@/tpl/minimal/flowSteps/SummaryStepTemplate")
   ),
-  "llm-step": lazy(
+  "llm-step": lazy( 
     () => import("@/tpl/minimal/flowSteps/LlmStepTemplate")
   ),
 };

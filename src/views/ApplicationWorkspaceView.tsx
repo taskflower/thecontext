@@ -7,30 +7,27 @@ import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
 
 export const ApplicationWorkspaceView: React.FC = () => {
   const { applicationId } = useParams<{ applicationId: string }>();
-  const { 
-    fetchApplicationById, 
-    getCurrentApplication, 
-    isLoading, 
-    error 
-  } = useApplicationStore();
+  const { fetchApplicationById, getCurrentApplication, isLoading, error } =
+    useApplicationStore();
   const { selectWorkspace } = useWorkspaceStore();
   const navigate = useNavigate();
 
-  console.log('ApplicationWorkspaceView rendering, applicationId:', applicationId);
+  console.log(
+    "ApplicationWorkspaceView rendering, applicationId:",
+    applicationId
+  );
 
   // Pobierz szczegóły aplikacji przy pierwszym renderowaniu
   useEffect(() => {
     if (applicationId) {
-      console.log('Fetching application data for ID:', applicationId);
+      console.log("Fetching application data for ID:", applicationId);
       fetchApplicationById(applicationId);
     }
   }, [applicationId, fetchApplicationById]);
 
   const currentApplication = getCurrentApplication();
-  console.log('Current application:', currentApplication);
-  
+
   const workspaces = currentApplication?.workspaces || [];
-  console.log('Workspaces:', workspaces);
 
   // Użyj domyślnego layoutu
   const LayoutComponent =
@@ -42,14 +39,14 @@ export const ApplicationWorkspaceView: React.FC = () => {
 
   // Obsługa wyboru workspace
   const handleSelect = (workspaceId: string) => {
-    console.log('handleSelect called with workspaceId:', workspaceId);
-    console.log('Application ID:', applicationId);
-    
+    console.log("handleSelect called with workspaceId:", workspaceId);
+    console.log("Application ID:", applicationId);
+
     // Wybierz workspace w store
     selectWorkspace(workspaceId);
-    
+
     // Nawiguj do strony scenariuszy
-    console.log('Navigating to:', `/app/${applicationId}/${workspaceId}`);
+    console.log("Navigating to:", `/app/${applicationId}/${workspaceId}`);
     navigate(`/app/${applicationId}/${workspaceId}`);
   };
 
@@ -57,7 +54,9 @@ export const ApplicationWorkspaceView: React.FC = () => {
   const workspaceData = workspaces.map((workspace) => ({
     id: workspace.id,
     name: workspace.name,
-    description: workspace.description || `Template: ${workspace.templateSettings.layoutTemplate}`,
+    description:
+      workspace.description ||
+      `Template: ${workspace.templateSettings.layoutTemplate}`,
     count: workspace.scenarios.length,
     countLabel: "scenarios",
     icon: workspace.icon || "briefcase",
@@ -76,7 +75,7 @@ export const ApplicationWorkspaceView: React.FC = () => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-red-600 text-lg">
           Błąd: {error}
-          <button 
+          <button
             onClick={() => applicationId && fetchApplicationById(applicationId)}
             className="ml-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
@@ -92,8 +91,8 @@ export const ApplicationWorkspaceView: React.FC = () => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-red-600 text-lg">
           Aplikacja o ID {applicationId} nie została znaleziona.
-          <button 
-            onClick={() => navigate('/')}
+          <button
+            onClick={() => navigate("/")}
             className="ml-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
             Wróć do listy aplikacji
@@ -111,16 +110,16 @@ export const ApplicationWorkspaceView: React.FC = () => {
         </div>
       }
     >
-      <LayoutComponent 
+      <LayoutComponent
         title={`Aplikacja: ${currentApplication.name}`}
-        onBackClick={() => navigate('/')}
+        onBackClick={() => navigate("/")}
       >
         <div className="mb-8">
           <h1 className="text-2xl font-bold mb-2">{currentApplication.name}</h1>
           <p className="text-gray-600">{currentApplication.description}</p>
           <div className="mt-4">
-            <button 
-              onClick={() => navigate('/')}
+            <button
+              onClick={() => navigate("/")}
               className="text-blue-600 hover:text-blue-800"
             >
               &larr; Wróć do listy aplikacji
