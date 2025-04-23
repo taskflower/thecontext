@@ -8,6 +8,7 @@ export type IconType = string;
 export interface LayoutProps {
   children: ReactNode;
   title?: string;
+  onBackClick?: () => void;
 }
 
 export interface WidgetProps {

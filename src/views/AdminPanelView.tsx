@@ -22,7 +22,7 @@ import FileUpload from "@/components/FileUpload";
 import StatusMessage from "@/components/StatusMessage";
 
 // Function to delete an application
-async function deleteApplication(applicationId:any) {
+async function deleteApplication(applicationId: string) {
   try {
     // 1. Find all workspaces belonging to this application
     const workspacesRef = collection(db, "workspaces");
@@ -86,12 +86,12 @@ const AdminPanelView = () => {
 
   const [isSeedingData, setIsSeedingData] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [seedResult, setSeedResult] = useState(null);
+  const [seedResult, setSeedResult] = useState<{ applicationId: string; workspaceId: string; scenarioId: string; } | null>(null);
   const [operationError, setOperationError] = useState<string | null>(null);
-  const [jsonFile, setJsonFile] = useState(null);
+  const [jsonFile, setJsonFile] = useState<File | null>(null);
   const [fileContent, setFileContent] = useState(null);
   const [selectedApplication, setSelectedApplication] = useState(null);
-  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   // Fetch applications on load
   useEffect(() => {
@@ -99,7 +99,7 @@ const AdminPanelView = () => {
   }, [fetchApplications]);
 
   // Handle file selection
-  const handleFileChange = (e:any) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setJsonFile(file);
@@ -154,7 +154,7 @@ const AdminPanelView = () => {
   };
 
   // Handle application deletion
-  const handleDeleteApplication = async (applicationId:any) => {
+  const handleDeleteApplication = async (applicationId: string) => {
     if (confirmDelete !== applicationId) {
       setConfirmDelete(applicationId);
       return;

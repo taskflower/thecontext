@@ -5,6 +5,33 @@ import { getLayoutComponent, getWidgetComponent } from "../tpl/templates";
 import { useApplicationStore } from "@/hooks/useApplicationStore";
 import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
 
+interface Workspace {
+  id: string;
+  name: string;
+  description?: string;
+  templateSettings: {
+    layoutTemplate: string;
+  };
+  scenarios: any[]; // Assuming 'any' for now, will investigate later
+  icon?: string;
+}
+
+interface WorkspaceData {
+  id: string;
+  name: string;
+  description: string;
+  count: number;
+  countLabel: string;
+  icon: string;
+}
+
+interface Application {
+  id: string;
+  name: string;
+  description: string;
+  workspaces: Workspace[];
+}
+
 export const ApplicationWorkspaceView: React.FC = () => {
   const { applicationId } = useParams<{ applicationId: string }>();
   const { fetchApplicationById, getCurrentApplication, isLoading, error } =
@@ -25,7 +52,7 @@ export const ApplicationWorkspaceView: React.FC = () => {
     }
   }, [applicationId, fetchApplicationById]);
 
-  const currentApplication = getCurrentApplication();
+  const currentApplication = getCurrentApplication() as Application | undefined;
   const workspaces = currentApplication?.workspaces || [];
 
   // Użyj domyślnego layoutu
@@ -50,7 +77,7 @@ export const ApplicationWorkspaceView: React.FC = () => {
   };
 
   // Przygotuj dane dla widgetu
-  const workspaceData = workspaces.map((workspace) => ({
+  const workspaceData: WorkspaceData[] = workspaces.map((workspace: Workspace) => ({
     id: workspace.id,
     name: workspace.name,
     description:

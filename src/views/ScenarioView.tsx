@@ -4,7 +4,7 @@ import { useNavigate, Navigate, useParams } from "react-router-dom";
 
 import { getLayoutComponent, getWidgetComponent } from "../tpl/templates";
 import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
-import { Scenario } from "@/types";
+import { Scenario, Workspace } from "@/types";
 
 export const ScenarioView: React.FC = () => {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ export const ScenarioView: React.FC = () => {
     }
   }, [workspace, selectWorkspace]);
   
-  const currentWorkspace = getCurrentWorkspace();
+  const currentWorkspace = getCurrentWorkspace() as Workspace | undefined;
 
   // Pokaż ładowanie
   if (isLoading) {
