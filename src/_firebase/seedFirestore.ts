@@ -8,14 +8,9 @@ import { db } from "@/_firebase/config";
  * @param jsonData Dane aplikacji w formacie JSON
  */
 export async function seedFirestoreFromData(userId: string, jsonData: any[]) {
-  console.log("Rozpoczęcie importu danych z pliku JSON do Firestore...");
-
   try {
     // Dodaj aplikacje z danych JSON
     const createdIds = await addDataToFirestore(userId, jsonData);
-
-    console.log("Proces importu danych zakończony powodzeniem!");
-    console.log("Utworzone ID:", createdIds);
 
     // Sprawdź, czy możemy bezpośrednio pobrać i wyświetlić dane
     await verifyDataWasAdded(createdIds);
@@ -45,8 +40,6 @@ async function addDataToFirestore(userId: string, appData: any[]) {
 
   // Dla każdej aplikacji z danych JSON
   for (const appItem of appData) {
-    console.log(`Dodawanie aplikacji: "${appItem.name}"...`);
-
     const applicationData = {
       name: appItem.name,
       description: appItem.description || "",
@@ -57,7 +50,6 @@ async function addDataToFirestore(userId: string, appData: any[]) {
     // Dodaj aplikację
     const applicationDoc = await addDoc(applicationsRef, applicationData);
     const applicationId = applicationDoc.id;
-    console.log(`Dodano aplikację "${appItem.name}" z ID: ${applicationId}`);
 
     // Zapisz ID pierwszej aplikacji
     if (!firstApplicationId) {
@@ -67,8 +59,6 @@ async function addDataToFirestore(userId: string, appData: any[]) {
     // Dla każdego workspace w aplikacji
     if (Array.isArray(appItem.workspaces)) {
       for (const workspaceItem of appItem.workspaces) {
-        console.log(`Dodawanie workspace: "${workspaceItem.name}"...`);
-
         const workspaceData = {
           name: workspaceItem.name,
           description: workspaceItem.description || "",
@@ -83,9 +73,6 @@ async function addDataToFirestore(userId: string, appData: any[]) {
         // Dodaj workspace
         const workspaceDoc = await addDoc(workspacesRef, workspaceData);
         const workspaceId = workspaceDoc.id;
-        console.log(
-          `Dodano workspace "${workspaceItem.name}" z ID: ${workspaceId}`
-        );
 
         // Zapisz ID pierwszego workspace'a
         if (!firstWorkspaceId) {
@@ -95,8 +82,6 @@ async function addDataToFirestore(userId: string, appData: any[]) {
         // Dla każdego scenariusza w workspace
         if (Array.isArray(workspaceItem.scenarios)) {
           for (const scenarioItem of workspaceItem.scenarios) {
-            console.log(`Dodawanie scenariusza: "${scenarioItem.name}"...`);
-
             const scenarioData = {
               name: scenarioItem.name,
               description: scenarioItem.description || "",
@@ -109,9 +94,6 @@ async function addDataToFirestore(userId: string, appData: any[]) {
             // Dodaj scenariusz
             const scenarioDoc = await addDoc(scenariosRef, scenarioData);
             const scenarioId = scenarioDoc.id;
-            console.log(
-              `Dodano scenariusz "${scenarioItem.name}" z ID: ${scenarioId}`
-            );
 
             // Zapisz ID pierwszego scenariusza
             if (!firstScenarioId) {
@@ -151,25 +133,17 @@ async function addDataToFirestore(userId: string, appData: any[]) {
 
                 // Dodaj węzeł
                 await addDoc(nodesRef, nodeData);
-                console.log(
-                  `Dodano węzeł "${
-                    nodeItem.label || nodeItem.id
-                  }" z order=${nodeOrder}`
-                );
               }
-              console.log(
-                `Dodano ${sortedNodes.length} węzłów do scenariusza "${scenarioItem.name}"`
-              );
             }
           }
         } else {
-          console.log(
+          console.error(
             `Workspace "${workspaceItem.name}" nie zawiera scenariuszy lub ma nieprawidłowy format`
           );
         }
       }
     } else {
-      console.log(
+      console.error(
         `Aplikacja "${appItem.name}" nie zawiera workspaces lub ma nieprawidłowy format`
       );
     }
