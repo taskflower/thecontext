@@ -22,7 +22,7 @@
                 "label": "Dane finansowe",
                 "assistantMessage": "Podaj przychody i koszty projektu:",
                 "contextPath": "collect-data",
-                "templateId": "form-step",
+                "templateId": "form-step-minimal",
                 "order": 0,
                 "attrs": { 
                   "schemaPath": "schemas.form.business" 
@@ -34,7 +34,7 @@
                 "label": "Raport ROI",
                 "assistantMessage": "Generuję raport ROI na podstawie danych...",
                 "contextPath": "generate-report",
-                "templateId": "llm-step",
+                "templateId": "llm-step-minimal",
                 "order": 1,
                 "attrs": {
                   "autoStart": true,
@@ -49,7 +49,7 @@
                 "label": "Podsumowanie",
                 "assistantMessage": "Oto podsumowanie wyników analizy finansowej twojego projektu.",
                 "contextPath": "summary",
-                "templateId": "summary-step",
+                "templateId": "summary-step",  
                 "order": 2,
                 "attrs": {
                   "schemaPath": "schemas.summary.businessSummary",

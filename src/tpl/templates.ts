@@ -19,22 +19,17 @@ const widgetImports = {
 // Dynamiczne importy dla kroków przepływu
 const flowStepImports = {
   // Domyślne kroki z default template
-  "basic-step": lazy(
-    () => import("@/tpl/default/flowSteps/BasicStepTemplate")
-  ),
-  "form-step": lazy(
-    () => import("@/tpl/default/flowSteps/FormInputTemplate")
-  ),
-  "llm-query": lazy(
-    () => import("@/tpl/default/flowSteps/LlmQueryTemplate")
-  ),
+  "basic-step": lazy(() => import("@/tpl/default/flowSteps/BasicStepTemplate")),
+  "form-step": lazy(() => import("@/tpl/default/flowSteps/FormInputTemplate")),
+  "llm-query": lazy(() => import("@/tpl/default/flowSteps/LlmQueryTemplate")),
 
   // Kroki z minimal template
   "summary-step": lazy(
     () => import("@/tpl/minimal/flowSteps/SummaryStepTemplate")
   ),
-  "llm-step": lazy( 
-    () => import("@/tpl/minimal/flowSteps/LlmStepTemplate")
+  "llm-step": lazy(() => import("@/tpl/minimal/flowSteps/LlmStepTemplate")),
+  "form-step-minimal": lazy(
+    () => import("@/tpl/minimal/flowSteps/FormStepTemplate")
   ),
 };
 
@@ -47,16 +42,23 @@ export function getWidgetComponent(id: string) {
 }
 
 export function getFlowStepComponent(id: string) {
-  return flowStepImports[id as keyof typeof flowStepImports] || null;
+  console.error('Błąd: Nie znaleziono komponentu przepływu', {
+    requestedId: id,
+    availableComponents: Object.keys(flowStepImports),
+    suggestedAlternative: id.replace('-minimal', '')
+  });
+
+  // Spróbuj znaleźć komponent bez sufiksu '-minimal'
+  const alternativeId = id.replace('-minimal', '');
+  return flowStepImports[alternativeId as keyof typeof flowStepImports] || null;
 }
 
 export function getFlowStepForNodeType(nodeType: string) {
-  // Można dodać logikę mapowania typów węzłów do kroków, jeśli będzie taka potrzeba
   const nodeTypeToStepMap: Record<string, string> = {
     default: "basic-step",
-    form: "form-step",
-    llm: "llm-query",
-    summary: "summary-step",
+    form: "form-step-minimal",
+    llm: "llm-step",
+    summary: "summary-step",  // Ensure this maps to the minimal template's summary step
   };
 
   const stepId = nodeTypeToStepMap[nodeType];
