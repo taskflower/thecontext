@@ -14,7 +14,7 @@ const ScenarioView = lazy(() => import("./views/ScenarioView"));
 const LoginView = lazy(() => import("./views/LoginView"));
 const ApplicationView = lazy(() => import("./views/ApplicationView"));
 const ApplicationWorkspaceView = lazy(() => import("./views/ApplicationWorkspaceView"));
-const AdminPanelView = lazy(() => import("./views/AdminPanelView")); // Nowy widok panelu administratora
+const AdminPanelView = lazy(() => import("./views/AdminPanelView"));
 
 // Providers and utilities
 import InitialDataProvider from "./InitialDataProvider";
@@ -24,6 +24,9 @@ import { AuthProvider } from "./_npHooks/useAuth";
 import ScenarioGenerator from "./_local_modules/scenarioGenerator/components/ScenarioGenerator";
 import EnhancedFlowDebugger from "./_local_modules/debug/EnhancedFlowDebugger";
 import { AuthWrapper } from "./_auth/AuthWrapper";
+
+// Import SharedLoader dla spójnego wyglądu ładowania
+import SharedLoader from "./components/SharedLoader";
 
 const AppWrapper = ({ children }: { children: React.ReactNode }) => (
   <div className="flex w-full h-screen overflow-hidden">
@@ -41,9 +44,7 @@ const App = () => (
     <AuthProvider>
       <Suspense
         fallback={
-          <div className="flex items-center justify-center h-screen">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-          </div>
+          <SharedLoader message="Ładowanie..." size="lg" fullScreen={true} />
         }
       >
         <AppWrapper>

@@ -27,7 +27,7 @@ const Header = () => {
       </h1>
       <div className="w-24 h-1 bg-primary mx-auto mb-6"></div>
       <p className="text-xl text-muted-foreground max-w-xl mx-auto">
-        Select an application to start building
+        Select an application to start
       </p>
     </div>
   );

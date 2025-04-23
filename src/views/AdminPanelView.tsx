@@ -1,9 +1,11 @@
+// src/views/AdminPanelView.tsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/_npHooks/useAuth";
 import { seedFirestoreFromData } from "@/_firebase/seedFirestore";
 import { useApplicationStore } from "@/hooks/useApplicationStore";
 import { LoadingState } from "@/components/LoadingState";
+import SharedLoader from "@/components/SharedLoader";
 import {
   deleteDoc,
   doc,
@@ -18,8 +20,6 @@ import ApplicationList from "@/components/ApplicationList";
 import AdminHeader from "@/components/AdminHeader";
 import FileUpload from "@/components/FileUpload";
 import StatusMessage from "@/components/StatusMessage";
-
-// Import our components
 
 // Function to delete an application
 async function deleteApplication(applicationId:any) {
@@ -192,12 +192,28 @@ const AdminPanelView = () => {
     }
   };
 
+  // Render loading state for data seeding
+  const renderSeedingLoader = () => {
+    if (isSeedingData) {
+      return <SharedLoader message="Importowanie danych..." size="md" />;
+    }
+    return null;
+  };
+
+  // Render loading state for deletion
+  const renderDeletingLoader = () => {
+    if (isDeleting) {
+      return <SharedLoader message="Usuwanie aplikacji..." size="md" />;
+    }
+    return null;
+  };
+
   return (
     <LoadingState
       isLoading={isLoading && !applications.length}
       error={error}
-      loadingMessage="Loading applications..."
-      errorTitle="Error loading applications"
+      loadingMessage="Ładowanie aplikacji..."
+      errorTitle="Błąd ładowania aplikacji"
       onRetry={fetchApplications}
     >
       <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -213,6 +229,9 @@ const AdminPanelView = () => {
               isSeedingData={isSeedingData}
               isDisabled={!fileContent || !user}
             />
+
+            {renderSeedingLoader()}
+            {renderDeletingLoader()}
 
             <StatusMessage
               error={operationError}

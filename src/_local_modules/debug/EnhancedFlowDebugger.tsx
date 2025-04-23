@@ -147,7 +147,7 @@ export const EnhancedFlowDebugger = () => {
   if (!isVisible) {
     return (
       <button
-        className="fixed right-3 bottom-3 z-50 px-3 py-2 text-xs rounded-md bg-gray-600 text-white font-medium flex items-center shadow-md hover:bg-gray-700 transition-colors"
+        className="fixed right-3 bottom-3 z-50 px-3 py-2 text-xs rounded-md bg-black text-white font-medium flex items-center shadow-md hover:border-b-2 transition-colors"
         onClick={toggleDebugger}
         title="Ctrl+Shift+D aby włączyć/wyłączyć debugger"
       >

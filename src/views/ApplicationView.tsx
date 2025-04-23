@@ -1,4 +1,5 @@
-import React, { useEffect, Suspense } from "react";
+// src/views/ApplicationView.tsx
+import { useEffect, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApplicationStore } from "@/hooks/useApplicationStore";
 import { LoadingState } from "@/components/LoadingState";
@@ -7,7 +8,7 @@ import Header from "@/components/Header";
 import EmptyState from "@/components/EmptyState";
 import ApplicationCard from "@/components/ApplicationCard";
 import Footer from "@/components/Footer";
-
+import SharedLoader from "@/components/SharedLoader";
 
 export const ApplicationView: React.FC = () => {
   const {
@@ -29,21 +30,15 @@ export const ApplicationView: React.FC = () => {
     navigate(`/app/${applicationId}`);
   };
 
-  const fallbackLoader = (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="text-muted-foreground text-lg">
-        Loading applications...
-      </div>
-    </div>
-  );
+  const fallbackLoader = <SharedLoader message="Ładowanie aplikacji..." fullScreen={true} />;
 
   return (
     <Suspense fallback={fallbackLoader}>
       <LoadingState
         isLoading={isLoading}
         error={error}
-        loadingMessage="Loading applications..."
-        errorTitle="Error loading applications"
+        loadingMessage="Ładowanie aplikacji..."
+        errorTitle="Błąd ładowania aplikacji"
         onRetry={() => fetchApplications()}
       >
         <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -61,7 +56,7 @@ export const ApplicationView: React.FC = () => {
                       app={{
                         id: app.id,
                         name: app.name,
-                        description: app.description || "Application without description",
+                        description: app.description || "Aplikacja bez opisu",
                       }}
                       onClick={() => handleSelect(app.id)}
                     />
