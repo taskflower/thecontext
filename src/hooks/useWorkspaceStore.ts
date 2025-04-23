@@ -32,13 +32,13 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   currentWorkspaceId: null,
   currentScenarioId: null,
 
-  // Pobierz wszystkie workspaces z Firebase
   fetchWorkspaces: async () => {
     try {
       set({ isLoading: true, error: null });
       const workspaces = await firebaseService.getWorkspaces();
       
-      // Inicjalizacja kontekstów dla każdego workspace
+      console.log("Pobrano workspaces:", workspaces.length);
+      
       const contexts: Record<string, any> = {};
       workspaces.forEach(ws => {
         contexts[ws.id] = ws.initialContext || {};
@@ -55,10 +55,13 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     }
   },
 
-  // Pobierz konkretny workspace po ID
   fetchWorkspaceById: async (id: string) => {
+    if (!id) return;
+    
     try {
       set({ isLoading: true, error: null });
+      console.log("Pobieranie workspace o ID:", id);
+      
       const workspace = await firebaseService.getWorkspaceById(id);
       
       if (!workspace) {
@@ -66,7 +69,6 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       }
       
       set((state) => {
-        // Aktualizuj istniejące workspaces lub dodaj nowy
         const exists = state.workspaces.some(w => w.id === id);
         let updatedWorkspaces = [...state.workspaces];
         
@@ -85,7 +87,6 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
         };
       });
       
-      // Inicjalizuj kontekst dla workspace
       const contexts = useContextStore.getState().contexts;
       if (!contexts[id]) {
         useContextStore.getState().setContexts({
@@ -103,11 +104,9 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     }
   },
 
-  // Ustaw workspaces (dla kompatybilności wstecznej)
   setWorkspaces: (workspaces) => {
     set({ workspaces });
 
-    // Inicjalizacja kontekstów dla każdego workspace
     const contexts: Record<string, any> = {};
     workspaces.forEach(ws => {
       contexts[ws.id] = ws.initialContext || {};
@@ -115,38 +114,37 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     useContextStore.getState().setContexts(contexts);
   },
 
-  // Wybór workspace
   selectWorkspace: (id) => {
+    if (!id) return;
+    
+    console.log("Wybór workspace:", id);
     set({ currentWorkspaceId: id, currentScenarioId: null });
     
-    // Automatycznie ładuj workspace jeśli nie został jeszcze pobrany
     const workspace = get().workspaces.find(w => w.id === id);
-    if (!workspace) {
+    if (!workspace || !workspace.scenarios || workspace.scenarios.length === 0) {
+      console.log("Workspace nie istnieje lub jest pusty, pobieranie:", id);
       get().fetchWorkspaceById(id);
     }
   },
   
-  // Wybór scenariusza
   selectScenario: (id) => {
+    if (!id) return;
     set({ currentScenarioId: id });
   },
 
-  // Pobierz aktualny workspace
   getCurrentWorkspace: () => {
     const { workspaces, currentWorkspaceId } = get();
+    if (!currentWorkspaceId) return undefined;
     return workspaces.find(w => w.id === currentWorkspaceId);
   },
 
-  // Pobierz aktualny scenariusz
   getCurrentScenario: () => {
     const workspace = get().getCurrentWorkspace();
     if (!workspace) return undefined;
-    return workspace.scenarios.find(s => s.id === get().currentScenarioId);
+    return workspace.scenarios?.find(s => s.id === get().currentScenarioId);
   },
   
-  // Ustawienie stanu ładowania
   setLoading: (loading: boolean) => set({ isLoading: loading }),
   
-  // Ustawienie błędu
   setError: (error: string | null) => set({ error }),
 }));

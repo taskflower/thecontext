@@ -3,6 +3,7 @@ import React, { useEffect, Suspense } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getLayoutComponent, getWidgetComponent } from "../tpl/templates";
 import { useApplicationStore } from "@/hooks/useApplicationStore";
+import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
 
 export const ApplicationWorkspaceView: React.FC = () => {
   const { applicationId } = useParams<{ applicationId: string }>();
@@ -12,17 +13,24 @@ export const ApplicationWorkspaceView: React.FC = () => {
     isLoading, 
     error 
   } = useApplicationStore();
+  const { selectWorkspace } = useWorkspaceStore();
   const navigate = useNavigate();
+
+  console.log('ApplicationWorkspaceView rendering, applicationId:', applicationId);
 
   // Pobierz szczegóły aplikacji przy pierwszym renderowaniu
   useEffect(() => {
     if (applicationId) {
+      console.log('Fetching application data for ID:', applicationId);
       fetchApplicationById(applicationId);
     }
   }, [applicationId, fetchApplicationById]);
 
   const currentApplication = getCurrentApplication();
+  console.log('Current application:', currentApplication);
+  
   const workspaces = currentApplication?.workspaces || [];
+  console.log('Workspaces:', workspaces);
 
   // Użyj domyślnego layoutu
   const LayoutComponent =
@@ -34,6 +42,14 @@ export const ApplicationWorkspaceView: React.FC = () => {
 
   // Obsługa wyboru workspace
   const handleSelect = (workspaceId: string) => {
+    console.log('handleSelect called with workspaceId:', workspaceId);
+    console.log('Application ID:', applicationId);
+    
+    // Wybierz workspace w store
+    selectWorkspace(workspaceId);
+    
+    // Nawiguj do strony scenariuszy
+    console.log('Navigating to:', `/app/${applicationId}/${workspaceId}`);
     navigate(`/app/${applicationId}/${workspaceId}`);
   };
 
