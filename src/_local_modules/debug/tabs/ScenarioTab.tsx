@@ -3,7 +3,7 @@
 import { List, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-export const ScenarioTab = ({ currentScenario, currentWorkspace }) => {
+export const ScenarioTab = ({ currentScenario, currentWorkspace }:any) => {
   const navigate = useNavigate();
   return (
     <div className="p-3 h-full overflow-auto">
@@ -86,7 +86,7 @@ export const ScenarioTab = ({ currentScenario, currentWorkspace }) => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {currentScenario.nodes.map((node, index) => (
+                      {currentScenario.nodes.map((node:any, index:any) => (
                         <tr
                           key={node.id}
                           className={

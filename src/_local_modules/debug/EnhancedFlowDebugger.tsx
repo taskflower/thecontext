@@ -1,13 +1,15 @@
 // src/debug/EnhancedFlowDebugger.jsx
 import { useState, useEffect, useRef } from "react";
-import { RefreshCw, Clock, List, Database, EyeOff } from "lucide-react";
+import { RefreshCw, Clock, List, Database, EyeOff, X, Users } from "lucide-react";
 import ContextTab from "./tabs/ContextTab";
 import LogsTab from "./tabs/LogsTab";
 import ScenarioTab from "./tabs/ScenarioTab";
 import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
 import { useContextStore } from "@/hooks/useContextStore";
+import { useNavigate } from "react-router-dom";
 
 export const EnhancedFlowDebugger = () => {
+  const navigate = useNavigate(); 
   const [isVisible, setIsVisible] = useState(
     localStorage.getItem("debuggerVisible") === "true"
   );
@@ -178,7 +180,7 @@ export const EnhancedFlowDebugger = () => {
             className="p-1 rounded hover:bg-blue-700"
             title="Ukryj debugger (Ctrl+Shift+D)"
           >
-            <EyeOff className="w-4 h-4" />
+            <X className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -218,6 +220,11 @@ export const EnhancedFlowDebugger = () => {
           <List className="w-4 h-4 mr-1.5" />
           Scenariusz
         </button>
+        <button  onClick={() => navigate('/admin')} className={`px-4 py-2 font-medium text-sm flex items-center ${
+            activeTab === "logs"
+              ? "bg-white text-blue-700 border-b-2 border-blue-600"
+              : "text-gray-600 hover:bg-gray-200"
+          }`}> <Users className="w-4 h-4 mr-1.5" /> Admin panel</button>
       </div>
 
       {/* Active tab content */}

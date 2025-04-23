@@ -2,7 +2,7 @@
 
 import JsonTreeRenderer from "../components/JsonTreeRenderer";
 
-export const ContextTab = ({ context, expandedPaths, setExpandedPaths }) => {
+export const ContextTab = ({ context, expandedPaths, setExpandedPaths }:any) => {
   return (
     <div className="p-3 h-full overflow-auto">
       <div className="mb-3 flex items-center justify-between">

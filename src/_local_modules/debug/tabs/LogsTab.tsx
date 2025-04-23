@@ -4,9 +4,9 @@ import { RefreshCw, Clock, Trash2 } from "lucide-react";
 import ChangeTracker from "../components/ChangeTracker";
 
 
-export const LogsTab = ({ logEntries, setLogEntries, logContainerRef }) => {
+export const LogsTab = ({ logEntries, setLogEntries, logContainerRef }:any) => {
   // Time formatting
-  const formatTime = (date) => {
+  const formatTime = (date:any) => {
     return date.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
@@ -50,7 +50,7 @@ export const LogsTab = ({ logEntries, setLogEntries, logContainerRef }) => {
             {logEntries
               .slice()
               .reverse()
-              .map((entry) => (
+              .map((entry:any) => (
                 <div
                   key={entry.id}
                   className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm"
