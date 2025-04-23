@@ -26,7 +26,6 @@ export const ApplicationWorkspaceView: React.FC = () => {
   }, [applicationId, fetchApplicationById]);
 
   const currentApplication = getCurrentApplication();
-
   const workspaces = currentApplication?.workspaces || [];
 
   // Użyj domyślnego layoutu
@@ -62,15 +61,20 @@ export const ApplicationWorkspaceView: React.FC = () => {
     icon: workspace.icon || "briefcase",
   }));
 
-  if (isLoading && !currentApplication) {
+  // Use a single loading state for initial data fetch
+  // We want to show loading until we've either successfully loaded the application OR hit a definite error
+  const isInitialLoading = isLoading || (!currentApplication && !error);
+  
+  if (isInitialLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-slate-700 text-lg">Ładowanie workspaces...</div>
+        <div className="text-slate-700 text-lg">Ładowanie aplikacji...</div>
       </div>
     );
   }
 
-  if (error && !currentApplication) {
+  // Show error only when we have a definite error and we're done loading
+  if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-red-600 text-lg">
@@ -86,6 +90,8 @@ export const ApplicationWorkspaceView: React.FC = () => {
     );
   }
 
+  // At this point, we know we're not loading and don't have an error
+  // If we still don't have currentApplication, it's truly not found
   if (!currentApplication) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -102,6 +108,7 @@ export const ApplicationWorkspaceView: React.FC = () => {
     );
   }
 
+  // If we reach here, we have the application data
   return (
     <Suspense
       fallback={
