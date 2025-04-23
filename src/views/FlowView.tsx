@@ -18,8 +18,13 @@ const FlowView: React.FC = () => {
   }>();
   const navigate = useNavigate();
 
-  const { getCurrentWorkspace, selectWorkspace, selectScenario, isLoading: workspaceLoading, error: workspaceError } =
-    useWorkspaceStore();
+  const {
+    getCurrentWorkspace,
+    selectWorkspace,
+    selectScenario,
+    isLoading: workspaceLoading,
+    error: workspaceError,
+  } = useWorkspaceStore();
 
   useEffect(() => {
     if (workspace) {
@@ -29,7 +34,7 @@ const FlowView: React.FC = () => {
       selectScenario(scenario);
     }
   }, [workspace, scenario, selectWorkspace, selectScenario]);
-  
+
   const currentWorkspace = getCurrentWorkspace();
 
   const {
@@ -38,7 +43,7 @@ const FlowView: React.FC = () => {
     handlePreviousNode,
     handleNodeExecution,
     contextItems,
-    currentScenario
+    currentScenario,
   } = useNodeManager();
 
   // Use workspace loading and error states
@@ -46,7 +51,9 @@ const FlowView: React.FC = () => {
   const error = workspaceError;
 
   // Fallback loader for Suspense
-  const fallbackLoader = <SharedLoader message="Ładowanie komponentów..." fullScreen={true} />;
+  const fallbackLoader = (
+    <SharedLoader message="Ładowanie komponentów..." fullScreen={true} />
+  );
 
   const renderContent = () => {
     if (!currentWorkspace || !currentScenario) {
@@ -86,17 +93,35 @@ const FlowView: React.FC = () => {
     );
 
     let FlowStepComponent;
+    let componentId = "nieznany";
+
     if (currentNode.templateId) {
-      FlowStepComponent = getFlowStepComponent(currentNode.templateId);
+      componentId = currentNode.templateId;
+      FlowStepComponent = getFlowStepComponent(componentId);
     } else if (currentNode.type) {
-      FlowStepComponent = getFlowStepForNodeType(currentNode.type);
+      componentId = currentNode.type;
+      FlowStepComponent = getFlowStepForNodeType(componentId);
     }
 
     if (!LayoutComponent) {
       return (
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-red-600 text-lg">
-            Błąd: Nie znaleziono komponentu layoutu.
+          <div className="text-red-600 text-lg p-4 bg-red-100 rounded-lg">
+            <h3 className="font-bold">
+              Błąd: Nie znaleziono komponentu layoutu
+            </h3>
+            <p className="mt-2">
+              Szukany layout:{" "}
+              <span className="font-mono bg-red-50 px-1">
+                {currentWorkspace.templateSettings?.layoutTemplate || "default"}
+              </span>
+            </p>
+            <button
+              onClick={() => navigate("/")}
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Wróć do listy aplikacji
+            </button>
           </div>
         </div>
       );
@@ -105,15 +130,38 @@ const FlowView: React.FC = () => {
     if (!FlowStepComponent) {
       return (
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-red-600 text-lg">
-            Błąd: Nie znaleziono komponentu flow step.
+          <div className="text-red-600 text-lg p-4 bg-red-100 rounded-lg">
+            <h3 className="font-bold">
+              Błąd: Nie znaleziono komponentu flow step
+            </h3>
+            <p className="mt-2">
+              Szukany komponent:{" "}
+              <span className="font-mono bg-red-50 px-1">{componentId}</span>
+            </p>
+            <p className="mt-2">
+              ID węzła:{" "}
+              <span className="font-mono bg-red-50 px-1">{currentNode.id}</span>
+            </p>
+            <p className="mt-2">
+              Sprawdź w konsoli przeglądarki listę dostępnych komponentów (F12
+              Console)
+            </p>
+            <button
+              onClick={() => navigate(`/app/${workspace}`)}
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Wróć do workspace
+            </button>
           </div>
         </div>
       );
     }
 
     return (
-      <LayoutComponent>
+      <LayoutComponent
+        title={currentScenario.name}
+        stepTitle={currentNode.label}
+      >
         <FlowStepComponent
           key={currentNode.id}
           node={currentNode}
@@ -122,6 +170,7 @@ const FlowView: React.FC = () => {
           isLastNode={isLastNode}
           contextItems={contextItems}
           scenario={currentScenario}
+          stepTitle={currentNode.label}
         />
       </LayoutComponent>
     );

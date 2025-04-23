@@ -19,7 +19,7 @@
               {
                 "id": "collect-data",
                 "scenarioId": "scenario-business",
-                "label": "Dane finansowe",
+                "label": "Krok 1: Dane finansowe",
                 "assistantMessage": "Podaj przychody i koszty projektu:",
                 "contextPath": "collect-data",
                 "templateId": "form-step-minimal",
@@ -31,7 +31,7 @@
               {
                 "id": "generate-report",
                 "scenarioId": "scenario-business",
-                "label": "Raport ROI",
+                "label": "Krok 2: Raport ROI",
                 "assistantMessage": "Generuję raport ROI na podstawie danych...",
                 "contextPath": "generate-report",
                 "templateId": "llm-step-minimal",
@@ -46,10 +46,10 @@
               {
                 "id": "show-summary",
                 "scenarioId": "scenario-business",
-                "label": "Podsumowanie",
+                "label": "Krok 3: Podsumowanie",
                 "assistantMessage": "Oto podsumowanie wyników analizy finansowej twojego projektu.",
                 "contextPath": "summary",
-                "templateId": "summary-step",  
+                "templateId": "summary-step-minimal",  
                 "order": 2,
                 "attrs": {
                   "schemaPath": "schemas.summary.businessSummary",

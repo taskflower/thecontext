@@ -9,7 +9,7 @@ const DefaultLayout: React.FC<LayoutProps> = ({
   onBackClick,
 }) => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 px-4 md:px-6">
       <div className="container mx-auto">
         <header className="flex justify-between items-center py-4">
           {title && <h1 className="text-xl font-bold">{title}</h1>}

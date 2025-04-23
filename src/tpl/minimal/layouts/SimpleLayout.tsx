@@ -7,7 +7,7 @@ const SimpleLayout: React.FC<LayoutProps> = ({
   title, 
   onBackClick 
 }) => (
-  <div className="flex flex-col bg-white rounded-lg mx-auto w-full max-w-4xl h-full md:min-h-[95vh] md:max-h-[95vh]">
+  <div className="flex flex-col bg-white rounded-lg mx-auto w-full max-w-4xl h-full md:min-h-[95vh] md:max-h-[95vh] px-4 md:px-6">
     {/* Header Section */}
     <div className="py-6 bg-white">
       <div className="w-full flex items-center justify-between">

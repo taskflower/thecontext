@@ -9,6 +9,6 @@ export const SummaryStepTemplate = lazy(() => import('./SummaryStepTemplate'));
 // Eksportujemy mapę nazw komponentów do ich importów
 export const flowStepComponents = {
   'form-step-minimal': FormStepTemplate,
-  'llm-step': LlmStepTemplate,
-  'summary-step': SummaryStepTemplate,
+  'llm-step-minimal': LlmStepTemplate,  // Updated to match templateId in config
+  'summary-step-minimal': SummaryStepTemplate,
 };
