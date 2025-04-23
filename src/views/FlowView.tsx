@@ -5,7 +5,7 @@ import {
   getLayoutComponent,
   getFlowStepComponent,
   getFlowStepForNodeType,
-} from "../lib/templates";
+} from "../tpl/templates";
 import { useNodeManager } from "../hooks/useNodeManager";
 import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
 

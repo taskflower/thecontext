@@ -1,60 +1,44 @@
-// src/views/ScenarioView.tsx - Updated with enhanced icon support
+// src/views/ScenarioView.tsx
 import React, { Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { getWidgetComponent, getLayoutComponent } from "../lib/templates";
-import { Scenario } from "@/types";
+import { getLayoutComponent, getWidgetComponent } from "../tpl/templates";
 import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
-
+import { Scenario } from "@/types";
 
 export const ScenarioView: React.FC = () => {
   const navigate = useNavigate();
   const { getCurrentWorkspace } = useWorkspaceStore();
   const currentWorkspace = getCurrentWorkspace();
 
-  // Redirect to home if workspace not found
   if (!currentWorkspace) {
     navigate("/");
     return null;
   }
 
-  const { templateSettings, scenarios = [] } = currentWorkspace;
+  const LayoutComponent =
+    getLayoutComponent(currentWorkspace.templateSettings.layoutTemplate) ||
+    (() => <div>Layout Not Found</div>);
 
-  // Get layout component
-  const LayoutComponent = getLayoutComponent(templateSettings.layoutTemplate);
-  if (!LayoutComponent) {
-    return <div className="p-4">Layout template not found</div>;
-  }
+  const WidgetComponent =
+    getWidgetComponent(
+      currentWorkspace.templateSettings.scenarioWidgetTemplate
+    ) ||
+    getWidgetComponent("card-list") ||
+    (() => <div>Widget Not Found</div>);
 
-  // Get widget component - use the one specified in template settings
-  let WidgetComponent = getWidgetComponent(
-    templateSettings.scenarioWidgetTemplate
-  );
-  if (!WidgetComponent) {
-    // If widget not found, fallback to default
-    WidgetComponent = getWidgetComponent("card-list");
-    if (!WidgetComponent) {
-      return <div className="p-4">Default widget template not found</div>;
-    }
-  }
-
-  // Handle scenario selection
   const handleSelectScenario = (scenarioId: string) => {
     navigate(`/${currentWorkspace.id}/${scenarioId}`);
   };
 
-// Przygotuj dane scenariuszy łącznie z ikonami
-const scenarioData = scenarios.map((scenario:Scenario) => {
-  console.log("Scenario icon:", scenario.icon); // Dodaj log do debugowania
-  return {
+  const scenarioData = currentWorkspace.scenarios.map((scenario: Scenario) => ({
     id: scenario.id,
     name: scenario.name,
     description: scenario.description,
-    count: scenario.getSteps?.().length || 0, // Używaj metody getSteps jeśli istnieje
+    count: scenario.nodes?.length || 0,
     countLabel: "steps",
-    icon: scenario.icon || "default-icon", // Dodaj fallback dla ikony
-  };
-});
+    icon: scenario.icon || "default-icon",
+  }));
 
   return (
     <Suspense fallback={<div className="p-4">Loading...</div>}>
@@ -64,3 +48,5 @@ const scenarioData = scenarios.map((scenario:Scenario) => {
     </Suspense>
   );
 };
+
+export default ScenarioView;

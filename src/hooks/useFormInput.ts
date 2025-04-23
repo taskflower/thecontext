@@ -12,7 +12,7 @@ interface UseFormInputProps {
   node: {
     attrs?: FormInputAttrs;
     assistantMessage?: string;
-    contextPath?: string; // np. 'web'
+    contextPath?: string; 
   };
 }
 
@@ -23,7 +23,6 @@ export function useFormInput({ node }: UseFormInputProps) {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [formFields, setFormFields] = useState<FormField[]>([]);
 
-  
   const processTemplate = useContextStore((s) => s.processTemplate);
   const updateByContextPath = useContextStore((s) => s.updateByContextPath);
   const currWrkspId = useWorkspaceStore((s) => s.currentWorkspaceId);
@@ -78,7 +77,9 @@ export function useFormInput({ node }: UseFormInputProps) {
    */
   const areRequiredFieldsFilled = () =>
     formFields.every(
-      (f) => !f.required || (formData[f.name] !== undefined && formData[f.name] !== "")
+      (f) =>
+        !f.required ||
+        (formData[f.name] !== undefined && formData[f.name] !== "")
     );
 
   return {
@@ -90,6 +91,3 @@ export function useFormInput({ node }: UseFormInputProps) {
     areRequiredFieldsFilled,
   };
 }
-
-
-

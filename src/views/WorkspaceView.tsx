@@ -1,35 +1,24 @@
-// src/views/WorkspaceView.tsx - Updated with consistent icon support
+// src/views/WorkspaceView.tsx
 import React, { Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { getWidgetComponent, getLayoutComponent } from "../lib/templates";
+import { getLayoutComponent, getWidgetComponent } from "../tpl/templates";
 import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
 
 export const WorkspaceView: React.FC = () => {
   const { workspaces } = useWorkspaceStore();
   const navigate = useNavigate();
 
-  // Use default layout template
-  const LayoutComponent = getLayoutComponent("default");
-  if (!LayoutComponent) {
-    return <div className="p-4">Default layout template not found</div>;
-  }
+  const LayoutComponent =
+    getLayoutComponent("default") || (() => <div>Layout Not Found</div>);
 
-  // Prefer icon-card-list if available, fallback to card-list
-  let WidgetComponent = getWidgetComponent("icon-card-list");
-  if (!WidgetComponent) {
-    WidgetComponent = getWidgetComponent("card-list");
-    if (!WidgetComponent) {
-      return <div className="p-4">Default widget template not found</div>;
-    }
-  }
+  const WidgetComponent =
+    getWidgetComponent("card-list") || (() => <div>Widget Not Found</div>);
 
   const handleSelect = (workspaceId: string) => {
-    // Navigate to the selected workspace
     navigate(`/${workspaceId}`);
   };
 
-  // Map workspaces to the format expected by the widget - include icon
   const workspaceData = workspaces.map((workspace) => ({
     id: workspace.id,
     name: workspace.name,
@@ -38,7 +27,7 @@ export const WorkspaceView: React.FC = () => {
       `Template: ${workspace.templateSettings.layoutTemplate}`,
     count: workspace.scenarios.length,
     countLabel: "scenarios",
-    icon: workspace.icon, // Use icon from workspace or fallback to "briefcase"
+    icon: workspace.icon || "briefcase",
   }));
 
   return (
@@ -55,3 +44,5 @@ export const WorkspaceView: React.FC = () => {
     </Suspense>
   );
 };
+
+export default WorkspaceView;

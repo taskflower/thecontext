@@ -2,31 +2,61 @@
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useWorkspaceStore } from "./hooks/useWorkspaceStore";
-import { initializeTemplates } from "./templates";
+import { useApplicationStore } from "./hooks/useApplicationStore";
 
-const InitialDataProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const { workspace, scenario } = useParams<{
-    workspace: string;
+interface InitialDataProviderProps {
+  children: React.ReactNode;
+}
+
+const InitialDataProvider: React.FC<InitialDataProviderProps> = ({ children }) => {
+  // Pobierz parametry z URL
+  const { application, workspace, scenario } = useParams<{
+    application?: string;
+    workspace?: string;
     scenario?: string;
   }>();
-  const { workspaces, setInitialWorkspaces, selectWorkspace, selectScenario } =
-    useWorkspaceStore();
+
+  // Pobierz dane i akcje ze store'ów
+  const { 
+    fetchApplications, 
+    selectApplication,
+    currentApplicationId 
+  } = useApplicationStore();
+  
+  const { 
+    selectWorkspace, 
+    selectScenario,
+    fetchWorkspaces
+  } = useWorkspaceStore();
+
+  // Inicjalne ładowanie danych aplikacji, jeśli nie są w URL
   useEffect(() => {
-    if (workspaces.length === 0) {
-      const templatesData = initializeTemplates();
-      setInitialWorkspaces(templatesData);
+    if (!application && !workspace) {
+      fetchApplications();
     }
-  }, [workspaces.length, setInitialWorkspaces]);
+  }, [fetchApplications, application, workspace]);
+  
+  // Ładowanie danych workspaces, jeśli nie ma application w URL
+  useEffect(() => {
+    if (!application && workspace) {
+      fetchWorkspaces();
+    }
+  }, [fetchWorkspaces, application, workspace]);
+
+  // Wybierz aplikację na podstawie URL
+  useEffect(() => {
+    if (application && application !== currentApplicationId) {
+      selectApplication(application);
+    }
+  }, [application, currentApplicationId, selectApplication]);
+
+  // Wybierz workspace i scenariusz na podstawie URL
   useEffect(() => {
     if (workspace) {
-      console.log("Selecting workspace:", workspace);
       selectWorkspace(workspace);
     }
-
+    
     if (scenario) {
-      console.log("Selecting scenario:", scenario);
       selectScenario(scenario);
     }
   }, [workspace, scenario, selectWorkspace, selectScenario]);

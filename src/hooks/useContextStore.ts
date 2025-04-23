@@ -1,6 +1,6 @@
 // src/hooks/useContextStore.ts
 import { create } from "zustand";
-import { getValueByPath, setValueByPath, processTemplate } from "@/lib/byPath";
+import { getValueByPath, setValueByPath, processTemplate } from "@/_npLib/byPath";
 import { useWorkspaceStore } from "./useWorkspaceStore";
 
 interface ContextState {
@@ -63,17 +63,13 @@ export const useContextStore = create<ContextState>((set, get) => ({
 
   processTemplate: (template) => {
     const currWrkspId = useWorkspaceStore.getState().currentWorkspaceId;
-    const ctx = currWrkspId
-      ? get().contexts[currWrkspId] || {}
-      : {};
+    const ctx = currWrkspId ? get().contexts[currWrkspId] || {} : {};
     return processTemplate(template, ctx);
   },
 
   getContext: (path) => {
     const currWrkspId = useWorkspaceStore.getState().currentWorkspaceId;
-    const context = currWrkspId
-      ? get().contexts[currWrkspId] || {}
-      : {};
+    const context = currWrkspId ? get().contexts[currWrkspId] || {} : {};
     if (!path) return context;
     return get().getContextPath(path);
   },

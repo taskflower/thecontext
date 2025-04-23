@@ -1,9 +1,9 @@
 // src/views/LoginView.tsx - Improved Version
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/_npHooks/useAuth';
 
-export const LoginView: React.FC = () => {
+const LoginView: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { signInWithGoogle } = useAuth();
   const navigate = useNavigate();
@@ -69,3 +69,4 @@ export const LoginView: React.FC = () => {
     </div>
   );
 };
+export default LoginView;

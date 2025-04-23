@@ -1,22 +1,31 @@
 // src/App.tsx
-import { Suspense } from "react";
+import { Suspense, lazy } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Outlet,
+  Navigate
 } from "react-router-dom";
-import FlowView from "./views/FlowView";
+
+// Lazy loaded components
+const FlowView = lazy(() => import("./views/FlowView"));
+const ScenarioView = lazy(() => import("./views/ScenarioView"));
+const LoginView = lazy(() => import("./views/LoginView"));
+const ApplicationView = lazy(() => import("./views/ApplicationView"));
+const ApplicationWorkspaceView = lazy(() => import("./views/ApplicationWorkspaceView"));
+const AdminPanelView = lazy(() => import("./views/AdminPanelView")); // Nowy widok panelu administratora
+
+// Providers and utilities
 import InitialDataProvider from "./InitialDataProvider";
-import { WorkspaceView } from "./views/WorkspaceView";
-import { LoginView } from "./views/LoginView";
-import { AuthProvider } from "./hooks/useAuth";
-import { ScenarioView } from "./views/ScenarioView";
+import { AuthProvider } from "./_npHooks/useAuth";
+
+// Development tools
 import ScenarioGenerator from "./_local_modules/scenarioGenerator/components/ScenarioGenerator";
 import EnhancedFlowDebugger from "./_local_modules/debug/EnhancedFlowDebugger";
+import { AuthWrapper } from "./_auth/AuthWrapper";
 
-
-const AppWrapper = ({ children }: any) => (
+const AppWrapper = ({ children }: { children: React.ReactNode }) => (
   <div className="flex w-full h-screen overflow-hidden">
     <div
       id="app-content"
@@ -33,16 +42,26 @@ const App = () => (
       <Suspense
         fallback={
           <div className="flex items-center justify-center h-screen">
-            Loading...
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
           </div>
         }
       >
         <AppWrapper>
           <Routes>
+            {/* Auth routes */}
             <Route path="/login" element={<LoginView />} />
+            
+            {/* Dev tools */}
             <Route path="/generator" element={<ScenarioGenerator />} />
-
-            {/* Routes requiring workspace params */}
+            
+            {/* Admin Panel - oddzielna podstrona */}
+            <Route path="/admin" element={
+              <AuthWrapper>
+                <AdminPanelView />
+              </AuthWrapper>
+            } />
+            
+            {/* Nowy przepływ z aplikacjami */}
             <Route
               element={
                 <InitialDataProvider>
@@ -50,14 +69,33 @@ const App = () => (
                 </InitialDataProvider>
               }
             >
-              <Route path="/" element={<WorkspaceView />} />
-              <Route path=":workspace" element={<ScenarioView />} />
-              <Route path=":workspace/:scenario" element={<FlowView />} />
+              {/* Strona główna - wybór aplikacji */}
+              <Route path="/" element={<ApplicationView />} />
+              
+              {/* Wybór workspace w ramach aplikacji */}
+              <Route path="/app/:applicationId" element={<ApplicationWorkspaceView />} />
+              
+              {/* Wybór scenariusza w ramach aplikacji i workspace */}
+              <Route path="/app/:application/:workspace" element={<ScenarioView />} />
+              
+              {/* Flow w ramach aplikacji, workspace i scenariusza */}
+              <Route path="/app/:application/:workspace/:scenario" element={<FlowView />} />
+              
+              {/* Stary przepływ (kompatybilność wsteczna) */}
+              <Route path="/:workspace" element={<ScenarioView />} />
+              <Route path="/:workspace/:scenario" element={<FlowView />} />
+              
+              {/* Redirects */}
+              <Route path="/workspaces" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>
         </AppWrapper>
       </Suspense>
-      <EnhancedFlowDebugger />
+      
+      {/* Debug tools - loaded conditionally */}
+      <Suspense fallback={null}>
+        <EnhancedFlowDebugger />
+      </Suspense>
     </AuthProvider>
   </Router>
 );
