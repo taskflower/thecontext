@@ -19,7 +19,7 @@ const FormStepTemplate: React.FC<FlowStepProps> = ({
   } = useFormInput({ node });
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="">
       {processedAssistantMessage && (
         <div className="bg-blue-50 p-4 rounded-lg mb-6">
           <p className="text-blue-800">{processedAssistantMessage}</p>

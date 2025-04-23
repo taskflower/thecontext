@@ -3,11 +3,11 @@ import React from "react";
 import { FlowStepProps } from "@/types";
 import { useLLM } from "@/hooks/useLLM";
 
-const LlmStepTemplate: React.FC<FlowStepProps> = ({ 
-  node, 
-  onSubmit, 
-  onPrevious, 
-  isLastNode 
+const LlmStepTemplate: React.FC<FlowStepProps> = ({
+  node,
+  onSubmit,
+  onPrevious,
+  isLastNode,
 }) => {
   const {
     sendMessage,
@@ -26,7 +26,7 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
   });
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="">
       {processedAssistantMessage && (
         <div className="bg-blue-50 p-4 rounded-lg mb-6">
           <p className="text-blue-800">{processedAssistantMessage}</p>
@@ -55,13 +55,15 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
                 {Array.isArray(value) ? (
                   <ul className="list-disc list-inside">
                     {(value as string[]).map((item, index) => (
-                      <li key={index} className="text-gray-700">{item}</li>
+                      <li key={index} className="text-gray-700">
+                        {item}
+                      </li>
                     ))}
                   </ul>
                 ) : (
                   <span className="ml-2 text-gray-700">
-                    {typeof value === 'object' 
-                      ? JSON.stringify(value, null, 2) 
+                    {typeof value === "object"
+                      ? JSON.stringify(value, null, 2)
                       : String(value)}
                   </span>
                 )}
@@ -72,18 +74,18 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
       )}
 
       <div className="flex justify-between mt-8">
-        <button 
+        <button
           onClick={onPrevious}
           className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
         >
           Wstecz
         </button>
         {responseData && (
-          <button 
+          <button
             onClick={() => onSubmit(responseData)}
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
-            {isLastNode ? 'Zakończ' : 'Dalej'}
+            {isLastNode ? "Zakończ" : "Dalej"}
           </button>
         )}
       </div>
