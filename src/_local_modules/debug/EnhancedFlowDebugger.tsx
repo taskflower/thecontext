@@ -12,7 +12,9 @@ export const EnhancedFlowDebugger = () => {
     localStorage.getItem("debuggerVisible") === "true"
   );
   const [context, setContext] = useState({});
-  const [logEntries, setLogEntries] = useState([]);
+  const [logEntries, setLogEntries] = useState<
+    { id: number; timestamp: Date; changes: any; type: string }[]
+  >([]);
   const [activeTab, setActiveTab] = useState("context"); // 'context', 'logs', 'scenario'
   const [expandedPaths, setExpandedPaths] = useState({});
   const { getCurrentScenario, getCurrentWorkspace } = useWorkspaceStore();
@@ -87,8 +89,8 @@ export const EnhancedFlowDebugger = () => {
   }, []);
 
   // Function to find changes between objects
-  const findChanges = (oldObj, newObj, path = "") => {
-    const changes = {};
+  const findChanges = (oldObj: any, newObj: any, path = "") => {
+    const changes: any = {};
 
     // Check for removed or modified keys
     for (const key in oldObj) {
