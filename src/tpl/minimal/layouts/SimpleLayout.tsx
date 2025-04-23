@@ -1,4 +1,5 @@
-// src/templates/minimal/layouts/SimpleLayout.tsx
+// src/tpl/minimal/layouts/SimpleLayout.tsx
+import React from "react";
 import { X } from "lucide-react";
 import { LayoutProps } from "@/types";
 
@@ -14,7 +15,7 @@ const SimpleLayout: React.FC<LayoutProps> = ({
         <div className="font-black text-xl tracking-tighter text-gray-900">
           WiseAds
         </div>
-        <button className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:text-gray-700 h-8 w-8 rounded-full text-gray-900 hover:bg-gray-100">
+        <button className="inline-flex items-center justify-center text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 hover:text-gray-700 h-8 w-8 rounded-full text-gray-900 hover:bg-gray-100">
           <X className="w-4 h-4" />
         </button>
       </div>

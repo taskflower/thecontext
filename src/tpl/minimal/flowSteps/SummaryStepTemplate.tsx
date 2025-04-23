@@ -13,16 +13,17 @@ const SummaryStepTemplate: React.FC<FlowStepProps> = ({
   const [summaryData, setSummaryData] = useState<Record<string, any>>({});
   const [summaryFields, setSummaryFields] = useState<any[]>([]);
   
-  const processTemplate = useContextStore((state) => state.processTemplate);
+  const contextStore = useContextStore();
   const currWrkspId = useWorkspaceStore((state) => state.currentWorkspaceId);
-  const getContextValue = useContextStore((state) => state.getValueByContextPath);
 
-  const contextSchemas = useContextStore(
-    (state) => state.contexts[currWrkspId || ""]?.schemas?.summary
-  );
+  const contextSchemas = contextStore.contexts && currWrkspId 
+    ? contextStore.contexts[currWrkspId]?.schemas?.summary 
+    : null;
 
   const processedAssistantMessage = node.assistantMessage
-    ? processTemplate(node.assistantMessage)
+    ? contextStore.processTemplate 
+      ? contextStore.processTemplate(node.assistantMessage)
+      : node.assistantMessage
     : "";
 
   // Load summary fields based on schema path
@@ -51,14 +52,27 @@ const SummaryStepTemplate: React.FC<FlowStepProps> = ({
 
   // Load data from context paths
   useEffect(() => {
-    if (!node.attrs?.dataPaths) {
+    if (!node.attrs?.dataPaths || !contextStore.contexts || !currWrkspId) {
       return;
     }
 
     const data: Record<string, any> = {};
+    const context = contextStore.contexts[currWrkspId];
+    
     Object.entries(node.attrs.dataPaths).forEach(([key, path]) => {
       if (typeof path === 'string') {
-        const value = getContextValue(path);
+        const pathParts = path.split('.');
+        let value = context;
+        
+        for (const part of pathParts) {
+          if (value && typeof value === 'object' && part in value) {
+            value = value[part];
+          } else {
+            value = undefined;
+            break;
+          }
+        }
+        
         if (value !== undefined) {
           data[key] = value;
         }
@@ -66,7 +80,7 @@ const SummaryStepTemplate: React.FC<FlowStepProps> = ({
     });
 
     setSummaryData(data);
-  }, [node.attrs?.dataPaths, getContextValue]);
+  }, [node.attrs?.dataPaths, contextStore.contexts, currWrkspId]);
 
   // Format value for display
   const formatValue = (value: any) => {
@@ -74,31 +88,31 @@ const SummaryStepTemplate: React.FC<FlowStepProps> = ({
       return (
         <ul className="list-disc list-inside">
           {value.map((item, index) => (
-            <li key={index} className="text-muted-foreground">{String(item)}</li>
+            <li key={index} className="text-gray-600">{String(item)}</li>
           ))}
         </ul>
       );
     } else if (typeof value === 'object' && value !== null) {
-      return <pre className="text-sm bg-muted p-2 rounded">{JSON.stringify(value, null, 2)}</pre>;
+      return <pre className="text-sm bg-gray-100 p-2 rounded">{JSON.stringify(value, null, 2)}</pre>;
     }
     return String(value);
   };
 
   return (
     <div className="my-4">
-      <div className="plugin-wrapper border-0">
-        <div className="plugin-content">
+      <div className="border-0">
+        <div className="w-full">
           {/* Assistant message */}
           {processedAssistantMessage && (
-            <div className="bg-primary/5 p-4 rounded-lg mb-6">
-              <p className="text-primary">{processedAssistantMessage}</p>
+            <div className="bg-gray-50 p-4 rounded-lg mb-6">
+              <p className="text-gray-800">{processedAssistantMessage}</p>
             </div>
           )}
 
           {/* Debugging info if no fields */}
           {summaryFields.length === 0 && !node.attrs?.dataPaths && (
-            <div className="bg-warning/10 p-4 rounded-lg mb-6">
-              <p className="text-warning">Nie znaleziono schematu podsumowania. Sprawdź konfigurację.</p>
+            <div className="bg-yellow-50 p-4 rounded-lg mb-6">
+              <p className="text-yellow-700">Nie znaleziono schematu podsumowania. Sprawdź konfigurację.</p>
               <pre className="mt-2 text-xs">
                 Schema path: {node.attrs?.schemaPath}
                 Workspace ID: {currWrkspId}
@@ -108,15 +122,15 @@ const SummaryStepTemplate: React.FC<FlowStepProps> = ({
           )}
 
           {/* Summary display */}
-          <div className="bg-background border border-border rounded-lg p-4 mb-6">
-            <h3 className="text-lg font-semibold mb-4">Podsumowanie</h3>
+          <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">Podsumowanie</h3>
 
             {/* Display data paths */}
             {node.attrs?.dataPaths && Object.entries(node.attrs.dataPaths).length > 0 && (
               <div className="space-y-4">
                 {Object.entries(summaryData).map(([key, value]) => (
-                  <div key={key} className="border-b pb-3 last:border-b-0">
-                    <div className="font-medium text-foreground mb-1">{key}</div>
+                  <div key={key} className="border-b border-gray-200 pb-3 last:border-b-0">
+                    <div className="font-medium text-gray-900 mb-1">{key}</div>
                     <div className="pl-2">{formatValue(value)}</div>
                   </div>
                 ))}
@@ -127,9 +141,9 @@ const SummaryStepTemplate: React.FC<FlowStepProps> = ({
             {summaryFields.length > 0 && !node.attrs?.dataPaths && (
               <div className="space-y-4">
                 {summaryFields.map((field) => (
-                  <div key={field.name} className="border-b pb-3 last:border-b-0">
-                    <div className="font-medium text-foreground mb-1">{field.name}</div>
-                    <div className="text-sm text-muted-foreground">{field.description}</div>
+                  <div key={field.name} className="border-b border-gray-200 pb-3 last:border-b-0">
+                    <div className="font-medium text-gray-900 mb-1">{field.name}</div>
+                    <div className="text-sm text-gray-500">{field.description}</div>
                     {summaryData[field.name] && (
                       <div className="pl-2 mt-1">{formatValue(summaryData[field.name])}</div>
                     )}
@@ -142,7 +156,7 @@ const SummaryStepTemplate: React.FC<FlowStepProps> = ({
           <div className="mt-6">
             <button 
               onClick={onSubmit}
-              className="px-5 py-3 rounded-md transition-colors text-base font-medium w-full bg-primary text-primary-foreground hover:bg-primary/90"
+              className="px-5 py-3 rounded-md transition-colors text-base font-medium w-full bg-gray-900 text-white hover:bg-gray-800"
             >
               {isLastNode ? 'Zakończ' : 'Dalej'}
             </button>
