@@ -21,8 +21,8 @@ import InitialDataProvider from "./InitialDataProvider";
 import { AuthProvider } from "./hooks/auth/useAuth";
 
 // Development tools
-import ScenarioGenerator from "./_local_modules/scenarioGenerator/components/ScenarioGenerator";
-import EnhancedFlowDebugger from "./_local_modules/debug/EnhancedFlowDebugger";
+import ScenarioGenerator from "./_modules/scenarioGenerator/components/ScenarioGenerator";
+import EnhancedFlowDebugger from "./_modules/debug/EnhancedFlowDebugger";
 import { AuthWrapper } from "./_auth/AuthWrapper";
 
 // Import SharedLoader for consistent loading appearance

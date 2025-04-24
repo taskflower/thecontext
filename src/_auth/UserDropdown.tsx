@@ -1,7 +1,7 @@
 // src/components/UserDropdown.tsx
+import { useAuth } from "@/hooks";
 import React, { useState, useRef, useEffect, memo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
 
 // Using memo to prevent unnecessary re-renders
 export const UserDropdown: React.FC = memo(() => {
@@ -30,8 +30,8 @@ export const UserDropdown: React.FC = memo(() => {
   // If not logged in, show login button
   if (!user) {
     return (
-      <button 
-        onClick={() => navigate("/login")} 
+      <button
+        onClick={() => navigate("/login")}
         className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
       >
         Login
@@ -52,16 +52,15 @@ export const UserDropdown: React.FC = memo(() => {
   return (
     <div className="relative" ref={dropdownRef}>
       <button
-        onClick={() => setIsOpen(prev => !prev)}
+        onClick={() => setIsOpen((prev) => !prev)}
         className="flex items-center space-x-2 focus:outline-none"
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
-       
-          <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-700 font-medium">
-            {user.displayName ? user.displayName[0].toUpperCase() : "U"}
-          </div>
-       
+        <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-700 font-medium">
+          {user.displayName ? user.displayName[0].toUpperCase() : "U"}
+        </div>
+
         <div className="text-left">
           <div className="font-medium">{user.displayName || user.email}</div>
           <div className="text-xs text-gray-600">
