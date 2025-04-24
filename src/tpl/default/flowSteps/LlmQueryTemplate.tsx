@@ -62,31 +62,7 @@ const LlmQueryTemplate: React.FC<FlowStepProps> = ({
         </div>
       )}
 
-      {responseData && (
-        <div className="bg-white border rounded-lg p-4 mb-6">
-          <h3 className="text-lg font-semibold mb-4">Wyniki analizy</h3>
-          <div className="space-y-2">
-            {Object.entries(responseData).map(([key, value]) => (
-              <div key={key} className="border-b pb-2 last:border-b-0">
-                <span className="font-medium">{key}:</span>
-                {Array.isArray(value) ? (
-                  <ul className="list-disc list-inside">
-                    {(value as string[]).map((item, index) => (
-                      <li key={index} className="text-gray-700">{item}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <span className="ml-2 text-gray-700">
-                    {typeof value === 'object' 
-                      ? JSON.stringify(value, null, 2) 
-                      : String(value)}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Usuwamy wyświetlanie podsumowania responseData w tym miejscu */}
 
       {!node.attrs?.autoStart && (
         <div className="mb-6">

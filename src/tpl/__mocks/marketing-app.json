@@ -1,82 +1,105 @@
 [
-    {
-      "name": "Marketing AI Tools",
-      "description": "Narzędzia marketingowe wspierane AI",
-      "workspaces": [
-        {
-          "id": "workspace-marketing",
-          "name": "Marketing Facebook",
-          "description": "Workspace do analizy marketingowej stron internetowych i wdrażania kampanii Facebook",
-          "scenarios": [
-            {
-              "id": "scenario-marketing-analysis",
-              "name": "Analiza Marketingowa WWW i Kampania Facebook",
-              "description": "Analiza strony internetowej pod kątem marketingowym i przygotowanie kampanii Facebook",
-              "icon": "chart",
-              "systemMessage": "Jesteś doświadczonym specjalistą ds. marketingu internetowego ze specjalizacją w reklamach Facebook. Używamy języka polskiego. Twoje analizy są zawsze oparte na najlepszych praktykach marketingowych.",
-              "nodes": [
+  {
+    "name": "Marketing AI Tools",
+    "description": "Narzędzia marketingowe wspierane AI",
+    "workspaces": [
+      {
+        "id": "workspace-marketing",
+        "name": "Marketing Facebook",
+        "description": "Workspace do analizy marketingowej stron internetowych i wdrażania kampanii Facebook",
+        "scenarios": [
+          {
+            "id": "scenario-marketing-analysis",
+            "name": "Analiza Marketingowa WWW i Kampania Facebook",
+            "description": "Analiza strony internetowej pod kątem marketingowym i przygotowanie kampanii Facebook",
+            "icon": "chart",
+            "systemMessage": "Jesteś doświadczonym specjalistą ds. marketingu internetowego ze specjalizacją w reklamach Facebook. Używamy języka polskiego. Twoje analizy są zawsze oparte na najlepszych praktykach marketingowych.",
+            "nodes": [
+              {
+                "id": "step-website-url",
+                "scenarioId": "scenario-marketing-analysis",
+                "label": "Adres strony WWW",
+                "assistantMessage": "Witaj! Podaj adres strony internetowej do analizy marketingowej:",
+                "contextPath": "web",
+                "templateId": "form-step",
+                "order": 0,
+                "attrs": {
+                  "schemaPath": "schemas.form.website"
+                }
+              },
+              {
+                "id": "step-website-analysis",
+                "scenarioId": "scenario-marketing-analysis",
+                "label": "Analiza AI",
+                "contextPath": "web.analysis",
+                "templateId": "llm-query",
+                "order": 1,
+                "attrs": {
+                  "autoStart": true,   
+                  "schemaPath": "schemas.llm.webAnalysis",
+                  "includeSystemMessage": true,
+                  "initialUserMessage": "Przeanalizuj adres WWW {{web.url}}. Przygotuj kompleksową analizę marketingową tej strony."
+                }
+              },
+              {
+                "id": "step-summary",
+                "scenarioId": "scenario-marketing-analysis",
+                "label": "Podsumowanie analizy",
+                "assistantMessage": "Oto podsumowanie analizy marketingowej strony internetowej.",
+                "contextPath": "web.summary",
+                "templateId": "summary-step",
+                "order": 2,
+                "attrs": {
+                  "schemaPath": "schemas.summary.marketingSummary",
+                  "dataPaths": {
+                    "Dane wejściowe": "web",
+                    "Wyniki analizy": "web.analysis"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "icon": "chart",
+        "templateSettings": {
+          "layoutTemplate": "default",
+          "scenarioWidgetTemplate": "card-list",
+          "defaultFlowStepTemplate": "basic-step",
+          "theme": "light"
+        },
+        "initialContext": {
+          "schemas": {
+            "form": {
+              "website": [
                 {
-                  "id": "step-website-url",
-                  "scenarioId": "scenario-marketing-analysis",
+                  "name": "url",
                   "label": "Adres strony WWW",
-                  "assistantMessage": "Witaj! Podaj adres strony internetowej do analizy marketingowej:",
-                  "contextPath": "web",
-                  "templateId": "form-step",
-                  "order": 0,
-                  "attrs": {
-                    "schemaPath": "schemas.form.website"
-                  }
-                },
-                {
-                  "id": "step-website-analysis",
-                  "scenarioId": "scenario-marketing-analysis",
-                  "label": "Analiza AI",
-                  "contextPath": "web.analysis",
-                  "templateId": "llm-query",
-                  "order": 1,
-                  "attrs": {
-                    "autoStart": true,   
-                    "schemaPath": "schemas.llm.webAnalysis",
-                    "includeSystemMessage": true,
-                    "initialUserMessage": "Przeanalizuj adres WWW {{web.url}}. Przygotuj kompleksową analizę marketingową tej strony."
-                  }
+                  "type": "text",
+                  "required": true,
+                  "description": "Pełny adres URL strony do analizy (np. https://example.com)"
                 }
               ]
-            }
-          ],
-          "icon": "chart",
-          "templateSettings": {
-            "layoutTemplate": "default",
-            "scenarioWidgetTemplate": "card-list",
-            "defaultFlowStepTemplate": "basic-step",
-            "theme": "light"
-          },
-          "initialContext": {
-            "schemas": {
-              "form": {
-                "website": [
-                  {
-                    "name": "url",
-                    "label": "Adres strony WWW",
-                    "type": "text",
-                    "required": true,
-                    "description": "Pełny adres URL strony do analizy (np. https://example.com)"
-                  }
-                ]
-              },
-              "llm": {
-                "webAnalysis": {
-                  "general_description": "Główne funkcje i typ strony", 
-                  "industry": "Nazwa najbardziej pasującej branży",
-                  "target_audience": "Do kogo skierowana jest strona",
-                  "strengths": ["Lista mocnych stron witryny"],
-                  "weaknesses": ["Lista słabych stron witryny"],
-                  "marketing_suggestions": "Jak poprawić konwersję"
-                }
+            },
+            "llm": {
+              "webAnalysis": {
+                "general_description": "Główne funkcje i typ strony", 
+                "industry": "Nazwa najbardziej pasującej branży",
+                "target_audience": "Do kogo skierowana jest strona",
+                "strengths": ["Lista mocnych stron witryny"],
+                "weaknesses": ["Lista słabych stron witryny"],
+                "marketing_suggestions": "Jak poprawić konwersję"
+              }
+            },
+            "summary": {
+              "marketingSummary": {
+                "inputData": "Dane wejściowe analizy",
+                "analysisResults": "Wyniki analizy marketingowej",
+                "conclusion": "Podsumowanie i rekomendacje"
               }
             }
           }
         }
-      ]
-    }
-  ]
+      }
+    ]
+  }
+]

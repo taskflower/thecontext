@@ -86,33 +86,7 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
             </div>
           )}
 
-          {responseData && (
-            <div className="bg-white border border-gray-200 rounded-lg p-4 mt-6">
-              <h3 className="text-lg font-semibold mb-4 text-gray-900">Wyniki analizy</h3>
-              <div className="space-y-3">
-                {Object.entries(responseData).map(([key, value]) => (
-                  <div key={key} className="border-b border-gray-200 pb-3 last:border-b-0">
-                    <span className="font-medium text-gray-900">{key}:</span>
-                    {Array.isArray(value) ? (
-                      <ul className="list-disc list-inside mt-2">
-                        {(value as string[]).map((item, index) => (
-                          <li key={index} className="text-gray-600">
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <span className="ml-2 text-gray-600">
-                        {typeof value === "object"
-                          ? JSON.stringify(value, null, 2)
-                          : String(value)}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Usuwamy wyświetlanie podsumowania responseData w tym miejscu */}
 
           {responseData && (
             <div className="flex flex-col sm:flex-row gap-4 mt-6">

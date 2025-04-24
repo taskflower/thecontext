@@ -144,7 +144,7 @@ const FormStepTemplate: React.FC<FlowStepProps> = ({
               <button
                 type="button"
                 onClick={handlePrevious}
-                className="px-5 py-3 rounded-md transition-colors text-base font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                className="px-5 py-3 rounded-md transition-colors duration-300 text-base font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
               >
                 {isFirstNode ? "Anuluj" : "Wstecz"}
               </button>
@@ -157,7 +157,7 @@ const FormStepTemplate: React.FC<FlowStepProps> = ({
                   handleComplete(data);
                 }}
                 disabled={!areRequiredFieldsFilled()}
-                className={`px-5 py-3 rounded-md transition-colors text-base font-medium flex-grow ${
+                className={`px-5 py-3 rounded-md transition-colors duration-300 text-base font-medium flex-grow ${
                   areRequiredFieldsFilled()
                     ? "bg-gray-900 text-white hover:bg-gray-800"
                     : "bg-gray-200 text-gray-400 cursor-not-allowed"

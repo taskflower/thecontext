@@ -100,7 +100,7 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         {formFields.map((field) => (
-          <div key={field.name} className="space-y-2">
+          <div key={field.name} className="space-y-2 p-4 bg-white">
             <label className="block text-sm font-medium text-gray-700">
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
@@ -126,7 +126,7 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
                 value={formData[field.name] || ''}
                 onChange={(e) => handleChange(field.name, Number(e.target.value))}
                 required={field.required}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                className="p-4 mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                 placeholder={`Wprowadź ${field.label.toLowerCase()}`}
               />
             ) : (
@@ -135,7 +135,7 @@ const FormInputTemplate: React.FC<FlowStepProps> = ({
                 value={formData[field.name] || ''}
                 onChange={(e) => handleChange(field.name, e.target.value)}
                 required={field.required}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                className="p-4 mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                 placeholder={`Wprowadź ${field.label.toLowerCase()}`}
               />
             )}

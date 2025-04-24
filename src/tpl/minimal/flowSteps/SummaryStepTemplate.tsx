@@ -119,7 +119,7 @@ const SummaryStepTemplate: React.FC<FlowStepProps> = ({
     }
   };
 
-  // Format value for display
+  // Format value for display based on schema
   const formatValue = (value: any) => {
     if (Array.isArray(value)) {
       return (
@@ -130,7 +130,20 @@ const SummaryStepTemplate: React.FC<FlowStepProps> = ({
         </ul>
       );
     } else if (typeof value === 'object' && value !== null) {
-      return <pre className="text-sm bg-gray-100 p-2 rounded">{JSON.stringify(value, null, 2)}</pre>;
+      return (
+        <div className="space-y-2">
+          {Object.entries(value).map(([subKey, subValue]) => (
+            <div key={subKey}>
+              <span className="font-medium text-gray-800">{subKey}:</span> {" "}
+              <span className="text-gray-600">
+                {typeof subValue === "object"
+                  ? JSON.stringify(subValue)
+                  : String(subValue)}
+              </span>
+            </div>
+          ))}
+        </div>
+      );
     }
     return String(value);
   };
@@ -169,6 +182,41 @@ const SummaryStepTemplate: React.FC<FlowStepProps> = ({
                   <div key={key} className="border-b border-gray-200 pb-3 last:border-b-0">
                     <div className="font-medium text-gray-900 mb-1">{key}</div>
                     <div className="pl-2">{formatValue(value)}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Wyświetlanie danych z responseData dla kroku LLM */}
+            {node.contextPath && node.contextPath.includes('generate-report') && (
+              <div className="space-y-4">
+                {summaryData && Object.entries(summaryData).map(([key, value]) => (
+                  <div key={key} className="border-b border-gray-200 pb-3 last:border-b-0">
+                    <div className="font-medium text-gray-900 mb-1">{key}</div>
+                    <div className="pl-2">
+                      {Array.isArray(value) ? (
+                        <ul className="list-disc list-inside">
+                          {(value as string[]).map((item, index) => (
+                            <li key={index} className="text-gray-600">{item}</li>
+                          ))}
+                        </ul>
+                      ) : typeof value === 'object' && value !== null ? (
+                        <div className="space-y-2">
+                          {Object.entries(value).map(([subKey, subValue]) => (
+                            <div key={subKey} className="ml-2">
+                              <span className="font-medium text-gray-700">{subKey}:</span> {" "}
+                              <span className="text-gray-600">
+                                {typeof subValue === "object"
+                                  ? JSON.stringify(subValue)
+                                  : String(subValue)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-600">{String(value)}</span>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

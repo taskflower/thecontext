@@ -5,10 +5,12 @@ import { lazy } from 'react';
 export const BasicStepTemplate = lazy(() => import('./BasicStepTemplate'));
 export const FormInputTemplate = lazy(() => import('./FormInputTemplate'));
 export const LlmQueryTemplate = lazy(() => import('./LlmQueryTemplate'));
+export const SummaryStepTemplate = lazy(() => import('./SummaryStepTemplate'));
 
 // Eksportujemy mapę nazw komponentów do ich importów
 export const flowStepComponents = {
   'basic-step': BasicStepTemplate,
   'form-step': FormInputTemplate,
   'llm-query': LlmQueryTemplate,
+  'summary-step': SummaryStepTemplate,
 };
