@@ -1,21 +1,10 @@
 // src/tpl/minimal/widgets/StatsWidget.tsx
 import React from "react";
-import { WidgetProps } from "@/types";
-
-interface StatItem {
-  label: string;
-  value: string | number;
-  icon?: string;
-  description?: string;
-}
-
-interface StatsWidgetProps extends WidgetProps {
-  title?: string;
-  stats?: StatItem[];
-}
+import { StatsWidgetProps } from "@/types";
 
 const StatsWidget: React.FC<StatsWidgetProps> = ({
   title,
+  description,
   stats,
   data = {},
 }) => {
@@ -30,6 +19,9 @@ const StatsWidget: React.FC<StatsWidgetProps> = ({
       {title && (
         <div className="px-5 py-4 border-b border-gray-200">
           <h3 className="text-base font-medium text-gray-900">{title}</h3>
+          {description && (
+            <p className="mt-1 text-xs text-gray-500">{description}</p>
+          )}
         </div>
       )}
       

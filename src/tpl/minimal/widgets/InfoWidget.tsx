@@ -1,13 +1,6 @@
 // src/tpl/minimal/widgets/InfoWidget.tsx
 import React from "react";
-import { WidgetProps } from "@/types";
-
-interface InfoWidgetProps extends WidgetProps {
-  title?: string;
-  content?: string | React.ReactNode;
-  icon?: string;
-  variant?: 'default' | 'info' | 'success' | 'warning' | 'error';
-}
+import { InfoWidgetProps } from "@/types";
 
 const InfoWidget: React.FC<InfoWidgetProps> = ({
   title,

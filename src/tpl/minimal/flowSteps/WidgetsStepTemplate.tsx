@@ -125,7 +125,7 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
       );
     }
 
-    return widgetSchema.widgets.map((widget, index) => {
+    return widgetSchema.widgets.map((widget: any, index: number) => {
       const { type, title, dataPath, dataPaths } = widget;
       
       // Pobierz dane dla tego widgetu

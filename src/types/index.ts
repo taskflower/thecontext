@@ -8,7 +8,7 @@ export type IconType = string;
 export interface LayoutProps {
   children: ReactNode;
   title?: string;
-  stepTitle?: string; // Dodano tę właściwość
+  stepTitle?: string;
   onBackClick?: () => void;
 }
 
@@ -18,16 +18,40 @@ export interface WidgetProps {
   attrs?: Record<string, any>;
 }
 
-
 export interface FlowStepProps {
   node: NodeData;
   onSubmit: (data: any) => void;
   onPrevious: () => void;
-  isLastNode: boolean;  // Zmienione na wymagane boolean
-  isFirstNode: boolean; // Zmienione na wymagane boolean
-  contextItems?: any[][] | any;
+  isLastNode: boolean;
+  isFirstNode: boolean;
+  contextItems?: any[][];
   scenario?: Scenario;
   stepTitle?: string;
+}
+
+// Widget specifyczne typy
+export interface StatsWidgetProps extends WidgetProps {
+  title?: string;
+  description?: string;
+  stats?: Array<{ 
+    label: string; 
+    value: any;
+    description?: string;
+    icon?: string;
+  }>;
+}
+
+export interface InfoWidgetProps extends WidgetProps {
+  title?: string;
+  content?: string | React.ReactNode;
+  icon?: string;
+  variant?: 'default' | 'info' | 'success' | 'warning' | 'error';
+}
+
+export interface DataDisplayWidgetProps extends WidgetProps {
+  title?: string;
+  description?: string;
+  type?: 'list' | 'object' | 'keyValue' | 'code';
 }
 
 // Szablony
@@ -63,16 +87,17 @@ export interface NodeData {
   attrs?: Record<string, any>;
   initialUserMessage?: string;
   includeSystemMessage?: boolean;
+  order?: number;
 }
 
 export interface Scenario {
-  [x: string]: any;
   id: string;
   name: string;
   description: string;
   nodes: NodeData[];
   systemMessage?: string;
   icon?: IconType;
+  [key: string]: any;
 }
 
 export interface TemplateSettings {

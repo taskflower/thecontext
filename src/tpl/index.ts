@@ -2,27 +2,7 @@
 import { ComponentType } from 'react';
 import * as defaultTemplate from './default';
 import * as minimalTemplate from './minimal';
-
-// Zdefiniujmy interfejsy dla typów komponentów
-interface LayoutProps {
-  children?: React.ReactNode;
-  title?: string;
-  onBackClick?: () => void;
-}
-
-interface WidgetProps {
-  data?: any[];
-  onSelect?: (id: string) => void;
-}
-
-interface FlowStepProps {
-  node: any;
-  onSubmit: (data: any) => void;
-  onPrevious: () => void;
-  isLastNode: boolean;
-  contextItems?: any[];
-  scenario?: any;
-}
+import { LayoutProps, WidgetProps, FlowStepProps } from '@/types';
 
 // Interfejs dla szablonu z typowanymi komponentami
 interface Template {

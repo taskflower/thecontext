@@ -17,19 +17,63 @@ interface ContextState {
 
 export const useContextStore = create<ContextState>((set, get) => ({
   contexts: {},
-  setContexts: (contexts) => set({ contexts }),
+  
+  // Poprawiona funkcja setContexts, aby unikać nieskończonych pętli aktualizacji
+  setContexts: (contexts) => {
+    // Sprawdź, czy naprawdę trzeba aktualizować stan
+    // Jeśli konteksty są identyczne, nie rób niczego
+    const currentContexts = get().contexts;
+    
+    // Szybkie porównanie referencji
+    if (contexts === currentContexts) return;
+    
+    // Porównanie kluczy i wartości
+    let hasChanges = false;
+    const allKeys = new Set([
+      ...Object.keys(currentContexts), 
+      ...Object.keys(contexts)
+    ]);
+    
+    for (const key of allKeys) {
+      // Jeśli klucz istnieje tylko w jednym obiekcie lub wartości się różnią
+      if (
+        !(key in currentContexts) || 
+        !(key in contexts) ||
+        JSON.stringify(currentContexts[key]) !== JSON.stringify(contexts[key])
+      ) {
+        hasChanges = true;
+        break;
+      }
+    }
+    
+    // Aktualizuj stan tylko jeśli są zmiany
+    if (hasChanges) {
+      set({ contexts });
+    }
+  },
+  
   updateContext: (key, value) => {
     const currWrkspId = useWorkspaceStore.getState().currentWorkspaceId;
     if (!currWrkspId) return;
-    set((state) => ({
-      contexts: {
-        ...state.contexts,
-        [currWrkspId]: {
-          ...state.contexts[currWrkspId],
-          [key]: value,
+    
+    set((state) => {
+      // Sprawdź, czy wartość faktycznie się zmienia
+      const currentValue = state.contexts[currWrkspId]?.[key];
+      if (JSON.stringify(currentValue) === JSON.stringify(value)) {
+        return state; // Jeśli wartość się nie zmieniła, zwróć aktualny stan
+      }
+      
+      // W przeciwnym przypadku aktualizuj stan
+      return {
+        contexts: {
+          ...state.contexts,
+          [currWrkspId]: {
+            ...state.contexts[currWrkspId],
+            [key]: value,
+          },
         },
-      },
-    }));
+      };
+    });
   },
 
   updateContextPath: (key, jsonPath, value) => {
@@ -39,6 +83,11 @@ export const useContextStore = create<ContextState>((set, get) => ({
     const currCtx = get().contexts[currWrkspId] || {};
     const keyData = currCtx[key] ? { ...currCtx[key] } : {};
     const updtKeyData = setValueByPath(keyData, jsonPath, value);
+    
+    // Sprawdź, czy wartość faktycznie się zmieniła
+    if (JSON.stringify(currCtx[key]) === JSON.stringify(updtKeyData)) {
+      return; // Jeśli wartość się nie zmieniła, nic nie rób
+    }
 
     set((state) => ({
       contexts: {

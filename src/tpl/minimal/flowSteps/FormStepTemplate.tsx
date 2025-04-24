@@ -34,7 +34,7 @@ const FormStepTemplate: React.FC<FlowStepProps> = ({
   });
   
   // Obsługa formularza i przejścia do następnego kroku
-  const processFormSubmit = (e: any) => {
+  const processFormSubmit = (e: React.FormEvent) => {
     const data = handleSubmit(e);
     handleComplete(data);
   };
