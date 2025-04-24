@@ -25,8 +25,8 @@ const SimpleLayout: React.FC<LayoutProps> = ({
 
   return (
     <div className="flex flex-col bg-white rounded-lg mx-auto w-full max-w-4xl h-full md:min-h-[95vh] md:max-h-[95vh] px-4 md:px-6">
-      {/* Header Section */}
-      <div className="py-6 bg-white">
+      {/* Header Section - Fixed position */}
+      <div className="py-4 bg-white sticky top-0 z-10">
         <div className="w-full flex items-center justify-between">
           <div className="font-black text-xl tracking-tighter text-gray-900">
             WiseAds
@@ -40,16 +40,16 @@ const SimpleLayout: React.FC<LayoutProps> = ({
         </div>
 
         {title && (
-          <div className="mt-10 mb-8">
-            <h2 className="text-3xl font-normal text-gray-900">
+          <div className="my-4">
+            <h2 className="text-2xl font-normal text-gray-900">
               {title}
             </h2> 
           </div>
         )}
       </div>
 
-      {/* Content Section */}
-      <div className="overflow-y-auto flex-1 flex flex-col justify-center">
+      {/* Scrollable Content Section */}
+      <div className="overflow-y-auto flex-1 pt-4 pb-6">
         {children}
       </div>
     </div>

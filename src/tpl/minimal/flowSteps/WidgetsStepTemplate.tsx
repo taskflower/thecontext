@@ -5,45 +5,12 @@ import { useContextStore } from "@/hooks/useContextStore";
 import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
 import { useNavigate, useParams } from "react-router-dom";
 
-// Simple widget components
-const TitleWidget = ({ title, data }) => (
-  <div className="mb-6">
-    <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
-  </div>
-);
+// Importy widgetów - używamy standardowych importów domyślnych
 
-const CardListWidget = ({ title, data, path }) => (
-  <div className="mb-6">
-    <h3 className="text-lg font-medium text-gray-700 mb-3">{title}</h3>
-    {Array.isArray(data) ? (
-      <div className="bg-gray-50 rounded-lg border border-gray-100">
-        <ul className="divide-y divide-gray-200">
-          {data.map((item, idx) => (
-            <li key={idx} className="p-4">
-              {typeof item === 'object' ? JSON.stringify(item) : String(item)}
-            </li>
-          ))}
-        </ul>
-      </div>
-    ) : (
-      <div className="p-4 bg-gray-50 rounded-lg border border-gray-100 text-gray-500 italic">
-        Brak danych do wyświetlenia
-      </div>
-    )}
-  </div>
-);
-
-const ValueWidget = ({ title, data, path }) => (
-  <div className="mb-6">
-    <h3 className="text-lg font-medium text-gray-700 mb-2">{title}</h3>
-    <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
-      {data !== undefined && data !== null ? 
-        <span className="text-gray-800 font-medium">{String(data)}</span> : 
-        <span className="text-gray-500 italic">Brak danych</span>
-      }
-    </div>
-  </div>
-);
+import DataDisplayWidget from "../widgets/DataDisplayWidget";
+import InfoWidget from "../widgets/InfoWidget";
+import MetricsWidget from "../widgets/MetricsWidget";
+import StatsWidget from "../widgets/StatsWidget";
 
 const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
   node,
@@ -66,7 +33,7 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
       : node.assistantMessage
     : "";
 
-  // Fetch widget schema
+  // Pobierz schemat widgetów z kontekstu
   useEffect(() => {
     if (!node.attrs?.schemaPath || !contextStore.contexts || !currWrkspId) return;
 
@@ -86,7 +53,7 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
     if (schemaObj) setWidgetSchema(schemaObj);
   }, [node.attrs?.schemaPath, contextStore.contexts, currWrkspId]);
 
-  // Fetch data from context
+  // Pobierz dane dla widgetów z kontekstu
   useEffect(() => {
     if (!node.attrs?.dataPaths || !contextStore.contexts || !currWrkspId) return;
 
@@ -114,9 +81,10 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
     setWidgetData(result);
   }, [node.attrs?.dataPaths, contextStore.contexts, currWrkspId]);
 
-  // Navigation handlers
+  // Obsługa nawigacji
   const handlePrevious = () => {
     if (isFirstNode) {
+      // Nawigacja wstecz do listy scenariuszy
       if (application && workspace) {
         navigate(`/app/${application}/${workspace}`);
       } else if (workspace) {
@@ -125,13 +93,16 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
         navigate('/');
       }
     } else {
+      // Użyj dostarczonego handlera onPrevious
       onPrevious();
     }
   };
 
   const handleComplete = () => {
+    // Wywołaj onSubmit aby zapisać dane
     onSubmit(widgetData);
     
+    // Jeśli to ostatni krok, nawiguj wstecz do scenariuszy
     if (isLastNode) {
       if (application && workspace) {
         navigate(`/app/${application}/${workspace}`);
@@ -141,12 +112,28 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
     }
   };
 
-  // Render widgets based on schema
+  // Pobierz wartość z danych na podstawie ścieżki dataPath
+  const getValueFromDataPath = (dataPath: string) => {
+    if (!dataPath) return null;
+    
+    // Sprawdź, czy ścieżka zawiera kropkę (wskazuje na zagnieżdżoną wartość)
+    if (dataPath.includes('.')) {
+      const [contextKey, fieldKey] = dataPath.split('.');
+      return widgetData[contextKey] && widgetData[contextKey][fieldKey] 
+        ? widgetData[contextKey][fieldKey] 
+        : null;
+    }
+    
+    // Jeśli nie, pobierz bezpośrednio z widgetData
+    return widgetData[dataPath] || null;
+  };
+
+  // Renderuj widgety na podstawie schematu
   const renderWidgets = () => {
     if (!widgetSchema.widgets || !Array.isArray(widgetSchema.widgets)) {
       return (
-        <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-100">
-          <p className="text-gray-500">Brak widgetów do wyświetlenia</p>
+        <div className="py-6 px-4 bg-yellow-50 border border-yellow-100 rounded-lg">
+          <p className="text-yellow-700 text-sm">Brak skonfigurowanych widgetów do wyświetlenia.</p>
         </div>
       );
     }
@@ -154,43 +141,144 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
     return widgetSchema.widgets.map((widget, index) => {
       const { type, title, dataPath } = widget;
       
-      // Find data for this widget
-      let data = null;
-      if (dataPath) {
-        const [contextKey, fieldKey] = dataPath.split('.');
-        if (widgetData[contextKey] && fieldKey) {
-          data = widgetData[contextKey][fieldKey];
-        } else {
-          data = widgetData[dataPath];
-        }
-      }
+      // Pobierz dane dla tego widgetu
+      const data = getValueFromDataPath(dataPath);
       
-      // Render appropriate widget based on type
+      // Renderuj odpowiedni widget na podstawie typu
       switch (type) {
         case 'title':
-          return <TitleWidget key={index} title={title} data={data} />;
+          return (
+            <div key={index} className="mb-6">
+              <h2 className="text-2xl font-semibold text-gray-900">{title}</h2>
+            </div>
+          );
+        
         case 'cardList':
-          return <CardListWidget key={index} title={title} data={data} path={dataPath} />;
+          // Obsługa listy kart - używa CardListWidget jeśli dane są odpowiedniego formatu,
+          // w przeciwnym razie używa DataDisplayWidget
+          if (!Array.isArray(data)) return null;
+          
+          return (
+            <div key={index} className="mb-6">
+              <h3 className="text-lg font-medium text-gray-800 mb-3">{title}</h3>
+              <DataDisplayWidget
+                title={title}
+                data={data}
+                type="list"
+              />
+            </div>
+          );
+        
         case 'value':
-          return <ValueWidget key={index} title={title} data={data} path={dataPath} />;
+          // Obsługa pojedynczych wartości
+          return (
+            <div key={index} className="mb-6">
+              <DataDisplayWidget
+                title={title}
+                data={{ [title]: data }}
+                type="keyValue"
+              />
+            </div>
+          );
+          
+        case 'stats':
+          // Jeśli typ to 'stats', użyj StatsWidget
+          if (typeof data !== 'object' || data === null) {
+            return (
+              <div key={index} className="mb-6">
+                <StatsWidget
+                  title={title}
+                  stats={[{
+                    label: title,
+                    value: data as any
+                  }]}
+                />
+              </div>
+            );
+          } else {
+            return (
+              <div key={index} className="mb-6">
+                <StatsWidget
+                  title={title}
+                  stats={Object.entries(data).map(([key, value]) => ({
+                    label: key,
+                    value: value as any
+                  }))}
+                />
+              </div>
+            );
+          }
+          
+        case 'metrics':
+          // Jeśli typ to 'metrics', użyj MetricsWidget
+          if (typeof data !== 'object' || data === null) {
+            return (
+              <div key={index} className="mb-6">
+                <MetricsWidget
+                  title={title}
+                  metrics={[{
+                    label: title,
+                    value: data as any
+                  }]}
+                />
+              </div>
+            );
+          } else {
+            return (
+              <div key={index} className="mb-6">
+                <MetricsWidget
+                  title={title}
+                  metrics={Object.entries(data).map(([key, value]) => ({
+                    label: key,
+                    value: value as any
+                  }))}
+                />
+              </div>
+            );
+          }
+          
+        case 'info':
+          // Jeśli typ to 'info', użyj InfoWidget
+          return (
+            <div key={index} className="mb-6">
+              <InfoWidget
+                title={title}
+                content={data}
+                variant={widget.variant || 'default'}
+              />
+            </div>
+          );
+          
         default:
-          return null;
+          // Domyślnie, jeśli typ nie jest rozpoznany, wyświetl dane jako obiekt
+          return (
+            <div key={index} className="mb-6">
+              <DataDisplayWidget
+                title={title}
+                data={data}
+                type={Array.isArray(data) ? "list" : "object"}
+              />
+            </div>
+          );
       }
     });
   };
 
   return (
     <div className="my-6">
+      {/* Wiadomość asystenta */}
       {processedAssistantMessage && (
         <div className="bg-gray-50 p-5 rounded-lg border border-gray-100 mb-6">
-          <p className="text-gray-700 leading-relaxed">{processedAssistantMessage}</p>
+          <p className="text-gray-700">{processedAssistantMessage}</p>
         </div>
       )}
 
-      <div className="mb-6">
+      {/* Widgety */}
+      <div className="mb-6 space-y-6">
         {renderWidgets()}
       </div>
 
+      {/* Przyciski nawigacji */}
       <div className="flex gap-3 mt-8">
         <button 
           onClick={handlePrevious}

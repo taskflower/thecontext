@@ -101,19 +101,29 @@
                     "title": "Wyniki analizy finansowej"
                   },
                   {
+                    "type": "stats",
+                    "title": "Wskaźniki finansowe",
+                    "dataPath": "inputData",
+                    "description": "Podstawowe dane finansowe projektu"
+                  },
+                  {
+                    "type": "metrics",
+                    "title": "ROI i opłacalność",
+                    "dataPath": "analysisResults",
+                    "fields": ["roi", "profitability"],
+                    "description": "Kluczowe wskaźniki efektywności projektu"
+                  },
+                  {
+                    "type": "info",
+                    "title": "Opłacalność projektu",
+                    "dataPath": "analysisResults.profitability",
+                    "variant": "success"
+                  },
+                  {
                     "type": "cardList",
                     "title": "Rekomendacje",
-                    "dataPath": "analysisResults.recommendations"
-                  },
-                  {
-                    "type": "value",
-                    "title": "Opłacalność projektu",
-                    "dataPath": "analysisResults.profitability"
-                  },
-                  {
-                    "type": "value",
-                    "title": "ROI",
-                    "dataPath": "analysisResults.roi"
+                    "dataPath": "analysisResults.recommendations",
+                    "description": "Sugerowane działania w oparciu o analizę finansową"
                   }
                 ]
               }
