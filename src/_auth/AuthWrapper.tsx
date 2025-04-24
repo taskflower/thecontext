@@ -1,7 +1,7 @@
 // src/_auth/AuthWrapper.tsx
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/_npHooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 import SharedLoader from '@/components/SharedLoader';
 
 interface AuthWrapperProps {

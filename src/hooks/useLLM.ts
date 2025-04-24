@@ -1,7 +1,7 @@
 // src/hooks/useLlmWithZod.ts
 import { useState, useCallback, useEffect } from "react";
 import { useContextStore } from "./useContextStore";
-import { useAuth } from "../_npHooks/useAuth";
+import { useAuth } from "./useAuth";
 import { processTemplate } from "@/_npLib/byPath";
 import { processLlmResponse } from "@/_npLib/apiUtils";
 

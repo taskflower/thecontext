@@ -3,7 +3,7 @@ import { useEffect, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApplicationStore } from "@/hooks/useApplicationStore";
 import { LoadingState } from "@/components/LoadingState";
-import { useAuth } from "@/_npHooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import EmptyState from "@/components/EmptyState";
 import ApplicationCard from "@/components/ApplicationCard";

@@ -18,7 +18,7 @@ const AdminPanelView = lazy(() => import("./views/AdminPanelView"));
 
 // Providers and utilities
 import InitialDataProvider from "./InitialDataProvider";
-import { AuthProvider } from "./_npHooks/useAuth";
+import { AuthProvider } from "./hooks/useAuth";
 
 // Development tools
 import ScenarioGenerator from "./_local_modules/scenarioGenerator/components/ScenarioGenerator";

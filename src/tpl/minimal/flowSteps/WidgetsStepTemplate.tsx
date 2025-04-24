@@ -5,8 +5,6 @@ import { useContextStore } from "@/hooks/useContextStore";
 import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
 import { useFlowStep } from "@/hooks/useFlowStep";
 
-// Importy widgetów - używamy standardowych importów domyślnych
-import CardListWidget from "../widgets/CardListWidget";
 import DataDisplayWidget from "../widgets/DataDisplayWidget";
 import InfoWidget from "../widgets/InfoWidget";
 import StatsWidget from "../widgets/StatsWidget";

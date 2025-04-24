@@ -1,7 +1,7 @@
 // src/views/AdminPanelView.tsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/_npHooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 import { seedFirestoreFromData } from "@/_firebase/seedFirestore";
 import { useApplicationStore } from "@/hooks/useApplicationStore";
 import { LoadingState } from "@/components/LoadingState";
