@@ -1,8 +1,8 @@
 // src/hooks/useNodeManager.ts
 import { useState, useEffect, useMemo } from "react";
-import { getValueByPath } from "../utils/byPath";
 import { useContextStore } from "./useContextStore";
 import { useWorkspaceStore } from "./useWorkspaceStore";
+import { contextUtils } from "@/utils/contextUtils";
 
 export function useNodeManager() {
   const { getContext, updateByContextPath } = useContextStore();
@@ -52,7 +52,7 @@ export function useNodeManager() {
     const path = node?.contextPath;
     if (!path) return [];
     const ctx = getContext();
-    const val = getValueByPath(ctx, path);
+    const val = contextUtils.getValueByPath(ctx, path);
     return val !== undefined ? [[path, val]] : Object.entries(ctx);
   }, [node, getContext]);
 

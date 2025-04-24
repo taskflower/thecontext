@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { FlowStepProps } from "@/views/types";
 import { useFormInput } from "@/hooks/useFormInput";
 import { useContextStore } from "@/hooks/useContextStore";
-import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
+import { useWorkspaceStore } from "@/hooks/stateManagment/useWorkspaceStore";
 
 const FormInputTemplate: React.FC<FlowStepProps> = ({ node, onSubmit, onPrevious, isLastNode }) => {
   const attrs = node.attrs || {};

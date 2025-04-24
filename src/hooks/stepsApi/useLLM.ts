@@ -1,10 +1,9 @@
-// src/hooks/useLlmWithZod.ts
+// src/hooks/useLlm.ts
 import { useState, useCallback, useEffect } from "react";
-import { useContextStore } from "./useContextStore";
-import { useAuth } from "./useAuth";
 import { processTemplate } from "@/utils/byPath";
 import { processLlmResponse } from "@/utils/apiUtils";
-
+import { errorUtils } from "@/utils/errorUtils";
+import { useAuth, useContextStore } from "..";
 
 interface Message {
   role: "system" | "user" | "assistant";
@@ -21,6 +20,9 @@ interface UseLLMProps {
   onDataSaved?: (data: any) => void;
 }
 
+/**
+ * Hook do komunikacji z modelem LLM
+ */
 export function useLLM({
   initialUserMessage,
   assistantMessage,
@@ -36,12 +38,11 @@ export function useLLM({
   const [schema, setSchema] = useState<any>(null);
 
   const { getToken, user } = useAuth();
-  const { getContextPath } = useContextStore();
+  const { getContextPath, getContext } = useContextStore();
 
   // Przetworzone wiadomości z szablonu
   const [processedInitialMessage, setProcessedInitialMessage] = useState("");
-  const [processedAssistantMessage, setProcessedAssistantMessage] =
-    useState("");
+  const [processedAssistantMessage, setProcessedAssistantMessage] = useState("");
 
   // Pobierz i ustaw schemat
   useEffect(() => {
@@ -51,16 +52,11 @@ export function useLLM({
         if (schemaData) {
           setSchema(schemaData);
         } else {
-          console.warn(
-            `[useLlmWithZod] Schema not found at path: ${schemaPath}`
-          );
+          console.warn(`[useLLM] Schema not found at path: ${schemaPath}`);
         }
       } catch (err) {
-        console.error(
-          `[useLlmWithZod] Error retrieving schema from ${schemaPath}:`,
-          err
-        );
-        setError(`Błąd pobierania schematu: ${err}`);
+        const errorMsg = errorUtils.handleError(err, "useLLM:getSchema");
+        setError(`Błąd pobierania schematu: ${errorMsg}`);
       }
     }
   }, [schemaPath, getContextPath]);
@@ -68,7 +64,7 @@ export function useLLM({
   // Przetwórz wiadomości z szablonu
   useEffect(() => {
     try {
-      const context = useContextStore.getState().getContext();
+      const context = getContext();
 
       if (initialUserMessage) {
         const processed = processTemplate(initialUserMessage, context);
@@ -80,17 +76,17 @@ export function useLLM({
         setProcessedAssistantMessage(processed);
       }
     } catch (err) {
-      console.error("[useLlmWithZod] Error processing template messages:", err);
-      setError("Błąd przetwarzania wiadomości szablonowych");
+      const errorMsg = errorUtils.handleError(err, "useLLM:processTemplate");
+      setError(`Błąd przetwarzania wiadomości szablonowych: ${errorMsg}`);
     }
-  }, [initialUserMessage, assistantMessage]);
+  }, [initialUserMessage, assistantMessage, getContext]);
 
   // Wyślij wiadomość do LLM
   const sendMessage = useCallback(
     async (message: string) => {
       try {
         if (!message.trim()) {
-          console.warn("[useLlmWithZod] Empty message, skipping API call");
+          console.warn("[useLLM] Empty message, skipping API call");
           return;
         }
 
@@ -194,23 +190,8 @@ export function useLLM({
 
         // Obsłuż błędy API
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error("[useLlmWithZod] API Error:", errorText);
-
-          try {
-            const errorData = JSON.parse(errorText);
-            throw new Error(
-              errorData.error?.message ||
-                `API request failed: ${response.status}`
-            );
-          } catch (e) {
-            throw new Error(
-              `API request failed: ${response.status} - ${errorText.substring(
-                0,
-                100
-              )}...`
-            );
-          }
+          const errorMsg = await errorUtils.handleApiError(response, "useLLM:apiRequest");
+          throw new Error(errorMsg);
         }
 
         // Przetwórz odpowiedź
@@ -224,8 +205,8 @@ export function useLLM({
           onDataSaved(processedData);
         }
       } catch (err) {
-        console.error("[useLlmWithZod] Error:", err);
-        setError(err instanceof Error ? err.message : "Unknown error occurred");
+        const errorMsg = errorUtils.handleError(err, "useLLM:sendMessage");
+        setError(errorMsg);
       } finally {
         setIsLoading(false);
       }
@@ -254,7 +235,7 @@ export function useLLM({
     if (autoStart && !isLoading && !responseData && !error) {
       const timer = setTimeout(() => {
         handleAutoStart();
-      }, 1000);
+      }, 10);
 
       return () => clearTimeout(timer);
     }

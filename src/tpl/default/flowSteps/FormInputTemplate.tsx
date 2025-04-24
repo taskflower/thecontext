@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { FlowStepProps } from "@/types";
 import { useContextStore } from "@/hooks/useContextStore";
-import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
+import { useWorkspaceStore } from "@/hooks/stateManagment/useWorkspaceStore";
 
 const FormInputTemplate: React.FC<FlowStepProps> = ({ 
   node, 

@@ -1,14 +1,16 @@
 // src/views/ApplicationView.tsx
 import { useEffect, Suspense } from "react";
-import { useNavigate } from "react-router-dom";
-import { useApplicationStore } from "@/hooks/useApplicationStore";
+
+
 import { LoadingState } from "@/components/LoadingState";
-import { useAuth } from "@/hooks/useAuth";
+
 import Header from "@/components/Header";
 import EmptyState from "@/components/EmptyState";
 import ApplicationCard from "@/components/ApplicationCard";
 import Footer from "@/components/Footer";
 import SharedLoader from "@/components/SharedLoader";
+import { useApplicationStore, useAuth } from "@/hooks";
+import { useNavigate } from "react-router-dom";
 
 export const ApplicationView: React.FC = () => {
   const {

@@ -9,6 +9,7 @@ import {
 } from '@firebase/auth';
 import { doc, getDoc, setDoc } from '@firebase/firestore';
 import { auth, googleProvider, db } from '@/_firebase/config';
+import { errorUtils } from '@/utils/errorUtils';
 
 // Extended user interface with tokens
 interface UserWithTokens extends User {
@@ -88,7 +89,8 @@ function useProvideAuth(): AuthContextType {
 
           setUser(userData);
         } catch (error) {
-          console.error("Error processing auth state change:", error);
+          const errorMsg = errorUtils.handleError(error, "useAuth:onAuthStateChanged");
+          console.error(errorMsg);
           setUser(null);
           setJwtToken(null);
         }
@@ -120,7 +122,7 @@ function useProvideAuth(): AuthContextType {
           setUser(prev => prev ? { ...prev, jwt: newToken } : null);
         }
       } catch (error) {
-        console.error('Error refreshing token:', error);
+        errorUtils.handleError(error, "useAuth:tokenRefresh");
       }
     }, 45 * 60 * 1000);
     
@@ -146,7 +148,7 @@ function useProvideAuth(): AuthContextType {
         googleAccessToken: accessToken
       };
     } catch (error) {
-      console.error('Google Sign-In Error', error);
+      errorUtils.handleError(error, "useAuth:signInWithGoogle");
       throw error;
     }
   }, []);
@@ -157,7 +159,7 @@ function useProvideAuth(): AuthContextType {
       setJwtToken(null);
       setUser(null);
     } catch (error) {
-      console.error('Logout Error', error);
+      errorUtils.handleError(error, "useAuth:logout");
       throw error;
     }
   }, []);
@@ -169,7 +171,7 @@ function useProvideAuth(): AuthContextType {
         setJwtToken(token);
         return token;
       } catch (error) {
-        console.error('Error getting token:', error);
+        errorUtils.handleError(error, "useAuth:getToken");
         return null;
       }
     }

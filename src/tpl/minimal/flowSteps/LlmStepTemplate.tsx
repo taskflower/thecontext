@@ -1,24 +1,17 @@
 // src/tpl/minimal/flowSteps/LlmStepTemplate.tsx
 import React from "react";
 import { FlowStepProps } from "@/types";
-import { useLLM } from "@/hooks/useLLM";
-import { useFlowStep } from "@/hooks/useFlowStep";
+import { useFlowStep, useLLM } from "@/hooks";
 
 const LlmStepTemplate: React.FC<FlowStepProps> = ({
   node,
   onSubmit,
   onPrevious,
   isLastNode,
-  isFirstNode
+  isFirstNode,
 }) => {
   // Hook do obsługi LLM i komunikacji z API
-  const {
-    sendMessage,
-    isLoading,
-    error,
-    responseData,
-    processedAssistantMessage,
-  } = useLLM({
+  const { isLoading, error, responseData, processedAssistantMessage } = useLLM({
     assistantMessage: node.assistantMessage || "",
     initialUserMessage: node.attrs?.initialUserMessage || "",
     schemaPath: node.attrs?.schemaPath || "",
@@ -29,15 +22,12 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
   });
 
   // Hook do obsługi nawigacji i przepływu
-  const {
-    handlePrevious,
-    handleComplete
-  } = useFlowStep({
+  const { handlePrevious, handleComplete } = useFlowStep({
     node,
     isFirstNode,
     isLastNode,
     onSubmit,
-    onPrevious
+    onPrevious,
   });
 
   return (

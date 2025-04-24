@@ -2,7 +2,7 @@
 import React, { Suspense, useEffect } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { getLayoutComponent, getWidgetComponent } from "../tpl"; 
-import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
+import { useWorkspaceStore } from "@/hooks/stateManagment/useWorkspaceStore";
 import { Scenario } from "@/types";
 import SharedLoader from "@/components/SharedLoader";
 

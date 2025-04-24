@@ -10,29 +10,24 @@ interface UseFlowStepProps {
   onPrevious: () => void;
 }
 
-/**
- * Hook dostarczający wspólną logikę dla komponentów kroków przepływu.
- */
 export function useFlowStep({
   isFirstNode,
   isLastNode,
   onSubmit,
-  onPrevious
+  onPrevious,
 }: UseFlowStepProps) {
   const navigate = useNavigate();
   const { workspace } = useParams();
 
-  // Obsługa przycisku wstecz/anuluj
   const handlePrevious = () => {
     if (isFirstNode) {
       if (workspace) navigate(`/${workspace}`);
-      else navigate('/');
+      else navigate("/");
     } else {
       onPrevious();
     }
   };
 
-  // Obsługa przycisku dalej/zakończ
   const handleComplete = (data: any) => {
     onSubmit(data);
     if (isLastNode && workspace) navigate(`/${workspace}`);

@@ -2,8 +2,8 @@
 import React, { useEffect, Suspense } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getLayoutComponent, getWidgetComponent } from "../tpl";
-import { useApplicationStore } from "@/hooks/useApplicationStore";
-import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
+import { useApplicationStore } from "@/hooks/stateManagment/useApplicationStore";
+import { useWorkspaceStore } from "@/hooks/stateManagment/useWorkspaceStore";
 import { LoadingState } from "@/components/LoadingState";
 import SharedLoader from "@/components/SharedLoader";
 

@@ -1,7 +1,7 @@
 // src/views/LoginView.tsx - Improved Version
+import { useAuth } from '@/hooks';
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
 
 const LoginView: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);

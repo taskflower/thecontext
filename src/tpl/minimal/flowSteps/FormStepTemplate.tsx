@@ -1,8 +1,8 @@
 // src/tpl/minimal/flowSteps/FormStepTemplate.tsx
 import React from "react";
 import { FlowStepProps } from "@/types";
-import { useFormInput } from "@/hooks/useFormInput";
-import { useFlowStep } from "@/hooks/useFlowStep";
+import { useFlowStep, useFormInput } from "@/hooks";
+
 
 const FormStepTemplate: React.FC<FlowStepProps> = ({ 
   node, 

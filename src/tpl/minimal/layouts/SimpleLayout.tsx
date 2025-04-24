@@ -2,7 +2,8 @@
 import React from "react";
 import { X } from "lucide-react";
 import { LayoutProps } from "@/types";
-import { useNavigation } from "@/hooks/useNavigation";
+import { useAppNavigation } from "@/hooks";
+
 
 const SimpleLayout: React.FC<LayoutProps> = ({ 
   children, 
@@ -10,7 +11,7 @@ const SimpleLayout: React.FC<LayoutProps> = ({
   stepTitle, // Dodane do obsługi stepTitle
   onBackClick 
 }) => {
-  const navigation = useNavigation();
+  const navigation = useAppNavigation();
   
   // Użyj dostarczonej funkcji onBackClick lub zdefiniowanej w hooku useNavigation
   const handleCloseClick = onBackClick || navigation.navigateToScenarios;

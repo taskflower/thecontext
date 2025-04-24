@@ -1,9 +1,6 @@
 // src/views/AdminPanelView.tsx
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
 import { seedFirestoreFromData } from "@/_firebase/seedFirestore";
-import { useApplicationStore } from "@/hooks/useApplicationStore";
 import { LoadingState } from "@/components/LoadingState";
 import SharedLoader from "@/components/SharedLoader";
 import {
@@ -20,6 +17,8 @@ import ApplicationList from "@/components/ApplicationList";
 import AdminHeader from "@/components/AdminHeader";
 import FileUpload from "@/components/FileUpload";
 import StatusMessage from "@/components/StatusMessage";
+import { useApplicationStore, useAuth } from "@/hooks";
+import { useNavigate } from "react-router-dom";
 
 // Function to delete an application
 async function deleteApplication(applicationId: string) {

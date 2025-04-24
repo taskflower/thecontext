@@ -1,12 +1,13 @@
 // src/debug/EnhancedFlowDebugger.jsx
 import { useState, useEffect, useRef } from "react";
-import { RefreshCw, Clock, List, Database, EyeOff, X, Users } from "lucide-react";
+import { RefreshCw, Clock, List, Database,  X, Users } from "lucide-react";
 import ContextTab from "./tabs/ContextTab";
 import LogsTab from "./tabs/LogsTab";
 import ScenarioTab from "./tabs/ScenarioTab";
-import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
-import { useContextStore } from "@/hooks/useContextStore";
+
+
 import { useNavigate } from "react-router-dom";
+import { useContextStore, useWorkspaceStore } from "@/hooks";
 
 export const EnhancedFlowDebugger = () => {
   const navigate = useNavigate(); 

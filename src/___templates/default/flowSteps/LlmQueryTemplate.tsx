@@ -14,7 +14,7 @@ import {
   Play,
 } from "lucide-react";
 import { FlowStepProps } from "@/views/types";
-import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
+import { useWorkspaceStore } from "@/hooks/stateManagment/useWorkspaceStore";
 
 // --- UI Components ---
 const LoadingSpinner: React.FC = () => (

@@ -2,10 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLlmService } from '../lib/scenarioGeneratorLLM';
-import { useAuth } from '@/hooks/useAuth';
+
 import { Scenario } from '@/types';
 import { createNewScenario } from '../lib/scenarioGenerator';
-import { useWorkspaceStore } from '@/hooks/useWorkspaceStore';
+import { useAuth, useWorkspaceStore } from '@/hooks';
+
 
 
 /**

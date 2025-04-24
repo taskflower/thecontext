@@ -1,6 +1,7 @@
 // src/hooks/useIndexedDB.ts
 import { useState, useEffect } from 'react';
 import localforage from 'localforage';
+import { errorUtils } from '@/utils/errorUtils';
 
 // Typy danych dla zapisywanych elementów
 export interface StoredItem {
@@ -39,48 +40,48 @@ export const useIndexedDB = (): UseIndexedDBReturn => {
     }
   }, []);
 
-  // Zapisywanie elementu
-  const saveItem = async (item: Omit<StoredItem, 'timestamp'>): Promise<void> => {
+  // Wykonuje operację z odpowiednią obsługą stanu ładowania i błędów
+  const executeDbOperation = async <T>(
+    operation: () => Promise<T>,
+    errorContext: string
+  ): Promise<T> => {
     try {
       setIsLoading(true);
       setError(null);
       
+      return await operation();
+    } catch (err) {
+      const errorMsg = errorUtils.handleError(err, errorContext);
+      const error = new Error(errorMsg);
+      setError(error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Zapisywanie elementu
+  const saveItem = async (item: Omit<StoredItem, 'timestamp'>): Promise<void> => {
+    await executeDbOperation(async () => {
       const storedItem: StoredItem = {
         ...item,
         timestamp: Date.now()
       };
       
       await localforage.setItem(item.id, storedItem);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Wystąpił błąd podczas zapisywania'));
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
+    }, 'useIndexedDB:saveItem');
   };
 
   // Pobieranie pojedynczego elementu
   const getItem = async (id: string): Promise<StoredItem | null> => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const item = await localforage.getItem<StoredItem>(id);
-      return item;
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Wystąpił błąd podczas pobierania'));
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
+    return executeDbOperation(async () => {
+      return await localforage.getItem<StoredItem>(id);
+    }, 'useIndexedDB:getItem');
   };
 
   // Pobieranie wszystkich elementów
   const getAllItems = async (): Promise<StoredItem[]> => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
+    return executeDbOperation(async () => {
       const items: StoredItem[] = [];
       
       await localforage.iterate<StoredItem, void>((value) => {
@@ -89,38 +90,22 @@ export const useIndexedDB = (): UseIndexedDBReturn => {
       
       // Sortowanie od najnowszych
       return items.sort((a, b) => b.timestamp - a.timestamp);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Wystąpił błąd podczas pobierania elementów'));
-      return [];
-    } finally {
-      setIsLoading(false);
-    }
+    }, 'useIndexedDB:getAllItems');
   };
 
   // Pobieranie elementów według typu
   const getAllByType = async (type: StoredItem['type']): Promise<StoredItem[]> => {
-    try {
+    return executeDbOperation(async () => {
       const allItems = await getAllItems();
       return allItems.filter(item => item.type === type);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error(`Wystąpił błąd podczas pobierania elementów typu ${type}`));
-      return [];
-    }
+    }, `useIndexedDB:getAllByType:${type}`);
   };
 
   // Usuwanie elementu
   const deleteItem = async (id: string): Promise<void> => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
+    await executeDbOperation(async () => {
       await localforage.removeItem(id);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Wystąpił błąd podczas usuwania'));
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
+    }, 'useIndexedDB:deleteItem');
   };
 
   return {

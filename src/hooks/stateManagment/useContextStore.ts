@@ -1,6 +1,7 @@
 // src/hooks/useContextStore.ts
 import { create } from "zustand";
-import { getValueByPath, setValueByPath, processTemplate } from "@/utils/byPath";
+import { processTemplate } from "@/utils/byPath";
+import { contextUtils } from "@/utils/contextUtils";
 import { useWorkspaceStore } from "./useWorkspaceStore";
 
 interface ContextState {
@@ -17,63 +18,56 @@ interface ContextState {
 
 export const useContextStore = create<ContextState>((set, get) => ({
   contexts: {},
-  
-  // Poprawiona funkcja setContexts, aby unikać nieskończonych pętli aktualizacji
+
   setContexts: (contexts) => {
-    // Sprawdź, czy naprawdę trzeba aktualizować stan
     const currentContexts = get().contexts;
-    
-    // Szybkie porównanie referencji - jeśli to ten sam obiekt, nic nie rób
+
     if (contexts === currentContexts) return;
-    
-    // Sprawdź, czy zawartość się zmieniła, zanim zrobimy aktualizację
-    // To pomaga uniknąć nieskończonych pętli renderowania
+
     let hasChanges = false;
     const allWorkspaceIds = new Set([
       ...Object.keys(currentContexts),
-      ...Object.keys(contexts)
+      ...Object.keys(contexts),
     ]);
-    
+
     for (const workspaceId of allWorkspaceIds) {
       // Jeśli klucz istnieje tylko w jednym obiekcie, na pewno są zmiany
       if (!(workspaceId in currentContexts) || !(workspaceId in contexts)) {
         hasChanges = true;
         break;
       }
-      
-      // Jeśli zawartość dla workspaceId różni się, mamy zmiany
-      if (JSON.stringify(currentContexts[workspaceId]) !== JSON.stringify(contexts[workspaceId])) {
+
+      if (
+        JSON.stringify(currentContexts[workspaceId]) !==
+        JSON.stringify(contexts[workspaceId])
+      ) {
         hasChanges = true;
         break;
       }
     }
-    
-    // Aktualizuj stan tylko jeśli są realne zmiany
+
     if (hasChanges) {
       set({ contexts });
     }
   },
-  
+
   updateContext: (key, value) => {
     const currWrkspId = useWorkspaceStore.getState().currentWorkspaceId;
     if (!currWrkspId) return;
-    
+
     set((state) => {
-      // Sprawdź, czy wartość faktycznie się zmienia
       const currentValue = state.contexts[currWrkspId]?.[key];
       if (JSON.stringify(currentValue) === JSON.stringify(value)) {
-        return state; // Jeśli wartość się nie zmieniła, zwróć aktualny stan
+        return state;
       }
-      
-      // W przeciwnym przypadku aktualizuj stan
+
       return {
-        contexts: {
-          ...state.contexts,
-          [currWrkspId]: {
-            ...state.contexts[currWrkspId],
-            [key]: value,
-          },
-        },
+        contexts: contextUtils.updateWorkspaceContext(
+          state.contexts,
+          currWrkspId,
+          key,
+          value
+        ),
       };
     });
   },
@@ -82,28 +76,32 @@ export const useContextStore = create<ContextState>((set, get) => ({
     const currWrkspId = useWorkspaceStore.getState().currentWorkspaceId;
     if (!currWrkspId) return;
 
-    const currCtx = get().contexts[currWrkspId] || {};
-    const keyData = currCtx[key] ? { ...currCtx[key] } : {};
-    const updtKeyData = setValueByPath(keyData, jsonPath, value);
-    
-    // Sprawdź, czy wartość faktycznie się zmieniła
-    if (JSON.stringify(currCtx[key]) === JSON.stringify(updtKeyData)) {
-      return; // Jeśli wartość się nie zmieniła, nic nie rób
-    }
+    set((state) => {
+      const currCtx = state.contexts[currWrkspId] || {};
+      const keyData = currCtx[key] ? { ...currCtx[key] } : {};
+      const updtKeyData = contextUtils.setValueByPath(keyData, jsonPath, value);
 
-    set((state) => ({
-      contexts: {
-        ...state.contexts,
-        [currWrkspId]: {
-          ...state.contexts[currWrkspId],
-          [key]: updtKeyData,
-        },
-      },
-    }));
+      if (JSON.stringify(currCtx[key]) === JSON.stringify(updtKeyData)) {
+        return state;
+      }
+
+      return {
+        contexts: contextUtils.updateWorkspaceContext(
+          state.contexts,
+          currWrkspId,
+          key,
+          updtKeyData
+        ),
+      };
+    });
   },
 
   updateByContextPath: (contextPath, value) => {
     if (!contextPath) return;
+
+    const currWrkspId = useWorkspaceStore.getState().currentWorkspaceId;
+    if (!currWrkspId) return;
+
     const [key, ...rest] = contextPath.split(".");
     if (rest.length === 0) {
       get().updateContext(key, value);
@@ -120,19 +118,20 @@ export const useContextStore = create<ContextState>((set, get) => ({
 
   getContext: (path) => {
     const currWrkspId = useWorkspaceStore.getState().currentWorkspaceId;
-    const context = currWrkspId ? get().contexts[currWrkspId] || {} : {};
+    const context = contextUtils.getContext(get().contexts, currWrkspId);
     if (!path) return context;
     return get().getContextPath(path);
   },
 
   getContextPath: (path) => {
     if (!path) return undefined;
-    const context = get().getContext();
-    return getValueByPath(context, path);
+
+    const currWrkspId = useWorkspaceStore.getState().currentWorkspaceId;
+    return contextUtils.getContextPath(get().contexts, currWrkspId, path);
   },
 
   hasContextPath: (path) => {
-    const val = get().getContextPath(path);
-    return val !== undefined && val !== null;
+    const currWrkspId = useWorkspaceStore.getState().currentWorkspaceId;
+    return contextUtils.hasContextPath(get().contexts, currWrkspId, path);
   },
 }));

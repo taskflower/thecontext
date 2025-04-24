@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import { FlowStepProps } from "../../baseTemplate";
 import { useLlmWithZod } from "@/hooks/useLLM";
-import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
+import { useWorkspaceStore } from "@/hooks/stateManagment/useWorkspaceStore";
 
 
 const LlmStepTemplate: React.FC<FlowStepProps> = ({ node, onSubmit, onPrevious, isLastNode }) => {

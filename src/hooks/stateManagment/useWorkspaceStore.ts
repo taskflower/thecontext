@@ -3,6 +3,8 @@ import { create } from 'zustand';
 import type { Workspace, Scenario } from '@/types';
 import { useContextStore } from './useContextStore';
 import { firebaseService } from '@/_firebase/firebase';
+import { errorUtils } from '@/utils/errorUtils';
+import { stateUtils } from '@/utils/stateUtils';
 
 interface WorkspaceState {
   workspaces: Workspace[];
@@ -47,9 +49,9 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       
       set({ workspaces, isLoading: false });
     } catch (error) {
-      console.error('Error fetching workspaces:', error);
+      const errorMsg = errorUtils.handleError(error, 'useWorkspaceStore:fetchWorkspaces');
       set({ 
-        error: error instanceof Error ? error.message : 'Failed to fetch workspaces', 
+        error: errorMsg, 
         isLoading: false 
       });
     }
@@ -69,16 +71,10 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       }
       
       set((state) => {
-        const exists = state.workspaces.some(w => w.id === id);
-        let updatedWorkspaces = [...state.workspaces];
-        
-        if (exists) {
-          updatedWorkspaces = updatedWorkspaces.map(w => 
-            w.id === id ? workspace : w
-          );
-        } else {
-          updatedWorkspaces.push(workspace);
-        }
+        const updatedWorkspaces = stateUtils.updateItemInList(
+          state.workspaces, 
+          workspace
+        );
         
         return { 
           workspaces: updatedWorkspaces,
@@ -96,9 +92,9 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       }
       
     } catch (error) {
-      console.error('Error fetching workspace:', error);
+      const errorMsg = errorUtils.handleError(error, 'useWorkspaceStore:fetchWorkspaceById');
       set({ 
-        error: error instanceof Error ? error.message : 'Failed to fetch workspace details', 
+        error: errorMsg, 
         isLoading: false 
       });
     }

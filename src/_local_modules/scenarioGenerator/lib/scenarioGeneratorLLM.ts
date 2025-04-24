@@ -1,5 +1,7 @@
 // src/services/llm.ts
-import { useAuth } from '@/hooks/useAuth';
+
+import { useAuth } from "@/hooks";
+
 
 /**
  * Interfejs dla odpowiedzi LLM

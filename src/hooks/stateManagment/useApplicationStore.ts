@@ -4,6 +4,8 @@ import { create } from 'zustand';
 import { Workspace } from '@/types';
 import { useContextStore } from './useContextStore';
 import { firebaseService } from '@/_firebase/firebase';
+import { errorUtils } from '@/utils/errorUtils';
+import { stateUtils } from '@/utils/stateUtils';
 
 interface Application {
   id: string;
@@ -42,9 +44,9 @@ export const useApplicationStore = create<ApplicationState>((set, get) => ({
       const applications = await firebaseService.getApplications();
       set({ applications, isLoading: false });
     } catch (error) {
-      console.error('Error fetching applications:', error);
+      const errorMsg = errorUtils.handleError(error, 'useApplicationStore:fetchApplications');
       set({ 
-        error: error instanceof Error ? error.message : 'Failed to fetch applications', 
+        error: errorMsg, 
         isLoading: false 
       });
     }
@@ -62,16 +64,10 @@ export const useApplicationStore = create<ApplicationState>((set, get) => ({
       
       set((state) => {
         // Aktualizuj istniejące aplikacje lub dodaj nową
-        const exists = state.applications.some(app => app.id === id);
-        let updatedApplications = [...state.applications];
-        
-        if (exists) {
-          updatedApplications = updatedApplications.map(app => 
-            app.id === id ? application : app
-          );
-        } else {
-          updatedApplications.push(application);
-        }
+        const updatedApplications = stateUtils.updateItemInList(
+          state.applications,
+          application
+        );
         
         return { 
           applications: updatedApplications,
@@ -83,16 +79,16 @@ export const useApplicationStore = create<ApplicationState>((set, get) => ({
       // Inicjalizuj konteksty dla workspaces
       if (application.workspaces && application.workspaces.length > 0) {
         const contexts: Record<string, any> = {};
-        application.workspaces.forEach(ws => {
+        application.workspaces.forEach((ws:Workspace) => {
           contexts[ws.id] = ws.initialContext || {};
         });
         useContextStore.getState().setContexts(contexts);
       }
       
     } catch (error) {
-      console.error('Error fetching application:', error);
+      const errorMsg = errorUtils.handleError(error, 'useApplicationStore:fetchApplicationById');
       set({ 
-        error: error instanceof Error ? error.message : 'Failed to fetch application details', 
+        error: errorMsg, 
         isLoading: false 
       });
     }

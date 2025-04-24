@@ -1,8 +1,8 @@
 // src/InitialDataProvider.tsx
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useWorkspaceStore } from "./hooks/useWorkspaceStore";
-import { useApplicationStore } from "./hooks/useApplicationStore";
+import { useWorkspaceStore } from "./hooks/stateManagment/useWorkspaceStore";
+import { useApplicationStore } from "./hooks/stateManagment/useApplicationStore";
 
 interface InitialDataProviderProps {
   children: React.ReactNode;

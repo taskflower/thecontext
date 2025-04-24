@@ -1,13 +1,12 @@
 // src/tpl/minimal/flowSteps/WidgetsStepTemplate.tsx
 import React, { useEffect, useState } from "react";
 import { FlowStepProps } from "@/types";
-import { useContextStore } from "@/hooks/useContextStore";
-import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
-import { useFlowStep } from "@/hooks/useFlowStep";
+
 
 import DataDisplayWidget from "../widgets/DataDisplayWidget";
 import InfoWidget from "../widgets/InfoWidget";
 import StatsWidget from "../widgets/StatsWidget";
+import { useContextStore, useFlowStep, useWorkspaceStore } from "@/hooks";
 
 const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
   node,

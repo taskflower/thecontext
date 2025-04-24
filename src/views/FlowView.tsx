@@ -6,13 +6,12 @@ import {
   getFlowStepComponent,
   getFlowStepForNodeType,
 } from "../tpl";
-import { useNodeManager } from "../hooks/useNodeManager";
-import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
-import { useContextStore } from "@/hooks/useContextStore";
-import { useNavigation } from "@/hooks/useNavigation";
+
+
 import { LoadingState } from "@/components/LoadingState";
 import SharedLoader from "@/components/SharedLoader";
 import { NodeData } from "@/types";
+import { useAppNavigation, useContextStore, useNodeManager, useWorkspaceStore } from "@/hooks";
 
 // Local storage key for flow state
 const FLOW_STATE_KEY = "wiseads_flow_state";
@@ -33,7 +32,7 @@ const FlowView: React.FC = () => {
   } = useWorkspaceStore();
 
   const contextStore = useContextStore();
-  const navigation = useNavigation();
+  const navigation = useAppNavigation();
 
   // Select workspace and scenario when component mounts
   useEffect(() => {

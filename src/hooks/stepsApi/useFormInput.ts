@@ -1,8 +1,8 @@
 // src/hooks/useFormInput.ts
 import { useState, useEffect } from "react";
 import { FormField } from "@/types";
-import { useContextStore } from "./useContextStore";
-import { useWorkspaceStore } from "./useWorkspaceStore";
+import { useContextStore, useWorkspaceStore } from "..";
+
 
 interface FormInputAttrs {
   schemaPath?: string; // np. 'schemas.form.website'
@@ -12,13 +12,10 @@ interface UseFormInputProps {
   node: {
     attrs?: FormInputAttrs;
     assistantMessage?: string;
-    contextPath?: string; 
+    contextPath?: string;
   };
 }
 
-/**
- * Hook obsługujący formularze na podstawie schematu z kontekstu.
- */
 export function useFormInput({ node }: UseFormInputProps) {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [formFields, setFormFields] = useState<FormField[]>([]);
@@ -51,22 +48,15 @@ export function useFormInput({ node }: UseFormInputProps) {
     }
   }, [contextSchemas, attrs.schemaPath]);
 
-  /**
-   * Aktualizuje lokalny stan formData
-   */
   const handleChange = (name: string, value: any) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  /**
-   * Zapisuje wszystkie pola do kontekstu pod ścieżką node.contextPath
-   */
   const handleSubmit = (e?: React.FormEvent | any) => {
-    // Only call preventDefault if e is a valid event object with preventDefault method
-    if (e && typeof e.preventDefault === 'function') {
+    if (e && typeof e.preventDefault === "function") {
       e.preventDefault();
     }
-    
+
     if (node.contextPath) {
       const basePath = node.contextPath;
       Object.entries(formData).forEach(([key, value]) => {
@@ -76,9 +66,6 @@ export function useFormInput({ node }: UseFormInputProps) {
     return formData;
   };
 
-  /**
-   * Sprawdza, czy wszystkie wymagane pola są wypełnione
-   */
   const areRequiredFieldsFilled = () =>
     formFields.every(
       (f) =>
