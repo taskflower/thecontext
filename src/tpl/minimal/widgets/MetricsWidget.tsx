@@ -1,19 +1,6 @@
 // src/tpl/minimal/widgets/MetricsWidget.tsx
 import React from "react";
-import { WidgetProps } from "@/types";
-
-interface MetricItem {
-  label: string;
-  value: string | number;
-  change?: number;
-  prefix?: string;
-  suffix?: string;
-}
-
-interface MetricsWidgetProps extends WidgetProps {
-  title?: string;
-  metrics: MetricItem[];
-}
+import { MetricsWidgetProps, MetricItem } from "../types";
 
 const MetricsWidget: React.FC<MetricsWidgetProps> = ({ 
   title,
@@ -21,7 +8,7 @@ const MetricsWidget: React.FC<MetricsWidgetProps> = ({
   data = [],
 }) => {
   // If metrics prop is not provided, try to convert data to metrics format
-  const displayMetrics = metrics.length > 0 
+  const displayMetrics: MetricItem[] = metrics && metrics.length > 0 
     ? metrics 
     : Array.isArray(data) 
       ? data.map(item => ({
@@ -29,10 +16,13 @@ const MetricsWidget: React.FC<MetricsWidgetProps> = ({
         value: item.value || 0,
         prefix: item.prefix || "",
         suffix: item.suffix || "",
+        change: item.change,
       }))
       : Object.entries(data || {}).map(([key, value]) => ({
         label: key,
         value: value as any,
+        prefix: "",
+        suffix: "",
       }));
 
   return (
@@ -59,7 +49,7 @@ const MetricsWidget: React.FC<MetricsWidgetProps> = ({
               )}
             </div>
             
-            {metric.change !== undefined && (
+            {typeof metric.change === 'number' && (
               <div className={`flex items-center text-xs font-medium ${
                 metric.change >= 0 ? 'text-green-600' : 'text-red-600'
               }`}>

@@ -1,6 +1,6 @@
 // src/tpl/minimal/widgets/StatsWidget.tsx
 import React from "react";
-import { StatsWidgetProps } from "@/types";
+import { StatsWidgetProps, StatItem } from "../types";
 
 const StatsWidget: React.FC<StatsWidgetProps> = ({
   title,
@@ -9,7 +9,7 @@ const StatsWidget: React.FC<StatsWidgetProps> = ({
   data = {},
 }) => {
   // Convert data to stats if stats not provided
-  const statsData = stats || Object.entries(data).map(([key, value]) => ({
+  const statsData: StatItem[] = stats || Object.entries(data).map(([key, value]) => ({
     label: key,
     value: value as any,
   }));

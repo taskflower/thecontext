@@ -1,6 +1,6 @@
 // src/tpl/minimal/widgets/InfoWidget.tsx
 import React from "react";
-import { InfoWidgetProps } from "@/types";
+import { InfoWidgetProps } from "../types";
 
 const InfoWidget: React.FC<InfoWidgetProps> = ({
   title,
@@ -156,8 +156,8 @@ const InfoWidget: React.FC<InfoWidgetProps> = ({
   };
 
   // Get content from props or data
-  const displayContent = content || data.content || data.message || "";
-  const displayTitle = title || data.title || "";
+  const displayContent = content || (data as any).content || (data as any).message || "";
+  const displayTitle = title || (data as any).title || "";
 
   return (
     <div className={`rounded-lg border p-4 ${styles.container}`}>

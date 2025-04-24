@@ -1,6 +1,6 @@
 // src/tpl/minimal/widgets/DataDisplayWidget.tsx
 import React from "react";
-import { DataDisplayWidgetProps } from "@/types";
+import { DataDisplayWidgetProps } from "../types";
 
 const DataDisplayWidget: React.FC<DataDisplayWidgetProps> = ({
   title,

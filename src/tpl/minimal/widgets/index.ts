@@ -16,3 +16,15 @@ export const widgetComponents = {
   'metrics': MetricsWidget,
   'stats': StatsWidget,
 };
+
+// Eksportujemy także typy z types.ts
+export type {
+  CardItem,
+  StatItem,
+  MetricItem,
+  StatsWidgetProps,
+  InfoWidgetProps,
+  DataDisplayWidgetProps,
+  CardListWidgetProps,
+  MetricsWidgetProps
+} from '../types';

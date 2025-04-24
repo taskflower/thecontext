@@ -29,30 +29,7 @@ export interface FlowStepProps {
   stepTitle?: string;
 }
 
-// Widget specifyczne typy
-export interface StatsWidgetProps extends WidgetProps {
-  title?: string;
-  description?: string;
-  stats?: Array<{ 
-    label: string; 
-    value: any;
-    description?: string;
-    icon?: string;
-  }>;
-}
 
-export interface InfoWidgetProps extends WidgetProps {
-  title?: string;
-  content?: string | React.ReactNode;
-  icon?: string;
-  variant?: 'default' | 'info' | 'success' | 'warning' | 'error';
-}
-
-export interface DataDisplayWidgetProps extends WidgetProps {
-  title?: string;
-  description?: string;
-  type?: 'list' | 'object' | 'keyValue' | 'code';
-}
 
 // Szablony
 export interface LayoutTemplate {

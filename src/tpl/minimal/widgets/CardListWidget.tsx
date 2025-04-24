@@ -1,18 +1,9 @@
 // src/tpl/minimal/widgets/CardListWidget.tsx
 import React from "react";
-import { WidgetProps } from "@/types";
 import { SubjectIcon } from "@/components/SubjectIcon";
+import { CardListWidgetProps, CardItem } from "../types";
 
-interface CardItem {
-  id: string;
-  name: string;
-  description?: string;
-  count?: number;
-  countLabel?: string;
-  icon?: string;
-}
-
-const CardListWidget: React.FC<WidgetProps> = ({ data = [], onSelect }) => {
+const CardListWidget: React.FC<CardListWidgetProps> = ({ data = [], onSelect }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {data.map((item: CardItem) => (

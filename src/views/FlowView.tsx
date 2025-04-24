@@ -12,7 +12,7 @@ import { useContextStore } from "@/hooks/useContextStore";
 import { useNavigation } from "@/hooks/useNavigation";
 import { LoadingState } from "@/components/LoadingState";
 import SharedLoader from "@/components/SharedLoader";
-import { NodeData, Scenario } from "@/types";
+import { NodeData } from "@/types";
 
 // Local storage key for flow state
 const FLOW_STATE_KEY = "wiseads_flow_state";
@@ -20,7 +20,7 @@ const FLOW_STATE_KEY = "wiseads_flow_state";
 const FlowView: React.FC = () => {
   const { workspace, scenario } = useParams();
   
-  // Ref aby uniknąć nieskończonej pętli aktualizacji
+  // Ref, aby zapobiec nieskończonym renderowaniom
   const contextInitialized = useRef(false);
   
   // Hooki z logiką biznesową
@@ -58,7 +58,6 @@ const FlowView: React.FC = () => {
   } = useNodeManager();
 
   // When the flow changes (new scenario), try to restore saved state
-  // Użycie useRef aby zapobiec nieskończonej pętli
   useEffect(() => {
     if (workspace && scenario && currentWorkspace && !contextInitialized.current) {
       try {
@@ -77,7 +76,7 @@ const FlowView: React.FC = () => {
                 ...parsedState.context
               }
             });
-            // Oznacz, że kontekst został zainicjalizowany
+            // Oznacz, że już zainicjalizowano kontekst, aby uniknąć pętli
             contextInitialized.current = true;
           }
         }
@@ -85,7 +84,7 @@ const FlowView: React.FC = () => {
         console.error("Error restoring flow state:", error);
       }
     }
-  }, [workspace, scenario, currentWorkspace, contextStore]);
+  }, [workspace, scenario, currentWorkspace, contextStore.contexts, contextStore]);
 
   // Save flow state when node execution occurs
   const handleNodeExecutionWithSave = (data: any) => {
@@ -220,31 +219,23 @@ const FlowView: React.FC = () => {
       );
     }
 
-    // Rozwiązanie błędów typów przez ręczne typowanie props jako any
-    // W normalnych okolicznościach lepszym rozwiązaniem byłoby poprawienie definicji typów
-    // ale dla szybkiego naprawienia błędów TypeScript to rozwiązanie zadziała
-    const layoutProps = {
-      title: currentScenario.name,
-      stepTitle: currentNode.label,
-      onBackClick: navigation.navigateToScenarios,
-      children: null // Będzie nadpisane przez JSX
-    };
-
-    const flowStepProps = {
-      node: currentNode as NodeData,
-      onSubmit: handleNodeExecutionWithSave,
-      onPrevious: handlePreviousNode,
-      isLastNode: isLastNode || false,
-      isFirstNode: isFirstNode || false,
-      contextItems: contextItems,
-      scenario: currentScenario as Scenario,
-      stepTitle: currentNode.label
-    };
-
     // Renderuj layout z komponentem flow
     return (
-      <LayoutComponent {...(layoutProps as any)}>
-        <FlowStepComponent {...(flowStepProps as any)} />
+      <LayoutComponent 
+        title={currentScenario.name}
+        stepTitle={currentNode.label}
+        onBackClick={navigation.navigateToScenarios}
+      >
+        <FlowStepComponent
+          node={currentNode as NodeData}
+          onSubmit={handleNodeExecutionWithSave}
+          onPrevious={handlePreviousNode}
+          isLastNode={isLastNode || false}
+          isFirstNode={isFirstNode || false}
+          contextItems={contextItems}
+          scenario={currentScenario}
+          stepTitle={currentNode.label}
+        />
       </LayoutComponent>
     );
   };

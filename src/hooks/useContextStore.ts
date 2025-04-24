@@ -21,32 +21,34 @@ export const useContextStore = create<ContextState>((set, get) => ({
   // Poprawiona funkcja setContexts, aby unikać nieskończonych pętli aktualizacji
   setContexts: (contexts) => {
     // Sprawdź, czy naprawdę trzeba aktualizować stan
-    // Jeśli konteksty są identyczne, nie rób niczego
     const currentContexts = get().contexts;
     
-    // Szybkie porównanie referencji
+    // Szybkie porównanie referencji - jeśli to ten sam obiekt, nic nie rób
     if (contexts === currentContexts) return;
     
-    // Porównanie kluczy i wartości
+    // Sprawdź, czy zawartość się zmieniła, zanim zrobimy aktualizację
+    // To pomaga uniknąć nieskończonych pętli renderowania
     let hasChanges = false;
-    const allKeys = new Set([
-      ...Object.keys(currentContexts), 
+    const allWorkspaceIds = new Set([
+      ...Object.keys(currentContexts),
       ...Object.keys(contexts)
     ]);
     
-    for (const key of allKeys) {
-      // Jeśli klucz istnieje tylko w jednym obiekcie lub wartości się różnią
-      if (
-        !(key in currentContexts) || 
-        !(key in contexts) ||
-        JSON.stringify(currentContexts[key]) !== JSON.stringify(contexts[key])
-      ) {
+    for (const workspaceId of allWorkspaceIds) {
+      // Jeśli klucz istnieje tylko w jednym obiekcie, na pewno są zmiany
+      if (!(workspaceId in currentContexts) || !(workspaceId in contexts)) {
+        hasChanges = true;
+        break;
+      }
+      
+      // Jeśli zawartość dla workspaceId różni się, mamy zmiany
+      if (JSON.stringify(currentContexts[workspaceId]) !== JSON.stringify(contexts[workspaceId])) {
         hasChanges = true;
         break;
       }
     }
     
-    // Aktualizuj stan tylko jeśli są zmiany
+    // Aktualizuj stan tylko jeśli są realne zmiany
     if (hasChanges) {
       set({ contexts });
     }
