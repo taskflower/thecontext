@@ -1,111 +1,111 @@
 [
-    {
-      "name": "Content Generator",
-      "description": "Generator treści i artykułów",
-      "workspaces": [
-        {
-          "id": "workspace-content", 
-          "name": "Generator Artykułów",
-          "description": "Tworzenie artykułów blogowych z wykorzystaniem AI",
-          "icon": "file-text",
-          "scenarios": [
-            {
-              "id": "scenario-article",
-              "name": "Artykuł na blog",
-              "description": "Stwórz kompletny artykuł blogowy",
-              "icon": "pencil",
-              "systemMessage": "Jesteś specjalistą od content marketingu z wieloletnim doświadczeniem w tworzeniu treści.",
-              "nodes": [
-                {
-                  "id": "article-topic",
-                  "scenarioId": "scenario-article",
-                  "label": "Temat artykułu",
-                  "assistantMessage": "Podaj temat artykułu oraz grupę docelową:",
-                  "contextPath": "article",
-                  "templateId": "form-step",
-                  "order": 0,
-                  "attrs": { 
-                    "schemaPath": "schemas.form.articleTopic" 
-                  }
+  {
+    "name": "Content Generator",
+    "description": "Generator treści i artykułów",
+    "workspaces": [
+      {
+        "id": "workspace-content", 
+        "name": "Generator Artykułów",
+        "description": "Tworzenie artykułów blogowych z wykorzystaniem AI",
+        "icon": "file-text",
+        "scenarios": [
+          {
+            "id": "scenario-article",
+            "name": "Artykuł na blog",
+            "description": "Stwórz kompletny artykuł blogowy",
+            "icon": "pencil",
+            "systemMessage": "Jesteś specjalistą od content marketingu z wieloletnim doświadczeniem w tworzeniu treści.",
+            "nodes": [
+              {
+                "id": "article-topic",
+                "scenarioId": "scenario-article",
+                "label": "Temat artykułu",
+                "assistantMessage": "Podaj temat artykułu oraz grupę docelową:",
+                "contextPath": "article",
+                "templateId": "form-step",
+                "order": 0,
+                "attrs": { 
+                  "schemaPath": "schemas.form.articleTopic" 
+                }
+              },
+              {
+                "id": "generate-outline",
+                "scenarioId": "scenario-article",
+                "label": "Plan artykułu",
+                "contextPath": "article.outline",
+                "templateId": "llm-step",
+                "order": 1,
+                "attrs": {
+                  "autoStart": true,
+                  "includeSystemMessage": true,
+                  "initialUserMessage": "Przygotuj plan artykułu na temat: {{article.topic}} dla grupy docelowej: {{article.audience}}",
+                  "schemaPath": "schemas.llm.articleOutline"
+                }
+              },
+              {
+                "id": "generate-article",
+                "scenarioId": "scenario-article",
+                "label": "Treść artykułu",
+                "contextPath": "article.content",
+                "templateId": "llm-step",
+                "order": 2,
+                "attrs": {
+                  "autoStart": true,
+                  "includeSystemMessage": true,
+                  "initialUserMessage": "Napisz pełny artykuł na temat: {{article.topic}} dla grupy docelowej: {{article.audience}} według następującego planu: {{article.outline.sections}}",
+                  "schemaPath": "schemas.llm.articleContent"
+                }
+              }
+            ]
+          }
+        ],
+        "templateSettings": {
+          "layoutTemplate": "default",
+          "scenarioWidgetTemplate": "card-list",
+          "defaultFlowStepTemplate": "form-step",
+          "theme": "light"
+        },
+        "initialContext": {
+          "schemas": {
+            "form": {
+              "articleTopic": [
+                { 
+                  "name": "topic", 
+                  "label": "Temat artykułu", 
+                  "type": "text", 
+                  "required": true 
                 },
-                {
-                  "id": "generate-outline",
-                  "scenarioId": "scenario-article",
-                  "label": "Plan artykułu",
-                  "contextPath": "article.outline",
-                  "templateId": "llm-step",
-                  "order": 1,
-                  "attrs": {
-                    "autoStart": true,
-                    "includeSystemMessage": true,
-                    "initialUserMessage": "Przygotuj plan artykułu na temat: {{article.topic}} dla grupy docelowej: {{article.audience}}",
-                    "schemaPath": "schemas.llm.articleOutline"
-                  }
+                { 
+                  "name": "audience", 
+                  "label": "Grupa docelowa", 
+                  "type": "text", 
+                  "required": true 
                 },
-                {
-                  "id": "generate-article",
-                  "scenarioId": "scenario-article",
-                  "label": "Treść artykułu",
-                  "contextPath": "article.content",
-                  "templateId": "llm-step",
-                  "order": 2,
-                  "attrs": {
-                    "autoStart": true,
-                    "includeSystemMessage": true,
-                    "initialUserMessage": "Napisz pełny artykuł na temat: {{article.topic}} dla grupy docelowej: {{article.audience}} według następującego planu: {{article.outline.sections}}",
-                    "schemaPath": "schemas.llm.articleContent"
-                  }
+                { 
+                  "name": "tone", 
+                  "label": "Ton artykułu", 
+                  "type": "select", 
+                  "required": true,
+                  "options": ["Formalny", "Konwersacyjny", "Edukacyjny", "Zabawny"]
                 }
               ]
-            }
-          ],
-          "templateSettings": {
-            "layoutTemplate": "default",
-            "scenarioWidgetTemplate": "card-list",
-            "defaultFlowStepTemplate": "form-step",
-            "theme": "light"
-          },
-          "initialContext": {
-            "schemas": {
-              "form": {
-                "articleTopic": [
-                  { 
-                    "name": "topic", 
-                    "label": "Temat artykułu", 
-                    "type": "text", 
-                    "required": true 
-                  },
-                  { 
-                    "name": "audience", 
-                    "label": "Grupa docelowa", 
-                    "type": "text", 
-                    "required": true 
-                  },
-                  { 
-                    "name": "tone", 
-                    "label": "Ton artykułu", 
-                    "type": "select", 
-                    "required": true,
-                    "options": ["Formalny", "Konwersacyjny", "Edukacyjny", "Zabawny"]
-                  }
-                ]
+            },
+            "llm": {
+              "articleOutline": {
+                "title": "Proponowany tytuł",
+                "sections": ["Lista sekcji/nagłówków artykułu"]
               },
-              "llm": {
-                "articleOutline": {
-                  "title": "Proponowany tytuł",
-                  "sections": ["Lista sekcji/nagłówków artykułu"]
-                },
-                "articleContent": {
-                  "title": "Tytuł artykułu",
-                  "intro": "Wstęp artykułu",
-                  "body": "Rozwinięcie artykułu", 
-                  "conclusion": "Podsumowanie artykułu",
-                  "cta": "Wezwanie do działania"
-                }
+              "articleContent": {
+                "title": "Tytuł artykułu",
+                "intro": "Wstęp artykułu",
+                "body": "Rozwinięcie artykułu", 
+                "conclusion": "Podsumowanie artykułu",
+                "cta": "Wezwanie do działania"
               }
             }
           }
         }
-      ]
-    }
-  ]
+      }
+    ]
+  }
+]

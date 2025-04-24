@@ -49,13 +49,13 @@
                 "label": "Krok 3: Podsumowanie",
                 "assistantMessage": "Oto podsumowanie wyników analizy finansowej twojego projektu.",
                 "contextPath": "summary",
-                "templateId": "summary-step-minimal",  
+                "templateId": "widgets-step-minimal",
                 "order": 2,
                 "attrs": {
-                  "schemaPath": "schemas.summary.businessSummary",
+                  "schemaPath": "schemas.widgets.businessWidgets",
                   "dataPaths": {
-                    "Dane wejściowe": "collect-data",
-                    "Wyniki analizy": "generate-report"
+                    "inputData": "collect-data",
+                    "analysisResults": "generate-report"
                   }
                 }
               }
@@ -93,11 +93,29 @@
                 "recommendations": ["Lista rekomendacji"]
               }
             },
-            "summary": {
-              "businessSummary": {
-                "inputData": "Dane wejściowe projektu",
-                "analysisResults": "Wyniki analizy finansowej",
-                "conclusion": "Końcowa ocena projektu"
+            "widgets": {
+              "businessWidgets": {
+                "widgets": [
+                  {
+                    "type": "title",
+                    "title": "Wyniki analizy finansowej"
+                  },
+                  {
+                    "type": "cardList",
+                    "title": "Rekomendacje",
+                    "dataPath": "analysisResults.recommendations"
+                  },
+                  {
+                    "type": "value",
+                    "title": "Opłacalność projektu",
+                    "dataPath": "analysisResults.profitability"
+                  },
+                  {
+                    "type": "value",
+                    "title": "ROI",
+                    "dataPath": "analysisResults.roi"
+                  }
+                ]
               }
             }
           }

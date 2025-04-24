@@ -4,11 +4,11 @@ import { lazy } from 'react';
 // Używamy importu dynamicznego z Vite dla komponentów kroków przepływu
 export const FormStepTemplate = lazy(() => import('./FormStepTemplate'));
 export const LlmStepTemplate = lazy(() => import('./LlmStepTemplate'));
-export const SummaryStepTemplate = lazy(() => import('./SummaryStepTemplate'));
+export const WidgetsStepTemplate = lazy(() => import('./WidgetsStepTemplate'));
 
 // Eksportujemy mapę nazw komponentów do ich importów
 export const flowStepComponents = {
   'form-step-minimal': FormStepTemplate,
-  'llm-step-minimal': LlmStepTemplate,  // Updated to match templateId in config
-  'summary-step-minimal': SummaryStepTemplate,
+  'llm-step-minimal': LlmStepTemplate,
+  'widgets-step-minimal': WidgetsStepTemplate,
 };

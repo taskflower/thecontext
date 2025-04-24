@@ -94,7 +94,21 @@
               "marketingSummary": {
                 "inputData": "Dane wejściowe analizy",
                 "analysisResults": "Wyniki analizy marketingowej",
-                "conclusion": "Podsumowanie i rekomendacje"
+                "conclusion": "Podsumowanie i rekomendacje",
+                "_layout": {
+                  "inputData": {
+                    "layout": "panel"
+                  },
+                  "analysisResults": {
+                    "layout": "card",
+                    "type": "list",
+                    "icon": "M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"
+                  },
+                  "conclusion": {
+                    "layout": "card",
+                    "icon": "M13 10V3L4 14h7v7l9-11h-7z"
+                  }
+                }
               }
             }
           }
