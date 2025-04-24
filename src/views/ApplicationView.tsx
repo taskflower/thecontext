@@ -4,10 +4,10 @@ import { useEffect, Suspense } from "react";
 
 import { LoadingState } from "@/components/LoadingState";
 
-import Header from "@/components/Header";
+import Header from "@/components/homeLayout/Header";
 import EmptyState from "@/components/EmptyState";
-import ApplicationCard from "@/components/ApplicationCard";
-import Footer from "@/components/Footer";
+import ApplicationCard from "@/components/homeLayout/ApplicationCard";
+import Footer from "@/components/homeLayout/Footer";
 import SharedLoader from "@/components/SharedLoader";
 import { useApplicationStore, useAuth } from "@/hooks";
 import { useNavigate } from "react-router-dom";

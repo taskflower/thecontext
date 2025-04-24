@@ -12,10 +12,10 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "@/_firebase/config";
-import Footer from "@/components/Footer";
-import ApplicationList from "@/components/ApplicationList";
-import AdminHeader from "@/components/AdminHeader";
-import FileUpload from "@/components/FileUpload";
+import Footer from "@/components/homeLayout/Footer";
+import ApplicationList from "@/_modules/admin/components/ApplicationList";
+import AdminHeader from "@/_modules/admin/components/AdminHeader";
+import FileUpload from "@/_modules/admin/components/FileUpload";
 import StatusMessage from "@/components/StatusMessage";
 import { useApplicationStore, useAuth } from "@/hooks";
 import { useNavigate } from "react-router-dom";

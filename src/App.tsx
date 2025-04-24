@@ -8,25 +8,19 @@ import {
   Navigate
 } from "react-router-dom";
 
-// Lazy loaded components
 const FlowView = lazy(() => import("./views/FlowView"));
 const ScenarioView = lazy(() => import("./views/ScenarioView"));
 const LoginView = lazy(() => import("./views/LoginView"));
 const ApplicationView = lazy(() => import("./views/ApplicationView"));
 const WorkspaceView = lazy(() => import("./views/WorkspaceView"));
-const AdminPanelView = lazy(() => import("./views/AdminPanelView"));
+const AdminPanelView = lazy(() => import("./_modules/admin/AdminPanelView"));
 
-// Providers and utilities
 import InitialDataProvider from "./InitialDataProvider";
-import { AuthProvider } from "./hooks/auth/useAuth";
-
-// Development tools
 import ScenarioGenerator from "./_modules/scenarioGenerator/components/ScenarioGenerator";
 import EnhancedFlowDebugger from "./_modules/debug/EnhancedFlowDebugger";
 import { AuthWrapper } from "./_auth/AuthWrapper";
-
-// Import SharedLoader for consistent loading appearance
 import SharedLoader from "./components/SharedLoader";
+import { AuthProvider } from "./hooks";
 
 const AppWrapper = ({ children }: { children: React.ReactNode }) => (
   <div className="flex w-full h-screen overflow-hidden">
