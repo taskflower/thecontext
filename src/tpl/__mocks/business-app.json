@@ -60,6 +60,76 @@
                 }
               }
             ]
+          },
+          {
+            "id": "scenario-marketing",
+            "name": "Analiza marketingowa",
+            "description": "Analiza wydatków marketingowych i efektywności",
+            "icon": "trending-up",
+            "systemMessage": "Jesteś asystentem marketingowym, specjalizującym się w analizie efektywności kampanii reklamowych.",
+            "dependsOn": ["scenario-business"],
+            "nodes": [
+              {
+                "id": "marketing-data",
+                "scenarioId": "scenario-marketing",
+                "label": "Krok 1: Dane marketingowe",
+                "assistantMessage": "Podaj informacje dotyczące twoich działań marketingowych:",
+                "contextPath": "marketing-data",
+                "templateId": "form-step-minimal",
+                "order": 0,
+                "attrs": { 
+                  "schemaPath": "schemas.form.marketing" 
+                }
+              },
+              {
+                "id":               "marketing-analysis",
+                "scenarioId": "scenario-marketing",
+                "label": "Krok 2: Analiza efektywności",
+                "assistantMessage": "Analizuję efektywność twoich działań marketingowych w oparciu o zebrane dane...",
+                "contextPath": "marketing-analysis",
+                "templateId": "llm-step-minimal",
+                "order": 1,
+                "attrs": {
+                  "autoStart": true,
+                  "includeSystemMessage": true,
+                  "usePreviousScenarioData": true,
+                  "initialUserMessage": "Na podstawie danych finansowych: przychody={{scenario-business.collect-data.revenue}}, koszty={{scenario-business.collect-data.cost}}, oraz danych marketingowych: budżet reklamowy={{marketing-data.adBudget}}, liczba kliknięć={{marketing-data.clicks}}, liczba konwersji={{marketing-data.conversions}}, przeprowadź analizę efektywności marketingowej. Oblicz wskaźniki: CPA (koszt pozyskania klienta), ROAS (zwrot z wydatków reklamowych), CPC (koszt za kliknięcie) oraz CTR (jeśli podano dane o wyświetleniach). Zaproponuj strategię optymalizacji marketingu.",
+                  "schemaPath": "schemas.llm.marketingAnalysis"
+                }
+              },
+              {
+                "id": "metrics-summary",
+                "scenarioId": "scenario-marketing",
+                "label": "Krok 3: Metryki marketingowe",
+                "assistantMessage": "Oto kluczowe metryki i wskaźniki marketingowe dla twojej kampanii.",
+                "contextPath": "metrics-summary",
+                "templateId": "widgets-step-minimal",
+                "order": 2,
+                "attrs": {
+                  "schemaPath": "schemas.widgets.marketingMetrics",
+                  "dataPaths": {
+                    "inputData": "marketing-data",
+                    "financialData": "scenario-business.collect-data",
+                    "analysisResults": "marketing-analysis"
+                  }
+                }
+              },
+              {
+                "id": "action-plan",
+                "scenarioId": "scenario-marketing",
+                "label": "Krok 4: Plan działania",
+                "assistantMessage": "Na podstawie przeprowadzonych analiz, przygotowałem plan działania w celu optymalizacji twoich działań marketingowych.",
+                "contextPath": "action-plan",
+                "templateId": "widgets-step-minimal",
+                "order": 3,
+                "attrs": {
+                  "schemaPath": "schemas.widgets.actionPlan",
+                  "dataPaths": {
+                    "marketingAnalysis": "marketing-analysis"
+                  }
+                }
+              }
+            ]
           }
         ],
         "templateSettings": {
@@ -84,6 +154,39 @@
                   "type": "number", 
                   "required": true 
                 }
+              ],
+              "marketing": [
+                { 
+                  "name": "adBudget", 
+                  "label": "Budżet reklamowy (PLN)", 
+                  "type": "number", 
+                  "required": true 
+                },
+                { 
+                  "name": "clicks", 
+                  "label": "Liczba kliknięć", 
+                  "type": "number", 
+                  "required": true 
+                },
+                { 
+                  "name": "conversions", 
+                  "label": "Liczba konwersji", 
+                  "type": "number", 
+                  "required": true 
+                },
+                { 
+                  "name": "impressions", 
+                  "label": "Liczba wyświetleń", 
+                  "type": "number", 
+                  "required": false 
+                },
+                { 
+                  "name": "adPlatform", 
+                  "label": "Platforma reklamowa", 
+                  "type": "select", 
+                  "options": ["Google Ads", "Facebook Ads", "LinkedIn Ads", "Instagram Ads", "TikTok Ads", "Inne"],
+                  "required": true 
+                }
               ]
             },
             "llm": {
@@ -91,6 +194,18 @@
                 "roi": "Wartość ROI w procentach",
                 "profitability": "Ocena opłacalności projektu",
                 "recommendations": ["Lista rekomendacji"]
+              },
+              "marketingAnalysis": {
+                "cpa": "Koszt pozyskania klienta (PLN)",
+                "roas": "Zwrot z wydatków reklamowych (%)",
+                "cpc": "Koszt za kliknięcie (PLN)",
+                "ctr": "Współczynnik klikalności (%)",
+                "conversionRate": "Współczynnik konwersji (%)",
+                "effectivenessRating": "Ogólna ocena efektywności kampanii (1-10)",
+                "strengths": ["Lista mocnych stron kampanii"],
+                "weaknesses": ["Lista słabych stron kampanii"],
+                "recommendations": ["Lista rekomendacji"],
+                "optimizationStrategy": "Strategia optymalizacji"
               }
             },
             "widgets": {
@@ -102,28 +217,90 @@
                   },
                   {
                     "type": "stats",
-                    "title": "Wskaźniki finansowe",
-                    "dataPath": "inputData",
-                    "description": "Podstawowe dane finansowe projektu"
-                  },
-                  {
-                    "type": "metrics",
-                    "title": "ROI i opłacalność",
-                    "dataPath": "analysisResults",
-                    "fields": ["roi", "profitability"],
-                    "description": "Kluczowe wskaźniki efektywności projektu"
+                    "title": "Kluczowe wskaźniki finansowe",
+                    "description": "Zestawienie danych finansowych i wyników analizy",
+                    "dataPaths": {
+                      "Przychody": "inputData.revenue",
+                      "Koszty": "inputData.cost",
+                      "ROI": "analysisResults.roi"
+                    }
                   },
                   {
                     "type": "info",
                     "title": "Opłacalność projektu",
                     "dataPath": "analysisResults.profitability",
-                    "variant": "success"
+                    "variant": "warning"
                   },
                   {
                     "type": "cardList",
                     "title": "Rekomendacje",
-                    "dataPath": "analysisResults.recommendations",
-                    "description": "Sugerowane działania w oparciu o analizę finansową"
+                    "dataPath": "analysisResults.recommendations"
+                  }
+                ]
+              },
+              "marketingMetrics": {
+                "widgets": [
+                  {
+                    "type": "title",
+                    "title": "Analiza efektywności marketingowej"
+                  },
+                  {
+                    "type": "metrics",
+                    "title": "Kluczowe wskaźniki efektywności",
+                    "dataPaths": {
+                      "CPA": "analysisResults.cpa",
+                      "ROAS": "analysisResults.roas",
+                      "CPC": "analysisResults.cpc", 
+                      "Konwersja": "analysisResults.conversionRate"
+                    }
+                  },
+                  {
+                    "type": "stats",
+                    "title": "Dane wejściowe",
+                    "description": "Zestawienie wprowadzonych danych",
+                    "dataPaths": {
+                      "Budżet reklamowy": "inputData.adBudget",
+                      "Przychody": "financialData.revenue",
+                      "Liczba kliknięć": "inputData.clicks",
+                      "Liczba konwersji": "inputData.conversions"
+                    }
+                  },
+                  {
+                    "type": "info",
+                    "title": "Ocena efektywności",
+                    "dataPath": "analysisResults.effectivenessRating",
+                    "variant": "info"
+                  }
+                ]
+              },
+              "actionPlan": {
+                "widgets": [
+                  {
+                    "type": "title",
+                    "title": "Plan działania marketingowego"
+                  },
+                  {
+                    "type": "info",
+                    "title": "Strategia optymalizacji",
+                    "dataPath": "marketingAnalysis.optimizationStrategy",
+                    "variant": "success"
+                  },
+                  {
+                    "type": "DataDisplayWidget",
+                    "title": "Mocne strony kampanii",
+                    "dataPath": "marketingAnalysis.strengths",
+                    "type": "list"
+                  },
+                  {
+                    "type": "DataDisplayWidget",
+                    "title": "Słabe strony kampanii",
+                    "dataPath": "marketingAnalysis.weaknesses",
+                    "type": "list"
+                  },
+                  {
+                    "type": "cardList",
+                    "title": "Rekomendowane działania",
+                    "dataPath": "marketingAnalysis.recommendations"
                   }
                 ]
               }

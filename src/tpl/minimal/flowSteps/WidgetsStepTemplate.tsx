@@ -6,10 +6,9 @@ import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
 import { useNavigate, useParams } from "react-router-dom";
 
 // Importy widgetów - używamy standardowych importów domyślnych
-
+import CardListWidget from "../widgets/CardListWidget";
 import DataDisplayWidget from "../widgets/DataDisplayWidget";
 import InfoWidget from "../widgets/InfoWidget";
-import MetricsWidget from "../widgets/MetricsWidget";
 import StatsWidget from "../widgets/StatsWidget";
 
 const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
@@ -128,6 +127,17 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
     return widgetData[dataPath] || null;
   };
 
+  // Pobierz dane z wielu ścieżek (dla widgetów z wieloma dataPath)
+  const getMultipleValuesFromDataPaths = (dataPaths: Record<string, string>) => {
+    const result: Record<string, any> = {};
+    
+    Object.entries(dataPaths).forEach(([key, path]) => {
+      result[key] = getValueFromDataPath(path);
+    });
+    
+    return result;
+  };
+
   // Renderuj widgety na podstawie schematu
   const renderWidgets = () => {
     if (!widgetSchema.widgets || !Array.isArray(widgetSchema.widgets)) {
@@ -139,10 +149,11 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
     }
 
     return widgetSchema.widgets.map((widget, index) => {
-      const { type, title, dataPath } = widget;
+      const { type, title, dataPath, dataPaths } = widget;
       
       // Pobierz dane dla tego widgetu
-      const data = getValueFromDataPath(dataPath);
+      const data = dataPath ? getValueFromDataPath(dataPath) : null;
+      const multiData = dataPaths ? getMultipleValuesFromDataPaths(dataPaths) : null;
       
       // Renderuj odpowiedni widget na podstawie typu
       switch (type) {
@@ -154,8 +165,7 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
           );
         
         case 'cardList':
-          // Obsługa listy kart - używa CardListWidget jeśli dane są odpowiedniego formatu,
-          // w przeciwnym razie używa DataDisplayWidget
+          // Obsługa listy kart
           if (!Array.isArray(data)) return null;
           
           return (
@@ -183,7 +193,22 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
           
         case 'stats':
           // Jeśli typ to 'stats', użyj StatsWidget
-          if (typeof data !== 'object' || data === null) {
+          if (multiData) {
+            // Jeśli mamy dane z wielu ścieżek
+            return (
+              <div key={index} className="mb-6">
+                <StatsWidget
+                  title={title}
+                  description={widget.description}
+                  stats={Object.entries(multiData).map(([key, value]) => ({
+                    label: key,
+                    value: value as any
+                  }))}
+                />
+              </div>
+            );
+          } else if (typeof data !== 'object' || data === null) {
+            // Jeśli dane są proste (nie obiekt)
             return (
               <div key={index} className="mb-6">
                 <StatsWidget
@@ -196,39 +221,12 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
               </div>
             );
           } else {
+            // Jeśli dane są obiektem
             return (
               <div key={index} className="mb-6">
                 <StatsWidget
                   title={title}
                   stats={Object.entries(data).map(([key, value]) => ({
-                    label: key,
-                    value: value as any
-                  }))}
-                />
-              </div>
-            );
-          }
-          
-        case 'metrics':
-          // Jeśli typ to 'metrics', użyj MetricsWidget
-          if (typeof data !== 'object' || data === null) {
-            return (
-              <div key={index} className="mb-6">
-                <MetricsWidget
-                  title={title}
-                  metrics={[{
-                    label: title,
-                    value: data as any
-                  }]}
-                />
-              </div>
-            );
-          } else {
-            return (
-              <div key={index} className="mb-6">
-                <MetricsWidget
-                  title={title}
-                  metrics={Object.entries(data).map(([key, value]) => ({
                     label: key,
                     value: value as any
                   }))}
@@ -255,7 +253,7 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
             <div key={index} className="mb-6">
               <DataDisplayWidget
                 title={title}
-                data={data}
+                data={data || multiData}
                 type={Array.isArray(data) ? "list" : "object"}
               />
             </div>
@@ -265,21 +263,21 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
   };
 
   return (
-    <div className="my-6">
+    <div>
       {/* Wiadomość asystenta */}
       {processedAssistantMessage && (
-        <div className="bg-gray-50 p-5 rounded-lg border border-gray-100 mb-6">
+        <div className="bg-gray-50 p-4 rounded-lg mb-6">
           <p className="text-gray-700">{processedAssistantMessage}</p>
         </div>
       )}
 
       {/* Widgety */}
-      <div className="mb-6 space-y-6">
+      <div className="space-y-6">
         {renderWidgets()}
       </div>
 
       {/* Przyciski nawigacji */}
-      <div className="flex gap-3 mt-8">
+      <div className="flex gap-3 mt-8 pb-4">
         <button 
           onClick={handlePrevious}
           className="px-5 py-2.5 border border-gray-200 rounded-md text-gray-700 hover:bg-gray-50 transition-colors font-medium text-sm"
