@@ -1,6 +1,6 @@
 // src/hooks/useContextStore.ts
 import { create } from "zustand";
-import { getValueByPath, setValueByPath, processTemplate } from "@/_npLib/byPath";
+import { getValueByPath, setValueByPath, processTemplate } from "@/utils/byPath";
 import { useWorkspaceStore } from "./useWorkspaceStore";
 
 interface ContextState {

@@ -1,6 +1,6 @@
 // src/hooks/useNodeManager.ts
 import { useState, useEffect, useMemo } from "react";
-import { getValueByPath } from "../_npLib/byPath";
+import { getValueByPath } from "../utils/byPath";
 import { useContextStore } from "./useContextStore";
 import { useWorkspaceStore } from "./useWorkspaceStore";
 

@@ -2,8 +2,8 @@
 import { useState, useCallback, useEffect } from "react";
 import { useContextStore } from "./useContextStore";
 import { useAuth } from "./useAuth";
-import { processTemplate } from "@/_npLib/byPath";
-import { processLlmResponse } from "@/_npLib/apiUtils";
+import { processTemplate } from "@/utils/byPath";
+import { processLlmResponse } from "@/utils/apiUtils";
 
 
 interface Message {

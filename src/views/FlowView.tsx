@@ -12,7 +12,7 @@ import { useContextStore } from "@/hooks/useContextStore";
 import { useNavigation } from "@/hooks/useNavigation";
 import { LoadingState } from "@/components/LoadingState";
 import SharedLoader from "@/components/SharedLoader";
-import { LayoutProps, FlowStepProps, NodeData } from "@/types";
+import {  NodeData } from "@/types";
 
 // Local storage key for flow state
 const FLOW_STATE_KEY = "wiseads_flow_state";
