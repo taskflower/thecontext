@@ -1,6 +1,6 @@
 // src/views/FlowView.tsx
 import React, { useEffect, Suspense } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   getLayoutComponent,
   getFlowStepComponent,
@@ -9,20 +9,18 @@ import {
 import { useNodeManager } from "../hooks/useNodeManager";
 import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
 import { useContextStore } from "@/hooks/useContextStore";
+import { useNavigation } from "@/hooks/useNavigation";
 import { LoadingState } from "@/components/LoadingState";
 import SharedLoader from "@/components/SharedLoader";
+import { LayoutProps, FlowStepProps, NodeData } from "@/types";
 
 // Local storage key for flow state
 const FLOW_STATE_KEY = "wiseads_flow_state";
 
 const FlowView: React.FC = () => {
-  const { workspace, scenario, application } = useParams<{
-    workspace: string;
-    scenario: string;
-    application?: string;
-  }>();
-  const navigate = useNavigate();
-
+  const { workspace, scenario } = useParams();
+  
+  // Hooki z logiką biznesową
   const {
     getCurrentWorkspace,
     selectWorkspace,
@@ -32,6 +30,7 @@ const FlowView: React.FC = () => {
   } = useWorkspaceStore();
 
   const contextStore = useContextStore();
+  const navigation = useNavigation();
 
   // Select workspace and scenario when component mounts
   useEffect(() => {
@@ -106,7 +105,7 @@ const FlowView: React.FC = () => {
   const isLoading = workspaceLoading;
   const error = workspaceError;
 
-  // Fallback loader for Suspense
+  // Fallback loader dla Suspense
   const fallbackLoader = (
     <SharedLoader message="Ładowanie komponentów..." fullScreen={true} />
   );
@@ -118,7 +117,7 @@ const FlowView: React.FC = () => {
           <div className="text-red-600 text-lg">
             Brak danych workspace lub scenariusza.
             <button
-              onClick={() => navigate("/")}
+              onClick={navigation.navigateToHome}
               className="ml-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               Wróć do listy aplikacji
@@ -134,15 +133,7 @@ const FlowView: React.FC = () => {
           <div className="text-red-600 text-lg">
             Błąd: Nie znaleziono node dla aktualnego flow.
             <button
-              onClick={() => {
-                if (application && workspace) {
-                  navigate(`/app/${application}/${workspace}`);
-                } else if (workspace) {
-                  navigate(`/${workspace}`);
-                } else {
-                  navigate("/");
-                }
-              }}
+              onClick={navigation.navigateToScenarios}
               className="ml-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               Wróć do scenariuszy
@@ -152,20 +143,10 @@ const FlowView: React.FC = () => {
       );
     }
 
+    // Użyj typów generycznych dla lepszej kontroli typów
     const LayoutComponent = getLayoutComponent(
       currentWorkspace.templateSettings?.layoutTemplate || "default"
     );
-
-    let FlowStepComponent;
-    let componentId = "nieznany";
-
-    if (currentNode.templateId) {
-      componentId = currentNode.templateId;
-      FlowStepComponent = getFlowStepComponent(componentId);
-    } else if (currentNode.type) {
-      componentId = currentNode.type;
-      FlowStepComponent = getFlowStepForNodeType(componentId);
-    }
 
     if (!LayoutComponent) {
       return (
@@ -181,7 +162,7 @@ const FlowView: React.FC = () => {
               </span>
             </p>
             <button
-              onClick={() => navigate("/")}
+              onClick={navigation.navigateToHome}
               className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               Wróć do listy aplikacji
@@ -189,6 +170,17 @@ const FlowView: React.FC = () => {
           </div>
         </div>
       );
+    }
+
+    let FlowStepComponent;
+    let componentId = "nieznany";
+
+    if (currentNode.templateId) {
+      componentId = currentNode.templateId;
+      FlowStepComponent = getFlowStepComponent(componentId);
+    } else if (currentNode.type) {
+      componentId = currentNode.type;
+      FlowStepComponent = getFlowStepForNodeType(componentId);
     }
 
     if (!FlowStepComponent) {
@@ -211,15 +203,7 @@ const FlowView: React.FC = () => {
               Console)
             </p>
             <button
-              onClick={() => {
-                if (application && workspace) {
-                  navigate(`/app/${application}/${workspace}`);
-                } else if (workspace) {
-                  navigate(`/${workspace}`);
-                } else {
-                  navigate("/");
-                }
-              }}
+              onClick={navigation.navigateToScenarios}
               className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               Wróć do scenariuszy
@@ -229,27 +213,20 @@ const FlowView: React.FC = () => {
       );
     }
 
+    
+
     return (
-      <LayoutComponent
+      <LayoutComponent 
         title={currentScenario.name}
         stepTitle={currentNode.label}
-        onBackClick={() => {
-          if (application && workspace) {
-            navigate(`/app/${application}/${workspace}`);
-          } else if (workspace) {
-            navigate(`/${workspace}`);
-          } else {
-            navigate("/");
-          }
-        }}
+        onBackClick={navigation.navigateToScenarios}
       >
         <FlowStepComponent
-          key={currentNode.id}
-          node={currentNode}
+          node={currentNode as NodeData}
           onSubmit={handleNodeExecutionWithSave}
           onPrevious={handlePreviousNode}
-          isLastNode={isLastNode}
-          isFirstNode={isFirstNode}
+          isLastNode={isLastNode || false}
+          isFirstNode={isFirstNode || false}
           contextItems={contextItems}
           scenario={currentScenario}
           stepTitle={currentNode.label}

@@ -2,26 +2,18 @@
 import React from "react";
 import { X } from "lucide-react";
 import { LayoutProps } from "@/types";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigation } from "@/hooks/useNavigation";
 
 const SimpleLayout: React.FC<LayoutProps> = ({ 
   children, 
-  title, 
+  title,
+  stepTitle, // Dodane do obsługi stepTitle
   onBackClick 
 }) => {
-  const navigate = useNavigate();
-  const { application, workspace } = useParams();
-
-  const handleCloseClick = () => {
-    // Navigate back to scenarios list
-    if (application && workspace) {
-      navigate(`/app/${application}/${workspace}`);
-    } else if (workspace) {
-      navigate(`/${workspace}`);
-    } else {
-      navigate('/');
-    }
-  };
+  const navigation = useNavigation();
+  
+  // Użyj dostarczonej funkcji onBackClick lub zdefiniowanej w hooku useNavigation
+  const handleCloseClick = onBackClick || navigation.navigateToScenarios;
 
   return (
     <div className="flex flex-col bg-white rounded-lg mx-auto w-full max-w-4xl h-full md:min-h-[95vh] md:max-h-[95vh] px-4 md:px-6">
@@ -44,6 +36,9 @@ const SimpleLayout: React.FC<LayoutProps> = ({
             <h2 className="text-2xl font-normal text-gray-900">
               {title}
             </h2> 
+            {stepTitle && (
+              <p className="text-sm text-gray-500 mt-1">{stepTitle}</p>
+            )}
           </div>
         )}
       </div>

@@ -2,7 +2,7 @@
 import React from "react";
 import { FlowStepProps } from "@/types";
 import { useLLM } from "@/hooks/useLLM";
-import { useNavigate, useParams } from "react-router-dom";
+import { useFlowStep } from "@/hooks/useFlowStep";
 
 const LlmStepTemplate: React.FC<FlowStepProps> = ({
   node,
@@ -11,9 +11,7 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
   isLastNode,
   isFirstNode
 }) => {
-  const navigate = useNavigate();
-  const { application, workspace } = useParams();
-  
+  // Hook do obsługi LLM i komunikacji z API
   const {
     sendMessage,
     isLoading,
@@ -26,43 +24,21 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
     schemaPath: node.attrs?.schemaPath || "",
     autoStart: true,
     onDataSaved: (data) => {
-      // We'll handle submission separately to account for navigation
+      // Dane są zapisywane ale nawigacja obsługiwana jest osobno
     },
   });
 
-  // Handle back navigation based on whether it's the first node
-  const handlePrevious = () => {
-    if (isFirstNode) {
-      // Navigate back to scenarios list
-      if (application && workspace) {
-        navigate(`/app/${application}/${workspace}`);
-      } else if (workspace) {
-        navigate(`/${workspace}`);
-      } else {
-        navigate('/');
-      }
-    } else {
-      // Use provided onPrevious handler
-      onPrevious();
-    }
-  };
-  
-  // Handle completion of the flow
-  const handleComplete = () => {
-    if (!responseData) return;
-    
-    // Call onSubmit to save the data
-    onSubmit(responseData);
-    
-    // If this is the last node, navigate back to scenarios
-    if (isLastNode) {
-      if (application && workspace) {
-        navigate(`/app/${application}/${workspace}`);
-      } else if (workspace) {
-        navigate(`/${workspace}`);
-      }
-    }
-  };
+  // Hook do obsługi nawigacji i przepływu
+  const {
+    handlePrevious,
+    handleComplete
+  } = useFlowStep({
+    node,
+    isFirstNode,
+    isLastNode,
+    onSubmit,
+    onPrevious
+  });
 
   return (
     <div className="my-4">
@@ -86,11 +62,9 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
             </div>
           )}
 
-          {/* Usuwamy wyświetlanie podsumowania responseData w tym miejscu */}
-
           {responseData && (
             <div className="flex flex-col sm:flex-row gap-4 mt-6">
-              {/* Back button (shown on all nodes) */}
+              {/* Przycisk wstecz/anuluj - uproszczona implementacja */}
               <button
                 onClick={handlePrevious}
                 className="px-5 py-3 rounded-md transition-colors text-base font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
@@ -98,9 +72,9 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
                 {isFirstNode ? "Anuluj" : "Wstecz"}
               </button>
 
-              {/* Continue button */}
+              {/* Przycisk dalej/zakończ - uproszczona implementacja */}
               <button
-                onClick={handleComplete}
+                onClick={() => handleComplete(responseData)}
                 className="px-5 py-3 rounded-md transition-colors text-base font-medium flex-grow bg-gray-900 text-white hover:bg-gray-800"
               >
                 {isLastNode ? "Zakończ" : "Dalej"}

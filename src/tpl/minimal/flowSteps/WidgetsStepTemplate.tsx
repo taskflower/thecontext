@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { FlowStepProps } from "@/types";
 import { useContextStore } from "@/hooks/useContextStore";
 import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
-import { useNavigate, useParams } from "react-router-dom";
+import { useFlowStep } from "@/hooks/useFlowStep";
 
 // Importy widgetów - używamy standardowych importów domyślnych
 import CardListWidget from "../widgets/CardListWidget";
@@ -23,8 +23,18 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
   
   const contextStore = useContextStore();
   const currWrkspId = useWorkspaceStore((state) => state.currentWorkspaceId);
-  const navigate = useNavigate();
-  const { application, workspace } = useParams();
+  
+  // Hook do obsługi nawigacji i przepływu
+  const {
+    handlePrevious,
+    handleComplete
+  } = useFlowStep({
+    node,
+    isFirstNode,
+    isLastNode,
+    onSubmit,
+    onPrevious
+  });
 
   const processedAssistantMessage = node.assistantMessage
     ? contextStore.processTemplate 
@@ -79,37 +89,6 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
     
     setWidgetData(result);
   }, [node.attrs?.dataPaths, contextStore.contexts, currWrkspId]);
-
-  // Obsługa nawigacji
-  const handlePrevious = () => {
-    if (isFirstNode) {
-      // Nawigacja wstecz do listy scenariuszy
-      if (application && workspace) {
-        navigate(`/app/${application}/${workspace}`);
-      } else if (workspace) {
-        navigate(`/${workspace}`);
-      } else {
-        navigate('/');
-      }
-    } else {
-      // Użyj dostarczonego handlera onPrevious
-      onPrevious();
-    }
-  };
-
-  const handleComplete = () => {
-    // Wywołaj onSubmit aby zapisać dane
-    onSubmit(widgetData);
-    
-    // Jeśli to ostatni krok, nawiguj wstecz do scenariuszy
-    if (isLastNode) {
-      if (application && workspace) {
-        navigate(`/app/${application}/${workspace}`);
-      } else if (workspace) {
-        navigate(`/${workspace}`);
-      }
-    }
-  };
 
   // Pobierz wartość z danych na podstawie ścieżki dataPath
   const getValueFromDataPath = (dataPath: string) => {
@@ -276,7 +255,7 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
         {renderWidgets()}
       </div>
 
-      {/* Przyciski nawigacji */}
+      {/* Przyciski nawigacji - uproszczone */}
       <div className="flex gap-3 mt-8 pb-4">
         <button 
           onClick={handlePrevious}
@@ -286,7 +265,7 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
         </button>
         
         <button 
-          onClick={handleComplete}
+          onClick={() => handleComplete(widgetData)}
           className="px-5 py-2.5 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors font-medium text-sm"
         >
           {isLastNode ? 'Zakończ' : 'Dalej'}

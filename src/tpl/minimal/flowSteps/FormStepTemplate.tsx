@@ -2,7 +2,7 @@
 import React from "react";
 import { FlowStepProps } from "@/types";
 import { useFormInput } from "@/hooks/useFormInput";
-import { useNavigate, useParams } from "react-router-dom";
+import { useFlowStep } from "@/hooks/useFlowStep";
 
 const FormStepTemplate: React.FC<FlowStepProps> = ({ 
   node, 
@@ -11,9 +11,7 @@ const FormStepTemplate: React.FC<FlowStepProps> = ({
   isLastNode,
   isFirstNode 
 }) => {
-  const navigate = useNavigate();
-  const { application, workspace } = useParams();
-  
+  // Hook do obsługi inputów formularza
   const {
     formData,
     formFields,
@@ -23,39 +21,22 @@ const FormStepTemplate: React.FC<FlowStepProps> = ({
     areRequiredFieldsFilled,
   } = useFormInput({ node });
 
-  // Handle back navigation based on whether it's the first node
-  const handlePrevious = () => {
-    if (isFirstNode) {
-      // Navigate back to scenarios list
-      if (application && workspace) {
-        navigate(`/app/${application}/${workspace}`);
-      } else if (workspace) {
-        navigate(`/${workspace}`);
-      } else {
-        navigate('/');
-      }
-    } else {
-      // Use provided onPrevious handler
-      onPrevious();
-    }
-  };
+  // Hook do obsługi nawigacji i przepływu
+  const {
+    handlePrevious,
+    handleComplete
+  } = useFlowStep({
+    node,
+    isFirstNode,
+    isLastNode,
+    onSubmit,
+    onPrevious
+  });
   
-  // Handle completion of the flow
-  const handleComplete = (data: any) => {
-    // Process form submission
-    const formData = handleSubmit(data as any);
-    
-    // Call onSubmit to save the data
-    onSubmit(formData);
-    
-    // If this is the last node, navigate back to scenarios
-    if (isLastNode) {
-      if (application && workspace) {
-        navigate(`/app/${application}/${workspace}`);
-      } else if (workspace) {
-        navigate(`/${workspace}`);
-      }
-    }
+  // Obsługa formularza i przejścia do następnego kroku
+  const processFormSubmit = (e: any) => {
+    const data = handleSubmit(e);
+    handleComplete(data);
   };
 
   return (
@@ -138,9 +119,9 @@ const FormStepTemplate: React.FC<FlowStepProps> = ({
               </div>
             ))}
             
-            {/* Navigation buttons */}
+            {/* Przyciski nawigacyjne - uproszczone */}
             <div className="flex flex-col sm:flex-row gap-4 mt-6">
-              {/* Back button (shown on all nodes) */}
+              {/* Przycisk wstecz/anuluj */}
               <button
                 type="button"
                 onClick={handlePrevious}
@@ -149,13 +130,10 @@ const FormStepTemplate: React.FC<FlowStepProps> = ({
                 {isFirstNode ? "Anuluj" : "Wstecz"}
               </button>
               
-              {/* Submit/Next button */}
+              {/* Przycisk dalej/zakończ */}
               <button
                 type="button"
-                onClick={(e) => {
-                  const data = handleSubmit(e as any);
-                  handleComplete(data);
-                }}
+                onClick={processFormSubmit}
                 disabled={!areRequiredFieldsFilled()}
                 className={`px-5 py-3 rounded-md transition-colors duration-300 text-base font-medium flex-grow ${
                   areRequiredFieldsFilled()

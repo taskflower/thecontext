@@ -1,54 +1,44 @@
 // src/views/ScenarioView.tsx
 import React, { Suspense, useEffect } from "react";
-import { useNavigate, Navigate, useParams } from "react-router-dom";
-
-import { getLayoutComponent, getWidgetComponent } from "../tpl";  // Zaktualizowana ścieżka importu
+import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { getLayoutComponent, getWidgetComponent } from "../tpl"; 
 import { useWorkspaceStore } from "@/hooks/useWorkspaceStore";
-import { Scenario, Workspace } from "@/types";
+import { Scenario } from "@/types";
+import SharedLoader from "@/components/SharedLoader";
 
 export const ScenarioView: React.FC = () => {
   const navigate = useNavigate();
   const { workspace } = useParams();
   const { selectWorkspace, getCurrentWorkspace, isLoading } = useWorkspaceStore();
   
-  // Podczas renderowania, ustawiamy aktualny workspace
+  // Ustawienie aktualnego workspace
   useEffect(() => {
-    if (workspace) {
-      selectWorkspace(workspace);
-    }
+    if (workspace) selectWorkspace(workspace);
   }, [workspace, selectWorkspace]);
   
-  const currentWorkspace = getCurrentWorkspace() as Workspace | undefined;
+  const currentWorkspace = getCurrentWorkspace();
 
-  // Pokaż ładowanie
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-slate-700 text-lg">Ładowanie...</div>
-      </div>
-    );
-  }
+  // Pokaż ładowanie lub obsłuż brak workspace
+  if (isLoading) return <SharedLoader message="Ładowanie workspace..." fullScreen={true} />;
+  if (!currentWorkspace) return <Navigate to="/" replace />;
 
-  // Jeśli nie ma workspace, wróć do strony głównej
-  if (!currentWorkspace) {
-    return <Navigate to="/" replace />;
-  }
+  // Przygotowanie komponentów
+  const LayoutComponent = getLayoutComponent(
+    currentWorkspace.templateSettings?.layoutTemplate || "default"
+  ) || (() => <div>Layout Not Found</div>);
+  
+  const WidgetComponent = getWidgetComponent(
+    currentWorkspace.templateSettings?.scenarioWidgetTemplate || "card-list"
+  ) || getWidgetComponent("card-list") || (() => <div>Widget Not Found</div>);
 
-  const LayoutComponent =
-    getLayoutComponent(currentWorkspace.templateSettings?.layoutTemplate || "default") ||
-    (() => <div>Layout Not Found</div>);
+  // Nawigacja bezpośrednio do scenariusza
+  const handleSelectScenario = (scenarioId: string) => 
+    navigate(`/${workspace}/${scenarioId}`);
 
-  const WidgetComponent =
-    getWidgetComponent(
-      currentWorkspace.templateSettings?.scenarioWidgetTemplate || "card-list"
-    ) ||
-    getWidgetComponent("card-list") ||
-    (() => <div>Widget Not Found</div>);
+  // Powrót do listy aplikacji
+  const handleBack = () => navigate('/');
 
-  const handleSelectScenario = (scenarioId: string) => {
-    navigate(`/${currentWorkspace.id}/${scenarioId}`);
-  };
-
+  // Dane dla widgetu scenariuszy
   const scenarioData = (currentWorkspace.scenarios || []).map((scenario: Scenario) => ({
     id: scenario.id,
     name: scenario.name,
@@ -59,8 +49,8 @@ export const ScenarioView: React.FC = () => {
   }));
 
   return (
-    <Suspense fallback={<div className="p-4">Loading...</div>}>
-      <LayoutComponent>
+    <Suspense fallback={<SharedLoader message="Ładowanie komponentów..." />}>
+      <LayoutComponent title={currentWorkspace.name} onBackClick={handleBack}>
         <WidgetComponent data={scenarioData} onSelect={handleSelectScenario} />
       </LayoutComponent>
     </Suspense>

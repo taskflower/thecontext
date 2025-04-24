@@ -1,4 +1,4 @@
-// src/types.ts - Uproszczone typy
+// src/types/index.ts
 import { ReactNode } from 'react';
 
 // Podstawowe typy
@@ -8,6 +8,7 @@ export type IconType = string;
 export interface LayoutProps {
   children: ReactNode;
   title?: string;
+  stepTitle?: string; // Dodano tę właściwość
   onBackClick?: () => void;
 }
 
@@ -17,13 +18,16 @@ export interface WidgetProps {
   attrs?: Record<string, any>;
 }
 
+
 export interface FlowStepProps {
   node: NodeData;
   onSubmit: (data: any) => void;
   onPrevious: () => void;
-  isLastNode?: boolean;
-  contextItems?: any;
+  isLastNode: boolean;  // Zmienione na wymagane boolean
+  isFirstNode: boolean; // Zmienione na wymagane boolean
+  contextItems?: any[][] | any;
   scenario?: Scenario;
+  stepTitle?: string;
 }
 
 // Szablony
