@@ -1,4 +1,8 @@
 // src/views/FlowView.tsx
+
+// TODO - dostrzegam tutaj logike ktora prowdopodobnie służy do zapisu sesji dla kroku flow,
+// jednak to nie dzieje sie w praktyce wiec treba to wypierdolic
+
 import React, { useEffect, Suspense, useRef } from "react";
 import { useParams } from "react-router-dom";
 import {
@@ -7,21 +11,31 @@ import {
   getFlowStepForNodeType,
 } from "../tpl";
 
-
 import { LoadingState } from "@/components/LoadingState";
 import SharedLoader from "@/components/SharedLoader";
 import { NodeData } from "@/types";
-import { useAppNavigation, useContextStore, useNodeManager, useWorkspaceStore } from "@/hooks";
+import {
+  useAppNavigation,
+  useContextStore,
+  useNodeManager,
+  useWorkspaceStore,
+} from "@/hooks";
+import {
+  MissingComponentError,
+  MissingLayoutError,
+  MissingNodeError,
+  MissingWorkspaceError,
+} from "./flowViewMessages";
 
 // Local storage key for flow state
 const FLOW_STATE_KEY = "wiseads_flow_state";
 
 const FlowView: React.FC = () => {
   const { workspace, scenario } = useParams();
-  
+
   // Ref, aby zapobiec nieskończonym renderowaniom
   const contextInitialized = useRef(false);
-  
+
   // Hooki z logiką biznesową
   const {
     getCurrentWorkspace,
@@ -58,12 +72,17 @@ const FlowView: React.FC = () => {
 
   // When the flow changes (new scenario), try to restore saved state
   useEffect(() => {
-    if (workspace && scenario && currentWorkspace && !contextInitialized.current) {
+    if (
+      workspace &&
+      scenario &&
+      currentWorkspace &&
+      !contextInitialized.current
+    ) {
       try {
         // Generate a unique key for this flow
         const flowKey = `${FLOW_STATE_KEY}_${workspace}_${scenario}`;
         const savedState = localStorage.getItem(flowKey);
-        
+
         if (savedState) {
           const parsedState = JSON.parse(savedState);
           // Restore context if available
@@ -72,8 +91,8 @@ const FlowView: React.FC = () => {
               ...contextStore.contexts,
               [workspace]: {
                 ...contextStore.contexts[workspace],
-                ...parsedState.context
-              }
+                ...parsedState.context,
+              },
             });
             // Oznacz, że już zainicjalizowano kontekst, aby uniknąć pętli
             contextInitialized.current = true;
@@ -83,13 +102,18 @@ const FlowView: React.FC = () => {
         console.error("Error restoring flow state:", error);
       }
     }
-  }, [workspace, scenario, currentWorkspace, contextStore.contexts, contextStore]);
+  }, [
+    workspace,
+    scenario,
+    currentWorkspace,
+    contextStore.contexts,
+    contextStore,
+  ]);
 
   // Save flow state when node execution occurs
   const handleNodeExecutionWithSave = (data: any) => {
-    // First handle the standard node execution
     handleNodeExecution(data);
-    
+
     // Then save the current state to local storage
     if (workspace && scenario) {
       try {
@@ -116,67 +140,27 @@ const FlowView: React.FC = () => {
 
   const renderContent = () => {
     if (!currentWorkspace || !currentScenario) {
-      return (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-red-600 text-lg">
-            Brak danych workspace lub scenariusza.
-            <button
-              onClick={navigation.navigateToHome}
-              className="ml-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Wróć do listy aplikacji
-            </button>
-          </div>
-        </div>
-      );
+      return <MissingWorkspaceError />;
     }
 
     if (!currentNode) {
-      return (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-red-600 text-lg">
-            Błąd: Nie znaleziono node dla aktualnego flow.
-            <button
-              onClick={navigation.navigateToScenarios}
-              className="ml-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Wróć do scenariuszy
-            </button>
-          </div>
-        </div>
-      );
+      return <MissingNodeError />;
     }
 
-    // Pobierz komponent layoutu
     const LayoutComponent = getLayoutComponent(
       currentWorkspace.templateSettings?.layoutTemplate || "default"
     );
 
     if (!LayoutComponent) {
       return (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-red-600 text-lg p-4 bg-red-100 rounded-lg">
-            <h3 className="font-bold">
-              Błąd: Nie znaleziono komponentu layoutu
-            </h3>
-            <p className="mt-2">
-              Szukany layout:{" "}
-              <span className="font-mono bg-red-50 px-1">
-                {currentWorkspace.templateSettings?.layoutTemplate || "default"}
-              </span>
-            </p>
-            <button
-              onClick={navigation.navigateToHome}
-              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Wróć do listy aplikacji
-            </button>
-          </div>
-        </div>
+        <MissingLayoutError
+          layoutName={
+            currentWorkspace.templateSettings?.layoutTemplate || "default"
+          }
+        />
       );
     }
 
-    // Pobierz komponent kroku flow
     let FlowStepComponent;
     let componentId = "nieznany";
 
@@ -190,37 +174,15 @@ const FlowView: React.FC = () => {
 
     if (!FlowStepComponent) {
       return (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-red-600 text-lg p-4 bg-red-100 rounded-lg">
-            <h3 className="font-bold">
-              Błąd: Nie znaleziono komponentu flow step
-            </h3>
-            <p className="mt-2">
-              Szukany komponent:{" "}
-              <span className="font-mono bg-red-50 px-1">{componentId}</span>
-            </p>
-            <p className="mt-2">
-              ID węzła:{" "}
-              <span className="font-mono bg-red-50 px-1">{currentNode.id}</span>
-            </p>
-            <p className="mt-2">
-              Sprawdź w konsoli przeglądarki listę dostępnych komponentów (F12
-              Console)
-            </p>
-            <button
-              onClick={navigation.navigateToScenarios}
-              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Wróć do scenariuszy
-            </button>
-          </div>
-        </div>
+        <MissingComponentError
+          componentId={componentId}
+          nodeId={currentNode.id}
+        />
       );
     }
 
-    // Renderuj layout z komponentem flow
     return (
-      <LayoutComponent 
+      <LayoutComponent
         title={currentScenario.name}
         stepTitle={currentNode.label}
         onBackClick={navigation.navigateToScenarios}
