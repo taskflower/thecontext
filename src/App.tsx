@@ -14,10 +14,11 @@ const LoginView = lazy(() => import("./views/LoginView"));
 const ApplicationView = lazy(() => import("./views/ApplicationView"));
 const WorkspaceView = lazy(() => import("./views/WorkspaceView"));
 const AdminPanelView = lazy(() => import("./_modules/admin/AdminPanelView"));
+const EnhancedFlowDebugger = lazy(() => import("./_modules/debug/EnhancedFlowDebugger"));
 
 import InitialDataProvider from "./InitialDataProvider";
 import ScenarioGenerator from "./_modules/scenarioGenerator/components/ScenarioGenerator";
-import EnhancedFlowDebugger from "./_modules/debug/EnhancedFlowDebugger";
+
 import { AuthWrapper } from "./_auth/AuthWrapper";
 import SharedLoader from "./components/SharedLoader";
 import { AuthProvider } from "./hooks";
