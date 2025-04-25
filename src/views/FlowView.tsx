@@ -3,13 +3,13 @@
 // TODO - dostrzegam tutaj logike ktora prowdopodobnie służy do zapisu sesji dla kroku flow,
 // jednak to nie dzieje sie w praktyce wiec treba to wypierdolic
 
-import React, { useEffect, Suspense, useRef } from "react";
+import React, { useEffect, Suspense } from "react";
 import { useParams } from "react-router-dom";
 import {
   getLayoutComponent,
   getFlowStepComponent,
   getFlowStepForNodeType,
-} from "../tpl";
+} from "../templates";
 
 import { LoadingState } from "@/components/LoadingState";
 import SharedLoader from "@/components/SharedLoader";
@@ -29,11 +29,8 @@ import {
 
 
 const FlowView: React.FC = () => {
+  const navigation = useAppNavigation();
   const { workspace, scenario } = useParams();
-
-  
-
-  // Hooki z logiką biznesową
   const {
     getCurrentWorkspace,
     selectWorkspace,
@@ -41,9 +38,6 @@ const FlowView: React.FC = () => {
     isLoading: workspaceLoading,
     error: workspaceError,
   } = useWorkspaceStore();
-
-
-  const navigation = useAppNavigation();
 
   // Select workspace and scenario when component mounts
   useEffect(() => {

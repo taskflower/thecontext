@@ -1,7 +1,7 @@
 // src/views/ScenarioView.tsx
 import React, { Suspense, useEffect } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
-import { getLayoutComponent, getWidgetComponent } from "../tpl";
+import { getLayoutComponent, getWidgetComponent } from "../templates";
 import { useWorkspaceStore } from "@/hooks/stateManagment/useWorkspaceStore";
 import { Scenario, LayoutProps, WidgetProps } from "@/types";
 import SharedLoader from "@/components/SharedLoader";
