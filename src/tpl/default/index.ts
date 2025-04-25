@@ -1,15 +1,8 @@
 // src/tpl/default/index.ts
-import { flowStepComponents } from './flowSteps';
-import { layoutComponents } from './layouts';
-import { widgetComponents } from './widgets';
+import { flowStepComponents } from "./flowSteps";
+import { layoutComponents } from "./layouts";
+import { widgetComponents } from "./widgets";
 
-// Eksportujemy wszystkie komponenty z podfolderów
-export {
-  // Re-eksportujemy komponenty bezpośrednio
-  flowStepComponents,
-  layoutComponents,
-  widgetComponents,
-};
+export { flowStepComponents, layoutComponents, widgetComponents };
 
-// Eksportujemy nazwę szablonu
-export const templateName = 'default';
+export const templateName = "default";

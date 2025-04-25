@@ -45,7 +45,7 @@ const FlowView: React.FC = () => {
     error: workspaceError,
   } = useWorkspaceStore();
 
-  const contextStore = useContextStore();
+
   const navigation = useAppNavigation();
 
   // Select workspace and scenario when component mounts
@@ -70,63 +70,9 @@ const FlowView: React.FC = () => {
     currentScenario,
   } = useNodeManager();
 
-  // When the flow changes (new scenario), try to restore saved state
-  useEffect(() => {
-    if (
-      workspace &&
-      scenario &&
-      currentWorkspace &&
-      !contextInitialized.current
-    ) {
-      try {
-        // Generate a unique key for this flow
-        const flowKey = `${FLOW_STATE_KEY}_${workspace}_${scenario}`;
-        const savedState = localStorage.getItem(flowKey);
-
-        if (savedState) {
-          const parsedState = JSON.parse(savedState);
-          // Restore context if available
-          if (parsedState.context && workspace) {
-            contextStore.setContexts({
-              ...contextStore.contexts,
-              [workspace]: {
-                ...contextStore.contexts[workspace],
-                ...parsedState.context,
-              },
-            });
-            // Oznacz, że już zainicjalizowano kontekst, aby uniknąć pętli
-            contextInitialized.current = true;
-          }
-        }
-      } catch (error) {
-        console.error("Error restoring flow state:", error);
-      }
-    }
-  }, [
-    workspace,
-    scenario,
-    currentWorkspace,
-    contextStore.contexts,
-    contextStore,
-  ]);
-
   // Save flow state when node execution occurs
   const handleNodeExecutionWithSave = (data: any) => {
     handleNodeExecution(data);
-
-    // Then save the current state to local storage
-    if (workspace && scenario) {
-      try {
-        const flowKey = `${FLOW_STATE_KEY}_${workspace}_${scenario}`;
-        const stateToSave = {
-          lastUpdated: new Date().toISOString(),
-          context: contextStore.contexts[workspace],
-        };
-        localStorage.setItem(flowKey, JSON.stringify(stateToSave));
-      } catch (error) {
-        console.error("Error saving flow state:", error);
-      }
-    }
   };
 
   // Use workspace loading and error states

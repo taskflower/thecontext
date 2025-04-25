@@ -1,60 +1,54 @@
-// src/templates/default/widgets/CardListWidget.tsx
+// src/tpl/minimal/widgets/CardListWidget.tsx
 import React from "react";
-import { WidgetProps } from "@/types";
 import { SubjectIcon } from "@/components/SubjectIcon";
+import { CardListWidgetProps, CardItem } from "../types";
 
-interface CardItem {
-  id: string;
-  name: string;
-  description?: string;
-  count?: number;
-  countLabel?: string;
-  icon?: string;
-}
-
-const CardListWidget: React.FC<WidgetProps> = ({ data = [], onSelect }) => {
+const CardListWidget: React.FC<CardListWidgetProps> = ({ data = [], onSelect }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {data.map((item: CardItem) => (
         <div
           key={item.id}
           onClick={() => onSelect && onSelect(item.id)}
-          className="bg-white border border-gray-200 p-4 rounded shadow cursor-pointer hover:bg-gray-50 transition-colors"
+          className="group relative bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
         >
-          <div className="space-y-4 gap-3 mb-2">
-            <div className="w-24 h-24 flex items-center justify-center rounded-md bg-gray-50 text-gray-600">
-              <SubjectIcon iconName={item.icon} size={24} />
-            </div>
-            <h2 className="font-semibold">{item.name}</h2>
-          </div>
-
-          {item.description && (
-            <p className="text-sm text-gray-500 mt-1">{item.description}</p>
-          )}
-
-          {item.count !== undefined && (
-            <div className="flex justify-between items-center mt-3 pt-2 border-t border-gray-100">
-              <p className="text-sm text-gray-500">
-                {item.count} {item.countLabel || "items"}
-              </p>
-              <div className="text-blue-600">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M5 12h14"></path>
-                  <path d="M12 5l7 7-7 7"></path>
-                </svg>
+          <div className="p-5 flex flex-col h-full">
+            <div className="mb-3">
+              <div className="w-10 h-10 flex items-center justify-center rounded-md bg-gray-100 text-gray-700 group-hover:bg-gray-900 group-hover:text-white transition-colors duration-200">
+                <SubjectIcon iconName={item.icon} size={20} />
               </div>
             </div>
-          )}
+            
+            <h2 className="text-lg font-medium text-gray-900 mb-1">{item.name}</h2>
+            
+            {item.description && (
+              <p className="text-sm text-gray-500 mb-4 flex-grow">{item.description}</p>
+            )}
+
+            {item.count !== undefined && (
+              <div className="flex justify-between items-center mt-auto pt-3 border-t border-gray-100">
+                <p className="text-xs font-medium text-gray-500">
+                  {item.count} {item.countLabel || "items"}
+                </p>
+                <div className="text-gray-600 group-hover:text-gray-900 transition-colors duration-200">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M5 12h14" />
+                    <path d="M12 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       ))}
     </div>

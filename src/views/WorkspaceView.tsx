@@ -63,6 +63,8 @@ export const WorkspaceView: React.FC = () => {
 
     // Pobierz komponenty na podstawie konfiguracji aplikacji
     const layoutName = currentApplication.templateSettings?.layoutTemplate || "default";
+
+    console.log('currentApplication',currentApplication)
     const LayoutComponent = getLayoutComponent(layoutName);
     
     if (!LayoutComponent) {

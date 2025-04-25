@@ -45,7 +45,7 @@
     },
     "workspaces": [
       {
-        "id": "workspace-minimal", 
+        "id": "workspace-minimal",
         "name": "Demo Biznesowe",
         "description": "Zbieranie danych i generowanie raportu AI",
         "icon": "briefcase",
@@ -63,10 +63,10 @@
                 "label": "Krok 1: Dane finansowe",
                 "assistantMessage": "Podaj przychody i koszty projektu:",
                 "contextPath": "collect-data",
-                "templateId": "form-step-minimal",
+                "templateId": "form-step",
                 "order": 0,
-                "attrs": { 
-                  "schemaPath": "schemas.form.business" 
+                "attrs": {
+                  "schemaPath": "schemas.form.business"
                 }
               },
               {
@@ -75,7 +75,7 @@
                 "label": "Krok 2: Raport ROI",
                 "assistantMessage": "Generuję raport ROI na podstawie danych...",
                 "contextPath": "generate-report",
-                "templateId": "llm-step-minimal",
+                "templateId": "llm-step",
                 "order": 1,
                 "attrs": {
                   "autoStart": true,
@@ -90,7 +90,7 @@
                 "label": "Krok 3: Podsumowanie",
                 "assistantMessage": "Oto podsumowanie wyników analizy finansowej twojego projektu.",
                 "contextPath": "summary",
-                "templateId": "widgets-step-minimal",
+                "templateId": "widgets-step",
                 "order": 2,
                 "attrs": {
                   "schemaPath": "schemas.widgets.businessWidgets",
@@ -108,7 +108,9 @@
             "description": "Analiza wydatków marketingowych i efektywności",
             "icon": "trending-up",
             "systemMessage": "Jesteś asystentem marketingowym, specjalizującym się w analizie efektywności kampanii reklamowych.",
-            "dependsOn": ["scenario-business"],
+            "dependsOn": [
+              "scenario-business"
+            ],
             "nodes": [
               {
                 "id": "marketing-data",
@@ -116,10 +118,10 @@
                 "label": "Krok 1: Dane marketingowe",
                 "assistantMessage": "Podaj informacje dotyczące twoich działań marketingowych:",
                 "contextPath": "marketing-data",
-                "templateId": "form-step-minimal",
+                "templateId": "form-step",
                 "order": 0,
-                "attrs": { 
-                  "schemaPath": "schemas.form.marketing" 
+                "attrs": {
+                  "schemaPath": "schemas.form.marketing"
                 }
               },
               {
@@ -128,7 +130,7 @@
                 "label": "Krok 2: Analiza efektywności",
                 "assistantMessage": "Analizuję efektywność twoich działań marketingowych w oparciu o zebrane dane...",
                 "contextPath": "marketing-analysis",
-                "templateId": "llm-step-minimal",
+                "templateId": "llm-step",
                 "order": 1,
                 "attrs": {
                   "autoStart": true,
@@ -144,7 +146,7 @@
                 "label": "Krok 3: Metryki marketingowe",
                 "assistantMessage": "Oto kluczowe metryki i wskaźniki marketingowe dla twojej kampanii.",
                 "contextPath": "metrics-summary",
-                "templateId": "widgets-step-minimal",
+                "templateId": "widgets-step",
                 "order": 2,
                 "attrs": {
                   "schemaPath": "schemas.widgets.marketingMetrics",
@@ -161,7 +163,7 @@
                 "label": "Krok 4: Plan działania",
                 "assistantMessage": "Na podstawie przeprowadzonych analiz, przygotowałem plan działania w celu optymalizacji twoich działań marketingowych.",
                 "contextPath": "action-plan",
-                "templateId": "widgets-step-minimal",
+                "templateId": "widgets-step",
                 "order": 3,
                 "attrs": {
                   "schemaPath": "schemas.widgets.actionPlan",
@@ -207,50 +209,57 @@
           "schemas": {
             "form": {
               "business": [
-                { 
-                  "name": "revenue", 
-                  "label": "Przychody (PLN)", 
-                  "type": "number", 
-                  "required": true 
+                {
+                  "name": "revenue",
+                  "label": "Przychody (PLN)",
+                  "type": "number",
+                  "required": true
                 },
-                { 
-                  "name": "cost", 
-                  "label": "Koszty (PLN)", 
-                  "type": "number", 
-                  "required": true 
+                {
+                  "name": "cost",
+                  "label": "Koszty (PLN)",
+                  "type": "number",
+                  "required": true
                 }
               ],
               "marketing": [
-                { 
-                  "name": "adBudget", 
-                  "label": "Budżet reklamowy (PLN)", 
-                  "type": "number", 
-                  "required": true 
+                {
+                  "name": "adBudget",
+                  "label": "Budżet reklamowy (PLN)",
+                  "type": "number",
+                  "required": true
                 },
-                { 
-                  "name": "clicks", 
-                  "label": "Liczba kliknięć", 
-                  "type": "number", 
-                  "required": true 
+                {
+                  "name": "clicks",
+                  "label": "Liczba kliknięć",
+                  "type": "number",
+                  "required": true
                 },
-                { 
-                  "name": "conversions", 
-                  "label": "Liczba konwersji", 
-                  "type": "number", 
-                  "required": true 
+                {
+                  "name": "conversions",
+                  "label": "Liczba konwersji",
+                  "type": "number",
+                  "required": true
                 },
-                { 
-                  "name": "impressions", 
-                  "label": "Liczba wyświetleń", 
-                  "type": "number", 
-                  "required": false 
+                {
+                  "name": "impressions",
+                  "label": "Liczba wyświetleń",
+                  "type": "number",
+                  "required": false
                 },
-                { 
-                  "name": "adPlatform", 
-                  "label": "Platforma reklamowa", 
-                  "type": "select", 
-                  "options": ["Google Ads", "Facebook Ads", "LinkedIn Ads", "Instagram Ads", "TikTok Ads", "Inne"],
-                  "required": true 
+                {
+                  "name": "adPlatform",
+                  "label": "Platforma reklamowa",
+                  "type": "select",
+                  "options": [
+                    "Google Ads",
+                    "Facebook Ads",
+                    "LinkedIn Ads",
+                    "Instagram Ads",
+                    "TikTok Ads",
+                    "Inne"
+                  ],
+                  "required": true
                 }
               ]
             },
@@ -258,7 +267,9 @@
               "businessReport": {
                 "roi": "Wartość ROI w procentach",
                 "profitability": "Ocena opłacalności projektu",
-                "recommendations": ["Lista rekomendacji"]
+                "recommendations": [
+                  "Lista rekomendacji"
+                ]
               },
               "marketingAnalysis": {
                 "cpa": "Koszt pozyskania klienta (PLN)",
@@ -267,9 +278,15 @@
                 "ctr": "Współczynnik klikalności (%)",
                 "conversionRate": "Współczynnik konwersji (%)",
                 "effectivenessRating": "Ogólna ocena efektywności kampanii (1-10)",
-                "strengths": ["Lista mocnych stron kampanii"],
-                "weaknesses": ["Lista słabych stron kampanii"],
-                "recommendations": ["Lista rekomendacji"],
+                "strengths": [
+                  "Lista mocnych stron kampanii"
+                ],
+                "weaknesses": [
+                  "Lista słabych stron kampanii"
+                ],
+                "recommendations": [
+                  "Lista rekomendacji"
+                ],
                 "optimizationStrategy": "Strategia optymalizacji"
               }
             },
@@ -315,7 +332,7 @@
                     "dataPaths": {
                       "CPA": "analysisResults.cpa",
                       "ROAS": "analysisResults.roas",
-                      "CPC": "analysisResults.cpc", 
+                      "CPC": "analysisResults.cpc",
                       "Konwersja": "analysisResults.conversionRate"
                     }
                   },
@@ -353,14 +370,14 @@
                   {
                     "type": "DataDisplayWidget",
                     "title": "Mocne strony kampanii",
-                    "dataPath": "marketingAnalysis.strengths",
-                    "type": "list"
+                    "dataPath": "marketingAnalysis.strengths"
+    
                   },
                   {
                     "type": "DataDisplayWidget",
                     "title": "Słabe strony kampanii",
-                    "dataPath": "marketingAnalysis.weaknesses",
-                    "type": "list"
+                    "dataPath": "marketingAnalysis.weaknesses"
+
                   },
                   {
                     "type": "cardList",

@@ -1,10 +1,9 @@
-// src/tpl/index.ts
+// src/tpl/index.ts - Updated to reference only default template
 import { ComponentType } from 'react';
 import * as defaultTemplate from './default';
-import * as minimalTemplate from './minimal';
 import { LayoutProps, WidgetProps, FlowStepProps } from '@/types';
 
-// Interfejs dla szablonu z typowanymi komponentami
+// Interface for template with typed components
 interface Template {
   templateName: string;
   layoutComponents?: Record<string, ComponentType<LayoutProps>>;
@@ -12,13 +11,12 @@ interface Template {
   flowStepComponents?: Record<string, ComponentType<FlowStepProps>>;
 }
 
-// Typowane mapowanie nazw szablonów
+// Typed mapping of template names
 const templates: Record<string, Template> = {
   default: defaultTemplate as unknown as Template,
-  minimal: minimalTemplate as unknown as Template,
 };
 
-// Cache dla komponentów
+// Cache for components
 const componentsCache = {
   layouts: new Map<string, ComponentType<LayoutProps>>(),
   widgets: new Map<string, ComponentType<WidgetProps>>(),
@@ -26,15 +24,15 @@ const componentsCache = {
 };
 
 /**
- * Pobiera komponent layoutu na podstawie ID
+ * Gets a layout component by ID
  */
 export function getLayoutComponent(id: string): ComponentType<LayoutProps> | null {
-  // Sprawdź cache
+  // Check cache
   if (componentsCache.layouts.has(id)) {
     return componentsCache.layouts.get(id) || null;
   }
 
-  // Znajdź komponent w szablonach
+  // Find component in templates
   for (const template of Object.values(templates)) {
     if (template.layoutComponents && id in template.layoutComponents) {
       const component = template.layoutComponents[id];
@@ -43,21 +41,21 @@ export function getLayoutComponent(id: string): ComponentType<LayoutProps> | nul
     }
   }
 
-  // Jeśli nie znaleziono, zwróć null
+  // If not found, return null
   console.warn(`Layout component not found: ${id}`);
   return null;
 }
 
 /**
- * Pobiera komponent widgetu na podstawie ID
+ * Gets a widget component by ID
  */
 export function getWidgetComponent(id: string): ComponentType<WidgetProps> | null {
-  // Sprawdź cache
+  // Check cache
   if (componentsCache.widgets.has(id)) {
     return componentsCache.widgets.get(id) || null;
   }
 
-  // Szukaj komponentu we wszystkich szablonach
+  // Search in all templates
   for (const template of Object.values(templates)) {
     if (template.widgetComponents && id in template.widgetComponents) {
       const component = template.widgetComponents[id];
@@ -66,21 +64,21 @@ export function getWidgetComponent(id: string): ComponentType<WidgetProps> | nul
     }
   }
 
-  // Jeśli nie znaleziono, zwróć null
+  // If not found, return null
   console.warn(`Widget component not found: ${id}`);
   return null;
 }
 
 /**
- * Pobiera komponent kroku przepływu na podstawie ID
+ * Gets a flow step component by ID
  */
 export function getFlowStepComponent(id: string): ComponentType<FlowStepProps> | null {
-  // Sprawdź cache
+  // Check cache
   if (componentsCache.flowSteps.has(id)) {
     return componentsCache.flowSteps.get(id) || null;
   }
 
-  // Szukaj komponentu we wszystkich szablonach
+  // Search in all templates
   for (const template of Object.values(templates)) {
     if (template.flowStepComponents && id in template.flowStepComponents) {
       const component = template.flowStepComponents[id];
@@ -89,7 +87,7 @@ export function getFlowStepComponent(id: string): ComponentType<FlowStepProps> |
     }
   }
 
-  // Jeśli nie znaleziono, spróbuj alternatywnej nazwy (bez -minimal)
+  // Try alternative names - handle -minimal suffix
   const alternativeId = id.replace('-minimal', '');
   
   if (alternativeId !== id) {
@@ -102,12 +100,9 @@ export function getFlowStepComponent(id: string): ComponentType<FlowStepProps> |
     }
   }
 
-  console.error('Błąd: Nie znaleziono komponentu przepływu', {
+  console.error('Error: Flow component not found', {
     requestedId: id,
-    availableComponents: [
-      ...Object.keys((defaultTemplate as unknown as Template).flowStepComponents || {}),
-      ...Object.keys((minimalTemplate as unknown as Template).flowStepComponents || {}),
-    ],
+    availableComponents: Object.keys((defaultTemplate as unknown as Template).flowStepComponents || {}),
     suggestedAlternative: alternativeId
   });
 
@@ -115,12 +110,12 @@ export function getFlowStepComponent(id: string): ComponentType<FlowStepProps> |
 }
 
 /**
- * Pobiera komponent kroku przepływu na podstawie typu węzła
+ * Gets a flow step component by node type
  */
 export function getFlowStepForNodeType(nodeType: string): ComponentType<FlowStepProps> | null {
   const nodeTypeToStepMap: Record<string, string> = {
     default: "basic-step",
-    form: "form-step-minimal",
+    form: "form-step",
     llm: "llm-step",
     summary: "summary-step",
   };
@@ -128,3 +123,26 @@ export function getFlowStepForNodeType(nodeType: string): ComponentType<FlowStep
   const stepId = nodeTypeToStepMap[nodeType];
   return stepId ? getFlowStepComponent(stepId) : null;
 }
+
+// Fix directory paths in imports for default template components
+// Update to point to ./default/ instead of ./minimal/
+
+// src/tpl/default/flowSteps/FormStepTemplate.tsx
+// First line should be:
+// import React from "react";
+// Replace ./minimal/ with ./default/ in all import paths
+
+// src/tpl/default/flowSteps/LlmStepTemplate.tsx
+// First line should be:
+// import React from "react";
+// Replace ./minimal/ with ./default/ in all import paths
+
+// src/tpl/default/flowSteps/WidgetsStepTemplate.tsx
+// First line should be:
+// import React from "react";
+// Replace ./minimal/ with ./default/ in all import paths
+
+// src/tpl/default/flowSteps/index.ts
+// First line should be:
+// import { lazy } from 'react';
+// Replace ./minimal/ with ./default/ in all import paths

@@ -1,7 +1,7 @@
 // src/hooks/useApplicationStore.ts
 import { create } from 'zustand';
 
-import { Workspace } from '@/types';
+import { TemplateSettings, Workspace } from '@/types';
 import { useContextStore } from './useContextStore';
 import { firebaseService } from '@/_firebase/firebase';
 import { errorUtils } from '@/utils/errorUtils';
@@ -12,6 +12,7 @@ interface Application {
   name: string;
   description?: string;
   workspaces: Workspace[];
+  templateSettings?: TemplateSettings
 }
 
 interface ApplicationState {

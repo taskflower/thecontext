@@ -1,16 +1,17 @@
 // src/tpl/default/flowSteps/index.ts
 import { lazy } from 'react';
 
-// Używamy importu dynamicznego z Vite dla komponentów kroków przepływu
-export const BasicStepTemplate = lazy(() => import('./BasicStepTemplate'));
-export const FormInputTemplate = lazy(() => import('./FormInputTemplate'));
-export const LlmQueryTemplate = lazy(() => import('./LlmQueryTemplate'));
-export const SummaryStepTemplate = lazy(() => import('./SummaryStepTemplate'));
+// Use dynamic import with Vite for flow step components
+export const FormStepTemplate = lazy(() => import('./FormStepTemplate'));
+export const LlmStepTemplate = lazy(() => import('./LlmStepTemplate'));
+export const WidgetsStepTemplate = lazy(() => import('./WidgetsStepTemplate'));
 
-// Eksportujemy mapę nazw komponentów do ich importów
+// Export map of component names to their imports
 export const flowStepComponents = {
-  'basic-step': BasicStepTemplate,
-  'form-step': FormInputTemplate,
-  'llm-query': LlmQueryTemplate,
-  'summary-step': SummaryStepTemplate,
+  'form-step': FormStepTemplate,
+  'form-step-minimal': FormStepTemplate, // Alias for backward compatibility
+  'llm-step': LlmStepTemplate,
+  'llm-step-minimal': LlmStepTemplate, // Alias for backward compatibility
+  'widgets-step': WidgetsStepTemplate,
+  'widgets-step-minimal': WidgetsStepTemplate, // Alias for backward compatibility
 };

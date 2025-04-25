@@ -95,6 +95,7 @@ export class FirebaseService {
         id: app.id,
         name: app.name,
         description: app.description,
+        templateSettings: app.templateSettings,
       }));
     } catch (error) {
       console.error("Error fetching applications:", error);

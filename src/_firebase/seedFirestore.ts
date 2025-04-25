@@ -43,6 +43,7 @@ async function addDataToFirestore(userId: string, appData: any[]) {
     const applicationData = {
       name: appItem.name,
       description: appItem.description || "",
+      templateSettings: appItem.templateSettings || {},
       createdAt: new Date(),
       createdBy: userId,
     };
