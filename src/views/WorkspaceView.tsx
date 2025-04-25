@@ -6,6 +6,7 @@ import { useApplicationStore } from "@/hooks/stateManagment/useApplicationStore"
 import { useWorkspaceStore } from "@/hooks/stateManagment/useWorkspaceStore";
 import { LoadingState } from "@/components/LoadingState";
 import SharedLoader from "@/components/SharedLoader";
+import { LayoutProps, WidgetProps } from "@/types";
 
 export const WorkspaceView: React.FC = () => {
   const { applicationId } = useParams();
@@ -13,7 +14,6 @@ export const WorkspaceView: React.FC = () => {
   const { fetchApplicationById, getCurrentApplication, isLoading, error } = useApplicationStore();
   const { selectWorkspace } = useWorkspaceStore();
 
-  // Pobierz szczegóły aplikacji przy pierwszym renderowaniu
   useEffect(() => {
     if (applicationId) {
       fetchApplicationById(applicationId);
@@ -23,17 +23,14 @@ export const WorkspaceView: React.FC = () => {
   const currentApplication = getCurrentApplication();
   const workspaces = currentApplication?.workspaces || [];
 
-  // Obsługa wyboru workspace
   const handleSelect = (workspaceId: string) => {
     selectWorkspace(workspaceId);
-    // Nawigacja bezpośrednio do workspace/scenariuszy
     navigate(`/${workspaceId}`);
   };
 
-  // Obsługa powrotu do strony głównej
   const handleBackClick = () => navigate('/');
 
-  // Przygotuj dane dla widgetu
+  // Przygotowanie danych dla widgetów
   const workspaceData = workspaces.map(workspace => ({
     id: workspace.id,
     name: workspace.name,
@@ -43,7 +40,13 @@ export const WorkspaceView: React.FC = () => {
     icon: workspace.icon || "briefcase",
   }));
 
-  // Render content with layout and widgets
+  const headerData = {
+    title: currentApplication?.name,
+    description: currentApplication?.description,
+    backLink: '/',
+    backText: 'Wróć do listy aplikacji'
+  };
+
   const renderContent = () => {
     if (!currentApplication) {
       return (
@@ -58,27 +61,71 @@ export const WorkspaceView: React.FC = () => {
       );
     }
 
-    const LayoutComponent = getLayoutComponent("default") || (() => <div>Layout Not Found</div>);
-    const WidgetComponent = getWidgetComponent("card-list") || (() => <div>Widget Not Found</div>);
+    // Pobierz komponenty na podstawie konfiguracji aplikacji
+    const layoutName = currentApplication.templateSettings?.layoutTemplate || "default";
+    const LayoutComponent = getLayoutComponent(layoutName);
+    
+    if (!LayoutComponent) {
+      return <div>Layout not found: {layoutName}</div>;
+    }
 
+    const LayoutComponentWithType = LayoutComponent as React.ComponentType<LayoutProps>;
+
+    // Renderuj layout z dynamicznym zawartością na podstawie konfiguracji
     return (
-      <LayoutComponent title={`${currentApplication.name}`} onBackClick={handleBackClick}>
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold mb-2">{currentApplication.name}</h1>
-          <p className="text-gray-600">{currentApplication.description}</p>
-          <button onClick={handleBackClick} className="mt-4 text-blue-600 hover:text-blue-800">
-            &larr; Wróć do listy aplikacji
-          </button>
-        </div>
-
-        {workspaces.length === 0 ? (
-          <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-            <p className="text-yellow-700">Brak dostępnych workspaces w tej aplikacji.</p>
-          </div>
-        ) : (
-          <WidgetComponent data={workspaceData} onSelect={handleSelect} />
+      <LayoutComponentWithType title={currentApplication.name} onBackClick={handleBackClick}>
+        {/* Renderuj widgety zgodnie z konfiguracją aplikacji */}
+        {currentApplication.templateSettings?.widgets?.map((widgetConfig: any, index: number) => {
+          const { type, data } = widgetConfig;
+          const WidgetComponent = getWidgetComponent(type);
+          
+          if (!WidgetComponent) {
+            return <div key={index}>Widget type not found: {type}</div>;
+          }
+          
+          const WidgetComponentWithType = WidgetComponent as React.ComponentType<WidgetProps>;
+          
+          // Wybierz odpowiednie dane dla widgetu
+          let widgetData;
+          if (type === 'card-list' && data === 'workspaces') {
+            widgetData = workspaceData;
+          } else if (type === 'info' && data === 'header') {
+            widgetData = headerData;
+          } else {
+            widgetData = widgetConfig.data || {};
+          }
+          
+          return (
+            <div key={index} className="mb-6">
+              <WidgetComponentWithType 
+                data={widgetData} 
+                onSelect={type === 'card-list' ? handleSelect : (path) => navigate(path)}
+                attrs={widgetConfig.attrs}
+              />
+            </div>
+          );
+        })}
+        
+        {/* Jeśli nie ma zdefiniowanych widgetów, pokaż domyślne */}
+        {(!currentApplication.templateSettings?.widgets || currentApplication.templateSettings.widgets.length === 0) && (
+          <>
+            
+            
+            {workspaces.length === 0 ? (
+              <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+                <p className="text-yellow-700">Brak dostępnych workspaces w tej aplikacji.</p>
+              </div>
+            ) : (
+              (() => {
+                const DefaultWidget = getWidgetComponent("card-list");
+                if (!DefaultWidget) return <div>Default widget not found</div>;
+                const DefaultWidgetWithType = DefaultWidget as React.ComponentType<WidgetProps>;
+                return <DefaultWidgetWithType data={workspaceData} onSelect={handleSelect} />;
+              })()
+            )}
+          </>
         )}
-      </LayoutComponent>
+      </LayoutComponentWithType>
     );
   };
 

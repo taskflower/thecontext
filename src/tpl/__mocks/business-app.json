@@ -2,6 +2,47 @@
   {
     "name": "Business Analytics",
     "description": "Analiza biznesowa i finansowa",
+    "templateSettings": {
+      "layoutTemplate": "simple",
+      "scenarioWidgetTemplate": "card-list",
+      "widgets": [
+        {
+          "type": "info",
+          "data": {
+            "title": "Witaj w Business Analytics",
+            "description": "System do analiz biznesowych i finansowych",
+            "backLink": "/",
+            "backText": "Wróć do listy aplikacji",
+            "variant": "info"
+          }
+        },
+        {
+          "type": "metrics",
+          "data": [
+            {
+              "label": "Liczba scenariuszy",
+              "value": 2,
+              "suffix": "dostępne"
+            },
+            {
+              "label": "Średni czas analizy",
+              "value": 5,
+              "suffix": "minut"
+            },
+            {
+              "label": "Dokładność predykcji",
+              "value": 92,
+              "suffix": "%",
+              "change": 3
+            }
+          ]
+        },
+        {
+          "type": "card-list",
+          "data": "workspaces"
+        }
+      ]
+    },
     "workspaces": [
       {
         "id": "workspace-minimal", 
@@ -82,7 +123,7 @@
                 }
               },
               {
-                "id":               "marketing-analysis",
+                "id": "marketing-analysis",
                 "scenarioId": "scenario-marketing",
                 "label": "Krok 2: Analiza efektywności",
                 "assistantMessage": "Analizuję efektywność twoich działań marketingowych w oparciu o zebrane dane...",
@@ -136,7 +177,31 @@
           "layoutTemplate": "simple",
           "scenarioWidgetTemplate": "card-list",
           "defaultFlowStepTemplate": "form-step",
-          "theme": "light"
+          "theme": "light",
+          "widgets": [
+            {
+              "type": "info",
+              "data": {
+                "title": "Demo Biznesowe",
+                "description": "Wybierz jeden z dostępnych scenariuszy",
+                "backLink": "/",
+                "backText": "Wróć do listy aplikacji",
+                "variant": "info"
+              }
+            },
+            {
+              "type": "stats",
+              "data": {
+                "Liczba scenariuszy": 2,
+                "Średnia złożoność": "średnia",
+                "Czas wykonania": "5-10 min"
+              }
+            },
+            {
+              "type": "card-list",
+              "data": "scenarios"
+            }
+          ]
         },
         "initialContext": {
           "schemas": {

@@ -2,6 +2,11 @@
   {
     "name": "Marketing AI Tools",
     "description": "Narzędzia marketingowe wspierane AI",
+    "templateSettings": {
+      "layoutTemplate": "simple",
+      "headerWidgetTemplate": "header-info",
+      "scenarioWidgetTemplate": "card-list"
+    },
     "workspaces": [
       {
         "id": "workspace-marketing",
@@ -21,7 +26,7 @@
                 "label": "Adres strony WWW",
                 "assistantMessage": "Witaj! Podaj adres strony internetowej do analizy marketingowej:",
                 "contextPath": "web",
-                "templateId": "form-step",
+                "templateId": "form-step-minimal",
                 "order": 0,
                 "attrs": {
                   "schemaPath": "schemas.form.website"
@@ -32,7 +37,7 @@
                 "scenarioId": "scenario-marketing-analysis",
                 "label": "Analiza AI",
                 "contextPath": "web.analysis",
-                "templateId": "llm-query",
+                "templateId": "llm-step-minimal",
                 "order": 1,
                 "attrs": {
                   "autoStart": true,   
@@ -47,7 +52,7 @@
                 "label": "Podsumowanie analizy",
                 "assistantMessage": "Oto podsumowanie analizy marketingowej strony internetowej.",
                 "contextPath": "web.summary",
-                "templateId": "summary-step",
+                "templateId": "widgets-step-minimal",
                 "order": 2,
                 "attrs": {
                   "schemaPath": "schemas.summary.marketingSummary",
@@ -62,9 +67,10 @@
         ],
         "icon": "chart",
         "templateSettings": {
-          "layoutTemplate": "default",
+          "layoutTemplate": "simple",
           "scenarioWidgetTemplate": "card-list",
-          "defaultFlowStepTemplate": "basic-step",
+          "headerWidgetTemplate": "header-info",
+          "defaultFlowStepTemplate": "form-step-minimal",
           "theme": "light"
         },
         "initialContext": {

@@ -2,6 +2,11 @@
   {
     "name": "Content Generator",
     "description": "Generator treści i artykułów",
+    "templateSettings": {
+      "layoutTemplate": "simple",
+      "headerWidgetTemplate": "header-info",
+      "scenarioWidgetTemplate": "card-list"
+    },
     "workspaces": [
       {
         "id": "workspace-content", 
@@ -22,7 +27,7 @@
                 "label": "Temat artykułu",
                 "assistantMessage": "Podaj temat artykułu oraz grupę docelową:",
                 "contextPath": "article",
-                "templateId": "form-step",
+                "templateId": "form-step-minimal",
                 "order": 0,
                 "attrs": { 
                   "schemaPath": "schemas.form.articleTopic" 
@@ -33,7 +38,7 @@
                 "scenarioId": "scenario-article",
                 "label": "Plan artykułu",
                 "contextPath": "article.outline",
-                "templateId": "llm-step",
+                "templateId": "llm-step-minimal",
                 "order": 1,
                 "attrs": {
                   "autoStart": true,
@@ -47,7 +52,7 @@
                 "scenarioId": "scenario-article",
                 "label": "Treść artykułu",
                 "contextPath": "article.content",
-                "templateId": "llm-step",
+                "templateId": "llm-step-minimal",
                 "order": 2,
                 "attrs": {
                   "autoStart": true,
@@ -60,9 +65,10 @@
           }
         ],
         "templateSettings": {
-          "layoutTemplate": "default",
+          "layoutTemplate": "simple",
           "scenarioWidgetTemplate": "card-list",
-          "defaultFlowStepTemplate": "form-step",
+          "headerWidgetTemplate": "header-info",
+          "defaultFlowStepTemplate": "form-step-minimal",
           "theme": "light"
         },
         "initialContext": {

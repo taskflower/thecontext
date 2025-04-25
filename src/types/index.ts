@@ -29,8 +29,6 @@ export interface FlowStepProps {
   stepTitle?: string;
 }
 
-
-
 // Szablony
 export interface LayoutTemplate {
   id: string;
@@ -50,6 +48,13 @@ export interface FlowStepTemplate {
   name: string;
   compatibleNodeTypes: string[];
   component: React.ComponentType<FlowStepProps>;
+}
+
+// Widgety w konfiguracji
+export interface WidgetConfig {
+  type: string;
+  data?: string | any;
+  attrs?: Record<string, any>;
 }
 
 // Dane przepływu
@@ -83,6 +88,8 @@ export interface TemplateSettings {
   defaultFlowStepTemplate: string;
   theme?: 'light' | 'dark' | 'system';
   customStyles?: Record<string, string>;
+  // Lista widgetów do renderowania
+  widgets?: WidgetConfig[];
 }
 
 export interface Workspace {
@@ -93,6 +100,15 @@ export interface Workspace {
   templateSettings: TemplateSettings;
   initialContext: Record<string, any>;
   icon?: IconType;
+}
+
+// Definicja typu Application
+export interface Application {
+  id: string;
+  name: string;
+  description?: string;
+  workspaces: Workspace[];
+  templateSettings?: TemplateSettings;
 }
 
 // Pole formularza

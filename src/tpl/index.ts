@@ -57,12 +57,13 @@ export function getWidgetComponent(id: string): ComponentType<WidgetProps> | nul
     return componentsCache.widgets.get(id) || null;
   }
 
-  // Widgety są głównie w default template
-  const defaultWidgets = (defaultTemplate as unknown as Template).widgetComponents;
-  if (defaultWidgets && id in defaultWidgets) {
-    const component = defaultWidgets[id];
-    componentsCache.widgets.set(id, component);
-    return component;
+  // Szukaj komponentu we wszystkich szablonach
+  for (const template of Object.values(templates)) {
+    if (template.widgetComponents && id in template.widgetComponents) {
+      const component = template.widgetComponents[id];
+      componentsCache.widgets.set(id, component);
+      return component;
+    }
   }
 
   // Jeśli nie znaleziono, zwróć null
