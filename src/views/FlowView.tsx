@@ -16,7 +16,6 @@ import SharedLoader from "@/components/SharedLoader";
 import { NodeData } from "@/types";
 import {
   useAppNavigation,
-  useContextStore,
   useNodeManager,
   useWorkspaceStore,
 } from "@/hooks";
@@ -27,14 +26,12 @@ import {
   MissingWorkspaceError,
 } from "./flowViewMessages";
 
-// Local storage key for flow state
-const FLOW_STATE_KEY = "wiseads_flow_state";
+
 
 const FlowView: React.FC = () => {
   const { workspace, scenario } = useParams();
 
-  // Ref, aby zapobiec nieskończonym renderowaniom
-  const contextInitialized = useRef(false);
+  
 
   // Hooki z logiką biznesową
   const {

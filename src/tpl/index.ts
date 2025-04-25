@@ -123,26 +123,3 @@ export function getFlowStepForNodeType(nodeType: string): ComponentType<FlowStep
   const stepId = nodeTypeToStepMap[nodeType];
   return stepId ? getFlowStepComponent(stepId) : null;
 }
-
-// Fix directory paths in imports for default template components
-// Update to point to ./default/ instead of ./minimal/
-
-// src/tpl/default/flowSteps/FormStepTemplate.tsx
-// First line should be:
-// import React from "react";
-// Replace ./minimal/ with ./default/ in all import paths
-
-// src/tpl/default/flowSteps/LlmStepTemplate.tsx
-// First line should be:
-// import React from "react";
-// Replace ./minimal/ with ./default/ in all import paths
-
-// src/tpl/default/flowSteps/WidgetsStepTemplate.tsx
-// First line should be:
-// import React from "react";
-// Replace ./minimal/ with ./default/ in all import paths
-
-// src/tpl/default/flowSteps/index.ts
-// First line should be:
-// import { lazy } from 'react';
-// Replace ./minimal/ with ./default/ in all import paths
