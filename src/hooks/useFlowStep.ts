@@ -1,9 +1,9 @@
 // src/hooks/useFlowStep.ts
 import { useState, useEffect } from 'react';
 import { NodeData, FormField } from '@/types';
-import { useAppStore } from '@/useAppStore';
 import { extractJsonFromContent } from '@/utils/apiUtils';
 import { useAuth } from './useAuth';
+import { useAppStore } from '@/useAppStore';
 
 /**
  * Zunifikowany hook do obsługi kroków flow - łączy funkcjonalności z:
@@ -55,8 +55,7 @@ export function useFlowStep({
     : '';
 
   // Pobieranie pól formularza ze schematu
-// Pobieranie pól formularza ze schematu
-useEffect(() => {
+  useEffect(() => {
     const attrs = node.attrs || {};
     if (!attrs.schemaPath) {
       setFormFields([]);
@@ -64,9 +63,30 @@ useEffect(() => {
     }
 
     try {
+      console.log("Loading schema from path:", attrs.schemaPath);
+      
       // Pobierz schemat z kontekstu
-      const schemaData = getContextPath(attrs.schemaPath);
-      console.log("Schema path:", attrs.schemaPath, "Schema data:", schemaData);
+      const schemaPath = attrs.schemaPath; // np. "schemas.form.business"
+      const pathParts = schemaPath.split('.');
+      
+      // Pobierz cały kontekst
+      const currentWorkspaceId = useAppStore.getState().data.currentWorkspaceId;
+      const context = useAppStore.getState().data.contexts[currentWorkspaceId || ''] || {};
+      
+      console.log("Current context:", context);
+      
+      // Nawiguj do schematu
+      let schemaData = context;
+      for (const part of pathParts) {
+        if (!schemaData || typeof schemaData !== 'object') {
+          console.warn(`Invalid path segment: ${part} in ${schemaPath}`);
+          schemaData = null;
+          break;
+        }
+        schemaData = schemaData[part];
+      }
+      
+      console.log("Schema data found:", schemaData);
       
       if (!schemaData) {
         console.warn(`Schema not found at path: ${attrs.schemaPath}`);
@@ -74,29 +94,35 @@ useEffect(() => {
         return;
       }
 
-      // W zależności od struktury schematu, extrahujenmy pola formularza
-      let fields;
+      // Jeśli dane są już tablicą pól formularza, użyj ich bezpośrednio
       if (Array.isArray(schemaData)) {
-        // Jeśli to bezpośrednio tablica pól
-        fields = schemaData;
-      } else {
-        // Jeśli to obiekt zawierający schematy
-        const key = attrs.schemaPath.split('.').pop() || '';
-        fields = schemaData[key];
+        console.log("Setting form fields directly:", schemaData);
+        setFormFields(schemaData);
+        return;
       }
       
-      if (Array.isArray(fields)) {
-        console.log("Form fields extracted:", fields);
-        setFormFields(fields);
-      } else {
-        console.warn(`Invalid form schema format at ${attrs.schemaPath}`, fields);
-        setFormFields([]);
+      // W przeciwnym razie szukaj w kluczu bazowym (ostatnia część ścieżki)
+      const baseKey = pathParts[pathParts.length - 1];
+      
+      // Jeśli mamy schemas.form.business, wystarczy nam "business"
+      if (typeof schemaData === 'object' && !Array.isArray(schemaData)) {
+        console.log(`Looking for fields in schema key: ${baseKey}`);
+        const fields = schemaData; // Tutaj schemaData to już właściwy schemat formularza
+        
+        if (Array.isArray(fields)) {
+          console.log("Setting form fields from object key:", fields);
+          setFormFields(fields);
+          return;
+        }
       }
+      
+      console.warn(`Could not find form fields in schema at ${attrs.schemaPath}`);
+      setFormFields([]);
     } catch (err) {
-      console.error(`Error loading form schema from ${attrs.schemaPath}:`, err);
+      console.error(`Error processing form schema:`, err);
       setFormFields([]);
     }
-  }, [node.attrs, getContextPath]);
+  }, [node.attrs]);
 
   // Obsługa zmian w formularzu
   const handleChange = (name: string, value: any) => {
