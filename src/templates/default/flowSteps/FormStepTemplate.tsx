@@ -1,8 +1,7 @@
-// src/tpl/minimal/flowSteps/FormStepTemplate.tsx
+// src/templates/default/flowSteps/FormStepTemplate.tsx
 import React from "react";
 import { FlowStepProps } from "@/types";
-import { useFlowStep, useFormInput } from "@/hooks";
-
+import { useFlowStep } from "@/hooks"; // Usunięto useFormInput
 
 const FormStepTemplate: React.FC<FlowStepProps> = ({ 
   node, 
@@ -11,7 +10,8 @@ const FormStepTemplate: React.FC<FlowStepProps> = ({
   isLastNode,
   isFirstNode 
 }) => {
-  // Hook do obsługi inputów formularza
+  // Używamy zunifikowanego hooka useFlowStep, który łączy funkcjonalności
+  // useFormInput i poprzedniego useFlowStep
   const {
     formData,
     formFields,
@@ -19,10 +19,6 @@ const FormStepTemplate: React.FC<FlowStepProps> = ({
     handleChange,
     handleSubmit,
     areRequiredFieldsFilled,
-  } = useFormInput({ node });
-
-  // Hook do obsługi nawigacji i przepływu
-  const {
     handlePrevious,
     handleComplete
   } = useFlowStep({

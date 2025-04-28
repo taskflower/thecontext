@@ -14,10 +14,11 @@ const LoginView = lazy(() => import("./views/LoginView"));
 const ApplicationView = lazy(() => import("./views/ApplicationView"));
 const WorkspaceView = lazy(() => import("./views/WorkspaceView"));
 const AdminPanelView = lazy(() => import("./_modules/admin/AdminPanelView"));
-const EnhancedFlowDebugger = lazy(() => import("./_modules/debug/EnhancedFlowDebugger"));
+
 
 import InitialDataProvider from "./InitialDataProvider";
-import ScenarioGenerator from "./_modules/scenarioGenerator/components/ScenarioGenerator";
+//const EnhancedFlowDebugger = lazy(() => import("./_modules/debug/EnhancedFlowDebugger"));
+// import ScenarioGenerator from "./_modules/scenarioGenerator/components/ScenarioGenerator";
 
 import { AuthWrapper } from "./_auth/AuthWrapper";
 import SharedLoader from "./components/SharedLoader";
@@ -48,7 +49,7 @@ const App = () => (
             <Route path="/login" element={<LoginView />} />
             
             {/* Dev tools */}
-            <Route path="/generator" element={<ScenarioGenerator />} />
+            {/* <Route path="/generator" element={<ScenarioGenerator />} /> */}
             
             {/* Admin Panel - separate subpage */}
             <Route path="/admin" element={
@@ -89,9 +90,9 @@ const App = () => (
       </Suspense>
       
       {/* Debug tools - loaded conditionally */}
-      <Suspense fallback={null}>
+      {/* <Suspense fallback={null}>
         <EnhancedFlowDebugger />
-      </Suspense>
+      </Suspense> */}
     </AuthProvider>
   </Router>
 );

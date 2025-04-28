@@ -1,25 +1,28 @@
 // src/views/ApplicationView.tsx
 import { useEffect, Suspense } from "react";
-
-
 import { LoadingState } from "@/components/LoadingState";
-
 import Header from "@/components/homeLayout/Header";
 import EmptyState from "@/components/EmptyState";
 import ApplicationCard from "@/components/homeLayout/ApplicationCard";
 import Footer from "@/components/homeLayout/Footer";
 import SharedLoader from "@/components/SharedLoader";
-import { useApplicationStore, useAuth } from "@/hooks";
+import {  useAuth } from "@/hooks"; // Zmienione z useApplicationStore na useAppStore
 import { useNavigate } from "react-router-dom";
+import { useAppStore } from "@/useAppStore";
 
 export const ApplicationView: React.FC = () => {
+  // Pobieramy dane i metody z useAppStore zamiast useApplicationStore
   const {
-    applications,
     fetchApplications,
-    isLoading,
-    error,
     selectApplication,
-  } = useApplicationStore();
+    getCurrentApplication,
+    error
+  } = useAppStore();
+  
+  // Pobieramy applications i isLoading ze stanu
+  const applications = useAppStore(state => state.data.applications);
+  const isLoading = useAppStore(state => state.loading.application);
+  
   const { user } = useAuth();
   const navigate = useNavigate();
 

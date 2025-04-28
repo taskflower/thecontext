@@ -1,17 +1,17 @@
-// Authentication
-export { useAuth, AuthProvider } from './auth/useAuth';
+// src/hooks/index.ts - Zunifikowany plik indeksu dla wszystkich hookoków
 
-// Navigation
-export { useFlowStep } from './navigation/useFlowStep';
-export { useAppNavigation } from './navigation/useAppNavigation';
+// Autoryzacja
+export { useAuth, AuthProvider } from './useAuth';
 
-// State Management
-export { useApplicationStore } from './stateManagment/useApplicationStore';
-export { useContextStore } from './stateManagment/useContextStore';
-export { useNodeManager } from './stateManagment/useNodeManager';
-export { useWorkspaceStore } from './stateManagment/useWorkspaceStore';
 
-// Steps API
-export { useFormInput } from './stepsApi/useFormInput';
-export { useIndexedDB, type StoredItem } from './stepsApi/useIndexedDB';
-export { useLLM } from './stepsApi/useLLM';
+// Nawigacja
+export { useNavigation } from './useNavigation';
+
+// Loader komponentów
+export { useComponentLoader } from './useComponentLoader';
+
+// Flow Step
+export { useFlowStep } from './useFlowStep';
+
+// IndexedDB (zachowany, bo ma specyficzne zastosowanie)
+export { useIndexedDB, type StoredItem } from './useIndexedDB';

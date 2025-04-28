@@ -1,31 +1,32 @@
-import React, { useEffect, Suspense, useState, useCallback } from "react";
+import React, { useEffect, Suspense } from "react";
 import { useParams } from "react-router-dom";
 import { LoadingState } from "@/components/LoadingState";
 import SharedLoader from "@/components/SharedLoader";
-import { useAppNavigation, useNodeManager, useWorkspaceStore } from "@/hooks";
-import {
-  MissingComponentError,
-  MissingLayoutError,
-  MissingNodeError,
-  MissingWorkspaceError,
-} from "./flowViewMessages";
+import { useComponentLoader, useNavigation } from "@/hooks";
+import { useAppStore } from "@/useAppStore";
 
-const FlowView: React.FC = () => {
-  const navigation = useAppNavigation();
+export const FlowView: React.FC = () => {
   const { workspace, scenario } = useParams();
-  const {
+  const { 
+    selectWorkspace, 
+    selectScenario, 
     getCurrentWorkspace,
-    selectWorkspace,
-    selectScenario,
-    isLoading: workspaceLoading,
-    error: workspaceError,
-  } = useWorkspaceStore();
-  
-  const [layoutComponent, setLayoutComponent] = useState<React.ComponentType<any> | null>(null);
-  const [flowStepComponent, setFlowStepComponent] = useState<React.ComponentType<any> | null>(null);
-  const [componentError, setComponentError] = useState<string | null>(null);
+    getCurrentScenario 
+  } = useAppStore();
 
-  // Select workspace and scenario when component mounts
+  const { 
+    currentNode, 
+    isFirstNode, 
+    isLastNode, 
+    handleBack, 
+    handleNext 
+  } = useNavigation();
+
+  // Pobierz aktualny workspace i scenariusz
+  const currentWorkspace = getCurrentWorkspace();
+  const currentScenario = getCurrentScenario();
+
+  // Wybierz workspace i scenariusz na podstawie parametrów URL
   useEffect(() => {
     if (workspace) {
       selectWorkspace(workspace);
@@ -35,170 +36,106 @@ const FlowView: React.FC = () => {
     }
   }, [workspace, scenario, selectWorkspace, selectScenario]);
 
-  const currentWorkspace = getCurrentWorkspace();
+  // Pobierz nazwę szablonu
+  const templateName = currentWorkspace?.templateSettings?.template || "default";
 
-  const {
-    currentNode,
-    isLastNode,
-    isFirstNode,
-    handlePreviousNode,
-    handleNodeExecution,
-    contextItems,
-    currentScenario,
-  } = useNodeManager();
+  // Ładuj komponent layoutu
+  const { 
+    component: LayoutComponent, 
+    error: layoutError, 
+    isLoading: layoutLoading 
+  } = useComponentLoader('layout', 'Simple');
 
-  // Get template name from workspace settings
-  const templateName = currentWorkspace?.templateSettings?.template || 
-                     currentWorkspace?.templateSettings?.layoutTemplate || 
-                     "default";
-
-  // Load layout component dynamically
-  const loadLayoutComponent = useCallback(async () => {
-    if (!templateName) return;
-    
-    try {
-      setComponentError(null);
-      // Using dynamic import for layout component
-      const layoutPath = `/src/templates/${templateName}/layouts/SimpleLayout.tsx`;
-      const modules = import.meta.glob("/src/templates/*/layouts/*.tsx");
-      
-      if (!modules[layoutPath]) {
-        throw new Error(`Layout ${layoutPath} not found`);
-      }
-
-      const module = await modules[layoutPath]();
-      setLayoutComponent(() => module.default);
-    } catch (error) {
-      console.error("Error loading layout component:", error);
-      setComponentError(`Failed to load layout: ${error instanceof Error ? error.message : String(error)}`);
-      setLayoutComponent(null);
-    }
-  }, [templateName]);
-
-  // Load flow step component dynamically based on node type or template
-  const loadFlowStepComponent = useCallback(async () => {
-    if (!currentNode || !templateName) return;
-    
-    try {
-      setComponentError(null);
-      let componentType: string;
-      
-      // Determine component type
-      if (currentNode.templateId) {
-        componentType = currentNode.templateId;
-      } else if (currentNode.template) {
-        // Convert template name to proper format (e.g., "form-step" to "FormStep")
-        componentType = currentNode.template
-          .split('-')
-          .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-          .join('');
-      } else if (currentNode.type) {
-        componentType = currentNode.type
-          .split('-')
-          .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-          .join('');
-      } else {
-        throw new Error(`No template or type specified for node ${currentNode.id}`);
-      }
-      
-      // Construct path and import component
-      const componentPath = `/src/templates/${templateName}/flowSteps/${componentType}Template.tsx`;
-      const modules = import.meta.glob("/src/templates/*/flowSteps/*.tsx");
-      
-      if (!modules[componentPath]) {
-        // Try alternative paths if first one fails
-        const alternativePaths = [
-          `/src/templates/${templateName}/flowSteps/${componentType}.tsx`,
-          `/src/templates/${templateName}/components/${componentType}.tsx`,
-          `/src/templates/default/flowSteps/${componentType}Template.tsx`,
-          `/src/templates/default/flowSteps/${componentType}.tsx`
-        ];
-        
-        let found = false;
-        for (const path of alternativePaths) {
-          if (modules[path]) {
-            const module = await modules[path]();
-            setFlowStepComponent(() => module.default);
-            found = true;
-            break;
-          }
-        }
-        
-        if (!found) {
-          throw new Error(`Component ${componentType} not found in any expected location`);
-        }
-      } else {
-        const module = await modules[componentPath]();
-        setFlowStepComponent(() => module.default);
-      }
-    } catch (error) {
-      console.error("Error loading flow step component:", error);
-      setComponentError(`Failed to load flow step component: ${error instanceof Error ? error.message : String(error)}`);
-      setFlowStepComponent(null);
-    }
-  }, [currentNode, templateName]);
-
-  // Load components when dependencies change
-  useEffect(() => {
-    if (currentWorkspace) {
-      loadLayoutComponent();
-    }
-  }, [currentWorkspace, loadLayoutComponent]);
-
-  useEffect(() => {
-    if (currentNode) {
-      loadFlowStepComponent();
-    }
-  }, [currentNode, loadFlowStepComponent]);
-
-  // Use workspace loading and error states
-  const isLoading = workspaceLoading;
-  const error = workspaceError || componentError;
-
-  // Fallback loader for Suspense
-  const fallbackLoader = (
-    <SharedLoader message="Ładowanie komponentów..." fullScreen={true} />
+  // Ładuj komponent kroku
+  const { 
+    component: FlowStepComponent, 
+    error: flowStepError, 
+    isLoading: componentLoading 
+  } = useComponentLoader(
+    'flowStep', 
+    currentNode?.template || 'form-step'
   );
 
+  // Połączony stan ładowania i błędów
+  const isLoading = layoutLoading || componentLoading;
+  const error = layoutError || flowStepError;
+
+  // Stan sklepu aplikacji
+  const storeLoading = useAppStore(state => state.loading.workspace || state.loading.scenario);
+  const storeError = useAppStore(state => state.error);
+
+  // Fallback loader dla Suspense
+  const fallbackLoader = <SharedLoader message="Ładowanie komponentów..." fullScreen={true} />;
+
+  // Renderuj zawartość
   const renderContent = () => {
+    // Sprawdź błędy i brak danych
     if (!currentWorkspace || !currentScenario) {
-      return <MissingWorkspaceError />;
+      return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-red-600 text-lg p-4 bg-red-100 rounded-lg">
+            Brak danych workspace lub scenariusza.
+          </div>
+        </div>
+      );
     }
 
     if (!currentNode) {
-      return <MissingNodeError />;
-    }
-
-    if (!layoutComponent) {
       return (
-        <MissingLayoutError
-          layoutName={templateName}
-        />
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-red-600 text-lg p-4 bg-red-100 rounded-lg">
+            Brak node dla aktualnego flow.
+          </div>
+        </div>
       );
     }
 
-    if (!flowStepComponent) {
+    if (!LayoutComponent) {
       return (
-        <MissingComponentError
-          componentId={currentNode.template || currentNode.templateId || currentNode.type || "unknown"}
-          nodeId={currentNode.id}
-        />
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-red-600 text-lg p-4 bg-red-100 rounded-lg">
+            <h3 className="font-bold">
+              Błąd: Nie znaleziono komponentu layoutu
+            </h3>
+            <p className="mt-2">
+              Szukany layout: <span className="font-mono bg-red-50 px-1">{templateName}</span>
+            </p>
+          </div>
+        </div>
       );
     }
 
-    return React.createElement(layoutComponent, {
+    if (!FlowStepComponent) {
+      return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-red-600 text-lg p-4 bg-red-100 rounded-lg">
+            <h3 className="font-bold">
+              Błąd: Nie znaleziono komponentu flow step
+            </h3>
+            <p className="mt-2">
+              Szukany komponent: <span className="font-mono bg-red-50 px-1">
+                {currentNode.template || "unknown"}
+              </span>
+            </p>
+            <p className="mt-2">
+              ID węzła: <span className="font-mono bg-red-50 px-1">{currentNode.id}</span>
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    // Renderuj layout i komponent kroku
+    return React.createElement(LayoutComponent, {
       title: currentScenario.name,
       stepTitle: currentNode.label,
-      onBackClick: navigation.navigateToScenarios,
-      children: React.createElement(flowStepComponent, {
+      onBackClick: handleBack,
+      children: React.createElement(FlowStepComponent, {
         node: currentNode,
-        onSubmit: handleNodeExecution,
-        onPrevious: handlePreviousNode,
+        onSubmit: handleNext,
+        onPrevious: handleBack,
         isLastNode: isLastNode || false,
         isFirstNode: isFirstNode || false,
-        contextItems: contextItems,
-        scenario: currentScenario,
-        stepTitle: currentNode.label
       })
     });
   };
@@ -206,8 +143,8 @@ const FlowView: React.FC = () => {
   return (
     <Suspense fallback={fallbackLoader}>
       <LoadingState
-        isLoading={isLoading}
-        error={error}
+        isLoading={isLoading || storeLoading}
+        error={error || storeError}
         loadingMessage="Ładowanie flow..."
         errorTitle="Błąd ładowania flow"
         onRetry={() => {
@@ -219,6 +156,5 @@ const FlowView: React.FC = () => {
       </LoadingState>
     </Suspense>
   );
-};
-
+}
 export default FlowView;

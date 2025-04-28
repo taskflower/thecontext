@@ -1,17 +1,17 @@
-// src/tpl/minimal/widgets/InfoWidget.tsx
+// src/templates/default/widgets/InfoWidget.tsx
 import React from "react";
 import { InfoWidgetProps } from "../types";
-import { useContextStore, useWorkspaceStore } from "@/hooks";
+import { useAppStore } from "@/useAppStore";
+
 
 const InfoWidget: React.FC<InfoWidgetProps> = ({
   data = {},
   onSelect
 }) => {
-  const { currentWorkspaceId } = useWorkspaceStore((state) => ({
-    currentWorkspaceId: state.currentWorkspaceId
-  }));
-  const contextStore = useContextStore();
-  const context = currentWorkspaceId ? contextStore.contexts?.[currentWorkspaceId] : null;
+  // Używamy scentralizowanego store zamiast osobnych
+  const currentWorkspaceId = useAppStore(state => state.data.currentWorkspaceId);
+  const contexts = useAppStore(state => state.data.contexts);
+  const context = currentWorkspaceId ? contexts[currentWorkspaceId] : null;
 
   // Pobierz dane z kontekstu jeśli data jest stringiem (np. "header")
   let widgetData = data;

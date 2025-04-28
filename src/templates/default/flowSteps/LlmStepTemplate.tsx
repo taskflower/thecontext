@@ -1,7 +1,7 @@
-// src/tpl/minimal/flowSteps/LlmStepTemplate.tsx
-import React from "react";
+// src/templates/default/flowSteps/LlmStepTemplate.tsx
+import React, { useEffect } from "react";
 import { FlowStepProps } from "@/types";
-import { useFlowStep, useLLM } from "@/hooks";
+import { useFlowStep } from "@/hooks"; // Usunięto useLLM
 
 const LlmStepTemplate: React.FC<FlowStepProps> = ({
   node,
@@ -10,25 +10,31 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
   isLastNode,
   isFirstNode,
 }) => {
-  // Hook do obsługi LLM i komunikacji z API
-  const { isLoading, error, responseData, processedAssistantMessage } = useLLM({
-    assistantMessage: node.assistantMessage || "",
-    initialUserMessage: node.attrs?.initialUserMessage || "",
-    schemaPath: node.attrs?.schemaPath || "",
-    autoStart: true,
-    onDataSaved: (data) => {
-      // Dane są zapisywane ale nawigacja obsługiwana jest osobno
-    },
-  });
-
-  // Hook do obsługi nawigacji i przepływu
-  const { handlePrevious, handleComplete } = useFlowStep({
+  // Używamy zunifikowanego hooka useFlowStep, który łączy funkcjonalności
+  // useLLM i poprzedniego useFlowStep
+  const { 
+    isLoading, 
+    error, 
+    responseData, 
+    processedAssistantMessage,
+    handlePrevious, 
+    handleComplete,
+    sendMessage
+  } = useFlowStep({
     node,
     isFirstNode,
     isLastNode,
     onSubmit,
     onPrevious,
   });
+
+  // Automatycznie wyślij zapytanie po załadowaniu komponentu
+  useEffect(() => {
+    if (node.attrs?.initialUserMessage) {
+      // Zakładamy, że sendMessage jest dostępne w useFlowStep
+      sendMessage(node.attrs.initialUserMessage);
+    }
+  }, [node.attrs?.initialUserMessage, sendMessage]);
 
   return (
     <div className="my-4">

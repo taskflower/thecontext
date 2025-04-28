@@ -1,7 +1,9 @@
-// Modyfikacja w WidgetsStepTemplate.tsx
+// src/templates/default/flowSteps/WidgetsStepTemplate.tsx
 import React, { useEffect, useState, useMemo } from "react";
 import { FlowStepProps } from "@/types";
-import { useContextStore, useFlowStep, useWorkspaceStore } from "@/hooks";
+import { useFlowStep, useComponentLoader } from "@/hooks";
+import { getValueByPath } from "@/utils"; // Zaimportuj z ujednoliconych utils
+import { useAppStore } from "@/useAppStore";
 
 const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
   node,
@@ -10,14 +12,17 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
   isLastNode,
   isFirstNode
 }) => {
-  const [widgetComponents, setWidgetComponents] = useState<Record<string, React.ComponentType<any>>>({});
   const [widgetData, setWidgetData] = useState<Record<string, any>>({});
   const [widgetSchema, setWidgetSchema] = useState<Record<string, any>>({});
   
-  const contextStore = useContextStore();
-  const currWrkspId = useWorkspaceStore((state) => state.currentWorkspaceId);
+  // Pobierz dane ze scentralizowanego store
+  const { 
+    data: { currentWorkspaceId, contexts },
+    processTemplate,
+    getContextPath
+  } = useAppStore();
   
-  // Hook do obsługi nawigacji i przepływu
+  // Użyj nowego hooka do obsługi nawigacji i przepływu
   const {
     handlePrevious,
     handleComplete
@@ -29,53 +34,22 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
     onPrevious
   });
 
+  // Przetwórz wiadomość asystenta
   const processedAssistantMessage = node.assistantMessage
-    ? contextStore.processTemplate 
-      ? contextStore.processTemplate(node.assistantMessage)
-      : node.assistantMessage
+    ? processTemplate(node.assistantMessage)
     : "";
 
-  // Dynamicznie ładuj komponenty widgetów
-  useEffect(() => {
-    const loadWidgetComponents = async () => {
-      try {
-        // Używamy import.meta.glob do dynamicznego ładowania wszystkich widgetów
-        const modules = import.meta.glob('../widgets/*.tsx');
-        const components: Record<string, React.ComponentType<any>> = {};
-        
-        // Dla każdego modułu, załaduj komponent i przypisz go do typu widgetu
-        for (const path in modules) {
-          const widgetName = path.split('/').pop()?.replace('.tsx', '') || '';
-          // Przekształć nazwy plików na typy widgetów (np. DataDisplayWidget -> dataDisplay)
-          const widgetType = widgetName.replace('Widget', '').toLowerCase();
-          
-          try {
-            const module = await modules[path]();
-            if (module.default) {
-              components[widgetType] = module.default;
-              
-              // Dodaj też mapowanie dla oryginalnej nazwy pliku (bez .tsx) jako fallback
-              components[widgetName] = module.default;
-            }
-          } catch (error) {
-            console.error(`Błąd ładowania widgetu ${widgetName}:`, error);
-          }
-        }
-        
-        setWidgetComponents(components);
-      } catch (error) {
-        console.error("Błąd ładowania komponentów widgetów:", error);
-      }
-    };
-
-    loadWidgetComponents();
-  }, []);
+  // Pobieranie kontekstu dla bieżącego workspace
+  const context = useMemo(() => 
+    currentWorkspaceId ? contexts[currentWorkspaceId] || {} : {},
+    [currentWorkspaceId, contexts]
+  );
 
   // Funkcja do parsowania ścieżek danych, obsługująca odwołania między scenariuszami
   const resolveDataPath = (path: string) => {
-    if (!path || !contextStore.contexts || !currWrkspId) return null;
+    if (!path || !context) return null;
     
-    // Sprawdź czy ścieżka zawiera odwołanie do innego scenariusza
+    // Sprawdź, czy ścieżka zawiera odwołanie do innego scenariusza
     if (path.includes('.')) {
       const segments = path.split('.');
       
@@ -83,31 +57,31 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
       if (segments[0].startsWith('scenario-')) {
         const scenarioId = segments[0];
         // Pobierz dane z kontekstu dla tego scenariusza
-        const scenarioData = contextStore.contexts[currWrkspId][scenarioId];
+        const scenarioData = context[scenarioId];
         
         if (!scenarioData) return null;
         
         // Usuń pierwszy segment (scenarioId) i pobierz dane z pozostałej ścieżki
         const remainingPath = segments.slice(1).join('.');
-        return contextUtils.getValueByPath(scenarioData, remainingPath);
+        return getValueByPath(scenarioData, remainingPath);
       }
     }
     
     // Standardowa ścieżka w aktualnym kontekście
-    return contextStore.getContextPath(path);
+    return getContextPath(path);
   };
 
   // Pobierz schemat widgetów z kontekstu
   useEffect(() => {
-    if (!node.attrs?.schemaPath || !contextStore.contexts || !currWrkspId) return;
+    if (!node.attrs?.schemaPath || !context) return;
 
-    const schemaObj = contextStore.getContextPath(node.attrs.schemaPath);
+    const schemaObj = getContextPath(node.attrs.schemaPath);
     if (schemaObj) setWidgetSchema({ widgets: schemaObj });
-  }, [node.attrs?.schemaPath, contextStore.contexts, currWrkspId, contextStore.getContextPath]);
+  }, [node.attrs?.schemaPath, context, getContextPath]);
 
   // Pobierz dane dla widgetów z kontekstu
   useEffect(() => {
-    if (!node.attrs?.dataPaths || !contextStore.contexts || !currWrkspId) return;
+    if (!node.attrs?.dataPaths || !context) return;
 
     const result: Record<string, any> = {};
     
@@ -119,7 +93,26 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
     });
     
     setWidgetData(result);
-  }, [node.attrs?.dataPaths, contextStore.contexts, currWrkspId]);
+  }, [node.attrs?.dataPaths, context]);
+
+  // Używamy nowego hooka do ładowania widgetów
+  const { component: DataDisplayWidget } = useComponentLoader('widget', 'DataDisplay');
+  const { component: MetricsWidget } = useComponentLoader('widget', 'Metrics');
+  const { component: StatsWidget } = useComponentLoader('widget', 'Stats');
+  const { component: InfoWidget } = useComponentLoader('widget', 'Info');
+  const { component: CardListWidget } = useComponentLoader('widget', 'CardList');
+
+  // Mapowanie typów widgetów do komponentów
+  const widgetComponents = useMemo(() => ({
+    'dataDisplay': DataDisplayWidget,
+    'metrics': MetricsWidget,
+    'stats': StatsWidget,
+    'info': InfoWidget,
+    'cardList': CardListWidget,
+    // Dodaj mapowanie nazw alternatywnych
+    'data-display': DataDisplayWidget,
+    'card-list': CardListWidget
+  }), [DataDisplayWidget, MetricsWidget, StatsWidget, InfoWidget, CardListWidget]);
 
   // Renderuj widgety na podstawie schematu
   const renderWidgets = () => {
@@ -152,24 +145,21 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
       }
       
       // Dla innych typów, znajdź odpowiedni komponent
+      const lowerType = type.toLowerCase();
+      
       // Spróbuj znaleźć komponent dla danego typu
-      let WidgetComponent = widgetComponents[type.toLowerCase()];
+      let WidgetComponent = widgetComponents[lowerType];
       
-      // Jeśli nie znaleziono, spróbuj z różnymi wariantami nazwy
-      if (!WidgetComponent && type.includes('-')) {
+      // Próby alternatywnych nazw
+      if (!WidgetComponent && lowerType.includes('-')) {
         // Konwersja kebab-case na camelCase
-        const camelCaseType = type.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+        const camelCaseType = lowerType.replace(/-([a-z])/g, (_, g) => g.toUpperCase());
         WidgetComponent = widgetComponents[camelCaseType];
-      }
-      
-      if (!WidgetComponent && !type.toLowerCase().endsWith('widget')) {
-        // Spróbuj dodać "Widget" na końcu
-        WidgetComponent = widgetComponents[`${type.toLowerCase()}Widget`];
       }
       
       // Jeśli nadal nie znaleziono, użyj DataDisplayWidget jako fallback
       if (!WidgetComponent) {
-        WidgetComponent = widgetComponents['dataDisplay'] || widgetComponents['DataDisplayWidget'];
+        WidgetComponent = widgetComponents['dataDisplay'];
         
         if (!WidgetComponent) {
           console.warn(`Nie znaleziono komponentu dla typu '${type}'`);
@@ -196,6 +186,9 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
     });
   };
 
+  // Sprawdź, czy wszystkie niezbędne widgety zostały załadowane
+  const areWidgetsReady = Object.values(widgetComponents).some(comp => comp !== null);
+
   return (
     <div>
       {/* Wiadomość asystenta */}
@@ -207,7 +200,7 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
 
       {/* Widgety */}
       <div className="space-y-6">
-        {Object.keys(widgetComponents).length > 0 ? renderWidgets() : (
+        {areWidgetsReady ? renderWidgets() : (
           <div className="py-6 px-4 bg-gray-50 border border-gray-100 rounded-lg">
             <p className="text-gray-700 text-sm">Ładowanie widgetów...</p>
           </div>

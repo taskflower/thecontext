@@ -1,20 +1,19 @@
-// src/tpl/minimal/layouts/SimpleLayout.tsx
+// src/templates/default/layouts/SimpleLayout.tsx
 import React from "react";
 import { X } from "lucide-react";
 import { LayoutProps } from "@/types";
-import { useAppNavigation } from "@/hooks";
-
+import { useNavigation } from "@/hooks"; // Zmienione z useAppNavigation na useNavigation
 
 const SimpleLayout: React.FC<LayoutProps> = ({ 
   children, 
   title,
-  stepTitle, // Dodane do obsługi stepTitle
+  stepTitle, 
   onBackClick 
 }) => {
-  const navigation = useAppNavigation();
+  const navigation = useNavigation();
   
-  // Użyj dostarczonej funkcji onBackClick lub zdefiniowanej w hooku useNavigation
-  const handleCloseClick = onBackClick || navigation.navigateToScenarios;
+  // Używamy dostarczonej funkcji onBackClick lub zdefiniowanej w nowym hooku useNavigation
+  const handleCloseClick = onBackClick || navigation.navigateToWorkspaces;
 
   return (
     <div className="flex flex-col bg-white rounded-lg mx-auto w-full max-w-4xl h-full md:min-h-[95vh] md:max-h-[95vh] px-4 md:px-6">
