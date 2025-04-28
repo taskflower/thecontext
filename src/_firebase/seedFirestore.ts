@@ -43,7 +43,7 @@ async function addDataToFirestore(userId: string, appData: any[]) {
     const applicationData = {
       name: appItem.name,
       description: appItem.description || "",
-      templateSettings: appItem.templateSettings || {},
+      template: appItem.template || "default", // Dodane pole template z JSON
       createdAt: new Date(),
       createdBy: userId,
     };
@@ -89,6 +89,8 @@ async function addDataToFirestore(userId: string, appData: any[]) {
               icon: scenarioItem.icon || "file",
               systemMessage: scenarioItem.systemMessage || "",
               workspaceId,
+              // Dodajemy dependsOn jeśli istnieje
+              dependsOn: scenarioItem.dependsOn || [],
               createdAt: new Date(),
             };
 
@@ -103,7 +105,7 @@ async function addDataToFirestore(userId: string, appData: any[]) {
 
             // Dla każdego węzła w scenariuszu
             if (Array.isArray(scenarioItem.nodes)) {
-              // Dodajemy węzły z uwzględnieniem pola order (sortujemy przed dodaniem, aby zapewnić poprawną kolejność)
+              // Dodajemy węzły z uwzględnieniem pola order
               const sortedNodes = [...scenarioItem.nodes].sort((a, b) => {
                 // Jeśli pole order istnieje, sortuj według niego
                 if (a.order !== undefined && b.order !== undefined) {
@@ -125,10 +127,11 @@ async function addDataToFirestore(userId: string, appData: any[]) {
                   label: nodeItem.label || "",
                   scenarioId,
                   contextPath: nodeItem.contextPath || "",
-                  templateId: nodeItem.templateId || "default",
+                  // Użyj pola template z JSON zamiast templateId
+                  template: nodeItem.template || "default",
                   assistantMessage: nodeItem.assistantMessage || "",
                   attrs: nodeItem.attrs || {},
-                  order: nodeOrder, // Dodajemy pole order do węzła w bazie danych
+                  order: nodeOrder,
                   createdAt: new Date(),
                 };
 

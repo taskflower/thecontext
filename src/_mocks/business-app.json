@@ -2,47 +2,7 @@
   {
     "name": "Business Analytics",
     "description": "Analiza biznesowa i finansowa",
-    "templateSettings": {
-      "layoutTemplate": "simple",
-      "scenarioWidgetTemplate": "card-list",
-      "widgets": [
-        {
-          "type": "info",
-          "data": {
-            "title": "Witaj w Business Analytics",
-            "description": "System do analiz biznesowych i finansowych",
-            "backLink": "/",
-            "backText": "Wróć do listy aplikacji",
-            "variant": "info"
-          }
-        },
-        {
-          "type": "metrics",
-          "data": [
-            {
-              "label": "Liczba scenariuszy",
-              "value": 2,
-              "suffix": "dostępne"
-            },
-            {
-              "label": "Średni czas analizy",
-              "value": 5,
-              "suffix": "minut"
-            },
-            {
-              "label": "Dokładność predykcji",
-              "value": 92,
-              "suffix": "%",
-              "change": 3
-            }
-          ]
-        },
-        {
-          "type": "card-list",
-          "data": "workspaces"
-        }
-      ]
-    },
+    "template": "default",
     "workspaces": [
       {
         "id": "workspace-minimal",
@@ -63,7 +23,7 @@
                 "label": "Krok 1: Dane finansowe",
                 "assistantMessage": "Podaj przychody i koszty projektu:",
                 "contextPath": "collect-data",
-                "templateId": "form-step",
+                "template": "form-step",
                 "order": 0,
                 "attrs": {
                   "schemaPath": "schemas.form.business"
@@ -75,7 +35,7 @@
                 "label": "Krok 2: Raport ROI",
                 "assistantMessage": "Generuję raport ROI na podstawie danych...",
                 "contextPath": "generate-report",
-                "templateId": "llm-step",
+                "template": "llm-step",
                 "order": 1,
                 "attrs": {
                   "autoStart": true,
@@ -90,7 +50,7 @@
                 "label": "Krok 3: Podsumowanie",
                 "assistantMessage": "Oto podsumowanie wyników analizy finansowej twojego projektu.",
                 "contextPath": "summary",
-                "templateId": "widgets-step",
+                "template": "widgets-step",
                 "order": 2,
                 "attrs": {
                   "schemaPath": "schemas.widgets.businessWidgets",
@@ -118,7 +78,7 @@
                 "label": "Krok 1: Dane marketingowe",
                 "assistantMessage": "Podaj informacje dotyczące twoich działań marketingowych:",
                 "contextPath": "marketing-data",
-                "templateId": "form-step",
+                "template": "form-step",
                 "order": 0,
                 "attrs": {
                   "schemaPath": "schemas.form.marketing"
@@ -130,7 +90,7 @@
                 "label": "Krok 2: Analiza efektywności",
                 "assistantMessage": "Analizuję efektywność twoich działań marketingowych w oparciu o zebrane dane...",
                 "contextPath": "marketing-analysis",
-                "templateId": "llm-step",
+                "template": "llm-step",
                 "order": 1,
                 "attrs": {
                   "autoStart": true,
@@ -146,7 +106,7 @@
                 "label": "Krok 3: Metryki marketingowe",
                 "assistantMessage": "Oto kluczowe metryki i wskaźniki marketingowe dla twojej kampanii.",
                 "contextPath": "metrics-summary",
-                "templateId": "widgets-step",
+                "template": "widgets-step",
                 "order": 2,
                 "attrs": {
                   "schemaPath": "schemas.widgets.marketingMetrics",
@@ -163,7 +123,7 @@
                 "label": "Krok 4: Plan działania",
                 "assistantMessage": "Na podstawie przeprowadzonych analiz, przygotowałem plan działania w celu optymalizacji twoich działań marketingowych.",
                 "contextPath": "action-plan",
-                "templateId": "widgets-step",
+                "template": "widgets-step",
                 "order": 3,
                 "attrs": {
                   "schemaPath": "schemas.widgets.actionPlan",
@@ -176,10 +136,7 @@
           }
         ],
         "templateSettings": {
-          "layoutTemplate": "simple",
-          "scenarioWidgetTemplate": "card-list",
-          "defaultFlowStepTemplate": "form-step",
-          "theme": "light",
+          "layout": "simple",
           "widgets": [
             {
               "type": "info",
@@ -190,18 +147,6 @@
                 "backText": "Wróć do listy aplikacji",
                 "variant": "info"
               }
-            },
-            {
-              "type": "stats",
-              "data": {
-                "Liczba scenariuszy": 2,
-                "Średnia złożoność": "średnia",
-                "Czas wykonania": "5-10 min"
-              }
-            },
-            {
-              "type": "card-list",
-              "data": "scenarios"
             }
           ]
         },
@@ -291,101 +236,93 @@
               }
             },
             "widgets": {
-              "businessWidgets": {
-                "widgets": [
-                  {
-                    "type": "title",
-                    "title": "Wyniki analizy finansowej"
-                  },
-                  {
-                    "type": "stats",
-                    "title": "Kluczowe wskaźniki finansowe",
-                    "description": "Zestawienie danych finansowych i wyników analizy",
-                    "dataPaths": {
-                      "Przychody": "inputData.revenue",
-                      "Koszty": "inputData.cost",
-                      "ROI": "analysisResults.roi"
-                    }
-                  },
-                  {
-                    "type": "info",
-                    "title": "Opłacalność projektu",
-                    "dataPath": "analysisResults.profitability",
-                    "variant": "warning"
-                  },
-                  {
-                    "type": "cardList",
-                    "title": "Rekomendacje",
-                    "dataPath": "analysisResults.recommendations"
+              "businessWidgets": [
+                {
+                  "type": "title",
+                  "title": "Wyniki analizy finansowej"
+                },
+                {
+                  "type": "stats",
+                  "title": "Kluczowe wskaźniki finansowe",
+                  "description": "Zestawienie danych finansowych i wyników analizy",
+                  "dataPaths": {
+                    "Przychody": "inputData.revenue",
+                    "Koszty": "inputData.cost",
+                    "ROI": "analysisResults.roi"
                   }
-                ]
-              },
-              "marketingMetrics": {
-                "widgets": [
-                  {
-                    "type": "title",
-                    "title": "Analiza efektywności marketingowej"
-                  },
-                  {
-                    "type": "metrics",
-                    "title": "Kluczowe wskaźniki efektywności",
-                    "dataPaths": {
-                      "CPA": "analysisResults.cpa",
-                      "ROAS": "analysisResults.roas",
-                      "CPC": "analysisResults.cpc",
-                      "Konwersja": "analysisResults.conversionRate"
-                    }
-                  },
-                  {
-                    "type": "stats",
-                    "title": "Dane wejściowe",
-                    "description": "Zestawienie wprowadzonych danych",
-                    "dataPaths": {
-                      "Budżet reklamowy": "inputData.adBudget",
-                      "Przychody": "financialData.revenue",
-                      "Liczba kliknięć": "inputData.clicks",
-                      "Liczba konwersji": "inputData.conversions"
-                    }
-                  },
-                  {
-                    "type": "info",
-                    "title": "Ocena efektywności",
-                    "dataPath": "analysisResults.effectivenessRating",
-                    "variant": "info"
+                },
+                {
+                  "type": "info",
+                  "title": "Opłacalność projektu",
+                  "dataPath": "analysisResults.profitability",
+                  "variant": "warning"
+                },
+                {
+                  "type": "cardList",
+                  "title": "Rekomendacje",
+                  "dataPath": "analysisResults.recommendations"
+                }
+              ],
+              "marketingMetrics": [
+                {
+                  "type": "title",
+                  "title": "Analiza efektywności marketingowej"
+                },
+                {
+                  "type": "metrics",
+                  "title": "Kluczowe wskaźniki efektywności",
+                  "dataPaths": {
+                    "CPA": "analysisResults.cpa",
+                    "ROAS": "analysisResults.roas",
+                    "CPC": "analysisResults.cpc",
+                    "Konwersja": "analysisResults.conversionRate"
                   }
-                ]
-              },
-              "actionPlan": {
-                "widgets": [
-                  {
-                    "type": "title",
-                    "title": "Plan działania marketingowego"
-                  },
-                  {
-                    "type": "info",
-                    "title": "Strategia optymalizacji",
-                    "dataPath": "marketingAnalysis.optimizationStrategy",
-                    "variant": "success"
-                  },
-                  {
-                    "type": "DataDisplayWidget",
-                    "title": "Mocne strony kampanii",
-                    "dataPath": "marketingAnalysis.strengths"
-    
-                  },
-                  {
-                    "type": "DataDisplayWidget",
-                    "title": "Słabe strony kampanii",
-                    "dataPath": "marketingAnalysis.weaknesses"
-
-                  },
-                  {
-                    "type": "cardList",
-                    "title": "Rekomendowane działania",
-                    "dataPath": "marketingAnalysis.recommendations"
+                },
+                {
+                  "type": "stats",
+                  "title": "Dane wejściowe",
+                  "description": "Zestawienie wprowadzonych danych",
+                  "dataPaths": {
+                    "Budżet reklamowy": "inputData.adBudget",
+                    "Przychody": "financialData.revenue",
+                    "Liczba kliknięć": "inputData.clicks",
+                    "Liczba konwersji": "inputData.conversions"
                   }
-                ]
-              }
+                },
+                {
+                  "type": "info",
+                  "title": "Ocena efektywności",
+                  "dataPath": "analysisResults.effectivenessRating",
+                  "variant": "info"
+                }
+              ],
+              "actionPlan": [
+                {
+                  "type": "title",
+                  "title": "Plan działania marketingowego"
+                },
+                {
+                  "type": "info",
+                  "title": "Strategia optymalizacji",
+                  "dataPath": "marketingAnalysis.optimizationStrategy",
+                  "variant": "success"
+                },
+                {
+                  "type": "DataDisplayWidget",
+                  "title": "Mocne strony kampanii",
+                  "dataPath": "marketingAnalysis.strengths"
+                },
+                {
+                  "type": "DataDisplayWidget",
+                  "title": "Słabe strony kampanii",
+                  "dataPath": "marketingAnalysis.weaknesses"
+                },
+                {
+                  "type": "cardList",
+                  "title": "Rekomendowane działania",
+                  "dataPath": "marketingAnalysis.recommendations"
+                }
+              ]
             }
           }
         }

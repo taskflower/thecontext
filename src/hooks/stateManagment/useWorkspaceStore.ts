@@ -111,7 +111,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   },
 
   selectWorkspace: (id) => {
-    if (!id) return;
+    if (!id || id === get().currentWorkspaceId) return; // Dodaj sprawdzenie czy ID się zmieniło
     
     console.log("Wybór workspace:", id);
     set({ currentWorkspaceId: id, currentScenarioId: null });

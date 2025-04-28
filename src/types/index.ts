@@ -1,121 +1,116 @@
 // src/types/index.ts
-import { ReactNode } from 'react';
 
-// Podstawowe typy
-export type IconType = string;
+// Typ dla komponentu widgetu
+export interface WidgetProps<T = any> {
+  data?: T;
+  onSelect?: (id: string) => void;
+  attrs?: Record<string, any>;
+}
 
-// Komponenty
+// Typ dla komponentu layoutu
 export interface LayoutProps {
-  children: ReactNode;
+  children: React.ReactNode;
   title?: string;
   stepTitle?: string;
   onBackClick?: () => void;
 }
 
-export interface WidgetProps {
-  data?: any;
-  onSelect?: (id: string) => void;
-  attrs?: Record<string, any>;
-}
-
+// Typ dla komponentu kroku flow
 export interface FlowStepProps {
   node: NodeData;
   onSubmit: (data: any) => void;
   onPrevious: () => void;
   isLastNode: boolean;
   isFirstNode: boolean;
-  contextItems?: any[][];
-  scenario?: Scenario;
+  contextItems?: [string, any][];
+  scenario?: any;
   stepTitle?: string;
 }
 
-// Szablony
-export interface LayoutTemplate {
-  id: string;
-  name: string;
-  component: React.ComponentType<LayoutProps>;
-}
-
-export interface WidgetTemplate {
-  id: string;
-  name: string;
-  category: string;
-  component: React.ComponentType<WidgetProps>;
-}
-
-export interface FlowStepTemplate {
-  id: string;
-  name: string;
-  compatibleNodeTypes: string[];
-  component: React.ComponentType<FlowStepProps>;
-}
-
-// Widgety w konfiguracji
-export interface WidgetConfig {
-  type: string;
-  data?: string | any;
-  attrs?: Record<string, any>;
-}
-
-// Dane przepływu
+// Typ dla danych węzła
 export interface NodeData {
   id: string;
-  scenarioId: string;
-  label: string;
+  label?: string;
+  type?: string;
+  template?: string;      // Zmienione z templateId na template
   assistantMessage?: string;
   contextPath?: string;
-  templateId: string;
-  type?: string;
-  attrs?: Record<string, any>;
-  initialUserMessage?: string;
-  includeSystemMessage?: boolean;
   order?: number;
-}
-
-export interface Scenario {
-  id: string;
-  name: string;
-  description: string;
-  nodes: NodeData[];
-  systemMessage?: string;
-  icon?: IconType;
+  attrs?: Record<string, any>;
+  scenarioId?: string;    // Dodane pole scenarioId
   [key: string]: any;
 }
 
-export interface TemplateSettings {
-  layoutTemplate: string;
-  scenarioWidgetTemplate: string;
-  defaultFlowStepTemplate: string;
-  theme?: 'light' | 'dark' | 'system';
-  customStyles?: Record<string, string>;
-  // Lista widgetów do renderowania
-  widgets?: WidgetConfig[];
+// Typ dla scenariusza
+export interface Scenario {
+  id: string;
+  name: string;
+  description?: string;
+  nodes?: NodeData[];
+  icon?: string;
+  systemMessage?: string;     // Dodane pole systemMessage
+  workspaceId?: string;       // Dodane pole workspaceId
+  dependsOn?: string[];       // Dodane pole dependsOn
+  getSteps?: () => NodeData[];
+  [key: string]: any;
 }
 
+// Typ dla workspace
 export interface Workspace {
   id: string;
   name: string;
   description?: string;
+  applicationId?: string;
+  userId?: string;            // Dodane pole userId
+  applicationName?: string;
   scenarios: Scenario[];
-  templateSettings: TemplateSettings;
-  initialContext: Record<string, any>;
-  icon?: IconType;
+  initialContext?: Record<string, any>;
+  templateSettings?: TemplateSettings;
+  icon?: string;
+  createdAt?: Date;           // Dodane pole createdAt
 }
 
-// Definicja typu Application
+// Typ dla ustawień szablonu
+export interface TemplateSettings {
+  layout?: string;            // Zmienione z layoutTemplate na layout
+  widgets?: WidgetConfig[];
+  [key: string]: any;         // Dodane dla dowolnych dodatkowych pól
+}
+
+// Typ dla konfiguracji widgetu
+export interface WidgetConfig {
+  type: string;
+  title?: string;
+  data?: string | any;
+  attrs?: Record<string, any>;
+  dataPath?: string;          // Dodane pole dataPath
+  dataPaths?: Record<string, string>; // Dodane pole dataPaths
+  variant?: string;           // Dodane pole variant
+}
+
+// Typ dla aplikacji
 export interface Application {
   id: string;
   name: string;
   description?: string;
-  workspaces: Workspace[];
+  template?: string;          // Dodane pole template zgodnie z JSON
+  workspaces?: Workspace[];
   templateSettings?: TemplateSettings;
+  createdAt?: Date;
+  createdBy?: string;
 }
 
-// Pole formularza
+// Typ dla pola formularza
 export interface FormField {
   name: string;
   label: string;
-  type?: string;
+  type: string;
   required?: boolean;
   options?: string[];
+  placeholder?: string;
+  helperText?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  defaultValue?: any;
 }

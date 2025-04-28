@@ -1,28 +1,41 @@
-// src/views/WorkspaceView.tsx
-import React, { useEffect, Suspense } from "react";
+import { useApplicationStore } from "@/hooks";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getLayoutComponent, getWidgetComponent } from "../templates";
-import { useApplicationStore } from "@/hooks/stateManagment/useApplicationStore";
 import { useWorkspaceStore } from "@/hooks/stateManagment/useWorkspaceStore";
-import { LoadingState } from "@/components/LoadingState";
-import SharedLoader from "@/components/SharedLoader";
-import { LayoutProps, WidgetProps } from "@/types";
+
+interface Module {
+  default: React.ComponentType<any>; // Updated to accept props
+}
 
 export const WorkspaceView: React.FC = () => {
   const { applicationId } = useParams();
   const navigate = useNavigate();
-  const { fetchApplicationById, getCurrentApplication, isLoading, error } = useApplicationStore();
+  const { fetchApplicationById, getCurrentApplication, isLoading, error } =
+    useApplicationStore();
   const { selectWorkspace } = useWorkspaceStore();
 
-  useEffect(() => {
-    if (applicationId) {
-      fetchApplicationById(applicationId);
-    }
-  }, [applicationId, fetchApplicationById]);
+  const [layoutComponent, setLayoutComponent] =
+    useState<React.ComponentType<any> | null>(null);
+  const [loadingError, setLoadingError] = useState<string | null>(null);
+  const [cardListComponent, setCardListComponent] = useState<React.ComponentType<any> | null>(null);
 
+  // Get current application
   const currentApplication = getCurrentApplication();
   const workspaces = currentApplication?.workspaces || [];
 
+  // Prepare workspace data for card list
+  const workspaceData = useMemo(() => {
+    return workspaces.map(workspace => ({
+      id: workspace.id,
+      name: workspace.name,
+      description: workspace.description || `Template: ${workspace.templateSettings?.layoutTemplate}`,
+      count: workspace.scenarios?.length || 0,
+      countLabel: "scenarios",
+      icon: workspace.icon || "briefcase",
+    }));
+  }, [workspaces]);
+
+  // Handle workspace selection
   const handleSelect = (workspaceId: string) => {
     selectWorkspace(workspaceId);
     navigate(`/${workspaceId}`);
@@ -30,119 +43,175 @@ export const WorkspaceView: React.FC = () => {
 
   const handleBackClick = () => navigate('/');
 
-  // Przygotowanie danych dla widgetów
-  const workspaceData = workspaces.map(workspace => ({
-    id: workspace.id,
-    name: workspace.name,
-    description: workspace.description || `Template: ${workspace.templateSettings.layoutTemplate}`,
-    count: workspace.scenarios.length,
-    countLabel: "scenarios",
-    icon: workspace.icon || "briefcase",
-  }));
+  // Determine template to use (from application settings or default)
+  const templateName = useMemo(() => {
+    return currentApplication?.templateSettings?.template || "default";
+  }, [currentApplication]);
 
-  const headerData = {
-    title: currentApplication?.name,
-    description: currentApplication?.description,
-    backLink: '/',
-    backText: 'Wróć do listy aplikacji'
-  };
+  // Fetch application data once when component mounts or applicationId changes
+  useEffect(() => {
+    if (applicationId) {
+      fetchApplicationById(applicationId);
+    }
+  }, [applicationId, fetchApplicationById]);
 
-  const renderContent = () => {
-    if (!currentApplication) {
-      return (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-red-600 text-lg">
-            Aplikacja o ID {applicationId} nie została znaleziona.
-            <button onClick={handleBackClick} className="ml-4 px-4 py-2 bg-blue-500 text-white rounded">
-              Wróć do listy aplikacji
-            </button>
+  // Load the card list component
+  useEffect(() => {
+    const loadCardListComponent = async () => {
+      try {
+        // Definiujemy ścieżkę do komponentu
+        const cardListPath = `/src/templates/${templateName}/widgets/card-list.tsx`;
+        // Pobierz wszystkie moduły widgetów
+        const modules = import.meta.glob("/src/templates/*/widgets/*.tsx");
+        
+        if (modules[cardListPath]) {
+          const module = await modules[cardListPath]();
+          setCardListComponent(() => module.default);
+          return;
+        }
+        
+        // Alternatywne próby znalezienia komponentu
+        for (const path in modules) {
+          const pathLower = path.toLowerCase();
+          if ((pathLower.includes('card') && pathLower.includes('list')) || 
+              pathLower.includes('cardlist')) {
+            try {
+              const module = await modules[path]();
+              if (module.default) {
+                setCardListComponent(() => module.default);
+                return;
+              }
+            } catch (err) {
+              console.error(`Próba załadowania ${path} nie powiodła się:`, err);
+            }
+          }
+        }
+        
+        // Jeśli nie znaleziono, użyj fallbacku
+        throw new Error(`Nie znaleziono komponentu CardList dla szablonu ${templateName}`);
+      } catch (error) {
+        console.error("Błąd ładowania komponentu CardList:", error);
+        
+        // Fallback komponent przy błędzie
+        const FallbackCardList: React.FC<any> = ({ data = [], onSelect }) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {(Array.isArray(data) ? data : []).map((item: any) => (
+              <div
+                key={item.id || Math.random().toString(36).substring(7)}
+                onClick={() => onSelect && onSelect(item.id)}
+                className="group bg-white rounded-lg border border-gray-200 p-5 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+              >
+                <h3 className="text-lg font-medium text-gray-900 mb-2">{item.name || 'Brak nazwy'}</h3>
+                {item.description && <p className="text-sm text-gray-500 mb-3">{item.description}</p>}
+                {item.count !== undefined && (
+                  <div className="flex justify-between items-center mt-3 pt-2 border-t border-gray-100">
+                    <span className="text-xs text-gray-500">{item.count} {item.countLabel || 'elementów'}</span>
+                    <span className="text-gray-500">→</span>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
+        );
+        
+        setCardListComponent(() => FallbackCardList);
+      }
+    };
+
+    if (templateName) {
+      loadCardListComponent();
+    }
+  }, [templateName]);
+
+  // Load the appropriate layout component based on template
+  const loadLayoutComponent = useCallback(async () => {
+    if (!templateName) return;
+
+    try {
+      // Use dynamic import with the template name
+      const layoutPath = `/src/templates/${templateName}/layouts/SimpleLayout.tsx`;
+      const modules = import.meta.glob("/src/templates/*/layouts/*.tsx");
+
+      if (!modules[layoutPath]) {
+        throw new Error(`Layout ${layoutPath} not found`);
+      }
+
+      const module = (await modules[layoutPath]()) as Module;
+      const ComponentToRender = module.default;
+
+      setLayoutComponent(() => ComponentToRender);
+      setLoadingError(null);
+    } catch (error) {
+      console.error("Error loading layout component:", error);
+      setLoadingError(
+        `Failed to load layout: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      setLayoutComponent(null);
+    }
+  }, [templateName]);
+
+  // Load the layout component when application or template changes
+  useEffect(() => {
+    if (currentApplication) {
+      loadLayoutComponent();
+    }
+  }, [currentApplication, loadLayoutComponent]);
+
+  // Render based on state
+  if (isLoading) {
+    return <div className="p-4">Loading application data...</div>;
+  }
+
+  if (error) {
+    return <div className="p-4 text-red-500">Error: {error}</div>;
+  }
+
+  if (loadingError) {
+    return <div className="p-4 text-red-500">Layout error: {loadingError}</div>;
+  }
+
+  if (!currentApplication) {
+    return (
+      <div className="p-4">No application found with ID: {applicationId}</div>
+    );
+  }
+
+  // Render workspace card list if no workspaces are available
+  const renderWorkspaceContent = () => {
+    if (workspaces.length === 0) {
+      return (
+        <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+          <p className="text-yellow-700">Brak dostępnych workspaces w tej aplikacji.</p>
         </div>
       );
     }
 
-    // Pobierz komponenty na podstawie konfiguracji aplikacji
-    const layoutName = currentApplication.templateSettings?.layoutTemplate || "default";
-
-    console.log('currentApplication',currentApplication)
-    const LayoutComponent = getLayoutComponent(layoutName);
-    
-    if (!LayoutComponent) {
-      return <div>Layout not found: {layoutName}</div>;
+    if (!cardListComponent) {
+      return <div className="p-4">Loading workspace cards...</div>;
     }
 
-    const LayoutComponentWithType = LayoutComponent as React.ComponentType<LayoutProps>;
-
-    // Renderuj layout z dynamicznym zawartością na podstawie konfiguracji
-    return (
-      <LayoutComponentWithType title={currentApplication.name} onBackClick={handleBackClick}>
-        {/* Renderuj widgety zgodnie z konfiguracją aplikacji */}
-        {currentApplication.templateSettings?.widgets?.map((widgetConfig: any, index: number) => {
-          const { type, data } = widgetConfig;
-          const WidgetComponent = getWidgetComponent(type);
-          
-          if (!WidgetComponent) {
-            return <div key={index}>Widget type not found: {type}</div>;
-          }
-          
-          const WidgetComponentWithType = WidgetComponent as React.ComponentType<WidgetProps>;
-          
-          // Wybierz odpowiednie dane dla widgetu
-          let widgetData;
-          if (type === 'card-list' && data === 'workspaces') {
-            widgetData = workspaceData;
-          } else if (type === 'info' && data === 'header') {
-            widgetData = headerData;
-          } else {
-            widgetData = widgetConfig.data || {};
-          }
-          
-          return (
-            <div key={index} className="mb-6">
-              <WidgetComponentWithType 
-                data={widgetData} 
-                onSelect={type === 'card-list' ? handleSelect : (path) => navigate(path)}
-                attrs={widgetConfig.attrs}
-              />
-            </div>
-          );
-        })}
-        
-        {/* Jeśli nie ma zdefiniowanych widgetów, pokaż domyślne */}
-        {(!currentApplication.templateSettings?.widgets || currentApplication.templateSettings.widgets.length === 0) && (
-          <>
-            
-            
-            {workspaces.length === 0 ? (
-              <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-                <p className="text-yellow-700">Brak dostępnych workspaces w tej aplikacji.</p>
-              </div>
-            ) : (
-              (() => {
-                const DefaultWidget = getWidgetComponent("card-list");
-                if (!DefaultWidget) return <div>Default widget not found</div>;
-                const DefaultWidgetWithType = DefaultWidget as React.ComponentType<WidgetProps>;
-                return <DefaultWidgetWithType data={workspaceData} onSelect={handleSelect} />;
-              })()
-            )}
-          </>
-        )}
-      </LayoutComponentWithType>
-    );
+    // Render the CardList component with workspace data
+    return React.createElement(cardListComponent, {
+      data: workspaceData,
+      onSelect: handleSelect
+    });
   };
 
-  return (
-    <Suspense fallback={<SharedLoader message="Ładowanie komponentów..." fullScreen={true} />}>
-      <LoadingState
-        isLoading={isLoading}
-        error={error}
-        loadingMessage="Ładowanie aplikacji..."
-        errorTitle="Błąd ładowania aplikacji"
-        onRetry={() => applicationId && fetchApplicationById(applicationId)}
-      >
-        {renderContent()}
-      </LoadingState>
-    </Suspense>
+  // Use proper JSX syntax for dynamic components with props
+  return layoutComponent ? (
+    React.createElement(layoutComponent, {
+      title: currentApplication.name,
+      onBackClick: handleBackClick,
+      children: (
+        <div className="space-y-6">
+          {renderWorkspaceContent()}
+        </div>
+      )
+    })
+  ) : (
+    <div className="p-4">Loading layout component...</div>
   );
 };
 
