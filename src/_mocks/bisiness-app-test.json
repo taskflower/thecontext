@@ -1,0 +1,135 @@
+[
+    {
+      "name": "Analiza Finansowa - test",
+      "description": "Prosta analiza finansowa projektu",
+      "template": "default",
+      "workspaces": [
+        {
+          "id": "workspace-finance",
+          "name": "Finanse Projektu",
+          "description": "Zbieranie i analiza danych finansowych",
+          "icon": "briefcase",
+          "scenarios": [
+            {
+              "id": "scenario-roi",
+              "name": "Analiza ROI",
+              "description": "Obliczanie zwrotu z inwestycji",
+              "icon": "calculator",
+              "nodes": [
+                {
+                  "id": "collect-financial-data",
+                  "scenarioId": "scenario-roi",
+                  "label": "Krok 1: Dane finansowe",
+                  "assistantMessage": "Podaj przychody i koszty projektu:",
+                  "contextPath": "financial-data",
+                  "template": "form-step",
+                  "order": 0,
+                  "attrs": {
+                    "schemaPath": "schemas.form.finance"
+                  }
+                },
+                {
+                  "id": "calculate-roi",
+                  "scenarioId": "scenario-roi",
+                  "label": "Krok 2: Obliczanie ROI",
+                  "assistantMessage": "Obliczam ROI na podstawie danych...",
+                  "contextPath": "roi-results",
+                  "template": "llm-step",
+                  "order": 1,
+                  "attrs": {
+                    "autoStart": true,
+                    "initialUserMessage": "Na podstawie danych: przychody={{financial-data.revenue}}, koszty={{financial-data.costs}} oblicz ROI i podaj wynik. Zwróć JSON z polami: 'roi' (wartość ROI w procentach), 'profit' (zysk w PLN) i 'profitability' (ocena opłacalności - \"wysoka\", \"średnia\" lub \"niska\")."
+                  }
+                },
+                {
+                  "id": "summary",
+                  "scenarioId": "scenario-roi",
+                  "label": "Krok 3: Podsumowanie",
+                  "assistantMessage": "Oto podsumowanie analizy finansowej projektu:",
+                  "contextPath": "summary-data",
+                  "template": "widgets-step",
+                  "order": 2,
+                  "attrs": {
+                    "widgets": [
+                      {
+                        "type": "title",
+                        "title": "Wyniki analizy finansowej"
+                      },
+                      {
+                        "type": "stats",
+                        "title": "Dane finansowe",
+                        "description": "Wartości wprowadzone przez użytkownika",
+                        "dataPaths": {
+                          "Przychody": "financial-data.revenue",
+                          "Koszty": "financial-data.costs"
+                        }
+                      },
+                      {
+                        "type": "metrics",
+                        "title": "Wyniki analizy",
+                        "dataPaths": {
+                          "ROI": "roi-results.roi",
+                          "Zysk": "roi-results.profit"
+                        }
+                      },
+                      {
+                        "type": "info",
+                        "title": "Opłacalność projektu",
+                        "dataPath": "roi-results.profitability",
+                        "variant": "info"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "templateSettings": {
+            "template": "default",
+            "layout": "simple",
+            "widgets": [
+              {
+                "type": "info",
+                "data": {
+                  "title": "Analiza Finansowa",
+                  "description": "Wybierz scenariusz do uruchomienia",
+                  "variant": "info"
+                }
+              },
+              {
+                "type": "stats",
+                "title": "Ostatnia analiza",
+                "description": "Dane z ostatnio przeprowadzonej analizy",
+                "dataPaths": {
+                  "ROI": "roi-results.roi",
+                  "Przychody": "financial-data.revenue",
+                  "Koszty": "financial-data.costs",
+                  "Zysk": "roi-results.profit"
+                }
+              }
+            ]
+          },
+          "initialContext": {
+            "schemas": {
+              "form": {
+                "finance": [
+                  {
+                    "name": "revenue",
+                    "label": "Przychody (PLN)",
+                    "type": "number",
+                    "required": true
+                  },
+                  {
+                    "name": "costs",
+                    "label": "Koszty (PLN)",
+                    "type": "number",
+                    "required": true
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]

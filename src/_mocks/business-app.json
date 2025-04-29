@@ -73,6 +73,7 @@
                       "title": "Kluczowe wskaźniki finansowe",
                       "description": "Zestawienie danych finansowych i wyników analizy",
                       "dataPaths": {
+                        "xxx":"collect-data.revenue",
                         "Przychody": "inputData.revenue",
                         "Koszty": "inputData.cost",
                         "ROI": "analysisResults.roi"

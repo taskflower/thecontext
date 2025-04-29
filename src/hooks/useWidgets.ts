@@ -1,5 +1,5 @@
 // src/hooks/useWidgets.ts
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'; // Dodany import useState
 import { useComponentLoader } from './useComponentLoader';
 import { useAppStore } from '@/useAppStore';
 
@@ -28,6 +28,11 @@ export function useWidgets(widgets: WidgetConfig[] = [], contextBasePath?: strin
   
   // Pobieranie kontekstu z useAppStore
   const { getContextPath, processTemplate } = useAppStore();
+  
+  // Dodana funkcja pomocnicza do sprawdzania, czy ścieżka jest absolutna
+  const isAbsolutePath = (path: string): boolean => {
+    return path && typeof path === 'string' && path.includes('.');
+  };
 
   useEffect(() => {
     const processWidgets = async () => {
@@ -37,49 +42,68 @@ export function useWidgets(widgets: WidgetConfig[] = [], contextBasePath?: strin
       setError(null);
       
       try {
+        console.log("Przetwarzanie widgetów z danymi:", widgets);
+        console.log("Context base path:", contextBasePath);
+        
         // Przetwarzanie każdego widgetu
         const processedWidgets = await Promise.all(widgets.map(async (widget, index) => {
-          // Określ typ widgetu (może być bezpośrednio typ lub z nazwy pliku)
           const widgetType = widget.type || widget.file || 'unknown';
-          
-          // Przygotuj dane dla widgetu
           let widgetDataObj: any = { ...widget };
           
-          // Jeśli jest określona ścieżka do danych, pobierz dane z kontekstu
+          // Obsługa pojedynczej ścieżki danych (dataPath)
           if (widget.dataPath) {
-            const fullPath = contextBasePath 
-              ? `${contextBasePath}.${widget.dataPath}` 
-              : widget.dataPath;
-              
+            // Kluczowa zmiana: sprawdź czy ścieżka jest absolutna
+            const fullPath = isAbsolutePath(widget.dataPath) 
+              ? widget.dataPath 
+              : contextBasePath 
+                ? `${contextBasePath}.${widget.dataPath}` 
+                : widget.dataPath;
+                
             try {
+              console.log(`Pobieranie danych dla widgetu ${widgetType} ze ścieżki:`, fullPath);
               const pathData = getContextPath(fullPath);
+              
               if (pathData !== undefined) {
+                console.log(`Znaleziono dane dla ścieżki ${fullPath}:`, pathData);
                 widgetDataObj.data = pathData;
+              } else {
+                console.warn(`Nie znaleziono danych dla ścieżki ${fullPath}`);
               }
             } catch (err) {
-              console.warn(`Error getting data from path: ${widget.dataPath}`, err);
+              console.warn(`Błąd pobierania danych ze ścieżki ${widget.dataPath}:`, err);
             }
           }
           
-          // Jeśli są określone multiple ścieżki danych, pobierz każdą z nich
+          // Obsługa wielu ścieżek danych (dataPaths)
           if (widget.dataPaths) {
             const mappedData: Record<string, any> = {};
             
+            console.log(`Pobieranie wielu ścieżek dla widgetu ${widgetType}:`, widget.dataPaths);
+            
             for (const [key, path] of Object.entries(widget.dataPaths)) {
-              const fullPath = contextBasePath 
-                ? `${contextBasePath}.${path}` 
-                : path;
-                
+              // Kluczowa zmiana: sprawdź czy ścieżka jest absolutna
+              const fullPath = isAbsolutePath(path) 
+                ? path 
+                : contextBasePath 
+                  ? `${contextBasePath}.${path}` 
+                  : path;
+                  
               try {
+                console.log(`Pobieranie danych dla klucza ${key} ze ścieżki:`, fullPath);
                 const pathData = getContextPath(fullPath);
+                
                 if (pathData !== undefined) {
+                  console.log(`Znaleziono dane dla ścieżki ${fullPath}:`, pathData);
                   mappedData[key] = pathData;
+                } else {
+                  console.warn(`Nie znaleziono danych dla ścieżki ${fullPath}`);
                 }
               } catch (err) {
-                console.warn(`Error getting data from path: ${path} for key: ${key}`, err);
+                console.warn(`Błąd pobierania danych ze ścieżki ${path} dla klucza ${key}:`, err);
               }
             }
             
+            console.log(`Zebrane dane dla widgetu ${widgetType}:`, mappedData);
             widgetDataObj.data = mappedData;
           }
           
@@ -92,17 +116,17 @@ export function useWidgets(widgets: WidgetConfig[] = [], contextBasePath?: strin
             widgetDataObj.description = processTemplate(widget.description);
           }
           
-          // Zwróć przetworzone dane widgetu
           return {
             ...widgetDataObj,
-            id: `widget-${index}`,
+            id: widget.id || `widget-${index}`,
             type: widgetType,
           };
         }));
         
+        console.log("Przetworzone widgety z danymi:", processedWidgets);
         setWidgetData(processedWidgets);
       } catch (err) {
-        console.error('Error processing widgets:', err);
+        console.error('Błąd przetwarzania widgetów:', err);
         setError(err instanceof Error ? err.message : String(err));
       } finally {
         setIsLoading(false);
