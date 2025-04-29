@@ -3,7 +3,6 @@ import React, { useEffect, useMemo, Suspense } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useComponentLoader, useNavigation, useWidgets } from "@/hooks";
 import { LoadingState } from "@/components/LoadingState";
-import SharedLoader from "@/components/SharedLoader";
 import WidgetRenderer from "@/components/WidgetRenderer";
 import { useAppStore } from "@/useAppStore";
 
@@ -17,41 +16,33 @@ export const ScenarioView: React.FC = () => {
     selectScenario,
     getCurrentWorkspace,
     getCurrentScenario,
-    error
+    error,
   } = useAppStore();
 
   // Pobranie stanu ładowania
-  const isLoading = useAppStore(state => 
-    state.loading.workspace || state.loading.scenario
+  const isLoading = useAppStore(
+    (state) => state.loading.workspace || state.loading.scenario
   );
 
   // Używamy hook nawigacji do obsługi flow
-  const {
-    currentNode,
-    isFirstNode,
-    isLastNode,
-    handleNext,
-    handleBack
-  } = useNavigation();
+  const { currentNode, isFirstNode, isLastNode, handleNext, handleBack } =
+    useNavigation();
 
   // Pobierz aktualny workspace i scenariusz
   const currentWorkspace = getCurrentWorkspace();
   const currentScenario = getCurrentScenario();
 
-  // Pobierz nazwę szablonu
-  const templateName = currentWorkspace?.templateSettings?.template || "default";
-
   // Przygotuj dane scenariuszy dla widoku listy
   const scenarioData = useMemo(() => {
     if (!currentWorkspace || !currentWorkspace.scenarios) return [];
-    
-    return currentWorkspace.scenarios.map(scenario => ({
+
+    return currentWorkspace.scenarios.map((scenario) => ({
       id: scenario.id,
       name: scenario.name,
       description: scenario.description || "",
       icon: scenario.icon || "folder",
       count: scenario.nodes?.length || 0,
-      countLabel: "kroków"
+      countLabel: "kroków",
     }));
   }, [currentWorkspace]);
 
@@ -62,10 +53,10 @@ export const ScenarioView: React.FC = () => {
   }, [currentWorkspace?.templateSettings?.widgets]);
 
   // Używamy hooka useWidgets do obsługi widgetów workspace
-  const { 
-    widgetData: workspaceWidgetData, 
-    isLoading: widgetsLoading, 
-    error: widgetsError 
+  const {
+    widgetData: workspaceWidgetData,
+    isLoading: widgetsLoading,
+    error: widgetsError,
   } = useWidgets(workspaceWidgets);
 
   // Wybierz workspace i scenariusz na podstawie parametrów URL
@@ -90,52 +81,51 @@ export const ScenarioView: React.FC = () => {
 
   // Obsługa wyboru elementu w widgecie
   const handleWidgetSelect = (itemId: string) => {
-    console.log("Widget selection:", itemId);
-    
     // Jeśli itemId wygląda jak URL, nawigujemy
-    if (itemId.startsWith('/')) {
+    if (itemId.startsWith("/")) {
       navigate(itemId);
-    } else if (itemId.includes(':')) {
+    } else if (itemId.includes(":")) {
       // Obsługa specjalnych akcji, np. "action:back"
-      const [action, target] = itemId.split(':');
-      if (action === 'navigate' && target) {
+      const [action, target] = itemId.split(":");
+      if (action === "navigate" && target) {
         navigate(target);
-      } else if (action === 'select' && target) {
+      } else if (action === "select" && target) {
         handleScenarioSelect(target);
       }
     }
   };
 
   // Używamy nowego hooka do ładowania komponentów
-  const { 
-    component: LayoutComponent, 
-    error: layoutError, 
-    isLoading: layoutLoading 
-  } = useComponentLoader('layout', 'Simple');
+  const {
+    component: LayoutComponent,
+    error: layoutError,
+    isLoading: layoutLoading,
+  } = useComponentLoader("layout", "Simple");
 
   // Dynamiczne ładowanie odpowiednich komponentów
-  const { 
-    component: CardListComponent, 
-    error: cardError, 
-    isLoading: cardLoading 
-  } = useComponentLoader('widget', 'CardList');
+  const {
+    component: CardListComponent,
+    error: cardError,
+    isLoading: cardLoading,
+  } = useComponentLoader("widget", "CardList");
 
-  const { 
-    component: FlowStepComponent, 
-    error: flowStepError, 
-    isLoading: flowStepLoading 
-  } = useComponentLoader(
-    'flowStep', 
-    currentNode?.template || 'form-step'
-  );
+  const {
+    component: FlowStepComponent,
+    error: flowStepError,
+    isLoading: flowStepLoading,
+  } = useComponentLoader("flowStep", currentNode?.template || "form-step");
 
   // Łączenie stanów ładowania i błędów
-  const combinedLoading = isLoading || layoutLoading || widgetsLoading || 
+  const combinedLoading =
+    isLoading ||
+    layoutLoading ||
+    widgetsLoading ||
     (scenarioId ? flowStepLoading : cardLoading);
-  const combinedError = error || layoutError || widgetsError || 
+  const combinedError =
+    error ||
+    layoutError ||
+    widgetsError ||
     (scenarioId ? flowStepError : cardError);
-
-  const fallbackLoader = <SharedLoader message="Ładowanie komponentów..." fullScreen={true} />;
 
   // Renderowanie widgetów workspace
   const renderWorkspaceWidgets = () => {
@@ -166,9 +156,11 @@ export const ScenarioView: React.FC = () => {
       return (
         <div className="p-4">
           <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-            <p className="text-yellow-700">Nie znaleziono workspace o ID: {workspaceId}</p>
-            <button 
-              onClick={() => navigate('/')}
+            <p className="text-yellow-700">
+              Nie znaleziono workspace o ID: {workspaceId}
+            </p>
+            <button
+              onClick={() => navigate("/")}
               className="mt-4 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-700 transition-colors"
             >
               Wróć do listy workspace
@@ -184,7 +176,7 @@ export const ScenarioView: React.FC = () => {
         <div className="space-y-6">
           {/* Wyświetl widgety workspace na górze */}
           {renderWorkspaceWidgets()}
-          
+
           {/* Wyświetl listę scenariuszy */}
           {CardListComponent ? (
             <CardListComponent
@@ -194,10 +186,12 @@ export const ScenarioView: React.FC = () => {
           ) : (
             <div className="p-4">Ładowanie scenariuszy...</div>
           )}
-          
+
           {scenarioData.length === 0 && (
             <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-              <p className="text-yellow-700">Brak dostępnych scenariuszy w tym workspace.</p>
+              <p className="text-yellow-700">
+                Brak dostępnych scenariuszy w tym workspace.
+              </p>
             </div>
           )}
         </div>
@@ -209,8 +203,10 @@ export const ScenarioView: React.FC = () => {
       return (
         <div className="p-4">
           <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-            <p className="text-yellow-700">Nie znaleziono scenariusza o ID: {scenarioId}</p>
-            <button 
+            <p className="text-yellow-700">
+              Nie znaleziono scenariusza o ID: {scenarioId}
+            </p>
+            <button
               onClick={() => navigate(`/${workspaceId}`)}
               className="mt-4 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-700 transition-colors"
             >
@@ -226,8 +222,10 @@ export const ScenarioView: React.FC = () => {
       return (
         <div className="p-4">
           <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-            <p className="text-yellow-700">Ten scenariusz nie zawiera żadnych kroków.</p>
-            <button 
+            <p className="text-yellow-700">
+              Ten scenariusz nie zawiera żadnych kroków.
+            </p>
+            <button
               onClick={() => navigate(`/${workspaceId}`)}
               className="mt-4 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-700 transition-colors"
             >
@@ -242,7 +240,9 @@ export const ScenarioView: React.FC = () => {
     return (
       <div className="space-y-6">
         {FlowStepComponent ? (
-          <Suspense fallback={<div className="p-4">Ładowanie komponentu kroku...</div>}>
+          <Suspense
+            fallback={<div className="p-4">Ładowanie komponentu kroku...</div>}
+          >
             <FlowStepComponent
               node={currentNode}
               onSubmit={handleNext}
@@ -275,8 +275,13 @@ export const ScenarioView: React.FC = () => {
       {LayoutComponent ? (
         <LayoutComponent
           title={currentScenario?.name || currentWorkspace?.name}
-          stepTitle={currentNode?.label || (scenarioId ? undefined : "Wybierz scenariusz")}
-          onBackClick={() => scenarioId ? navigate(`/${workspaceId}`) : navigate('/')}
+          stepTitle={
+            currentNode?.label ||
+            (scenarioId ? undefined : "Wybierz scenariusz")
+          }
+          onBackClick={() =>
+            scenarioId ? navigate(`/${workspaceId}`) : navigate("/")
+          }
         >
           {renderContent()}
         </LayoutComponent>
