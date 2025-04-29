@@ -9,7 +9,7 @@ import {
 } from "react-router-dom";
 
 const FlowView = lazy(() => import("./views/FlowView"));
-const ScenarioView = lazy(() => import("./views/ScenarioView"));
+
 const LoginView = lazy(() => import("./views/LoginView"));
 const ApplicationView = lazy(() => import("./views/ApplicationView"));
 const WorkspaceView = lazy(() => import("./views/WorkspaceView"));
@@ -17,12 +17,10 @@ const AdminPanelView = lazy(() => import("./_modules/admin/AdminPanelView"));
 
 
 import InitialDataProvider from "./InitialDataProvider";
-//const EnhancedFlowDebugger = lazy(() => import("./_modules/debug/EnhancedFlowDebugger"));
-// import ScenarioGenerator from "./_modules/scenarioGenerator/components/ScenarioGenerator";
-
 import { AuthWrapper } from "./_auth/AuthWrapper";
 import SharedLoader from "./components/SharedLoader";
 import { AuthProvider } from "./hooks";
+import ScenarioView from "./views/ScenarioView";
 
 const AppWrapper = ({ children }: { children: React.ReactNode }) => (
   <div className="flex w-full h-screen overflow-hidden">

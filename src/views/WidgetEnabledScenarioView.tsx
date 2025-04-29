@@ -1,4 +1,4 @@
-// src/views/ScenarioView.tsx
+// src/views/WidgetEnabledScenarioView.tsx
 import React, { useEffect, useMemo, Suspense } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useComponentLoader, useNavigation, useWidgets } from "@/hooks";
@@ -7,7 +7,7 @@ import SharedLoader from "@/components/SharedLoader";
 import WidgetRenderer from "@/components/WidgetRenderer";
 import { useAppStore } from "@/useAppStore";
 
-export const ScenarioView: React.FC = () => {
+export const WidgetEnabledScenarioView: React.FC = () => {
   const { workspace: workspaceId, scenario: scenarioId } = useParams();
   const navigate = useNavigate();
 
@@ -287,4 +287,4 @@ export const ScenarioView: React.FC = () => {
   );
 };
 
-export default ScenarioView;
+export default WidgetEnabledScenarioView;
