@@ -1,8 +1,7 @@
 // src/InitialDataProvider.tsx
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useWorkspaceStore } from "./hooks/stateManagment/useWorkspaceStore";
-import { useApplicationStore } from "./hooks/stateManagment/useApplicationStore";
+import { useAppStore } from "@/useAppStore";
 
 interface InitialDataProviderProps {
   children: React.ReactNode;
@@ -16,18 +15,18 @@ const InitialDataProvider: React.FC<InitialDataProviderProps> = ({ children }) =
     scenario?: string;
   }>();
 
-  // Pobierz dane i akcje ze store'ów
+  // Pobierz dane i akcje ze zunifikowanego store
   const { 
     fetchApplications, 
     selectApplication,
-    currentApplicationId 
-  } = useApplicationStore();
-  
-  const { 
+    fetchApplicationById,
     selectWorkspace, 
     selectScenario,
-    fetchWorkspaces
-  } = useWorkspaceStore();
+    getCurrentApplication
+  } = useAppStore();
+  
+  const currentApplication = getCurrentApplication();
+  const currentApplicationId = currentApplication?.id;
 
   // Inicjalne ładowanie danych aplikacji, jeśli nie są w URL
   useEffect(() => {
@@ -36,12 +35,12 @@ const InitialDataProvider: React.FC<InitialDataProviderProps> = ({ children }) =
     }
   }, [fetchApplications, application, workspace]);
   
-  // Ładowanie danych workspaces, jeśli nie ma application w URL
+  // Ładowanie danych pojedynczej aplikacji, jeśli mamy ID w URL
   useEffect(() => {
-    if (!application && workspace) {
-      fetchWorkspaces();
+    if (application && application !== currentApplicationId) {
+      fetchApplicationById(application);
     }
-  }, [fetchWorkspaces, application, workspace]);
+  }, [application, currentApplicationId, fetchApplicationById]);
 
   // Wybierz aplikację na podstawie URL
   useEffect(() => {

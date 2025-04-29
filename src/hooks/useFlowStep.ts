@@ -1,9 +1,9 @@
 // src/hooks/useFlowStep.ts
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { NodeData, FormField } from '@/types';
-import { extractJsonFromContent } from '@/utils/apiUtils';
 import { useAuth } from './useAuth';
 import { useAppStore } from '@/useAppStore';
+import { extractJsonFromContent } from '@/utils';
 
 /**
  * Zunifikowany hook do obsługi kroków flow - łączy funkcjonalności z:

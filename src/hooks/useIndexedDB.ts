@@ -1,7 +1,7 @@
 // src/hooks/useIndexedDB.ts
 import { useState, useEffect } from 'react';
 import localforage from 'localforage';
-import { errorUtils } from '@/utils/errorUtils';
+import { getErrorMessage } from '@/utils'; // Zaimportuj getErrorMessage z zunifikowanego modułu utils
 
 // Typy danych dla zapisywanych elementów
 export interface StoredItem {
@@ -51,7 +51,9 @@ export const useIndexedDB = (): UseIndexedDBReturn => {
       
       return await operation();
     } catch (err) {
-      const errorMsg = errorUtils.handleError(err, errorContext);
+      // Używamy zunifikowanej funkcji getErrorMessage zamiast errorUtils
+      const errorMsg = getErrorMessage(err);
+      console.error(`[${errorContext}] Error:`, err);
       const error = new Error(errorMsg);
       setError(error);
       throw error;
