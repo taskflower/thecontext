@@ -1,258 +1,108 @@
-// src/views/AdminPanelView.tsx
-import { useState, useEffect } from "react";
-import { seedFirestoreFromData } from "@/_firebase/seedFirestore";
-import { LoadingState } from "@/components/LoadingState";
-import SharedLoader from "@/components/SharedLoader";
-import {
-  deleteDoc,
-  doc,
-  collection,
-  getDocs,
-  query,
-  where,
-} from "firebase/firestore";
-import { db } from "@/_firebase/config";
-import Footer from "@/components/homeLayout/Footer";
-import ApplicationList from "@/_modules/admin/components/ApplicationList";
-import AdminHeader from "@/_modules/admin/components/AdminHeader";
-import FileUpload from "@/_modules/admin/components/FileUpload";
-import StatusMessage from "@/components/StatusMessage";
-import { useApplicationStore, useAuth } from "@/hooks";
-import { useNavigate } from "react-router-dom";
+// src/_modules/admin/AdminPanelView.tsx
+import React, { useState } from 'react';
+import { useAuth } from '@/hooks';
+import { Navigate } from 'react-router-dom';
+import AppManager from './components/AppManager';
 
-// Function to delete an application
-async function deleteApplication(applicationId: string) {
-  try {
-    // 1. Find all workspaces belonging to this application
-    const workspacesRef = collection(db, "workspaces");
-    const workspacesQuery = query(
-      workspacesRef,
-      where("applicationId", "==", applicationId)
-    );
-    const workspacesSnapshot = await getDocs(workspacesQuery);
+// Definicja zakładek panelu administratora
+const TABS = [
+  { id: 'applications', label: 'Aplikacje' },
+  { id: 'users', label: 'Użytkownicy' },
+  { id: 'settings', label: 'Ustawienia' },
+];
 
-    // 2. For each workspace, find and delete all scenarios
-    for (const workspaceDoc of workspacesSnapshot.docs) {
-      const workspaceId = workspaceDoc.id;
-
-      const scenariosRef = collection(db, "scenarios");
-      const scenariosQuery = query(
-        scenariosRef,
-        where("workspaceId", "==", workspaceId)
-      );
-      const scenariosSnapshot = await getDocs(scenariosQuery);
-
-      // 3. For each scenario, find and delete all nodes
-      for (const scenarioDoc of scenariosSnapshot.docs) {
-        const scenarioId = scenarioDoc.id;
-
-        const nodesRef = collection(db, "nodes");
-        const nodesQuery = query(
-          nodesRef,
-          where("scenarioId", "==", scenarioId)
-        );
-        const nodesSnapshot = await getDocs(nodesQuery);
-
-        // Delete all nodes
-        const nodeDeletePromises = nodesSnapshot.docs.map((doc) =>
-          deleteDoc(doc.ref)
-        );
-        await Promise.all(nodeDeletePromises);
-
-        // Delete scenario
-        await deleteDoc(scenarioDoc.ref);
-      }
-
-      // Delete workspace
-      await deleteDoc(workspaceDoc.ref);
-    }
-
-    // Delete application
-    await deleteDoc(doc(db, "applications", applicationId));
-
-    return true;
-  } catch (error) {
-    console.error("Error deleting application:", error);
-    throw error;
-  }
-}
-
-const AdminPanelView = () => {
+const AdminPanelView: React.FC = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const { applications, fetchApplications, isLoading, error } =
-    useApplicationStore();
+  const [activeTab, setActiveTab] = useState('applications');
 
-  const [isSeedingData, setIsSeedingData] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [seedResult, setSeedResult] = useState<{ applicationId: string; workspaceId: string; scenarioId: string; } | null>(null);
-  const [operationError, setOperationError] = useState<string | null>(null);
-  const [jsonFile, setJsonFile] = useState<File | null>(null);
-  const [fileContent, setFileContent] = useState(null);
-  const [selectedApplication, setSelectedApplication] = useState(null);
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  // Sprawdzenie, czy użytkownik jest zalogowany
+  if (!user) {
+    // Redirect do strony logowania jeśli użytkownik nie jest zalogowany
+    return <Navigate to="/login" state={{ from: '/admin' }} />;
+  }
+  
+  // Panel dostępny dla wszystkich zalogowanych użytkowników
 
-  // Fetch applications on load
-  useEffect(() => {
-    fetchApplications();
-  }, [fetchApplications]);
-
-  // Handle file selection
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setJsonFile(file);
-      const reader = new FileReader();
-
-      reader.onload = (event) => {
-        try {
-          const jsonContent = JSON.parse(event.target?.result as string);
-          setFileContent(jsonContent);
-        } catch (err: any) {
-          setOperationError(`Invalid JSON format: ${err.message}`);
-          console.error(err);
-        }
-      };
-
-      reader.onerror = () => {
-        setOperationError("Error reading file");
-      };
-
-      reader.readAsText(file);
+  // Renderowanie zawartości wybranej zakładki
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'applications':
+        return <AppManager />;
+      case 'users':
+        return (
+          <div className="p-6 border border-slate-200 rounded-lg bg-white">
+            <h3 className="text-xl font-semibold mb-4">Zarządzanie użytkownikami</h3>
+            <p className="text-slate-600">Ta funkcjonalność jest w trakcie implementacji.</p>
+          </div>
+        );
+      case 'settings':
+        return (
+          <div className="p-6 border border-slate-200 rounded-lg bg-white">
+            <h3 className="text-xl font-semibold mb-4">Ustawienia systemowe</h3>
+            <p className="text-slate-600">Ta funkcjonalność jest w trakcie implementacji.</p>
+          </div>
+        );
+      default:
+        return null;
     }
-  };
-
-  // Handle data import from JSON
-  const handleImportData = async () => {
-    if (!user) {
-      setOperationError("You must be logged in to import data");
-      return;
-    }
-
-    if (!fileContent) {
-      setOperationError("You must select a JSON file first");
-      return;
-    }
-
-    setIsSeedingData(true);
-    setOperationError(null);
-    setSeedResult(null);
-
-    try {
-      const result = await seedFirestoreFromData(user.uid, fileContent);
-      setSeedResult(result);
-
-      // Refresh applications
-      fetchApplications();
-    } catch (err) {
-      setOperationError("Error occurred during data import");
-      console.error(err);
-    } finally {
-      setIsSeedingData(false);
-    }
-  };
-
-  // Handle application deletion
-  const handleDeleteApplication = async (applicationId: string) => {
-    if (confirmDelete !== applicationId) {
-      setConfirmDelete(applicationId);
-      return;
-    }
-
-    setIsDeleting(true);
-    setOperationError(null);
-
-    try {
-      await deleteApplication(applicationId);
-      // Refresh application list
-      fetchApplications();
-      setConfirmDelete(null);
-    } catch (err) {
-      setOperationError("Error occurred while deleting application");
-      console.error(err);
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  // Cancel delete confirmation
-  const cancelDelete = () => {
-    setConfirmDelete(null);
-  };
-
-  // Navigate to workspace after adding data
-  const handleNavigateToWorkspace = () => {
-    if (seedResult) {
-      if (seedResult.applicationId && seedResult.workspaceId) {
-        navigate(`/app/${seedResult.applicationId}/${seedResult.workspaceId}`);
-      } else if (seedResult.workspaceId) {
-        navigate(`/${seedResult.workspaceId}`);
-      }
-    }
-  };
-
-  // Render loading state for data seeding
-  const renderSeedingLoader = () => {
-    if (isSeedingData) {
-      return <SharedLoader message="Importowanie danych..." size="md" />;
-    }
-    return null;
-  };
-
-  // Render loading state for deletion
-  const renderDeletingLoader = () => {
-    if (isDeleting) {
-      return <SharedLoader message="Usuwanie aplikacji..." size="md" />;
-    }
-    return null;
   };
 
   return (
-    <LoadingState
-      isLoading={isLoading && !applications.length}
-      error={error}
-      loadingMessage="Ładowanie aplikacji..."
-      errorTitle="Błąd ładowania aplikacji"
-      onRetry={fetchApplications}
-    >
-      <div className="min-h-screen bg-background text-foreground flex flex-col">
-        <main className="max-w-6xl w-full py-8 px-4 md:px-6 mx-auto flex-1">
-          <AdminHeader />
-
-          <div className="grid md:grid-cols-2 gap-6 mb-6">
-            <FileUpload
-              onFileChange={handleFileChange}
-              jsonFile={jsonFile}
-              fileContent={fileContent}
-              onImport={handleImportData}
-              isSeedingData={isSeedingData}
-              isDisabled={!fileContent || !user}
-            />
-
-            {renderSeedingLoader()}
-            {renderDeletingLoader()}
-
-            <StatusMessage
-              error={operationError}
-              success={seedResult}
-              onNavigate={handleNavigateToWorkspace}
-            />
+    <div className="min-h-screen bg-slate-50">
+      {/* Nagłówek panelu */}
+      <header className="bg-slate-800 text-white shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+          <div className="flex items-center space-x-4">
+            <h1 className="text-xl font-bold">Panel administratora</h1>
+            <span className="text-xs px-2 py-1 bg-green-600 rounded-full">v1.0</span>
           </div>
+          
+          <div className="flex items-center space-x-4">
+            <div className="text-sm">
+              <span className="opacity-75">Zalogowany jako:</span> {user.email}
+            </div>
+            <button
+              onClick={() => window.location.href = '/'}
+              className="px-3 py-1 text-sm bg-slate-700 hover:bg-slate-600 rounded transition-colors"
+            >
+              Powrót do aplikacji
+            </button>
+          </div>
+        </div>
+      </header>
 
-          <ApplicationList
-            applications={applications}
-            selectedApplication={selectedApplication}
-            setSelectedApplication={setSelectedApplication}
-            confirmDelete={confirmDelete}
-            handleDeleteApplication={handleDeleteApplication}
-            cancelDelete={cancelDelete}
-            isDeleting={isDeleting}
-          />
-        </main>
+      {/* Główna zawartość */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Zakładki */}
+        <div className="mb-6 border-b border-slate-200">
+          <nav className="flex space-x-8">
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-4 px-1 font-medium text-sm border-b-2 -mb-px ${
+                  activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
 
-        <Footer user={user} />
-      </div>
-    </LoadingState>
+        {/* Zawartość zakładki */}
+        {renderTabContent()}
+      </main>
+
+      {/* Stopka */}
+      <footer className="bg-white border-t border-slate-200 mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-slate-500 text-sm">
+          &copy; {new Date().getFullYear()} EduGo.ai - Panel administratora
+        </div>
+      </footer>
+    </div>
   );
 };
 

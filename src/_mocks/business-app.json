@@ -53,11 +53,43 @@
                 "template": "widgets-step",
                 "order": 2,
                 "attrs": {
-                  "schemaPath": "schemas.widgets.businessWidgets",
-                  "dataPaths": {
-                    "inputData": "collect-data",
-                    "analysisResults": "generate-report"
-                  }
+                  "widgets": [
+                    {
+                      "file": "info",
+                      "data": {
+                        "title": "Demo Biznesowe",
+                        "description": "Wybierz jeden z dostępnych scenariuszy",
+                        "url": "/",
+                        "urlLAbel": "Wróć do listy aplikacji",
+                        "variant": "info"
+                      }
+                    },
+                    {
+                      "type": "title",
+                      "title": "Wyniki analizy finansowej"
+                    },
+                    {
+                      "type": "stats",
+                      "title": "Kluczowe wskaźniki finansowe",
+                      "description": "Zestawienie danych finansowych i wyników analizy",
+                      "dataPaths": {
+                        "Przychody": "inputData.revenue",
+                        "Koszty": "inputData.cost",
+                        "ROI": "analysisResults.roi"
+                      }
+                    },
+                    {
+                      "type": "info",
+                      "title": "Opłacalność projektu",
+                      "dataPath": "analysisResults.profitability",
+                      "variant": "warning"
+                    },
+                    {
+                      "type": "cardList",
+                      "title": "Rekomendacje",
+                      "dataPath": "analysisResults.recommendations"
+                    }
+                  ]
                 }
               }
             ]
@@ -109,12 +141,39 @@
                 "template": "widgets-step",
                 "order": 2,
                 "attrs": {
-                  "schemaPath": "schemas.widgets.marketingMetrics",
-                  "dataPaths": {
-                    "inputData": "marketing-data",
-                    "financialData": "scenario-business.collect-data",
-                    "analysisResults": "marketing-analysis"
-                  }
+                 "widgets": [
+                    {
+                      "type": "title",
+                      "title": "Analiza efektywności marketingowej"
+                    },
+                    {
+                      "type": "metrics",
+                      "title": "Kluczowe wskaźniki efektywności",
+                      "dataPaths": {
+                        "CPA": "analysisResults.cpa",
+                        "ROAS": "analysisResults.roas",
+                        "CPC": "analysisResults.cpc",
+                        "Konwersja": "analysisResults.conversionRate"
+                      }
+                    },
+                    {
+                      "type": "stats",
+                      "title": "Dane wejściowe",
+                      "description": "Zestawienie wprowadzonych danych",
+                      "dataPaths": {
+                        "Budżet reklamowy": "inputData.adBudget",
+                        "Przychody": "financialData.revenue",
+                        "Liczba kliknięć": "inputData.clicks",
+                        "Liczba konwersji": "inputData.conversions"
+                      }
+                    },
+                    {
+                      "type": "info",
+                      "title": "Ocena efektywności",
+                      "dataPath": "analysisResults.effectivenessRating",
+                      "variant": "info"
+                    }
+                  ]
                 }
               },
               {
@@ -126,10 +185,33 @@
                 "template": "widgets-step",
                 "order": 3,
                 "attrs": {
-                  "schemaPath": "schemas.widgets.actionPlan",
-                  "dataPaths": {
-                    "marketingAnalysis": "marketing-analysis"
-                  }
+                  "widgets": [
+                    {
+                      "type": "title",
+                      "title": "Plan działania marketingowego"
+                    },
+                    {
+                      "type": "info",
+                      "title": "Strategia optymalizacji",
+                      "dataPath": "marketingAnalysis.optimizationStrategy",
+                      "variant": "success"
+                    },
+                    {
+                      "type": "DataDisplayWidget",
+                      "title": "Mocne strony kampanii",
+                      "dataPath": "marketingAnalysis.strengths"
+                    },
+                    {
+                      "type": "DataDisplayWidget",
+                      "title": "Słabe strony kampanii",
+                      "dataPath": "marketingAnalysis.weaknesses"
+                    },
+                    {
+                      "type": "cardList",
+                      "title": "Rekomendowane działania",
+                      "dataPath": "marketingAnalysis.recommendations"
+                    }
+                  ]
                 }
               }
             ]
@@ -139,12 +221,12 @@
           "layout": "simple",
           "widgets": [
             {
-              "type": "info",
+              "file": "info",
               "data": {
                 "title": "Demo Biznesowe",
                 "description": "Wybierz jeden z dostępnych scenariuszy",
-                "backLink": "/",
-                "backText": "Wróć do listy aplikacji",
+                "url": "/",
+                "urlLAbel": "Wróć do listy aplikacji",
                 "variant": "info"
               }
             }
@@ -234,95 +316,6 @@
                 ],
                 "optimizationStrategy": "Strategia optymalizacji"
               }
-            },
-            "widgets": {
-              "businessWidgets": [
-                {
-                  "type": "title",
-                  "title": "Wyniki analizy finansowej"
-                },
-                {
-                  "type": "stats",
-                  "title": "Kluczowe wskaźniki finansowe",
-                  "description": "Zestawienie danych finansowych i wyników analizy",
-                  "dataPaths": {
-                    "Przychody": "inputData.revenue",
-                    "Koszty": "inputData.cost",
-                    "ROI": "analysisResults.roi"
-                  }
-                },
-                {
-                  "type": "info",
-                  "title": "Opłacalność projektu",
-                  "dataPath": "analysisResults.profitability",
-                  "variant": "warning"
-                },
-                {
-                  "type": "cardList",
-                  "title": "Rekomendacje",
-                  "dataPath": "analysisResults.recommendations"
-                }
-              ],
-              "marketingMetrics": [
-                {
-                  "type": "title",
-                  "title": "Analiza efektywności marketingowej"
-                },
-                {
-                  "type": "metrics",
-                  "title": "Kluczowe wskaźniki efektywności",
-                  "dataPaths": {
-                    "CPA": "analysisResults.cpa",
-                    "ROAS": "analysisResults.roas",
-                    "CPC": "analysisResults.cpc",
-                    "Konwersja": "analysisResults.conversionRate"
-                  }
-                },
-                {
-                  "type": "stats",
-                  "title": "Dane wejściowe",
-                  "description": "Zestawienie wprowadzonych danych",
-                  "dataPaths": {
-                    "Budżet reklamowy": "inputData.adBudget",
-                    "Przychody": "financialData.revenue",
-                    "Liczba kliknięć": "inputData.clicks",
-                    "Liczba konwersji": "inputData.conversions"
-                  }
-                },
-                {
-                  "type": "info",
-                  "title": "Ocena efektywności",
-                  "dataPath": "analysisResults.effectivenessRating",
-                  "variant": "info"
-                }
-              ],
-              "actionPlan": [
-                {
-                  "type": "title",
-                  "title": "Plan działania marketingowego"
-                },
-                {
-                  "type": "info",
-                  "title": "Strategia optymalizacji",
-                  "dataPath": "marketingAnalysis.optimizationStrategy",
-                  "variant": "success"
-                },
-                {
-                  "type": "DataDisplayWidget",
-                  "title": "Mocne strony kampanii",
-                  "dataPath": "marketingAnalysis.strengths"
-                },
-                {
-                  "type": "DataDisplayWidget",
-                  "title": "Słabe strony kampanii",
-                  "dataPath": "marketingAnalysis.weaknesses"
-                },
-                {
-                  "type": "cardList",
-                  "title": "Rekomendowane działania",
-                  "dataPath": "marketingAnalysis.recommendations"
-                }
-              ]
             }
           }
         }

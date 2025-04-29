@@ -1,7 +1,7 @@
 // src/hooks/store/useAppStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { doc, getDoc, setDoc, collection, getDocs, query, where } from '@firebase/firestore';
+import { doc, getDoc, collection, getDocs, query, where } from '@firebase/firestore';
 import { db } from '@/_firebase/config';
 import { Application, Workspace, Scenario, NodeData } from '@/types';
 
