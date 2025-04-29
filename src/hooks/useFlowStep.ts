@@ -5,13 +5,6 @@ import { useAuth } from './useAuth';
 import { useAppStore } from '@/useAppStore';
 import { extractJsonFromContent } from '@/utils';
 
-/**
- * Zunifikowany hook do obsługi kroków flow - łączy funkcjonalności z:
- * - useFlowStep
- * - useFormInput
- * - useLLM
- * w jeden spójny interfejs
- */
 export function useFlowStep({ 
   node, 
   onSubmit, 
@@ -26,17 +19,8 @@ export function useFlowStep({
   isLastNode: boolean;
 }) {
   // Obsługa nawigacji
-  const handlePrevious = () => {
-    if (isFirstNode) {
-      onPrevious();
-    } else {
-      onPrevious();
-    }
-  };
-
-  const handleComplete = (data: any) => {
-    onSubmit(data);
-  };
+  const handlePrevious = () => onPrevious();
+  const handleComplete = (data: any) => onSubmit(data);
 
   // Część dla formularzy
   const [formData, setFormData] = useState<Record<string, any>>({});
@@ -45,6 +29,7 @@ export function useFlowStep({
   // Referencje dla LLM
   const autoStartExecutedRef = useRef(false);
   const isMountedRef = useRef(true);
+  const autoCompleteExecutedRef = useRef(false);
   
   // Stan dla części LLM
   const [isLoading, setIsLoading] = useState(false);
@@ -69,13 +54,11 @@ export function useFlowStep({
 
   // Ustaw referencję zamontowania i resetuj stan autostartu przy zmianie node
   useEffect(() => {
-    console.log(`[useFlowStep] Node changed to: ${node.id} (${node.template})`);
     isMountedRef.current = true;
-    // Resetuj flagę autostartu przy zmianie node
     autoStartExecutedRef.current = false;
+    autoCompleteExecutedRef.current = false;
     
     return () => {
-      console.log(`[useFlowStep] Unmounting node: ${node.id}`);
       isMountedRef.current = false;
     };
   }, [node.id, node.template]);
@@ -89,81 +72,35 @@ export function useFlowStep({
     }
 
     try {
-      console.log("[useFlowStep] Loading schema from path:", attrs.schemaPath);
-      
       // Pobierz schemat z kontekstu
-      const schemaPath = attrs.schemaPath; // np. "schemas.form.business"
-      const pathParts = schemaPath.split('.');
-      
-      // Pobierz cały kontekst
-      const currentWorkspaceId = useAppStore.getState().data.currentWorkspaceId;
-      const context = useAppStore.getState().data.contexts[currentWorkspaceId || ''] || {};
-      
-      console.log("[useFlowStep] Current context:", context);
-      
-      // Nawiguj do schematu
-      let schemaData = context;
-      for (const part of pathParts) {
-        if (!schemaData || typeof schemaData !== 'object') {
-          console.warn(`[useFlowStep] Invalid path segment: ${part} in ${schemaPath}`);
-          schemaData = null;
-          break;
-        }
-        schemaData = schemaData[part];
-      }
-      
-      console.log("[useFlowStep] Schema data found:", schemaData);
+      const schemaData = getContextPath(attrs.schemaPath);
       
       if (!schemaData) {
-        console.warn(`[useFlowStep] Schema not found at path: ${attrs.schemaPath}`);
         setFormFields([]);
         return;
       }
 
       // Jeśli dane są już tablicą pól formularza, użyj ich bezpośrednio
       if (Array.isArray(schemaData)) {
-        console.log("[useFlowStep] Setting form fields directly:", schemaData);
         setFormFields(schemaData);
         return;
       }
       
-      // W przeciwnym razie szukaj w kluczu bazowym (ostatnia część ścieżki)
-      const baseKey = pathParts[pathParts.length - 1];
-      
-      // Jeśli mamy schemas.form.business, wystarczy nam "business"
-      if (typeof schemaData === 'object' && !Array.isArray(schemaData)) {
-        console.log(`[useFlowStep] Looking for fields in schema key: ${baseKey}`);
-        const fields = schemaData; // Tutaj schemaData to już właściwy schemat formularza
-        
-        if (Array.isArray(fields)) {
-          console.log("[useFlowStep] Setting form fields from object key:", fields);
-          setFormFields(fields);
-          return;
-        }
-      }
-      
-      console.warn(`[useFlowStep] Could not find form fields in schema at ${attrs.schemaPath}`);
-      setFormFields([]);
+      // W przeciwnym razie sprawdź czy obiekt schemaData to właściwy schemat formularza
+      setFormFields(Array.isArray(schemaData) ? schemaData : []);
     } catch (err) {
       console.error(`[useFlowStep] Error processing form schema:`, err);
       setFormFields([]);
     }
-  }, [node.attrs]);
+  }, [node.attrs, getContextPath]);
 
   // Pobieranie schematu dla LLM
   useEffect(() => {
     if (node.attrs?.schemaPath) {
       try {
-        console.log(`[useFlowStep:LLM] Getting schema from path: ${node.attrs.schemaPath}`);
         const schemaData = getContextPath(node.attrs.schemaPath);
-        if (schemaData) {
-          console.log(`[useFlowStep:LLM] Schema found:`, schemaData);
-          setSchema(schemaData);
-        } else {
-          console.warn(`[useFlowStep:LLM] Schema not found at path: ${node.attrs.schemaPath}`);
-        }
+        setSchema(schemaData);
       } catch (err) {
-        console.error('[useFlowStep:LLM] Error getting schema:', err);
         setError(`Error getting schema: ${err instanceof Error ? err.message : String(err)}`);
       }
     }
@@ -202,12 +139,8 @@ export function useFlowStep({
   // Wysłanie wiadomości do LLM
   const sendMessage = useCallback(async (message: string) => {
     try {
-      if (!message.trim()) {
-        console.warn("[useFlowStep:LLM] Empty message, skipping API call");
-        return null;
-      }
+      if (!message.trim()) return null;
 
-      console.log(`[useFlowStep:LLM] Sending message: ${message.substring(0, 100)}...`);
       setIsLoading(true);
       setError(null);
 
@@ -225,21 +158,18 @@ export function useFlowStep({
 
       // Dodaj wiadomość systemową jeśli wymagana
       if (node.attrs?.systemMessage) {
-        console.log(`[useFlowStep:LLM] Adding system message`);
         messages.push({
           role: 'system',
           content: node.attrs.systemMessage,
         });
       }
 
-      // Dodaj wiadomość inicjalizacyjną i odpowiedź asystenta jeśli istnieją
+      // Dodaj wiadomość inicjalizacyjną i odpowiedź asystenta
       if (node.attrs?.initialUserMessage) {
         const initialMessage = processTemplate(node.attrs.initialUserMessage);
-        console.log(`[useFlowStep:LLM] Processing initial message: ${initialMessage.substring(0, 100)}...`);
         
         let initialContent = initialMessage;
         if (schema && !initialContent.includes('```json')) {
-          console.log(`[useFlowStep:LLM] Adding schema to initial message`);
           initialContent += `\n\nUse the following JSON schema:\n\`\`\`json\n${JSON.stringify(
             schema,
             null,
@@ -252,7 +182,7 @@ export function useFlowStep({
           content: initialContent,
         });
 
-        if (processedAssistantMessage && processedAssistantMessage.trim() !== '') {
+        if (processedAssistantMessage) {
           messages.push({
             role: 'assistant',
             content: processedAssistantMessage,
@@ -263,7 +193,6 @@ export function useFlowStep({
       // Dodaj aktualną wiadomość użytkownika
       let userContent = message;
       if (schema && !userContent.includes('```json')) {
-        console.log(`[useFlowStep:LLM] Adding schema to user message`);
         userContent += `\n\nUse the following JSON schema:\n\`\`\`json\n${JSON.stringify(
           schema,
           null,
@@ -281,18 +210,13 @@ export function useFlowStep({
         messages: messages,
         userId: user.uid,
       };
-
-      console.log("[useFlowStep:LLM] Payload prepared:", { 
-        messagesCount: messages.length, 
-        firstMessagePreview: messages[0]?.content.substring(0, 50) + '...'
-      });
       
       // Ustaw informacje debugowania
       const apiUrl = `${import.meta.env.VITE_API_URL}/api/v1/services/gemini/chat/completion`;
       setDebugInfo(`Sending to: ${apiUrl}`);
+      console.log("[useFlowStep:LLM] Sending request to API:", apiUrl);
 
       // Wywołaj API
-      console.log(`[useFlowStep:LLM] Sending request to API: ${apiUrl}`);
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -303,10 +227,7 @@ export function useFlowStep({
       });
 
       // Sprawdź czy komponent jest nadal zamontowany
-      if (!isMountedRef.current) {
-        console.log("[useFlowStep:LLM] Component unmounted, aborting response processing");
-        return null;
-      }
+      if (!isMountedRef.current) return null;
 
       // Obsłuż błędy API
       if (!response.ok) {
@@ -315,7 +236,7 @@ export function useFlowStep({
           const errorData = JSON.parse(errorText);
           throw new Error(errorData.error?.message || `API request failed: ${response.status}`);
         } catch {
-          throw new Error(`API request failed: ${response.status} - ${errorText.substring(0, 100)}...`);
+          throw new Error(`API request failed: ${response.status}`);
         }
       }
 
@@ -337,7 +258,6 @@ export function useFlowStep({
 
         // Zapisz dane do kontekstu jeśli podano contextPath
         if (node.contextPath && data) {
-          console.log(`[useFlowStep:LLM] Saving data to context path: ${node.contextPath}`);
           updateContextPath(node.contextPath, data);
         }
       }
@@ -366,47 +286,58 @@ export function useFlowStep({
     updateContextPath
   ]);
 
-  // Obsługa autostartu dla LLM
+  // KLUCZOWA ZMIANA: Obsługa autostartu dla LLM - dodane console.log do debugowania
   useEffect(() => {
     const handleAutoStart = async () => {
       if (
         node.template === 'llm-step' && 
-        node.attrs?.autoStart && 
+        node.attrs?.autoStart === true && 
         !autoStartExecutedRef.current && 
         !isLoading && 
         !responseData && 
         !error
       ) {
-        console.log(`[useFlowStep:LLM] Auto-starting LLM for node: ${node.id}`);
+        console.log(`[useFlowStep:LLM] Starting auto-start for node: ${node.id}, type: ${node.template}`);
         // Ustaw flagę przed wysłaniem, aby uniknąć duplikacji wywołań
         autoStartExecutedRef.current = true;
         
         const initialMessage = node.attrs?.initialUserMessage || '';
         if (initialMessage) {
-          console.log(`[useFlowStep:LLM] Using initial message for autostart: ${initialMessage.substring(0, 50)}...`);
+          console.log(`[useFlowStep:LLM] Sending initial message: ${initialMessage.substring(0, 50)}...`);
           const processedMessage = processTemplate(initialMessage);
           await sendMessage(processedMessage);
+          console.log(`[useFlowStep:LLM] Auto-start message sent`);
+        } else {
+          console.log(`[useFlowStep:LLM] No initial message to send`);
         }
       }
     };
 
-    // Uruchom autostart z małym opóźnieniem dla stabilności
-    const timer = setTimeout(() => {
-      handleAutoStart();
-    }, 200);
+    if (node.template === 'llm-step') {
+      console.log(`[useFlowStep:LLM] LLM step detected: ${node.id}, autoStart:`, 
+        node.attrs?.autoStart,
+        'autoStartExecuted:', autoStartExecutedRef.current,
+        'isLoading:', isLoading,
+        'responseData:', Boolean(responseData),
+        'error:', Boolean(error)
+      );
+    }
 
-    return () => clearTimeout(timer);
+    handleAutoStart();
   }, [
     node.template,
+    node.id,
     node.attrs?.autoStart,
     node.attrs?.initialUserMessage,
-    node.id,
     isLoading,
     responseData,
     error,
     processTemplate,
     sendMessage
   ]);
+
+  // BLOKOWANIE AUTO-COMPLETE: Nigdy nie wywołuj automatycznego przejścia do następnego kroku
+  // Wróć ręczny wybór użytkownika w LlmStepTemplate.tsx
 
   return {
     // Właściwości wspólne

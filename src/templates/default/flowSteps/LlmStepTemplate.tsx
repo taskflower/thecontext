@@ -1,5 +1,5 @@
 // src/templates/default/flowSteps/LlmStepTemplate.tsx
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { FlowStepProps } from "@/types";
 import { useFlowStep } from "@/hooks";
 
@@ -10,8 +10,10 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
   isLastNode,
   isFirstNode,
 }) => {
-  // Używamy zunifikowanego hooka useFlowStep, który zawiera
-  // wszystkie funkcjonalności potrzebne do obsługi kroku LLM
+  // CRITICAL FIX: Dodaj ref aby śledzić czy już wykonano automatyczne przejście
+  const autoCompleteFiredRef = useRef(false);
+  
+  // Używamy zunifikowanego hooka useFlowStep
   const { 
     isLoading, 
     error, 
@@ -29,25 +31,16 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
     onPrevious,
   });
 
-  // Funkcja renderująca informacje debugowania
-  const renderDebugInfo = () => {
-    if (!debugInfo || process.env.NODE_ENV === 'production') return null;
-    
-    return (
-      <div className="mt-2 p-2 bg-gray-100 text-xs text-gray-500 rounded">
-        <p>Debug: {debugInfo}</p>
-        <button 
-          className="text-xs underline text-blue-500 mt-1"
-          onClick={() => console.log({
-            node,
-            context: useFlowStep.getState?.()?.data?.contexts || "Context not available"
-          })}
-        >
-          Log Context
-        </button>
-      </div>
-    );
-  };
+  // CRITICAL: Usuń wszystkie istniejące useEffect, które mogłyby wywoływać handleComplete
+
+  // CRITICAL: Dodajemy console.log dla śledzenia
+  console.log('LlmStepTemplate RENDERING:', { 
+    nodeId: node.id,
+    isLoading, 
+    hasResponse: !!responseData, 
+    hasError: !!error,
+    autoCompleteFired: autoCompleteFiredRef.current
+  });
 
   return (
     <div className="my-4">
@@ -64,12 +57,18 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
           {isLoading && (
             <div className="flex flex-col justify-center items-center h-40">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-              <p className="mt-3 text-gray-600">Analizuję dane...</p>
+              <p className="mt-3 text-gray-600">
+                <strong>Analizuję dane...</strong>
+              </p>
             </div>
           )}
 
-          {/* Informacje diagnostyczne - tylko w trybie deweloperskim */}
-          {renderDebugInfo()}
+          {/* Informacje diagnostyczne */}
+          {debugInfo && (
+            <div className="mt-2 p-2 bg-gray-100 text-xs text-gray-500 rounded">
+              <p>Debug: {debugInfo}</p>
+            </div>
+          )}
 
           {/* Komunikat błędu */}
           {error && (
@@ -89,8 +88,18 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
             </div>
           )}
 
-          {/* Przyciski nawigacji - widoczne tylko gdy mamy odpowiedź */}
-          {responseData && (
+          {/* Wyświetl odpowiedź LLM jeśli jest dostępna */}
+          {responseData && !error && !isLoading && (
+            <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
+              <h3 className="font-medium text-gray-900 mb-2">Wynik analizy:</h3>
+              <pre className="bg-gray-50 p-3 rounded overflow-auto text-sm whitespace-pre-wrap">
+                {JSON.stringify(responseData, null, 2)}
+              </pre>
+            </div>
+          )}
+
+          {/* CRITICAL: Przyciski nawigacji - ZAWSZE widoczne po otrzymaniu odpowiedzi, bez żadnych automatycznych akcji */}
+          {responseData && !isLoading && (
             <div className="flex flex-col sm:flex-row gap-4 mt-6">
               {/* Przycisk wstecz/anuluj */}
               <button
@@ -102,7 +111,10 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
 
               {/* Przycisk dalej/zakończ */}
               <button
-                onClick={() => handleComplete(responseData)}
+                onClick={() => {
+                  console.log("Ręczne kliknięcie przycisku Dalej/Zakończ");
+                  handleComplete(responseData);
+                }}
                 className="px-5 py-3 rounded-md transition-colors text-base font-medium flex-grow bg-gray-900 text-white hover:bg-gray-800"
               >
                 {isLastNode ? "Zakończ" : "Dalej"}

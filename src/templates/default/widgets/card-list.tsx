@@ -1,12 +1,23 @@
-// src/tpl/minimal/widgets/CardListWidget.tsx
+// src/templates/default/widgets/card-list.tsx
 import React from "react";
 import { SubjectIcon } from "@/components/SubjectIcon";
 import { CardListWidgetProps, CardItem } from "../types";
 
 const CardListWidget: React.FC<CardListWidgetProps> = ({ data = [], onSelect }) => {
+  // Sprawdzamy, czy data jest tablicą, jeśli nie - zwracamy pustą tablicę
+  const items = Array.isArray(data) ? data : [];
+
+  if (items.length === 0) {
+    return (
+      <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+        <p className="text-yellow-700">Brak danych do wyświetlenia.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {data.map((item: CardItem) => (
+      {items.map((item: CardItem) => (
         <div
           key={item.id}
           onClick={() => onSelect && onSelect(item.id)}

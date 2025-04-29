@@ -1,9 +1,10 @@
-// src/hooks/store/useAppStore.ts
+// src/useAppStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { doc, getDoc, collection, getDocs, query, where } from '@firebase/firestore';
 import { db } from '@/_firebase/config';
 import { Application, Workspace, Scenario, NodeData } from '@/types';
+import { getValueByPath, setValueByPath, processTemplate, updateItemInList } from '@/utils';
 
 interface State {
   // Stany ładowania
@@ -49,70 +50,19 @@ interface State {
   getCurrentNode: () => NodeData | undefined;
 }
 
-// Pomocnicze funkcje
-const getValueByPath = (obj: Record<string, any>, path: string): any => {
-  if (!obj || !path) return undefined;
-  return path
-    .split('.')
-    .reduce((acc, key) => {
-      if (acc == null) return undefined;
-      const m = key.match(/^(\w+)\[(\d+)\]$/);
-      return m ? acc[m[1]]?.[+m[2]] : acc[key];
-    }, obj);
-};
-
-const setValueByPath = (obj: Record<string, any>, path: string, value: any): Record<string, any> => {
-  if (!obj || !path) return obj;
-  const keys = path.split('.');
-  const result = Array.isArray(obj) ? [...obj] : { ...obj };
-  let cur = result;
-
-  keys.forEach((key, i) => {
-    const isLast = i === keys.length - 1;
-    const m = key.match(/^(\w+)\[(\d+)\]$/);
-
-    if (m) {
-      const [, k, idxStr] = m;
-      const idx = +idxStr;
-      cur[k] = [...(cur[k] || [])];
-      while (cur[k].length <= idx) cur[k].push(undefined);
-
-      if (isLast) {
-        cur[k][idx] = value;
-      } else {
-        cur[k][idx] = cur[k][idx] != null && typeof cur[k][idx] === 'object' ? { ...cur[k][idx] } : {};
-        cur = cur[k][idx];
-      }
-    } else {
-      if (isLast) {
-        cur[key] = value;
-      } else {
-        cur[key] = cur[key] != null && typeof cur[key] === 'object' ? { ...cur[key] } : {};
-        cur = cur[key];
-      }
-    }
-  });
-
-  return result;
-};
-
-// Funkcja do przetwarzania szablonów
-const processTemplate = (template: string, ctx: Record<string, any>): string => {
-  return template.replace(/\{\{([^}]+)\}\}/g, (_, p) => {
-    const v = getValueByPath(ctx, p.trim());
-    return v != null ? String(v) : _;
-  });
-};
-
-// Funkcja do aktualizacji elementu w liście
-const updateItemInList = <T extends { id: string }>(list: T[], item: T): T[] => {
-  const exists = list.some(i => i.id === item.id);
-  return exists ? list.map(i => i.id === item.id ? item : i) : [...list, item];
+type AppPersist = {
+  data: {
+    applications: Application[];
+    currentAppId: string | null;
+    currentWorkspaceId: string | null;
+    currentScenarioId: string | null;
+    contexts: Record<string, any>;
+  };
 };
 
 // Właściwy store
-export const useAppStore = create<State>(
-  persist(
+export const useAppStore = create<State>()(
+  persist<State, [], [], AppPersist>(
     (set, get) => ({
       loading: {
         application: false,
@@ -144,24 +94,14 @@ export const useAppStore = create<State>(
           
           set(state => ({
             ...state,
-            data: {
-              ...state.data,
-              applications
-            },
-            loading: {
-              ...state.loading,
-              application: false
-            }
+            data: { ...state.data, applications },
+            loading: { ...state.loading, application: false }
           }));
         } catch (error) {
-          console.error('Error fetching applications:', error);
           set(state => ({
             ...state,
             error: error instanceof Error ? error.message : String(error),
-            loading: {
-              ...state.loading,
-              application: false
-            }
+            loading: { ...state.loading, application: false }
           }));
         }
       },
@@ -267,20 +207,13 @@ export const useAppStore = create<State>(
               currentAppId: id,
               contexts
             },
-            loading: {
-              ...state.loading,
-              application: false
-            }
+            loading: { ...state.loading, application: false }
           }));
         } catch (error) {
-          console.error('Error fetching application by ID:', error);
           set(state => ({
             ...state,
             error: error instanceof Error ? error.message : String(error),
-            loading: {
-              ...state.loading,
-              application: false
-            }
+            loading: { ...state.loading, application: false }
           }));
         }
       },
@@ -398,20 +331,13 @@ export const useAppStore = create<State>(
               applications,
               contexts
             },
-            loading: {
-              ...state.loading,
-              workspace: false
-            }
+            loading: { ...state.loading, workspace: false }
           }));
         } catch (error) {
-          console.error('Error fetching workspaces:', error);
           set(state => ({
             ...state,
             error: error instanceof Error ? error.message : String(error),
-            loading: {
-              ...state.loading,
-              workspace: false
-            }
+            loading: { ...state.loading, workspace: false }
           }));
         }
       },
@@ -508,20 +434,13 @@ export const useAppStore = create<State>(
               currentWorkspaceId: id,
               contexts
             },
-            loading: {
-              ...state.loading,
-              workspace: false
-            }
+            loading: { ...state.loading, workspace: false }
           }));
         } catch (error) {
-          console.error('Error fetching workspace by ID:', error);
           set(state => ({
             ...state,
             error: error instanceof Error ? error.message : String(error),
-            loading: {
-              ...state.loading,
-              workspace: false
-            }
+            loading: { ...state.loading, workspace: false }
           }));
         }
       },
@@ -549,10 +468,7 @@ export const useAppStore = create<State>(
       selectScenario: (id: string) => {
         set(state => ({
           ...state,
-          data: {
-            ...state.data,
-            currentScenarioId: id
-          }
+          data: { ...state.data, currentScenarioId: id }
         }));
       },
       
@@ -563,15 +479,13 @@ export const useAppStore = create<State>(
         
         set(state => {
           const currentContext = state.data.contexts[currentWorkspaceId] || {};
-          const newContextValue = { ...currentContext, [key]: value };
-          
           return {
             ...state,
             data: {
               ...state.data,
               contexts: {
                 ...state.data.contexts,
-                [currentWorkspaceId]: newContextValue
+                [currentWorkspaceId]: { ...currentContext, [key]: value }
               }
             }
           };
@@ -595,15 +509,13 @@ export const useAppStore = create<State>(
           const keyData = currentContext[key] ? { ...currentContext[key] } : {};
           const updatedKeyData = setValueByPath(keyData, rest.join('.'), value);
           
-          const newContextValue = { ...currentContext, [key]: updatedKeyData };
-          
           return {
             ...state,
             data: {
               ...state.data,
               contexts: {
                 ...state.data.contexts,
-                [currentWorkspaceId]: newContextValue
+                [currentWorkspaceId]: { ...currentContext, [key]: updatedKeyData }
               }
             }
           };
