@@ -7,8 +7,7 @@ export const COMPONENT_TYPES = ['flowStep', 'layout', 'widget'] as const;
 export type ComponentType = typeof COMPONENT_TYPES[number];
 
 /**
- * Uproszczony hook do dynamicznego ładowania komponentów z szablonów.
- * Zastępuje useComponentLoader i upraszcza system szablonów.
+ * Hook do dynamicznego ładowania komponentów z szablonów
  */
 export function useComponents<T = any>(
   componentType: ComponentType,
@@ -32,20 +31,16 @@ export function useComponents<T = any>(
       setError(null);
       
       try {
-        let loadedComponent = null;
-        const formattedComponentId = formatComponentId(componentId);
-        
-        // Konstruuj możliwe ścieżki do komponentu
-        const possiblePaths = getPossiblePaths(templateName, componentType, formattedComponentId);
-        
-        // Dynamicznie importuj moduły
+        const formattedId = formatComponentId(componentId);
+        const paths = getPossiblePaths(templateName, componentType, formattedId);
         const modules = getModulesByType(componentType);
+        let loadedComponent = null;
         
-        // Spróbuj załadować z głównych ścieżek
-        for (const path of possiblePaths) {
+        // Próba załadowania z głównych ścieżek
+        for (const path of paths) {
           if (modules[path]) {
             try {
-              const module:any = await modules[path]();
+              const module = await modules[path]();
               if (module.default) {
                 loadedComponent = module.default;
                 break;
@@ -56,14 +51,14 @@ export function useComponents<T = any>(
           }
         }
         
-        // Jeśli nie znaleziono, spróbuj zastąpić nazwę komponentu
+        // Jeśli nie znaleziono, próba załadowania domyślnego komponentu
         if (!loadedComponent && fallbackToDefault) {
-          const defaultPaths = getPossiblePaths('default', componentType, formattedComponentId);
+          const defaultPaths = getPossiblePaths('default', componentType, formattedId);
           
           for (const path of defaultPaths) {
             if (modules[path]) {
               try {
-                const module:any = await modules[path]();
+                const module = await modules[path]();
                 if (module.default) {
                   loadedComponent = module.default;
                   break;
@@ -80,11 +75,10 @@ export function useComponents<T = any>(
         } else {
           const errorMsg = `Component not found: ${componentId} (${componentType})`;
           setError(errorMsg);
-          console.error(errorMsg, { possiblePaths });
+          console.error(errorMsg, { possiblePaths: paths });
         }
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : String(err);
-        setError(errorMsg);
+        setError(err instanceof Error ? err.message : String(err));
         console.error(`Error loading component ${componentId}:`, err);
       } finally {
         setIsLoading(false);
@@ -97,48 +91,48 @@ export function useComponents<T = any>(
   return { component, error, isLoading };
 }
 
-// Funkcja formatująca ID komponentu
+// Funkcje pomocnicze
 function formatComponentId(id: string): string {
-  // Przekształca kebab-case na PascalCase (np. form-step => FormStep)
+  // Konwersja kebab-case na PascalCase
   return id
     .split('-')
     .map(part => part.charAt(0).toUpperCase() + part.slice(1))
     .join('');
 }
 
-// Funkcja generująca możliwe ścieżki
 function getPossiblePaths(
   templateName: string,
   componentType: ComponentType,
   componentId: string
 ): string[] {
   const paths: string[] = [];
+  const base = `/src/templates/${templateName}`;
   
   switch (componentType) {
     case 'flowStep':
       paths.push(
-        `/src/templates/${templateName}/flowSteps/${componentId}Template.tsx`,
-        `/src/templates/${templateName}/flowSteps/${componentId}.tsx`,
-        `/src/templates/${templateName}/components/${componentId}Template.tsx`,
-        `/src/templates/${templateName}/components/${componentId}.tsx`
+        `${base}/flowSteps/${componentId}Template.tsx`,
+        `${base}/flowSteps/${componentId}.tsx`,
+        `${base}/components/${componentId}Template.tsx`,
+        `${base}/components/${componentId}.tsx`
       );
       break;
     case 'layout':
       paths.push(
-        `/src/templates/${templateName}/layouts/${componentId}Layout.tsx`,
-        `/src/templates/${templateName}/layouts/${componentId}.tsx`,
-        `/src/templates/${templateName}/components/${componentId}Layout.tsx`,
-        `/src/templates/${templateName}/components/${componentId}.tsx`
+        `${base}/layouts/${componentId}Layout.tsx`,
+        `${base}/layouts/${componentId}.tsx`,
+        `${base}/components/${componentId}Layout.tsx`,
+        `${base}/components/${componentId}.tsx`
       );
       break;
     case 'widget':
       paths.push(
-        `/src/templates/${templateName}/widgets/${componentId}Widget.tsx`,
-        `/src/templates/${templateName}/widgets/${componentId}.tsx`,
-        `/src/templates/${templateName}/components/${componentId}Widget.tsx`,
-        `/src/templates/${templateName}/components/${componentId}.tsx`,
-        `/src/templates/${templateName}/widgets/${componentId.toLowerCase()}.tsx`,
-        `/src/templates/${templateName}/widgets/card-list.tsx` // Specjalny przypadek dla CardListWidget
+        `${base}/widgets/${componentId}Widget.tsx`,
+        `${base}/widgets/${componentId}.tsx`,
+        `${base}/components/${componentId}Widget.tsx`,
+        `${base}/components/${componentId}.tsx`,
+        `${base}/widgets/${componentId.toLowerCase()}.tsx`,
+        `${base}/widgets/card-list.tsx` // Specjalny przypadek
       );
       break;
   }
@@ -146,16 +140,11 @@ function getPossiblePaths(
   return paths;
 }
 
-// Funkcja zwracająca odpowiednie dynamiczne importy według typu
 function getModulesByType(componentType: ComponentType) {
   switch (componentType) {
-    case 'flowStep':
-      return import.meta.glob('/src/templates/*/flowSteps/*.tsx');
-    case 'layout':
-      return import.meta.glob('/src/templates/*/layouts/*.tsx');
-    case 'widget':
-      return import.meta.glob('/src/templates/*/widgets/*.tsx');
-    default:
-      return import.meta.glob('/src/templates/*/*.tsx');
+    case 'flowStep': return import.meta.glob('/src/templates/*/flowSteps/*.tsx');
+    case 'layout': return import.meta.glob('/src/templates/*/layouts/*.tsx');
+    case 'widget': return import.meta.glob('/src/templates/*/widgets/*.tsx');
+    default: return import.meta.glob('/src/templates/*/*.tsx');
   }
 }

@@ -1,22 +1,18 @@
 // src/hooks/useAuth.tsx
 import { useState, useEffect, useCallback, createContext, useContext } from 'react';
 import { 
-  signInWithPopup, 
-  signOut, 
-  onAuthStateChanged, 
-  User,
-  GoogleAuthProvider 
+  signInWithPopup, signOut, onAuthStateChanged, User, GoogleAuthProvider 
 } from '@firebase/auth';
 import { doc, getDoc, setDoc } from '@firebase/firestore';
 import { auth, googleProvider, db } from '@/_firebase/config';
 
-// Extended user interface with tokens
+// Uproszczony typ użytkownika z tokenami
 interface UserWithTokens extends User {
   availableTokens?: number;
   jwt?: string;
 }
 
-// Auth context interface
+// Interfejs kontekstu auth
 interface AuthContextType {
   user: UserWithTokens | null;
   loading: boolean;
@@ -27,30 +23,22 @@ interface AuthContextType {
   fetchWithAuth: (url: string, options?: RequestInit) => Promise<Response>;
 }
 
-// Create context
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// Context provider component
 export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
   const [user, setUser] = useState<UserWithTokens | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [jwtToken, setJwtToken] = useState<string | null>(null);
 
-  // Set up auth state change listener
+  // Nasłuchiwanie zmian stanu autoryzacji
   useEffect(() => {
-    let unsubscribed = false;
-    
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (unsubscribed) return;
-      
       if (currentUser) {
         try {
-          // Get token
           const token = await currentUser.getIdToken(true);
           setJwtToken(token);
           
-          // Check if user exists in Firestore
           const userDocRef = doc(db, 'users', currentUser.uid);
           const userDoc = await getDoc(userDocRef);
 
@@ -58,7 +46,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
           userData.jwt = token;
 
           if (!userDoc.exists()) {
-            // Create new user with initial tokens
+            // Nowy użytkownik
             await setDoc(userDocRef, {
               email: currentUser.email,
               displayName: currentUser.displayName,
@@ -68,9 +56,8 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
             });
             userData.availableTokens = 5000;
           } else {
-            // Get existing data
-            const data = userDoc.data();
-            userData.availableTokens = data.availableTokens || 0;
+            // Istniejący użytkownik
+            userData.availableTokens = userDoc.data().availableTokens || 0;
           }
 
           setUser(userData);
@@ -88,18 +75,13 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
       setLoading(false);
     });
 
-    // Cleanup function
-    return () => {
-      unsubscribed = true;
-      unsubscribe();
-    };
+    return unsubscribe;
   }, []);
 
-  // Token refresh
+  // Odświeżanie tokena
   useEffect(() => {
     if (!user) return;
     
-    // Refresh token every 45 minutes (tokens expire after 1 hour)
     const tokenRefreshInterval = setInterval(async () => {
       try {
         if (auth.currentUser) {
@@ -110,32 +92,23 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
       } catch (error) {
         setError(error instanceof Error ? error.message : String(error));
       }
-    }, 45 * 60 * 1000);
+    }, 45 * 60 * 1000); // 45 minut
     
     return () => clearInterval(tokenRefreshInterval);
   }, [user]);
 
-  // Google sign-in
+  // Logowanie Google
   const signInWithGoogle = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       
       const result = await signInWithPopup(auth, googleProvider);
-      
-      // Google API access token if needed
       const credential = GoogleAuthProvider.credentialFromResult(result);
-      const accessToken = credential ? credential.accessToken : null;
-      
-      // Get JWT
       const token = await result.user.getIdToken();
       setJwtToken(token);
       
-      return {
-        user: result.user,
-        jwt: token,
-        googleAccessToken: accessToken
-      };
+      return { user: result.user, jwt: token, googleAccessToken: credential?.accessToken };
     } catch (error) {
       setError(error instanceof Error ? error.message : String(error));
       throw error;
@@ -144,7 +117,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
     }
   }, []);
 
-  // Logout
+  // Wylogowanie
   const logout = useCallback(async () => {
     try {
       await signOut(auth);
@@ -157,7 +130,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
     }
   }, []);
 
-  // Get token
+  // Pobranie tokena
   const getToken = useCallback(async (): Promise<string | null> => {
     if (auth.currentUser) {
       try {
@@ -172,36 +145,34 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
     return jwtToken;
   }, [jwtToken]);
 
-  // Make authenticated request
+  // Wykonanie żądania z autoryzacją
   const fetchWithAuth = useCallback(async (url: string, options: RequestInit = {}) => {
     const token = await getToken();
     
-    const headers = {
-      ...(options.headers || {}),
-      Authorization: token ? `Bearer ${token}` : '',
-    };
-    
     return fetch(url, {
       ...options,
-      headers,
+      headers: {
+        ...(options.headers || {}),
+        Authorization: token ? `Bearer ${token}` : '',
+      },
     });
   }, [getToken]);
 
-  // Return context
-  const authContext = {
-    user,
-    loading,
-    error,
-    signInWithGoogle,
-    logout,
-    getToken,
-    fetchWithAuth
-  };
-
-  return <AuthContext.Provider value={authContext}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      error,
+      signInWithGoogle,
+      logout,
+      getToken,
+      fetchWithAuth
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
-// Hook for using auth context
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {

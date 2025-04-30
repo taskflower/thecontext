@@ -10,7 +10,6 @@ const FormStepTemplate: React.FC<FlowStepProps> = ({
   isLastNode,
   isFirstNode 
 }) => {
-  // Używamy ujednoliconego hooka useFlow
   const {
     formData,
     formFields,
@@ -28,11 +27,86 @@ const FormStepTemplate: React.FC<FlowStepProps> = ({
     isLastNode
   });
   
-  // Obsługa formularza i przejścia do następnego kroku
   const processFormSubmit = (e: React.FormEvent) => {
     const data = handleSubmit(e);
     handleNext(data);
   };
+
+  // Renderuje pole formularza na podstawie typu
+  const renderFormField = (field: any) => {
+    const { name, label, type, required, options } = field;
+    
+    if (type === "number") {
+      return (
+        <div className="relative w-full border-2 rounded-md transition-all border-gray-200 hover:border-gray-400">
+          <input
+            type="number"
+            value={formData[name] || ""}
+            onChange={(e) => handleChange(name, Number(e.target.value))}
+            required={required}
+            placeholder={`Wpisz ${label.toLowerCase()}...`}
+            className="flex h-12 w-full bg-transparent px-3 py-2 text-base text-gray-900 placeholder:text-gray-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          />
+        </div>
+      );
+    } 
+    
+    if (type === "select" && options) {
+      return (
+        <div className="relative w-full border-2 rounded-md transition-all border-gray-200 hover:border-blue-300">
+          <select
+            value={formData[name] || ""}
+            onChange={(e) => handleChange(name, e.target.value)}
+            required={required}
+            className="flex h-12 w-full bg-transparent px-3 py-2 text-base text-gray-900 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value="">Wybierz...</option>
+            {options.map((option: string) => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+        </div>
+      );
+    } 
+    
+    // Text inputs (fallback for unknown types too)
+    const isUrl = name.toLowerCase().includes("url") || 
+      name.toLowerCase().includes("www") || 
+      name.toLowerCase().includes("striny");
+    
+    if (isUrl) {
+      return (
+        <div className="relative w-full border-2 rounded-md transition-all border-gray-200 hover:border-blue-300">
+          <div className="flex items-center p-2">
+            <div className="flex items-center justify-center h-12 px-3 text-base rounded-md bg-gray-100 text-gray-500">
+              http://
+            </div>
+            <input
+              type="text"
+              value={formData[name] || ""}
+              onChange={(e) => handleChange(name, e.target.value)}
+              required={required}
+              placeholder="Wpisz ją tutaj..."
+              className="flex h-12 w-full bg-transparent px-3 py-2 text-base text-gray-900 placeholder:text-gray-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 flex-grow"
+            />
+          </div>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="relative w-full border-2 rounded-md transition-all border-gray-200 hover:border-blue-300">
+        <input
+          type="text"
+          value={formData[name] || ""}
+          onChange={(e) => handleChange(name, e.target.value)}
+          required={required}
+          placeholder={`Wpisz ${label.toLowerCase()}...`}
+          className="flex h-12 w-full bg-transparent px-3 py-2 text-base text-gray-900 placeholder:text-gray-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="my-4">
@@ -53,70 +127,13 @@ const FormStepTemplate: React.FC<FlowStepProps> = ({
                 </label>
 
                 <div className="space-y-3">
-                  {field.type === "number" ? (
-                    <div className="relative w-full border-2 rounded-md transition-all border-gray-200 hover:border-gray-400">
-                      <input
-                        type="number"
-                        value={formData[field.name] || ""}
-                        onChange={(e) => handleChange(field.name, Number(e.target.value))}
-                        required={field.required}
-                        placeholder={`Wpisz ${field.label.toLowerCase()}...`}
-                        className="flex h-12 w-full bg-transparent px-3 py-2 text-base text-gray-900 placeholder:text-gray-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                      />
-                    </div>
-                  ) : field.type === "select" && field.options ? (
-                    <div className="relative w-full border-2 rounded-md transition-all border-gray-200 hover:border-blue-300">
-                      <select
-                        value={formData[field.name] || ""}
-                        onChange={(e) => handleChange(field.name, e.target.value)}
-                        required={field.required}
-                        className="flex h-12 w-full bg-transparent px-3 py-2 text-base text-gray-900 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        <option value="">Wybierz...</option>
-                        {field.options.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  ) : field.type === "text" || !field.type ? (
-                    <div className="relative w-full border-2 rounded-md transition-all border-gray-200 hover:border-blue-300">
-                      {field.name.toLowerCase().includes("url") || 
-                        field.name.toLowerCase().includes("www") || 
-                        field.name.toLowerCase().includes("striny") ? (
-                        <div className="flex items-center p-2">
-                          <div className="flex items-center justify-center h-12 px-3 text-base rounded-md bg-gray-100 text-gray-500">
-                            http://
-                          </div>
-                          <input
-                            type="text"
-                            value={formData[field.name] || ""}
-                            onChange={(e) => handleChange(field.name, e.target.value)}
-                            required={field.required}
-                            placeholder="Wpisz ją tutaj..."
-                            className="flex h-12 w-full bg-transparent px-3 py-2 text-base text-gray-900 placeholder:text-gray-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 flex-grow"
-                          />
-                        </div>
-                      ) : (
-                        <input
-                          type="text"
-                          value={formData[field.name] || ""}
-                          onChange={(e) => handleChange(field.name, e.target.value)}
-                          required={field.required}
-                          placeholder={`Wpisz ${field.label.toLowerCase()}...`}
-                          className="flex h-12 w-full bg-transparent px-3 py-2 text-base text-gray-900 placeholder:text-gray-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                        />
-                      )}
-                    </div>
-                  ) : null}
+                  {renderFormField(field)}
                 </div>
               </div>
             ))}
             
             {/* Przyciski nawigacyjne */}
             <div className="flex flex-col sm:flex-row gap-4 mt-6">
-              {/* Przycisk wstecz/anuluj */}
               <button
                 type="button"
                 onClick={handleBack}
@@ -125,7 +142,6 @@ const FormStepTemplate: React.FC<FlowStepProps> = ({
                 {isFirstNode ? "Anuluj" : "Wstecz"}
               </button>
               
-              {/* Przycisk dalej/zakończ */}
               <button
                 type="button"
                 onClick={processFormSubmit}

@@ -8,12 +8,9 @@ import { useAppStore } from "@/useAppStore";
 
 export const FlowView: React.FC = () => {
   const { workspace, scenario } = useParams();
-  const { 
-    selectWorkspace, 
-    selectScenario,
-  } = useAppStore();
+  const { selectWorkspace, selectScenario } = useAppStore();
 
-  // Używamy ujednoliconego hooka useFlow
+  // Główny hook przepływu
   const { 
     currentNode, 
     isFirstNode, 
@@ -24,49 +21,30 @@ export const FlowView: React.FC = () => {
     currentScenario: flowScenario
   } = useFlow();
 
-  // Wybierz workspace i scenariusz na podstawie parametrów URL
+  // Inicjalizacja na podstawie parametrów URL
   useEffect(() => {
-    if (workspace) {
-      selectWorkspace(workspace);
-    }
-    if (scenario) {
-      selectScenario(scenario);
-    }
+    if (workspace) selectWorkspace(workspace);
+    if (scenario) selectScenario(scenario);
   }, [workspace, scenario, selectWorkspace, selectScenario]);
 
-  // Pobierz nazwę szablonu
+  // Szablon i komponent
   const templateName = currentWorkspace?.templateSettings?.template || "default";
+  const { component: LayoutComponent, error: layoutError, isLoading: layoutLoading } = 
+    useComponents('layout', 'Simple');
 
-  // Ładuj komponenty używając nowego hooka useComponents
-  const { 
-    component: LayoutComponent, 
-    error: layoutError, 
-    isLoading: layoutLoading 
-  } = useComponents('layout', 'Simple');
+  const { component: FlowStepComponent, error: flowStepError, isLoading: componentLoading } = 
+    useComponents('flowStep', currentNode?.template || 'form-step');
 
-  const { 
-    component: FlowStepComponent, 
-    error: flowStepError, 
-    isLoading: componentLoading 
-  } = useComponents(
-    'flowStep', 
-    currentNode?.template || 'form-step'
-  );
-
-  // Połączony stan ładowania i błędów
+  // Stany ładowania i błędów
   const isLoading = layoutLoading || componentLoading;
   const error = layoutError || flowStepError;
-
-  // Stan sklepu aplikacji
   const storeLoading = useAppStore(state => state.loading.workspace || state.loading.scenario);
   const storeError = useAppStore(state => state.error);
-
-  // Fallback loader dla Suspense
   const fallbackLoader = <SharedLoader message="Ładowanie komponentów..." fullScreen={true} />;
 
-  // Renderuj zawartość
+  // Render zawartości
   const renderContent = () => {
-    // Sprawdź błędy i brak danych
+    // Weryfikacja danych
     if (!currentWorkspace || !flowScenario) {
       return (
         <div className="flex items-center justify-center min-h-screen">
@@ -91,9 +69,7 @@ export const FlowView: React.FC = () => {
       return (
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-red-600 text-lg p-4 bg-red-100 rounded-lg">
-            <h3 className="font-bold">
-              Błąd: Nie znaleziono komponentu layoutu
-            </h3>
+            <h3 className="font-bold">Błąd: Nie znaleziono komponentu layoutu</h3>
             <p className="mt-2">
               Szukany layout: <span className="font-mono bg-red-50 px-1">{templateName}</span>
             </p>
@@ -106,9 +82,7 @@ export const FlowView: React.FC = () => {
       return (
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-red-600 text-lg p-4 bg-red-100 rounded-lg">
-            <h3 className="font-bold">
-              Błąd: Nie znaleziono komponentu flow step
-            </h3>
+            <h3 className="font-bold">Błąd: Nie znaleziono komponentu flow step</h3>
             <p className="mt-2">
               Szukany komponent: <span className="font-mono bg-red-50 px-1">
                 {currentNode.template || "unknown"}
@@ -122,7 +96,7 @@ export const FlowView: React.FC = () => {
       );
     }
 
-    // Renderuj layout i komponent kroku
+    // Renderuj komponent
     return React.createElement(LayoutComponent, {
       title: flowScenario.name,
       stepTitle: currentNode.label,

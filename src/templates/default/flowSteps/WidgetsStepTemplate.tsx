@@ -11,12 +11,10 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
   isLastNode,
   isFirstNode,
 }) => {
-  // Użyj ujednoliconego hooka useFlow
   const { 
     handleBack, 
     handleNext, 
-    processedAssistantMessage,
-    currentWorkspace 
+    processedAssistantMessage 
   } = useFlow({
     node,
     onSubmit,
@@ -25,10 +23,10 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
     isLastNode,
   });
 
-  // Lista widgetów do renderowania
+  // Lista widgetów
   const widgets = node.attrs?.widgets || [];
 
-  // Użyj hooka useWidgets do zarządzania widgetami
+  // Dane widgetów
   const { widgetData, isLoading, error } = useWidgets(
     widgets,
     node.contextPath
@@ -36,35 +34,32 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
 
   // Obsługa kliknięcia elementu w widgecie
   const handleWidgetSelect = (widgetId: string, itemId: string) => {
-    // Dodaj obsługę interakcji z widgetami
     console.log(`Widget ${widgetId} element ${itemId} clicked`);
   };
 
   // Dane do przekazania przy zakończeniu kroku
-  const stepData = useMemo(() => {
-    return {
-      widgetInteractions: {}, // Można dodać informacje o interakcjach z widgetami
-      completed: true,
-    };
-  }, []);
+  const stepData = useMemo(() => ({
+    widgetInteractions: {}, 
+    completed: true,
+  }), []);
 
   return (
     <div className="space-y-6">
-      {/* Assistant message */}
+      {/* Komunikat asystenta */}
       {processedAssistantMessage && (
         <div className="bg-gray-50 p-4 rounded-lg mb-6">
           <p className="text-gray-700">{processedAssistantMessage}</p>
         </div>
       )}
 
-      {/* Loading indicator for widgets */}
+      {/* Wskaźnik ładowania */}
       {isLoading && (
         <div className="flex justify-center py-6">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </div>
       )}
 
-      {/* Error display */}
+      {/* Błąd */}
       {error && (
         <div className="bg-red-50 border border-red-200 p-4 rounded-lg text-red-700">
           <p className="font-medium">Error loading widgets</p>
@@ -72,7 +67,7 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
         </div>
       )}
 
-      {/* Widgets */}
+      {/* Widgety */}
       {!isLoading && !error && (
         <div className="space-y-6">
           {widgetData.map((widget, index) => (
@@ -96,7 +91,7 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
         </div>
       )}
 
-      {/* Navigation buttons */}
+      {/* Przyciski nawigacji */}
       <div className="flex gap-3 mt-8 pb-4">
         <button
           onClick={handleBack}
