@@ -6,23 +6,15 @@ import EmptyState from "@/components/EmptyState";
 import ApplicationCard from "@/components/homeLayout/ApplicationCard";
 import Footer from "@/components/homeLayout/Footer";
 import SharedLoader from "@/components/SharedLoader";
-import {  useAuth } from "@/hooks"; // Zmienione z useApplicationStore na useAppStore
+import { useAuth } from "@/hooks";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/useAppStore";
 
 export const ApplicationView: React.FC = () => {
-  // Pobieramy dane i metody z useAppStore zamiast useApplicationStore
-  const {
-    fetchApplications,
-    selectApplication,
-    getCurrentApplication,
-    error
-  } = useAppStore();
-  
-  // Pobieramy applications i isLoading ze stanu
-  const applications = useAppStore(state => state.data.applications);
-  const isLoading = useAppStore(state => state.loading.application);
-  
+  const { fetchApplications, selectApplication, error } = useAppStore();
+  const applications = useAppStore((state) => state.data.applications);
+  const isLoading = useAppStore((state) => state.loading.application);
+
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -35,7 +27,9 @@ export const ApplicationView: React.FC = () => {
     navigate(`/app/${applicationId}`);
   };
 
-  const fallbackLoader = <SharedLoader message="Ładowanie aplikacji..." fullScreen={true} />;
+  const fallbackLoader = (
+    <SharedLoader message="Ładowanie aplikacji..." fullScreen={true} />
+  );
 
   return (
     <Suspense fallback={fallbackLoader}>
@@ -56,7 +50,7 @@ export const ApplicationView: React.FC = () => {
               ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {applications.map((app) => (
-                    <ApplicationCard 
+                    <ApplicationCard
                       key={app.id}
                       app={{
                         id: app.id,
@@ -70,7 +64,7 @@ export const ApplicationView: React.FC = () => {
               )}
             </div>
           </main>
-          
+
           <Footer user={user} />
         </div>
       </LoadingState>

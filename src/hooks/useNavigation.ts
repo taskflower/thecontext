@@ -1,13 +1,13 @@
 // src/hooks/useNavigation.ts
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppStore } from '@/useAppStore';
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useRef } from 'react';
 
 export function useNavigation() {
   const navigate = useNavigate();
   const { application, workspace, scenario } = useParams();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  // CRITICAL FIX: Dodaj ref dla śledzenia ostatniego przejścia, aby zapobiec podwójnym
+  // CRITICAL FIX: Add ref to track last navigation to prevent double calls
   const lastNavigationTimeRef = useRef(0);
   
   const { 
@@ -20,18 +20,13 @@ export function useNavigation() {
   
   const currentScenario = getCurrentScenario();
   
-  // CRITICAL DEBUG
-  useEffect(() => {
-    console.log(`[Navigation] Current step index changed to: ${currentStepIndex}`);
-  }, [currentStepIndex]);
-  
-  // Pobierz węzły z posortowaniem
+  // Get nodes with sorting
   const nodes = useMemo(() => {
     if (!currentScenario) return [];
 
     const unsortedNodes = currentScenario.nodes || [];
     
-    // Sortuj węzły według pola order
+    // Sort nodes by order field
     const sorted = [...unsortedNodes].sort((a, b) => {
       if (a.order !== undefined && b.order !== undefined) {
         return a.order - b.order;
@@ -41,27 +36,15 @@ export function useNavigation() {
       return 0;
     });
     
-    // DEBUG
-    console.log(`[Navigation] Sorted nodes:`, sorted.map(node => ({
-      id: node.id, 
-      template: node.template,
-      order: node.order
-    })));
-    
     return sorted;
   }, [currentScenario]);
   
-  // Aktualny węzeł i informacje o pozycji
+  // Current node and position information
   const currentNode = nodes[currentStepIndex];
   const isFirstNode = currentStepIndex === 0;
   const isLastNode = currentStepIndex === nodes.length - 1;
   
-  // CRITICAL DEBUG
-  useEffect(() => {
-    console.log(`[Navigation] Current node: ${currentNode?.id} (${currentNode?.template}), isFirstNode: ${isFirstNode}, isLastNode: ${isLastNode}`);
-  }, [currentNode?.id, isFirstNode, isLastNode]);
-  
-  // Nawigacja między stronami
+  // Page navigation
   const navigateToHome = () => navigate('/');
   
   const navigateToApplications = () => {
@@ -86,79 +69,69 @@ export function useNavigation() {
     if (workspace) {
       selectScenario(scenarioId);
       navigate(`/${workspace}/${scenarioId}`);
-      setCurrentStepIndex(0); // Reset do pierwszego kroku
+      setCurrentStepIndex(0); // Reset to first step
     }
   };
   
-  // CRITICAL FIX: Nawigacja między węzłami w flow z blokadą wielokrotnych wywołań
+  // CRITICAL FIX: Node navigation in flow with protection against multiple calls
   const handleNext = (data?: any) => {
-    // Zapobiegaj wielokrotnym wywołaniom w krótkim czasie
+    // Prevent multiple calls in short time
     const now = Date.now();
     if (now - lastNavigationTimeRef.current < 1000) {
-      console.log("[Navigation] Ignorowanie zbyt szybkiego wywołania handleNext");
       return;
     }
     
     lastNavigationTimeRef.current = now;
     
-    console.log(`[Navigation] handleNext called with data: ${data ? 'exists' : 'null'}`);
-    
-    // Zapisz dane do kontekstu jeśli podano
+    // Save data to context if provided
     if (data && currentNode?.contextPath) {
       updateContextPath(currentNode.contextPath, data);
     }
     
-    // Jeśli to ostatni krok, wróć do listy scenariuszy
+    // If this is the last step, return to scenario list
     if (isLastNode) {
-      console.log("[Navigation] Last node, navigating to workspaces");
       navigateToWorkspaces();
       return;
     }
     
-    // Przejdź do następnego kroku
-    console.log(`[Navigation] Moving to next step: ${currentStepIndex + 1}`);
+    // Go to next step
     setCurrentStepIndex(idx => idx + 1);
   };
   
   const handleBack = () => {
-    // Zapobiegaj wielokrotnym wywołaniom w krótkim czasie
+    // Prevent multiple calls in short time
     const now = Date.now();
     if (now - lastNavigationTimeRef.current < 1000) {
-      console.log("[Navigation] Ignorowanie zbyt szybkiego wywołania handleBack");
       return;
     }
     
     lastNavigationTimeRef.current = now;
     
-    console.log("[Navigation] handleBack called");
-    
-    // Jeśli to pierwszy krok, wróć do listy scenariuszy
+    // If this is the first step, return to scenario list
     if (isFirstNode) {
-      console.log("[Navigation] First node, navigating to workspaces");
       navigateToWorkspaces();
       return;
     }
     
-    // Wróć do poprzedniego kroku
-    console.log(`[Navigation] Moving to previous step: ${currentStepIndex - 1}`);
+    // Go to previous step
     setCurrentStepIndex(idx => idx - 1);
   };
   
   return {
-    // Nawigacja między stronami
+    // Page navigation
     navigateToHome,
     navigateToApplications,
     navigateToWorkspaces,
     navigateToScenario,
     
-    // Nawigacja w flow
+    // Flow navigation
     currentNode,
     isFirstNode,
     isLastNode,
     handleNext,
     handleBack,
     
-    // Parametry URL
+    // URL parameters
     params: { application, workspace, scenario }
   };
 }

@@ -10,13 +10,13 @@ import {
 import { doc, getDoc, setDoc } from '@firebase/firestore';
 import { auth, googleProvider, db } from '@/_firebase/config';
 
-// Rozszerzony interfejs użytkownika z tokenami
+// Extended user interface with tokens
 interface UserWithTokens extends User {
   availableTokens?: number;
   jwt?: string;
 }
 
-// Interfejs kontekstu autoryzacji
+// Auth context interface
 interface AuthContextType {
   user: UserWithTokens | null;
   loading: boolean;
@@ -27,17 +27,17 @@ interface AuthContextType {
   fetchWithAuth: (url: string, options?: RequestInit) => Promise<Response>;
 }
 
-// Utworzenie kontekstu
+// Create context
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// Komponent dostawcy kontekstu
+// Context provider component
 export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
   const [user, setUser] = useState<UserWithTokens | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [jwtToken, setJwtToken] = useState<string | null>(null);
 
-  // Ustawienie nasłuchiwania na zmiany stanu uwierzytelnienia
+  // Set up auth state change listener
   useEffect(() => {
     let unsubscribed = false;
     
@@ -46,11 +46,11 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
       
       if (currentUser) {
         try {
-          // Pobierz token
+          // Get token
           const token = await currentUser.getIdToken(true);
           setJwtToken(token);
           
-          // Sprawdź, czy użytkownik istnieje w Firestore
+          // Check if user exists in Firestore
           const userDocRef = doc(db, 'users', currentUser.uid);
           const userDoc = await getDoc(userDocRef);
 
@@ -58,7 +58,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
           userData.jwt = token;
 
           if (!userDoc.exists()) {
-            // Utwórz nowego użytkownika z początkowymi tokenami
+            // Create new user with initial tokens
             await setDoc(userDocRef, {
               email: currentUser.email,
               displayName: currentUser.displayName,
@@ -68,7 +68,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
             });
             userData.availableTokens = 5000;
           } else {
-            // Pobierz istniejące dane
+            // Get existing data
             const data = userDoc.data();
             userData.availableTokens = data.availableTokens || 0;
           }
@@ -76,7 +76,6 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
           setUser(userData);
           setError(null);
         } catch (error) {
-          console.error('Authentication error:', error);
           setError(error instanceof Error ? error.message : String(error));
           setUser(null);
           setJwtToken(null);
@@ -89,18 +88,18 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
       setLoading(false);
     });
 
-    // Funkcja czyszcząca
+    // Cleanup function
     return () => {
       unsubscribed = true;
       unsubscribe();
     };
   }, []);
 
-  // Odświeżenie tokenu
+  // Token refresh
   useEffect(() => {
     if (!user) return;
     
-    // Odświeżaj token co 45 minut (tokeny wygasają po 1 godzinie)
+    // Refresh token every 45 minutes (tokens expire after 1 hour)
     const tokenRefreshInterval = setInterval(async () => {
       try {
         if (auth.currentUser) {
@@ -109,7 +108,6 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
           setUser(prev => prev ? { ...prev, jwt: newToken } : null);
         }
       } catch (error) {
-        console.error('Token refresh error:', error);
         setError(error instanceof Error ? error.message : String(error));
       }
     }, 45 * 60 * 1000);
@@ -117,7 +115,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
     return () => clearInterval(tokenRefreshInterval);
   }, [user]);
 
-  // Logowanie przez Google
+  // Google sign-in
   const signInWithGoogle = useCallback(async () => {
     try {
       setLoading(true);
@@ -125,11 +123,11 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
       
       const result = await signInWithPopup(auth, googleProvider);
       
-      // Token dostępu Google API jeśli potrzebny
+      // Google API access token if needed
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const accessToken = credential ? credential.accessToken : null;
       
-      // Pobierz JWT
+      // Get JWT
       const token = await result.user.getIdToken();
       setJwtToken(token);
       
@@ -139,7 +137,6 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
         googleAccessToken: accessToken
       };
     } catch (error) {
-      console.error('Google sign-in error:', error);
       setError(error instanceof Error ? error.message : String(error));
       throw error;
     } finally {
@@ -147,7 +144,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
     }
   }, []);
 
-  // Wylogowanie
+  // Logout
   const logout = useCallback(async () => {
     try {
       await signOut(auth);
@@ -155,13 +152,12 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
       setUser(null);
       setError(null);
     } catch (error) {
-      console.error('Logout error:', error);
       setError(error instanceof Error ? error.message : String(error));
       throw error;
     }
   }, []);
 
-  // Pobranie tokenu
+  // Get token
   const getToken = useCallback(async (): Promise<string | null> => {
     if (auth.currentUser) {
       try {
@@ -169,7 +165,6 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
         setJwtToken(token);
         return token;
       } catch (error) {
-        console.error('Get token error:', error);
         setError(error instanceof Error ? error.message : String(error));
         return null;
       }
@@ -177,7 +172,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
     return jwtToken;
   }, [jwtToken]);
 
-  // Wykonanie żądania z autoryzacją
+  // Make authenticated request
   const fetchWithAuth = useCallback(async (url: string, options: RequestInit = {}) => {
     const token = await getToken();
     
@@ -192,7 +187,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
     });
   }, [getToken]);
 
-  // Zwróć kontekst
+  // Return context
   const authContext = {
     user,
     loading,
@@ -206,7 +201,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
   return <AuthContext.Provider value={authContext}>{children}</AuthContext.Provider>;
 };
 
-// Hook do korzystania z kontekstu
+// Hook for using auth context
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {

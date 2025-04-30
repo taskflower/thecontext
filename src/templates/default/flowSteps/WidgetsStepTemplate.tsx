@@ -12,14 +12,14 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
   isLastNode,
   isFirstNode
 }) => {
-  // Pobierz dane ze scentralizowanego store
+  // Get data from centralized store
   const { 
     data: { currentWorkspaceId, contexts },
     processTemplate,
     getContextPath
   } = useAppStore();
   
-  // Użyj hooka do obsługi nawigacji i przepływu
+  // Use hook for navigation and flow handling
   const {
     handlePrevious,
     handleComplete
@@ -31,62 +31,61 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
     onPrevious
   });
 
-  // Przetwórz wiadomość asystenta
+  // Process assistant message
   const processedAssistantMessage = node.assistantMessage
     ? processTemplate(node.assistantMessage)
     : "";
 
-  // Pobieranie kontekstu dla bieżącego workspace
+  // Get context for current workspace
   const context = useMemo(() => 
     currentWorkspaceId ? contexts[currentWorkspaceId] || {} : {},
     [currentWorkspaceId, contexts]
   );
 
-  // Lista widgetów do wyrenderowania
+  // List of widgets to render
   const widgets = node.attrs?.widgets || [];
   
-  // Użyj nowego hooka do zarządzania widgetami
+  // Use new hook for widget management
   const { widgetData, isLoading, error } = useWidgets(widgets, node.contextPath);
 
-  // Obsługa wyboru elementu w widgecie
+  // Handle widget item selection
   const handleWidgetSelect = (widgetId: string, itemId: string) => {
-    // Tutaj możesz dodać logikę obsługi kliknięcia w element widgetu
-    console.log(`Widget ${widgetId} selected item: ${itemId}`);
+    // Add logic for handling widget item clicks here
   };
 
-  // Dane do przekazania podczas zakończenia kroku
+  // Data to pass when completing the step
   const stepData = useMemo(() => {
     return {
-      widgetInteractions: {}, // Tutaj można dodać dane o interakcjach z widgetami
+      widgetInteractions: {}, // Can add data about widget interactions here
       completed: true
     };
   }, []);
 
   return (
     <div className="space-y-6">
-      {/* Wiadomość asystenta */}
+      {/* Assistant message */}
       {processedAssistantMessage && (
         <div className="bg-gray-50 p-4 rounded-lg mb-6">
           <p className="text-gray-700">{processedAssistantMessage}</p>
         </div>
       )}
 
-      {/* Loader podczas ładowania widgetów */}
+      {/* Loading indicator for widgets */}
       {isLoading && (
         <div className="flex justify-center py-6">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </div>
       )}
 
-      {/* Wyświetlanie błędu */}
+      {/* Error display */}
       {error && (
         <div className="bg-red-50 border border-red-200 p-4 rounded-lg text-red-700">
-          <p className="font-medium">Błąd ładowania widgetów</p>
+          <p className="font-medium">Error loading widgets</p>
           <p className="text-sm mt-1">{error}</p>
         </div>
       )}
 
-      {/* Widgety */}
+      {/* Widgets */}
       {!isLoading && !error && (
         <div className="space-y-6">
           {widgetData.map((widget, index) => (
@@ -104,26 +103,26 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
           
           {widgetData.length === 0 && (
             <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-              <p className="text-yellow-700">Brak widgetów do wyświetlenia.</p>
+              <p className="text-yellow-700">No widgets to display.</p>
             </div>
           )}
         </div>
       )}
 
-      {/* Przyciski nawigacji */}
+      {/* Navigation buttons */}
       <div className="flex gap-3 mt-8 pb-4">
         <button 
           onClick={handlePrevious}
           className="px-5 py-2.5 border border-gray-200 rounded-md text-gray-700 hover:bg-gray-50 transition-colors font-medium text-sm"
         >
-          {isFirstNode ? "Anuluj" : "Wstecz"}
+          {isFirstNode ? "Cancel" : "Back"}
         </button>
         
         <button 
           onClick={() => handleComplete(stepData)}
           className="px-5 py-2.5 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors font-medium text-sm"
         >
-          {isLastNode ? 'Zakończ' : 'Dalej'}
+          {isLastNode ? 'Finish' : 'Next'}
         </button>
       </div>
     </div>

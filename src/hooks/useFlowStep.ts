@@ -8,9 +8,7 @@ import { extractJsonFromContent } from '@/utils';
 export function useFlowStep({ 
   node, 
   onSubmit, 
-  onPrevious, 
-  isFirstNode, 
-  isLastNode 
+  onPrevious
 }: {
   node: NodeData;
   onSubmit: (data: any) => void;
@@ -18,27 +16,27 @@ export function useFlowStep({
   isFirstNode: boolean;
   isLastNode: boolean;
 }) {
-  // Obsługa nawigacji
+  // Navigation handling
   const handlePrevious = () => onPrevious();
   const handleComplete = (data: any) => onSubmit(data);
 
-  // Część dla formularzy
+  // Form state
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [formFields, setFormFields] = useState<FormField[]>([]);
 
-  // Referencje dla LLM
+  // LLM references
   const autoStartExecutedRef = useRef(false);
   const isMountedRef = useRef(true);
   const autoCompleteExecutedRef = useRef(false);
   
-  // Stan dla części LLM
+  // LLM state
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [responseData, setResponseData] = useState<any>(null);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const [schema, setSchema] = useState<any>(null);
 
-  // Pobieranie danych kontekstowych
+  // Context data
   const { 
     processTemplate, 
     getContextPath, 
@@ -47,12 +45,12 @@ export function useFlowStep({
   
   const { getToken, user } = useAuth();
 
-  // Przetworzony tekst asystenta
+  // Processed assistant message
   const processedAssistantMessage = node.assistantMessage 
     ? processTemplate(node.assistantMessage) 
     : '';
 
-  // Ustaw referencję zamontowania i resetuj stan autostartu przy zmianie node
+  // Set mounted reference and reset autostart state on node change
   useEffect(() => {
     isMountedRef.current = true;
     autoStartExecutedRef.current = false;
@@ -63,7 +61,7 @@ export function useFlowStep({
     };
   }, [node.id, node.template]);
 
-  // Pobieranie pól formularza ze schematu
+  // Get form fields from schema
   useEffect(() => {
     const attrs = node.attrs || {};
     if (!attrs.schemaPath) {
@@ -72,7 +70,7 @@ export function useFlowStep({
     }
 
     try {
-      // Pobierz schemat z kontekstu
+      // Get schema from context
       const schemaData = getContextPath(attrs.schemaPath);
       
       if (!schemaData) {
@@ -80,21 +78,20 @@ export function useFlowStep({
         return;
       }
 
-      // Jeśli dane są już tablicą pól formularza, użyj ich bezpośrednio
+      // If data is already an array of form fields, use it directly
       if (Array.isArray(schemaData)) {
         setFormFields(schemaData);
         return;
       }
       
-      // W przeciwnym razie sprawdź czy obiekt schemaData to właściwy schemat formularza
+      // Otherwise check if schemaData is a proper form schema
       setFormFields(Array.isArray(schemaData) ? schemaData : []);
     } catch (err) {
-      console.error(`[useFlowStep] Error processing form schema:`, err);
       setFormFields([]);
     }
   }, [node.attrs, getContextPath]);
 
-  // Pobieranie schematu dla LLM
+  // Get schema for LLM
   useEffect(() => {
     if (node.attrs?.schemaPath) {
       try {
@@ -106,12 +103,12 @@ export function useFlowStep({
     }
   }, [node.attrs?.schemaPath, getContextPath]);
 
-  // Obsługa zmian w formularzu
+  // Handle form changes
   const handleChange = (name: string, value: any) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Sprawdzenie czy wymagane pola są wypełnione
+  // Check if required fields are filled
   const areRequiredFieldsFilled = () => {
     return formFields.every(
       field => !field.required || 
@@ -119,7 +116,7 @@ export function useFlowStep({
     );
   };
   
-  // Obsługa potwierdzenia formularza
+  // Handle form submission
   const handleSubmit = (e?: React.FormEvent) => {
     if (e && typeof e.preventDefault === 'function') {
       e.preventDefault();
@@ -136,7 +133,7 @@ export function useFlowStep({
     return formData;
   };
 
-  // Wysłanie wiadomości do LLM
+  // Send message to LLM
   const sendMessage = useCallback(async (message: string) => {
     try {
       if (!message.trim()) return null;
@@ -153,10 +150,10 @@ export function useFlowStep({
         throw new Error("User not logged in. Please login again.");
       }
 
-      // Przygotuj wiadomości
+      // Prepare messages
       const messages = [];
 
-      // Dodaj wiadomość systemową jeśli wymagana
+      // Add system message if required
       if (node.attrs?.systemMessage) {
         messages.push({
           role: 'system',
@@ -164,7 +161,7 @@ export function useFlowStep({
         });
       }
 
-      // Dodaj wiadomość inicjalizacyjną i odpowiedź asystenta
+      // Add initial message and assistant response
       if (node.attrs?.initialUserMessage) {
         const initialMessage = processTemplate(node.attrs.initialUserMessage);
         
@@ -190,7 +187,7 @@ export function useFlowStep({
         }
       }
 
-      // Dodaj aktualną wiadomość użytkownika
+      // Add current user message
       let userContent = message;
       if (schema && !userContent.includes('```json')) {
         userContent += `\n\nUse the following JSON schema:\n\`\`\`json\n${JSON.stringify(
@@ -205,18 +202,17 @@ export function useFlowStep({
         content: userContent,
       });
 
-      // Przygotuj payload do API
+      // Prepare API payload
       const payload = {
         messages: messages,
         userId: user.uid,
       };
       
-      // Ustaw informacje debugowania
+      // Set debug info
       const apiUrl = `${import.meta.env.VITE_API_URL}/api/v1/services/gemini/chat/completion`;
       setDebugInfo(`Sending to: ${apiUrl}`);
-      console.log("[useFlowStep:LLM] Sending request to API:", apiUrl);
 
-      // Wywołaj API
+      // Call API
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -226,10 +222,10 @@ export function useFlowStep({
         body: JSON.stringify(payload),
       });
 
-      // Sprawdź czy komponent jest nadal zamontowany
+      // Check if component is still mounted
       if (!isMountedRef.current) return null;
 
-      // Obsłuż błędy API
+      // Handle API errors
       if (!response.ok) {
         const errorText = await response.text();
         try {
@@ -240,9 +236,8 @@ export function useFlowStep({
         }
       }
 
-      // Przetwórz odpowiedź
+      // Process response
       const apiResponseData = await response.json();
-      console.log("[useFlowStep:LLM] API response received:", apiResponseData);
       
       const content = apiResponseData?.success && apiResponseData?.data?.message?.content;
       
@@ -251,12 +246,11 @@ export function useFlowStep({
       }
       
       const data = extractJsonFromContent(content);
-      console.log("[useFlowStep:LLM] Extracted data from response:", data);
       
       if (isMountedRef.current) {
         setResponseData(data);
 
-        // Zapisz dane do kontekstu jeśli podano contextPath
+        // Save data to context if contextPath provided
         if (node.contextPath && data) {
           updateContextPath(node.contextPath, data);
         }
@@ -264,7 +258,6 @@ export function useFlowStep({
       
       return data;
     } catch (err) {
-      console.error('[useFlowStep:LLM] API error:', err);
       if (isMountedRef.current) {
         setError(err instanceof Error ? err.message : String(err));
       }
@@ -286,7 +279,7 @@ export function useFlowStep({
     updateContextPath
   ]);
 
-  // KLUCZOWA ZMIANA: Obsługa autostartu dla LLM - dodane console.log do debugowania
+  // KEY CHANGE: Auto-start handling for LLM
   useEffect(() => {
     const handleAutoStart = async () => {
       if (
@@ -297,31 +290,16 @@ export function useFlowStep({
         !responseData && 
         !error
       ) {
-        console.log(`[useFlowStep:LLM] Starting auto-start for node: ${node.id}, type: ${node.template}`);
-        // Ustaw flagę przed wysłaniem, aby uniknąć duplikacji wywołań
+        // Set flag before sending to avoid duplicate calls
         autoStartExecutedRef.current = true;
         
         const initialMessage = node.attrs?.initialUserMessage || '';
         if (initialMessage) {
-          console.log(`[useFlowStep:LLM] Sending initial message: ${initialMessage.substring(0, 50)}...`);
           const processedMessage = processTemplate(initialMessage);
           await sendMessage(processedMessage);
-          console.log(`[useFlowStep:LLM] Auto-start message sent`);
-        } else {
-          console.log(`[useFlowStep:LLM] No initial message to send`);
         }
       }
     };
-
-    if (node.template === 'llm-step') {
-      console.log(`[useFlowStep:LLM] LLM step detected: ${node.id}, autoStart:`, 
-        node.attrs?.autoStart,
-        'autoStartExecuted:', autoStartExecutedRef.current,
-        'isLoading:', isLoading,
-        'responseData:', Boolean(responseData),
-        'error:', Boolean(error)
-      );
-    }
 
     handleAutoStart();
   }, [
@@ -336,25 +314,22 @@ export function useFlowStep({
     sendMessage
   ]);
 
-  // BLOKOWANIE AUTO-COMPLETE: Nigdy nie wywołuj automatycznego przejścia do następnego kroku
-  // Wróć ręczny wybór użytkownika w LlmStepTemplate.tsx
-
   return {
-    // Właściwości wspólne
+    // Common properties
     isLoading,
     error,
     processedAssistantMessage,
     handlePrevious,
     handleComplete,
     
-    // Właściwości formularza
+    // Form properties
     formData,
     formFields,
     handleChange,
     handleSubmit,
     areRequiredFieldsFilled,
     
-    // Właściwości LLM
+    // LLM properties
     responseData,
     sendMessage,
     schema,
