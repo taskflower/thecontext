@@ -45,7 +45,7 @@ export function useComponents<T = any>(
         for (const path of possiblePaths) {
           if (modules[path]) {
             try {
-              const module = await modules[path]();
+              const module:any = await modules[path]();
               if (module.default) {
                 loadedComponent = module.default;
                 break;
@@ -63,7 +63,7 @@ export function useComponents<T = any>(
           for (const path of defaultPaths) {
             if (modules[path]) {
               try {
-                const module = await modules[path]();
+                const module:any = await modules[path]();
                 if (module.default) {
                   loadedComponent = module.default;
                   break;

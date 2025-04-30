@@ -1,6 +1,7 @@
 // src/components/WidgetRenderer.tsx
+import { useComponents, useFlow } from '@/hooks';
 import React from 'react';
-import { useComponentLoader } from '@/hooks';
+
 
 /**
  * Właściwości dla komponentu WidgetRenderer
@@ -28,7 +29,7 @@ const WidgetRenderer: React.FC<WidgetRendererProps> = ({
   const widgetId = formatWidgetType(type);
   
   // Ładowanie komponentu widgetu
-  const { component: WidgetComponent, error, isLoading } = useComponentLoader(
+  const { component: WidgetComponent, error, isLoading } = useComponents(
     'widget',
     widgetId
   );

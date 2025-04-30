@@ -2,7 +2,8 @@
 import React from "react";
 import { X } from "lucide-react";
 import { LayoutProps } from "@/types";
-import { useNavigation } from "@/hooks"; // Zmienione z useAppNavigation na useNavigation
+import { useFlow } from "@/hooks";
+
 
 const SimpleLayout: React.FC<LayoutProps> = ({ 
   children, 
@@ -10,7 +11,7 @@ const SimpleLayout: React.FC<LayoutProps> = ({
   stepTitle, 
   onBackClick 
 }) => {
-  const navigation = useNavigation();
+  const navigation = useFlow();
   
   // Używamy dostarczonej funkcji onBackClick lub zdefiniowanej w nowym hooku useNavigation
   const handleCloseClick = onBackClick || navigation.navigateToWorkspaces;
