@@ -5,12 +5,11 @@ import * as LucideIcons from "lucide-react";
 // Mapowanie nazw ikon do odpowiadających im komponentów z Lucide
 const SUBJECT_ICONS: Record<string, keyof typeof LucideIcons> = {
   // Bezpośrednie mapowanie nazw ikon (kebab-case) na komponenty Lucide
-  "calculate": "Calculate",
+  "calculate": "Calculator",
   "calculator": "Calculator",
   "circle-dot": "CircleDot",
   "atom": "Atom",
-  "flask": "Flask",
-  "flask-conical": "FlaskConical",
+  "flask": "FlaskConical",
   "leaf": "Leaf",
   "code": "Code",
   "code2": "Code2",
@@ -74,7 +73,7 @@ export const SubjectIcon: React.FC<SchoolIconProps> = ({
   }
   
   // Pobierz komponent ikony z Lucide
-  const IconComponent = LucideIcons[lucideIconName] || LucideIcons[fallback];
+  const IconComponent:any = LucideIcons[lucideIconName] || LucideIcons[fallback];
   return <IconComponent size={size} className={className} color={color} />;
 };
 
