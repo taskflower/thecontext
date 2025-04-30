@@ -1,77 +1,112 @@
-// src/hooks/useFlowStep.ts
-import { useState, useEffect, useRef, useCallback } from 'react';
+// src/hooks/useFlow.ts
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { NodeData, FormField } from '@/types';
-import { useAuth } from './useAuth';
 import { useAppStore } from '@/useAppStore';
 import { extractJsonFromContent } from '@/utils';
+import { useAuth } from './useAuth';
 
-export function useFlowStep({ 
-  node, 
-  onSubmit, 
-  onPrevious
+/**
+ * Ujednolicony hook do zarządzania przepływem (flow) w aplikacji.
+ * Zastępuje funkcjonalność useFlowStep, useNavigation i częściowo useComponentLoader
+ */
+export function useFlow({
+  node,
+  onSubmit,
+  onPrevious,
+  isFirstNode,
+  isLastNode
 }: {
-  node: NodeData;
-  onSubmit: (data: any) => void;
-  onPrevious: () => void;
-  isFirstNode: boolean;
-  isLastNode: boolean;
-}) {
-  // Navigation handling
-  const handlePrevious = () => onPrevious();
-  const handleComplete = (data: any) => onSubmit(data);
+  node?: NodeData;
+  onSubmit?: (data: any) => void;
+  onPrevious?: () => void;
+  isFirstNode?: boolean;
+  isLastNode?: boolean;
+} = {}) {
+  const navigate = useNavigate();
+  const { application, workspace, scenario } = useParams();
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const lastNavigationTimeRef = useRef(0);
+  
+  // Auth & API
+  const { getToken, user } = useAuth();
 
+  // Store & context
+  const { 
+    selectApplication, 
+    selectWorkspace, 
+    selectScenario, 
+    getCurrentScenario,
+    getCurrentWorkspace,
+    getContextPath,
+    updateContextPath,
+    processTemplate
+  } = useAppStore();
+  
+  // Current data
+  const currentScenario = getCurrentScenario();
+  const currentWorkspace = getCurrentWorkspace();
+  
+  // Get nodes with sorting
+  const nodes = useMemo(() => {
+    if (!currentScenario) return [];
+
+    const unsortedNodes = currentScenario.nodes || [];
+    
+    // Sort nodes by order field
+    return [...unsortedNodes].sort((a, b) => {
+      if (a.order !== undefined && b.order !== undefined) {
+        return a.order - b.order;
+      }
+      if (a.order !== undefined) return -1;
+      if (b.order !== undefined) return 1;
+      return 0;
+    });
+  }, [currentScenario]);
+  
+  // Current node and position information
+  const currentNode = node || nodes[currentStepIndex];
+  const isFirst = isFirstNode !== undefined ? isFirstNode : currentStepIndex === 0;
+  const isLast = isLastNode !== undefined ? isLastNode : currentStepIndex === nodes.length - 1;
+  
   // Form state
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [formFields, setFormFields] = useState<FormField[]>([]);
 
-  // LLM references
+  // LLM references & state
   const autoStartExecutedRef = useRef(false);
   const isMountedRef = useRef(true);
-  const autoCompleteExecutedRef = useRef(false);
-  
-  // LLM state
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [responseData, setResponseData] = useState<any>(null);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const [schema, setSchema] = useState<any>(null);
-
-  // Context data
-  const { 
-    processTemplate, 
-    getContextPath, 
-    updateContextPath 
-  } = useAppStore();
   
-  const { getToken, user } = useAuth();
-
   // Processed assistant message
-  const processedAssistantMessage = node.assistantMessage 
-    ? processTemplate(node.assistantMessage) 
+  const processedAssistantMessage = currentNode?.assistantMessage 
+    ? processTemplate(currentNode.assistantMessage) 
     : '';
 
   // Set mounted reference and reset autostart state on node change
   useEffect(() => {
     isMountedRef.current = true;
     autoStartExecutedRef.current = false;
-    autoCompleteExecutedRef.current = false;
     
     return () => {
       isMountedRef.current = false;
     };
-  }, [node.id, node.template]);
+  }, [currentNode?.id, currentNode?.template]);
 
   // Get form fields from schema
   useEffect(() => {
-    const attrs = node.attrs || {};
-    if (!attrs.schemaPath) {
+    if (!currentNode?.attrs?.schemaPath) {
       setFormFields([]);
       return;
     }
 
     try {
       // Get schema from context
-      const schemaData = getContextPath(attrs.schemaPath);
+      const schemaData = getContextPath(currentNode.attrs.schemaPath);
       
       if (!schemaData) {
         setFormFields([]);
@@ -89,49 +124,134 @@ export function useFlowStep({
     } catch (err) {
       setFormFields([]);
     }
-  }, [node.attrs, getContextPath]);
+  }, [currentNode?.attrs, getContextPath]);
 
   // Get schema for LLM
   useEffect(() => {
-    if (node.attrs?.schemaPath) {
+    if (currentNode?.attrs?.schemaPath) {
       try {
-        const schemaData = getContextPath(node.attrs.schemaPath);
+        const schemaData = getContextPath(currentNode.attrs.schemaPath);
         setSchema(schemaData);
       } catch (err) {
         setError(`Error getting schema: ${err instanceof Error ? err.message : String(err)}`);
       }
     }
-  }, [node.attrs?.schemaPath, getContextPath]);
+  }, [currentNode?.attrs?.schemaPath, getContextPath]);
+
+  // Page navigation
+  const navigateToHome = useCallback(() => navigate('/'), [navigate]);
+  
+  const navigateToApplications = useCallback(() => {
+    if (application) {
+      selectApplication(application);
+      navigate(`/app/${application}`);
+    } else {
+      navigateToHome();
+    }
+  }, [application, navigate, navigateToHome, selectApplication]);
+  
+  const navigateToWorkspaces = useCallback(() => {
+    if (workspace) {
+      selectWorkspace(workspace);
+      navigate(`/${workspace}`);
+    } else {
+      navigateToApplications();
+    }
+  }, [workspace, navigateToApplications, navigate, selectWorkspace]);
+  
+  const navigateToScenario = useCallback((scenarioId: string) => {
+    if (workspace) {
+      selectScenario(scenarioId);
+      navigate(`/${workspace}/${scenarioId}`);
+      setCurrentStepIndex(0); // Reset to first step
+    }
+  }, [workspace, navigate, selectScenario]);
 
   // Handle form changes
-  const handleChange = (name: string, value: any) => {
+  const handleChange = useCallback((name: string, value: any) => {
     setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
   // Check if required fields are filled
-  const areRequiredFieldsFilled = () => {
+  const areRequiredFieldsFilled = useCallback(() => {
     return formFields.every(
       field => !field.required || 
       (formData[field.name] !== undefined && formData[field.name] !== '')
     );
-  };
+  }, [formFields, formData]);
   
   // Handle form submission
-  const handleSubmit = (e?: React.FormEvent) => {
+  const handleSubmit = useCallback((e?: React.FormEvent) => {
     if (e && typeof e.preventDefault === 'function') {
       e.preventDefault();
     }
 
-    if (node.contextPath) {
-      const basePath = node.contextPath;
+    if (currentNode?.contextPath) {
+      const basePath = currentNode.contextPath;
       Object.entries(formData).forEach(([key, value]) => {
         updateContextPath(`${basePath}.${key}`, value);
       });
     }
     
-    handleComplete(formData);
+    if (onSubmit) {
+      onSubmit(formData);
+    }
     return formData;
-  };
+  }, [currentNode?.contextPath, formData, onSubmit, updateContextPath]);
+
+  // Node navigation in flow with protection against multiple calls
+  const handleNext = useCallback((data?: any) => {
+    // Prevent multiple calls in short time
+    const now = Date.now();
+    if (now - lastNavigationTimeRef.current < 1000) {
+      return;
+    }
+    
+    lastNavigationTimeRef.current = now;
+    
+    // Save data to context if provided
+    if (data && currentNode?.contextPath) {
+      updateContextPath(currentNode.contextPath, data);
+    }
+    
+    // If this is the last step, return to scenario list
+    if (isLast) {
+      navigateToWorkspaces();
+      return;
+    }
+    
+    // Go to next step
+    setCurrentStepIndex(idx => idx + 1);
+    
+    // If external handler provided, call it too
+    if (onSubmit) {
+      onSubmit(data);
+    }
+  }, [currentNode?.contextPath, isLast, navigateToWorkspaces, onSubmit, updateContextPath]);
+  
+  const handleBack = useCallback(() => {
+    // Prevent multiple calls in short time
+    const now = Date.now();
+    if (now - lastNavigationTimeRef.current < 1000) {
+      return;
+    }
+    
+    lastNavigationTimeRef.current = now;
+    
+    // If this is the first step, return to scenario list
+    if (isFirst) {
+      navigateToWorkspaces();
+      return;
+    }
+    
+    // Go to previous step
+    setCurrentStepIndex(idx => idx - 1);
+    
+    // If external handler provided, call it too
+    if (onPrevious) {
+      onPrevious();
+    }
+  }, [isFirst, navigateToWorkspaces, onPrevious]);
 
   // Send message to LLM
   const sendMessage = useCallback(async (message: string) => {
@@ -154,16 +274,16 @@ export function useFlowStep({
       const messages = [];
 
       // Add system message if required
-      if (node.attrs?.systemMessage) {
+      if (currentNode?.attrs?.systemMessage) {
         messages.push({
           role: 'system',
-          content: node.attrs.systemMessage,
+          content: currentNode.attrs.systemMessage,
         });
       }
 
       // Add initial message and assistant response
-      if (node.attrs?.initialUserMessage) {
-        const initialMessage = processTemplate(node.attrs.initialUserMessage);
+      if (currentNode?.attrs?.initialUserMessage) {
+        const initialMessage = processTemplate(currentNode.attrs.initialUserMessage);
         
         let initialContent = initialMessage;
         if (schema && !initialContent.includes('```json')) {
@@ -251,8 +371,8 @@ export function useFlowStep({
         setResponseData(data);
 
         // Save data to context if contextPath provided
-        if (node.contextPath && data) {
-          updateContextPath(node.contextPath, data);
+        if (currentNode?.contextPath && data) {
+          updateContextPath(currentNode.contextPath, data);
         }
       }
       
@@ -270,21 +390,21 @@ export function useFlowStep({
   }, [
     getToken,
     user,
-    node.attrs?.systemMessage,
-    node.attrs?.initialUserMessage,
-    node.contextPath,
+    currentNode?.attrs?.systemMessage,
+    currentNode?.attrs?.initialUserMessage,
+    currentNode?.contextPath,
     processTemplate,
     processedAssistantMessage,
     schema,
     updateContextPath
   ]);
 
-  // KEY CHANGE: Auto-start handling for LLM
+  // Auto-start handling for LLM
   useEffect(() => {
     const handleAutoStart = async () => {
       if (
-        node.template === 'llm-step' && 
-        node.attrs?.autoStart === true && 
+        currentNode?.template === 'llm-step' && 
+        currentNode.attrs?.autoStart === true && 
         !autoStartExecutedRef.current && 
         !isLoading && 
         !responseData && 
@@ -293,7 +413,7 @@ export function useFlowStep({
         // Set flag before sending to avoid duplicate calls
         autoStartExecutedRef.current = true;
         
-        const initialMessage = node.attrs?.initialUserMessage || '';
+        const initialMessage = currentNode.attrs?.initialUserMessage || '';
         if (initialMessage) {
           const processedMessage = processTemplate(initialMessage);
           await sendMessage(processedMessage);
@@ -303,10 +423,10 @@ export function useFlowStep({
 
     handleAutoStart();
   }, [
-    node.template,
-    node.id,
-    node.attrs?.autoStart,
-    node.attrs?.initialUserMessage,
+    currentNode?.template,
+    currentNode?.id,
+    currentNode?.attrs?.autoStart,
+    currentNode?.attrs?.initialUserMessage,
     isLoading,
     responseData,
     error,
@@ -315,24 +435,41 @@ export function useFlowStep({
   ]);
 
   return {
-    // Common properties
+    // Navigation
+    currentNode,
+    isFirstNode: isFirst,
+    isLastNode: isLast,
+    navigateToHome,
+    navigateToApplications,
+    navigateToWorkspaces,
+    navigateToScenario,
+    handleNext,
+    handleBack,
+    
+    // URL parameters
+    params: { application, workspace, scenario },
+    
+    // Common flow state
     isLoading,
     error,
     processedAssistantMessage,
-    handlePrevious,
-    handleComplete,
     
-    // Form properties
+    // Form state
     formData,
     formFields,
     handleChange,
     handleSubmit,
     areRequiredFieldsFilled,
     
-    // LLM properties
+    // LLM state
     responseData,
     sendMessage,
     schema,
-    debugInfo
+    debugInfo,
+    
+    // Current data
+    currentScenario,
+    currentWorkspace,
+    nodes
   };
 }

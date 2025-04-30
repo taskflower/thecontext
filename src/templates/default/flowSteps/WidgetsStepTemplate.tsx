@@ -1,8 +1,7 @@
 // src/templates/default/flowSteps/WidgetsStepTemplate.tsx
 import React, { useMemo } from "react";
 import { FlowStepProps } from "@/types";
-import { useFlowStep, useWidgets } from "@/hooks";
-import { useAppStore } from "@/useAppStore";
+import { useFlow, useWidgets } from "@/hooks";
 import WidgetRenderer from "@/components/WidgetRenderer";
 
 const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
@@ -12,50 +11,39 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
   isLastNode,
   isFirstNode,
 }) => {
-  // Get data from centralized store
-  const {
-    data: { currentWorkspaceId, contexts },
-    processTemplate,
-  } = useAppStore();
-
-  // Use hook for navigation and flow handling
-  const { handlePrevious, handleComplete } = useFlowStep({
+  // Użyj ujednoliconego hooka useFlow
+  const { 
+    handleBack, 
+    handleNext, 
+    processedAssistantMessage,
+    currentWorkspace 
+  } = useFlow({
     node,
-    isFirstNode,
-    isLastNode,
     onSubmit,
     onPrevious,
+    isFirstNode,
+    isLastNode,
   });
 
-  // Process assistant message
-  const processedAssistantMessage = node.assistantMessage
-    ? processTemplate(node.assistantMessage)
-    : "";
-
-  // Get context for current workspace
-  const context = useMemo(
-    () => (currentWorkspaceId ? contexts[currentWorkspaceId] || {} : {}),
-    [currentWorkspaceId, contexts]
-  );
-
-  // List of widgets to render
+  // Lista widgetów do renderowania
   const widgets = node.attrs?.widgets || [];
 
-  // Use new hook for widget management
+  // Użyj hooka useWidgets do zarządzania widgetami
   const { widgetData, isLoading, error } = useWidgets(
     widgets,
     node.contextPath
   );
 
-  // Handle widget item selection
+  // Obsługa kliknięcia elementu w widgecie
   const handleWidgetSelect = (widgetId: string, itemId: string) => {
-    // Add logic for handling widget item clicks here
+    // Dodaj obsługę interakcji z widgetami
+    console.log(`Widget ${widgetId} element ${itemId} clicked`);
   };
 
-  // Data to pass when completing the step
+  // Dane do przekazania przy zakończeniu kroku
   const stepData = useMemo(() => {
     return {
-      widgetInteractions: {}, // Can add data about widget interactions here
+      widgetInteractions: {}, // Można dodać informacje o interakcjach z widgetami
       completed: true,
     };
   }, []);
@@ -111,14 +99,14 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
       {/* Navigation buttons */}
       <div className="flex gap-3 mt-8 pb-4">
         <button
-          onClick={handlePrevious}
+          onClick={handleBack}
           className="px-5 py-2.5 border border-gray-200 rounded-md text-gray-700 hover:bg-gray-50 transition-colors font-medium text-sm"
         >
           {isFirstNode ? "Cancel" : "Back"}
         </button>
 
         <button
-          onClick={() => handleComplete(stepData)}
+          onClick={() => handleNext(stepData)}
           className="px-5 py-2.5 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors font-medium text-sm"
         >
           {isLastNode ? "Finish" : "Next"}

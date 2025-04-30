@@ -1,16 +1,15 @@
 // src/views/WorkspaceView.tsx
 import React, { useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useComponentLoader } from "@/hooks";
+import { useComponents } from "@/hooks";
 import { LoadingState } from "@/components/LoadingState";
-import SharedLoader from "@/components/SharedLoader";
 import { useAppStore } from "@/useAppStore";
 
 export const WorkspaceView: React.FC = () => {
   const { applicationId } = useParams();
   const navigate = useNavigate();
   
-  // Używanie zunifikowanego store zamiast osobnych
+  // Używanie zunifikowanego store
   const { 
     fetchApplicationById, 
     getCurrentApplication, 
@@ -21,7 +20,7 @@ export const WorkspaceView: React.FC = () => {
   // Pobieranie stanu ładowania ze store
   const isLoading = useAppStore(state => state.loading.application);
   
-  // Pobieranie aktualnej aplikacji z nowego store
+  // Pobieranie aktualnej aplikacji
   const currentApplication = getCurrentApplication();
   const workspaces = currentApplication?.workspaces || [];
 
@@ -45,8 +44,6 @@ export const WorkspaceView: React.FC = () => {
 
   const handleBackClick = () => navigate('/');
 
-  // Pobieranie nazwy szablonu
-  const templateName = currentApplication?.templateSettings?.template || "default";
 
   // Pobranie danych aplikacji raz, gdy zmienia się applicationId
   useEffect(() => {
@@ -55,19 +52,19 @@ export const WorkspaceView: React.FC = () => {
     }
   }, [applicationId, fetchApplicationById]);
 
-  // Używanie nowego hooka do ładowania komponentów
+  // Używanie nowego hooka useComponents
   const { 
     component: LayoutComponent, 
     error: layoutError, 
     isLoading: layoutLoading 
-  } = useComponentLoader('layout', 'Simple');
+  } = useComponents('layout', 'Simple');
 
-  // Używanie nowego hooka do ładowania komponentu karty
+  // Używanie nowego hooka useComponents do ładowania komponentu karty
   const { 
     component: CardListComponent, 
     error: cardError, 
     isLoading: cardLoading 
-  } = useComponentLoader('widget', 'CardList');
+  } = useComponents('widget', 'CardList');
 
   // Łączenie stanów ładowania i błędów
   const combinedLoading = isLoading || layoutLoading || cardLoading;

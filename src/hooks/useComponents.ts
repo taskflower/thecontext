@@ -1,16 +1,16 @@
-// src/hooks/useComponentLoader.ts
+// src/hooks/useComponents.ts
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/useAppStore';
 
-// Definicja typów komponentów i szablonów
-const COMPONENT_TYPES = ['flowStep', 'layout', 'widget'] as const;
-type ComponentType = typeof COMPONENT_TYPES[number];
+// Definicja typów komponentów
+export const COMPONENT_TYPES = ['flowStep', 'layout', 'widget'] as const;
+export type ComponentType = typeof COMPONENT_TYPES[number];
 
 /**
- * Hook do dynamicznego ładowania komponentów z szablonów
- * Zastępuje skomplikowaną logikę ładowania obecną w wielu miejscach
+ * Uproszczony hook do dynamicznego ładowania komponentów z szablonów.
+ * Zastępuje useComponentLoader i upraszcza system szablonów.
  */
-export function useComponentLoader<T = any>(
+export function useComponents<T = any>(
   componentType: ComponentType,
   componentId: string,
   fallbackToDefault = true
@@ -39,7 +39,7 @@ export function useComponentLoader<T = any>(
         const possiblePaths = getPossiblePaths(templateName, componentType, formattedComponentId);
         
         // Dynamicznie importuj moduły
-        const modules:any = getModulesByType(componentType);
+        const modules = getModulesByType(componentType);
         
         // Spróbuj załadować z głównych ścieżek
         for (const path of possiblePaths) {

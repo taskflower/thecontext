@@ -1,30 +1,28 @@
+// src/views/FlowView.tsx
 import React, { useEffect, Suspense } from "react";
 import { useParams } from "react-router-dom";
 import { LoadingState } from "@/components/LoadingState";
 import SharedLoader from "@/components/SharedLoader";
-import { useComponentLoader, useNavigation } from "@/hooks";
+import { useFlow, useComponents } from "@/hooks";
 import { useAppStore } from "@/useAppStore";
 
 export const FlowView: React.FC = () => {
   const { workspace, scenario } = useParams();
   const { 
     selectWorkspace, 
-    selectScenario, 
-    getCurrentWorkspace,
-    getCurrentScenario 
+    selectScenario,
   } = useAppStore();
 
+  // Używamy ujednoliconego hooka useFlow
   const { 
     currentNode, 
     isFirstNode, 
     isLastNode, 
     handleBack, 
-    handleNext 
-  } = useNavigation();
-
-  // Pobierz aktualny workspace i scenariusz
-  const currentWorkspace = getCurrentWorkspace();
-  const currentScenario = getCurrentScenario();
+    handleNext,
+    currentWorkspace,
+    currentScenario: flowScenario
+  } = useFlow();
 
   // Wybierz workspace i scenariusz na podstawie parametrów URL
   useEffect(() => {
@@ -39,19 +37,18 @@ export const FlowView: React.FC = () => {
   // Pobierz nazwę szablonu
   const templateName = currentWorkspace?.templateSettings?.template || "default";
 
-  // Ładuj komponent layoutu
+  // Ładuj komponenty używając nowego hooka useComponents
   const { 
     component: LayoutComponent, 
     error: layoutError, 
     isLoading: layoutLoading 
-  } = useComponentLoader('layout', 'Simple');
+  } = useComponents('layout', 'Simple');
 
-  // Ładuj komponent kroku
   const { 
     component: FlowStepComponent, 
     error: flowStepError, 
     isLoading: componentLoading 
-  } = useComponentLoader(
+  } = useComponents(
     'flowStep', 
     currentNode?.template || 'form-step'
   );
@@ -70,7 +67,7 @@ export const FlowView: React.FC = () => {
   // Renderuj zawartość
   const renderContent = () => {
     // Sprawdź błędy i brak danych
-    if (!currentWorkspace || !currentScenario) {
+    if (!currentWorkspace || !flowScenario) {
       return (
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-red-600 text-lg p-4 bg-red-100 rounded-lg">
@@ -127,7 +124,7 @@ export const FlowView: React.FC = () => {
 
     // Renderuj layout i komponent kroku
     return React.createElement(LayoutComponent, {
-      title: currentScenario.name,
+      title: flowScenario.name,
       stepTitle: currentNode.label,
       onBackClick: handleBack,
       children: React.createElement(FlowStepComponent, {
@@ -157,4 +154,5 @@ export const FlowView: React.FC = () => {
     </Suspense>
   );
 }
+
 export default FlowView;

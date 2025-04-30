@@ -1,20 +1,10 @@
 // src/hooks/useWidgets.ts
 import { useEffect, useState } from 'react';
 import { useAppStore } from '@/useAppStore';
-
-// Definicja typu widgetu
-export interface WidgetConfig {
-  type: string;
-  title?: string;
-  description?: string;
-  data?: any;
-  dataPath?: string;
-  dataPaths?: Record<string, string>;
-  [key: string]: any;
-}
+import { WidgetConfig } from '@/types';
 
 /**
- * Hook do zarządzania widgetami w aplikacji
+ * Uproszczony hook do zarządzania widgetami w aplikacji
  */
 export function useWidgets(widgets: WidgetConfig[] = [], contextBasePath?: string) {
   const [widgetData, setWidgetData] = useState<any[]>([]);
@@ -26,7 +16,7 @@ export function useWidgets(widgets: WidgetConfig[] = [], contextBasePath?: strin
   
   // Funkcja pomocnicza do sprawdzania, czy ścieżka jest absolutna
   const isAbsolutePath = (path: string): boolean => {
-    return path && typeof path === 'string' && path.includes('.');
+    return path && typeof path === 'string' && path.startsWith('data.') || path.includes('.');
   };
 
   useEffect(() => {
@@ -39,7 +29,7 @@ export function useWidgets(widgets: WidgetConfig[] = [], contextBasePath?: strin
       try {
         // Przetwarzanie każdego widgetu
         const processedWidgets = await Promise.all(widgets.map(async (widget, index) => {
-          const widgetType = widget.type || widget.file || 'unknown';
+          const widgetType = widget.type || 'unknown';
           let widgetDataObj: any = { ...widget };
           
           // Obsługa pojedynczej ścieżki danych (dataPath)

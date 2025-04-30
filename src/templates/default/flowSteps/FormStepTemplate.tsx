@@ -1,7 +1,7 @@
 // src/templates/default/flowSteps/FormStepTemplate.tsx
 import React from "react";
 import { FlowStepProps } from "@/types";
-import { useFlowStep } from "@/hooks"; // Usunięto useFormInput
+import { useFlow } from "@/hooks";
 
 const FormStepTemplate: React.FC<FlowStepProps> = ({ 
   node, 
@@ -10,8 +10,7 @@ const FormStepTemplate: React.FC<FlowStepProps> = ({
   isLastNode,
   isFirstNode 
 }) => {
-  // Używamy zunifikowanego hooka useFlowStep, który łączy funkcjonalności
-  // useFormInput i poprzedniego useFlowStep
+  // Używamy ujednoliconego hooka useFlow
   const {
     formData,
     formFields,
@@ -19,20 +18,20 @@ const FormStepTemplate: React.FC<FlowStepProps> = ({
     handleChange,
     handleSubmit,
     areRequiredFieldsFilled,
-    handlePrevious,
-    handleComplete
-  } = useFlowStep({
+    handleBack,
+    handleNext
+  } = useFlow({
     node,
-    isFirstNode,
-    isLastNode,
     onSubmit,
-    onPrevious
+    onPrevious,
+    isFirstNode,
+    isLastNode
   });
   
   // Obsługa formularza i przejścia do następnego kroku
   const processFormSubmit = (e: React.FormEvent) => {
     const data = handleSubmit(e);
-    handleComplete(data);
+    handleNext(data);
   };
 
   return (
@@ -115,12 +114,12 @@ const FormStepTemplate: React.FC<FlowStepProps> = ({
               </div>
             ))}
             
-            {/* Przyciski nawigacyjne - uproszczone */}
+            {/* Przyciski nawigacyjne */}
             <div className="flex flex-col sm:flex-row gap-4 mt-6">
               {/* Przycisk wstecz/anuluj */}
               <button
                 type="button"
-                onClick={handlePrevious}
+                onClick={handleBack}
                 className="px-5 py-3 rounded-md transition-colors duration-300 text-base font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
               >
                 {isFirstNode ? "Anuluj" : "Wstecz"}

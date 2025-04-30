@@ -1,7 +1,7 @@
 // src/templates/default/flowSteps/LlmStepTemplate.tsx
-import React, { useRef } from "react";
+import React from "react";
 import { FlowStepProps } from "@/types";
-import { useFlowStep } from "@/hooks";
+import { useFlow } from "@/hooks";
 
 const LlmStepTemplate: React.FC<FlowStepProps> = ({
   node,
@@ -10,25 +10,22 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
   isLastNode,
   isFirstNode,
 }) => {
-  // Reference to track if auto-complete was already fired
-  const autoCompleteFiredRef = useRef(false);
-  
-  // Use unified flow step hook
+  // Użyj ujednoliconego hooka useFlow
   const { 
     isLoading, 
     error, 
     responseData, 
     processedAssistantMessage,
     debugInfo,
-    handlePrevious, 
-    handleComplete,
+    handleBack, 
+    handleNext,
     sendMessage
-  } = useFlowStep({
+  } = useFlow({
     node,
-    isFirstNode,
-    isLastNode,
     onSubmit,
     onPrevious,
+    isFirstNode,
+    isLastNode,
   });
 
   return (
@@ -87,12 +84,12 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
             </div>
           )}
 
-          {/* Navigation buttons - ALWAYS visible after getting a response, without any automatic actions */}
+          {/* Navigation buttons */}
           {responseData && !isLoading && (
             <div className="flex flex-col sm:flex-row gap-4 mt-6">
               {/* Back/cancel button */}
               <button
-                onClick={handlePrevious}
+                onClick={handleBack}
                 className="px-5 py-3 rounded-md transition-colors text-base font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
               >
                 {isFirstNode ? "Cancel" : "Back"}
@@ -100,9 +97,7 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
 
               {/* Next/finish button */}
               <button
-                onClick={() => {
-                  handleComplete(responseData);
-                }}
+                onClick={() => handleNext(responseData)}
                 className="px-5 py-3 rounded-md transition-colors text-base font-medium flex-grow bg-gray-900 text-white hover:bg-gray-800"
               >
                 {isLastNode ? "Finish" : "Next"}

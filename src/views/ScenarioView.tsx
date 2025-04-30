@@ -1,7 +1,7 @@
 // src/views/ScenarioView.tsx
 import React, { useEffect, useMemo, Suspense } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useComponentLoader, useNavigation, useWidgets } from "@/hooks";
+import { useFlow, useWidgets, useComponents } from "@/hooks";
 import { LoadingState } from "@/components/LoadingState";
 import WidgetRenderer from "@/components/WidgetRenderer";
 import { useAppStore } from "@/useAppStore";
@@ -10,12 +10,10 @@ export const ScenarioView: React.FC = () => {
   const { workspace: workspaceId, scenario: scenarioId } = useParams();
   const navigate = useNavigate();
 
-  // Używamy zunifikowanego store zamiast osobnych
+  // Używamy zunifikowanego store
   const {
     selectWorkspace,
     selectScenario,
-    getCurrentWorkspace,
-    getCurrentScenario,
     error,
   } = useAppStore();
 
@@ -24,13 +22,16 @@ export const ScenarioView: React.FC = () => {
     (state) => state.loading.workspace || state.loading.scenario
   );
 
-  // Używamy hook nawigacji do obsługi flow
-  const { currentNode, isFirstNode, isLastNode, handleNext, handleBack } =
-    useNavigation();
-
-  // Pobierz aktualny workspace i scenariusz
-  const currentWorkspace = getCurrentWorkspace();
-  const currentScenario = getCurrentScenario();
+  // Używamy ujednoliconego hooka useFlow
+  const { 
+    currentNode, 
+    isFirstNode, 
+    isLastNode, 
+    handleNext, 
+    handleBack,
+    currentWorkspace,
+    currentScenario
+  } = useFlow();
 
   // Przygotuj dane scenariuszy dla widoku listy
   const scenarioData = useMemo(() => {
@@ -52,7 +53,7 @@ export const ScenarioView: React.FC = () => {
     return currentWorkspace.templateSettings.widgets;
   }, [currentWorkspace?.templateSettings?.widgets]);
 
-  // Używamy hooka useWidgets do obsługi widgetów workspace
+  // Używamy naszego hooka useWidgets do obsługi widgetów
   const {
     widgetData: workspaceWidgetData,
     isLoading: widgetsLoading,
@@ -95,25 +96,24 @@ export const ScenarioView: React.FC = () => {
     }
   };
 
-  // Używamy nowego hooka do ładowania komponentów
+  // Używamy ujednoliconego hooka useComponents
   const {
     component: LayoutComponent,
     error: layoutError,
     isLoading: layoutLoading,
-  } = useComponentLoader("layout", "Simple");
+  } = useComponents("layout", "Simple");
 
-  // Dynamiczne ładowanie odpowiednich komponentów
   const {
     component: CardListComponent,
     error: cardError,
     isLoading: cardLoading,
-  } = useComponentLoader("widget", "CardList");
+  } = useComponents("widget", "CardList");
 
   const {
     component: FlowStepComponent,
     error: flowStepError,
     isLoading: flowStepLoading,
-  } = useComponentLoader("flowStep", currentNode?.template || "form-step");
+  } = useComponents("flowStep", currentNode?.template || "form-step");
 
   // Łączenie stanów ładowania i błędów
   const combinedLoading =
