@@ -10,25 +10,21 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
   onSubmit,
   onPrevious,
   isLastNode,
-  isFirstNode
+  isFirstNode,
 }) => {
   // Get data from centralized store
-  const { 
+  const {
     data: { currentWorkspaceId, contexts },
     processTemplate,
-    getContextPath
   } = useAppStore();
-  
+
   // Use hook for navigation and flow handling
-  const {
-    handlePrevious,
-    handleComplete
-  } = useFlowStep({
+  const { handlePrevious, handleComplete } = useFlowStep({
     node,
     isFirstNode,
     isLastNode,
     onSubmit,
-    onPrevious
+    onPrevious,
   });
 
   // Process assistant message
@@ -37,16 +33,19 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
     : "";
 
   // Get context for current workspace
-  const context = useMemo(() => 
-    currentWorkspaceId ? contexts[currentWorkspaceId] || {} : {},
+  const context = useMemo(
+    () => (currentWorkspaceId ? contexts[currentWorkspaceId] || {} : {}),
     [currentWorkspaceId, contexts]
   );
 
   // List of widgets to render
   const widgets = node.attrs?.widgets || [];
-  
+
   // Use new hook for widget management
-  const { widgetData, isLoading, error } = useWidgets(widgets, node.contextPath);
+  const { widgetData, isLoading, error } = useWidgets(
+    widgets,
+    node.contextPath
+  );
 
   // Handle widget item selection
   const handleWidgetSelect = (widgetId: string, itemId: string) => {
@@ -57,7 +56,7 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
   const stepData = useMemo(() => {
     return {
       widgetInteractions: {}, // Can add data about widget interactions here
-      completed: true
+      completed: true,
     };
   }, []);
 
@@ -100,7 +99,7 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
               />
             </div>
           ))}
-          
+
           {widgetData.length === 0 && (
             <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
               <p className="text-yellow-700">No widgets to display.</p>
@@ -111,18 +110,18 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
 
       {/* Navigation buttons */}
       <div className="flex gap-3 mt-8 pb-4">
-        <button 
+        <button
           onClick={handlePrevious}
           className="px-5 py-2.5 border border-gray-200 rounded-md text-gray-700 hover:bg-gray-50 transition-colors font-medium text-sm"
         >
           {isFirstNode ? "Cancel" : "Back"}
         </button>
-        
-        <button 
+
+        <button
           onClick={() => handleComplete(stepData)}
           className="px-5 py-2.5 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors font-medium text-sm"
         >
-          {isLastNode ? 'Finish' : 'Next'}
+          {isLastNode ? "Finish" : "Next"}
         </button>
       </div>
     </div>
