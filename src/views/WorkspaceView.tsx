@@ -9,68 +9,53 @@ export const WorkspaceView: React.FC = () => {
   const { applicationId } = useParams();
   const navigate = useNavigate();
   
-  // Używanie zunifikowanego store
-  const { 
-    fetchApplicationById, 
-    getCurrentApplication, 
-    selectWorkspace,
-    error
-  } = useAppStore();
-  
-  // Pobieranie stanu ładowania ze store
+  // Store
+  const { fetchApplicationById, getCurrentApplication, selectWorkspace, error } = useAppStore();
   const isLoading = useAppStore(state => state.loading.application);
   
-  // Pobieranie aktualnej aplikacji
+  // Dane aplikacji
   const currentApplication = getCurrentApplication();
   const workspaces = currentApplication?.workspaces || [];
 
-  // Przygotowanie danych workspace do wyświetlenia
-  const workspaceData = useMemo(() => {
-    return workspaces.map(workspace => ({
+  // Dane do widoku
+  const workspaceData = useMemo(() => 
+    workspaces.map(workspace => ({
       id: workspace.id,
       name: workspace.name,
       description: workspace.description || `Template: ${workspace.templateSettings?.template}`,
       count: workspace.scenarios?.length || 0,
       countLabel: "scenarios",
       icon: workspace.icon || "briefcase",
-    }));
-  }, [workspaces]);
+    })), 
+    [workspaces]
+  );
 
-  // Obsługa wyboru workspace
+  // Obsługa wyboru
   const handleSelect = (workspaceId: string) => {
     selectWorkspace(workspaceId);
     navigate(`/${workspaceId}`);
   };
 
+  // Nawigacja
   const handleBackClick = () => navigate('/');
 
-
-  // Pobranie danych aplikacji raz, gdy zmienia się applicationId
+  // Ładowanie aplikacji
   useEffect(() => {
-    if (applicationId) {
-      fetchApplicationById(applicationId);
-    }
+    if (applicationId) fetchApplicationById(applicationId);
   }, [applicationId, fetchApplicationById]);
 
-  // Używanie nowego hooka useComponents
-  const { 
-    component: LayoutComponent, 
-    error: layoutError, 
-    isLoading: layoutLoading 
-  } = useComponents('layout', 'Simple');
+  // Komponenty UI
+  const { component: LayoutComponent, error: layoutError, isLoading: layoutLoading } = 
+    useComponents('layout', 'Simple');
 
-  // Używanie nowego hooka useComponents do ładowania komponentu karty
-  const { 
-    component: CardListComponent, 
-    error: cardError, 
-    isLoading: cardLoading 
-  } = useComponents('widget', 'CardList');
+  const { component: CardListComponent, error: cardError, isLoading: cardLoading } = 
+    useComponents('widget', 'CardList');
 
-  // Łączenie stanów ładowania i błędów
+  // Stany ładowania i błędów
   const combinedLoading = isLoading || layoutLoading || cardLoading;
   const combinedError = error || layoutError || cardError;
 
-  // Sprawdź, czy aplikacja istnieje
+  // Brak aplikacji
   if (!currentApplication && !combinedLoading) {
     return (
       <div className="p-4">
@@ -87,7 +72,7 @@ export const WorkspaceView: React.FC = () => {
     );
   }
 
-  // Renderowanie widoku workspace
+  // Główny widok
   return (
     <LoadingState
       isLoading={combinedLoading}

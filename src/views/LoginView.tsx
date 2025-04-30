@@ -1,4 +1,4 @@
-// src/views/LoginView.tsx - Improved Version
+// src/views/LoginView.tsx
 import { useAuth } from '@/hooks';
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -9,11 +9,12 @@ const LoginView: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Logowanie przez Google
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
       await signInWithGoogle();
-      // Navigate to the page the user was trying to access or home
+      // Nawigacja do poprzedniej strony lub strony głównej
       const from = location.state?.from || '/';
       navigate(from, { replace: true });
     } catch (error) {
@@ -28,7 +29,9 @@ const LoginView: React.FC = () => {
       <div className="w-full max-w-md space-y-8 rounded-xl border border-slate-200 bg-white p-8 shadow-md">
         <div className="space-y-3 text-center">
           <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Welcome back</h1>
-          <p className="text-slate-500 text-base leading-relaxed max-w-sm mx-auto">Sign in to your account to continue your learning journey</p>
+          <p className="text-slate-500 text-base leading-relaxed max-w-sm mx-auto">
+            Sign in to your account to continue your learning journey
+          </p>
         </div>
         
         <div className="pt-6">
@@ -69,4 +72,5 @@ const LoginView: React.FC = () => {
     </div>
   );
 };
+
 export default LoginView;

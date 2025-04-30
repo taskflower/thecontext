@@ -18,21 +18,19 @@ export const ApplicationView: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  // Ładowanie aplikacji
   useEffect(() => {
     fetchApplications();
   }, [fetchApplications]);
 
+  // Obsługa wyboru
   const handleSelect = (applicationId: string) => {
     selectApplication(applicationId);
     navigate(`/app/${applicationId}`);
   };
 
-  const fallbackLoader = (
-    <SharedLoader message="Ładowanie aplikacji..." fullScreen={true} />
-  );
-
   return (
-    <Suspense fallback={fallbackLoader}>
+    <Suspense fallback={<SharedLoader message="Ładowanie aplikacji..." fullScreen={true} />}>
       <LoadingState
         isLoading={isLoading}
         error={error}
