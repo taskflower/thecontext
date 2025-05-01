@@ -1,6 +1,6 @@
 // src/hooks/useWidgets.ts
 import { useEffect, useState } from 'react';
-import { useAppStore } from '@/useAppStore';
+import { useAppStore } from '@/hooks';
 import { WidgetConfig } from '@/types';
 
 /**

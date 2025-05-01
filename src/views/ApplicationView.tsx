@@ -6,9 +6,8 @@ import EmptyState from "@/components/EmptyState";
 import ApplicationCard from "@/components/homeLayout/ApplicationCard";
 import Footer from "@/components/homeLayout/Footer";
 import SharedLoader from "@/components/SharedLoader";
-import { useAuth } from "@/hooks";
+import { useAuth, useAppStore } from "@/hooks";
 import { useNavigate } from "react-router-dom";
-import { useAppStore } from "@/useAppStore";
 
 export const ApplicationView: React.FC = () => {
   const { fetchApplications, selectApplication, error } = useAppStore();
@@ -30,7 +29,11 @@ export const ApplicationView: React.FC = () => {
   };
 
   return (
-    <Suspense fallback={<SharedLoader message="Ładowanie aplikacji..." fullScreen={true} />}>
+    <Suspense
+      fallback={
+        <SharedLoader message="Ładowanie aplikacji..." fullScreen={true} />
+      }
+    >
       <LoadingState
         isLoading={isLoading}
         error={error}

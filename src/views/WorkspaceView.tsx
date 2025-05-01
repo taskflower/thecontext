@@ -1,32 +1,39 @@
 // src/views/WorkspaceView.tsx
 import React, { useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useComponents } from "@/hooks";
+import { useComponents, useAppStore } from "@/hooks";
 import { LoadingState } from "@/components/LoadingState";
-import { useAppStore } from "@/useAppStore";
 
 export const WorkspaceView: React.FC = () => {
   const { applicationId } = useParams();
   const navigate = useNavigate();
-  
+
   // Store
-  const { fetchApplicationById, getCurrentApplication, selectWorkspace, error } = useAppStore();
-  const isLoading = useAppStore(state => state.loading.application);
-  
+  const {
+    fetchApplicationById,
+    getCurrentApplication,
+    selectWorkspace,
+    error,
+  } = useAppStore();
+  const isLoading = useAppStore((state) => state.loading.application);
+
   // Dane aplikacji
   const currentApplication = getCurrentApplication();
   const workspaces = currentApplication?.workspaces || [];
 
   // Dane do widoku
-  const workspaceData = useMemo(() => 
-    workspaces.map(workspace => ({
-      id: workspace.id,
-      name: workspace.name,
-      description: workspace.description || `Template: ${workspace.templateSettings?.template}`,
-      count: workspace.scenarios?.length || 0,
-      countLabel: "scenarios",
-      icon: workspace.icon || "briefcase",
-    })), 
+  const workspaceData = useMemo(
+    () =>
+      workspaces.map((workspace) => ({
+        id: workspace.id,
+        name: workspace.name,
+        description:
+          workspace.description ||
+          `Template: ${workspace.templateSettings?.template}`,
+        count: workspace.scenarios?.length || 0,
+        countLabel: "scenarios",
+        icon: workspace.icon || "briefcase",
+      })),
     [workspaces]
   );
 
@@ -37,7 +44,7 @@ export const WorkspaceView: React.FC = () => {
   };
 
   // Nawigacja
-  const handleBackClick = () => navigate('/');
+  const handleBackClick = () => navigate("/");
 
   // Ładowanie aplikacji
   useEffect(() => {
@@ -45,11 +52,17 @@ export const WorkspaceView: React.FC = () => {
   }, [applicationId, fetchApplicationById]);
 
   // Komponenty UI
-  const { component: LayoutComponent, error: layoutError, isLoading: layoutLoading } = 
-    useComponents('layout', 'Simple');
+  const {
+    component: LayoutComponent,
+    error: layoutError,
+    isLoading: layoutLoading,
+  } = useComponents("layout", "Simple");
 
-  const { component: CardListComponent, error: cardError, isLoading: cardLoading } = 
-    useComponents('widget', 'CardList');
+  const {
+    component: CardListComponent,
+    error: cardError,
+    isLoading: cardLoading,
+  } = useComponents("widget", "CardList");
 
   // Stany ładowania i błędów
   const combinedLoading = isLoading || layoutLoading || cardLoading;
@@ -60,9 +73,11 @@ export const WorkspaceView: React.FC = () => {
     return (
       <div className="p-4">
         <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-          <p className="text-yellow-700">Nie znaleziono aplikacji o ID: {applicationId}</p>
-          <button 
-            onClick={() => navigate('/')}
+          <p className="text-yellow-700">
+            Nie znaleziono aplikacji o ID: {applicationId}
+          </p>
+          <button
+            onClick={() => navigate("/")}
             className="mt-4 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-700 transition-colors"
           >
             Wróć do listy aplikacji
@@ -89,13 +104,12 @@ export const WorkspaceView: React.FC = () => {
           <div className="space-y-6">
             {workspaces.length === 0 ? (
               <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-                <p className="text-yellow-700">Brak dostępnych workspaces w tej aplikacji.</p>
+                <p className="text-yellow-700">
+                  Brak dostępnych workspaces w tej aplikacji.
+                </p>
               </div>
             ) : CardListComponent ? (
-              <CardListComponent
-                data={workspaceData}
-                onSelect={handleSelect}
-              />
+              <CardListComponent data={workspaceData} onSelect={handleSelect} />
             ) : (
               <div className="p-4">Ładowanie komponentu listy...</div>
             )}

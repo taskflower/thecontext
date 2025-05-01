@@ -3,22 +3,21 @@ import React, { useEffect, Suspense } from "react";
 import { useParams } from "react-router-dom";
 import { LoadingState } from "@/components/LoadingState";
 import SharedLoader from "@/components/SharedLoader";
-import { useFlow, useComponents } from "@/hooks";
-import { useAppStore } from "@/useAppStore";
+import { useFlow, useComponents, useAppStore } from "@/hooks";
 
 export const FlowView: React.FC = () => {
   const { workspace, scenario } = useParams();
   const { selectWorkspace, selectScenario } = useAppStore();
 
   // Główny hook przepływu
-  const { 
-    currentNode, 
-    isFirstNode, 
-    isLastNode, 
-    handleBack, 
+  const {
+    currentNode,
+    isFirstNode,
+    isLastNode,
+    handleBack,
     handleNext,
     currentWorkspace,
-    currentScenario: flowScenario
+    currentScenario: flowScenario,
   } = useFlow();
 
   // Inicjalizacja na podstawie parametrów URL
@@ -28,19 +27,30 @@ export const FlowView: React.FC = () => {
   }, [workspace, scenario, selectWorkspace, selectScenario]);
 
   // Szablon i komponent
-  const templateName = currentWorkspace?.templateSettings?.template || "default";
-  const { component: LayoutComponent, error: layoutError, isLoading: layoutLoading } = 
-    useComponents('layout', 'Simple');
+  const templateName =
+    currentWorkspace?.templateSettings?.template || "default";
+  const {
+    component: LayoutComponent,
+    error: layoutError,
+    isLoading: layoutLoading,
+  } = useComponents("layout", "Simple");
 
-  const { component: FlowStepComponent, error: flowStepError, isLoading: componentLoading } = 
-    useComponents('flowStep', currentNode?.template || 'form-step');
+  const {
+    component: FlowStepComponent,
+    error: flowStepError,
+    isLoading: componentLoading,
+  } = useComponents("flowStep", currentNode?.template || "form-step");
 
   // Stany ładowania i błędów
   const isLoading = layoutLoading || componentLoading;
   const error = layoutError || flowStepError;
-  const storeLoading = useAppStore(state => state.loading.workspace || state.loading.scenario);
-  const storeError = useAppStore(state => state.error);
-  const fallbackLoader = <SharedLoader message="Ładowanie komponentów..." fullScreen={true} />;
+  const storeLoading = useAppStore(
+    (state) => state.loading.workspace || state.loading.scenario
+  );
+  const storeError = useAppStore((state) => state.error);
+  const fallbackLoader = (
+    <SharedLoader message="Ładowanie komponentów..." fullScreen={true} />
+  );
 
   // Render zawartości
   const renderContent = () => {
@@ -69,9 +79,12 @@ export const FlowView: React.FC = () => {
       return (
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-red-600 text-lg p-4 bg-red-100 rounded-lg">
-            <h3 className="font-bold">Błąd: Nie znaleziono komponentu layoutu</h3>
+            <h3 className="font-bold">
+              Błąd: Nie znaleziono komponentu layoutu
+            </h3>
             <p className="mt-2">
-              Szukany layout: <span className="font-mono bg-red-50 px-1">{templateName}</span>
+              Szukany layout:{" "}
+              <span className="font-mono bg-red-50 px-1">{templateName}</span>
             </p>
           </div>
         </div>
@@ -82,14 +95,18 @@ export const FlowView: React.FC = () => {
       return (
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-red-600 text-lg p-4 bg-red-100 rounded-lg">
-            <h3 className="font-bold">Błąd: Nie znaleziono komponentu flow step</h3>
+            <h3 className="font-bold">
+              Błąd: Nie znaleziono komponentu flow step
+            </h3>
             <p className="mt-2">
-              Szukany komponent: <span className="font-mono bg-red-50 px-1">
+              Szukany komponent:{" "}
+              <span className="font-mono bg-red-50 px-1">
                 {currentNode.template || "unknown"}
               </span>
             </p>
             <p className="mt-2">
-              ID węzła: <span className="font-mono bg-red-50 px-1">{currentNode.id}</span>
+              ID węzła:{" "}
+              <span className="font-mono bg-red-50 px-1">{currentNode.id}</span>
             </p>
           </div>
         </div>
@@ -107,7 +124,7 @@ export const FlowView: React.FC = () => {
         onPrevious: handleBack,
         isLastNode: isLastNode || false,
         isFirstNode: isFirstNode || false,
-      })
+      }),
     });
   };
 
@@ -127,6 +144,6 @@ export const FlowView: React.FC = () => {
       </LoadingState>
     </Suspense>
   );
-}
+};
 
 export default FlowView;

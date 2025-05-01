@@ -1,28 +1,33 @@
 // src/views/ScenarioView.tsx
 import React, { useEffect, useMemo, Suspense } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useFlow, useWidgets, useComponents } from "@/hooks";
+import { useFlow, useWidgets, useComponents, useAppStore } from "@/hooks";
 import { LoadingState } from "@/components/LoadingState";
 import WidgetRenderer from "@/components/WidgetRenderer";
-import { useAppStore } from "@/useAppStore";
 
 export const ScenarioView: React.FC = () => {
   const { workspace: workspaceId, scenario: scenarioId } = useParams();
   const navigate = useNavigate();
   const { selectWorkspace, selectScenario, error } = useAppStore();
-  const isLoading = useAppStore(state => state.loading.workspace || state.loading.scenario);
+  const isLoading = useAppStore(
+    (state) => state.loading.workspace || state.loading.scenario
+  );
 
   // Hook flow
-  const { 
-    currentNode, isFirstNode, isLastNode, 
-    handleNext, handleBack,
-    currentWorkspace, currentScenario
+  const {
+    currentNode,
+    isFirstNode,
+    isLastNode,
+    handleNext,
+    handleBack,
+    currentWorkspace,
+    currentScenario,
   } = useFlow();
 
   // Dane dla widoku listy
   const scenarioData = useMemo(() => {
     if (!currentWorkspace?.scenarios) return [];
-    return currentWorkspace.scenarios.map(scenario => ({
+    return currentWorkspace.scenarios.map((scenario) => ({
       id: scenario.id,
       name: scenario.name,
       description: scenario.description || "",
@@ -33,14 +38,17 @@ export const ScenarioView: React.FC = () => {
   }, [currentWorkspace]);
 
   // Widgety workspace
-  const workspaceWidgets = useMemo(() => 
-    currentWorkspace?.templateSettings?.widgets || [], 
+  const workspaceWidgets = useMemo(
+    () => currentWorkspace?.templateSettings?.widgets || [],
     [currentWorkspace?.templateSettings?.widgets]
   );
 
   // Dane widgetów
-  const { widgetData: workspaceWidgetData, isLoading: widgetsLoading, error: widgetsError } = 
-    useWidgets(workspaceWidgets);
+  const {
+    widgetData: workspaceWidgetData,
+    isLoading: widgetsLoading,
+    error: widgetsError,
+  } = useWidgets(workspaceWidgets);
 
   // Wybór workspace i scenariusza
   useEffect(() => {
@@ -71,19 +79,34 @@ export const ScenarioView: React.FC = () => {
   };
 
   // Komponenty UI
-  const { component: LayoutComponent, error: layoutError, isLoading: layoutLoading } = 
-    useComponents("layout", "Simple");
+  const {
+    component: LayoutComponent,
+    error: layoutError,
+    isLoading: layoutLoading,
+  } = useComponents("layout", "Simple");
 
-  const { component: CardListComponent, error: cardError, isLoading: cardLoading } = 
-    useComponents("widget", "CardList");
+  const {
+    component: CardListComponent,
+    error: cardError,
+    isLoading: cardLoading,
+  } = useComponents("widget", "CardList");
 
-  const { component: FlowStepComponent, error: flowStepError, isLoading: flowStepLoading } = 
-    useComponents("flowStep", currentNode?.template || "form-step");
+  const {
+    component: FlowStepComponent,
+    error: flowStepError,
+    isLoading: flowStepLoading,
+  } = useComponents("flowStep", currentNode?.template || "form-step");
 
   // Stany ładowania i błędów
-  const combinedLoading = isLoading || layoutLoading || widgetsLoading || 
+  const combinedLoading =
+    isLoading ||
+    layoutLoading ||
+    widgetsLoading ||
     (scenarioId ? flowStepLoading : cardLoading);
-  const combinedError = error || layoutError || widgetsError || 
+  const combinedError =
+    error ||
+    layoutError ||
+    widgetsError ||
     (scenarioId ? flowStepError : cardError);
 
   // Widgety workspace
@@ -115,7 +138,9 @@ export const ScenarioView: React.FC = () => {
       return (
         <div className="p-4">
           <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-            <p className="text-yellow-700">Nie znaleziono workspace o ID: {workspaceId}</p>
+            <p className="text-yellow-700">
+              Nie znaleziono workspace o ID: {workspaceId}
+            </p>
             <button
               onClick={() => navigate("/")}
               className="mt-4 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-700 transition-colors"
@@ -158,7 +183,9 @@ export const ScenarioView: React.FC = () => {
       return (
         <div className="p-4">
           <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-            <p className="text-yellow-700">Nie znaleziono scenariusza o ID: {scenarioId}</p>
+            <p className="text-yellow-700">
+              Nie znaleziono scenariusza o ID: {scenarioId}
+            </p>
             <button
               onClick={() => navigate(`/${workspaceId}`)}
               className="mt-4 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-700 transition-colors"
@@ -175,7 +202,9 @@ export const ScenarioView: React.FC = () => {
       return (
         <div className="p-4">
           <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-            <p className="text-yellow-700">Ten scenariusz nie zawiera żadnych kroków.</p>
+            <p className="text-yellow-700">
+              Ten scenariusz nie zawiera żadnych kroków.
+            </p>
             <button
               onClick={() => navigate(`/${workspaceId}`)}
               className="mt-4 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-700 transition-colors"
@@ -191,7 +220,9 @@ export const ScenarioView: React.FC = () => {
     return (
       <div className="space-y-6">
         {FlowStepComponent ? (
-          <Suspense fallback={<div className="p-4">Ładowanie komponentu kroku...</div>}>
+          <Suspense
+            fallback={<div className="p-4">Ładowanie komponentu kroku...</div>}
+          >
             <FlowStepComponent
               node={currentNode}
               onSubmit={handleNext}
@@ -224,8 +255,13 @@ export const ScenarioView: React.FC = () => {
       {LayoutComponent ? (
         <LayoutComponent
           title={currentScenario?.name || currentWorkspace?.name}
-          stepTitle={currentNode?.label || (scenarioId ? undefined : "Wybierz scenariusz")}
-          onBackClick={() => scenarioId ? navigate(`/${workspaceId}`) : navigate("/")}
+          stepTitle={
+            currentNode?.label ||
+            (scenarioId ? undefined : "Wybierz scenariusz")
+          }
+          onBackClick={() =>
+            scenarioId ? navigate(`/${workspaceId}`) : navigate("/")
+          }
         >
           {renderContent()}
         </LayoutComponent>

@@ -2,13 +2,10 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { NodeData, FormField } from '@/types';
-import { useAppStore } from '@/useAppStore';
 import { extractJsonFromContent } from '@/utils';
-import { useAuth } from './useAuth';
+import { useAppStore, useAuth } from '@/hooks';
 
-/**
- * Ujednolicony hook do zarządzania przepływem w aplikacji
- */
+
 export function useFlow({
   node,
   onSubmit,

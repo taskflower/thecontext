@@ -1,7 +1,7 @@
 // src/templates/default/widgets/InfoWidget.tsx
 import React from "react";
 import { InfoWidgetProps } from "../types";
-import { useAppStore } from "@/useAppStore";
+import { useAppStore } from "@/hooks";
 
 
 const InfoWidget: React.FC<InfoWidgetProps> = ({

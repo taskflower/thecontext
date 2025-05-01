@@ -1,6 +1,6 @@
 // src/hooks/useComponents.ts
 import { useState, useEffect } from 'react';
-import { useAppStore } from '@/useAppStore';
+import { useAppStore } from '@/hooks/useAppStore';
 
 // Definicja typów komponentów
 export const COMPONENT_TYPES = ['flowStep', 'layout', 'widget'] as const;
