@@ -36,6 +36,7 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
             <p className="text-gray-800">{processedAssistantMessage}</p>
           </div>
         )}
+        
 
         {/* Loading indicator */}
         {isLoading && (

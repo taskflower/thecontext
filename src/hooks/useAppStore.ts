@@ -4,10 +4,9 @@ import { persist } from 'zustand/middleware';
 import { doc, getDoc, collection, getDocs, query, where } from '@firebase/firestore';
 import { db } from '@/_firebase/config';
 import { Application, Workspace, Scenario, NodeData } from '@/types';
-import { getValueByPath, setValueByPath, processTemplate, updateItemInList } from '@/utils';
+import { getValueByPath, setValueByPath, processTemplate as procTemplate, updateItemInList } from '@/utils';
 
 interface State {
-  // Stany ładowania
   loading: {
     application: boolean;
     workspace: boolean;
@@ -15,7 +14,6 @@ interface State {
   };
   error: string | null;
   
-  // Dane
   data: {
     applications: Application[];
     currentAppId: string | null;
@@ -24,7 +22,6 @@ interface State {
     contexts: Record<string, any>;
   };
   
-  // Akcje
   fetchApplications: () => Promise<void>;
   fetchApplicationById: (id: string) => Promise<void>;
   selectApplication: (id: string | null) => void;
@@ -37,19 +34,16 @@ interface State {
   getContextPath: (path: string) => any;
   processTemplate: (template: string) => string;
   
-  // Gettery
   getCurrentApplication: () => Application | undefined;
   getCurrentWorkspace: () => Workspace | undefined;
   getCurrentScenario: () => Scenario | undefined;
   getCurrentNode: () => NodeData | undefined;
 }
 
-// Dane do persystencji
 type AppPersist = {
   data: State['data'];
 };
 
-// Pomocnicza funkcja do sortowania węzłów
 const sortNodes = (nodes: NodeData[]) => 
   [...nodes].sort((a, b) => {
     if (a.order !== undefined && b.order !== undefined) return a.order - b.order;
@@ -58,10 +52,34 @@ const sortNodes = (nodes: NodeData[]) =>
     return 0;
   });
 
+const fetchNodesForScenario = async (scenarioId: string) => {
+  const nodesSnapshot = await getDocs(
+    query(collection(db, 'nodes'), where('scenarioId', '==', scenarioId))
+  );
+  
+  return nodesSnapshot.docs.map(nodeDoc => ({
+    id: nodeDoc.id,
+    ...nodeDoc.data()
+  } as NodeData));
+};
+
+const fetchScenariosForWorkspace = async (workspaceId: string) => {
+  const scenariosSnapshot = await getDocs(
+    query(collection(db, 'scenarios'), where('workspaceId', '==', workspaceId))
+  );
+  
+  return Promise.all(
+    scenariosSnapshot.docs.map(async scenarioDoc => {
+      const scenario = { id: scenarioDoc.id, ...scenarioDoc.data() } as Scenario;
+      const nodes = await fetchNodesForScenario(scenario.id);
+      return { ...scenario, nodes: sortNodes(nodes) };
+    })
+  );
+};
+
 export const useAppStore = create<State>()(
   persist<State, [], [], AppPersist>(
     (set, get) => ({
-      // Stan początkowy
       loading: { application: false, workspace: false, scenario: false },
       error: null,
       data: {
@@ -72,7 +90,6 @@ export const useAppStore = create<State>()(
         contexts: {}
       },
       
-      // Ładowanie aplikacji
       fetchApplications: async () => {
         try {
           set(state => ({ ...state, loading: { ...state.loading, application: true }, error: null }));
@@ -97,57 +114,28 @@ export const useAppStore = create<State>()(
         }
       },
       
-      // Ładowanie pojedynczej aplikacji
       fetchApplicationById: async (id: string) => {
         try {
           set(state => ({ ...state, loading: { ...state.loading, application: true }, error: null }));
           
-          // Ładowanie aplikacji
           const appDoc = await getDoc(doc(db, 'applications', id));
           if (!appDoc.exists()) throw new Error(`Application with ID ${id} not found`);
           const application = { id: appDoc.id, ...appDoc.data() } as Application;
           
-          // Ładowanie workspaces dla aplikacji
           const workspacesSnapshot = await getDocs(
             query(collection(db, 'workspaces'), where('applicationId', '==', id))
           );
           
-          // Dla każdego workspace ładowanie scenariuszy
           const workspaces = await Promise.all(
             workspacesSnapshot.docs.map(async workspaceDoc => {
               const workspace = { id: workspaceDoc.id, ...workspaceDoc.data() } as Workspace;
-              
-              const scenariosSnapshot = await getDocs(
-                query(collection(db, 'scenarios'), where('workspaceId', '==', workspace.id))
-              );
-              
-              // Dla każdego scenariusza ładowanie węzłów
-              const scenarios = await Promise.all(
-                scenariosSnapshot.docs.map(async scenarioDoc => {
-                  const scenario = { id: scenarioDoc.id, ...scenarioDoc.data() } as Scenario;
-                  
-                  const nodesSnapshot = await getDocs(
-                    query(collection(db, 'nodes'), where('scenarioId', '==', scenario.id))
-                  );
-                  
-                  const nodes = nodesSnapshot.docs.map(nodeDoc => ({
-                    id: nodeDoc.id,
-                    ...nodeDoc.data()
-                  } as NodeData));
-                  
-                  // Sortowanie węzłów
-                  return { ...scenario, nodes: sortNodes(nodes) };
-                })
-              );
-              
+              const scenarios = await fetchScenariosForWorkspace(workspace.id);
               return { ...workspace, scenarios };
             })
           );
           
-          // Kompletna aplikacja z workspaces
           const appWithWorkspaces = { ...application, workspaces };
           
-          // Inicjalizacja kontekstów dla workspace'ów
           const contexts = { ...get().data.contexts };
           workspaces.forEach(ws => {
             contexts[ws.id] = ws.initialContext || {};
@@ -172,7 +160,6 @@ export const useAppStore = create<State>()(
         }
       },
       
-      // Wybór aplikacji
       selectApplication: (id: string | null) => {
         set(state => ({
           ...state,
@@ -192,51 +179,25 @@ export const useAppStore = create<State>()(
         }
       },
       
-      // Ładowanie workspaces
       fetchWorkspaces: async () => {
         try {
           set(state => ({ ...state, loading: { ...state.loading, workspace: true }, error: null }));
           
-          // Ładowanie wszystkich workspaces
           const workspacesSnapshot = await getDocs(collection(db, 'workspaces'));
           
-          // Dla każdego workspace ładowanie scenariuszy i węzłów
           const workspaces = await Promise.all(
             workspacesSnapshot.docs.map(async workspaceDoc => {
               const workspace = { id: workspaceDoc.id, ...workspaceDoc.data() } as Workspace;
-              
-              const scenariosSnapshot = await getDocs(
-                query(collection(db, 'scenarios'), where('workspaceId', '==', workspace.id))
-              );
-              
-              const scenarios = await Promise.all(
-                scenariosSnapshot.docs.map(async scenarioDoc => {
-                  const scenario = { id: scenarioDoc.id, ...scenarioDoc.data() } as Scenario;
-                  
-                  const nodesSnapshot = await getDocs(
-                    query(collection(db, 'nodes'), where('scenarioId', '==', scenario.id))
-                  );
-                  
-                  const nodes = nodesSnapshot.docs.map(nodeDoc => ({
-                    id: nodeDoc.id,
-                    ...nodeDoc.data()
-                  } as NodeData));
-                  
-                  return { ...scenario, nodes: sortNodes(nodes) };
-                })
-              );
-              
+              const scenarios = await fetchScenariosForWorkspace(workspace.id);
               return { ...workspace, scenarios };
             })
           );
           
-          // Inicjalizacja kontekstów
           const contexts = { ...get().data.contexts };
           workspaces.forEach(ws => {
             contexts[ws.id] = ws.initialContext || {};
           });
           
-          // Aktualizacja aplikacji
           const applications = [...get().data.applications];
           workspaces.forEach(workspace => {
             if (workspace.applicationId) {
@@ -269,52 +230,24 @@ export const useAppStore = create<State>()(
         }
       },
       
-      // Ładowanie pojedynczego workspace
       fetchWorkspaceById: async (id: string) => {
         try {
           set(state => ({ ...state, loading: { ...state.loading, workspace: true }, error: null }));
           
-          // Ładowanie workspace
           const workspaceDoc = await getDoc(doc(db, 'workspaces', id));
           if (!workspaceDoc.exists()) {
             throw new Error(`Workspace with ID ${id} not found`);
           }
           
           const workspace = { id: workspaceDoc.id, ...workspaceDoc.data() } as Workspace;
-          
-          // Ładowanie scenariuszy
-          const scenariosSnapshot = await getDocs(
-            query(collection(db, 'scenarios'), where('workspaceId', '==', id))
-          );
-          
-          // Ładowanie węzłów dla każdego scenariusza
-          const scenarios = await Promise.all(
-            scenariosSnapshot.docs.map(async scenarioDoc => {
-              const scenario = { id: scenarioDoc.id, ...scenarioDoc.data() } as Scenario;
-              
-              const nodesSnapshot = await getDocs(
-                query(collection(db, 'nodes'), where('scenarioId', '==', scenario.id))
-              );
-              
-              const nodes = nodesSnapshot.docs.map(nodeDoc => ({
-                id: nodeDoc.id,
-                ...nodeDoc.data()
-              } as NodeData));
-              
-              return { ...scenario, nodes: sortNodes(nodes) };
-            })
-          );
-          
-          // Workspace z scenariuszami
+          const scenarios = await fetchScenariosForWorkspace(id);
           const workspaceWithScenarios = { ...workspace, scenarios };
           
-          // Inicjalizacja kontekstu
           const contexts = { ...get().data.contexts };
           if (!contexts[id]) {
             contexts[id] = workspace.initialContext || {};
           }
           
-          // Aktualizacja aplikacji, jeśli workspace jest powiązany z aplikacją
           let applications = [...get().data.applications];
           if (workspace.applicationId) {
             const appIndex = applications.findIndex(app => app.id === workspace.applicationId);
@@ -346,7 +279,6 @@ export const useAppStore = create<State>()(
         }
       },
       
-      // Wybór workspace
       selectWorkspace: (id: string) => {
         set(state => ({
           ...state,
@@ -357,7 +289,6 @@ export const useAppStore = create<State>()(
           }
         }));
         
-        // Sprawdź czy workspace istnieje i ma scenariusze
         const currentApp = get().getCurrentApplication();
         const workspace = currentApp?.workspaces?.find(w => w.id === id);
         
@@ -366,7 +297,6 @@ export const useAppStore = create<State>()(
         }
       },
       
-      // Wybór scenariusza
       selectScenario: (id: string) => {
         set(state => ({
           ...state,
@@ -374,7 +304,6 @@ export const useAppStore = create<State>()(
         }));
       },
       
-      // Aktualizacja kontekstu
       updateContext: (key: string, value: any) => {
         const { currentWorkspaceId } = get().data;
         if (!currentWorkspaceId) return;
@@ -394,7 +323,6 @@ export const useAppStore = create<State>()(
         });
       },
       
-      // Aktualizacja kontekstu wg ścieżki
       updateContextPath: (contextPath: string, value: any) => {
         if (!contextPath) return;
         
@@ -425,7 +353,6 @@ export const useAppStore = create<State>()(
         });
       },
       
-      // Pobieranie wartości z kontekstu wg ścieżki
       getContextPath: (path: string) => {
         if (!path) return undefined;
         
@@ -436,20 +363,17 @@ export const useAppStore = create<State>()(
         return getValueByPath(context, path);
       },
       
-      // Przetwarzanie szablonu z wartościami z kontekstu
       processTemplate: (template: string) => {
         const { currentWorkspaceId, contexts } = get().data;
         const context = currentWorkspaceId ? contexts[currentWorkspaceId] || {} : {};
-        return processTemplate(template, context);
+        return procTemplate(template, context);
       },
       
-      // Pobieranie aktualnej aplikacji
       getCurrentApplication: () => {
         const { applications, currentAppId } = get().data;
         return applications.find(app => app.id === currentAppId);
       },
       
-      // Pobieranie aktualnego workspace
       getCurrentWorkspace: () => {
         const { currentWorkspaceId } = get().data;
         const currentApp = get().getCurrentApplication();
@@ -458,7 +382,6 @@ export const useAppStore = create<State>()(
         return currentApp.workspaces?.find(w => w.id === currentWorkspaceId);
       },
       
-      // Pobieranie aktualnego scenariusza
       getCurrentScenario: () => {
         const { currentScenarioId } = get().data;
         const currentWorkspace = get().getCurrentWorkspace();
@@ -467,7 +390,6 @@ export const useAppStore = create<State>()(
         return currentWorkspace.scenarios.find(s => s.id === currentScenarioId);
       },
       
-      // Pobieranie aktualnego węzła
       getCurrentNode: () => {
         const currentScenario = get().getCurrentScenario();
         if (!currentScenario?.nodes?.length) return undefined;
@@ -475,7 +397,7 @@ export const useAppStore = create<State>()(
       }
     }),
     {
-      name: 'app-store-storage', // klucz w localStorage
+      name: 'app-store-storage',
       partialize: (state) => ({
         data: {
           applications: state.data.applications,

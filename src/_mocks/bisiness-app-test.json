@@ -22,7 +22,7 @@
                   "label": "Krok 1: Dane finansowe",
                   "assistantMessage": "Podaj przychody i koszty projektu:",
                   "contextPath": "financial-data",
-                  "template": "form-step",
+                  "template": "formStep",
                   "order": 0,
                   "attrs": {
                     "schemaPath": "schemas.form.finance"
@@ -34,7 +34,7 @@
                   "label": "Krok 2: Obliczanie ROI",
                   "assistantMessage": "Obliczam ROI na podstawie danych...",
                   "contextPath": "roi-results",
-                  "template": "llm-step",
+                  "template": "llmStep",
                   "order": 1,
                   "attrs": {
                     "autoStart": true,
@@ -47,7 +47,7 @@
                   "label": "Krok 3: Podsumowanie",
                   "assistantMessage": "Oto podsumowanie analizy finansowej projektu:",
                   "contextPath": "summary-data",
-                  "template": "widgets-step",
+                  "template": "widgetsStep",
                   "order": 2,
                   "attrs": {
                     "widgets": [

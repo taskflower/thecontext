@@ -5,7 +5,6 @@ import { NodeData, FormField } from '@/types';
 import { extractJsonFromContent } from '@/utils';
 import { useAppStore, useAuth } from '@/hooks';
 
-
 export function useFlow({
   node,
   onSubmit,
@@ -20,25 +19,20 @@ export function useFlow({
   isLastNode?: boolean;
 } = {}) {
   const navigate = useNavigate();
-  const { application, workspace, scenario } = useParams();
+  const params = useParams();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const lastNavigationTimeRef = useRef(0);
   
-  // Auth & API
   const { getToken, user } = useAuth();
-
-  // Store & context
   const { 
     selectApplication, selectWorkspace, selectScenario, 
     getCurrentScenario, getCurrentWorkspace,
     getContextPath, updateContextPath, processTemplate
   } = useAppStore();
   
-  // Current data
   const currentScenario = getCurrentScenario();
   const currentWorkspace = getCurrentWorkspace();
   
-  // Get nodes with sorting
   const nodes = useMemo(() => {
     if (!currentScenario?.nodes) return [];
     return [...currentScenario.nodes].sort((a, b) => 
@@ -47,16 +41,12 @@ export function useFlow({
     );
   }, [currentScenario]);
   
-  // Current node and position information
   const currentNode = node || nodes[currentStepIndex];
   const isFirst = isFirstNode !== undefined ? isFirstNode : currentStepIndex === 0;
   const isLast = isLastNode !== undefined ? isLastNode : currentStepIndex === nodes.length - 1;
   
-  // Form state
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [formFields, setFormFields] = useState<FormField[]>([]);
-
-  // LLM references & state
   const autoStartExecutedRef = useRef(false);
   const isMountedRef = useRef(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -65,19 +55,16 @@ export function useFlow({
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const [schema, setSchema] = useState<any>(null);
   
-  // Processed assistant message
   const processedAssistantMessage = currentNode?.assistantMessage 
     ? processTemplate(currentNode.assistantMessage) 
     : '';
 
-  // Set mounted reference and reset autostart state on node change
   useEffect(() => {
     isMountedRef.current = true;
     autoStartExecutedRef.current = false;
     return () => { isMountedRef.current = false; };
   }, [currentNode?.id, currentNode?.template]);
 
-  // Get form fields from schema
   useEffect(() => {
     if (!currentNode?.attrs?.schemaPath) {
       setFormFields([]);
@@ -86,17 +73,12 @@ export function useFlow({
 
     try {
       const schemaData = getContextPath(currentNode.attrs.schemaPath);
-      if (!schemaData) {
-        setFormFields([]);
-        return;
-      }
       setFormFields(Array.isArray(schemaData) ? schemaData : []);
-    } catch (err) {
+    } catch {
       setFormFields([]);
     }
   }, [currentNode?.attrs, getContextPath]);
 
-  // Get schema for LLM
   useEffect(() => {
     if (currentNode?.attrs?.schemaPath) {
       try {
@@ -107,36 +89,34 @@ export function useFlow({
     }
   }, [currentNode?.attrs?.schemaPath, getContextPath]);
 
-  // Navigation functions
   const navigateToHome = useCallback(() => navigate('/'), [navigate]);
   
   const navigateToApplications = useCallback(() => {
-    if (application) {
-      selectApplication(application);
-      navigate(`/app/${application}`);
+    if (params.application) {
+      selectApplication(params.application);
+      navigate(`/app/${params.application}`);
     } else {
       navigateToHome();
     }
-  }, [application, navigate, navigateToHome, selectApplication]);
+  }, [params.application, navigate, navigateToHome, selectApplication]);
   
   const navigateToWorkspaces = useCallback(() => {
-    if (workspace) {
-      selectWorkspace(workspace);
-      navigate(`/${workspace}`);
+    if (params.workspace) {
+      selectWorkspace(params.workspace);
+      navigate(`/${params.workspace}`);
     } else {
       navigateToApplications();
     }
-  }, [workspace, navigateToApplications, navigate, selectWorkspace]);
+  }, [params.workspace, navigateToApplications, navigate, selectWorkspace]);
   
   const navigateToScenario = useCallback((scenarioId: string) => {
-    if (workspace) {
+    if (params.workspace) {
       selectScenario(scenarioId);
-      navigate(`/${workspace}/${scenarioId}`);
+      navigate(`/${params.workspace}/${scenarioId}`);
       setCurrentStepIndex(0);
     }
-  }, [workspace, navigate, selectScenario]);
+  }, [params.workspace, navigate, selectScenario]);
 
-  // Form handlers
   const handleChange = useCallback((name: string, value: any) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   }, []);
@@ -160,7 +140,6 @@ export function useFlow({
     return formData;
   }, [currentNode?.contextPath, formData, onSubmit, updateContextPath]);
 
-  // Node navigation
   const handleNext = useCallback((data?: any) => {
     const now = Date.now();
     if (now - lastNavigationTimeRef.current < 1000) return;
@@ -193,7 +172,6 @@ export function useFlow({
     onPrevious?.();
   }, [isFirst, navigateToWorkspaces, onPrevious]);
 
-  // Send message to LLM
   const sendMessage = useCallback(async (message: string) => {
     if (!message.trim()) return null;
 
@@ -205,7 +183,6 @@ export function useFlow({
       if (!token) throw new Error("Authorization token unavailable");
       if (!user) throw new Error("User not logged in");
 
-      // Prepare messages
       const messages = [];
       if (currentNode?.attrs?.systemMessage) {
         messages.push({ role: 'system', content: currentNode.attrs.systemMessage });
@@ -226,14 +203,12 @@ export function useFlow({
         }
       }
 
-      // Add current user message
       let userContent = message;
       if (schema && !userContent.includes('```json')) {
         userContent += `\n\nUse the following JSON schema:\n\`\`\`json\n${JSON.stringify(schema, null, 2)}\n\`\`\``;
       }
       messages.push({ role: 'user', content: userContent });
 
-      // API call
       const apiUrl = `${import.meta.env.VITE_API_URL}/api/v1/services/gemini/chat/completion`;
       setDebugInfo(`Sending to: ${apiUrl}`);
 
@@ -247,6 +222,7 @@ export function useFlow({
       });
 
       if (!isMountedRef.current) return null;
+      
       if (!response.ok) {
         const errorText = await response.text();
         try {
@@ -286,10 +262,9 @@ export function useFlow({
     processTemplate, processedAssistantMessage, schema, updateContextPath
   ]);
 
-  // Auto-start for LLM
   useEffect(() => {
     if (
-      currentNode?.template === 'llm-step' && 
+      currentNode?.template === 'llmStep' && 
       currentNode.attrs?.autoStart === true && 
       !autoStartExecutedRef.current && 
       !isLoading && 
@@ -309,7 +284,6 @@ export function useFlow({
   ]);
 
   return {
-    // Navigation
     currentNode,
     isFirstNode: isFirst,
     isLastNode: isLast,
@@ -319,29 +293,19 @@ export function useFlow({
     navigateToScenario,
     handleNext,
     handleBack,
-    
-    // URL parameters
-    params: { application, workspace, scenario },
-    
-    // Common flow state
+    params,
     isLoading,
     error,
     processedAssistantMessage,
-    
-    // Form state
     formData,
     formFields,
     handleChange,
     handleSubmit,
     areRequiredFieldsFilled,
-    
-    // LLM state
     responseData,
     sendMessage,
     schema,
     debugInfo,
-    
-    // Current data
     currentScenario,
     currentWorkspace,
     nodes
