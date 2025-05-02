@@ -3,19 +3,28 @@ import { useEffect, useState } from 'react';
 import { useAppStore } from '@/hooks';
 import { WidgetConfig } from '@/types';
 
+// Rozszerzony interfejs dla wewnętrznego użytku, zawiera dodatkowe pola
+interface ProcessedWidget extends WidgetConfig {
+  id?: string;
+  description?: string;
+  [key: string]: any;
+}
+
 /**
  * Hook do zarządzania widgetami w aplikacji
  */
 export function useWidgets(widgets: WidgetConfig[] = [], contextBasePath?: string) {
-  const [widgetData, setWidgetData] = useState<any[]>([]);
+  const [widgetData, setWidgetData] = useState<ProcessedWidget[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   const { getContextPath, processTemplate } = useAppStore();
   
   // Sprawdza czy ścieżka jest absolutna
-  const isAbsolutePath = (path: string): boolean => 
-    path && typeof path === 'string' && (path.startsWith('data.') || path.includes('.'));
+  const isAbsolutePath = (path: string): boolean => {
+    if (!path || typeof path !== 'string') return false;
+    return path.startsWith('data.') || path.includes('.');
+  };
 
   useEffect(() => {
     const processWidgets = async () => {
@@ -26,8 +35,8 @@ export function useWidgets(widgets: WidgetConfig[] = [], contextBasePath?: strin
       
       try {
         const processedWidgets = await Promise.all(widgets.map(async (widget, index) => {
-          const widgetType = widget.type || 'unknown';
-          let widgetDataObj: any = { ...widget };
+          const widgetTplFile = widget.tplFile || 'unknown'; // Zmienione z type na tplFile
+          let widgetDataObj: ProcessedWidget = { ...widget };
           
           // Obsługa pojedynczej ścieżki danych
           if (widget.dataPath) {
@@ -72,14 +81,14 @@ export function useWidgets(widgets: WidgetConfig[] = [], contextBasePath?: strin
             widgetDataObj.title = processTemplate(widget.title);
           }
           
-          if (widget.description) {
-            widgetDataObj.description = processTemplate(widget.description);
+          if (widgetDataObj.description) {
+            widgetDataObj.description = processTemplate(widgetDataObj.description);
           }
           
           return {
             ...widgetDataObj,
-            id: widget.id || `widget-${index}`,
-            type: widgetType,
+            id: widgetDataObj.id || `widget-${index}`,
+            tplFile: widgetTplFile, // Zmienione na tplFile
           };
         }));
         

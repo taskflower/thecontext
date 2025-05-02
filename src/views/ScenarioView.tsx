@@ -91,11 +91,12 @@ export const ScenarioView: React.FC = () => {
     isLoading: cardLoading,
   } = useComponents("widget", "CardList");
 
+  // Używamy tplFile zamiast template
   const {
     component: FlowStepComponent,
     error: flowStepError,
     isLoading: flowStepLoading,
-  } = useComponents("flowStep", currentNode?.template || "form-step");
+  } = useComponents("flowStep", currentNode?.tplFile || "form-step");
 
   // Stany ładowania i błędów
   const combinedLoading =
@@ -118,7 +119,7 @@ export const ScenarioView: React.FC = () => {
         {workspaceWidgetData.map((widget, index) => (
           <div key={`workspace-widget-${index}`}>
             <WidgetRenderer
-              type={widget.type}
+              type={widget.tplFile} // Używamy tplFile zamiast type
               title={widget.title}
               description={widget.description}
               data={widget.data}

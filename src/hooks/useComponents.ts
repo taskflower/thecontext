@@ -18,7 +18,7 @@ export function useComponents<T = any>(
 
   const getCurrentWorkspace = useAppStore((state) => state.getCurrentWorkspace);
   const workspace = getCurrentWorkspace();
-  const tplName = workspace?.templateSettings?.template || "default";
+  const tplDirName = workspace?.templateSettings?.tplDir || "default"; // Zmienione z template na tplDir
 
   useEffect(() => {
     const loadComponent = async () => {
@@ -33,13 +33,13 @@ export function useComponents<T = any>(
 
         switch (componentType) {
           case "flowStep":
-            tplPath = `/src/templates/${tplName}/flowSteps/${componentId}.tsx`;
+            tplPath = `/src/templates/${tplDirName}/flowSteps/${componentId}.tsx`;
             break;
           case "layout":
-            tplPath = `/src/templates/${tplName}/layouts/${componentId}.tsx`;
+            tplPath = `/src/templates/${tplDirName}/layouts/${componentId}.tsx`;
             break;
           case "widget":
-            tplPath = `/src/templates/${tplName}/widgets/${componentId}.tsx`;
+            tplPath = `/src/templates/${tplDirName}/widgets/${componentId}.tsx`;
             break;
         }
 
@@ -57,8 +57,8 @@ export function useComponents<T = any>(
           }
         }
 
-        if (!loadedComponent && fallbackToDefault && tplName !== "default") {
-          const defaultPath = tplPath.replace(`/${tplName}/`, "/default/");
+        if (!loadedComponent && fallbackToDefault && tplDirName !== "default") {
+          const defaultPath = tplPath.replace(`/${tplDirName}/`, "/default/");
 
           if (mds[defaultPath]) {
             try {
@@ -91,7 +91,7 @@ export function useComponents<T = any>(
     };
 
     loadComponent();
-  }, [tplName, componentType, componentId, fallbackToDefault]);
+  }, [tplDirName, componentType, componentId, fallbackToDefault]);
 
   return { component, error, isLoading };
 }

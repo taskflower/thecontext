@@ -27,8 +27,8 @@ export const FlowView: React.FC = () => {
   }, [workspace, scenario, selectWorkspace, selectScenario]);
 
   // Szablon i komponent
-  const templateName =
-    currentWorkspace?.templateSettings?.template || "default";
+  const templateDirName =
+    currentWorkspace?.templateSettings?.tplDir || "default"; // Zmienione z template na tplDir
   const {
     component: LayoutComponent,
     error: layoutError,
@@ -39,7 +39,7 @@ export const FlowView: React.FC = () => {
     component: FlowStepComponent,
     error: flowStepError,
     isLoading: componentLoading,
-  } = useComponents("flowStep", currentNode?.template || "form-step");
+  } = useComponents("flowStep", currentNode?.tplFile || "form-step"); // Zmienione z template na tplFile
 
   // Stany ładowania i błędów
   const isLoading = layoutLoading || componentLoading;
@@ -84,7 +84,7 @@ export const FlowView: React.FC = () => {
             </h3>
             <p className="mt-2">
               Szukany layout:{" "}
-              <span className="font-mono bg-red-50 px-1">{templateName}</span>
+              <span className="font-mono bg-red-50 px-1">{templateDirName}</span>
             </p>
           </div>
         </div>
@@ -101,7 +101,7 @@ export const FlowView: React.FC = () => {
             <p className="mt-2">
               Szukany komponent:{" "}
               <span className="font-mono bg-red-50 px-1">
-                {currentNode.template || "unknown"}
+                {currentNode.tplFile || "unknown"} {/* Zmienione z template na tplFile */}
               </span>
             </p>
             <p className="mt-2">

@@ -43,7 +43,7 @@ async function addDataToFirestore(userId: string, appData: any[]) {
     const applicationData = {
       name: appItem.name,
       description: appItem.description || "",
-      template: appItem.template || "default", // Dodane pole template z JSON
+      tplDir: appItem.tplDir || "default", // Zmienione z template na tplDir
       createdAt: new Date(),
       createdBy: userId,
     };
@@ -60,6 +60,17 @@ async function addDataToFirestore(userId: string, appData: any[]) {
     // Dla każdego workspace w aplikacji
     if (Array.isArray(appItem.workspaces)) {
       for (const workspaceItem of appItem.workspaces) {
+        // Przekształć stare templateSettings jeśli istnieją
+        let templateSettings = workspaceItem.templateSettings || {};
+        if (templateSettings.template && !templateSettings.tplDir) {
+          templateSettings.tplDir = templateSettings.template;
+          delete templateSettings.template;
+        }
+        if (templateSettings.layout && !templateSettings.layoutFile) {
+          templateSettings.layoutFile = templateSettings.layout;
+          delete templateSettings.layout;
+        }
+
         const workspaceData = {
           name: workspaceItem.name,
           description: workspaceItem.description || "",
@@ -67,7 +78,7 @@ async function addDataToFirestore(userId: string, appData: any[]) {
           userId,
           icon: workspaceItem.icon || "folder",
           initialContext: workspaceItem.initialContext || {},
-          templateSettings: workspaceItem.templateSettings || {},
+          templateSettings: templateSettings,
           createdAt: new Date(),
         };
 
@@ -122,13 +133,16 @@ async function addDataToFirestore(userId: string, appData: any[]) {
                 const nodeOrder =
                   nodeItem.order !== undefined ? nodeItem.order : i;
 
+                // Obsługa migracji z template na tplFile
+                let tplFile = nodeItem.tplFile || nodeItem.template || "default";
+
                 const nodeData = {
                   id: nodeItem.id,
                   label: nodeItem.label || "",
                   scenarioId,
                   contextPath: nodeItem.contextPath || "",
-                  // Użyj pola template z JSON zamiast templateId
-                  template: nodeItem.template || "default",
+                  // Użyj tplFile zamiast template
+                  tplFile: tplFile,
                   assistantMessage: nodeItem.assistantMessage || "",
                   attrs: nodeItem.attrs || {},
                   order: nodeOrder,

@@ -2,7 +2,7 @@
     {
       "name": "Analiza Finansowa - test",
       "description": "Prosta analiza finansowa projektu",
-      "template": "default",
+      "tplDir": "default",
       "workspaces": [
         {
           "id": "workspace-finance",
@@ -22,7 +22,7 @@
                   "label": "Krok 1: Dane finansowe",
                   "assistantMessage": "Podaj przychody i koszty projektu:",
                   "contextPath": "financial-data",
-                  "template": "formStep",
+                  "tplFile": "formStep",
                   "order": 0,
                   "attrs": {
                     "schemaPath": "schemas.form.finance"
@@ -34,7 +34,7 @@
                   "label": "Krok 2: Obliczanie ROI",
                   "assistantMessage": "Obliczam ROI na podstawie danych...",
                   "contextPath": "roi-results",
-                  "template": "llmStep",
+                  "tplFile": "llmStep",
                   "order": 1,
                   "attrs": {
                     "autoStart": true,
@@ -47,16 +47,16 @@
                   "label": "Krok 3: Podsumowanie",
                   "assistantMessage": "Oto podsumowanie analizy finansowej projektu:",
                   "contextPath": "summary-data",
-                  "template": "widgetsStep",
+                  "tplFile": "widgetsStep",
                   "order": 2,
                   "attrs": {
                     "widgets": [
                       {
-                        "type": "title",
+                        "tplFile": "title",
                         "title": "Wyniki analizy finansowej"
                       },
                       {
-                        "type": "stats",
+                        "tplFile": "stats",
                         "title": "Dane finansowe",
                         "description": "Wartości wprowadzone przez użytkownika",
                         "dataPaths": {
@@ -65,7 +65,7 @@
                         }
                       },
                       {
-                        "type": "metrics",
+                        "tplFile": "metrics",
                         "title": "Wyniki analizy",
                         "dataPaths": {
                           "ROI": "roi-results.roi",
@@ -73,7 +73,7 @@
                         }
                       },
                       {
-                        "type": "info",
+                        "tplFile": "info",
                         "title": "Opłacalność projektu",
                         "dataPath": "roi-results.profitability",
                         "variant": "info"
@@ -85,11 +85,10 @@
             }
           ],
           "templateSettings": {
-            "template": "default",
-            "layout": "simple",
+            "layoutFile": "simple",
             "widgets": [
               {
-                "type": "info",
+                "tplFile": "info",
                 "data": {
                   "title": "Analiza Finansowa",
                   "description": "Wybierz scenariusz do uruchomienia",
@@ -97,7 +96,7 @@
                 }
               },
               {
-                "type": "stats",
+                "tplFile": "stats",
                 "title": "Ostatnia analiza",
                 "description": "Dane z ostatnio przeprowadzonej analizy",
                 "dataPaths": {

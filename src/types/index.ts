@@ -1,5 +1,4 @@
 // src/types/index.ts
-
 export interface WidgetProps<T = any> {
   data?: T;
   onSelect?: (id: string) => void;
@@ -28,7 +27,7 @@ export interface NodeData {
   id: string;
   label?: string;
   type?: string;
-  template?: string;     
+  tplFile?: string;     // Zmienione z template na tplFile
   assistantMessage?: string;
   contextPath?: string;
   order?: number;
@@ -65,13 +64,14 @@ export interface Workspace {
 }
 
 export interface TemplateSettings {
-  layout?: string;           
+  tplDir?: string;          // Zmienione z template na tplDir
+  layoutFile?: string;      // Dodane zamiast layout
   widgets?: WidgetConfig[];
   [key: string]: any;         
 }
 
 export interface WidgetConfig {
-  type: string;
+  tplFile?: string;         // Dodane, zamiast używania type
   title?: string;
   data?: string | any;
   attrs?: Record<string, any>;
@@ -84,7 +84,7 @@ export interface Application {
   id: string;
   name: string;
   description?: string;
-  template?: string;
+  tplDir?: string;          // Zmienione z template na tplDir
   workspaces?: Workspace[];
   templateSettings?: TemplateSettings;
   createdAt?: Date;

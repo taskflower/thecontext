@@ -1,13 +1,12 @@
 // src/components/WidgetRenderer.tsx
-import { useComponents, useFlow } from '@/hooks';
+import { useComponents } from '@/hooks';
 import React from 'react';
-
 
 /**
  * Właściwości dla komponentu WidgetRenderer
  */
 interface WidgetRendererProps {
-  type: string;
+  tplFile?: string; // Zmienione z type na tplFile
   data?: any;
   onSelect?: (id: string) => void;
   [key: string]: any;
@@ -20,13 +19,14 @@ interface WidgetRendererProps {
  * i przekazuje do niego dane oraz funkcje obsługi zdarzeń
  */
 const WidgetRenderer: React.FC<WidgetRendererProps> = ({
-  type,
+  tplFile, // Zmienione z type na tplFile
   data,
   onSelect,
   ...rest
 }) => {
   // Formatowanie nazwy widgetu (może być "cardList", "card-list", "CardList" itp.)
-  const widgetId = formatWidgetType(type);
+  // Dodajemy sprawdzenie czy tplFile jest zdefiniowany
+  const widgetId = tplFile ? formatWidgetType(tplFile) : 'unknown';
   
   // Ładowanie komponentu widgetu
   const { component: WidgetComponent, error, isLoading } = useComponents(
@@ -77,6 +77,9 @@ const WidgetRenderer: React.FC<WidgetRendererProps> = ({
  * - DataDisplayWidget -> DataDisplay
  */
 function formatWidgetType(type: string): string {
+  // Zabezpieczenie przed undefined/null
+  if (!type) return 'unknown';
+  
   // Usuń przyrostek "Widget" jeśli istnieje
   let formatted = type.replace(/Widget$/, '');
   

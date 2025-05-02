@@ -63,7 +63,7 @@ export function useFlow({
     isMountedRef.current = true;
     autoStartExecutedRef.current = false;
     return () => { isMountedRef.current = false; };
-  }, [currentNode?.id, currentNode?.template]);
+  }, [currentNode?.id, currentNode?.tplFile]); // Zmienione z template na tplFile
 
   useEffect(() => {
     if (!currentNode?.attrs?.schemaPath) {
@@ -264,7 +264,7 @@ export function useFlow({
 
   useEffect(() => {
     if (
-      currentNode?.template === 'llmStep' && 
+      currentNode?.tplFile === 'llmStep' && 
       currentNode.attrs?.autoStart === true && 
       !autoStartExecutedRef.current && 
       !isLoading && 
@@ -278,7 +278,7 @@ export function useFlow({
       }
     }
   }, [
-    currentNode?.template, currentNode?.id, currentNode?.attrs?.autoStart,
+    currentNode?.tplFile, currentNode?.id, currentNode?.attrs?.autoStart,
     currentNode?.attrs?.initialUserMessage, isLoading, responseData, error,
     processTemplate, sendMessage
   ]);

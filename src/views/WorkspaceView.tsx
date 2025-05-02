@@ -29,7 +29,7 @@ export const WorkspaceView: React.FC = () => {
         name: workspace.name,
         description:
           workspace.description ||
-          `Template: ${workspace.templateSettings?.template}`,
+          `Template: ${workspace.templateSettings?.tplDir}`, // Zmienione z template na tplDir
         count: workspace.scenarios?.length || 0,
         countLabel: "scenarios",
         icon: workspace.icon || "briefcase",
