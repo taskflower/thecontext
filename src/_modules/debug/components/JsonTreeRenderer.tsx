@@ -1,10 +1,24 @@
-// src/debug/components/JsonTreeRenderer.jsx
+// src/_modules/debug/components/JsonTreeRenderer.tsx
 import React from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
-export const JsonTreeRenderer = ({ data, basePath = "", level = 0, expandedPaths, setExpandedPaths }) => {
+interface JsonTreeRendererProps {
+  data: any;
+  basePath?: string;
+  level?: number;
+  expandedPaths: Record<string, boolean>;
+  setExpandedPaths: (paths: Record<string, boolean>) => void;
+}
+
+export const JsonTreeRenderer: React.FC<JsonTreeRendererProps> = ({ 
+  data, 
+  basePath = "", 
+  level = 0, 
+  expandedPaths, 
+  setExpandedPaths 
+}) => {
   // Format JSON values
-  const formatValue = (value) => {
+  const formatValue = (value: any) => {
     if (value === undefined)
       return <span className="text-gray-400 italic">undefined</span>;
     if (value === null)
@@ -23,11 +37,11 @@ export const JsonTreeRenderer = ({ data, basePath = "", level = 0, expandedPaths
   };
 
   // Handle expanding/collapsing JSON nodes
-  const togglePath = (path) => {
-    setExpandedPaths((prev) => ({
-      ...prev,
-      [path]: !prev[path],
-    }));
+  const togglePath = (path: string) => {
+    setExpandedPaths({
+      ...expandedPaths,
+      [path]: !expandedPaths[path],
+    });
   };
 
   if (!data || typeof data !== "object") return formatValue(data);
@@ -46,17 +60,17 @@ export const JsonTreeRenderer = ({ data, basePath = "", level = 0, expandedPaths
         style={{ marginLeft: `${indentation}px` }}
         className="flex items-center"
       >
-        <span
+        <button
+          className="h-5 w-5 p-0 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-sm"
           onClick={() => togglePath(basePath || "root")}
-          className="cursor-pointer text-gray-500 hover:text-gray-800 mr-1"
         >
           {expandedPaths[basePath || "root"] ? (
-            <ChevronDown className="w-4 h-4 inline" />
+            <ChevronDown className="h-3.5 w-3.5" />
           ) : (
-            <ChevronRight className="w-4 h-4 inline" />
+            <ChevronRight className="h-3.5 w-3.5" />
           )}
-        </span>
-        <span className="text-gray-700">{isArray ? "[" : "{"}</span>
+        </button>
+        <span className="text-gray-800">{isArray ? "[" : "{"}</span>
 
         {!expandedPaths[basePath || "root"] && (
           <span className="text-gray-500 ml-1">
@@ -95,7 +109,7 @@ export const JsonTreeRenderer = ({ data, basePath = "", level = 0, expandedPaths
                 {isLastItem && expandedPaths[basePath || "root"] && (
                   <div
                     style={{ marginLeft: `${indentation}px` }}
-                    className="text-gray-700 mt-1"
+                    className="text-gray-800 mt-1"
                   >
                     {isArray ? "]" : "}"}
                   </div>

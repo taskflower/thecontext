@@ -19,6 +19,7 @@ import { AuthWrapper } from "./_auth/AuthWrapper";
 import SharedLoader from "./components/SharedLoader";
 import { AuthProvider } from "./hooks";
 import ScenarioView from "./views/ScenarioView";
+import { EnhancedFlowDebugger } from "./_modules/debug/EnhancedFlowDebugger";
 
 const AppWrapper = ({ children }: { children: React.ReactNode }) => (
   <div className="flex w-full h-screen overflow-hidden">
@@ -89,9 +90,9 @@ const App = () => (
       </Suspense>
 
       {/* Debug tools - loaded conditionally */}
-      {/* <Suspense fallback={null}>
+      <Suspense fallback={null}>
         <EnhancedFlowDebugger />
-      </Suspense> */}
+      </Suspense>
     </AuthProvider>
   </Router>
 );

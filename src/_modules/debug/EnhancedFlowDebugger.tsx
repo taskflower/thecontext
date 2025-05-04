@@ -1,16 +1,27 @@
-// src/debug/EnhancedFlowDebugger.jsx
+// src/_modules/debug/EnhancedFlowDebugger.tsx
 import { useState, useEffect, useRef } from "react";
-import { RefreshCw, Clock, List, Database,  X, Users } from "lucide-react";
+import { 
+  RefreshCw, 
+  Clock, 
+  List, 
+  Database, 
+  X, 
+  Users, 
+  ChevronDown,
+  ChevronRight,
+  Layers,
+  Settings
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAppStore } from "@/hooks";
+
+// Import Tabs
 import ContextTab from "./tabs/ContextTab";
 import LogsTab from "./tabs/LogsTab";
 import ScenarioTab from "./tabs/ScenarioTab";
 
-
-import { useNavigate } from "react-router-dom";
-import { useContextStore, useWorkspaceStore } from "@/hooks";
-
 export const EnhancedFlowDebugger = () => {
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(
     localStorage.getItem("debuggerVisible") === "true"
   );
@@ -18,10 +29,12 @@ export const EnhancedFlowDebugger = () => {
   const [logEntries, setLogEntries] = useState<
     { id: number; timestamp: Date; changes: any; type: string }[]
   >([]);
-  const [activeTab, setActiveTab] = useState("context"); // 'context', 'logs', 'scenario'
+  const [activeTab, setActiveTab] = useState("context");
   const [expandedPaths, setExpandedPaths] = useState({});
-  const { getCurrentScenario, getCurrentWorkspace } = useWorkspaceStore();
-  const { getContext } = useContextStore();
+  
+  const appStore = useAppStore();
+  const { getCurrentScenario, getCurrentWorkspace, getContextPath } = appStore;
+  
   const prevContextRef = useRef({});
   const logContainerRef = useRef(null);
   const currentScenario = getCurrentScenario();
@@ -30,7 +43,14 @@ export const EnhancedFlowDebugger = () => {
   // Context change tracking
   useEffect(() => {
     const intervalId = setInterval(() => {
-      const currentContext = getContext();
+      // Get the current context from the workspace ID
+      const workspaceId = appStore.data.currentWorkspaceId;
+      if (!workspaceId) {
+        setContext({});
+        return;
+      }
+      
+      const currentContext = appStore.data.contexts[workspaceId] || {};
       setContext(currentContext);
 
       // Detecting changes
@@ -57,7 +77,7 @@ export const EnhancedFlowDebugger = () => {
     }, 1000);
 
     return () => clearInterval(intervalId);
-  }, [getContext]);
+  }, [appStore]);
 
   // Save settings to localStorage and manage split screen layout
   useEffect(() => {
@@ -148,11 +168,16 @@ export const EnhancedFlowDebugger = () => {
     setIsVisible((prev) => !prev);
   };
 
+  // Handle tab change
+  const handleTabChange = (tabName: string) => {
+    setActiveTab(tabName);
+  };
+
   // Render toggle button when debugger is hidden
   if (!isVisible) {
     return (
       <button
-        className="fixed right-3 bottom-3 z-50 px-3 py-2 text-xs rounded-md bg-black text-white font-medium flex items-center shadow-md hover:border-b-2 transition-colors"
+        className="fixed right-3 bottom-3 z-50 px-3 py-2 text-xs rounded-md bg-white text-gray-900 font-medium flex items-center shadow-md border border-gray-200 hover:bg-gray-50 transition-colors"
         onClick={toggleDebugger}
         title="Ctrl+Shift+D aby włączyć/wyłączyć debugger"
       >
@@ -164,21 +189,18 @@ export const EnhancedFlowDebugger = () => {
 
   // Render debugger in split screen mode
   return (
-    <div className="fixed top-0 right-0 z-40 w-1/2 h-full bg-white border-l border-gray-300 shadow-lg flex flex-col">
+    <div className="fixed top-0 right-0 z-40 w-1/2 h-full bg-white border-l border-gray-200 shadow-xl flex flex-col">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white px-4 py-2 flex justify-between items-center">
+      <div className="bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center">
         <div className="font-semibold flex items-center">
           <Database className="w-4 h-4 mr-2" />
           Flow Debugger
-          <span className="text-xs bg-blue-900 px-2 py-0.5 rounded ml-2">
-            v1.2
-          </span>
+          <span className="ml-2 text-xs bg-gray-100 rounded-full px-2 py-0.5 text-gray-700">v2.0</span>
         </div>
         <div className="flex space-x-1">
-          {/* Buttons */}
           <button
+            className="p-1 rounded-md hover:bg-gray-100 text-gray-700"
             onClick={toggleDebugger}
-            className="p-1 rounded hover:bg-blue-700"
             title="Ukryj debugger (Ctrl+Shift+D)"
           >
             <X className="w-4 h-4" />
@@ -187,49 +209,53 @@ export const EnhancedFlowDebugger = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 bg-gray-100">
-        <button
-          className={`px-4 py-2 font-medium text-sm flex items-center ${
-            activeTab === "context"
-              ? "bg-white text-blue-700 border-b-2 border-blue-600"
-              : "text-gray-600 hover:bg-gray-200"
-          }`}
-          onClick={() => setActiveTab("context")}
-        >
-          <Database className="w-4 h-4 mr-1.5" />
-          Kontekst
-        </button>
-        <button
-          className={`px-4 py-2 font-medium text-sm flex items-center ${
-            activeTab === "logs"
-              ? "bg-white text-blue-700 border-b-2 border-blue-600"
-              : "text-gray-600 hover:bg-gray-200"
-          }`}
-          onClick={() => setActiveTab("logs")}
-        >
-          <Clock className="w-4 h-4 mr-1.5" />
-          Logi zmian {logEntries.length > 0 && `(${logEntries.length})`}
-        </button>
-        <button
-          className={`px-4 py-2 font-medium text-sm flex items-center ${
-            activeTab === "scenario"
-              ? "bg-white text-blue-700 border-b-2 border-blue-600"
-              : "text-gray-600 hover:bg-gray-200"
-          }`}
-          onClick={() => setActiveTab("scenario")}
-        >
-          <List className="w-4 h-4 mr-1.5" />
-          Scenariusz
-        </button>
-        <button  onClick={() => navigate('/admin')} className={`px-4 py-2 font-medium text-sm flex items-center ${
-            activeTab === "logs"
-              ? "bg-white text-blue-700 border-b-2 border-blue-600"
-              : "text-gray-600 hover:bg-gray-200"
-          }`}> <Users className="w-4 h-4 mr-1.5" /> Admin panel</button>
+      <div className="border-b border-gray-200">
+        <div className="flex">
+          <button
+            className={`px-4 py-2.5 text-sm font-medium flex items-center transition-colors ${
+              activeTab === "context"
+                ? "border-b-2 border-blue-600 text-blue-600"
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+            }`}
+            onClick={() => handleTabChange("context")}
+          >
+            <Database className="w-4 h-4 mr-2" />
+            Kontekst
+          </button>
+          <button
+            className={`px-4 py-2.5 text-sm font-medium flex items-center transition-colors ${
+              activeTab === "logs"
+                ? "border-b-2 border-blue-600 text-blue-600"
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+            }`}
+            onClick={() => handleTabChange("logs")}
+          >
+            <Clock className="w-4 h-4 mr-2" />
+            Logi zmian {logEntries.length > 0 && `(${logEntries.length})`}
+          </button>
+          <button
+            className={`px-4 py-2.5 text-sm font-medium flex items-center transition-colors ${
+              activeTab === "scenario"
+                ? "border-b-2 border-blue-600 text-blue-600"
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+            }`}
+            onClick={() => handleTabChange("scenario")}
+          >
+            <List className="w-4 h-4 mr-2" />
+            Scenariusz
+          </button>
+          <button
+            className={`px-4 py-2.5 text-sm font-medium flex items-center transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50`}
+            onClick={() => navigate('/admin')}
+          >
+            <Users className="w-4 h-4 mr-2" />
+            Admin panel
+          </button>
+        </div>
       </div>
 
-      {/* Active tab content */}
-      <div className="flex-grow overflow-hidden">
+      {/* Tab content */}
+      <div className="flex-1 overflow-hidden">
         {activeTab === "context" && (
           <ContextTab
             context={context}
@@ -253,7 +279,7 @@ export const EnhancedFlowDebugger = () => {
       </div>
 
       {/* Footer */}
-      <div className="bg-gray-100 border-t border-gray-200 px-3 py-1.5 text-xs text-gray-500 flex justify-between items-center">
+      <div className="bg-gray-50 border-t border-gray-200 px-3 py-1.5 text-xs text-gray-500 flex justify-between items-center">
         <div>Skrót: Ctrl+Shift+D (pokaż/ukryj)</div>
         <div className="flex items-center">
           <RefreshCw className="w-3 h-3 mr-1 animate-spin" />

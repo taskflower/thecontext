@@ -1,4 +1,4 @@
-// src/debug/index.js
+// src/_modules/debug/index.ts
 export { default as EnhancedFlowDebugger } from './EnhancedFlowDebugger';
 export { default as ContextTab } from './tabs/ContextTab';
 export { default as LogsTab } from './tabs/LogsTab';
