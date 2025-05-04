@@ -20,6 +20,7 @@ import SharedLoader from "./components/SharedLoader";
 import { AuthProvider } from "./hooks";
 import ScenarioView from "./views/ScenarioView";
 import { EnhancedFlowDebugger } from "./_modules/debug/EnhancedFlowDebugger";
+import ScenarioGenerator from "./_modules/scenarioGenerator/components/ScenarioGenerator";
 
 const AppWrapper = ({ children }: { children: React.ReactNode }) => (
   <div className="flex w-full h-screen overflow-hidden">
@@ -46,7 +47,7 @@ const App = () => (
             <Route path="/login" element={<LoginView />} />
 
             {/* Dev tools */}
-            {/* <Route path="/generator" element={<ScenarioGenerator />} /> */}
+            <Route path="/generator" element={<ScenarioGenerator />} />
 
             {/* Admin Panel - separate subpage */}
             <Route

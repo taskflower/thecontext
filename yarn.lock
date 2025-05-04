@@ -1882,11 +1882,6 @@ reusify@^1.0.4:
   resolved "https://registry.yarnpkg.com/reusify/-/reusify-1.1.0.tgz#0fe13b9522e1473f51b558ee796e08f11f9b489f"
   integrity sha512-g6QUff04oZpHs0eG5p83rFLhHeV00ug/Yf9nZM6fLeUrPguBTkTQOdpAWWspMh55TZfVQDPaN3NQJfbVRAxdIw==
 
-revertcontext-nodes-module@1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/revertcontext-nodes-module/-/revertcontext-nodes-module-1.0.5.tgz#328c9abd6955e34b230acbeaa2c30c8794cc659f"
-  integrity sha512-tRQXuJCtKTmFhkyTlyiL4TrHvq9K9AbPrap/jII2Z1AFZIYzzkH5rXq2nfKsddirTEotFSXsPqItY5eeu1Kfhg==
-
 rollup@^3.27.1:
   version "3.29.5"
   resolved "https://registry.yarnpkg.com/rollup/-/rollup-3.29.5.tgz#8a2e477a758b520fb78daf04bca4c522c1da8a54"
@@ -2034,11 +2029,6 @@ tailwindcss@^3.3.2:
     resolve "^1.22.8"
     sucrase "^3.35.0"
 
-template-registry-module@1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/template-registry-module/-/template-registry-module-1.0.3.tgz#52f7a1c2d8b9ddb70b0d99e69e08d6e48df0ae92"
-  integrity sha512-l7ZZyxoppmq9RUKRfDS68DYKpMFMguI2xFIHxNz3b2SIFgBul6N3Q3LkJwQfryac3spm14EPFp7DCkYyesqM4g==
-
 thenify-all@^1.0.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/thenify-all/-/thenify-all-1.6.0.tgz#1a1918d402d8fc3f98fbf234db0bcc8cc10e9726"
@@ -2102,6 +2092,11 @@ util-deprecate@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
   integrity sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==
+
+uuid@^11.1.0:
+  version "11.1.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-11.1.0.tgz#9549028be1753bb934fc96e2bca09bb4105ae912"
+  integrity sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==
 
 victory-vendor@^36.6.8:
   version "36.9.2"

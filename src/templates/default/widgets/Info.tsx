@@ -1,28 +1,28 @@
-// src/templates/default/widgets/InfoWidget.tsx
+// src/templates/default/widgets/Info.tsx
 import React from "react";
 import { InfoWidgetProps } from "../types";
-import { useAppStore } from "@/hooks";
-
 
 const InfoWidget: React.FC<InfoWidgetProps> = ({
   data = {},
+  title,
+  variant: propVariant,
   onSelect
 }) => {
-  // Używamy scentralizowanego store zamiast osobnych
-  const currentWorkspaceId = useAppStore(state => state.data.currentWorkspaceId);
-  const contexts = useAppStore(state => state.data.contexts);
-  const context = currentWorkspaceId ? contexts[currentWorkspaceId] : null;
-
-  // Pobierz dane z kontekstu jeśli data jest stringiem (np. "header")
+  // Usprawnione przetwarzanie danych
   let widgetData = data;
-  if (typeof data === 'string' && context) {
-    // Znajdź dane w kontekście (np. dla "header" znajdź headerData w kontekście)
-    widgetData = context[data] || {};
-  }
-
-  // Fallback, gdy widgetData to nadal string lub jest puste
-  if (typeof widgetData === 'string' || !widgetData) {
-    widgetData = {};
+  let displayTitle = title;
+  let displayDescription = "";
+  let displayVariant = propVariant || "default";
+  
+  // Obsługa różnych formatów danych
+  if (typeof data === 'string') {
+    // Jeśli przekazano prosty string, użyj go jako opis
+    displayDescription = data;
+  } else if (data && typeof data === 'object') {
+    // Jeśli to obiekt, użyj jego pól
+    displayTitle = data.title || title;
+    displayDescription = data.description || "";
+    displayVariant = data.variant || propVariant || "default";
   }
 
   // Określenie stylów dla wariantów
@@ -34,17 +34,16 @@ const InfoWidget: React.FC<InfoWidgetProps> = ({
     error: "bg-red-50 border-red-200 text-red-800"
   };
 
-  const variant = widgetData.variant || 'default';
-  const bgStyle = variantStyles[variant as keyof typeof variantStyles] || variantStyles.default;
+  const bgStyle = variantStyles[displayVariant as keyof typeof variantStyles] || variantStyles.default;
 
   return (
     <div className={`rounded-lg border p-4 ${bgStyle}`}>
-      {widgetData.title && <h3 className="font-medium text-lg mb-2">{widgetData.title}</h3>}
-      {widgetData.description && <div className="text-sm">{widgetData.description}</div>}
+      {displayTitle && <h3 className="font-medium text-lg mb-2">{displayTitle}</h3>}
+      {displayDescription && <div className="text-sm">{displayDescription}</div>}
       
-      {widgetData.backLink && widgetData.backText && (
+      {data && data.backLink && data.backText && (
         <button 
-          onClick={() => onSelect && onSelect(widgetData.backLink)} 
+          onClick={() => onSelect && onSelect(data.backLink)} 
           className="mt-4 text-sm flex items-center hover:underline"
         >
           <svg 
@@ -61,7 +60,7 @@ const InfoWidget: React.FC<InfoWidgetProps> = ({
           >
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
-          {widgetData.backText}
+          {data.backText}
         </button>
       )}
     </div>
