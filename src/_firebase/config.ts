@@ -1,9 +1,9 @@
 // src/_firebase/config.ts
-import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
-import { Analytics, getAnalytics, isSupported } from 'firebase/analytics';
+import { initializeApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
+import { Analytics, getAnalytics, isSupported } from "firebase/analytics";
 
 // Zmieniamy na false, ponieważ usunęliśmy mechanizm mocków
 export const USE_MOCKS = false;
@@ -15,7 +15,7 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 // Inicjalizacja Firebase
@@ -25,7 +25,7 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 // Dodajemy scope'y dla Google Drive
-googleProvider.addScope('https://www.googleapis.com/auth/drive.file');
+googleProvider.addScope("https://www.googleapis.com/auth/drive.file");
 
 export const db = getFirestore(app);
 export const storage = getStorage(app);
@@ -39,6 +39,6 @@ export let analytics: Analytics;
       analytics = getAnalytics(app);
     }
   } catch (error) {
-    console.warn('Firebase Analytics not supported in this environment', error);
+    console.warn("Firebase Analytics not supported in this environment", error);
   }
 })();

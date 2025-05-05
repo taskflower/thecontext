@@ -47,6 +47,8 @@ const sortNodes = (nodes: NodeData[]) => [...nodes].sort((a, b) => {
 
 const fetchNodesForScenario = async (scenarioId: string) => {
   const snapshot = await getDocs(query(collection(db, 'nodes'), where('scenarioId', '==', scenarioId)));
+ console.log('snapshot', snapshot);
+ 
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NodeData));
 };
 

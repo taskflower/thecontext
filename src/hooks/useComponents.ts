@@ -16,9 +16,34 @@ export function useComponents<T = any>(
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Get current application and workspace
   const getCurrentWorkspace = useAppStore((state) => state.getCurrentWorkspace);
+  const getCurrentApplication = useAppStore(
+    (state) => state.getCurrentApplication
+  );
+
   const workspace = getCurrentWorkspace();
-  const tplDirName = workspace?.templateSettings?.tplDir || "default";
+  const app = getCurrentApplication();
+
+  // Try to get tplDir from multiple places in order of priority
+  const getTplDir = () => {
+    if (workspace?.templateSettings?.tplDir) {
+      console.log(
+        "Using tplDir from workspace.templateSettings:",
+        workspace.templateSettings.tplDir
+      );
+      return workspace.templateSettings.tplDir;
+    }
+
+    if (app?.tplDir) {
+      return app.tplDir;
+    }
+
+    console.log("No tplDir found, using default");
+    return "default";
+  };
+
+  const tplDirName = getTplDir();
 
   useEffect(() => {
     const loadComponent = async () => {
@@ -28,48 +53,73 @@ export function useComponents<T = any>(
       setError(null);
 
       try {
-        // Get exact path based on component type
-        let componentPath = "";
-
+        // Get directory path based on component type
+        let componentDir;
         switch (componentType) {
           case "flowStep":
-            componentPath = `/src/templates/${tplDirName}/flowSteps/${componentId}`;
+            componentDir = "flowSteps";
             break;
           case "layout":
-            componentPath = `/src/templates/${tplDirName}/layouts/${componentId}`;
+            componentDir = "layouts";
             break;
           case "widget":
-            componentPath = `/src/templates/${tplDirName}/widgets/${componentId}`;
+            componentDir = "widgets";
             break;
+          default:
+            componentDir = componentType + "s";
         }
 
+        // Build exact paths for both the template directory and default
+        const mainComponentPath = `/src/templates/${tplDirName}/${componentDir}/${componentId}.tsx`;
+        const defaultComponentPath = `/src/templates/default/${componentDir}/${componentId}.tsx`;
+
+        // Get all available modules
         const modules = getModulesByType(componentType);
+        const modulePaths = Object.keys(modules);
+
         let loadedComponent = null;
 
-        // First, try with the exact name
-        if (modules[`${componentPath}.tsx`]) {
+        // First try the specific template directory
+        if (modulePaths.includes(mainComponentPath)) {
           try {
-            const module: any = await modules[`${componentPath}.tsx`]();
+            const module: any = await modules[mainComponentPath]();
             if (module.default) {
               loadedComponent = module.default;
+            } else {
+              console.error(
+                `Module loaded but no default export found at ${mainComponentPath}`
+              );
             }
           } catch (e) {
-            console.error(`Error loading component from ${componentPath}.tsx:`, e);
+            console.error(
+              `Error loading component from ${mainComponentPath}:`,
+              e
+            );
           }
+        } else {
+          console.log(
+            `%c[APP-DEBUG] Component not found at: ${mainComponentPath}`,
+            "background: #80322a; color: #fcfcfc; padding: 5px 10px; border-radius: 4px; border: 1px solid #ad5045;"
+          );
         }
 
-        // If not found and fallback is enabled, try the default template
+        // If component not found and fallback is enabled, try default template
         if (!loadedComponent && fallbackToDefault && tplDirName !== "default") {
-          const defaultPath = componentPath.replace(`/${tplDirName}/`, "/default/");
-          
-          if (modules[`${defaultPath}.tsx`]) {
+          if (modulePaths.includes(defaultComponentPath)) {
             try {
-              const module: any = await modules[`${defaultPath}.tsx`]();
+              const module: any = await modules[defaultComponentPath]();
               if (module.default) {
                 loadedComponent = module.default;
+              } else {
+                console.error(
+                  `Module loaded but no default export found at ${defaultComponentPath}`
+                );
               }
             } catch (e) {
-              console.error(`Error loading default component from ${defaultPath}.tsx:`, e);
+              console.error(
+                `Error loading fallback component from ${defaultComponentPath}:`,
+                e
+              );
             }
           }
         }
@@ -78,8 +128,13 @@ export function useComponents<T = any>(
           setComponent(() => loadedComponent);
         } else {
           const errorMsg = `Component not found: ${componentId} (${componentType})`;
+          console.error(errorMsg, {
+            path:
+              tplDirName !== "default"
+                ? `${mainComponentPath} (fallback: ${defaultComponentPath})`
+                : mainComponentPath,
+          });
           setError(errorMsg);
-          console.error(errorMsg, { path: componentPath });
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err));

@@ -22,7 +22,7 @@
                   "label": "Krok 1: Dane finansowe",
                   "assistantMessage": "Podaj przychody i koszty projektu:",
                   "contextPath": "financial-data",
-                  "tplFile": "formStep",
+                  "tplFile": "formStep",  
                   "order": 0,
                   "attrs": {
                     "schemaPath": "schemas.form.finance"

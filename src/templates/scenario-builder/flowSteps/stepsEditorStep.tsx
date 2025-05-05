@@ -23,8 +23,6 @@ const StepsEditorStep: React.FC<FlowStepProps> = ({
     isLoading,
     error,
     processedAssistantMessage,
-    getContextPath,
-    updateContextPath,
     handleBack,
     handleNext
   } = useFlow({
@@ -40,27 +38,81 @@ const StepsEditorStep: React.FC<FlowStepProps> = ({
   const [editingStepIndex, setEditingStepIndex] = useState<number | null>(null);
   const [newStep, setNewStep] = useState<StepData | null>(null);
 
-  // Pobierz kroki z kontekstu
+  // Pobierz kroki z kontekstu - używając node.attrs?.dataPath
   useEffect(() => {
-    if (node?.attrs?.dataPath) {
-      const stepsFromContext = getContextPath(node.attrs.dataPath);
-      if (stepsFromContext && Array.isArray(stepsFromContext)) {
-        // Upewnij się, że każdy krok ma unikalny ID
-        const stepsWithIds = stepsFromContext.map((step, index) => ({
-          ...step,
-          id: step.id || `step-${Date.now()}-${index}`
-        }));
-        setSteps(stepsWithIds);
+    const loadStepsData = async () => {
+      if (!node?.attrs?.dataPath) return;
+      
+      try {
+        // Sprawdź, czy mamy dane w atrybutach węzła
+        if (node.attrs.data) {
+          console.log("Loading steps from node.attrs.data");
+          const stepsData = node.attrs.data;
+          if (Array.isArray(stepsData)) {
+            const stepsWithIds = stepsData.map((step, index) => ({
+              ...step,
+              id: step.id || `step-${Date.now()}-${index}`
+            }));
+            setSteps(stepsWithIds);
+          }
+        } 
+        // Jeśli nie mamy bezpośrednich danych, próbujemy znaleźć je w kontekście
+        else if (window && window.appContext && typeof window.appContext.getContextPath === 'function') {
+          console.log("Loading steps from global appContext");
+          const stepsFromContext = window.appContext.getContextPath(node.attrs.dataPath);
+          if (stepsFromContext && Array.isArray(stepsFromContext)) {
+            const stepsWithIds = stepsFromContext.map((step, index) => ({
+              ...step,
+              id: step.id || `step-${Date.now()}-${index}`
+            }));
+            setSteps(stepsWithIds);
+          }
+        }
+        // Użyj przykładowych danych, jeśli nic innego nie zadziała
+        else {
+          console.log("Using example steps data");
+          // Przykładowe dane dla trybu development
+          const exampleSteps = [
+            {
+              id: "step-1",
+              label: "Krok 1: Formularz",
+              type: "formStep",
+              description: "Zbieranie danych od użytkownika",
+              contextPath: "step-1-data"
+            },
+            {
+              id: "step-2",
+              label: "Krok 2: Analiza",
+              type: "llmStep",
+              description: "Analiza zebranych danych",
+              contextPath: "step-2-data"
+            }
+          ];
+          setSteps(exampleSteps);
+          console.warn("getContextPath is not available. Using example data for development.");
+        }
+      } catch (err) {
+        console.error("Error loading steps data:", err);
       }
-    }
-  }, [node?.attrs?.dataPath, getContextPath]);
+    };
+
+    loadStepsData();
+  }, [node?.attrs?.dataPath]);
 
   // Zapisz kroki do kontekstu przy każdej zmianie
   useEffect(() => {
     if (node?.contextPath && steps.length > 0) {
-      updateContextPath(node.contextPath, steps);
+      try {
+        if (window && window.appContext && typeof window.appContext.updateContextPath === 'function') {
+          window.appContext.updateContextPath(node.contextPath, steps);
+        } else {
+          console.warn("updateContextPath is not available. Changes will not be saved to context.");
+        }
+      } catch (err) {
+        console.error("Error saving steps to context:", err);
+      }
     }
-  }, [steps, node?.contextPath, updateContextPath]);
+  }, [steps, node?.contextPath]);
 
   // Obsługa dodawania nowego kroku
   const handleAddStep = () => {
