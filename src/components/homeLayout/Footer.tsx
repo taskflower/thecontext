@@ -1,8 +1,8 @@
-import { useNavigate } from "react-router-dom";
-import { Github, Twitter, Users } from "lucide-react";
 
-const Footer = ({ user }: any) => {
-  const navigate = useNavigate();
+import { Github, Twitter} from "lucide-react";
+
+const Footer = () => {
+
 
   return (
     <footer className="border-t border-border bg-background/80 backdrop-blur-sm mt-auto">
@@ -29,15 +29,7 @@ const Footer = ({ user }: any) => {
             >
               <Twitter className="w-5 h-5" />
             </button>
-            {user && (
-              <button
-                onClick={() => navigate("/admin")}
-                className="inline-flex items-center justify-center h-10 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium shadow hover:bg-primary/90 transition"
-              >
-                <Users className="w-4 h-4 mr-2" />
-                Admin Panel
-              </button>
-            )}
+            
           </div>
         </div>
       </div>

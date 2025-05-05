@@ -6,10 +6,7 @@ import {
   List, 
   Database, 
   X, 
-  Users, 
-  ChevronDown,
-  ChevronRight,
-  Layers,
+
   Settings
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -19,6 +16,8 @@ import { useAppStore } from "@/hooks";
 import ContextTab from "./tabs/ContextTab";
 import LogsTab from "./tabs/LogsTab";
 import ScenarioTab from "./tabs/ScenarioTab";
+
+import AppManager from "../admin/components/AppManager";
 
 export const EnhancedFlowDebugger = () => {
   const navigate = useNavigate();
@@ -177,12 +176,12 @@ export const EnhancedFlowDebugger = () => {
   if (!isVisible) {
     return (
       <button
-        className="fixed right-3 bottom-3 z-50 px-3 py-2 text-xs rounded-md bg-white text-gray-900 font-medium flex items-center shadow-md border border-gray-200 hover:bg-gray-50 transition-colors"
+        className="fixed right-6 bottom-6 z-50 px-3 py-2 text-xs rounded-md bg-white text-gray-900 font-medium flex items-center shadow-md border border-gray-200 hover:bg-gray-50 transition-colors"
         onClick={toggleDebugger}
         title="Ctrl+Shift+D aby włączyć/wyłączyć debugger"
       >
-        <Database className="w-4 h-4 mr-1.5" />
-        Debugger
+        <Settings className="w-4 h-4 mr-1.5" />
+        App Inspector
       </button>
     );
   }
@@ -245,11 +244,15 @@ export const EnhancedFlowDebugger = () => {
             Scenariusz
           </button>
           <button
-            className={`px-4 py-2.5 text-sm font-medium flex items-center transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50`}
-            onClick={() => navigate('/admin')}
+            className={`px-4 py-2.5 text-sm font-medium flex items-center transition-colors ${
+              activeTab === "admin"
+                ? "border-b-2 border-blue-600 text-blue-600"
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+            }`}
+            onClick={() => handleTabChange("admin")}
           >
-            <Users className="w-4 h-4 mr-2" />
-            Admin panel
+            <Settings className="w-4 h-4 mr-2" />
+            Panel Admin
           </button>
         </div>
       </div>
@@ -275,6 +278,9 @@ export const EnhancedFlowDebugger = () => {
             currentScenario={currentScenario}
             currentWorkspace={currentWorkspace}
           />
+        )}
+        {activeTab === "admin" && (
+          <AppManager />
         )}
       </div>
 

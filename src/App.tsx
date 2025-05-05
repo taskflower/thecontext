@@ -13,9 +13,6 @@ const FlowView = lazy(() => import("./views/FlowView"));
 const LoginView = lazy(() => import("./views/LoginView"));
 const ApplicationView = lazy(() => import("./views/ApplicationView"));
 const WorkspaceView = lazy(() => import("./views/WorkspaceView"));
-const AdminPanelView = lazy(() => import("./_modules/admin/AdminPanelView"));
-
-import { AuthWrapper } from "./_auth/AuthWrapper";
 import SharedLoader from "./components/SharedLoader";
 import { AuthProvider } from "./hooks";
 import ScenarioView from "./views/ScenarioView";
@@ -45,15 +42,7 @@ const App = () => (
             {/* Auth routes */}
             <Route path="/login" element={<LoginView />} />
 
-            {/* Admin Panel - separate subpage */}
-            <Route
-              path="/admin"
-              element={
-                <AuthWrapper>
-                  <AdminPanelView />
-                </AuthWrapper>
-              }
-            />
+           
 
             {/* New flow with applications */}
             <Route element={<Outlet />}>
