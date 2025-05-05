@@ -1,10 +1,14 @@
 // src/hooks/useAppStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { doc, getDoc, collection, getDocs, query, where } from '@firebase/firestore';
-import { db } from '@/_firebase/config';
 import { Application, Workspace, Scenario, NodeData } from '@/types';
 import { getValueByPath, setValueByPath, processTemplate as procTemplate, updateItemInList } from '@/utils';
+import { 
+  applicationService, 
+  workspaceService, 
+  scenarioService, 
+  nodeService 
+} from '@/_firebase/services';
 
 interface State {
   loading: { application: boolean; workspace: boolean; scenario: boolean };
@@ -37,30 +41,6 @@ interface State {
   getCurrentNode: () => NodeData | undefined;
 }
 
-// Pomocnicze funkcje
-const sortNodes = (nodes: NodeData[]) => [...nodes].sort((a, b) => {
-  if (a.order !== undefined && b.order !== undefined) return a.order - b.order;
-  if (a.order !== undefined) return -1;
-  if (b.order !== undefined) return 1;
-  return 0;
-});
-
-const fetchNodesForScenario = async (scenarioId: string) => {
-  const snapshot = await getDocs(query(collection(db, 'nodes'), where('scenarioId', '==', scenarioId)));
- console.log('snapshot', snapshot);
- 
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NodeData));
-};
-
-const fetchScenariosForWorkspace = async (workspaceId: string) => {
-  const snapshot = await getDocs(query(collection(db, 'scenarios'), where('workspaceId', '==', workspaceId)));
-  return Promise.all(snapshot.docs.map(async doc => {
-    const scenario = { id: doc.id, ...doc.data() } as Scenario;
-    scenario.nodes = sortNodes(await fetchNodesForScenario(scenario.id));
-    return scenario;
-  }));
-};
-
 // Store z persystencją
 export const useAppStore = create<State>()(
   persist((set, get) => ({
@@ -78,8 +58,9 @@ export const useAppStore = create<State>()(
     fetchApplications: async () => {
       try {
         set(state => ({ ...state, loading: { ...state.loading, application: true }, error: null }));
-        const snapshot = await getDocs(collection(db, 'applications'));
-        const applications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Application));
+        
+        const applications = await applicationService.getAll();
+        
         set(state => ({
           ...state,
           data: { ...state.data, applications },
@@ -99,17 +80,21 @@ export const useAppStore = create<State>()(
         set(state => ({ ...state, loading: { ...state.loading, application: true }, error: null }));
         
         // Pobierz aplikację
-        const appDoc = await getDoc(doc(db, 'applications', id));
-        if (!appDoc.exists()) throw new Error(`Aplikacja ${id} nie znaleziona`);
-        const app = { id: appDoc.id, ...appDoc.data() } as Application;
+        const app = await applicationService.getById(id);
+        if (!app) throw new Error(`Aplikacja ${id} nie znaleziona`);
         
         // Pobierz workspaces dla aplikacji
-        const wsSnapshot = await getDocs(query(collection(db, 'workspaces'), where('applicationId', '==', id)));
-        const workspaces = await Promise.all(wsSnapshot.docs.map(async wsDoc => {
-          const workspace = { id: wsDoc.id, ...wsDoc.data() } as Workspace;
-          workspace.scenarios = await fetchScenariosForWorkspace(workspace.id);
-          return workspace;
-        }));
+        const workspaces = await workspaceService.getAllByApplication(id);
+        
+        // Pobierz scenariusze i węzły dla każdego workspace
+        for (const workspace of workspaces) {
+          workspace.scenarios = await scenarioService.getAllByWorkspace(workspace.id);
+          
+          // Pobierz węzły dla każdego scenariusza
+          for (const scenario of workspace.scenarios) {
+            scenario.nodes = await nodeService.getAllByScenario(scenario.id);
+          }
+        }
         
         // Aktualizuj store
         const appWithWorkspaces = { ...app, workspaces };
@@ -152,13 +137,18 @@ export const useAppStore = create<State>()(
       try {
         set(state => ({ ...state, loading: { ...state.loading, workspace: true }, error: null }));
         
-        // Pobierz wszystkie workspaces
-        const wsSnapshot = await getDocs(collection(db, 'workspaces'));
-        const workspaces = await Promise.all(wsSnapshot.docs.map(async wsDoc => {
-          const workspace = { id: wsDoc.id, ...wsDoc.data() } as Workspace;
-          workspace.scenarios = await fetchScenariosForWorkspace(workspace.id);
-          return workspace;
-        }));
+        // Pobierz wszystkie workspaces z pełnymi danymi
+        const workspaces = await workspaceService.getAll();
+        
+        // Pobierz scenariusze i węzły dla każdego workspace
+        for (const workspace of workspaces) {
+          workspace.scenarios = await scenarioService.getAllByWorkspace(workspace.id);
+          
+          // Pobierz węzły dla każdego scenariusza
+          for (const scenario of workspace.scenarios) {
+            scenario.nodes = await nodeService.getAllByScenario(scenario.id);
+          }
+        }
         
         // Aktualizuj store
         const contexts = { ...get().data.contexts };
@@ -196,10 +186,16 @@ export const useAppStore = create<State>()(
         set(state => ({ ...state, loading: { ...state.loading, workspace: true }, error: null }));
         
         // Pobierz workspace
-        const wsDoc = await getDoc(doc(db, 'workspaces', id));
-        if (!wsDoc.exists()) throw new Error(`Workspace ${id} nie znaleziony`);
-        const workspace = { id: wsDoc.id, ...wsDoc.data() } as Workspace;
-        workspace.scenarios = await fetchScenariosForWorkspace(id);
+        const workspace = await workspaceService.getById(id);
+        if (!workspace) throw new Error(`Workspace ${id} nie znaleziony`);
+        
+        // Pobierz scenariusze dla workspace
+        workspace.scenarios = await scenarioService.getAllByWorkspace(id);
+        
+        // Pobierz węzły dla każdego scenariusza
+        for (const scenario of workspace.scenarios) {
+          scenario.nodes = await nodeService.getAllByScenario(scenario.id);
+        }
         
         // Aktualizuj store
         const contexts = { ...get().data.contexts };
