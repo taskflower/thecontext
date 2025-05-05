@@ -22,13 +22,7 @@ export const ScenarioTab: React.FC<ScenarioTabProps> = ({
           <h3 className="text-lg font-semibold text-gray-800">
             Informacje o scenariuszu
           </h3>
-          <button 
-            onClick={() => navigate('/generator')}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md flex items-center transition-colors"
-          >
-            <Wand2 className="w-4 h-4 mr-2" />
-            Generator scenariuszy
-          </button>
+         
         </div>
 
         <div className="space-y-4 overflow-auto pb-4">

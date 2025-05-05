@@ -3,19 +3,22 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/hooks";
 import { applicationService, importService } from "@/_firebase/services";
 import { Application } from "@/types";
+import { Database, FileJson, Trash2, RefreshCw, Check, X } from "lucide-react";
 
 const AppManager: React.FC = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [jsonFile, setJsonFile] = useState<File | null>(null);
+  const [fileContent, setFileContent] = useState<any>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
   const [deleteInProgress, setDeleteInProgress] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const { user } = useAuth();
 
-  // Pobieranie listy aplikacji
+  // Fetch applications list
   const fetchApplications = async () => {
     try {
       setIsLoading(true);
@@ -25,25 +28,39 @@ const AppManager: React.FC = () => {
       setApplications(appList);
     } catch (err) {
       console.error("Error fetching applications:", err);
-      setError("Nie udało się pobrać listy aplikacji");
+      setError("Failed to fetch applications list");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Ładowanie listy przy montowaniu komponentu
+  // Load list on component mount
   useEffect(() => {
     fetchApplications();
   }, []);
 
-  // Obsługa przesyłania pliku JSON
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle JSON file upload
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setJsonFile(file);
     setUploadSuccess(null);
+    
+    if (file) {
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        setFileContent(data);
+      } catch (err) {
+        console.error("Error parsing JSON file:", err);
+        setError("Invalid JSON file format");
+        setFileContent(null);
+      }
+    } else {
+      setFileContent(null);
+    }
   };
 
-  // Obsługa importu danych z JSON
+  // Handle data import from JSON
   const handleImport = async () => {
     if (!jsonFile || !user) return;
 
@@ -52,71 +69,70 @@ const AppManager: React.FC = () => {
       setError(null);
       setUploadSuccess(null);
 
-      // Czytanie zawartości pliku
-      const fileContent = await jsonFile.text();
-      const jsonData = JSON.parse(fileContent);
-
-      // Sprawdzenie czy dane mają poprawny format
-      if (!Array.isArray(jsonData)) {
-        throw new Error(
-          "Niepoprawny format danych. Oczekiwana tablica aplikacji."
-        );
+      // Using the pre-parsed content
+      if (!fileContent || !Array.isArray(fileContent)) {
+        throw new Error("Invalid data format. Expected an array of applications.");
       }
 
-      // Import danych do Firebase
+      // Import data to Firebase
       const result = await importService.seedFirestoreFromData(
         user.uid,
-        jsonData
+        fileContent
       );
 
       setUploadSuccess(
-        `Pomyślnie zaimportowano dane. ID aplikacji: ${result.applicationId}`
+        `Successfully imported data. Application ID: ${result.applicationId}`
       );
 
-      // Odświeżenie listy aplikacji
+      // Refresh applications list
       await fetchApplications();
     } catch (err) {
       console.error("Error importing data:", err);
       setError(
-        `Błąd importu: ${err instanceof Error ? err.message : "Nieznany błąd"}`
+        `Import error: ${err instanceof Error ? err.message : "Unknown error"}`
       );
     } finally {
       setIsUploading(false);
     }
   };
 
-  // Usuwanie aplikacji
+  // Handle application delete
   const handleDeleteApp = async (appId: string) => {
-    if (
-      !user ||
-      !confirm(
-        "Czy na pewno chcesz usunąć tę aplikację i wszystkie powiązane dane?"
-      )
-    ) {
+    if (!user) return;
+    
+    // If not yet confirmed, set the confirm state
+    if (confirmDeleteId !== appId) {
+      setConfirmDeleteId(appId);
       return;
     }
-
+    
     try {
       setDeleteInProgress(appId);
+      setConfirmDeleteId(null);
 
-      // Używamy naszego serwisu do usunięcia aplikacji wraz z powiązanymi danymi
+      // Use the service to delete the application and related data
       await applicationService.delete(appId);
 
-      // Odśwież listę
+      // Refresh the list
       await fetchApplications();
     } catch (err) {
       console.error("Error deleting application:", err);
       setError(
-        `Błąd usuwania: ${err instanceof Error ? err.message : "Nieznany błąd"}`
+        `Delete error: ${err instanceof Error ? err.message : "Unknown error"}`
       );
     } finally {
       setDeleteInProgress(null);
     }
   };
 
-  // Formatowanie daty
+  // Cancel delete confirmation
+  const cancelDelete = () => {
+    setConfirmDeleteId(null);
+  };
+
+  // Format date
   const formatDate = (date: Date) => {
-    return date.toLocaleString("pl-PL", {
+    return date.toLocaleString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -126,121 +142,172 @@ const AppManager: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Zarządzanie aplikacjami</h2>
-        <button
-          onClick={fetchApplications}
-          className="px-3 py-1 bg-slate-200 hover:bg-slate-300 rounded-md transition-colors"
-          disabled={isLoading}
-        >
-          {isLoading ? "Ładowanie..." : "Odśwież"}
-        </button>
-      </div>
+    <div className="p-4 h-full overflow-auto">
+      <div className="flex flex-col space-y-4 h-full">
+        {/* File Upload Section */}
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+          <div className="border-b border-gray-200 px-4 py-3 flex justify-between items-center">
+            <h3 className="text-sm font-medium flex items-center text-gray-800">
+              <FileJson className="w-4 h-4 mr-2 text-blue-600" />
+              Import JSON Data
+            </h3>
+            <button
+              onClick={fetchApplications}
+              className="p-1 rounded-md hover:bg-gray-100 text-gray-700 flex items-center text-xs"
+              disabled={isLoading}
+            >
+              <RefreshCw className={`w-3.5 h-3.5 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+              {isLoading ? "Loading..." : "Refresh"}
+            </button>
+          </div>
+          <div className="p-3">
+            <div className="mb-3">
+              <label 
+                htmlFor="file-upload" 
+                className="flex items-center justify-center border-2 border-dashed border-gray-300 rounded-md p-3 w-full cursor-pointer hover:bg-gray-50 transition-colors"
+              >
+                <input
+                  id="file-upload"
+                  type="file"
+                  accept=".json"
+                  onChange={handleFileChange}
+                  className="sr-only"
+                  disabled={isUploading}
+                />
+                <div className="text-center">
+                  <FileJson className="mx-auto h-6 w-6 text-gray-400 mb-1" />
+                  <p className="text-xs font-medium text-gray-700">Click to upload or drag and drop</p>
+                  <p className="text-xs text-gray-500 mt-0.5">JSON files only</p>
+                </div>
+              </label>
+            </div>
 
-      {/* Sekcja importu */}
-      <div className="p-6 border border-slate-200 rounded-lg bg-white">
-        <h3 className="text-xl font-semibold mb-4">Import aplikacji z JSON</h3>
+            {jsonFile && (
+              <div className="mb-3 p-2 bg-blue-50 border border-blue-100 rounded-md text-xs">
+                <p className="text-blue-700 flex items-center">
+                  <FileJson className="mr-1.5 h-3.5 w-3.5" />
+                  <span className="font-medium">{jsonFile.name}</span>
+                </p>
+                {fileContent && (
+                  <p className="text-blue-600/80 mt-1 text-xs">
+                    File contains {Array.isArray(fileContent) ? fileContent.length : "unknown number of"} applications
+                  </p>
+                )}
+              </div>
+            )}
 
-        <div className="flex gap-4 items-center">
-          <input
-            type="file"
-            accept=".json"
-            onChange={handleFileChange}
-            className="flex-1 border border-slate-300 rounded-md p-2"
-            disabled={isUploading}
-          />
+            <button
+              onClick={handleImport}
+              disabled={!jsonFile || isUploading}
+              className="w-full h-8 px-3 rounded-md bg-blue-600 text-white text-xs font-medium shadow hover:bg-blue-700 transition disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center justify-center"
+            >
+              {isUploading ? (
+                <>
+                  <RefreshCw className="animate-spin w-3.5 h-3.5 mr-1.5" />
+                  Importing...
+                </>
+              ) : (
+                "Import Data"
+              )}
+            </button>
 
-          <button
-            onClick={handleImport}
-            disabled={!jsonFile || isUploading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed"
-          >
-            {isUploading ? "Importowanie..." : "Importuj dane"}
-          </button>
+            {uploadSuccess && (
+              <div className="mt-2 p-2 bg-green-50 text-green-700 border border-green-100 rounded-md text-xs flex items-start">
+                <Check className="w-3.5 h-3.5 mr-1.5 mt-0.5 flex-shrink-0" />
+                <span>{uploadSuccess}</span>
+              </div>
+            )}
+
+            {error && (
+              <div className="mt-2 p-2 bg-red-50 text-red-700 border border-red-100 rounded-md text-xs flex items-start">
+                <X className="w-3.5 h-3.5 mr-1.5 mt-0.5 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+          </div>
         </div>
 
-        {uploadSuccess && (
-          <div className="mt-3 p-3 bg-green-50 text-green-700 border border-green-200 rounded">
-            {uploadSuccess}
+        {/* Applications List */}
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden flex-1">
+          <div className="border-b border-gray-200 px-4 py-3">
+            <h3 className="text-sm font-medium flex items-center text-gray-800">
+              <Database className="w-4 h-4 mr-2 text-blue-600" />
+              Applications List ({applications.length})
+            </h3>
           </div>
-        )}
-      </div>
-
-      {/* Komunikat o błędzie */}
-      {error && (
-        <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
-          {error}
-        </div>
-      )}
-
-      {/* Lista aplikacji */}
-      <div className="p-6 border border-slate-200 rounded-lg bg-white">
-        <h3 className="text-xl font-semibold mb-4">Lista aplikacji</h3>
-
-        {isLoading ? (
-          <div className="flex justify-center p-8">
-            <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
-          </div>
-        ) : applications.length === 0 ? (
-          <div className="text-center p-8 text-slate-500">
-            Brak aplikacji w bazie danych
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200">
-              <thead className="bg-slate-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Nazwa
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Opis
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Data utworzenia
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Utworzono przez
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Akcje
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-slate-200">
+          
+          <div className="p-0.5 max-h-80 overflow-y-auto">
+            {isLoading ? (
+              <div className="flex justify-center p-6">
+                <div className="animate-spin h-6 w-6 border-3 border-blue-500 border-t-transparent rounded-full"></div>
+              </div>
+            ) : applications.length === 0 ? (
+              <div className="text-center p-6 text-gray-500 text-sm">
+                No applications in the database
+              </div>
+            ) : (
+              <div className="space-y-0.5">
                 {applications.map((app) => (
-                  <tr key={app.id} className="hover:bg-slate-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="font-medium text-slate-900">
-                        {app.name}
+                  <div 
+                    key={app.id} 
+                    className="p-3 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="font-medium text-sm text-gray-800">
+                          {app.name}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-0.5">
+                          {app.description || "No description"}
+                        </div>
+                        <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-500">
+                          <div>
+                            ID: <span className="font-mono">{app.id}</span>
+                          </div>
+                          <div>
+                            Created: {formatDate(app.createdAt ?? new Date())}
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-xs text-slate-500">ID: {app.id}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      {app.description || "Brak opisu"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {formatDate(app.createdAt ?? new Date())}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap truncate max-w-[200px]">
-                      {app.createdBy || "Nieznany"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <button
-                        onClick={() => handleDeleteApp(app.id)}
-                        disabled={deleteInProgress === app.id}
-                        className="text-red-600 hover:text-red-900 disabled:text-red-300 disabled:cursor-not-allowed"
-                      >
-                        {deleteInProgress === app.id ? "Usuwanie..." : "Usuń"}
-                      </button>
-                    </td>
-                  </tr>
+                      
+                      <div>
+                        {confirmDeleteId === app.id ? (
+                          <div className="flex gap-1">
+                            <button
+                              onClick={() => handleDeleteApp(app.id)}
+                              disabled={deleteInProgress === app.id}
+                              className="p-1.5 rounded-md bg-red-600 text-white text-xs hover:bg-red-700 transition-colors disabled:bg-red-300"
+                            >
+                              Confirm
+                            </button>
+                            <button
+                              onClick={cancelDelete}
+                              className="p-1.5 rounded-md bg-gray-200 text-gray-700 text-xs hover:bg-gray-300 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => handleDeleteApp(app.id)}
+                            disabled={deleteInProgress === app.id}
+                            className="p-1.5 rounded-md hover:bg-red-100 text-red-600 transition-colors disabled:text-red-300 flex items-center"
+                          >
+                            {deleteInProgress === app.id ? (
+                              <RefreshCw className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

@@ -56,7 +56,7 @@
                         "title": "Wyniki analizy finansowej"
                       },
                       {
-                        "tplFile": "Stats",
+                        "tplFile": "WidgetsStep",
                         "title": "Dane finansowe",
                         "description": "Wartości wprowadzone przez użytkownika",
                         "dataPaths": {

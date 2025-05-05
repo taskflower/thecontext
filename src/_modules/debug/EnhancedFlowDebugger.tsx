@@ -7,7 +7,8 @@ import {
   Database, 
   X, 
 
-  Settings
+
+  AppWindowMac
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/hooks";
@@ -180,7 +181,7 @@ export const EnhancedFlowDebugger = () => {
         onClick={toggleDebugger}
         title="Ctrl+Shift+D aby włączyć/wyłączyć debugger"
       >
-        <Settings className="w-4 h-4 mr-1.5" />
+        <AppWindowMac className="w-4 h-4 mr-1.5" />
         App Inspector
       </button>
     );
@@ -192,8 +193,8 @@ export const EnhancedFlowDebugger = () => {
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center">
         <div className="font-semibold flex items-center">
-          <Database className="w-4 h-4 mr-2" />
-          Flow Debugger
+          <AppWindowMac className="w-4 h-4 mr-2" />
+          App Inspector
           <span className="ml-2 text-xs bg-gray-100 rounded-full px-2 py-0.5 text-gray-700">v2.0</span>
         </div>
         <div className="flex space-x-1">
@@ -251,8 +252,8 @@ export const EnhancedFlowDebugger = () => {
             }`}
             onClick={() => handleTabChange("admin")}
           >
-            <Settings className="w-4 h-4 mr-2" />
-            Panel Admin
+            <AppWindowMac className="w-4 h-4 mr-2" />
+            Applications
           </button>
         </div>
       </div>
