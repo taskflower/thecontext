@@ -61,9 +61,19 @@ const FormStepTemplate: React.FC<FlowStepProps> = ({
             className="flex h-12 w-full bg-transparent px-3 py-2 text-base text-gray-900 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             <option value="">Wybierz...</option>
-            {options.map((option: string) => (
-              <option key={option} value={option}>{option}</option>
-            ))}
+            {Array.isArray(options) && options.map((option, index) => {
+              // Ensure option is a string and use a unique key
+              const optionValue = typeof option === 'object' ? JSON.stringify(option) : String(option);
+              const optionText = typeof option === 'object' ? 
+                (option.label || option.name || JSON.stringify(option)) : 
+                String(option);
+              
+              return (
+                <option key={`${name}-option-${index}`} value={optionValue}>
+                  {optionText}
+                </option>
+              );
+            })}
           </select>
         </div>
       );

@@ -96,7 +96,7 @@ export const ScenarioView: React.FC = () => {
     component: FlowStepComponent,
     error: flowStepError,
     isLoading: flowStepLoading,
-  } = useComponents("flowStep", currentNode?.tplFile || "form-step");
+  } = useComponents("flowStep", currentNode?.tplFile || "formStep");
 
   // Stany ładowania i błędów
   const combinedLoading =

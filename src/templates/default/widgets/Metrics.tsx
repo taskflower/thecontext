@@ -1,4 +1,4 @@
-// src/tpl/minimal/widgets/MetricsWidget.tsx
+// src/templates/default/widgets/Metrics.tsx
 import React from "react";
 import { MetricsWidgetProps, MetricItem } from "../types";
 
@@ -13,14 +13,14 @@ const MetricsWidget: React.FC<MetricsWidgetProps> = ({
     : Array.isArray(data) 
       ? data.map(item => ({
         label: item.label || item.name || "",
-        value: item.value || 0,
+        value: item.value !== undefined ? String(item.value) : "",
         prefix: item.prefix || "",
         suffix: item.suffix || "",
         change: item.change,
       }))
       : Object.entries(data || {}).map(([key, value]) => ({
         label: key,
-        value: value as any,
+        value: value !== undefined ? String(value) : "",
         prefix: "",
         suffix: "",
       }));

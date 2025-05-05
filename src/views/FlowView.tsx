@@ -39,7 +39,7 @@ export const FlowView: React.FC = () => {
     component: FlowStepComponent,
     error: flowStepError,
     isLoading: componentLoading,
-  } = useComponents("flowStep", currentNode?.tplFile || "form-step"); // Zmienione z template na tplFile
+  } = useComponents("flowStep", currentNode?.tplFile || "formStep"); // Zmienione z template na tplFile
 
   // Stany ładowania i błędów
   const isLoading = layoutLoading || componentLoading;

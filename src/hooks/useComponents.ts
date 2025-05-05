@@ -18,7 +18,7 @@ export function useComponents<T = any>(
 
   const getCurrentWorkspace = useAppStore((state) => state.getCurrentWorkspace);
   const workspace = getCurrentWorkspace();
-  const tplDirName = workspace?.templateSettings?.tplDir || "default"; // Zmienione z template na tplDir
+  const tplDirName = workspace?.templateSettings?.tplDir || "default";
 
   useEffect(() => {
     const loadComponent = async () => {
@@ -28,49 +28,48 @@ export function useComponents<T = any>(
       setError(null);
 
       try {
-        // Określ podstawową ścieżkę do komponentu w zależności od typu
-        let tplPath = "";
+        // Get exact path based on component type
+        let componentPath = "";
 
         switch (componentType) {
           case "flowStep":
-            tplPath = `/src/templates/${tplDirName}/flowSteps/${componentId}.tsx`;
+            componentPath = `/src/templates/${tplDirName}/flowSteps/${componentId}`;
             break;
           case "layout":
-            tplPath = `/src/templates/${tplDirName}/layouts/${componentId}.tsx`;
+            componentPath = `/src/templates/${tplDirName}/layouts/${componentId}`;
             break;
           case "widget":
-            tplPath = `/src/templates/${tplDirName}/widgets/${componentId}.tsx`;
+            componentPath = `/src/templates/${tplDirName}/widgets/${componentId}`;
             break;
         }
 
-        const mds = getModulesByType(componentType);
+        const modules = getModulesByType(componentType);
         let loadedComponent = null;
 
-        if (mds[tplPath]) {
+        // First, try with the exact name
+        if (modules[`${componentPath}.tsx`]) {
           try {
-            const md: any = await mds[tplPath]();
-            if (md.default) {
-              loadedComponent = md.default;
+            const module: any = await modules[`${componentPath}.tsx`]();
+            if (module.default) {
+              loadedComponent = module.default;
             }
           } catch (e) {
-            console.error(`Error loading component from ${tplPath}:`, e);
+            console.error(`Error loading component from ${componentPath}.tsx:`, e);
           }
         }
 
+        // If not found and fallback is enabled, try the default template
         if (!loadedComponent && fallbackToDefault && tplDirName !== "default") {
-          const defaultPath = tplPath.replace(`/${tplDirName}/`, "/default/");
-
-          if (mds[defaultPath]) {
+          const defaultPath = componentPath.replace(`/${tplDirName}/`, "/default/");
+          
+          if (modules[`${defaultPath}.tsx`]) {
             try {
-              const md: any = await mds[defaultPath]();
-              if (md.default) {
-                loadedComponent = md.default;
+              const module: any = await modules[`${defaultPath}.tsx`]();
+              if (module.default) {
+                loadedComponent = module.default;
               }
             } catch (e) {
-              console.error(
-                `Error loading default component from ${defaultPath}:`,
-                e
-              );
+              console.error(`Error loading default component from ${defaultPath}.tsx:`, e);
             }
           }
         }
@@ -80,7 +79,7 @@ export function useComponents<T = any>(
         } else {
           const errorMsg = `Component not found: ${componentId} (${componentType})`;
           setError(errorMsg);
-          console.error(errorMsg, { path: tplPath });
+          console.error(errorMsg, { path: componentPath });
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err));

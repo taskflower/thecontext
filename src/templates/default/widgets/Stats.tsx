@@ -1,4 +1,4 @@
-// src/templates/default/widgets/StatsWidget.tsx
+// src/templates/default/widgets/Stats.tsx
 import React from "react";
 import { StatsWidgetProps, StatItem } from "../types";
 
@@ -8,19 +8,13 @@ const StatsWidget: React.FC<StatsWidgetProps> = ({
   stats,
   data = {},
 }) => {
-  // Dodany log dla debugowania
-  console.log("StatsWidget - otrzymane dane:", { title, description, stats, data });
-
-  // Konwersja danych na format statystyk
+  // Convert data to stats format
   const statsData: StatItem[] = stats || Object.entries(data).map(([key, value]) => ({
     label: key,
-    value: value as any,
+    value: typeof value === 'object' ? JSON.stringify(value) : String(value),
   }));
 
-  // Dodany log po konwersji
-  console.log("StatsWidget - dane po konwersji:", statsData);
-
-  // Sprawdzanie czy mamy jakiekolwiek dane do wyświetlenia
+  // Check if we have any data to display
   const hasData = statsData && statsData.length > 0;
 
   return (
@@ -35,12 +29,12 @@ const StatsWidget: React.FC<StatsWidgetProps> = ({
       )}
       
       {!hasData ? (
-        // Wyświetl informację, gdy brak danych
+        // Display a message when no data is available
         <div className="p-5 text-center text-gray-500">
           <p>Brak danych do wyświetlenia</p>
         </div>
       ) : (
-        // Wyświetl statystyki
+        // Display statistics
         <div className="grid gap-6 p-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
           {statsData.map((stat, index) => (
             <div key={index} className="flex flex-col">

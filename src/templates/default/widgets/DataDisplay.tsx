@@ -1,4 +1,4 @@
-// src/tpl/minimal/widgets/DataDisplayWidget.tsx
+// src/templates/default/widgets/DataDisplay.tsx
 import React from "react";
 import { DataDisplayWidgetProps } from "../types";
 
@@ -53,9 +53,9 @@ const DataDisplayWidget: React.FC<DataDisplayWidgetProps> = ({
                 onClick={() => onSelect && onSelect(idx.toString())}
               >
                 <span className="mr-2 mt-1.5 h-1.5 w-1.5 rounded-full bg-gray-500 flex-shrink-0"></span>
-                <span className="text-sm text-gray-700">{
-                  typeof item === 'object' ? JSON.stringify(item) : String(item)
-                }</span>
+                <span className="text-sm text-gray-700">
+                  {typeof item === 'object' ? JSON.stringify(item) : String(item)}
+                </span>
               </li>
             ))}
           </ul>

@@ -35,6 +35,11 @@ const SUBJECT_ICONS: Record<string, keyof typeof LucideIcons> = {
   "folder-kanban": "FolderKanban",
   "presentation": "Presentation",
   "school": "School",
+  //
+  "settings": "Settings",
+  "plus-circle": "PlusCircle",
+  "minus-circle": "MinusCircle",
+  "edit": "Edit",
 };
 
 // Interfejs dla właściwości komponentu
