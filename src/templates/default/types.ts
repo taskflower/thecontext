@@ -1,4 +1,4 @@
-// src/tpl/minimal/types.ts
+// src/templates/default/types.ts
 import { WidgetProps } from "@/types";
 
 // Podstawowy typ dla danych karty w CardListWidget

@@ -1,100 +1,59 @@
 // src/components/WidgetRenderer.tsx
-import { useComponents } from "@/hooks";
 import React from "react";
+import { WidgetProps } from "@/types";
+import { useComponents } from "@/hooks";
 
-/**
- * Właściwości dla komponentu WidgetRenderer
- */
-interface WidgetRendererProps {
-  tplFile?: string; // Zmienione z type na tplFile
+interface WidgetRendererProps extends WidgetProps {
+  type?: string;
+  title?: string;
+  description?: string;
   data?: any;
   onSelect?: (id: string) => void;
+  tplFile?: string;  // Dodane właściwość tplFile
   [key: string]: any;
 }
 
-/**
- * Komponent renderujący widget na podstawie jego typu
- *
- * Automatycznie ładuje odpowiedni komponent widget z template
- * i przekazuje do niego dane oraz funkcje obsługi zdarzeń
- */
 const WidgetRenderer: React.FC<WidgetRendererProps> = ({
-  tplFile, // Zmienione z type na tplFile
+  type,
+  tplFile,  // Używamy tplFile zamiast type
+  title,
+  description,
   data,
   onSelect,
   ...rest
 }) => {
-  // Formatowanie nazwy widgetu (może być "cardList", "card-list", "CardList" itp.)
-  // Dodajemy sprawdzenie czy tplFile jest zdefiniowany
-  const widgetId = tplFile ? formatWidgetType(tplFile) : "unknown";
-
-  // Ładowanie komponentu widgetu
+  // Używamy tplFile jako głównego identyfikatora typu komponentu
+  const componentType = tplFile || type || 'default';
+  
   const {
-    component: WidgetComponent,
+    component: Widget,
     error,
     isLoading,
-  } = useComponents("widget", widgetId);
+  } = useComponents("widget", componentType);
 
-  // Jeśli komponent jest w trakcie ładowania
   if (isLoading) {
-    return (
-      <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
-        <div className="flex items-center justify-center">
-          <div className="animate-spin h-5 w-5 border-2 border-gray-900 rounded-full border-t-transparent"></div>
-          <span className="ml-2 text-sm text-gray-600">
-            Ładowanie widgetu...
-          </span>
-        </div>
-      </div>
-    );
+    return <div className="p-4 text-gray-500">Ładowanie widgetu...</div>;
   }
 
-  // Jeśli wystąpił błąd ładowania
-  if (error || !WidgetComponent) {
+  if (error || !Widget) {
     return (
-      <div className="p-4 border border-red-200 rounded-lg bg-red-50">
-        <h3 className="text-sm font-medium text-red-600">
-          Błąd widgetu: {widgetId}
-        </h3>
-        <p className="text-xs text-red-500 mt-1">
-          {error || `Nie znaleziono komponentu widgetu: ${widgetId}`}
+      <div className="p-4 bg-red-50 text-red-600 rounded-md border border-red-200">
+        <p className="font-medium">Błąd ładowania widgetu</p>
+        <p className="text-sm mt-1">
+          Nie znaleziono komponentu typu: {componentType}
         </p>
+        {error && <p className="text-xs mt-2">{error}</p>}
       </div>
     );
   }
 
-  // Renderowanie komponentu widgetu z wszystkimi danymi
-  return <WidgetComponent data={data} onSelect={onSelect} {...rest} />;
+  // Przekazujemy dane również dla CardList, ale będzie ich używał tylko jeśli są potrzebne
+  if (componentType === "CardList") {
+    return <Widget data={data} onSelect={onSelect} {...rest} />;
+  }
+
+  // Dla pozostałych widgetów przekazujemy standardowe props
+  return <Widget title={title} description={description} data={data} onSelect={onSelect} {...rest} />;
 };
-
-/**
- * Formatuje typ widgetu do standardowej postaci
- *
- * Obsługuje różne konwencje nazewnictwa:
- * - cardList, CardList -> CardList
- * - card-list -> CardList
- * - DataDisplayWidget -> DataDisplay
- */
-function formatWidgetType(type: string): string {
-  // Zabezpieczenie przed undefined/null
-  if (!type) return "unknown";
-
-  // Usuń przyrostek "Widget" jeśli istnieje
-  let formatted = type.replace(/Widget$/, "");
-
-  // Przekształć kebab-case na PascalCase
-  if (formatted.includes("-")) {
-    formatted = formatted
-      .split("-")
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join("");
-  }
-  // Przekształć camelCase na PascalCase
-  else if (/^[a-z]/.test(formatted)) {
-    formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
-  }
-
-  return formatted;
-}
 
 export default WidgetRenderer;

@@ -1,4 +1,4 @@
-// src/templates/default/widgets/card-list.tsx
+// src/templates/default/widgets/CardList.tsx
 import React from "react";
 import { SubjectIcon } from "@/components/SubjectIcon";
 import { CardListWidgetProps, CardItem } from "../types";

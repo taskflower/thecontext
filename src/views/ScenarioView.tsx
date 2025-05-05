@@ -50,6 +50,18 @@ export const ScenarioView: React.FC = () => {
     error: widgetsError,
   } = useWidgets(workspaceWidgets);
 
+  // Sprawdzenie, czy wśród widgetów jest już lista scenariuszy
+  const hasScenarioListWidget = useMemo(() => {
+    return workspaceWidgetData.some(widget => 
+      widget.tplFile === "cardList" && 
+      widget.data && 
+      widget.data.some((item: any) => 
+        item.id && 
+        currentWorkspace?.scenarios?.some(scenario => scenario.id === item.id)
+      )
+    );
+  }, [workspaceWidgetData, currentWorkspace?.scenarios]);
+
   // Wybór workspace i scenariusza
   useEffect(() => {
     if (workspaceId) selectWorkspace(workspaceId);
@@ -96,7 +108,7 @@ export const ScenarioView: React.FC = () => {
     component: FlowStepComponent,
     error: flowStepError,
     isLoading: flowStepLoading,
-  } = useComponents("flowStep", currentNode?.tplFile || "formStep");
+  } = useComponents("flowStep", currentNode?.tplFile || "FormStep");
 
   // Stany ładowania i błędów
   const combinedLoading =
@@ -120,6 +132,7 @@ export const ScenarioView: React.FC = () => {
           <div key={`workspace-widget-${index}`}>
             <WidgetRenderer
               type={widget.tplFile} // Używamy tplFile zamiast type
+              tplFile={widget.tplFile} // Dodajemy również tplFile
               title={widget.title}
               description={widget.description}
               data={widget.data}
@@ -157,18 +170,21 @@ export const ScenarioView: React.FC = () => {
     if (!scenarioId) {
       return (
         <div className="space-y-6">
+          {/* Renderuj widgety workspace */}
           {renderWorkspaceWidgets()}
 
-          {CardListComponent ? (
-            <CardListComponent
-              data={scenarioData}
-              onSelect={handleScenarioSelect}
-            />
-          ) : (
+          {/* Renderuj CardListComponent tylko jeśli nie ma już widgetu z listą scenariuszy */}
+          {!hasScenarioListWidget && CardListComponent && (
+            <CardListComponent data={scenarioData} onSelect={handleScenarioSelect} />
+          )}
+
+          {/* Pokaż komunikat ładowania tylko gdy brak widgetów i CardListComponent się ładuje */}
+          {!hasScenarioListWidget && !CardListComponent && (
             <div className="p-4">Ładowanie scenariuszy...</div>
           )}
 
-          {scenarioData.length === 0 && (
+          {/* Pokaż komunikat o braku scenariuszy */}
+          {!hasScenarioListWidget && currentWorkspace?.scenarios?.length === 0 && (
             <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
               <p className="text-yellow-700">
                 Brak dostępnych scenariuszy w tym workspace.

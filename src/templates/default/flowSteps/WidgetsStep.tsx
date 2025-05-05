@@ -74,6 +74,7 @@ const WidgetsStepTemplate: React.FC<FlowStepProps> = ({
             <div key={widget.id || `widget-${index}`} className="mb-6">
               <WidgetRenderer
                 type={widget.type}
+                tplFile={widget.tplFile} // Dodajemy tplFile, który jest używany zamiast type
                 title={widget.title}
                 description={widget.description}
                 data={widget.data}

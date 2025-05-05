@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { useAppStore } from "@/hooks";
 import { WidgetConfig } from "@/types";
+import { resolveContextPath } from "@/utils/context";
+import { getErrorMessage } from "@/utils/errors";
 
 interface ProcessedWidget extends WidgetConfig {
   description?: string;
@@ -17,17 +19,6 @@ export function useWidgets(
   const [error, setError] = useState<string | null>(null);
 
   const { getContextPath, processTemplate } = useAppStore();
-
-  // Ulepszona funkcja sprawdzająca typ ścieżki
-  const resolveContextPath = (path: string): string => {
-    if (!path) return "";
-    // Wykorzystaj prostszą logikę - jeśli ścieżka zawiera kropkę, uznaj ją za absolutną
-    return path.includes(".")
-      ? path
-      : contextBasePath
-      ? `${contextBasePath}.${path}`
-      : path;
-  };
 
   useEffect(() => {
     if (!widgets || widgets.length === 0) return;
@@ -45,10 +36,12 @@ export function useWidgets(
             tplFile: widgetTplFile,
           };
 
-          // Obsługa pojedynczej ścieżki danych - bardziej efektywna
           if (widget.dataPath) {
             try {
-              const fullPath = resolveContextPath(widget.dataPath);
+              const fullPath = resolveContextPath(
+                widget.dataPath,
+                contextBasePath
+              );
               const pathData = getContextPath(fullPath);
               if (pathData !== undefined) {
                 widgetDataObj.data = pathData;
@@ -56,18 +49,17 @@ export function useWidgets(
             } catch (err) {
               console.warn(
                 `Error getting data from path ${widget.dataPath}:`,
-                err
+                getErrorMessage(err)
               );
             }
           }
 
-          // Obsługa wielu ścieżek danych - ulepszona
           if (widget.dataPaths) {
             const mappedData: Record<string, any> = {};
 
             Object.entries(widget.dataPaths).forEach(([key, path]) => {
               try {
-                const fullPath = resolveContextPath(path);
+                const fullPath = resolveContextPath(path, contextBasePath);
                 const pathData = getContextPath(fullPath);
                 if (pathData !== undefined) {
                   mappedData[key] = pathData;
@@ -75,7 +67,7 @@ export function useWidgets(
               } catch (err) {
                 console.warn(
                   `Error getting data from path ${path} for key ${key}:`,
-                  err
+                  getErrorMessage(err)
                 );
               }
             });
@@ -83,7 +75,6 @@ export function useWidgets(
             widgetDataObj.data = mappedData;
           }
 
-          // Przetwarzanie szablonów - zoptymalizowane
           if (widget.title) {
             widgetDataObj.title = processTemplate(widget.title);
           }
@@ -99,7 +90,7 @@ export function useWidgets(
 
         setWidgetData(processedWidgets);
       } catch (err) {
-        setError(err instanceof Error ? err.message : String(err));
+        setError(getErrorMessage(err));
       } finally {
         setIsLoading(false);
       }

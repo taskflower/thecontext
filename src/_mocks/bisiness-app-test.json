@@ -22,7 +22,7 @@
                   "label": "Krok 1: Dane finansowe",
                   "assistantMessage": "Podaj przychody i koszty projektu:",
                   "contextPath": "financial-data",
-                  "tplFile": "formStep",  
+                  "tplFile": "FormStep",  
                   "order": 0,
                   "attrs": {
                     "schemaPath": "schemas.form.finance"
@@ -34,7 +34,7 @@
                   "label": "Krok 2: Obliczanie ROI",
                   "assistantMessage": "Obliczam ROI na podstawie danych...",
                   "contextPath": "roi-results",
-                  "tplFile": "llmStep",
+                  "tplFile": "LlmStep",
                   "order": 1,
                   "attrs": {
                     "autoStart": true,
@@ -47,16 +47,16 @@
                   "label": "Krok 3: Podsumowanie",
                   "assistantMessage": "Oto podsumowanie analizy finansowej projektu:",
                   "contextPath": "summary-data",
-                  "tplFile": "widgetsStep",
+                  "tplFile": "WidgetsStep",
                   "order": 2,
                   "attrs": {
                     "widgets": [
                       {
-                        "tplFile": "title",
+                        "tplFile": "Title",
                         "title": "Wyniki analizy finansowej"
                       },
                       {
-                        "tplFile": "stats",
+                        "tplFile": "Stats",
                         "title": "Dane finansowe",
                         "description": "Wartości wprowadzone przez użytkownika",
                         "dataPaths": {
@@ -65,7 +65,7 @@
                         }
                       },
                       {
-                        "tplFile": "metrics",
+                        "tplFile": "Metrics",
                         "title": "Wyniki analizy",
                         "dataPaths": {
                           "ROI": "roi-results.roi",
@@ -73,7 +73,7 @@
                         }
                       },
                       {
-                        "tplFile": "info",
+                        "tplFile": "Info",
                         "title": "Opłacalność projektu",
                         "dataPath": "roi-results.profitability",
                         "variant": "info"
@@ -85,10 +85,10 @@
             }
           ],
           "templateSettings": {
-            "layoutFile": "simple",
+            "layoutFile": "Simple",
             "widgets": [
               {
-                "tplFile": "info",
+                "tplFile": "Info",
                 "data": {
                   "title": "Analiza Finansowa",
                   "description": "Wybierz scenariusz do uruchomienia",
@@ -96,7 +96,7 @@
                 }
               },
               {
-                "tplFile": "stats",
+                "tplFile": "Stats",
                 "title": "Ostatnia analiza",
                 "description": "Dane z ostatnio przeprowadzonej analizy",
                 "dataPaths": {

@@ -1,5 +1,5 @@
 // src/templates/scenario-builder/flowSteps/scenarioPickerStep.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { FlowStepProps } from "@/types";
 import { useFlow, useAppStore } from "@/hooks";
 import { SubjectIcon } from "@/components/SubjectIcon";
@@ -17,7 +17,7 @@ const ScenarioPickerStep: React.FC<FlowStepProps> = ({
     error,
     handleBack,
     handleNext,
-    updateContextPath
+
   } = useFlow({
     node,
     onSubmit,

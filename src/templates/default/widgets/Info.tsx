@@ -9,7 +9,6 @@ const InfoWidget: React.FC<InfoWidgetProps> = ({
   onSelect
 }) => {
   // Usprawnione przetwarzanie danych
-  let widgetData = data;
   let displayTitle = title;
   let displayDescription = "";
   let displayVariant = propVariant || "default";

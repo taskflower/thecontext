@@ -1,32 +1,32 @@
-// src/hooks/useIndexedDB.ts
-import { useState, useEffect } from 'react';
-import localforage from 'localforage';
-import { getErrorMessage } from '@/utils';
+// src/hooks/useIndexedDB.ts - zoptymalizowana wersja
+import { useState, useEffect } from "react";
+import localforage from "localforage";
+import { getErrorMessage } from "@/utils/errors";
 
 // Typy danych
 export interface StoredItem {
   id: string;
-  type: 'lesson' | 'quiz' | 'project';
+  type: "lesson" | "quiz" | "project";
   title: string;
   content: any;
   timestamp: number;
 }
 
 interface UseIndexedDBReturn {
-  saveItem: (item: Omit<StoredItem, 'timestamp'>) => Promise<void>;
+  saveItem: (item: Omit<StoredItem, "timestamp">) => Promise<void>;
   getItem: (id: string) => Promise<StoredItem | null>;
   getAllItems: () => Promise<StoredItem[]>;
   deleteItem: (id: string) => Promise<void>;
-  getAllByType: (type: StoredItem['type']) => Promise<StoredItem[]>;
+  getAllByType: (type: StoredItem["type"]) => Promise<StoredItem[]>;
   isLoading: boolean;
   error: Error | null;
 }
 
 // Inicjalizacja bazy IndexedDB
 localforage.config({
-  name: 'eduSprint',
-  storeName: 'savedItems',
-  description: 'Lokalnie zapisane materiały edukacyjne'
+  name: "eduSprint",
+  storeName: "savedItems",
+  description: "Lokalnie zapisane materiały edukacyjne",
 });
 
 export const useIndexedDB = (): UseIndexedDBReturn => {
@@ -36,7 +36,7 @@ export const useIndexedDB = (): UseIndexedDBReturn => {
   // Sprawdzenie dostępności IndexedDB
   useEffect(() => {
     if (!window.indexedDB) {
-      setError(new Error('Twoja przeglądarka nie obsługuje IndexedDB'));
+      setError(new Error("Twoja przeglądarka nie obsługuje IndexedDB"));
     }
   }, []);
 
@@ -61,21 +61,23 @@ export const useIndexedDB = (): UseIndexedDBReturn => {
   };
 
   // Zapisywanie elementu
-  const saveItem = async (item: Omit<StoredItem, 'timestamp'>): Promise<void> => {
+  const saveItem = async (
+    item: Omit<StoredItem, "timestamp">
+  ): Promise<void> => {
     await executeDbOperation(async () => {
       const storedItem: StoredItem = {
         ...item,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
       await localforage.setItem(item.id, storedItem);
-    }, 'useIndexedDB:saveItem');
+    }, "useIndexedDB:saveItem");
   };
 
   // Pobieranie elementu
   const getItem = async (id: string): Promise<StoredItem | null> => {
     return executeDbOperation(async () => {
       return await localforage.getItem<StoredItem>(id);
-    }, 'useIndexedDB:getItem');
+    }, "useIndexedDB:getItem");
   };
 
   // Pobieranie wszystkich elementów
@@ -86,14 +88,16 @@ export const useIndexedDB = (): UseIndexedDBReturn => {
         items.push(value);
       });
       return items.sort((a, b) => b.timestamp - a.timestamp);
-    }, 'useIndexedDB:getAllItems');
+    }, "useIndexedDB:getAllItems");
   };
 
   // Pobieranie wg typu
-  const getAllByType = async (type: StoredItem['type']): Promise<StoredItem[]> => {
+  const getAllByType = async (
+    type: StoredItem["type"]
+  ): Promise<StoredItem[]> => {
     return executeDbOperation(async () => {
       const allItems = await getAllItems();
-      return allItems.filter(item => item.type === type);
+      return allItems.filter((item) => item.type === type);
     }, `useIndexedDB:getAllByType:${type}`);
   };
 
@@ -101,7 +105,7 @@ export const useIndexedDB = (): UseIndexedDBReturn => {
   const deleteItem = async (id: string): Promise<void> => {
     await executeDbOperation(async () => {
       await localforage.removeItem(id);
-    }, 'useIndexedDB:deleteItem');
+    }, "useIndexedDB:deleteItem");
   };
 
   return {
@@ -111,6 +115,6 @@ export const useIndexedDB = (): UseIndexedDBReturn => {
     deleteItem,
     getAllByType,
     isLoading,
-    error
+    error,
   };
 };
