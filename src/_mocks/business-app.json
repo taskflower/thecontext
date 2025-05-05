@@ -2,7 +2,7 @@
   {
     "name": "Business Analytics",
     "description": "Analiza biznesowa i finansowa",
-    "template": "default",
+    "tplDir": "scenario-builder",
     "workspaces": [
       {
         "id": "workspace-minimal",
@@ -23,7 +23,7 @@
                 "label": "Krok 1: Dane finansowe",
                 "assistantMessage": "Podaj przychody i koszty projektu:",
                 "contextPath": "collect-data",
-                "template": "form-step",
+               "tplFile": "formStep",
                 "order": 0,
                 "attrs": {
                   "schemaPath": "schemas.form.business"
@@ -35,7 +35,7 @@
                 "label": "Krok 2: Raport ROI",
                 "assistantMessage": "Generuję raport ROI na podstawie danych...",
                 "contextPath": "generate-report",
-                "template": "llm-step",
+                "tplFile": "llmStep",
                 "order": 1,
                 "attrs": {
                   "autoStart": true,
@@ -50,7 +50,7 @@
                 "label": "Krok 3: Podsumowanie",
                 "assistantMessage": "Oto podsumowanie wyników analizy finansowej twojego projektu.",
                 "contextPath": "summary",
-                "template": "widgets-step",
+                "tplFile": "widgetsStep",
                 "order": 2,
                 "attrs": {
                   "widgets": [

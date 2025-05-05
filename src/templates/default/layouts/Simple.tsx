@@ -1,4 +1,4 @@
-// src/templates/default/layouts/SimpleLayout.tsx
+// src/templates/default/layouts/Simple.tsx
 import React from "react";
 import { X } from "lucide-react";
 import { LayoutProps } from "@/types";

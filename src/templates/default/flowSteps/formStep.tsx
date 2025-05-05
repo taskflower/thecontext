@@ -1,4 +1,4 @@
-// src/templates/default/flowSteps/FormStepTemplate.tsx
+// src/templates/default/flowSteps/formStep.tsx
 import React from "react";
 import { FlowStepProps } from "@/types";
 import { useFlow } from "@/hooks";

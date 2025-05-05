@@ -1,4 +1,4 @@
-// src/templates/default/flowSteps/WidgetsStepTemplate.tsx
+// src/templates/default/flowSteps/widgetsStep.tsx
 import React, { useMemo } from "react";
 import { FlowStepProps } from "@/types";
 import { useFlow, useWidgets } from "@/hooks";
