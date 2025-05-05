@@ -63,15 +63,15 @@ export interface Workspace {
   createdAt?: Date;          
 }
 
-export interface TemplateSettings {
-  tplDir?: string;          // Zmienione z template na tplDir
-  layoutFile?: string;      // Dodane zamiast layout
+export interface TemplateSettings {       
+  layoutFile?: string;      
   widgets?: WidgetConfig[];
   [key: string]: any;         
 }
 
 export interface WidgetConfig {
-  tplFile?: string;         // Dodane, zamiast używania type
+  id: string;
+  tplFile?: string;         
   title?: string;
   data?: string | any;
   attrs?: Record<string, any>;
@@ -84,7 +84,7 @@ export interface Application {
   id: string;
   name: string;
   description?: string;
-  tplDir?: string;          // Zmienione z template na tplDir
+  tplDir?: string;          
   workspaces?: Workspace[];
   templateSettings?: TemplateSettings;
   createdAt?: Date;
