@@ -1,5 +1,5 @@
 // src/templates/default/flowSteps/LlmStep.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FlowStepProps } from "@/types";
 import { useFlow } from "@/hooks";
 
@@ -19,7 +19,9 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
     debugInfo,
     handleBack, 
     handleNext,
-    sendMessage
+    sendMessage,
+    schema,
+    currentNode
   } = useFlow({
     node,
     onSubmit,
@@ -33,6 +35,29 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
   const [manualInput, setManualInput] = useState("");
   const [showManualInput, setShowManualInput] = useState(false);
   const [manualInputError, setManualInputError] = useState<string | null>(null);
+
+  // Extract schema from initialUserMessage if missing
+  const extractSchema = () => {
+    if (schema) return schema;
+    
+    // Try to extract schema from initialUserMessage
+    if (currentNode?.attrs?.initialUserMessage) {
+      const message = currentNode.attrs.initialUserMessage;
+      const schemaMatch = message.match(/```json\s*([\s\S]*?)```/);
+      
+      if (schemaMatch && schemaMatch[1]) {
+        try {
+          return JSON.parse(schemaMatch[1]);
+        } catch (e) {
+          console.error("Failed to parse schema from message:", e);
+        }
+      }
+    }
+    
+    return null;
+  };
+  
+  const actualSchema = extractSchema();
 
   // Function to handle manual JSON input
   const handleManualSubmit = () => {
@@ -63,6 +88,40 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
   const hasJsonResponse = responseData && !error && !isLoading;
   const hasRawResponseButNoJson = rawResponseData && !responseData && !isLoading;
   const hasError = error || (!responseData && !rawResponseData && !isLoading && node.attrs?.autoStart === true);
+
+  // Extract expected format from the prompt
+  const getExpectedFormat = () => {
+    if (actualSchema) {
+      return JSON.stringify(actualSchema, null, 2);
+    }
+    
+    // If we have a raw response but no schema, try to infer from it
+    if (rawResponseData && !responseData) {
+      // Extract any JSON code blocks
+      const jsonBlockRegex = /```(?:json)?\s*([\s\S]*?)```/g;
+      const matches = Array.from(rawResponseData.matchAll(jsonBlockRegex));
+      if (matches.length > 0) {
+        return matches[0][1].trim();
+      }
+    }
+
+    // Extract expected format from initialUserMessage
+    if (currentNode?.attrs?.initialUserMessage) {
+      const message = currentNode.attrs.initialUserMessage;
+      // Look for description of expected format in the initialUserMessage
+      if (message.includes("JSON") || message.includes("json")) {
+        const formatDesc = message.split("Zwróć JSON z polami:")[1] || 
+                         message.split("Return JSON with fields:")[1] || 
+                         message.split("response in JSON format with:")[1];
+        
+        if (formatDesc) {
+          return formatDesc.trim();
+        }
+      }
+    }
+    
+    return "Unable to determine expected format. Please provide valid JSON data.";
+  };
 
   return (
     <div className="my-4">
@@ -145,6 +204,19 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
             <p className="text-sm text-gray-600 mb-3">
               Enter JSON data in the format expected by the next step:
             </p>
+            
+            <div className="mb-4">
+              <p className="text-sm font-medium mb-1">Expected Format:</p>
+              <pre className="bg-gray-50 p-3 rounded overflow-auto text-xs whitespace-pre-wrap border border-gray-200">
+                {getExpectedFormat()}
+              </pre>
+              
+              {currentNode?.contextPath && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Data will be stored at context path: {currentNode.contextPath}
+                </p>
+              )}
+            </div>
             
             <textarea
               value={manualInput}
