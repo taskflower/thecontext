@@ -35,16 +35,18 @@ const ScenarioListWidget: React.FC<ScenarioListWidgetProps> = ({
       description: scenario.description || "",
       icon: scenario.icon || "folder",
       count: scenario.nodes?.length || 0,
-      countLabel: "kroków",
-      // Dodajemy własną funkcję onClick do każdego scenariusza
-      onClick: (id: string) => {
-        const wsId = workspaceId || currentWorkspace?.id;
-        if (wsId) {
-          navigate(`/${wsId}/${id}`);
-        }
-      }
+      countLabel: "kroków"
+      // UWAGA: Usunięto onClick, ponieważ zostanie obsłużony przez onSelect callback w CardListWidget
     }));
-  }, [currentWorkspace, workspaceId, navigate]);
+  }, [currentWorkspace]);
+
+  // Funkcja obsługująca kliknięcie w element scenariusza
+  const handleScenarioSelect = (id: string) => {
+    const wsId = workspaceId || currentWorkspace?.id;
+    if (wsId) {
+      navigate(`/${wsId}/${id}`);
+    }
+  };
 
   // Widget nie ma danych do wyświetlenia
   if (scenarioData.length === 0) {
@@ -64,6 +66,7 @@ const ScenarioListWidget: React.FC<ScenarioListWidgetProps> = ({
         data={scenarioData}
         title={props.title || "Scenariusze"}
         description={props.description}
+        onSelect={handleScenarioSelect} // Dodajemy callback do obsługi kliknięć
       />
     </div>
   );
