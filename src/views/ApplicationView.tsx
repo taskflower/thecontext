@@ -41,30 +41,31 @@ export const ApplicationView: React.FC = () => {
         errorTitle="Błąd ładowania aplikacji"
         onRetry={() => fetchApplications()}
       >
-        <div className="min-h-screen bg-background text-foreground flex flex-col">
-          <main className="max-w-6xl w-full py-12 px-4 md:px-6 mx-auto flex-1">
-            <Header />
-
-            <div className="space-y-8">
-              {applications.length === 0 ? (
-                <EmptyState user={user} />
-              ) : (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {applications.map((app) => (
-                    <ApplicationCard
-                      key={app.id}
-                      app={{
-                        id: app.id,
-                        name: app.name,
-                        description: app.description || "Aplikacja bez opisu",
-                      }}
-                      onClick={() => handleSelect(app.id)}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          </main>
+        <div className="min-h-screen bg-background text-foreground flex flex-col  bg-gray-50">
+          <Header />
+          <div className="flex-1 pt-12 ">
+            <main className="max-w-6xl w-full pb-12 px-4 md:px-6 mx-auto flex-1 ">
+              <div className="space-y-8">
+                {applications.length === 0 ? (
+                  <EmptyState user={user} />
+                ) : (
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {applications.map((app) => (
+                      <ApplicationCard
+                        key={app.id}
+                        app={{
+                          id: app.id,
+                          name: app.name,
+                          description: app.description || "Aplikacja bez opisu",
+                        }}
+                        onClick={() => handleSelect(app.id)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </main>
+          </div>
 
           <Footer user={user} />
         </div>

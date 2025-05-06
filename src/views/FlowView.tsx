@@ -1,5 +1,5 @@
 // src/views/FlowView.tsx
-import React, { useEffect, Suspense } from "react";
+import React, { useEffect, useMemo, Suspense } from "react";
 import { useParams } from "react-router-dom";
 import { LoadingState } from "@/components/LoadingState";
 import SharedLoader from "@/components/SharedLoader";
@@ -26,20 +26,28 @@ export const FlowView: React.FC = () => {
     if (scenario) selectScenario(scenario);
   }, [workspace, scenario, selectWorkspace, selectScenario]);
 
-  // Szablon i komponent
-  const templateDirName =
-    currentWorkspace?.templateSettings?.tplDir || "default"; // Zmienione z template na tplDir
+  // Pobierz nazwę layoutu z templateSettings workspace lub użyj domyślnego "Simple"
+  const layoutName = useMemo(() => {
+    if (currentWorkspace?.templateSettings?.layoutFile) {
+      console.log(`Flow: Używam layoutu z konfiguracji workspace: ${currentWorkspace.templateSettings.layoutFile}`);
+      return currentWorkspace.templateSettings.layoutFile;
+    }
+    console.log('Flow: Brak layoutu w konfiguracji, używam domyślnego "Simple"');
+    return "Simple";
+  }, [currentWorkspace?.templateSettings?.layoutFile]);
+
+  // Szablon i komponent - używamy dynamicznego layoutName
   const {
     component: LayoutComponent,
     error: layoutError,
     isLoading: layoutLoading,
-  } = useComponents("layout", "Simple");
+  } = useComponents("layout", layoutName);
 
   const {
     component: FlowStepComponent,
     error: flowStepError,
     isLoading: componentLoading,
-  } = useComponents("flowStep", currentNode?.tplFile || "formStep"); // Zmienione z template na tplFile
+  } = useComponents("flowStep", currentNode?.tplFile || "formStep");
 
   // Stany ładowania i błędów
   const isLoading = layoutLoading || componentLoading;
@@ -84,7 +92,7 @@ export const FlowView: React.FC = () => {
             </h3>
             <p className="mt-2">
               Szukany layout:{" "}
-              <span className="font-mono bg-red-50 px-1">{templateDirName}</span>
+              <span className="font-mono bg-red-50 px-1">{layoutName}</span>
             </p>
           </div>
         </div>
@@ -101,7 +109,7 @@ export const FlowView: React.FC = () => {
             <p className="mt-2">
               Szukany komponent:{" "}
               <span className="font-mono bg-red-50 px-1">
-                {currentNode.tplFile || "unknown"} {/* Zmienione z template na tplFile */}
+                {currentNode.tplFile || "unknown"}
               </span>
             </p>
             <p className="mt-2">

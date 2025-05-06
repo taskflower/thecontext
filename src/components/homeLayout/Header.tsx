@@ -2,7 +2,7 @@
 
 const Header = () => {
   return (
-    <div className="mb-16 md:mb-20 text-center">
+    <div className="text-center border-b py-12 bg-white  ">
       <div className="flex justify-center mb-6">
         <svg
           xmlns="http://www.w3.org/2000/svg"

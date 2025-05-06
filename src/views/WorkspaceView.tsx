@@ -21,6 +21,31 @@ export const WorkspaceView: React.FC = () => {
   const currentApplication = getCurrentApplication();
   const workspaces = currentApplication?.workspaces || [];
 
+  // Obsługa wyboru
+  const handleSelect = (workspaceId: string) => {
+    console.log("Kliknięto workspace:", workspaceId);
+    selectWorkspace(workspaceId);
+    navigate(`/${workspaceId}`);
+  };
+
+  // Pobierz nazwę layoutu z templateSettings pierwszego workspace lub użyj domyślnego "Simple"
+  const layoutName = useMemo(() => {
+    // Jeśli pierwszy workspace ma zdefiniowany layout, użyj go
+    if (workspaces.length > 0 && workspaces[0].templateSettings?.layoutFile) {
+      console.log(`Używam layoutu z konfiguracji pierwszego workspace: ${workspaces[0].templateSettings.layoutFile}`);
+      return workspaces[0].templateSettings.layoutFile;
+    }
+    
+    // Jeśli aplikacja ma domyślny layout, użyj go
+    if (currentApplication?.defaultLayoutFile) {
+      console.log(`Używam domyślnego layoutu aplikacji: ${currentApplication.defaultLayoutFile}`);
+      return currentApplication.defaultLayoutFile;
+    }
+    
+    console.log('Brak layoutu w konfiguracji, używam domyślnego "Simple"');
+    return "Simple";
+  }, [workspaces, currentApplication?.defaultLayoutFile]);
+
   // Dane do widoku
   const workspaceData = useMemo(
     () =>
@@ -32,14 +57,9 @@ export const WorkspaceView: React.FC = () => {
           `Template: ${workspace.templateSettings?.tplDir}`,
         count: workspace.scenarios?.length || 0,
         countLabel: "scenarios",
-        icon: workspace.icon || "briefcase",
-        // Dodajemy funkcję onClick bezpośrednio do danych
-        onClick: (id: string) => {
-          selectWorkspace(id);
-          navigate(`/${id}`);
-        }
+        icon: workspace.icon || "briefcase"
       })),
-    [workspaces, selectWorkspace, navigate]
+    [workspaces]
   );
 
   // Nawigacja
@@ -50,12 +70,12 @@ export const WorkspaceView: React.FC = () => {
     if (applicationId) fetchApplicationById(applicationId);
   }, [applicationId, fetchApplicationById]);
 
-  // Komponenty UI
+  // Komponenty UI - używamy dynamicznego layoutName
   const {
     component: LayoutComponent,
     error: layoutError,
     isLoading: layoutLoading,
-  } = useComponents("layout", "Simple");
+  } = useComponents("layout", layoutName);
 
   const {
     component: CardListComponent,
@@ -108,7 +128,10 @@ export const WorkspaceView: React.FC = () => {
                 </p>
               </div>
             ) : CardListComponent ? (
-              <CardListComponent data={workspaceData} />
+              <CardListComponent 
+                data={workspaceData} 
+                onSelect={handleSelect}
+              />
             ) : (
               <div className="p-4">Ładowanie komponentu listy...</div>
             )}

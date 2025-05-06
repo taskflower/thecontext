@@ -5,7 +5,7 @@ const ApplicationCard = ({ app, onClick }:any) => {
   return (
     <div
       onClick={onClick}
-      className="border border-border bg-card rounded-lg overflow-hidden hover:border-primary transition-colors cursor-pointer group flex flex-col justify-between"
+      className="border border-border bg-white rounded-lg overflow-hidden hover:border-primary transition-colors cursor-pointer group flex flex-col justify-between"
     >
       <div className="p-6">
         <div className="flex items-center mb-4">
