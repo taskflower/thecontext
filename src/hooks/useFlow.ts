@@ -20,7 +20,7 @@ export function useFlow({
   isFirstNode,
   isLastNode,
 }: UseFlowProps = {}) {
-  // Hooki i stan
+  // Hooks and state
   const navigate = useNavigate();
   const params = useParams();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -29,15 +29,16 @@ export function useFlow({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [responseData, setResponseData] = useState<any>(null);
+  const [rawResponseData, setRawResponseData] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const [schema, setSchema] = useState<any>(null);
   
-  // Referencje
+  // References
   const lastNavigationTimeRef = useRef(0);
   const isMountedRef = useRef(true);
   const autoStartExecutedRef = useRef(false);
 
-  // Hooki autoryzacji i store
+  // Auth and store hooks
   const { getToken, user } = useAuth();
   const {
     selectApplication,
@@ -50,11 +51,11 @@ export function useFlow({
     processTemplate,
   } = useAppStore();
 
-  // Bieżące dane
+  // Current data
   const currentScenario = getCurrentScenario();
   const currentWorkspace = getCurrentWorkspace();
 
-  // Nody i bieżący node
+  // Nodes and current node
   const nodes = useMemo(() => {
     if (!currentScenario?.nodes) return [];
     return [...currentScenario.nodes].sort((a, b) => 
@@ -69,14 +70,14 @@ export function useFlow({
     ? processTemplate(currentNode.assistantMessage)
     : "";
 
-  // Setup i cleanup
+  // Setup and cleanup
   useEffect(() => {
     isMountedRef.current = true;
     autoStartExecutedRef.current = false;
     return () => { isMountedRef.current = false; };
   }, [currentNode?.id, currentNode?.tplFile]);
 
-  // Ładowanie pól formularza i schematu
+  // Load form fields and schema
   useEffect(() => {
     if (!currentNode?.attrs?.schemaPath) {
       setFormFields([]);
@@ -93,7 +94,7 @@ export function useFlow({
     }
   }, [currentNode?.attrs?.schemaPath, getContextPath]);
 
-  // Funkcje nawigacji
+  // Navigation functions
   const navigateToHome = useCallback(() => navigate("/"), [navigate]);
   
   const navigateToApplications = useCallback(() => {
@@ -122,7 +123,7 @@ export function useFlow({
     }
   }, [params.workspace, navigate, selectScenario]);
 
-  // Obsługa formularza
+  // Form handling
   const handleChange = useCallback((name: string, value: any) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   }, []);
@@ -146,7 +147,7 @@ export function useFlow({
     return formData;
   }, [currentNode?.contextPath, formData, onSubmit, updateContextPath]);
 
-  // Obsługa nawigacji
+  // Navigation handling
   const handleNext = useCallback((data?: any) => {
     const now = Date.now();
     if (now - lastNavigationTimeRef.current < 1000) return;
@@ -177,25 +178,26 @@ export function useFlow({
     }
   }, [isFirst, navigateToWorkspaces, onPrevious]);
 
-  // Interakcja z API
+  // API interaction
   const sendMessage = useCallback(async (message: string) => {
     if (!message.trim()) return null;
 
     try {
       setIsLoading(true);
       setError(null);
+      setRawResponseData(null); // Reset raw response
 
-      // Walidacja
+      // Validation
       const token = await getToken();
       if (!token || !user) {
         throw new Error(token ? "Użytkownik nie zalogowany" : "Brak tokenu autoryzacji");
       }
 
-      // Budowanie wiadomości
+      // Build message
       const { systemMessage, initialUserMessage } = currentNode?.attrs || {};
       const messages = [];
       
-      // Dodawanie schematu do wiadomości
+      // Add schema to messages if needed
       const addSchemaIfNeeded = (content: string) => {
         if (schema && !content.includes("```json")) {
           return `${content}\n\nUse the following JSON schema:\n\`\`\`json\n${JSON.stringify(schema, null, 2)}\n\`\`\``;
@@ -208,21 +210,21 @@ export function useFlow({
         messages.push({ role: "system", content: systemMessage });
       }
       
-      // Początkowa wiadomość użytkownika
+      // Initial user message
       if (initialUserMessage) {
         const initialContent = addSchemaIfNeeded(processTemplate(initialUserMessage));
         messages.push({ role: "user", content: initialContent });
         
-        // Odpowiedź asystenta jeśli dostępna
+        // Assistant response if available
         if (processedAssistantMessage) {
           messages.push({ role: "assistant", content: processedAssistantMessage });
         }
       }
       
-      // Aktualna wiadomość użytkownika
+      // Current user message
       messages.push({ role: "user", content: addSchemaIfNeeded(message) });
 
-      // Wykonanie zapytania API
+      // API request execution
       const apiUrl = `${import.meta.env.VITE_API_URL}/api/v1/services/gemini/chat/completion`;
       setDebugInfo(`Wysyłanie do: ${apiUrl}`);
       
@@ -237,27 +239,64 @@ export function useFlow({
 
       if (!isMountedRef.current) return null;
       
-      // Obsługa błędów
+      // Error handling
       if (!response.ok) {
         throw new Error(await handleApiError(response, "send-message"));
       }
 
-      // Przetwarzanie odpowiedzi
+      // Response processing
       const { success, data } = await response.json();
       const content = success && data?.message?.content;
       
       if (!content) throw new Error("Nieprawidłowy format odpowiedzi API");
       
+      // Store raw response
+      setRawResponseData(content);
+      
+      // Extract JSON if available
       const extractedData = extractJsonFromContent(content);
       
-      if (isMountedRef.current) {
-        setResponseData(extractedData);
-        if (currentNode?.contextPath && extractedData) {
-          updateContextPath(currentNode.contextPath, extractedData);
+      // If no JSON was extracted but we have content
+      if (!extractedData && content) {
+        if (isMountedRef.current) {
+          setResponseData(null);
+          
+          // Store raw content in context if needed
+          if (currentNode?.contextPath) {
+            updateContextPath(`${currentNode.contextPath}_raw`, {
+              content,
+              timestamp: new Date().toISOString()
+            });
+          }
         }
+        
+        return { 
+          rawResponse: content,
+          success: true 
+        };
       }
-
-      return extractedData;
+      
+      // If we have JSON data
+      if (extractedData) {
+        if (isMountedRef.current) {
+          setResponseData(extractedData);
+          if (currentNode?.contextPath) {
+            updateContextPath(currentNode.contextPath, extractedData);
+          }
+        }
+        
+        return {
+          ...extractedData,
+          rawResponse: content,
+          success: true
+        };
+      }
+      
+      // If we reach here, we have content but no JSON
+      return { 
+        rawResponse: content,
+        success: false 
+      };
     } catch (err) {
       if (isMountedRef.current) {
         setError(err instanceof Error ? err.message : String(err));
@@ -325,6 +364,7 @@ export function useFlow({
     handleSubmit,
     areRequiredFieldsFilled,
     responseData,
+    rawResponseData,
     sendMessage,
     schema,
     debugInfo,
