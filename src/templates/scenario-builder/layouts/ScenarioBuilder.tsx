@@ -24,7 +24,7 @@ const ScenarioBuilderLayout: React.FC<LayoutProps> = ({
   const progress = ((currentStepIndex + 1) / totalSteps) * 100;
 
   return (
-    <div className="flex flex-col bg-white rounded-lg shadow-lg mx-auto w-full max-w-5xl h-full md:min-h-[95vh] md:max-h-[95vh]">
+    <div className="flex flex-col bg-white rounded-lg shadow-lg mx-auto w-full max-w-5xl h-full md:min-h-[95vh] md:max-h-[95vh] mt-6">
       {/* Nagłówek */}
       <div className="border-b border-gray-200 bg-gray-50 px-6 py-4">
         <div className="flex items-center justify-between">
