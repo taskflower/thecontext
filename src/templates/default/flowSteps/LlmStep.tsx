@@ -1,4 +1,4 @@
-// src/templates/default/flowSteps/llmStep.tsx
+// src/templates/default/flowSteps/LlmStep.tsx
 import React from "react";
 import { FlowStepProps } from "@/types";
 import { useFlow } from "@/hooks";

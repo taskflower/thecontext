@@ -76,14 +76,14 @@ const StepsEditorStep: React.FC<FlowStepProps> = ({
             {
               id: "step-1",
               label: "Krok 1: Formularz",
-              type: "formStep",
+              type: "FormStep",
               description: "Zbieranie danych od użytkownika",
               contextPath: "step-1-data"
             },
             {
               id: "step-2",
               label: "Krok 2: Analiza",
-              type: "llmStep",
+              type: "LlmStep",
               description: "Analiza zebranych danych",
               contextPath: "step-2-data"
             }
@@ -229,9 +229,9 @@ const StepsEditorStep: React.FC<FlowStepProps> = ({
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md"
           >
-            <option value="formStep">Formularz</option>
-            <option value="llmStep">Analiza AI</option>
-            <option value="widgetsStep">Widżety</option>
+            <option value="FormStep">Formularz</option>
+            <option value="LlmStep">Analiza AI</option>
+            <option value="WidgetsStep">Widżety</option>
           </select>
         </div>
         

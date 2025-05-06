@@ -280,7 +280,7 @@ export function useFlow({
   // Auto-start
   useEffect(() => {
     const shouldAutoStart = 
-      currentNode?.tplFile === "llmStep" && 
+      currentNode?.tplFile === "LlmStep" && 
       currentNode.attrs?.autoStart === true && 
       !autoStartExecutedRef.current && 
       !isLoading && 
