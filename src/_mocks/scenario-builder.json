@@ -47,7 +47,7 @@
                 "label": "Krok 3: Konfiguracja kroków",
                 "assistantMessage": "Dostosuj wygenerowane kroki scenariusza:",
                 "contextPath": "scenario-data.steps-config",
-                "tplFile": "stepsEditorStep",
+                "tplFile": "StepsEditorStep",
                 "order": 2,
                 "attrs": {
                   "dataPath": "scenario-data.ai-result.steps"
@@ -59,7 +59,7 @@
                 "label": "Krok 4: Generacja kodu",
                 "assistantMessage": "Generuję kod implementujący scenariusz...",
                 "contextPath": "scenario-data.generated-code",
-                "tplFile": "lmStep",
+                "tplFile": "LlmStep",
                 "order": 3,
                 "attrs": {
                   "autoStart": true,
@@ -72,26 +72,26 @@
                 "label": "Krok 5: Podsumowanie",
                 "assistantMessage": "Oto podsumowanie utworzonego scenariusza:",
                 "contextPath": "scenario-data.summary",
-                "tplFile": "widgetsStep",
+                "tplFile": "WidgetsStep",
                 "order": 4,
                 "attrs": {
                   "widgets": [
                     {
-                      "tplFile": "title",
+                      "tplFile": "Title",
                       "title": "Scenariusz utworzony pomyślnie!"
                     },
                     {
-                      "tplFile": "scenarioInfoCard",
+                      "tplFile": "ScenarioInfoCard",
                       "title": "Informacje o scenariuszu",
                       "dataPath": "scenario-data.basic"
                     },
                     {
-                      "tplFile": "stepsOverview",
+                      "tplFile": "StepsOverview",
                       "title": "Kroki scenariusza",
                       "dataPath": "scenario-data.steps-config"
                     },
                     {
-                      "tplFile": "codePreview",
+                      "tplFile": "CodePreview",
                       "title": "Wygenerowany kod",
                       "dataPath": "scenario-data.generated-code"
                     }
@@ -169,7 +169,7 @@
               }
             },
             {
-              "tplFile": "CardList",
+              "tplFile": "ScenarioList",
               "data": []
             }
           ]
