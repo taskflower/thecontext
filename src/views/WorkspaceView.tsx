@@ -29,19 +29,18 @@ export const WorkspaceView: React.FC = () => {
         name: workspace.name,
         description:
           workspace.description ||
-          `Template: ${workspace.templateSettings?.tplDir}`, // Zmienione z template na tplDir
+          `Template: ${workspace.templateSettings?.tplDir}`,
         count: workspace.scenarios?.length || 0,
         countLabel: "scenarios",
         icon: workspace.icon || "briefcase",
+        // Dodajemy funkcję onClick bezpośrednio do danych
+        onClick: (id: string) => {
+          selectWorkspace(id);
+          navigate(`/${id}`);
+        }
       })),
-    [workspaces]
+    [workspaces, selectWorkspace, navigate]
   );
-
-  // Obsługa wyboru
-  const handleSelect = (workspaceId: string) => {
-    selectWorkspace(workspaceId);
-    navigate(`/${workspaceId}`);
-  };
 
   // Nawigacja
   const handleBackClick = () => navigate("/");
@@ -109,7 +108,7 @@ export const WorkspaceView: React.FC = () => {
                 </p>
               </div>
             ) : CardListComponent ? (
-              <CardListComponent data={workspaceData} onSelect={handleSelect} />
+              <CardListComponent data={workspaceData} />
             ) : (
               <div className="p-4">Ładowanie komponentu listy...</div>
             )}
