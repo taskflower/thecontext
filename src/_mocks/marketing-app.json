@@ -1,77 +1,156 @@
 [
   {
-    "name": "Marketing AI Tools",
-    "description": "Narzędzia marketingowe wspierane AI",
-    "templateSettings": {
-      "layoutTemplate": "simple",
-      "headerWidgetTemplate": "header-info",
-      "scenarioWidgetTemplate": "card-list"
-    },
+    "name": "Analiza Marketingowa Strony",
+    "description": "Analiza strony internetowej pod kątem przyszłych kampanii marketingowych",
+    "tplDir": "default",
     "workspaces": [
       {
         "id": "workspace-marketing",
-        "name": "Marketing Facebook",
-        "description": "Workspace do analizy marketingowej stron internetowych i wdrażania kampanii Facebook",
+        "name": "Analiza Marketingowa",
+        "description": "Analiza strony internetowej i generowanie opisu marketingowego",
+        "icon": "globe",
         "scenarios": [
           {
-            "id": "scenario-marketing-analysis",
-            "name": "Analiza Marketingowa WWW i Kampania Facebook",
-            "description": "Analiza strony internetowej pod kątem marketingowym i przygotowanie kampanii Facebook",
-            "icon": "chart",
-            "systemMessage": "Jesteś doświadczonym specjalistą ds. marketingu internetowego ze specjalizacją w reklamach Facebook. Używamy języka polskiego. Twoje analizy są zawsze oparte na najlepszych praktykach marketingowych.",
+            "id": "scenario-website-analysis",
+            "name": "Analiza Strony WWW",
+            "description": "Analiza strony i przygotowanie opisu marketingowego",
+            "icon": "search",
             "nodes": [
               {
-                "id": "step-website-url",
-                "scenarioId": "scenario-marketing-analysis",
-                "label": "Adres strony WWW",
-                "assistantMessage": "Witaj! Podaj adres strony internetowej do analizy marketingowej:",
-                "contextPath": "web",
-                "templateId": "form-step-minimal",
+                "id": "collect-url",
+                "scenarioId": "scenario-website-analysis",
+                "label": "Krok 1: Adres strony",
+                "assistantMessage": "Podaj adres URL strony do analizy:",
+                "contextPath": "website-data",
+                "tplFile": "FormStep",  
                 "order": 0,
                 "attrs": {
                   "schemaPath": "schemas.form.website"
                 }
               },
               {
-                "id": "step-website-analysis",
-                "scenarioId": "scenario-marketing-analysis",
-                "label": "Analiza AI",
-                "contextPath": "web.analysis",
-                "templateId": "llm-step-minimal",
+                "id": "analyze-website",
+                "scenarioId": "scenario-website-analysis",
+                "label": "Krok 2: Analiza strony",
+                "assistantMessage": "Analizuję stronę na podstawie podanego adresu...",
+                "contextPath": "website-summary",
+                "tplFile": "LlmStep",
                 "order": 1,
                 "attrs": {
-                  "autoStart": true,   
-                  "schemaPath": "schemas.llm.webAnalysis",
-                  "includeSystemMessage": true,
-                  "initialUserMessage": "Przeanalizuj adres WWW {{web.url}}. Przygotuj kompleksową analizę marketingową tej strony."
+                  "autoStart": true,
+                  "initialUserMessage": "Przeanalizuj stronę pod adresem {{website-data.url}} i przygotuj szczegółowe streszczenie jej zawartości. Zwróć JSON z polami: 'summary' (streszczenie zawartości strony), 'keywords' (słowa kluczowe występujące na stronie jako tablica), 'mainTopics' (główne tematy strony jako tablica)."
                 }
               },
               {
-                "id": "step-summary",
-                "scenarioId": "scenario-marketing-analysis",
-                "label": "Podsumowanie analizy",
-                "assistantMessage": "Oto podsumowanie analizy marketingowej strony internetowej.",
-                "contextPath": "web.summary",
-                "templateId": "widgets-step-minimal",
+                "id": "create-marketing",
+                "scenarioId": "scenario-website-analysis",
+                "label": "Krok 3: Opis marketingowy",
+                "assistantMessage": "Przygotowuję opis marketingowy na podstawie analizy strony...",
+                "contextPath": "marketing-description",
+                "tplFile": "LlmStep",
                 "order": 2,
                 "attrs": {
-                  "schemaPath": "schemas.summary.marketingSummary",
-                  "dataPaths": {
-                    "Dane wejściowe": "web",
-                    "Wyniki analizy": "web.analysis"
-                  }
+                  "autoStart": true,
+                  "initialUserMessage": "Na podstawie analizy strony: {{website-summary.summary}} i słów kluczowych: {{website-summary.keywords}} przygotuj opis marketingowy, który może być wykorzystany w przyszłych kampaniach. Dodatkowo określ branżę, do której należy ta strona. Zwróć JSON z polami: 'marketingDescription' (opis marketingowy o długości 150-200 słów), 'industry' (nazwa branży), 'targetAudience' (grupa docelowa), 'suggestedChannels' (sugerowane kanały marketingowe jako tablica z obiektami w formacie {id: string, name: string, description: string, icon: string, count: number, countLabel: string}), 'metrics' (metryki jako tablica z obiektami w formacie {label: string, value: number, prefix: string, suffix: string, change: number})."
+                }
+              },
+              {
+                "id": "summary",
+                "scenarioId": "scenario-website-analysis",
+                "label": "Krok 4: Podsumowanie",
+                "assistantMessage": "Oto podsumowanie analizy marketingowej strony:",
+                "contextPath": "summary-data",
+                "tplFile": "WidgetsStep",
+                "order": 3,
+                "attrs": {
+                  "widgets": [
+                    {
+                      "tplFile": "Title",
+                      "title": "Wyniki analizy marketingowej strony",
+                      "size": "large"
+                    },
+                    {
+                      "tplFile": "Info",
+                      "title": "Analizowana strona",
+                      "dataPath": "website-data.url",
+                      "variant": "info"
+                    },
+                    {
+                      "tplFile": "Info",
+                      "title": "Branża",
+                      "dataPath": "marketing-description.industry",
+                      "variant": "success"
+                    },
+                    {
+                      "tplFile": "DataDisplay",
+                      "title": "Streszczenie strony",
+                      "type": "keyValue",
+                      "dataPath": "website-summary"
+                    },
+                    {
+                      "tplFile": "DataDisplay",
+                      "title": "Słowa kluczowe",
+                      "type": "list",
+                      "dataPath": "website-summary.keywords"
+                    },
+                    {
+                      "tplFile": "DataDisplay",
+                      "title": "Opis marketingowy",
+                      "type": "code",
+                      "dataPath": "marketing-description.marketingDescription"
+                    },
+                    {
+                      "tplFile": "Info",
+                      "title": "Grupa docelowa",
+                      "dataPath": "marketing-description.targetAudience",
+                      "variant": "warning"
+                    },
+                    {
+                      "tplFile": "CardList",
+                      "dataPath": "marketing-description.suggestedChannels"
+                    },
+                    {
+                      "tplFile": "Metrics",
+                      "title": "Metryki marketingowe",
+                      "dataPath": "marketing-description.metrics"
+                    }
+                  ]
                 }
               }
             ]
           }
         ],
-        "icon": "chart",
         "templateSettings": {
-          "layoutTemplate": "simple",
-          "scenarioWidgetTemplate": "card-list",
-          "headerWidgetTemplate": "header-info",
-          "defaultFlowStepTemplate": "form-step-minimal",
-          "theme": "light"
+          "layoutFile": "Simple",
+          "widgets": [
+            {
+              "tplFile": "Title",
+              "title": "Analiza Marketingowa Strony",
+              "description": "Wybierz scenariusz do uruchomienia",
+              "size": "large"
+            },
+            {
+              "tplFile": "Info",
+              "data": {
+                "title": "Jak to działa?",
+                "description": "Narzędzie analizuje podaną stronę internetową i przygotowuje szczegółowy opis marketingowy, który może być wykorzystany w przyszłych kampaniach.",
+                "variant": "info"
+              }
+            },
+            {
+              "tplFile": "Stats",
+              "title": "Ostatnia analiza",
+              "description": "Dane z ostatnio przeprowadzonej analizy",
+              "dataPaths": {
+                "URL": "website-data.url",
+                "Branża": "marketing-description.industry",
+                "Grupa docelowa": "marketing-description.targetAudience"
+              }
+            },
+            {
+              "tplFile": "ScenarioList"
+            }
+          ]
         },
         "initialContext": {
           "schemas": {
@@ -79,43 +158,12 @@
               "website": [
                 {
                   "name": "url",
-                  "label": "Adres strony WWW",
+                  "label": "Adres URL strony",
                   "type": "text",
                   "required": true,
-                  "description": "Pełny adres URL strony do analizy (np. https://example.com)"
+                  "placeholder": "https://example.com"
                 }
               ]
-            },
-            "llm": {
-              "webAnalysis": {
-                "general_description": "Główne funkcje i typ strony", 
-                "industry": "Nazwa najbardziej pasującej branży",
-                "target_audience": "Do kogo skierowana jest strona",
-                "strengths": ["Lista mocnych stron witryny"],
-                "weaknesses": ["Lista słabych stron witryny"],
-                "marketing_suggestions": "Jak poprawić konwersję"
-              }
-            },
-            "summary": {
-              "marketingSummary": {
-                "inputData": "Dane wejściowe analizy",
-                "analysisResults": "Wyniki analizy marketingowej",
-                "conclusion": "Podsumowanie i rekomendacje",
-                "_layout": {
-                  "inputData": {
-                    "layout": "panel"
-                  },
-                  "analysisResults": {
-                    "layout": "card",
-                    "type": "list",
-                    "icon": "M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"
-                  },
-                  "conclusion": {
-                    "layout": "card",
-                    "icon": "M13 10V3L4 14h7v7l9-11h-7z"
-                  }
-                }
-              }
             }
           }
         }
