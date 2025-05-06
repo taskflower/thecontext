@@ -8,7 +8,6 @@ interface WidgetRendererProps extends WidgetProps {
   title?: string;
   description?: string;
   data?: any;
-  onSelect?: (id: string) => void;
   tplFile?: string;  // Dodane właściwość tplFile
   [key: string]: any;
 }
@@ -19,7 +18,6 @@ const WidgetRenderer: React.FC<WidgetRendererProps> = ({
   title,
   description,
   data,
-  onSelect,
   ...rest
 }) => {
   // Używamy tplFile jako głównego identyfikatora typu komponentu
@@ -47,13 +45,19 @@ const WidgetRenderer: React.FC<WidgetRendererProps> = ({
     );
   }
 
-  // Przekazujemy dane również dla CardList, ale będzie ich używał tylko jeśli są potrzebne
-  if (componentType === "CardList") {
-    return <Widget data={data} onSelect={onSelect} {...rest} />;
-  }
-
-  // Dla pozostałych widgetów przekazujemy standardowe props
-  return <Widget title={title} description={description} data={data} onSelect={onSelect} {...rest} />;
+  // Usuwamy undefined props, aby uniknąć nadpisywania domyślnych wartości
+  const allProps = {
+    ...rest,
+    title,
+    description,
+    data
+  };
+  
+  Object.keys(allProps).forEach(key => 
+    allProps[key] === undefined && delete allProps[key]
+  );
+  
+  return <Widget {...allProps} />;
 };
 
 export default WidgetRenderer;

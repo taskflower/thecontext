@@ -1,5 +1,5 @@
 // src/views/ScenarioView.tsx
-import React, { useEffect, useMemo, Suspense } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useFlow, useWidgets, useComponents, useAppStore } from "@/hooks";
 import { LoadingState } from "@/components/LoadingState";
@@ -15,27 +15,18 @@ export const ScenarioView: React.FC = () => {
 
   // Hook flow
   const {
-    currentNode,
-    isFirstNode,
-    isLastNode,
-    handleNext,
-    handleBack,
     currentWorkspace,
     currentScenario,
   } = useFlow();
 
-  // Dane dla widoku listy
-  const scenarioData = useMemo(() => {
-    if (!currentWorkspace?.scenarios) return [];
-    return currentWorkspace.scenarios.map((scenario) => ({
-      id: scenario.id,
-      name: scenario.name,
-      description: scenario.description || "",
-      icon: scenario.icon || "folder",
-      count: scenario.nodes?.length || 0,
-      countLabel: "kroków",
-    }));
-  }, [currentWorkspace]);
+  // Wybór workspace i scenariusza
+  useEffect(() => {
+    if (workspaceId) selectWorkspace(workspaceId);
+  }, [workspaceId, selectWorkspace]);
+
+  useEffect(() => {
+    if (scenarioId && workspaceId) selectScenario(scenarioId);
+  }, [scenarioId, workspaceId, selectScenario]);
 
   // Widgety workspace
   const workspaceWidgets = useMemo(
@@ -50,46 +41,6 @@ export const ScenarioView: React.FC = () => {
     error: widgetsError,
   } = useWidgets(workspaceWidgets);
 
-  // Sprawdzenie, czy wśród widgetów jest już lista scenariuszy
-  const hasScenarioListWidget = useMemo(() => {
-    return workspaceWidgetData.some(widget => 
-      widget.tplFile === "cardList" && 
-      widget.data && 
-      widget.data.some((item: any) => 
-        item.id && 
-        currentWorkspace?.scenarios?.some(scenario => scenario.id === item.id)
-      )
-    );
-  }, [workspaceWidgetData, currentWorkspace?.scenarios]);
-
-  // Wybór workspace i scenariusza
-  useEffect(() => {
-    if (workspaceId) selectWorkspace(workspaceId);
-  }, [workspaceId, selectWorkspace]);
-
-  useEffect(() => {
-    if (scenarioId && workspaceId) selectScenario(scenarioId);
-  }, [scenarioId, workspaceId, selectScenario]);
-
-  // Obsługa wyboru
-  const handleScenarioSelect = (id: string) => {
-    if (workspaceId) navigate(`/${workspaceId}/${id}`);
-  };
-
-  // Obsługa elementu w widgecie
-  const handleWidgetSelect = (itemId: string) => {
-    if (itemId.startsWith("/")) {
-      navigate(itemId);
-    } else if (itemId.includes(":")) {
-      const [action, target] = itemId.split(":");
-      if (action === "navigate" && target) {
-        navigate(target);
-      } else if (action === "select" && target) {
-        handleScenarioSelect(target);
-      }
-    }
-  };
-
   // Komponenty UI
   const {
     component: LayoutComponent,
@@ -97,32 +48,17 @@ export const ScenarioView: React.FC = () => {
     isLoading: layoutLoading,
   } = useComponents("layout", "Simple");
 
-  const {
-    component: CardListComponent,
-    error: cardError,
-    isLoading: cardLoading,
-  } = useComponents("widget", "CardList");
-
-  // Używamy tplFile zamiast template
-  const {
-    component: FlowStepComponent,
-    error: flowStepError,
-    isLoading: flowStepLoading,
-  } = useComponents("flowStep", currentNode?.tplFile || "FormStep");
-
   // Stany ładowania i błędów
   const combinedLoading =
     isLoading ||
     layoutLoading ||
-    widgetsLoading ||
-    (scenarioId ? flowStepLoading : cardLoading);
+    widgetsLoading;
   const combinedError =
     error ||
     layoutError ||
-    widgetsError ||
-    (scenarioId ? flowStepError : cardError);
+    widgetsError;
 
-  // Widgety workspace
+  // Renderuj standardowe widgety
   const renderWorkspaceWidgets = () => {
     if (workspaceWidgetData.length === 0) return null;
 
@@ -131,128 +67,15 @@ export const ScenarioView: React.FC = () => {
         {workspaceWidgetData.map((widget, index) => (
           <div key={`workspace-widget-${index}`}>
             <WidgetRenderer
-              type={widget.tplFile} // Używamy tplFile zamiast type
-              tplFile={widget.tplFile} // Dodajemy również tplFile
+              type={widget.tplFile}
+              tplFile={widget.tplFile}
               title={widget.title}
               description={widget.description}
               data={widget.data}
-              onSelect={handleWidgetSelect}
               {...widget}
             />
           </div>
         ))}
-      </div>
-    );
-  };
-
-  // Zawartość
-  const renderContent = () => {
-    // Brak workspace
-    if (!currentWorkspace) {
-      return (
-        <div className="p-4">
-          <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-            <p className="text-yellow-700">
-              Nie znaleziono workspace o ID: {workspaceId}
-            </p>
-            <button
-              onClick={() => navigate("/")}
-              className="mt-4 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-700 transition-colors"
-            >
-              Wróć do listy workspace
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    // Lista scenariuszy (brak wybranego scenariusza)
-    if (!scenarioId) {
-      return (
-        <div className="space-y-6">
-          {/* Renderuj widgety workspace */}
-          {renderWorkspaceWidgets()}
-
-          {/* Renderuj CardListComponent tylko jeśli nie ma już widgetu z listą scenariuszy */}
-          {!hasScenarioListWidget && CardListComponent && (
-            <CardListComponent data={scenarioData} onSelect={handleScenarioSelect} />
-          )}
-
-          {/* Pokaż komunikat ładowania tylko gdy brak widgetów i CardListComponent się ładuje */}
-          {!hasScenarioListWidget && !CardListComponent && (
-            <div className="p-4">Ładowanie scenariuszy...</div>
-          )}
-
-          {/* Pokaż komunikat o braku scenariuszy */}
-          {!hasScenarioListWidget && currentWorkspace?.scenarios?.length === 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-              <p className="text-yellow-700">
-                Brak dostępnych scenariuszy w tym workspace.
-              </p>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    // Brak scenariusza
-    if (!currentScenario) {
-      return (
-        <div className="p-4">
-          <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-            <p className="text-yellow-700">
-              Nie znaleziono scenariusza o ID: {scenarioId}
-            </p>
-            <button
-              onClick={() => navigate(`/${workspaceId}`)}
-              className="mt-4 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-700 transition-colors"
-            >
-              Wróć do listy scenariuszy
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    // Brak węzła
-    if (!currentNode) {
-      return (
-        <div className="p-4">
-          <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-            <p className="text-yellow-700">
-              Ten scenariusz nie zawiera żadnych kroków.
-            </p>
-            <button
-              onClick={() => navigate(`/${workspaceId}`)}
-              className="mt-4 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-700 transition-colors"
-            >
-              Wróć do listy scenariuszy
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    // Renderowanie kroku flow
-    return (
-      <div className="space-y-6">
-        {FlowStepComponent ? (
-          <Suspense
-            fallback={<div className="p-4">Ładowanie komponentu kroku...</div>}
-          >
-            <FlowStepComponent
-              node={currentNode}
-              onSubmit={handleNext}
-              onPrevious={handleBack}
-              isFirstNode={isFirstNode}
-              isLastNode={isLastNode}
-            />
-          </Suspense>
-        ) : (
-          <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-            <p className="text-yellow-700">Ładowanie szablonu dla kroku...</p>
-          </div>
-        )}
       </div>
     );
   };
@@ -272,15 +95,21 @@ export const ScenarioView: React.FC = () => {
       {LayoutComponent ? (
         <LayoutComponent
           title={currentScenario?.name || currentWorkspace?.name}
-          stepTitle={
-            currentNode?.label ||
-            (scenarioId ? undefined : "Wybierz scenariusz")
-          }
-          onBackClick={() =>
-            scenarioId ? navigate(`/${workspaceId}`) : navigate("/")
-          }
+          stepTitle={null}
+          onBackClick={() => navigate("/")}
         >
-          {renderContent()}
+          {/* Uproszczony widok - tylko widgety */}
+          <div className="space-y-6">
+            {renderWorkspaceWidgets()}
+            
+            {workspaceWidgetData.length === 0 && (
+              <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+                <p className="text-yellow-700">
+                  Brak dostępnych widgetów w tym workspace.
+                </p>
+              </div>
+            )}
+          </div>
         </LayoutComponent>
       ) : (
         <div className="p-4">Ładowanie layoutu...</div>
