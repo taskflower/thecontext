@@ -112,7 +112,7 @@
                 "label": "Krok 1: Wybierz scenariusz",
                 "assistantMessage": "Wybierz scenariusz do edycji:",
                 "contextPath": "edit-data.selection",
-                "tplFile": "scenarioPickerStep",
+                "tplFile": "ScenarioPickerStep",
                 "order": 0,
                 "attrs": {}
               },
@@ -122,7 +122,7 @@
                 "label": "Krok 2: Ładowanie scenariusza",
                 "assistantMessage": "Ładuję wybrany scenariusz...",
                 "contextPath": "edit-data.loaded",
-                "tplFile": "llmStep",
+                "tplFile": "LlmStep",
                 "order": 1,
                 "attrs": {
                   "autoStart": true,
@@ -135,7 +135,7 @@
                 "label": "Krok 3: Modyfikacja scenariusza",
                 "assistantMessage": "Dostosuj parametry scenariusza:",
                 "contextPath": "edit-data.modified",
-                "tplFile": "scenarioEditorStep",
+                "tplFile": "ScenarioEditorStep",
                 "order": 2,
                 "attrs": {
                   "dataPath": "edit-data.loaded"
@@ -147,7 +147,7 @@
                 "label": "Krok 4: Aktualizacja kodu",
                 "assistantMessage": "Aktualizuję kod scenariusza...",
                 "contextPath": "edit-data.updated-code",
-                "tplFile": "llmStep",
+                "tplFile": "LlmStep",
                 "order": 3,
                 "attrs": {
                   "autoStart": true,
@@ -161,7 +161,7 @@
           "layoutFile": "ScenarioBuilder",
           "widgets": [
             {
-              "tplFile": "info",
+              "tplFile": "Info",
               "data": {
                 "title": "Generator Scenariuszy",
                 "description": "Wybierz opcję, aby rozpocząć pracę ze scenariuszami",
