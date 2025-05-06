@@ -28,6 +28,16 @@ export const ScenarioView: React.FC = () => {
     if (scenarioId && workspaceId) selectScenario(scenarioId);
   }, [scenarioId, workspaceId, selectScenario]);
 
+  // Pobierz nazwę layoutu z templateSettings lub użyj domyślnego "Simple"
+  const layoutName = useMemo(() => {
+    if (currentWorkspace?.templateSettings?.layoutFile) {
+      console.log(`Używam layoutu z konfiguracji: ${currentWorkspace.templateSettings.layoutFile}`);
+      return currentWorkspace.templateSettings.layoutFile;
+    }
+    console.log('Brak layoutu w konfiguracji, używam domyślnego "Simple"');
+    return "Simple";
+  }, [currentWorkspace?.templateSettings?.layoutFile]);
+
   // Widgety workspace
   const workspaceWidgets = useMemo(
     () => currentWorkspace?.templateSettings?.widgets || [],
@@ -41,12 +51,12 @@ export const ScenarioView: React.FC = () => {
     error: widgetsError,
   } = useWidgets(workspaceWidgets);
 
-  // Komponenty UI
+  // Komponenty UI - używamy layoutName zamiast "Simple"
   const {
     component: LayoutComponent,
     error: layoutError,
     isLoading: layoutLoading,
-  } = useComponents("layout", "Simple");
+  } = useComponents("layout", layoutName);
 
   // Stany ładowania i błędów
   const combinedLoading =
@@ -112,7 +122,16 @@ export const ScenarioView: React.FC = () => {
           </div>
         </LayoutComponent>
       ) : (
-        <div className="p-4">Ładowanie layoutu...</div>
+        <div className="p-4">
+          <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
+            <p className="text-red-700">
+              Błąd ładowania layoutu: {layoutName}
+            </p>
+            <p className="text-sm text-red-600 mt-2">
+              Sprawdź, czy layout istnieje w katalogu szablonów.
+            </p>
+          </div>
+        </div>
       )}
     </LoadingState>
   );

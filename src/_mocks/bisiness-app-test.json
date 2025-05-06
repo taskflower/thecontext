@@ -105,6 +105,9 @@
                   "Koszty": "financial-data.costs",
                   "Zysk": "roi-results.profit"
                 }
+              },
+              {
+                "tplFile": "ScenarioList"
               }
             ]
           },
