@@ -1,7 +1,9 @@
+// src/core/engine.tsx
 import React, { Suspense, lazy, useMemo } from 'react';
 import { z, ZodTypeAny } from 'zod';
 import { useFlowStore } from './context';
 import { AppConfig, NodeConfig } from './types';
+import { useNavigate, useParams } from 'react-router-dom';
 
 // Deklaracja typów dla window
 declare global {
@@ -54,10 +56,7 @@ const NodeRenderer: React.FC<{
   
   // Zoptymalizowane logowanie - tylko raz dla każdej ścieżki schematu
   if (process.env.NODE_ENV === 'development') {
-    // Inicjalizacja obiektu dla śledzenia zalogowanych schematów
     window._loggedSchemas = window._loggedSchemas || {};
-    
-    // Loguj schemat tylko raz dla danej ścieżki
     if (!window._loggedSchemas[node.contextSchemaPath]) {
       console.log("Schemat JSON dla", node.contextSchemaPath, ":", jsonSchema);
       window._loggedSchemas[node.contextSchemaPath] = true;
@@ -115,6 +114,8 @@ export const FlowEngine: React.FC<{
   scenarioSlug?: string;
 }> = ({ config, scenarioSlug }) => {
   const { currentNodeIndex, setCurrentNodeIndex } = useFlowStore();
+  const navigate = useNavigate();
+  const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
   
   // Wybierz scenariusz (domyślnie pierwszy lub wg sluga)
   const scenario = useMemo(() => 
@@ -122,7 +123,7 @@ export const FlowEngine: React.FC<{
       ? config.scenarios.find(s => s.slug === scenarioSlug) 
       : config.scenarios[0],
   [config.scenarios, scenarioSlug]);
-    
+  
   if (!scenario) return <div>Scenariusz nie znaleziony</div>;
   
   // Posortowane węzły wg kolejności
@@ -132,13 +133,16 @@ export const FlowEngine: React.FC<{
   
   const currentNode = sortedNodes[currentNodeIndex];
   
-  if (!currentNode) return <div>Zakończono!</div>;
-  
   const handleNext = () => {
     if (currentNodeIndex < sortedNodes.length - 1) {
       setCurrentNodeIndex(currentNodeIndex + 1);
+    } else {
+      // Po zakończeniu scenariusza wróć do widoku workspace
+      navigate(`/${workspaceSlug}`);
     }
   };
+  
+  if (!currentNode) return <div>Zakończono!</div>;
   
   return (
     <NodeRenderer
