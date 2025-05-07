@@ -166,68 +166,81 @@ const config: AppConfig = {
               "Na podstawie analizy: {{website-summary.summary}} i słów kluczowych: {{website-summary.keywords}} przygotuj opis marketingowy o długości 150-200 słów, określ branżę, grupę docelową, zwróć też suggestedChannels i metrics w JSON.",
           },
         },
-        {
-          slug: "summary",
-          label: "Krok 4: Podsumowanie",
-          contextSchemaPath: "summary-data",
-          contextDataPath: "summary-data",
-          tplFile: "WidgetsStep",
-          order: 3,
-          attrs: {
-            widgets: [
-              {
-                tplFile: "Title",
-                title: "Wyniki analizy marketingowej strony",
-                size: "large",
-              },
-              {
-                tplFile: "Info",
-                title: "Analizowana strona",
-                dataPath: "website-data.url",
-                variant: "info",
-              },
-              {
-                tplFile: "Info",
-                title: "Branża",
-                dataPath: "marketing-description.industry",
-                variant: "success",
-              },
-              {
-                tplFile: "DataDisplay",
-                title: "Streszczenie strony",
-                type: "keyValue",
-                dataPath: "website-summary",
-              },
-              {
-                tplFile: "DataDisplay",
-                title: "Słowa kluczowe",
-                type: "list",
-                dataPath: "website-summary.keywords",
-              },
-              {
-                tplFile: "DataDisplay",
-                title: "Opis marketingowy",
-                type: "code",
-                dataPath: "marketing-description.marketingDescription",
-              },
-              {
-                tplFile: "Info",
-                title: "Grupa docelowa",
-                dataPath: "marketing-description.targetAudience",
-                variant: "warning",
-              },
-              {
-                tplFile: "CardListWidget",
-                contextDataPath: "marketing-description.suggestedChannels",
-              },
-              {
-                tplFile: "MetricsWidget",
-                title: "Metryki marketingowe",
-                dataPath: "marketing-description.metrics",
-              },
-            ],
-          },
+        // Poprawione widgety w kroku summary
+      // Poprawione widgety z szerszym układem
+      {
+        slug: "summary",
+        label: "Krok 4: Podsumowanie",
+        contextSchemaPath: "summary-data",
+        contextDataPath: "summary-data",
+        tplFile: "WidgetsStep",
+        order: 3,
+        attrs: {
+          widgets: [
+            {
+              tplFile: "TitleWidget",
+              title: "Wyniki analizy marketingowej strony",
+              size: "large",
+              colSpan: 3,
+            },
+            {
+              tplFile: "InfoWidget",
+              title: "Analizowana strona",
+              contextDataPath: "website-data.url",
+              variant: "info",
+              colSpan: 1,
+            },
+            {
+              tplFile: "InfoWidget",
+              title: "Branża",
+              contextDataPath: "marketing-description.industry",
+              variant: "success",
+              colSpan: 1,
+            },
+            {
+              tplFile: "InfoWidget",
+              title: "Grupa docelowa",
+              contextDataPath: "marketing-description.targetAudience",
+              variant: "warning",
+              colSpan: 1,
+            },
+            {
+              tplFile: "CardListWidget",
+              title: "Opis marketingowy",
+              contextDataPath: "marketing-description.marketingDescription",
+              layout: "list",
+              colSpan: 3,
+            },
+            {
+              tplFile: "CardListWidget",
+              title: "Streszczenie strony",
+              contextDataPath: "website-summary.summary",
+              layout: "list",
+              colSpan: 2,
+            },
+            {
+              tplFile: "CardListWidget",
+              title: "Słowa kluczowe",
+              contextDataPath: "website-summary.keywords",
+              layout: "grid",
+              colSpan: 1,
+            },
+            {
+              tplFile: "CardListWidget",
+              title: "Sugerowane kanały",
+              contextDataPath: "marketing-description.suggestedChannels",
+              layout: "grid",
+              colSpan: 2,
+            },
+            {
+              tplFile: "MetricsWidget",
+              title: "Metryki marketingowe",
+              contextDataPath: "marketing-description.metrics",
+              colSpan: 1,
+            },
+          ],
         },
+      }
       ],
     },
   ],

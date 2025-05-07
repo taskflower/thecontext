@@ -21,11 +21,10 @@ type CardListProps = {
   layout?: 'grid' | 'list' | 'table';
 };
 
-export default function CardListWidget({ 
+export default function ListTableWidget({ 
   title, 
   data = [], 
   emptyMessage = 'Brak elementów do wyświetlenia',
-  layout = 'grid'
 }: CardListProps) {
   const renderIcon = (icon?: string) => {
     if (!icon) return null;
@@ -50,7 +49,7 @@ export default function CardListWidget({
     );
   };
 
-  if (layout === 'table') {
+  
     return (
       <div className="h-full overflow-x-auto">
         {title && <h3 className="text-xl font-semibold mb-4 text-slate-800">{title}</h3>}
@@ -90,77 +89,7 @@ export default function CardListWidget({
         )}
       </div>
     );
-  }
+
   
-  if (layout === 'list') {
-    return (
-      <div className="p-6 h-full">
-        {title && <h3 className="text-lg font-medium text-zinc-900 mb-4">{title}</h3>}
-        
-        {data.length > 0 ? (
-          <div className="rounded-md border overflow-hidden">
-            {data.map((item, index) => (
-              <div key={item.id} className={`p-4 hover:bg-zinc-50 transition-colors ${index !== data.length - 1 ? 'border-b' : ''}`}>
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center">
-                    {renderIcon(item.icon)}
-                    <div>
-                      <div className="font-medium text-zinc-900">{item.name}</div>
-                      {item.description && (
-                        <div className="text-sm text-zinc-500 mt-1">{item.description}</div>
-                      )}
-                    </div>
-                  </div>
-                  {item.value !== undefined && (
-                    <div className="font-medium text-zinc-900 ml-2">{item.value}</div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="py-6 text-center text-zinc-500">
-            {emptyMessage}
-          </div>
-        )}
-      </div>
-    );
-  }
-  
-  // Default 'grid' layout
-  return (
-    <div className="p-6 h-full">
-      {title && <h3 className="text-lg font-medium text-zinc-900 mb-4">{title}</h3>}
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {data.length > 0 ? (
-          data.map(item => (
-            <div
-              key={item.id}
-              className="rounded-md border p-4 hover:bg-zinc-50 transition-colors"
-            >
-              <div className="flex items-center mb-2">
-                {renderIcon(item.icon)}
-                <h4 className="text-base font-medium text-zinc-900">{item.name}</h4>
-              </div>
-              
-              {item.description && (
-                <p className="text-sm text-zinc-500 mb-3">{item.description}</p>
-              )}
-              
-              {item.value !== undefined && (
-                <div className="pt-2 text-right">
-                  <span className="text-sm font-medium text-zinc-900">{item.value}</span>
-                </div>
-              )}
-            </div>
-          ))
-        ) : (
-          <div className="col-span-full py-6 text-center text-zinc-500">
-            {emptyMessage}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+
 }
