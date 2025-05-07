@@ -1,7 +1,7 @@
 // src/main.tsx
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { App } from './App'; // Poprawiony import
+import App  from './App'; // Poprawiony import
 import "./index.css";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 

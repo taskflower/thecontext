@@ -1,7 +1,7 @@
 // src/hooks/useIndexedDB.ts - zoptymalizowana wersja
 import { useState, useEffect } from "react";
 import localforage from "localforage";
-import { getErrorMessage } from "@/utils/errors";
+// import { getErrorMessage } from "@/utils/errors";
 
 // Typy danych
 export interface StoredItem {
@@ -50,7 +50,7 @@ export const useIndexedDB = (): UseIndexedDBReturn => {
       setError(null);
       return await operation();
     } catch (err) {
-      const errorMsg = getErrorMessage(err);
+      const errorMsg =`${errorContext}: ${err instanceof Error ? err.message : "Unknown error"}`
       console.error(`[${errorContext}] Error:`, err);
       const error = new Error(errorMsg);
       setError(error);
