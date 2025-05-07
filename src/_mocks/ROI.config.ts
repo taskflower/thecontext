@@ -91,9 +91,10 @@ const config: AppConfig = {
         widgets: [
           {
             tplFile: "ScenarioListWidget",
-            title: "Dostępne scenariusze"
-          }
-        ]
+            title: "Dostępne scenariusze",
+            colSpan: "full",
+          },
+        ],
       },
     },
   ],
