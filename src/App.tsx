@@ -1,104 +1,23 @@
-// // src/App.tsx
-// import { Suspense, lazy } from "react";
-// import {
-//   BrowserRouter as Router,
-//   Routes,
-//   Route,
-//   Outlet,
-//   Navigate,
-// } from "react-router-dom";
-
-// const FlowView = lazy(() => import("./views/FlowView"));
-
-// const LoginView = lazy(() => import("./views/LoginView"));
-// const ApplicationView = lazy(() => import("./views/ApplicationView"));
-// const WorkspaceView = lazy(() => import("./views/WorkspaceView"));
-// import SharedLoader from "./components/SharedLoader";
-// import { AuthProvider } from "./hooks";
-// import ScenarioView from "./views/ScenarioView";
-// import { EnhancedFlowDebugger } from "./_modules/debug/EnhancedFlowDebugger";
-
-// const AppWrapper = ({ children }: { children: React.ReactNode }) => (
-//   <div className="flex w-full h-screen overflow-hidden">
-//     <div
-//       id="app-content"
-//       className="h-full transition-all duration-300 ease-in-out w-full overflow-auto"
-//     >
-//       {children}
-//     </div>
-//   </div>
-// );
-
-// const App = () => (
-//   <Router>
-//     <AuthProvider>
-//       <Suspense
-//         fallback={
-//           <SharedLoader message="Ładowanie..." size="lg" fullScreen={true} />
-//         }
-//       >
-//         <AppWrapper>
-//           <Routes>
-//             {/* Auth routes */}
-//             <Route path="/login" element={<LoginView />} />
-
-           
-
-//             {/* New flow with applications */}
-//             <Route element={<Outlet />}>
-//               {/* Home page - application selection */}
-//               <Route path="/" element={<ApplicationView />} />
-
-//               {/* Workspace selection within application */}
-//               <Route path="/app/:applicationId" element={<WorkspaceView />} />
-
-//               {/* Scenario selection within application and workspace */}
-//               <Route
-//                 path="/app/:application/:workspace"
-//                 element={<ScenarioView />}
-//               />
-
-//               {/* Flow within application, workspace and scenario */}
-//               <Route
-//                 path="/app/:application/:workspace/:scenario"
-//                 element={<FlowView />}
-//               />
-
-//               {/* Old flow (backward compatibility) */}
-//               <Route path="/:workspace" element={<ScenarioView />} />
-//               <Route path="/:workspace/:scenario" element={<FlowView />} />
-
-//               {/* Redirects */}
-//               <Route path="/workspaces" element={<Navigate to="/" replace />} />
-//             </Route>
-//           </Routes>
-//         </AppWrapper>
-//       </Suspense>
-
-//       {/* Debug tools - loaded conditionally */}
-//       <Suspense fallback={null}>
-//         <EnhancedFlowDebugger />
-//       </Suspense>
-//     </AuthProvider>
-//   </Router>
-// );
-
-// export default App;
-
-
-import React, { Suspense, lazy, useState, useEffect } from 'react';
+import React, { Suspense, lazy, useState, useEffect, useRef } from 'react';
 import { FlowEngine } from './core/engine';
 import { useFlowStore } from './core/context';
 import type { AppConfig } from './core/types';
 import { AuthProvider } from './hooks';
 
-// Dynamiczne ładowanie layoutu
-const loadLayout = (tplDir: string, layoutFile: string) => 
-  lazy(() => 
+// Preload Layout - This ensures we only load it once
+const preloadLayout = (tplDir: string, layoutFile: string) => {
+  const Layout = lazy(() => 
     import(`./themes/${tplDir}/layouts/${layoutFile}`)
       .catch(() => import('./themes/default/layouts/Simple'))
   );
+  
+  // Return a component that will reuse the same Layout instance
+  return React.memo(({ children }: { children: React.ReactNode }) => (
+    <Layout>{children}</Layout>
+  ));
+};
 
+// This is our core application logic
 export const App: React.FC<{ 
   configUrl?: string;
   initialConfig?: AppConfig;
@@ -107,8 +26,9 @@ export const App: React.FC<{
   const [loading, setLoading] = useState(!initialConfig);
   const [error, setError] = useState<string | null>(null);
   const { reset } = useFlowStore();
+  const layoutRef = useRef<React.ComponentType<{children: React.ReactNode}> | null>(null);
   
-  // Ładowanie konfiguracji
+  // Load configuration
   useEffect(() => {
     if (initialConfig) return;
     
@@ -131,27 +51,132 @@ export const App: React.FC<{
     fetchConfig();
   }, [configUrl, initialConfig]);
   
-  // Resetowanie stanu przy zmianie konfiguracji
+  // Reset state when configuration changes
   useEffect(() => {
     if (config) reset();
   }, [config, reset]);
   
-  if (loading) return <div>Ładowanie konfiguracji...</div>;
-  if (error) return <div>Błąd: {error}</div>;
-  if (!config) return <div>Brak konfiguracji</div>;
+  // Initial loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="p-6 bg-white rounded-lg shadow-sm">
+          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+          <p className="text-center text-gray-700">Ładowanie konfiguracji...</p>
+        </div>
+      </div>
+    );
+  }
   
-  // Wybór szablonu i layoutu
-  const tplDir = config.tplDir || 'default';
-  const layoutFile = config.templateSettings?.layoutFile || 'Simple';
+  // Error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="p-6 max-w-md bg-white rounded-lg shadow-sm">
+          <div className="text-red-500 text-center mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-lg font-semibold text-center mb-2">Błąd</h2>
+          <p className="text-center text-gray-700">{error}</p>
+        </div>
+      </div>
+    );
+  }
   
-  const Layout = loadLayout(tplDir, layoutFile);
+  // No configuration
+  if (!config) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="p-6 bg-white rounded-lg shadow-sm">
+          <p className="text-center text-gray-700">Brak konfiguracji</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // Create or reuse the layout component
+  if (!layoutRef.current) {
+    const tplDir = config.tplDir || 'default';
+    const layoutFile = config.templateSettings?.layoutFile || 'Simple';
+    layoutRef.current = preloadLayout(tplDir, layoutFile);
+  }
+  
+  // Get the current Layout component
+  const AppLayout = layoutRef.current;
   
   return (
-    <Suspense fallback={<div>Ładowanie aplikacji...</div>}>
-       <AuthProvider><Layout>
-        <FlowEngine config={config} />
-      </Layout></AuthProvider>
+    <AuthProvider>
+      <Suspense fallback={
+        <div className="flex items-center justify-center min-h-screen bg-gray-50">
+          <div className="p-6 bg-white rounded-lg shadow-sm">
+            <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+            <p className="text-center text-gray-700">Ładowanie aplikacji...</p>
+          </div>
+        </div>
+      }>
+        <AppLayout>
+          <StableFlowEngine config={config} />
+        </AppLayout>
+      </Suspense>
+    </AuthProvider>
+  );
+};
+
+// Component that ensures stable step transitions
+const StableFlowEngine: React.FC<{ 
+  config: AppConfig; 
+  scenarioSlug?: string;
+}> = ({ config, scenarioSlug }) => {
+  const { currentNodeIndex } = useFlowStore();
+  const [prevIndex, setPrevIndex] = useState(currentNodeIndex);
+  const [transitioning, setTransitioning] = useState(false);
+  
+  // Handle step transitions
+  useEffect(() => {
+    if (currentNodeIndex !== prevIndex) {
+      setTransitioning(true);
       
-    </Suspense>
+      // Short timeout to allow for CSS transition
+      const timer = setTimeout(() => {
+        setPrevIndex(currentNodeIndex);
+        setTransitioning(false);
+      }, 200);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [currentNodeIndex, prevIndex]);
+  
+  return (
+    <>
+      {/* Active step content - fades out when transitioning */}
+      <div 
+        className={`transition-all duration-200 ${
+          transitioning ? 'opacity-0' : 'opacity-100'
+        }`}
+      >
+        <Suspense fallback={
+          <div className="p-8 bg-white rounded-lg shadow-md min-h-[400px] flex items-center justify-center">
+            <div className="flex flex-col items-center">
+              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+              <p className="text-gray-600">Ładowanie zawartości...</p>
+            </div>
+          </div>
+        }>
+          {!transitioning && <FlowEngine config={config} scenarioSlug={scenarioSlug} />}
+        </Suspense>
+      </div>
+      
+      {/* We only show a loading indicator during transitions */}
+      {transitioning && (
+        <div className="p-8 bg-white rounded-lg shadow-md min-h-[400px] flex items-center justify-center">
+          <div className="flex flex-col items-center">
+            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+            <p className="text-gray-600">Przechodzenie do kolejnego kroku...</p>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
