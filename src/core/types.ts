@@ -16,6 +16,7 @@ export interface ScenarioConfig {
   description?: string;
   icon?: string;
   systemMessage?: string;
+  workspaceSlug: string;
   nodes: NodeConfig[];
 }
 
@@ -24,6 +25,7 @@ export interface WorkspaceConfig {
   name: string;
   description?: string;
   icon?: string;
+  templateSettings?: TemplateSettings;
   contextSchema: {
     type: string;
     properties: Record<string, any>;
@@ -45,7 +47,7 @@ export interface AppConfig {
   tplDir: string;
   workspaces: WorkspaceConfig[];
   scenarios: ScenarioConfig[];
-  templateSettings?: TemplateSettings;
+
 }
 
 export interface TemplateComponentProps<T = any> {

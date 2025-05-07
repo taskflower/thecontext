@@ -10,8 +10,8 @@ const config: AppConfig = {
     tplDir: "default",
     layoutFile: "Simple",
     widgets: [
-      { tplFile: "Title", title: "Analiza Marketingowa Strony", description: "Wybierz scenariusz do uruchomienia", size: "large" },
-      { tplFile: "Info", data: { title: "Jak to działa?", description: "Narzędzie analizuje podaną stronę internetową i przygotowuje szczegółowy opis marketingowy, który może być wykorzystany w przyszłych kampaniach.", variant: "info" } },
+      { tplFile: "TitleWidget ", title: "Analiza Marketingowa Strony", description: "Wybierz scenariusz do uruchomienia", size: "large" },
+      { tplFile: "InfoWidget", data: { title: "Jak to działa?", description: "Narzędzie analizuje podaną stronę internetową i przygotowuje szczegółowy opis marketingowy, który może być wykorzystany w przyszłych kampaniach.", variant: "info" } },
       { tplFile: "Stats", title: "Ostatnia analiza", description: "Dane z ostatnio przeprowadzonej analizy", dataPaths: { URL: "website-data.url", Branża: "marketing-description.industry", "Grupa docelowa": "marketing-description.targetAudience" } },
       { tplFile: "ScenarioList" }
     ]
