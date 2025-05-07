@@ -2,7 +2,8 @@
 import React, { useMemo } from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import type { AppConfig } from '../core/types';
-import AppLoading from './AppLoading';
+
+
 
 const ScenarioWrapper: React.FC<{ config: AppConfig }> = ({ config }) => {
   const { workspaceSlug, scenarioSlug } = useParams<{ workspaceSlug: string; scenarioSlug: string }>();
