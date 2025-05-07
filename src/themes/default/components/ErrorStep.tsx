@@ -1,3 +1,4 @@
+// src/themes/default/components/ErrorStep.tsx
 import { AlertTriangle } from 'lucide-react';
 
 type ErrorStepProps = {
@@ -27,7 +28,7 @@ export default function ErrorStep({
       <div>
         <button 
           onClick={() => onSubmit({})}
-          className="py-2 px-4 bg-slate-800 text-white rounded-md shadow-sm font-medium hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+          className="px-5 py-3 rounded-md transition-colors text-base font-medium bg-gray-900 text-white hover:bg-gray-800"
         >
           Kontynuuj
         </button>

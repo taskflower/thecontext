@@ -1,3 +1,4 @@
+// src/themes/default/widgets/CardListWidget.tsx
 import React from 'react';
 import { 
   Star, Check, Info, AlertTriangle, X, 
@@ -32,12 +33,12 @@ export default function CardListWidget({
     const iconMap: Record<string, React.ReactNode> = {
       'star': <Star className="w-4 h-4 text-amber-600" />,
       'check': <Check className="w-4 h-4 text-green-600" />,
-      'info': <Info className="w-4 h-4 text-slate-600" />,
+      'info': <Info className="w-4 h-4 text-gray-600" />,
       'warning': <AlertTriangle className="w-4 h-4 text-amber-600" />,
       'error': <X className="w-4 h-4 text-red-600" />,
       'briefcase': <Briefcase className="w-4 h-4 text-indigo-600" />,
       'calculator': <Calculator className="w-4 h-4 text-purple-600" />,
-      'chart': <BarChart className="w-4 h-4 text-slate-600" />,
+      'chart': <BarChart className="w-4 h-4 text-gray-600" />,
       'money': <DollarSign className="w-4 h-4 text-green-600" />,
       'document': <FileText className="w-4 h-4 text-gray-600" />,
     };
@@ -52,7 +53,7 @@ export default function CardListWidget({
   if (layout === 'table') {
     return (
       <div className="p-6 h-full overflow-x-auto">
-        {title && <h3 className="mt-0 mb-4 text-lg font-medium text-slate-800">{title}</h3>}
+        {title && <h3 className="mt-0 mb-4 text-lg font-medium text-gray-900">{title}</h3>}
         
         {data.length > 0 ? (
           <table className="w-full text-left border-collapse">
@@ -69,13 +70,13 @@ export default function CardListWidget({
                   <td className="p-3">
                     <div className="flex items-center">
                       {renderIcon(item.icon)}
-                      <span className="font-medium text-slate-700">{item.name}</span>
+                      <span className="font-medium text-gray-700">{item.name}</span>
                     </div>
                   </td>
                   <td className="p-3 text-sm text-gray-600">
                     {item.description || '-'}
                   </td>
-                  <td className="p-3 text-right font-medium text-slate-700">
+                  <td className="p-3 text-right font-medium text-gray-700">
                     {item.value !== undefined ? item.value : '-'}
                   </td>
                 </tr>
@@ -94,7 +95,7 @@ export default function CardListWidget({
   if (layout === 'list') {
     return (
       <div className="p-6 h-full">
-        {title && <h3 className="mt-0 mb-4 text-lg font-medium text-slate-800">{title}</h3>}
+        {title && <h3 className="mt-0 mb-4 text-lg font-medium text-gray-900">{title}</h3>}
         
         {data.length > 0 ? (
           <div className="border border-gray-200 rounded-md divide-y divide-gray-200 shadow-sm">
@@ -104,14 +105,14 @@ export default function CardListWidget({
                   <div className="flex items-center">
                     {renderIcon(item.icon)}
                     <div>
-                      <div className="font-medium text-slate-700">{item.name}</div>
+                      <div className="font-medium text-gray-700">{item.name}</div>
                       {item.description && (
                         <div className="text-sm text-gray-600 mt-1">{item.description}</div>
                       )}
                     </div>
                   </div>
                   {item.value !== undefined && (
-                    <div className="font-medium text-slate-700 ml-2">{item.value}</div>
+                    <div className="font-medium text-gray-700 ml-2">{item.value}</div>
                   )}
                 </div>
               </div>
@@ -129,7 +130,7 @@ export default function CardListWidget({
   // Default 'grid' layout
   return (
     <div className="p-6 h-full">
-      {title && <h3 className="mt-0 mb-4 text-lg font-medium text-slate-800">{title}</h3>}
+      {title && <h3 className="mt-0 mb-4 text-lg font-medium text-gray-900">{title}</h3>}
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {data.length > 0 ? (
@@ -141,7 +142,7 @@ export default function CardListWidget({
               <div className="p-4">
                 <div className="flex items-center mb-2">
                   {renderIcon(item.icon)}
-                  <h4 className="m-0 text-base font-medium text-slate-800">{item.name}</h4>
+                  <h4 className="m-0 text-base font-medium text-gray-800">{item.name}</h4>
                 </div>
                 
                 {item.description && (
@@ -150,7 +151,7 @@ export default function CardListWidget({
                 
                 {item.value !== undefined && (
                   <div className="pt-2 border-t border-gray-100 text-right">
-                    <span className="text-sm font-medium text-slate-700">{item.value}</span>
+                    <span className="text-sm font-medium text-gray-700">{item.value}</span>
                   </div>
                 )}
               </div>

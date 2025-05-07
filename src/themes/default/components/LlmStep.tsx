@@ -1,3 +1,4 @@
+// src/themes/default/components/LlmStep.tsx
 import { ZodType } from "zod";
 import { useAuth } from "@/hooks";
 import { useLlm } from "../../../core/hooks/useLlm";
@@ -53,7 +54,7 @@ export default function LlmStep<T>({
     return (
       <button 
         onClick={() => setStarted(true)}
-        className="px-4 py-2 bg-slate-800 text-white rounded-md shadow-sm font-medium hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+        className="px-5 py-3 rounded-md transition-colors text-base font-medium bg-gray-900 text-white hover:bg-gray-800"
       >
         Rozpocznij
       </button>
@@ -63,8 +64,8 @@ export default function LlmStep<T>({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-6">
-        <div className="w-6 h-6 border-4 border-slate-800 border-t-transparent rounded-full animate-spin mr-2"></div>
-        <span className="text-slate-800 font-medium">Przetwarzanie...</span>
+        <div className="w-6 h-6 border-4 border-gray-900 border-t-transparent rounded-full animate-spin mr-2"></div>
+        <span className="text-gray-900 font-medium">Przetwarzanie...</span>
       </div>
     );
   }
@@ -76,7 +77,7 @@ export default function LlmStep<T>({
         <p>{error}</p>
         <button 
           onClick={startLlmProcess}
-          className="mt-4 px-4 py-2 bg-slate-800 text-white rounded-md shadow-sm font-medium hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+          className="mt-4 px-5 py-3 rounded-md transition-colors text-base font-medium bg-gray-900 text-white hover:bg-gray-800"
         >
           Spróbuj ponownie
         </button>
@@ -98,7 +99,7 @@ export default function LlmStep<T>({
   return (
     <div 
       onClick={startLlmProcess}
-      className="p-6 bg-slate-50 text-slate-700 rounded-md border border-slate-200 cursor-pointer hover:bg-slate-100 transition-colors"
+      className="p-6 bg-gray-50 text-gray-700 rounded-md border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors"
     >
       Kliknij, aby rozpocząć przetwarzanie
     </div>

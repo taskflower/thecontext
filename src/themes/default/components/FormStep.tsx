@@ -1,3 +1,4 @@
+// src/themes/default/components/FormStep.tsx
 import React, { useEffect } from 'react';
 import { TemplateComponentProps } from '../../../core/types';
 import { useFormSchema } from '../../../core/hooks/useFormSchema';
@@ -58,36 +59,40 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
     const hasError = !!fieldError;
     
     return (
-      <div key={fieldName} className="mb-5">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+      <div key={fieldName} className="my-4 space-y-3">
+        <label className="text-base font-medium text-gray-900">
           {title} {required && <span className="text-red-600">*</span>}
         </label>
         
         {description && (
-          <p className="text-xs text-gray-500 mb-1">{description}</p>
+          <p className="text-sm text-gray-500">{description}</p>
         )}
         
         {fieldType === 'text' && (
-          <input
-            type="text"
-            value={fieldValue || ''}
-            onChange={(e) => handleChange(fieldName, e.target.value)}
-            placeholder={fieldSchema.placeholder}
-            className={`w-full p-2 border rounded-md shadow-sm focus:ring-2 focus:ring-slate-300 focus:border-slate-300 ${hasError ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'}`}
-          />
+          <div className="relative w-full border-2 rounded-md transition-all border-gray-200 hover:border-gray-400">
+            <input
+              type="text"
+              value={fieldValue || ''}
+              onChange={(e) => handleChange(fieldName, e.target.value)}
+              placeholder={fieldSchema.placeholder}
+              className="flex h-12 w-full bg-transparent px-3 py-2 text-base focus-visible:outline-none"
+            />
+          </div>
         )}
         
         {fieldType === 'number' && (
-          <input
-            type="number"
-            value={fieldValue === undefined ? '' : fieldValue}
-            min={fieldSchema.min}
-            max={fieldSchema.max}
-            step={fieldSchema.step}
-            onChange={(e) => handleChange(fieldName, e.target.value === '' ? '' : Number(e.target.value))}
-            placeholder={fieldSchema.placeholder}
-            className={`w-full p-2 border rounded-md shadow-sm focus:ring-2 focus:ring-slate-300 focus:border-slate-300 ${hasError ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'}`}
-          />
+          <div className="relative w-full border-2 rounded-md transition-all border-gray-200 hover:border-gray-400">
+            <input
+              type="number"
+              value={fieldValue === undefined ? '' : fieldValue}
+              min={fieldSchema.min}
+              max={fieldSchema.max}
+              step={fieldSchema.step}
+              onChange={(e) => handleChange(fieldName, e.target.value === '' ? '' : Number(e.target.value))}
+              placeholder={fieldSchema.placeholder}
+              className="flex h-12 w-full bg-transparent px-3 py-2 text-base focus-visible:outline-none"
+            />
+          </div>
         )}
         
         {fieldType === 'checkbox' && (
@@ -96,58 +101,71 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
               type="checkbox"
               checked={fieldValue || false}
               onChange={(e) => handleChange(fieldName, e.target.checked)}
-              className={`h-4 w-4 text-slate-800 focus:ring-slate-300 ${hasError ? 'border-red-500' : 'border-gray-300'} rounded`}
+              className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
-            <span className="ml-2 text-sm text-gray-600">{fieldSchema.placeholder || 'Zaznacz'}</span>
+            <span className="ml-2 text-base text-gray-900">{fieldSchema.placeholder || 'Zaznacz'}</span>
           </div>
         )}
         
         {fieldType === 'email' && (
-          <input
-            type="email"
-            value={fieldValue || ''}
-            onChange={(e) => handleChange(fieldName, e.target.value)}
-            placeholder={fieldSchema.placeholder || 'email@example.com'}
-            className={`w-full p-2 border rounded-md shadow-sm focus:ring-2 focus:ring-slate-300 focus:border-slate-300 ${hasError ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'}`}
-          />
+          <div className="relative w-full border-2 rounded-md transition-all border-gray-200 hover:border-gray-400">
+            <div className="flex items-center">
+              <div className="flex items-center justify-center h-12 px-3 text-base rounded-md bg-gray-100 text-gray-500">
+                @
+              </div>
+              <input
+                type="email"
+                value={fieldValue || ''}
+                onChange={(e) => handleChange(fieldName, e.target.value)}
+                placeholder={fieldSchema.placeholder || 'email@example.com'}
+                className="flex h-12 w-full bg-transparent px-3 py-2 text-base focus-visible:outline-none"
+              />
+            </div>
+          </div>
         )}
         
         {fieldType === 'date' && (
-          <input
-            type="date"
-            value={fieldValue || ''}
-            onChange={(e) => handleChange(fieldName, e.target.value)}
-            className={`w-full p-2 border rounded-md shadow-sm focus:ring-2 focus:ring-slate-300 focus:border-slate-300 ${hasError ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'}`}
-          />
+          <div className="relative w-full border-2 rounded-md transition-all border-gray-200 hover:border-gray-400">
+            <input
+              type="date"
+              value={fieldValue || ''}
+              onChange={(e) => handleChange(fieldName, e.target.value)}
+              className="flex h-12 w-full bg-transparent px-3 py-2 text-base focus-visible:outline-none"
+            />
+          </div>
         )}
         
         {fieldType === 'textarea' && (
-          <textarea
-            value={fieldValue || ''}
-            onChange={(e) => handleChange(fieldName, e.target.value)}
-            placeholder={fieldSchema.placeholder}
-            rows={4}
-            className={`w-full p-2 border rounded-md shadow-sm focus:ring-2 focus:ring-slate-300 focus:border-slate-300 ${hasError ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'}`}
-          />
+          <div className="relative w-full border-2 rounded-md transition-all border-gray-200 hover:border-gray-400">
+            <textarea
+              value={fieldValue || ''}
+              onChange={(e) => handleChange(fieldName, e.target.value)}
+              placeholder={fieldSchema.placeholder}
+              rows={4}
+              className="w-full bg-transparent px-3 py-2 text-base focus-visible:outline-none"
+            />
+          </div>
         )}
         
         {fieldType === 'select' && options && (
-          <select
-            value={fieldValue || ''}
-            onChange={(e) => handleChange(fieldName, e.target.value)}
-            className={`w-full p-2 border rounded-md shadow-sm focus:ring-2 focus:ring-slate-300 focus:border-slate-300 ${hasError ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'}`}
-          >
-            <option value="">-- Wybierz --</option>
-            {options.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          <div className="relative w-full border-2 rounded-md transition-all border-gray-200 hover:border-gray-400">
+            <select
+              value={fieldValue || ''}
+              onChange={(e) => handleChange(fieldName, e.target.value)}
+              className="flex h-12 w-full bg-transparent px-3 py-2 text-base focus-visible:outline-none"
+            >
+              <option value="">-- Wybierz --</option>
+              {options.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
         )}
         
         {hasError && (
-          <p className="text-red-600 text-sm mt-1">{fieldError}</p>
+          <p className="text-red-600 text-sm">{fieldError}</p>
         )}
       </div>
     );
@@ -155,7 +173,7 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
 
   return (
     <div className="pt-6">
-      <h2 className="text-xl font-semibold text-slate-800 mb-3">{title}</h2>
+      <h2 className="text-xl font-semibold text-gray-900 mb-3">{title}</h2>
       
       {description && (
         <p className="text-gray-600 mb-6">{description}</p>
@@ -171,7 +189,7 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
         )}
         
         {showRequiredHint && hasRequiredFields && (
-          <p className="text-xs text-gray-500 mt-2 mb-4">
+          <p className="text-sm text-gray-500 mt-2 mb-4">
             Pola oznaczone <span className="text-red-600">*</span> są wymagane
           </p>
         )}
@@ -185,7 +203,7 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
         <div className="mt-6">
           <button
             type="submit"
-            className="px-4 py-2 bg-slate-800 text-white rounded-md shadow-sm font-medium hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+            className="px-5 py-3 rounded-md transition-colors text-base font-medium w-full bg-gray-900 text-white hover:bg-gray-800"
           >
             {submitLabel}
           </button>

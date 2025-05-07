@@ -3,7 +3,7 @@ import { AppConfig } from "../core/types";
 const config: AppConfig = {
   name: "Analiza Finansowa - test",
   description: "Prosta analiza finansowa projektu",
-  tplDir: "clean",
+  tplDir: "default",
   workspaces: [
     {
       slug: "workspace-finance",

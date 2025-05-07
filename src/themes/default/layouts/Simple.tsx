@@ -1,6 +1,7 @@
 // src/themes/default/layouts/Simple.tsx
 import React from "react";
 import { Link } from "react-router-dom";
+import { X } from "lucide-react";
 
 interface LayoutContext {
   workspace: any;
@@ -16,63 +17,54 @@ interface LayoutProps {
 }
 
 const SimpleLayout: React.FC<LayoutProps> = ({ children, context }) => {
-  // Dostęp do danych kontekstowych
   const { workspace, scenario, stepIdx = 0, totalSteps = 0 } = context || {};
-  const workspaceSlug = workspace?.slug;
-  const scenarioSlug = scenario?.slug;
-
-  // Renderowanie elementów UI tylko gdy mamy context scenariusza
   const showScenarioUI = !!scenario;
   
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-white shadow-sm py-4 border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4">
-          <h1 className="text-xl font-semibold text-gray-800">
-            {workspace?.name || 'FlowApp'}
-          </h1>
-        </div>
-      </header>
-      
-      <main className="flex-1">
-        {/* Breadcrumbs - renderowane tylko dla scenariusza */}
-        {showScenarioUI && (
-          <nav className="max-w-6xl mx-auto py-2 px-4 flex text-sm text-gray-500 bg-gray-50 border-b border-gray-200">
-            <Link to="/">Home</Link><span className="mx-2">/</span>
-            <Link to={`/${workspaceSlug}`}>{workspace?.name}</Link><span className="mx-2">/</span>
-            <span>{scenario?.name}</span><span className="mx-2">/</span>
-            <span>Krok {stepIdx + 1}</span>
-          </nav>
-        )}
-
-        {/* Pasek postępu - renderowany tylko dla scenariusza */}
-        {showScenarioUI && (
-          <div className="max-w-6xl mx-auto px-4 py-4">
-            <div className="flex items-center mb-6">
-              <div className="flex-1 h-1.5 bg-gray-200 rounded overflow-hidden mr-4">
-                <div
-                  className="h-full bg-blue-500 rounded transition-all duration-300"
-                  style={{ width: `${((stepIdx + 1) / totalSteps) * 100}%` }}
-                />
-              </div>
-              <div className="text-sm text-gray-500">
-                {stepIdx + 1} / {totalSteps}
-              </div>
+    <div className="min-h-screen bg-gray-50 flex flex-col pt-6">
+      <div className="overflow-hidden flex flex-col bg-white rounded-lg border border-gray-200 shadow-lg w-full max-w-4xl mx-auto h-full md:min-h-[95vh] md:max-h-[95vh]">
+        <div className="px-5 py-6 bg-white">
+          <div className="w-full flex items-center justify-between">
+            <div className="font-black text-xl tracking-tighter text-gray-900">
+              {workspace?.name || 'FlowApp'}
             </div>
+            <button className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 h-8 w-8 rounded-full text-gray-900 hover:bg-gray-100">
+              <X className="h-4 w-4" />
+            </button>
           </div>
-        )}
-
-        {/* Zawartość */}
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          {children}
+          
+          {showScenarioUI && (
+            <>
+              <div className="mt-10 mb-8">
+                <h2 className="text-3xl font-normal text-gray-900">
+                  {workspace?.name}<br />
+                  <span className="font-bold">{scenario?.name}</span>
+                </h2>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-bold text-base text-gray-900">
+                  Krok {stepIdx + 1}: {scenario?.steps?.[stepIdx]?.title || ''}
+                </h3>
+              </div>
+              
+              <div className="mb-6">
+                <div className="h-1.5 bg-gray-200 rounded overflow-hidden">
+                  <div
+                    className="h-full bg-blue-500 rounded transition-all duration-300"
+                    style={{ width: `${((stepIdx + 1) / totalSteps) * 100}%` }}
+                  />
+                </div>
+              </div>
+            </>
+          )}
         </div>
-      </main>
-
-      <footer className="bg-white py-4 border-t border-gray-200 mt-auto">
-        <div className="max-w-6xl mx-auto px-4 text-center text-sm text-gray-500">
-          &copy; 2025 FlowApp
+        
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-6">
+            {children}
+          </div>
         </div>
-      </footer>
+      </div>
     </div>
   );
 };

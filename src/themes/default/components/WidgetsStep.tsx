@@ -1,3 +1,4 @@
+// src/themes/default/components/WidgetsStep.tsx
 import { lazy, Suspense } from "react";
 import { useFlow } from "../../../core/context";
 import { CheckSquare, Loader } from "lucide-react";
@@ -54,13 +55,13 @@ export default function WidgetsStep({
     return (
       <div
         key={widget.tplFile + (widget.title || "")}
-        className={`bg-white rounded-lg border-gray-200 overflow-hidden h-full ${getColSpanClass(widget.colSpan)}`}
+        className={`bg-white rounded-lg border border-gray-200 overflow-hidden h-full ${getColSpanClass(widget.colSpan)}`}
       > 
         <Suspense
           fallback={
             <div className="flex items-center justify-center p-6 h-32">
-              <Loader className="w-6 h-6 text-slate-800 animate-spin" />
-              <span className="ml-2 text-slate-600">Ładowanie widgetu...</span>
+              <Loader className="w-6 h-6 text-gray-900 animate-spin" />
+              <span className="ml-2 text-gray-600">Ładowanie widgetu...</span>
             </div>
           }
         >
@@ -74,7 +75,7 @@ export default function WidgetsStep({
     <div className="max-w-6xl mx-auto p-6">
       {(title || subtitle) && (
         <div className="mb-8">
-          {title && <h2 className="text-2xl font-semibold text-slate-800 mb-2">{title}</h2>}
+          {title && <h2 className="text-2xl font-semibold text-gray-900 mb-2">{title}</h2>}
           {subtitle && <p className="text-gray-600">{subtitle}</p>}
         </div>
       )}
@@ -86,7 +87,7 @@ export default function WidgetsStep({
       <div className="flex justify-end">
         <button
           onClick={() => onSubmit({})}
-          className="py-2 px-4 bg-slate-800 text-white rounded-md shadow-sm font-medium hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 flex items-center"
+          className="px-5 py-3 rounded-md transition-colors text-base font-medium bg-gray-900 text-white hover:bg-gray-800 flex items-center"
         >
           <CheckSquare className="w-4 h-4 mr-2" />
           Zakończ

@@ -34,7 +34,7 @@ const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
       const timer = setTimeout(() => {
         setPrevIdx(stepIdx);
         setTransitioning(false);
-      }, 200);
+      }, 100);
       return () => clearTimeout(timer);
     }
   }, [stepIdx, prevIdx]);
