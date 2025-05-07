@@ -1,15 +1,15 @@
 // src/components/WorkspaceOverview.tsx
-import React, { useMemo, Suspense } from 'react';
-import { useParams } from 'react-router-dom';
-import type { AppConfig } from '../core/types';
-import AppLoading from './AppLoading';
-import { preloadLayout } from '../preloadLayout';
-import WidgetsStep from '@/themes/default/components/WidgetsStep';
+import React, { useMemo, Suspense } from "react";
+import { useParams } from "react-router-dom";
+import type { AppConfig } from "../core/types";
+import AppLoading from "./AppLoading";
+import { preloadLayout } from "../preloadLayout";
+import WidgetsStep from "@/themes/default/components/WidgetsStep";
 
 const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
   const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
   const workspace = useMemo(
-    () => config.workspaces.find(w => w.slug === workspaceSlug),
+    () => config.workspaces.find((w) => w.slug === workspaceSlug),
     [config.workspaces, workspaceSlug]
   );
 
@@ -17,12 +17,17 @@ const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="p-6 max-w-md bg-white rounded-lg shadow-sm">
-          <h2 className="text-lg font-semibold text-center mb-2">Workspace nie znaleziony</h2>
+          <h2 className="text-lg font-semibold text-center mb-2">
+            Workspace nie znaleziony
+          </h2>
           <p className="text-center text-gray-700 mb-4">
             Przepraszamy, ale workspace "{workspaceSlug}" nie istnieje.
           </p>
           <div className="flex justify-center">
-            <a href="/" className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+            <a
+              href="/"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
               Wróć do strony głównej
             </a>
           </div>
@@ -33,7 +38,7 @@ const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
 
   // Użyj ustawień tplDir i layoutFile z workspace
   const tplDir = workspace.templateSettings?.tplDir || config.tplDir;
-  const layoutFile = workspace.templateSettings?.layoutFile || 'Simple';
+  const layoutFile = workspace.templateSettings?.layoutFile || "Simple";
   const AppLayout = useMemo(
     () => preloadLayout(tplDir, layoutFile),
     [tplDir, layoutFile]
@@ -41,11 +46,12 @@ const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
 
   // Przekaż do widgetu minimalne props
   const widgets = useMemo(
-    () => workspace.templateSettings?.widgets?.map(widget => ({
-      ...widget,
-      config,
-      workspaceSlug
-    })) || [],
+    () =>
+      workspace.templateSettings?.widgets?.map((widget) => ({
+        ...widget,
+        config,
+        workspaceSlug,
+      })) || [],
     [workspace, config, workspaceSlug]
   );
 

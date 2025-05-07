@@ -1,6 +1,5 @@
 // src/components/ScenarioWithStep.tsx
-import React, { useMemo, useEffect, useState } from "react";
-import { Suspense } from "react";
+import React, { useMemo, useEffect, useState, Suspense } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { FlowEngine } from "../core/engine";
 import type { AppConfig } from "../core/types";
@@ -20,24 +19,35 @@ const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
   const [transitioning, setTransitioning] = useState(false);
   const [prevIndex, setPrevIndex] = useState(stepIdx);
 
-  // Znajdź bieżący scenariusz i workspace
-  const scenario = useMemo(
-    () => config.scenarios.find((s) => s.slug === scenarioSlug),
-    [config.scenarios, scenarioSlug]
-  );
+  // Znajdź workspace
   const workspace = useMemo(
     () => config.workspaces.find((w) => w.slug === workspaceSlug),
     [config.workspaces, workspaceSlug]
   );
+  if (!workspace) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="p-6 max-w-md bg-white rounded-lg shadow-sm">
+          <h2 className="text-lg font-semibold text-center mb-2">Workspace nie znaleziony</h2>
+          <p className="text-center text-gray-700 mb-4">
+            Przepraszamy, ale workspace "{workspaceSlug}" nie istnieje.
+          </p>
+          <div className="flex justify-center">
+            <Link to="/" className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+              Wróć do strony głównej
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  // Wczytaj layout tylko raz
+  // Użyj tplDir i layoutFile z workspace.templateSettings
+  const tplDir = workspace.templateSettings?.tplDir || config.tplDir;
+  const layoutFile = workspace.templateSettings?.layoutFile || "Simple";
   const AppLayout = useMemo(
-    () =>
-      preloadLayout(
-        config.tplDir || "default",
-        config.templateSettings?.layoutFile || "Simple"
-      ),
-    [config.tplDir, config.templateSettings?.layoutFile]
+    () => preloadLayout(tplDir, layoutFile),
+    [tplDir, layoutFile]
   );
 
   // Reset i synchronizacja stanu przy montażu
@@ -48,7 +58,7 @@ const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
     }
   }, [scenarioSlug, reset]);
 
-  // Aktualizuj URL jeśli index się zmienił
+  // Aktualizuj URL gdy index się zmieni
   useEffect(() => {
     if (stepIdx !== currentNodeIndex) {
       navigate(`/${workspaceSlug}/${scenarioSlug}/${currentNodeIndex}`, {
@@ -69,149 +79,44 @@ const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
     }
   }, [currentNodeIndex, prevIndex]);
 
-  if (!scenario)
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="p-6 max-w-md bg-white rounded-lg shadow-sm">
-          <h2 className="text-lg font-semibold text-center mb-2">
-            Scenariusz nie znaleziony
-          </h2>
-          <p className="text-center text-gray-700 mb-4">
-            Przepraszamy, ale scenariusz "{scenarioSlug}" nie istnieje.
-          </p>
-          {config.scenarios.length > 0 && (
-            <div className="mb-4">
-              <p className="text-center text-gray-700 mb-2">
-                Dostępne scenariusze:
-              </p>
-              <div className="flex flex-wrap justify-center gap-2">
-                {config.scenarios.map((s) => (
-                  <Link
-                    key={s.slug}
-                    to={`/${workspaceSlug}/${s.slug}`}
-                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-                  >
-                    {s.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-          <div className="flex justify-center">
-            <Link
-              to={`/${workspaceSlug}`}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Wróć do workspace
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-
-  if (!workspace)
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="p-6 max-w-md bg-white rounded-lg shadow-sm">
-          <h2 className="text-lg font-semibold text-center mb-2">
-            Workspace nie znaleziony
-          </h2>
-          <p className="text-center text-gray-700 mb-4">
-            Przepraszamy, ale workspace "{workspaceSlug}" nie istnieje.
-          </p>
-          <div className="flex mb-4">
-            <p className="text-gray-700 mr-2">Dostępne workspaces:</p>
-            {config.workspaces.map((w) => (
-              <Link
-                key={w.slug}
-                to={`/${w.slug}`}
-                className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-              >
-                {w.name}
-              </Link>
-            ))}
-          </div>
-          <div className="flex justify-center">
-            <Link
-              to="/"
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Wróć do strony głównej
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-
-  // Przygotuj kroki i progres
-  const { sortedNodes, totalSteps } = useMemo(() => {
-    const nodes = [...scenario.nodes].sort((a, b) => a.order - b.order);
-    return { sortedNodes: nodes, totalSteps: nodes.length };
-  }, [scenario.nodes]);
+  if (!scenarioSlug || !scenarioSlug) return null; // safety
 
   return (
-    <Suspense fallback={<AppLoading message="Ładowanie layoutu..." />}>
+    <Suspense fallback={<AppLoading message="Ładowanie scenariusza..." />}>
       <AppLayout>
         <div className="bg-gray-50 border-b border-gray-200 mb-6">
-          <div className="max-w-6xl mx-auto py-2 px-4">
-            <nav className="flex text-sm text-gray-500">
-              <Link to="/" className="hover:text-gray-700">
-                Home
-              </Link>
-              <span className="mx-2">/</span>
-              <Link to={`/${workspaceSlug}`} className="hover:text-gray-700">
-                {workspace.name}
-              </Link>
-              <span className="mx-2">/</span>
-              <span className="text-gray-700">{scenario.name}</span>
-              <span className="mx-2">/</span>
-              <span className="text-gray-700">Krok {currentNodeIndex + 1}</span>
-            </nav>
-          </div>
+          <nav className="flex text-sm text-gray-500 max-w-6xl mx-auto py-2 px-4">
+            <Link to="/" className="hover:text-gray-700">Home</Link>
+            <span className="mx-2">/</span>
+            <Link to={`/${workspaceSlug}`} className="hover:text-gray-700">{workspace.name}</Link>
+            <span className="mx-2">/</span>
+            <span className="text-gray-700">{scenarioSlug}</span>
+            <span className="mx-2">/</span>
+            <span className="text-gray-700">Krok {currentNodeIndex + 1}</span>
+          </nav>
         </div>
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex items-center mb-6">
+        <div className="max-w-6xl mx-auto px-4 mb-6">
+          <div className="flex items-center">
             <div className="flex-1 h-1.5 bg-gray-200 rounded overflow-hidden mr-4">
               <div
                 className="h-full bg-blue-500 rounded transition-all duration-300"
-                style={{
-                  width: `${((currentNodeIndex + 1) / totalSteps) * 100}%`,
-                }}
+                style={{ width: `${((currentNodeIndex + 1) / config.scenarios.find(s => s.slug === scenarioSlug)!.nodes.length) * 100}%` }}
               />
             </div>
             <div className="text-sm text-gray-500">
-              Krok {currentNodeIndex + 1} / {totalSteps}
+              Krok {currentNodeIndex + 1} / {config.scenarios.find(s => s.slug === scenarioSlug)!.nodes.length}
             </div>
           </div>
         </div>
         <div className="max-w-6xl mx-auto px-4 h-full">
-          <div
-            className={`transition-all duration-200 ${
-              transitioning ? "opacity-0" : "opacity-100"
-            }`}
-          >
-            <Suspense
-              fallback={
-                <div className="p-8 bg-white rounded-lg shadow-md min-h-[400px] flex items-center justify-center">
-                  <div className="flex flex-col items-center">
-                    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-                    <p className="text-gray-600">Ładowanie zawartości...</p>
-                  </div>
-                </div>
-              }
-            >
-              {!transitioning && (
-                <FlowEngine config={config} scenarioSlug={scenarioSlug} />
-              )}
-            </Suspense>
+          <div className={`transition-all duration-200 ${transitioning ? "opacity-0" : "opacity-100"}`}>
+            {!transitioning && <FlowEngine config={config} scenarioSlug={scenarioSlug} />}
           </div>
           {transitioning && (
             <div className="h-full flex items-center justify-center">
               <div className="flex flex-col items-center">
                 <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-                <p className="text-gray-600">
-                  Przechodzenie do kolejnego kroku...
-                </p>
+                <p className="text-gray-600">Przechodzenie do kolejnego kroku...</p>
               </div>
             </div>
           )}

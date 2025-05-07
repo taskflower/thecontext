@@ -26,8 +26,8 @@ export default function ROIWidget({
   const roiColor = getRoiColor(roi);
 
   return (
-    <div className="p-4 h-full">
-      <h3 className="font-semibold text-lg mb-4">{title}</h3>
+    <div className="p-4 h-full border border-gray-200 rounded-lg">
+      <h3 className="font-semibold text-md mb-4">{title}</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-4 rounded-lg border border-gray-200 flex items-center">

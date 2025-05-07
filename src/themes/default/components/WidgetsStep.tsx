@@ -54,8 +54,8 @@ export default function WidgetsStep({
     return (
       <div
         key={widget.tplFile + (widget.title || "")}
-        className={`bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden h-full ${getColSpanClass(widget.colSpan)}`}
-      >
+        className={`bg-white rounded-lg border-gray-200 overflow-hidden h-full ${getColSpanClass(widget.colSpan)}`}
+      > 
         <Suspense
           fallback={
             <div className="flex items-center justify-center p-6 h-32">
