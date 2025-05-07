@@ -55,7 +55,7 @@ export default function WidgetsStep({
     return (
       <div
         key={widget.tplFile + (widget.title || "")}
-        className={`bg-white rounded-lg border border-gray-200 overflow-hidden h-full ${getColSpanClass(widget.colSpan)}`}
+        className={`bg-white rounded-lg overflow-hidden h-full ${getColSpanClass(widget.colSpan)}`}
       > 
         <Suspense
           fallback={

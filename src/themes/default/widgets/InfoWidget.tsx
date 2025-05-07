@@ -80,10 +80,12 @@ export default function InfoWidget({
 
   return (
     <div className={getContainerClasses()}>
-      <div className={getHeaderClasses()}>
-        {renderIcon()}
-        {title && <h3 className="m-0 ml-2 text-base font-medium text-slate-800">{title}</h3>}
-      </div>
+      {(title || icon) && (
+        <div className={getHeaderClasses()}>
+          {renderIcon()}
+          {title && <h3 className="m-0 ml-2 text-base font-medium text-slate-800">{title}</h3>}
+        </div>
+      )}
       
       <div className={getContentClasses()}>
         {data !== undefined ? (
