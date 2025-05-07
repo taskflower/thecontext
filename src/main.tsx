@@ -1,22 +1,24 @@
 // src/main.tsx
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
+import { App } from './App'; // Poprawiony import
 import "./index.css";
 import { ErrorBoundary } from "./components/ErrorBoundary";
-import Header from "./components/homeLayout/Header";
+
+import config from "./_mocks/config";
+
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ErrorBoundary
       fallback={
         <div>
-          <Header />
+        
           Błąd krytyczny. Odśwież stronę.
         </div>
       }
     >
-      <App />
+    <App initialConfig={config} />
     </ErrorBoundary>
   </React.StrictMode>
 );

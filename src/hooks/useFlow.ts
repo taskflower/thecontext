@@ -37,6 +37,7 @@ export function useFlow({
   const lastNavigationTimeRef = useRef(0);
   const isMountedRef = useRef(true);
   const autoStartExecutedRef = useRef(false);
+  const currentNodeIdRef = useRef<string | null>(null);
 
   // Auth and store hooks
   const { getToken, user } = useAuth();
@@ -73,9 +74,15 @@ export function useFlow({
   // Setup and cleanup
   useEffect(() => {
     isMountedRef.current = true;
-    autoStartExecutedRef.current = false;
+    
+    // Resetuj flagi auto-startu tylko gdy zmienia się identyfikator węzła
+    if (currentNode?.id !== currentNodeIdRef.current) {
+      currentNodeIdRef.current = currentNode?.id || null;
+      autoStartExecutedRef.current = false;
+    }
+    
     return () => { isMountedRef.current = false; };
-  }, [currentNode?.id, currentNode?.tplFile]);
+  }, [currentNode?.id]);
 
   // Load form fields and schema
   useEffect(() => {
@@ -182,7 +189,43 @@ export function useFlow({
   const sendMessage = useCallback(async (message: string) => {
     if (!message.trim()) return null;
 
+    // DEBUG: Wypisz parametry wejściowe funkcji
+    console.log("[sendMessage] Wywołanie z parametrami:", {
+      message: message.substring(0, 50) + "...",
+      isLlmStep: currentNode?.tplFile === "LlmStep",
+      hasAutoStart: currentNode?.attrs?.autoStart === true,
+      initialUserMessage: currentNode?.attrs?.initialUserMessage ? 
+        currentNode.attrs.initialUserMessage.substring(0, 50) + "..." : null,
+      processedInitialMsg: currentNode?.attrs?.initialUserMessage ?
+        processTemplate(currentNode.attrs.initialUserMessage).substring(0, 50) + "..." : null,
+      autoStartExecuted: autoStartExecutedRef.current
+    });
+
+    // Sprawdzenie czy to wywołanie autostartu - UPROSZCZONE
+    const isAutoStartRequest = 
+      currentNode?.tplFile === "LlmStep" && 
+      currentNode.attrs?.autoStart === true &&
+      (message === currentNode.attrs?.initialUserMessage || 
+       message.includes(currentNode.attrs?.initialUserMessage || ""));
+  
+    // Blokowanie wielokrotnych wywołań tego samego autostartu
+    if (isAutoStartRequest && autoStartExecutedRef.current) {
+      console.log("[sendMessage] Ignoruję duplikat autostart request, flagi:", {
+        isAutoStart: isAutoStartRequest,
+        autoStartExecuted: autoStartExecutedRef.current,
+        initialMsg: currentNode.attrs?.initialUserMessage?.substring(0, 30)
+      });
+      return null;
+    }
+
     try {
+      // Sprawdź, czy już wykonujemy żądanie
+      if (isLoading) {
+        console.log("[sendMessage] Już wykonywane jest żądanie, pomijam");
+        return null;
+      }
+
+      console.log("[sendMessage] Rozpoczynam faktyczne przetwarzanie żądania");
       setIsLoading(true);
       setError(null);
       setRawResponseData(null); // Reset raw response
@@ -228,6 +271,7 @@ export function useFlow({
       const apiUrl = `${import.meta.env.VITE_API_URL}/api/v1/services/gemini/chat/completion`;
       setDebugInfo(`Wysyłanie do: ${apiUrl}`);
       
+      console.log(`[sendMessage] Wysyłanie żądania do API: ${apiUrl}`);
       const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
@@ -237,7 +281,10 @@ export function useFlow({
         body: JSON.stringify({ messages, userId: user.uid }),
       });
 
-      if (!isMountedRef.current) return null;
+      if (!isMountedRef.current) {
+        console.log("[sendMessage] Komponent odmontowany, przerywam");
+        return null;
+      }
       
       // Error handling
       if (!response.ok) {
@@ -303,45 +350,74 @@ export function useFlow({
       }
       return null;
     } finally {
-      if (isMountedRef.current) setIsLoading(false);
+      if (isMountedRef.current) {
+        setIsLoading(false);
+        console.log("[sendMessage] Zakończono przetwarzanie odpowiedzi");
+      }
     }
   }, [
     getToken, 
     user, 
     currentNode?.attrs, 
-    currentNode?.contextPath, 
+    currentNode?.contextPath,
+    currentNode?.tplFile,
     processTemplate, 
     processedAssistantMessage,
     schema, 
-    updateContextPath
+    updateContextPath,
+    isLoading,
+    autoStartExecutedRef
   ]);
 
-  // Auto-start
+  // Auto-start - poprawiony
   useEffect(() => {
-    const shouldAutoStart = 
-      currentNode?.tplFile === "LlmStep" && 
-      currentNode.attrs?.autoStart === true && 
-      !autoStartExecutedRef.current && 
-      !isLoading && 
-      !responseData && 
-      !error;
+    // DEBUG: Wyświetl warunki autostartu
+    console.log("[Auto-start] Warunki:", {
+      isLlmStep: currentNode?.tplFile === "LlmStep",
+      hasAutoStart: currentNode?.attrs?.autoStart === true,
+      autoStartExecuted: autoStartExecutedRef.current,
+      isLoading,
+      hasResponse: !!responseData,
+      hasRawResponse: !!rawResponseData,
+      hasError: !!error,
+      nodeId: currentNode?.id
+    });
+
+    if (
+      currentNode?.tplFile !== "LlmStep" || 
+      currentNode.attrs?.autoStart !== true ||
+      autoStartExecutedRef.current ||
+      isLoading || 
+      responseData || 
+      rawResponseData || 
+      error
+    ) {
+      return;
+    }
+
+    console.log(`[Auto-start] Wykonuję auto-start dla węzła ${currentNode.id}`);
+    
+    // ZMIANA: Oznaczamy wykonanie dopiero po faktycznym wywołaniu sendMessage
+    const initialMessage = currentNode.attrs?.initialUserMessage || "";
+    if (initialMessage) {
+      const processedMessage = processTemplate(initialMessage);
+      console.log(`[Auto-start] Przygotowano wiadomość: ${processedMessage.substring(0, 50)}...`);
       
-    if (shouldAutoStart) {
+      // KLUCZOWA ZMIANA: Wywołaj sendMessage bezpośrednio
+      sendMessage(processedMessage);
       autoStartExecutedRef.current = true;
-      const initialMessage = currentNode.attrs?.initialUserMessage || "";
-      if (initialMessage) {
-        sendMessage(processTemplate(initialMessage));
-      }
     }
   }, [
+    currentNode?.id,
     currentNode?.tplFile,
     currentNode?.attrs?.autoStart,
     currentNode?.attrs?.initialUserMessage,
     isLoading,
     responseData,
+    rawResponseData,
     error,
     processTemplate,
-    sendMessage,
+    sendMessage
   ]);
 
   return {

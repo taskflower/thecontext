@@ -1,137 +1,133 @@
 [
-    {
-      "name": "Analiza Finansowa - test",
-      "description": "Prosta analiza finansowa projektu",
-      "tplDir": "default",
-      "workspaces": [
-        {
-          "id": "workspace-finance",
-          "name": "Finanse Projektu",
-          "description": "Zbieranie i analiza danych finansowych",
-          "icon": "briefcase",
-          "scenarios": [
-            {
-              "id": "scenario-roi",
-              "name": "Analiza ROI",
-              "description": "Obliczanie zwrotu z inwestycji",
-              "icon": "calculator",
-              "nodes": [
-                {
-                  "id": "collect-financial-data",
-                  "scenarioId": "scenario-roi",
-                  "label": "Krok 1: Dane finansowe",
-                  "assistantMessage": "Podaj przychody i koszty projektu:",
-                  "contextPath": "financial-data",
-                  "tplFile": "FormStep",  
-                  "order": 0,
-                  "attrs": {
-                    "schemaPath": "schemas.form.finance"
-                  }
-                },
-                {
-                  "id": "calculate-roi",
-                  "scenarioId": "scenario-roi",
-                  "label": "Krok 2: Obliczanie ROI",
-                  "assistantMessage": "Obliczam ROI na podstawie danych...",
-                  "contextPath": "roi-results",
-                  "tplFile": "LlmStep",
-                  "order": 1,
-                  "attrs": {
-                    "autoStart": true,
-                    "initialUserMessage": "Na podstawie danych: przychody={{financial-data.revenue}}, koszty={{financial-data.costs}} oblicz ROI i podaj wynik. Zwróć JSON z polami: 'roi' (wartość ROI w procentach), 'profit' (zysk w PLN) i 'profitability' (ocena opłacalności - \"wysoka\", \"średnia\" lub \"niska\")."
-                  }
-                },
-                {
-                  "id": "summary",
-                  "scenarioId": "scenario-roi",
-                  "label": "Krok 3: Podsumowanie",
-                  "assistantMessage": "Oto podsumowanie analizy finansowej projektu:",
-                  "contextPath": "summary-data",
-                  "tplFile": "WidgetsStep",
-                  "order": 2,
-                  "attrs": {
-                    "widgets": [
-                      {
-                        "tplFile": "Title",
-                        "title": "Wyniki analizy finansowej"
-                      },
-                      {
-                        "tplFile": "WidgetsStep",
-                        "title": "Dane finansowe",
-                        "description": "Wartości wprowadzone przez użytkownika",
-                        "dataPaths": {
-                          "Przychody": "financial-data.revenue",
-                          "Koszty": "financial-data.costs"
-                        }
-                      },
-                      {
-                        "tplFile": "Metrics",
-                        "title": "Wyniki analizy",
-                        "dataPaths": {
-                          "ROI": "roi-results.roi",
-                          "Zysk": "roi-results.profit"
-                        }
-                      },
-                      {
-                        "tplFile": "Info",
-                        "title": "Opłacalność projektu",
-                        "dataPath": "roi-results.profitability",
-                        "variant": "info"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          ],
-          "templateSettings": {
-            "layoutFile": "Simple",
-            "widgets": [
+  {
+    "name": "Analiza Finansowa - test",
+    "description": "Prosta analiza finansowa projektu",
+    "tplDir": "default",
+    "workspaces": [
+      {
+        "id": "workspace-finance",
+        "name": "Finanse Projektu",
+        "description": "Zbieranie i analiza danych finansowych",
+        "icon": "briefcase",
+        "scenarios": [
+          {
+            "id": "scenario-roi",
+            "name": "Analiza ROI",
+            "description": "Obliczanie zwrotu z inwestycji",
+            "icon": "calculator",
+            "nodes": [
               {
-                "tplFile": "Info",
-                "data": {
-                  "title": "Analiza Finansowa",
-                  "description": "Wybierz scenariusz do uruchomienia",
-                  "variant": "info"
+                "id": "collect-financial-data",
+                "scenarioId": "scenario-roi",
+                "label": "Krok 1: Dane finansowe",
+                "assistantMessage": "Podaj przychody i koszty projektu:",
+                "contextPath": "financial-data",
+                "tplFile": "FormStep",
+                "order": 0,
+                "attrs": {
+                  "schemaPath": "schemas.finance"
                 }
               },
               {
-                "tplFile": "Stats",
-                "title": "Ostatnia analiza",
-                "description": "Dane z ostatnio przeprowadzonej analizy",
-                "dataPaths": {
-                  "ROI": "roi-results.roi",
-                  "Przychody": "financial-data.revenue",
-                  "Koszty": "financial-data.costs",
-                  "Zysk": "roi-results.profit"
+                "id": "calculate-roi",
+                "scenarioId": "scenario-roi",
+                "label": "Krok 2: Obliczanie ROI",
+                "contextPath": "productSuggestion",
+                "tplFile": "LlmStep",
+                "order": 1,
+                "attrs": {
+                  "autoStart": true,
+                  "initialUserMessage": "Na podstawie danych: przychody={{financial-data.revenue}}, koszty={{financial-data.costs}} przygotuj rekomendacje produktów i dopasowanie do budżetu.",
+                  "schemaPath": "schemas.productSuggestion"
                 }
               },
               {
-                "tplFile": "ScenarioList"
+                "id": "summary",
+                "scenarioId": "scenario-roi",
+                "label": "Krok 3: Podsumowanie",
+                "assistantMessage": "Oto podsumowanie analizy finansowej projektu:",
+                "contextPath": "summary-data",
+                "tplFile": "WidgetsStep",
+                "order": 2,
+                "attrs": {
+                  "widgets": [
+                    {
+                      "id": "title-widget",
+                      "tplFile": "Title",
+                      "title": "Wyniki analizy"
+                    },
+                    {
+                      "id": "budget-widget",
+                      "tplFile": "Info",
+                      "title": "Dopasowanie do budżetu",
+                      "dataPath": "productSuggestion.budgetFit"
+                    },
+                    {
+                      "id": "recommendations-widget",
+                      "tplFile": "CardList",
+                      "title": "Rekomendowane produkty",
+                      "dataPath": "productSuggestion.recommendations"
+                    }
+                  ]
+                }
               }
             ]
-          },
-          "initialContext": {
-            "schemas": {
-              "form": {
-                "finance": [
-                  {
-                    "name": "revenue",
-                    "label": "Przychody (PLN)",
-                    "type": "number",
-                    "required": true
-                  },
-                  {
-                    "name": "costs",
-                    "label": "Koszty (PLN)",
-                    "type": "number",
-                    "required": true
+          }
+        ],
+        "templateSettings": {
+          "tplDir": "default",
+          "layoutFile": "Simple",
+          "widgets": [
+            {
+              "tplFile": "ScenarioList"
+            }
+          ]
+        },
+        "initialContext": {
+          "schemas": {
+            "finance": [
+              {
+                "name": "revenue",
+                "label": "Przychody (PLN)",
+                "type": "number",
+                "required": true
+              },
+              {
+                "name": "costs",
+                "label": "Koszty (PLN)",
+                "type": "number",
+                "required": true
+              }
+            ],
+            "productSuggestion": {
+              "budgetFit": {
+                "type": "string",
+                "description": "Ocena dopasowania do budżetu"
+              },
+              "recommendations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "icon": {
+                      "type": "string"
+                    }
                   }
-                ]
+                }
               }
             }
           }
         }
-      ]
-    }
-  ]
+      }
+    ]
+  }
+]

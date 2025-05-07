@@ -87,7 +87,9 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
   // Determine if we have a response and if it's valid
   const hasJsonResponse = responseData && !error && !isLoading;
   const hasRawResponseButNoJson = rawResponseData && !responseData && !isLoading;
-  const hasError = error || (!responseData && !rawResponseData && !isLoading && node.attrs?.autoStart === true);
+  
+  // POPRAWIONE: Pokazuj błąd tylko gdy faktycznie jest błąd API
+  const hasError = !!error;
 
   // Extract expected format from the prompt
   const getExpectedFormat = () => {
@@ -152,7 +154,7 @@ const LlmStepTemplate: React.FC<FlowStepProps> = ({
 
         {/* Error message and retry options */}
         {hasError && (
-          <div className="bg-red-50 p-4 rounded-lg mb-4">
+          <div className="border p-4 rounded-lg mb-4">
             <p className="text-red-600 mb-2">
               {error || "Couldn't generate a valid response. The model may not have access to the requested information."}
             </p>
