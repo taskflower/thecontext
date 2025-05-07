@@ -6,19 +6,40 @@ type WidgetConfig = {
   tplFile: string;
   title?: string;
   contextDataPath?: string;
+  colSpan?: 1 | 2 | 3 | "full"; // Dodana opcja określająca szerokość widgetu
   [key: string]: any;
 };
 
 type WidgetsStepProps = {
   widgets: WidgetConfig[];
   onSubmit: (data: any) => void;
+  title?: string;
+  subtitle?: string;
 };
 
 export default function WidgetsStep({
   widgets = [],
   onSubmit,
+  title = "Podsumowanie",
+  subtitle,
 }: WidgetsStepProps) {
   const { get } = useFlow();
+
+  // Funkcja mapująca colSpan na klasy CSS
+  const getColSpanClass = (colSpan?: 1 | 2 | 3 | "full") => {
+    switch (colSpan) {
+      case 1:
+        return "col-span-1";
+      case 2:
+        return "col-span-2";
+      case 3:
+        return "col-span-3";
+      case "full":
+        return "col-span-full";
+      default:
+        return "col-span-1";
+    }
+  };
 
   // Funkcja do ładowania widgetów
   const loadWidget = (widget: WidgetConfig) => {
@@ -36,7 +57,7 @@ export default function WidgetsStep({
     return (
       <div
         key={widget.tplFile + (widget.title || "")}
-        className="bg-white rounded-lg shadow overflow-hidden"
+        className={`bg-white rounded-lg shadow overflow-hidden h-full ${getColSpanClass(widget.colSpan)}`}
       >
         <Suspense
           fallback={
@@ -54,6 +75,13 @@ export default function WidgetsStep({
 
   return (
     <div className="max-w-6xl mx-auto p-4">
+      {(title || subtitle) && (
+        <div className="mb-6">
+          {title && <h2 className="text-2xl font-bold mb-2">{title}</h2>}
+          {subtitle && <p className="text-gray-600">{subtitle}</p>}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {widgets.map(loadWidget)}
       </div>

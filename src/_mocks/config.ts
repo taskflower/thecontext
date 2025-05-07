@@ -34,6 +34,18 @@ const config: AppConfig = {
                 "type": "string",
                 "description": "Ocena dopasowania do budżetu"
               },
+              "roi": {
+                "type": "number",
+                "description": "Procent zwrotu z inwestycji"
+              },
+              "profits": {
+                "type": "number",
+                "description": "Zysk w PLN"
+              },
+              "investment": {
+                "type": "number",
+                "description": "Wartość inwestycji w PLN"
+              },
               "recommendations": {
                 "type": "array",
                 "items": {
@@ -50,13 +62,16 @@ const config: AppConfig = {
                     },
                     "icon": {
                       "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
                     }
                   },
                   "required": ["id", "name", "description"]
                 }
               }
             },
-            "required": ["budgetFit", "recommendations"]
+            "required": ["budgetFit", "recommendations", "roi", "profits", "investment"]
           },
           "summary-data": {
             "type": "object",
@@ -81,7 +96,11 @@ const config: AppConfig = {
           "contextDataPath": "financial-data",
           "tplFile": "FormStep",
           "order": 0,
-          "attrs": {}
+          "attrs": {
+            "title": "Wprowadź dane finansowe",
+            "description": "Podaj podstawowe dane finansowe projektu, aby obliczyć wskaźniki ROI.",
+            "submitLabel": "Oblicz ROI"
+          }
         },
         {
           "slug": "calculate-roi",
@@ -93,7 +112,7 @@ const config: AppConfig = {
           "attrs": {
             "autoStart": true,
             "showResults": true,
-            "userMessage": "Na podstawie danych: przychody={{financial-data.revenue}}, koszty={{financial-data.costs}} przygotuj rekomendacje produktów i dopasowanie do budżetu."
+            "userMessage": "Na podstawie danych: przychody={{financial-data.revenue}}, koszty={{financial-data.costs}} przygotuj rekomendacje produktów i dopasowanie do budżetu. Oblicz ROI (zwrot z inwestycji) w procentach, zysk w PLN i wartość inwestycji w PLN. Zwróć dane w formacie JSON zgodnym ze schematem."
           }
         },
         {
@@ -104,20 +123,29 @@ const config: AppConfig = {
           "tplFile": "WidgetsStep",
           "order": 2,
           "attrs": {
+            "title": "Podsumowanie analizy finansowej",
+            "subtitle": "Poniżej znajduje się zwrot z inwestycji oraz rekomendowane działania",
             "widgets": [
               {
-                "tplFile": "TitleWidget",
-                "title": "Wyniki analizy"
+                "tplFile": "ROIWidget",
+                "title": "Analiza zwrotu z inwestycji",
+                "contextDataPath": "productSuggestion",
+                "colSpan": "full"
               },
               {
                 "tplFile": "InfoWidget",
                 "title": "Dopasowanie do budżetu",
-                "contextDataPath": "productSuggestion.budgetFit"
+                "contextDataPath": "productSuggestion.budgetFit",
+                "icon": "info",
+                "variant": "filled",
+                "colSpan": 1
               },
               {
                 "tplFile": "CardListWidget",
                 "title": "Rekomendowane produkty",
-                "contextDataPath": "productSuggestion.recommendations"
+                "contextDataPath": "productSuggestion.recommendations",
+                "layout": "table",
+                "colSpan": 2
               }
             ]
           }

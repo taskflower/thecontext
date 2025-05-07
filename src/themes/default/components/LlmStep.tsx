@@ -1,9 +1,7 @@
 // src/themes/default/components/LlmStep.tsx
-import { useState, useCallback, useMemo } from "react";
 import { ZodType } from "zod";
-import { useFlow } from "../../../core/context";
-
 import { useAuth } from "@/hooks";
+import { useLlm } from "../../../core/hooks/useLlm";
 
 type LlmStepProps<T> = {
   schema: ZodType<T>;
@@ -20,138 +18,93 @@ type LlmStepProps<T> = {
 export default function LlmStep<T>({
   schema,
   jsonSchema,
+  data,
   onSubmit,
   userMessage,
   systemMessage,
-  showResults = false,
+  showResults = true,
   autoStart = false,
   apiEndpoint,
 }: LlmStepProps<T>) {
-  const { get } = useFlow();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<T | null>(null);
-  const [started, setStarted] = useState(autoStart);
-
   const { getToken, user } = useAuth();
+  
+  // Używamy hooka useLlm z core
+  const { 
+    isLoading, 
+    error, 
+    result, 
+    started, 
+    startLlmProcess,
+    setStarted
+  } = useLlm<T>({
+    schema,
+    jsonSchema,
+    userMessage,
+    systemMessage,
+    autoStart,
+    apiEndpoint,
+    getToken,
+    user
+  });
 
-  // Process template strings with context values
-  const processTemplateString = useCallback(
-    (str: string) => {
-      return str.replace(/{{([^}]+)}}/g, (_, path) => {
-        const value = get(path.trim());
-        return value !== undefined ? String(value) : "";
-      });
-    },
-    [get]
-  );
-
-  const processedUserMessage = useMemo(
-    () => processTemplateString(userMessage),
-    [processTemplateString, userMessage]
-  );
-
-  const handleStart = useCallback(async () => {
-    if (isLoading) return;
-
-    setStarted(true);
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const messages = [
-        ...(systemMessage
-          ? [
-              {
-                role: "system",
-                content: processTemplateString(systemMessage),
-              },
-            ]
-          : []),
-        {
-          role: "user",
-          content: processedUserMessage,
-        },
-      ];
-
-      const payload = {
-        messages,
-        generationConfig: {
-          temperature: 0.7,
-          responseSchema: jsonSchema,
-        },
-      };
-
-      const token = await getToken();
-      if (!token || !user) {
-        throw new Error(
-          token ? "Użytkownik nie zalogowany" : "Brak tokenu autoryzacji"
-        );
-      }
-
-      const apiUrl = apiEndpoint || `${import.meta.env.VITE_API_URL}/api/v1/services/gemini/chat/completion`;
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ ...payload, userId: user.uid }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.error?.message || "Nieznany błąd podczas wysyłania wiadomości"
-        );
-      }
-
-      const responseData = await response.json();
-      let llmResult: any = responseData.result;
-
-      // Jeśli wynik jest stringiem JSON, spróbuj sparsować
-      if (typeof llmResult === 'string') {
-        try {
-          llmResult = JSON.parse(llmResult);
-        } catch {
-          // jeśli parsing się nie powiedzie, zostaw oryginał
-        }
-      }
-
-      // Walidacja wyników
-      if (schema) {
-        const validationResult = schema.safeParse(llmResult);
-        if (!validationResult.success) {
-          throw new Error(
-            "Nieprawidłowy format odpowiedzi: " + validationResult.error.message
-          );
-        }
-        setResult(validationResult.data);
-      } else {
-        setResult(llmResult);
-      }
-
-      setIsLoading(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Wystąpił nieznany błąd");
-      setIsLoading(false);
-    }
-  }, [processedUserMessage, processTemplateString, systemMessage, jsonSchema, isLoading, schema, getToken, user, apiEndpoint]);
+  // Gdy mamy rezultat i jeszcze nie wysłaliśmy go, wywołujemy onSubmit
+  if (result && data !== result) {
+    onSubmit(result);
+  }
 
   // Renderowanie UI
   if (!started) {
-    return <button onClick={handleStart}>Rozpocznij</button>;
+    return (
+      <button 
+        onClick={() => setStarted(true)}
+        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      >
+        Rozpocznij
+      </button>
+    );
   }
+  
   if (isLoading) {
-    return <div>Ładowanie...</div>;
+    return (
+      <div className="flex items-center justify-center p-4">
+        <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mr-2"></div>
+        <span>Przetwarzanie...</span>
+      </div>
+    );
   }
+  
   if (error) {
-    return <div className="text-red-600">Błąd: {error}</div>;
+    return (
+      <div className="p-4 bg-red-100 text-red-700 rounded">
+        <h3 className="font-bold mb-2">Wystąpił błąd</h3>
+        <p>{error}</p>
+        <button 
+          onClick={startLlmProcess}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Spróbuj ponownie
+        </button>
+      </div>
+    );
   }
-  if (result) {
-    // wyświetl wynik jako sformatowany JSON
-    return <pre>{JSON.stringify(result, null, 2)}</pre>;
+  
+  if (result && showResults) {
+    return (
+      <div className="p-4 bg-green-50 rounded">
+        <h3 className="font-bold mb-2 text-green-700">Odpowiedź otrzymana</h3>
+        <pre className="bg-white p-4 rounded overflow-auto max-h-80 text-sm">
+          {JSON.stringify(result, null, 2)}
+        </pre>
+      </div>
+    );
   }
-
-  return <div onClick={handleStart}>Kliknij, aby uruchomić</div>;
+  
+  return (
+    <div 
+      onClick={startLlmProcess}
+      className="p-4 bg-blue-50 text-blue-700 rounded cursor-pointer hover:bg-blue-100 transition-colors"
+    >
+      Kliknij, aby rozpocząć przetwarzanie
+    </div>
+  );
 }
