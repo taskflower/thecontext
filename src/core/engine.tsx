@@ -5,17 +5,9 @@ import { useFlowStore } from './context';
 import { AppConfig, NodeConfig } from './types';
 import { useNavigate, useParams } from 'react-router-dom';
 
-// Deklaracja typów dla window
-declare global {
-  interface Window {
-    _loggedSchemas?: Record<string, boolean>;
-  }
-}
-
 // Konwerter JSON Schema -> Zod
 function jsonToZod(schema: any): ZodTypeAny {
   if (!schema) return z.any();
-  
   switch (schema.type) {
     case 'string': return z.string();
     case 'number': return z.number();
@@ -26,129 +18,73 @@ function jsonToZod(schema: any): ZodTypeAny {
       for (const key in schema.properties || {}) {
         props[key] = jsonToZod(schema.properties[key]);
       }
-      
       let obj = z.object(props);
-      if (schema.required?.length) {
-        const required = schema.required.reduce((acc: any, key: string) => {
-          acc[key] = props[key];
-          return acc;
-        }, {});
-        obj = obj.extend(required);
+      if (schema.required) {
+        obj = obj.extend(
+          schema.required.reduce((acc: any, key: string) => {
+            acc[key] = props[key];
+            return acc;
+          }, {})
+        );
       }
       return obj;
     }
-    default: return z.any();
+    default:
+      return z.any();
   }
 }
 
-// Component do renderowania pojedynczego kroku
-const NodeRenderer: React.FC<{
-  config: AppConfig;
-  node: NodeConfig;
-  onNext: () => void;
-}> = ({ config, node, onNext }) => {
+// Renderuje pojedynczy krok
+const NodeRenderer: React.FC<{ config: AppConfig; node: NodeConfig; onNext: () => void }> = ({ config, node, onNext }) => {
   const { get, set } = useFlowStore();
-  
-  // Uproszczone podejście - bezpośredni dostęp do schematu
-  const jsonSchema = useMemo(() => 
-    config.workspaces[0]?.contextSchema?.properties?.[node.contextSchemaPath] || {},
-  [config.workspaces, node.contextSchemaPath]);
-  
-  // Zoptymalizowane logowanie - tylko raz dla każdej ścieżki schematu
-  if (process.env.NODE_ENV === 'development') {
-    window._loggedSchemas = window._loggedSchemas || {};
-    if (!window._loggedSchemas[node.contextSchemaPath]) {
-      console.log("Schemat JSON dla", node.contextSchemaPath, ":", jsonSchema);
-      window._loggedSchemas[node.contextSchemaPath] = true;
-    }
-  }
-  
+  const jsonSchema = useMemo(
+    () => config.workspaces[0]?.contextSchema.properties?.[node.contextSchemaPath] || {},
+    [config.workspaces, node.contextSchemaPath]
+  );
   const schema = useMemo(() => jsonToZod(jsonSchema), [jsonSchema]);
   const data = get(node.contextDataPath);
-  
-  // Dynamiczne ładowanie komponentu szablonu
-  const Component = lazy(() => 
+  const Component = lazy(() =>
     import(`../themes/${config.tplDir}/components/${node.tplFile}`)
       .catch(() => import('../themes/default/components/ErrorStep'))
   );
-  
-  // Obsługa templatów z wartościami z contextu - memoizacja
-  const processTemplateString = useMemo(() => {
-    return (str: string) => {
-      return str.replace(/{{([^}]+)}}/g, (_, path) => {
-        const value = get(path.trim());
-        return value !== undefined ? String(value) : '';
-      });
-    };
-  }, [get]);
-  
-  // Przetworzone atrybuty z obsługą templateów - memoizacja
-  const processedAttrs = useMemo(() => {
-    return Object.entries(node.attrs || {}).reduce((acc, [key, value]) => {
-      acc[key] = typeof value === 'string' ? processTemplateString(value) : value;
-      return acc;
-    }, {} as Record<string, any>);
-  }, [node.attrs, processTemplateString]);
-  
-  const handleSubmit = (val: any) => {
-    set(node.contextDataPath, val);
-    onNext();
-  };
-  
+  // Przekaż dodatkowe atrybuty z konfiguracji węzła (np. userMessage)
+  const attrs = node.attrs || {};
+
   return (
-    <Suspense fallback={<div>Ładowanie...</div>}>
-      <Component 
+    <Suspense fallback={<div>Ładowanie kroku...</div>}>
+      <Component
         schema={schema}
-        jsonSchema={jsonSchema} 
-        data={data} 
-        onSubmit={handleSubmit}
-        {...processedAttrs}
+        jsonSchema={jsonSchema}
+        data={data}
+        onSubmit={(val: any) => { set(node.contextDataPath, val); onNext(); }}
+        {...attrs}
       />
     </Suspense>
   );
 };
 
-// Główny silnik aplikacji
-export const FlowEngine: React.FC<{ 
-  config: AppConfig;
-  scenarioSlug?: string;
-}> = ({ config, scenarioSlug }) => {
-  const { currentNodeIndex, setCurrentNodeIndex } = useFlowStore();
+// Główny silnik aplikacji sterowany URL-em
+export const FlowEngine: React.FC<{ config: AppConfig; scenarioSlug: string; stepIdx: number }> = ({ config, scenarioSlug, stepIdx }) => {
   const navigate = useNavigate();
   const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
-  
-  // Wybierz scenariusz (domyślnie pierwszy lub wg sluga)
-  const scenario = useMemo(() => 
-    scenarioSlug 
-      ? config.scenarios.find(s => s.slug === scenarioSlug) 
-      : config.scenarios[0],
-  [config.scenarios, scenarioSlug]);
-  
+
+  const scenario = useMemo(
+    () => config.scenarios.find(s => s.slug === scenarioSlug),
+    [config.scenarios, scenarioSlug]
+  );
   if (!scenario) return <div>Scenariusz nie znaleziony</div>;
-  
-  // Posortowane węzły wg kolejności
-  const sortedNodes = useMemo(() => 
-    [...scenario.nodes].sort((a, b) => a.order - b.order),
-  [scenario.nodes]);
-  
-  const currentNode = sortedNodes[currentNodeIndex];
-  
+
+  const nodes = useMemo(() => [...scenario.nodes].sort((a, b) => a.order - b.order), [scenario.nodes]);
+  const index = Math.min(Math.max(stepIdx, 0), nodes.length - 1);
+  const node = nodes[index];
+
   const handleNext = () => {
-    if (currentNodeIndex < sortedNodes.length - 1) {
-      setCurrentNodeIndex(currentNodeIndex + 1);
+    if (index < nodes.length - 1) {
+      navigate(`/${workspaceSlug}/${scenarioSlug}/${index + 1}`);
     } else {
-      // Po zakończeniu scenariusza wróć do widoku workspace
       navigate(`/${workspaceSlug}`);
     }
   };
-  
-  if (!currentNode) return <div>Zakończono!</div>;
-  
-  return (
-    <NodeRenderer
-      config={config}
-      node={currentNode}
-      onNext={handleNext}
-    />
-  );
+
+  return <NodeRenderer config={config} node={node} onNext={handleNext} />;
 };
