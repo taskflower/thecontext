@@ -154,7 +154,7 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
   };
 
   return (
-    <div className="p-6">
+    <div className="pt-6">
       <h2 className="text-xl font-semibold text-slate-800 mb-3">{title}</h2>
       
       {description && (

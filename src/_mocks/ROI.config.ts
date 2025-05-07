@@ -10,6 +10,16 @@ const config: AppConfig = {
       name: "Finanse Projektu",
       description: "Zbieranie i analiza danych finansowych",
       icon: "briefcase",
+      templateSettings: {
+        layoutFile: "Simple",
+        widgets: [
+          {
+            tplFile: "ScenarioListWidget",
+            title: "Dostępne scenariusze",
+            colSpan: "full",
+          },
+        ],
+      },
       contextSchema: {
         type: "object",
         properties: {
@@ -84,18 +94,7 @@ const config: AppConfig = {
             properties: {},
           },
         },
-      },
-      templateSettings: {
-        tplDir: "default",
-        layoutFile: "Simple",
-        widgets: [
-          {
-            tplFile: "ScenarioListWidget",
-            title: "Dostępne scenariusze",
-            colSpan: "full",
-          },
-        ],
-      },
+      }
     },
   ],
   scenarios: [

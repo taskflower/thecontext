@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import type { AppConfig } from "../core/types";
 import AppLoading from "./AppLoading";
 import { preloadLayout } from "../preloadLayout";
-import WidgetsStep from "@/themes/default/components/WidgetsStep";
+import { preloadComponent } from "../preloadComponent";
 
 const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
   const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
@@ -43,6 +43,12 @@ const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
     () => preloadLayout(tplDir, layoutFile),
     [tplDir, layoutFile]
   );
+  
+  // Dynamicznie ładuj WidgetsStep z odpowiedniego szablonu
+  const WidgetsStep = useMemo(
+    () => preloadComponent(tplDir, "WidgetsStep"),
+    [tplDir]
+  );
 
   // Przekaż do widgetu minimalne props
   const widgets = useMemo(
@@ -58,12 +64,14 @@ const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
   return (
     <Suspense fallback={<AppLoading message="Ładowanie workspace..." />}>
       <AppLayout>
-        <WidgetsStep
-          widgets={widgets}
-          onSubmit={() => {}}
-          title={workspace.name}
-          subtitle={workspace.description}
-        />
+        <Suspense fallback={<div className="p-4">Ładowanie widgetów...</div>}>
+          <WidgetsStep
+            widgets={widgets}
+            onSubmit={() => {}}
+            title={workspace.name}
+            subtitle={workspace.description}
+          />
+        </Suspense>
       </AppLayout>
     </Suspense>
   );

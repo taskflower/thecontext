@@ -24,33 +24,35 @@ export default function ScenarioListWidget({
 }: ScenarioListWidgetProps) {
   const navigate = useNavigate();
 
-  // Filtruj scenariusze dla tego workspace
+  // Filter scenarios for this workspace
   const scenarios: Scenario[] = React.useMemo(
     () => config.scenarios.filter(s => s.workspaceSlug === workspaceSlug),
     [config.scenarios, workspaceSlug]
   );
 
   return (
-    <div className="p-6">
-      {title && <h3 className="text-xl font-semibold mb-4">{title}</h3>}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="py-6">
+      {title && <h3 className="text-xl font-semibold text-zinc-900 mb-6">{title}</h3>}
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {scenarios.map(s => (
           <div
             key={s.slug}
             onClick={() => navigate(`/${workspaceSlug}/${s.slug}/0`)}
-            className="p-5 hover:bg-gray-50 cursor-pointer"
+            className="bg-white rounded-lg border shadow-sm hover:shadow transition-all cursor-pointer p-5 group"
           >
             <div className="flex items-center mb-3">
               {s.icon && (
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                  <span className="text-blue-500">{s.icon}</span>
+                <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center mr-3 text-blue-500 group-hover:bg-blue-100 transition-colors">
+                  {s.icon}
                 </div>
               )}
-              <h4 className="font-medium text-lg">{s.name}</h4>
+              <h4 className="font-medium text-lg text-zinc-900 group-hover:text-zinc-800">{s.name}</h4>
             </div>
-            {s.description && <p className="text-gray-600 text-sm">{s.description}</p>}
+            {s.description && <p className="text-zinc-500 text-sm group-hover:text-zinc-600">{s.description}</p>}
           </div>
         ))}
       </div>
-    </div>)
+    </div>
+  );
 }

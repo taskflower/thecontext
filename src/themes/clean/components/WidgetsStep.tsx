@@ -28,16 +28,11 @@ export default function WidgetsStep({
 
   const getColSpanClass = (colSpan?: 1 | 2 | 3 | "full") => {
     switch (colSpan) {
-      case 1:
-        return "col-span-1";
-      case 2:
-        return "col-span-2";
-      case 3:
-        return "col-span-3";
-      case "full":
-        return "col-span-full";
-      default:
-        return "col-span-1";
+      case 1: return "col-span-1";
+      case 2: return "col-span-2";
+      case 3: return "col-span-3";
+      case "full": return "col-span-full";
+      default: return "col-span-1";
     }
   };
 
@@ -55,13 +50,13 @@ export default function WidgetsStep({
     return (
       <div
         key={widget.tplFile + (widget.title || "")}
-        className={`rounded-lg overflow-hidden h-full ${getColSpanClass(widget.colSpan)}`}
+        className={`h-full ${getColSpanClass(widget.colSpan)}`}
       > 
         <Suspense
           fallback={
-            <div className="flex items-center justify-center p-6 h-32">
-              <Loader className="w-6 h-6 text-slate-800 animate-spin" />
-              <span className="ml-2 text-slate-600">Ładowanie widgetu...</span>
+            <div className="flex items-center justify-center h-32">
+              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <span className="ml-3 text-gray-600">Ładowanie widgetu...</span>
             </div>
           }
         >
@@ -72,7 +67,7 @@ export default function WidgetsStep({
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto py-6 border-t border-gray-200">
       {(title || subtitle) && (
         <div className="mb-8">
           {title && <h2 className="text-2xl font-semibold text-slate-800 mb-2">{title}</h2>}

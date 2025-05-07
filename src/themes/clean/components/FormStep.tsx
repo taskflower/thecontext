@@ -58,14 +58,19 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
     const fieldError = errors[fieldName];
     const hasError = !!fieldError;
     
+    const inputClasses = `w-full px-3 py-2 border rounded-md shadow-sm 
+      focus:outline-none focus:ring-2 ${hasError 
+        ? 'border-red-300 focus:border-red-300 focus:ring-red-200' 
+        : 'border-slate-300 focus:border-slate-300 focus:ring-slate-200'}`;
+    
     return (
       <div key={fieldName} className="mb-5">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          {title} {required && <span className="text-red-600">*</span>}
+        <label className="block text-sm font-medium text-slate-700 mb-1">
+          {title} {required && <span className="text-red-500">*</span>}
         </label>
         
         {description && (
-          <p className="text-xs text-gray-500 mb-1">{description}</p>
+          <p className="text-xs text-slate-500 mb-1">{description}</p>
         )}
         
         {fieldType === 'text' && (
@@ -74,7 +79,7 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
             value={fieldValue || ''}
             onChange={(e) => handleChange(fieldName, e.target.value)}
             placeholder={fieldSchema.placeholder}
-            className={`w-full p-2 rounded-md shadow-sm focus:ring-2 focus:ring-slate-300 ${hasError ? 'focus:ring-red-200' : ''}`}
+            className={inputClasses}
           />
         )}
         
@@ -87,7 +92,7 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
             step={fieldSchema.step}
             onChange={(e) => handleChange(fieldName, e.target.value === '' ? '' : Number(e.target.value))}
             placeholder={fieldSchema.placeholder}
-            className={`w-full p-2 rounded-md shadow-sm focus:ring-2 focus:ring-slate-300 ${hasError ? 'focus:ring-red-200' : ''}`}
+            className={inputClasses}
           />
         )}
         
@@ -97,9 +102,9 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
               type="checkbox"
               checked={fieldValue || false}
               onChange={(e) => handleChange(fieldName, e.target.checked)}
-              className={`h-4 w-4 text-slate-800 focus:ring-slate-300 ${hasError ? '' : ''} rounded`}
+              className={`h-4 w-4 text-slate-600 focus:ring-slate-300 ${hasError ? 'border-red-300' : 'border-slate-300'} rounded`}
             />
-            <span className="ml-2 text-sm text-gray-600">{fieldSchema.placeholder || 'Zaznacz'}</span>
+            <span className="ml-2 text-sm text-slate-600">{fieldSchema.placeholder || 'Zaznacz'}</span>
           </div>
         )}
         
@@ -109,7 +114,7 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
             value={fieldValue || ''}
             onChange={(e) => handleChange(fieldName, e.target.value)}
             placeholder={fieldSchema.placeholder || 'email@example.com'}
-            className={`w-full p-2 rounded-md shadow-sm focus:ring-2 focus:ring-slate-300 ${hasError ? 'focus:ring-red-200' : ''}`}
+            className={inputClasses}
           />
         )}
         
@@ -118,7 +123,7 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
             type="date"
             value={fieldValue || ''}
             onChange={(e) => handleChange(fieldName, e.target.value)}
-            className={`w-full p-2 rounded-md shadow-sm focus:ring-2 focus:ring-slate-300 ${hasError ? 'focus:ring-red-200' : ''}`}
+            className={inputClasses}
           />
         )}
         
@@ -128,7 +133,7 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
             onChange={(e) => handleChange(fieldName, e.target.value)}
             placeholder={fieldSchema.placeholder}
             rows={4}
-            className={`w-full p-2 rounded-md shadow-sm focus:ring-2 focus:ring-slate-300 ${hasError ? 'focus:ring-red-200' : ''}`}
+            className={inputClasses}
           />
         )}
         
@@ -136,7 +141,7 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
           <select
             value={fieldValue || ''}
             onChange={(e) => handleChange(fieldName, e.target.value)}
-            className={`w-full p-2 rounded-md shadow-sm focus:ring-2 focus:ring-slate-300 ${hasError ? 'focus:ring-red-200' : ''}`}
+            className={inputClasses}
           >
             <option value="">-- Wybierz --</option>
             {options.map(option => (
@@ -148,37 +153,37 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
         )}
         
         {hasError && (
-          <p className="text-red-600 text-sm mt-1">{fieldError}</p>
+          <p className="text-red-500 text-sm mt-1">{fieldError}</p>
         )}
       </div>
     );
   };
 
   return (
-    <div className="p-6">
+    <div className="mt-3 mx-auto bg-white rounded-lg border border-slate-200 shadow-sm p-6">
       <h2 className="text-xl font-semibold text-slate-800 mb-3">{title}</h2>
       
       {description && (
-        <p className="text-gray-600 mb-6">{description}</p>
+        <p className="text-slate-500 mb-6">{description}</p>
       )}
       
       <form onSubmit={handleSubmit}>
         {Object.keys(fieldSchemas).map(renderField)}
         
         {Object.keys(fieldSchemas).length === 0 && (
-          <div className="p-4 text-amber-800">
+          <div className="p-4 bg-amber-50 border border-amber-200 rounded-md text-amber-700">
             <p>Brak zdefiniowanych pól w schemacie. Sprawdź konfigurację.</p>
           </div>
         )}
         
         {showRequiredHint && hasRequiredFields && (
-          <p className="text-xs text-gray-500 mt-2 mb-4">
-            Pola oznaczone <span className="text-red-600">*</span> są wymagane
+          <p className="text-xs text-slate-500 mt-2 mb-4">
+            Pola oznaczone <span className="text-red-500">*</span> są wymagane
           </p>
         )}
         
         {errors._form && (
-          <div className="my-4 p-4 text-red-700">
+          <div className="my-4 p-4 bg-red-50 border border-red-200 rounded-md text-red-600">
             <p>{errors._form}</p>
           </div>
         )}
@@ -186,7 +191,7 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
         <div className="mt-6">
           <button
             type="submit"
-            className="px-4 py-2 bg-slate-800 text-white rounded-md font-medium hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+            className="px-4 py-2 bg-slate-800 text-white rounded-md shadow-sm font-medium hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
           >
             {submitLabel}
           </button>

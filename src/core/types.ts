@@ -33,7 +33,7 @@ export interface WorkspaceConfig {
 }
 
 export interface TemplateSettings {
-  tplDir: string;
+  tplDir?: string;
   layoutFile: string;
   widgets?: Array<{
     tplFile: string;
