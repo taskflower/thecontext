@@ -1,4 +1,3 @@
-// src/themes/default/components/LlmStep.tsx
 import { ZodType } from "zod";
 import { useAuth } from "@/hooks";
 import { useLlm } from "../../../core/hooks/useLlm";
@@ -28,7 +27,6 @@ export default function LlmStep<T>({
 }: LlmStepProps<T>) {
   const { getToken, user } = useAuth();
   
-  // Używamy hooka useLlm z core
   const { 
     isLoading, 
     error, 
@@ -47,17 +45,15 @@ export default function LlmStep<T>({
     user
   });
 
-  // Gdy mamy rezultat i jeszcze nie wysłaliśmy go, wywołujemy onSubmit
   if (result && data !== result) {
     onSubmit(result);
   }
 
-  // Renderowanie UI
   if (!started) {
     return (
       <button 
         onClick={() => setStarted(true)}
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        className="px-4 py-2 bg-slate-800 text-white rounded-md shadow-sm font-medium hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
       >
         Rozpocznij
       </button>
@@ -66,21 +62,21 @@ export default function LlmStep<T>({
   
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-4">
-        <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mr-2"></div>
-        <span>Przetwarzanie...</span>
+      <div className="flex items-center justify-center p-6">
+        <div className="w-6 h-6 border-4 border-slate-800 border-t-transparent rounded-full animate-spin mr-2"></div>
+        <span className="text-slate-800 font-medium">Przetwarzanie...</span>
       </div>
     );
   }
   
   if (error) {
     return (
-      <div className="p-4 bg-red-100 text-red-700 rounded">
-        <h3 className="font-bold mb-2">Wystąpił błąd</h3>
+      <div className="p-6 bg-red-50 text-red-700 rounded-md border border-red-200">
+        <h3 className="font-semibold mb-2">Wystąpił błąd</h3>
         <p>{error}</p>
         <button 
           onClick={startLlmProcess}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          className="mt-4 px-4 py-2 bg-slate-800 text-white rounded-md shadow-sm font-medium hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
         >
           Spróbuj ponownie
         </button>
@@ -90,9 +86,9 @@ export default function LlmStep<T>({
   
   if (result && showResults) {
     return (
-      <div className="p-4 bg-green-50 rounded">
-        <h3 className="font-bold mb-2 text-green-700">Odpowiedź otrzymana</h3>
-        <pre className="bg-white p-4 rounded overflow-auto max-h-80 text-sm">
+      <div className="p-6 bg-green-50 rounded-md border border-green-200">
+        <h3 className="font-semibold mb-2 text-green-800">Odpowiedź otrzymana</h3>
+        <pre className="bg-white p-4 rounded-md shadow-sm overflow-auto max-h-80 text-sm border border-gray-200">
           {JSON.stringify(result, null, 2)}
         </pre>
       </div>
@@ -102,7 +98,7 @@ export default function LlmStep<T>({
   return (
     <div 
       onClick={startLlmProcess}
-      className="p-4 bg-blue-50 text-blue-700 rounded cursor-pointer hover:bg-blue-100 transition-colors"
+      className="p-6 bg-slate-50 text-slate-700 rounded-md border border-slate-200 cursor-pointer hover:bg-slate-100 transition-colors"
     >
       Kliknij, aby rozpocząć przetwarzanie
     </div>

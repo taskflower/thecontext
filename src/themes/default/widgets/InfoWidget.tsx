@@ -1,4 +1,4 @@
-import { Info, AlertTriangle, CheckCircle, XCircle, ArrowUpRight, ArrowRight } from 'lucide-react';
+import { Info, AlertTriangle, CheckCircle, XCircle, ArrowRight } from 'lucide-react';
 
 type InfoProps = {
   title?: string;
@@ -17,29 +17,27 @@ export default function InfoWidget({
   actionText = 'Więcej',
   variant = 'default'
 }: InfoProps) {
-  // Funkcja do renderowania ikony
   const renderIcon = () => {
     switch (icon) {
       case 'info':
-        return <Info className="w-5 h-5 text-blue-500" />;
+        return <Info className="w-5 h-5 text-slate-600" />;
       case 'warning':
-        return <AlertTriangle className="w-5 h-5 text-amber-500" />;
+        return <AlertTriangle className="w-5 h-5 text-amber-600" />;
       case 'success':
-        return <CheckCircle className="w-5 h-5 text-green-500" />;
+        return <CheckCircle className="w-5 h-5 text-green-600" />;
       case 'error':
-        return <XCircle className="w-5 h-5 text-red-500" />;
+        return <XCircle className="w-5 h-5 text-red-600" />;
       default:
         return null;
     }
   };
 
-  // Klasy CSS dla różnych wariantów
   const getContainerClasses = () => {
     switch (variant) {
       case 'outlined':
-        return "border rounded-lg border-gray-200 h-full";
+        return "border rounded-lg border-gray-200 h-full shadow-sm";
       case 'filled':
-        return "h-full rounded-lg " + getColorByIcon();
+        return "h-full rounded-lg shadow-sm " + getColorByIcon();
       case 'default':
       default:
         return "h-full";
@@ -49,15 +47,15 @@ export default function InfoWidget({
   const getColorByIcon = () => {
     switch (icon) {
       case 'info':
-        return "bg-blue-50 border border-blue-100";
+        return "bg-slate-50 border border-slate-200";
       case 'warning':
-        return "bg-amber-50 border border-amber-100";
+        return "bg-amber-50 border border-amber-200";
       case 'success':
-        return "bg-green-50 border border-green-100";
+        return "bg-green-50 border border-green-200";
       case 'error':
-        return "bg-red-50 border border-red-100";
+        return "bg-red-50 border border-red-200";
       default:
-        return "bg-gray-50 border border-gray-100";
+        return "bg-gray-50 border border-gray-200";
     }
   };
 
@@ -76,7 +74,7 @@ export default function InfoWidget({
         return "p-4 pt-0";
       case 'default':
       default:
-        return "bg-gray-100 p-4 rounded";
+        return "bg-gray-50 p-4 rounded-md border border-gray-200";
     }
   };
 
@@ -84,20 +82,20 @@ export default function InfoWidget({
     <div className={getContainerClasses()}>
       <div className={getHeaderClasses()}>
         {renderIcon()}
-        {title && <h3 className="m-0 ml-2 text-base font-medium">{title}</h3>}
+        {title && <h3 className="m-0 ml-2 text-base font-medium text-slate-800">{title}</h3>}
       </div>
       
       <div className={getContentClasses()}>
         {data !== undefined ? (
           <div className="flex flex-col">
-            <p className="m-0 break-words text-lg font-medium">
+            <p className="m-0 break-words text-lg font-medium text-slate-700">
               {String(data)}
             </p>
             
             {actionUrl && (
               <a 
                 href={actionUrl} 
-                className="mt-3 inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
+                className="mt-3 inline-flex items-center text-sm font-medium text-slate-600 hover:text-slate-800"
                 target="_blank"
                 rel="noopener noreferrer"
               >

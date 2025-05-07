@@ -5,7 +5,7 @@ import App  from './App'; // Poprawiony import
 import "./index.css";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
-import config from "./_mocks/config";
+import config from "./_mocks/marketingApp.config";
 
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

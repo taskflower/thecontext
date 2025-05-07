@@ -6,7 +6,7 @@ type WidgetConfig = {
   tplFile: string;
   title?: string;
   contextDataPath?: string;
-  colSpan?: 1 | 2 | 3 | "full"; // Dodana opcja określająca szerokość widgetu
+  colSpan?: 1 | 2 | 3 | "full";
   [key: string]: any;
 };
 
@@ -25,7 +25,6 @@ export default function WidgetsStep({
 }: WidgetsStepProps) {
   const { get } = useFlow();
 
-  // Funkcja mapująca colSpan na klasy CSS
   const getColSpanClass = (colSpan?: 1 | 2 | 3 | "full") => {
     switch (colSpan) {
       case 1:
@@ -41,7 +40,6 @@ export default function WidgetsStep({
     }
   };
 
-  // Funkcja do ładowania widgetów
   const loadWidget = (widget: WidgetConfig) => {
     const Widget = lazy(() =>
       import(`../widgets/${widget.tplFile}`).catch(
@@ -49,7 +47,6 @@ export default function WidgetsStep({
       )
     );
 
-    // Dane dla widgetu
     const data = widget.contextDataPath
       ? get(widget.contextDataPath)
       : undefined;
@@ -57,13 +54,13 @@ export default function WidgetsStep({
     return (
       <div
         key={widget.tplFile + (widget.title || "")}
-        className={`bg-white rounded-lg shadow overflow-hidden h-full ${getColSpanClass(widget.colSpan)}`}
+        className={`bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden h-full ${getColSpanClass(widget.colSpan)}`}
       >
         <Suspense
           fallback={
-            <div className="flex items-center justify-center p-4 h-32">
-              <Loader className="w-6 h-6 text-blue-500 animate-spin" />
-              <span className="ml-2">Ładowanie widgetu...</span>
+            <div className="flex items-center justify-center p-6 h-32">
+              <Loader className="w-6 h-6 text-slate-800 animate-spin" />
+              <span className="ml-2 text-slate-600">Ładowanie widgetu...</span>
             </div>
           }
         >
@@ -74,22 +71,22 @@ export default function WidgetsStep({
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-4">
+    <div className="max-w-6xl mx-auto p-6">
       {(title || subtitle) && (
-        <div className="mb-6">
-          {title && <h2 className="text-2xl font-bold mb-2">{title}</h2>}
+        <div className="mb-8">
+          {title && <h2 className="text-2xl font-semibold text-slate-800 mb-2">{title}</h2>}
           {subtitle && <p className="text-gray-600">{subtitle}</p>}
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {widgets.map(loadWidget)}
       </div>
 
       <div className="flex justify-end">
         <button
           onClick={() => onSubmit({})}
-          className="py-2 px-4 bg-blue-500 text-white border-none rounded cursor-pointer hover:bg-blue-400 flex items-center"
+          className="py-2 px-4 bg-slate-800 text-white rounded-md shadow-sm font-medium hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 flex items-center"
         >
           <CheckSquare className="w-4 h-4 mr-2" />
           Zakończ
