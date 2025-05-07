@@ -160,7 +160,7 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
 
   // Renderowanie formularza
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow">
+    <div className="p-4">
       <h2 className="text-xl font-bold mb-2">{title}</h2>
       
       {description && (

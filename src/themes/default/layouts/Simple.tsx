@@ -41,8 +41,8 @@ export default function SimpleLayout({
         </header>
       )}
 
-      <main className="flex-1 w-full max-w-6xl mx-auto p-4 md:p-8">
-        <div className="bg-white rounded-lg shadow-md overflow-hidden min-h-[400px]">
+      <main className="flex-1 w-full max-w-6xl mx-auto py-4 md:py-8 flex flex-col">
+        <div className="flex-1 bg-white rounded-lg shadow-md overflow-hidden min-h-[400px]">
           {children}
         </div>
       </main>
