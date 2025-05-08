@@ -1,7 +1,7 @@
 // src/themes/clean/widgets/ScenarioListWidget.tsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import type { AppConfig } from '../../../core/types';
 
 type Scenario = {

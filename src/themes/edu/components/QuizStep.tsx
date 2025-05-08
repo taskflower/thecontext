@@ -1,13 +1,18 @@
 // src/themes/default/components/QuizStep.tsx
-import React, { useState, useEffect } from 'react';
-import { ZodType } from 'zod';
-import { Check, X, HelpCircle } from 'lucide-react';
-import { useFlow } from '../../../core/context';
+import React, { useState, useEffect } from "react";
+import { ZodType } from "zod";
+import { Check,  HelpCircle } from "lucide-react";
+import { useFlow } from "../../../core/context";
 
 type Question = {
   id: string;
   question: string;
-  type: 'single-choice' | 'multiple-choice' | 'true-false' | 'fill-in' | 'matching';
+  type:
+    | "single-choice"
+    | "multiple-choice"
+    | "true-false"
+    | "fill-in"
+    | "matching";
   options?: {
     id: string;
     text: string;
@@ -42,26 +47,26 @@ type QuizStepProps<T> = {
 };
 
 export default function QuizStep<T>({
-  schema,
-  jsonSchema,
   data,
   onSubmit,
   quizData: quizDataProp,
   showResults = false,
-  calculateResults = false, // Domyślnie false dla zgodności wstecznej
-  submitLabel = "Sprawdź wyniki"
+
+  submitLabel = "Sprawdź wyniki",
 }: QuizStepProps<T>) {
   const { get } = useFlow();
-  
+
   // Pobierz dane quizu z kontekstu lub propsa
   const quizData: QuizData = React.useMemo(() => {
-    if (typeof quizDataProp === 'string') {
+    if (typeof quizDataProp === "string") {
       const contextData = get(quizDataProp);
-      if (contextData && typeof contextData === 'object') {
+      if (contextData && typeof contextData === "object") {
         return contextData as QuizData;
       }
-      console.warn(`QuizStep: Nie można pobrać danych quizu z kontekstu "${quizDataProp}"`);
-      return { title: 'Quiz', description: 'Brak danych quizu', questions: [] };
+      console.warn(
+        `QuizStep: Nie można pobrać danych quizu z kontekstu "${quizDataProp}"`
+      );
+      return { title: "Quiz", description: "Brak danych quizu", questions: [] };
     }
     return quizDataProp as QuizData;
   }, [quizDataProp, get]);
@@ -71,7 +76,7 @@ export default function QuizStep<T>({
   const [timeStarted, setTimeStarted] = useState<number>(Date.now());
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
-  const [textAnswer, setTextAnswer] = useState<string>('');
+  const [textAnswer, setTextAnswer] = useState<string>("");
   const [showExplanation, setShowExplanation] = useState(false);
 
   const currentQuestion = quizData?.questions?.[currentQuestionIdx];
@@ -91,31 +96,46 @@ export default function QuizStep<T>({
   // Przywrócenie stanu dla bieżącego pytania
   useEffect(() => {
     if (currentQuestion) {
-      const existingAnswer = userAnswers.find(a => a.questionId === currentQuestion.id);
-      
+      const existingAnswer = userAnswers.find(
+        (a) => a.questionId === currentQuestion.id
+      );
+
       if (existingAnswer) {
         setSelectedOptions(existingAnswer.selectedOptions || []);
-        setTextAnswer(existingAnswer.textAnswer || '');
+        setTextAnswer(existingAnswer.textAnswer || "");
       } else {
         setSelectedOptions([]);
-        setTextAnswer('');
+        setTextAnswer("");
       }
       setShowExplanation(false);
     }
   }, [currentQuestion, userAnswers]);
 
   // Funkcja sprawdzająca poprawność odpowiedzi
-  const checkAnswerCorrectness = (question: Question, selectedOpts: string[], textAns: string): boolean => {
-    if (question.type === 'fill-in' || question.type === 'matching') {
-      return textAns.toLowerCase().trim() === (question.correctAnswer || '').toLowerCase().trim();
+  const checkAnswerCorrectness = (
+    question: Question,
+    selectedOpts: string[],
+    textAns: string
+  ): boolean => {
+    if (question.type === "fill-in" || question.type === "matching") {
+      return (
+        textAns.toLowerCase().trim() ===
+        (question.correctAnswer || "").toLowerCase().trim()
+      );
     } else if (question.options) {
-      if (question.type === 'single-choice' || question.type === 'true-false') {
-        const selectedOption = question.options.find(opt => selectedOpts.includes(opt.id));
+      if (question.type === "single-choice" || question.type === "true-false") {
+        const selectedOption = question.options.find((opt) =>
+          selectedOpts.includes(opt.id)
+        );
         return selectedOption?.isCorrect || false;
-      } else if (question.type === 'multiple-choice') {
-        const correctOptions = question.options.filter(opt => opt.isCorrect).map(opt => opt.id);
-        return correctOptions.length === selectedOpts.length &&
-               correctOptions.every(id => selectedOpts.includes(id));
+      } else if (question.type === "multiple-choice") {
+        const correctOptions = question.options
+          .filter((opt) => opt.isCorrect)
+          .map((opt) => opt.id);
+        return (
+          correctOptions.length === selectedOpts.length &&
+          correctOptions.every((id) => selectedOpts.includes(id))
+        );
       }
     }
     return false;
@@ -123,17 +143,17 @@ export default function QuizStep<T>({
 
   // Funkcja obliczająca końcowy wynik
   const calculateFinalResults = (answers: UserAnswer[]): any => {
-    const score = answers.filter(a => a.isCorrect).length;
+    const score = answers.filter((a) => a.isCorrect).length;
     const maxScore = totalQuestions;
     const percentage = Math.round((score / maxScore) * 100);
     const timeTaken = Math.floor((Date.now() - timeStarted) / 1000);
-    
+
     return {
       answers,
       score,
       maxScore,
       percentage,
-      timeTaken
+      timeTaken,
     };
   };
 
@@ -142,7 +162,9 @@ export default function QuizStep<T>({
     return (
       <div className="py-6 text-center">
         <h2 className="text-xl font-medium mb-4">Brak pytań quizowych</h2>
-        <p className="text-gray-600 mb-6">Nie można załadować pytań quizowych. Sprawdź konfigurację.</p>
+        <p className="text-gray-600 mb-6">
+          Nie można załadować pytań quizowych. Sprawdź konfigurację.
+        </p>
         <button
           onClick={() => onSubmit({} as T)}
           className="px-5 py-2.5 bg-black text-white rounded text-sm font-medium hover:bg-gray-800"
@@ -154,11 +176,14 @@ export default function QuizStep<T>({
   }
 
   const handleOptionSelect = (optionId: string) => {
-    if (currentQuestion.type === 'single-choice' || currentQuestion.type === 'true-false') {
+    if (
+      currentQuestion.type === "single-choice" ||
+      currentQuestion.type === "true-false"
+    ) {
       setSelectedOptions([optionId]);
-    } else if (currentQuestion.type === 'multiple-choice') {
+    } else if (currentQuestion.type === "multiple-choice") {
       if (selectedOptions.includes(optionId)) {
-        setSelectedOptions(selectedOptions.filter(id => id !== optionId));
+        setSelectedOptions(selectedOptions.filter((id) => id !== optionId));
       } else {
         setSelectedOptions([...selectedOptions, optionId]);
       }
@@ -173,18 +198,28 @@ export default function QuizStep<T>({
     if (!currentQuestion) return;
 
     // Sprawdź poprawność odpowiedzi
-    const isCorrect = checkAnswerCorrectness(currentQuestion, selectedOptions, textAnswer);
+    const isCorrect = checkAnswerCorrectness(
+      currentQuestion,
+      selectedOptions,
+      textAnswer
+    );
 
     // Aktualizuj stan odpowiedzi
     const answer: UserAnswer = {
       questionId: currentQuestion.id,
       selectedOptions: selectedOptions,
-      textAnswer: currentQuestion.type === 'fill-in' || currentQuestion.type === 'matching' ? textAnswer : undefined,
-      isCorrect
+      textAnswer:
+        currentQuestion.type === "fill-in" ||
+        currentQuestion.type === "matching"
+          ? textAnswer
+          : undefined,
+      isCorrect,
     };
 
-    setUserAnswers(prev => {
-      const existingIndex = prev.findIndex(a => a.questionId === currentQuestion.id);
+    setUserAnswers((prev) => {
+      const existingIndex = prev.findIndex(
+        (a) => a.questionId === currentQuestion.id
+      );
       if (existingIndex >= 0) {
         const updated = [...prev];
         updated[existingIndex] = answer;
@@ -196,46 +231,48 @@ export default function QuizStep<T>({
 
   const handleNextQuestion = () => {
     saveCurrentAnswer();
-    
+
     if (isLastQuestion) {
       completeQuiz();
     } else {
-      setCurrentQuestionIdx(prev => prev + 1);
+      setCurrentQuestionIdx((prev) => prev + 1);
     }
   };
 
   const handlePrevQuestion = () => {
     saveCurrentAnswer();
     if (currentQuestionIdx > 0) {
-      setCurrentQuestionIdx(prev => prev - 1);
+      setCurrentQuestionIdx((prev) => prev - 1);
     }
   };
 
   const completeQuiz = () => {
     // Najpierw zapisujemy ostatnią odpowiedź
     saveCurrentAnswer();
-    
+
     // Następnie obliczamy wyniki wszystkich odpowiedzi
-    const updatedAnswers = userAnswers.map(answer => {
-      const question = quizData.questions.find(q => q.id === answer.questionId);
+    const updatedAnswers = userAnswers.map((answer) => {
+      const question = quizData.questions.find(
+        (q) => q.id === answer.questionId
+      );
       if (question) {
         return {
           ...answer,
           isCorrect: checkAnswerCorrectness(
-            question, 
-            answer.selectedOptions, 
-            answer.textAnswer || ''
-          )
+            question,
+            answer.selectedOptions,
+            answer.textAnswer || ""
+          ),
         };
       }
       return answer;
     });
-    
+
     // Obliczamy końcowy wynik
     const results = calculateFinalResults(updatedAnswers);
-    
+
     setQuizCompleted(true);
-    
+
     // Przekazujemy wyniki dalej
     onSubmit(results as any);
   };
@@ -250,25 +287,29 @@ export default function QuizStep<T>({
     return (
       <>
         <h3 className="text-lg font-medium mb-4">{currentQuestion.question}</h3>
-        
-        {(currentQuestion.type === 'single-choice' || currentQuestion.type === 'multiple-choice' || currentQuestion.type === 'true-false') && (
+
+        {(currentQuestion.type === "single-choice" ||
+          currentQuestion.type === "multiple-choice" ||
+          currentQuestion.type === "true-false") && (
           <div className="space-y-3">
-            {currentQuestion.options?.map(option => (
-              <div 
+            {currentQuestion.options?.map((option) => (
+              <div
                 key={option.id}
                 onClick={() => handleOptionSelect(option.id)}
                 className={`p-3 rounded border cursor-pointer transition-colors ${
-                  selectedOptions.includes(option.id) 
-                    ? 'bg-black text-white border-black' 
-                    : 'bg-white text-gray-800 border-gray-200 hover:border-gray-300'
+                  selectedOptions.includes(option.id)
+                    ? "bg-black text-white border-black"
+                    : "bg-white text-gray-800 border-gray-200 hover:border-gray-300"
                 }`}
               >
                 <div className="flex items-center">
-                  <div className={`flex-shrink-0 w-5 h-5 rounded-full border ${
-                    selectedOptions.includes(option.id) 
-                      ? 'bg-white border-white' 
-                      : 'border-gray-300'
-                  } mr-3`}>
+                  <div
+                    className={`flex-shrink-0 w-5 h-5 rounded-full border ${
+                      selectedOptions.includes(option.id)
+                        ? "bg-white border-white"
+                        : "border-gray-300"
+                    } mr-3`}
+                  >
                     {selectedOptions.includes(option.id) && (
                       <Check className="w-4 h-4 text-black" />
                     )}
@@ -279,8 +320,9 @@ export default function QuizStep<T>({
             ))}
           </div>
         )}
-        
-        {(currentQuestion.type === 'fill-in' || currentQuestion.type === 'matching') && (
+
+        {(currentQuestion.type === "fill-in" ||
+          currentQuestion.type === "matching") && (
           <div className="mb-4">
             <input
               type="text"
@@ -291,23 +333,23 @@ export default function QuizStep<T>({
             />
           </div>
         )}
-        
+
         {showExplanation && currentQuestion.explanation && (
           <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded text-blue-800 text-sm">
             <p className="font-medium mb-1">Wyjaśnienie:</p>
             <p>{currentQuestion.explanation}</p>
           </div>
         )}
-        
+
         <div className="flex justify-between mt-6">
           <button
             onClick={toggleExplanation}
             className="px-4 py-2 border border-gray-200 rounded text-sm font-medium flex items-center text-gray-600 hover:bg-gray-50"
           >
             <HelpCircle className="w-4 h-4 mr-2" />
-            {showExplanation ? 'Ukryj wyjaśnienie' : 'Pokaż wyjaśnienie'}
+            {showExplanation ? "Ukryj wyjaśnienie" : "Pokaż wyjaśnienie"}
           </button>
-          
+
           <div>
             {currentQuestionIdx > 0 && (
               <button
@@ -317,12 +359,12 @@ export default function QuizStep<T>({
                 Wstecz
               </button>
             )}
-            
+
             <button
               onClick={handleNextQuestion}
               className="px-5 py-2 bg-black text-white rounded text-sm font-medium hover:bg-gray-800"
             >
-              {isLastQuestion ? submitLabel : 'Następne'}
+              {isLastQuestion ? submitLabel : "Następne"}
             </button>
           </div>
         </div>
@@ -337,32 +379,39 @@ export default function QuizStep<T>({
           <div className="mb-6">
             <h2 className="text-xl font-medium mb-2">{quizData.title}</h2>
             <p className="text-gray-600 text-sm">{quizData.description}</p>
-            
+
             <div className="flex items-center justify-between mt-4 mb-2">
               <span className="text-sm font-medium">
                 Pytanie {currentQuestionIdx + 1} z {totalQuestions}
               </span>
               <span className="text-sm text-gray-500">
-                Ukończono: {Math.round((userAnswers.length / totalQuestions) * 100)}%
+                Ukończono:{" "}
+                {Math.round((userAnswers.length / totalQuestions) * 100)}%
               </span>
             </div>
-            
+
             <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div 
+              <div
                 className="h-full bg-black rounded-full"
-                style={{ width: `${((currentQuestionIdx + 1) / totalQuestions) * 100}%` }}
+                style={{
+                  width: `${
+                    ((currentQuestionIdx + 1) / totalQuestions) * 100
+                  }%`,
+                }}
               ></div>
             </div>
           </div>
-          
+
           {renderQuestion()}
         </>
       )}
-      
+
       {quizCompleted && showResults && (
         <div className="text-center py-8">
           <h2 className="text-xl font-medium mb-2">Quiz ukończony!</h2>
-          <p className="text-gray-600 mb-6">Twoje odpowiedzi zostały zapisane.</p>
+          <p className="text-gray-600 mb-6">
+            Twoje odpowiedzi zostały zapisane.
+          </p>
           <div className="inline-flex items-center justify-center p-3 bg-green-50 text-green-700 rounded-full mb-3">
             <Check className="w-6 h-6" />
           </div>

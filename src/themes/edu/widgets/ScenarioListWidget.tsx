@@ -1,8 +1,8 @@
 // src/themes/clean/widgets/ScenarioListWidget.tsx
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Play, ArrowRight } from 'lucide-react';
-import type { AppConfig } from '../../../core/types';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
+import type { AppConfig } from "../../../core/types";
 
 type Scenario = {
   slug: string;
@@ -10,7 +10,7 @@ type Scenario = {
   description?: string;
   icon?: string;
   workspaceSlug: string;
-  status?: 'active' | 'completed' | 'pending';
+  status?: "active" | "completed" | "pending";
 };
 
 type ScenarioListWidgetProps = {
@@ -22,22 +22,24 @@ type ScenarioListWidgetProps = {
 export default function ScenarioListWidget({
   title,
   config,
-  workspaceSlug
+  workspaceSlug,
 }: ScenarioListWidgetProps) {
   const navigate = useNavigate();
 
   // Filter scenarios for this workspace
   const scenarios: Scenario[] = React.useMemo(
-    () => config.scenarios.filter(s => s.workspaceSlug === workspaceSlug),
+    () => config.scenarios.filter((s) => s.workspaceSlug === workspaceSlug),
     [config.scenarios, workspaceSlug]
   );
 
   return (
     <div className="py-6">
-      {title && <h3 className="text-xl font-semibold text-slate-800 mb-6">{title}</h3>}
-      
+      {title && (
+        <h3 className="text-xl font-semibold text-slate-800 mb-6">{title}</h3>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {scenarios.map(s => (
+        {scenarios.map((s) => (
           <div
             key={s.slug}
             onClick={() => navigate(`/${workspaceSlug}/${s.slug}/0`)}
@@ -50,15 +52,17 @@ export default function ScenarioListWidget({
                     {s.icon}
                   </div>
                 )}
-                <h4 className="font-medium text-lg text-slate-800 group-hover:text-indigo-700">{s.name}</h4>
+                <h4 className="font-medium text-lg text-slate-800 group-hover:text-indigo-700">
+                  {s.name}
+                </h4>
               </div>
-              
+
               {s.description && (
                 <p className="text-slate-500 text-sm mb-6 group-hover:text-slate-600">
                   {s.description}
                 </p>
               )}
-              
+
               <div className="flex justify-end">
                 <div className="inline-flex items-center text-sm font-medium text-indigo-600 group-hover:text-indigo-800">
                   Rozpocznij <ArrowRight className="ml-1 w-4 h-4" />

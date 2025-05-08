@@ -1,5 +1,5 @@
 // src/themes/default/components/LessonStep.tsx
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { ZodType } from 'zod';
 import { BookOpen, ArrowRight, ArrowLeft, Download, PlayCircle, List, BookMarked } from 'lucide-react';
 
@@ -32,8 +32,6 @@ type LessonStepProps<T> = {
 };
 
 export default function LessonStep<T>({
-  schema,
-  jsonSchema,
   data,
   onSubmit,
   submitLabel = "Kontynuuj do quizu"

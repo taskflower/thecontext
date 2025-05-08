@@ -1,7 +1,7 @@
 // src/themes/clean/components/WidgetsStep.tsx
 import { lazy, Suspense } from "react";
 import { useFlow } from "../../../core/context";
-import { CheckSquare, Loader, ArrowRight, Database } from "lucide-react";
+import { CheckSquare,  ArrowRight, Database } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { getDatabaseProvider } from "../../../core/databaseProvider";
 import { get as getPath } from 'lodash';

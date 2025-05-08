@@ -14,6 +14,7 @@ interface UseFormResult<T> {
   handleChange: (field: string, value: any) => void;
   validateForm: () => boolean;
   resetForm: () => void;
+  data?: T; 
 }
 
 export const useForm = <T>({

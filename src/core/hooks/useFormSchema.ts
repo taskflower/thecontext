@@ -26,6 +26,7 @@ interface UseFormSchemaOptions<T> {
 interface UseFormSchemaResult<T> extends ReturnType<typeof useForm> {
   fieldSchemas: Record<string, FieldSchema>;
   hasRequiredFields: boolean;
+  data?: T; 
 }
 
 export const useFormSchema = <T>({
