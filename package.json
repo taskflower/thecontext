@@ -12,6 +12,10 @@
     "lint": "eslint src --ext ts,tsx"
   },
   "dependencies": {
+    "@stoplight/json-schema-viewer": "^4.16.4",
+    "@stoplight/markdown-viewer": "^5.7.1",
+    "@stoplight/mosaic": "^1.53.4",
+    "@stoplight/mosaic-code-viewer": "^1.53.4",
     "firebase": "^11.6.0",
     "localforage": "^1.10.0",
     "lodash": "^4.17.21",
