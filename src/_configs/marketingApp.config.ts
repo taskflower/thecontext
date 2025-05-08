@@ -5,7 +5,7 @@ const config: AppConfig = {
   name: "Analiza Marketingowa Strony",
   description:
     "Analiza strony internetowej pod kątem przyszłych kampanii marketingowych",
-  tplDir: "default",
+  tplDir: "clean",
   workspaces: [
     {
       slug: "workspace-marketing",
@@ -14,7 +14,6 @@ const config: AppConfig = {
         "Analiza strony internetowej i generowanie opisu marketingowego",
       icon: "globe",
       templateSettings: {
-        tplDir: "default",
         layoutFile: "Simple",
         widgets: [
           {

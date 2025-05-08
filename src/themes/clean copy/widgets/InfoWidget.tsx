@@ -16,28 +16,34 @@ export default function InfoWidget({
   icon,
   actionUrl,
   actionText = 'Więcej',
+  variant = 'default'
 }: InfoProps) {
   const renderIcon = () => {
     switch (icon) {
       case 'info':
-        return <Info className="h-5 w-5 text-blue-500" />;
+        return <Info className="h-5 w-5 text-cyan-500" />;
       case 'warning':
         return <AlertTriangle className="h-5 w-5 text-amber-500" />;
       case 'success':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
+        return <CheckCircle className="h-5 w-5 text-emerald-500" />;
       case 'error':
-        return <XCircle className="h-5 w-5 text-red-500" />;
+        return <XCircle className="h-5 w-5 text-rose-500" />;
       default:
         return null;
     }
   };
 
+  // Variant styling
+  const cardClass = variant === 'filled' 
+    ? "bg-sky-50 rounded-lg overflow-hidden h-full shadow-sm" 
+    : "bg-white rounded-lg border border-sky-200 overflow-hidden h-full shadow-sm";
+
   return (
-    <div className="bg-white rounded-lg border border-zinc-200 shadow-sm overflow-hidden h-full">
-      <div className="p-4 border-b border-zinc-100">
+    <div className={cardClass}>
+      <div className="p-4 border-b border-sky-100">
         <div className="flex items-center">
           {renderIcon()}
-          {title && <h3 className="text-lg font-medium ml-2 text-slate-800">{title}</h3>}
+          {title && <h3 className="text-base font-medium ml-2 text-slate-800">{title}</h3>}
         </div>
       </div>
       
@@ -51,7 +57,7 @@ export default function InfoWidget({
             {actionUrl && (
               <a 
                 href={actionUrl} 
-                className="mt-4 inline-flex items-center text-blue-600 hover:text-blue-800 font-medium text-sm"
+                className="mt-4 inline-flex items-center text-indigo-600 hover:text-indigo-800 font-medium text-sm"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -60,7 +66,7 @@ export default function InfoWidget({
             )}
           </div>
         ) : (
-          <p className="text-zinc-500 italic">Brak danych</p>
+          <p className="text-slate-500 italic">Brak danych</p>
         )}
       </div>
     </div>

@@ -1,6 +1,7 @@
 // src/themes/default/layouts/Simple.tsx
 import React from "react";
 import { X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface LayoutContext {
   workspace: any;
@@ -16,8 +17,16 @@ interface LayoutProps {
 }
 
 const SimpleLayout: React.FC<LayoutProps> = ({ children, context }) => {
+  const navigate = useNavigate();
   const { workspace, scenario, stepIdx = 0, totalSteps = 0 } = context || {};
   const showScenarioUI = !!scenario;
+  
+  // Handle returning to workspace overview when X button is clicked
+  const handleClose = () => {
+    if (workspace?.slug) {
+      navigate(`/${workspace.slug}`);
+    }
+  };
   
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col pt-6">
@@ -27,9 +36,15 @@ const SimpleLayout: React.FC<LayoutProps> = ({ children, context }) => {
             <div className="font-bold text-lg tracking-tight text-gray-900">
               {workspace?.name || 'FlowApp'}
             </div>
-            <button className="inline-flex items-center justify-center text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-400 h-8 w-8 rounded-md text-gray-600 hover:bg-gray-100">
-              <X className="h-4 w-4" />
-            </button>
+            {/* Only show close button when in a scenario */}
+            {showScenarioUI && (
+              <button 
+                onClick={handleClose}
+                className="inline-flex items-center justify-center text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-400 h-8 w-8 rounded-md text-gray-600 hover:bg-gray-100"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
           
           {showScenarioUI && (

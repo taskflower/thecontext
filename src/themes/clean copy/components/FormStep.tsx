@@ -20,7 +20,6 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
   description,
   submitLabel = 'Dalej',
   showRequiredHint = true,
-
 }) => {
   const { 
     formData, 
@@ -58,15 +57,15 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
     const fieldError = errors[fieldName];
     const hasError = !!fieldError;
     
-    const inputClasses = `w-full px-3 py-2 border rounded-md shadow-sm 
+    const inputClasses = `w-full px-3 py-2 border rounded-lg shadow-sm 
       focus:outline-none focus:ring-2 ${hasError 
-        ? 'border-red-300 focus:border-red-300 focus:ring-red-200' 
-        : 'border-slate-300 focus:border-slate-300 focus:ring-slate-200'}`;
+        ? 'border-rose-300 focus:border-rose-300 focus:ring-rose-200' 
+        : 'border-sky-200 focus:border-indigo-300 focus:ring-indigo-100'}`;
     
     return (
       <div key={fieldName} className="mb-5">
         <label className="block text-sm font-medium text-slate-700 mb-1">
-          {title} {required && <span className="text-red-500">*</span>}
+          {title} {required && <span className="text-rose-500">*</span>}
         </label>
         
         {description && (
@@ -102,7 +101,7 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
               type="checkbox"
               checked={fieldValue || false}
               onChange={(e) => handleChange(fieldName, e.target.checked)}
-              className={`h-4 w-4 text-slate-600 focus:ring-slate-300 ${hasError ? 'border-red-300' : 'border-slate-300'} rounded`}
+              className={`h-4 w-4 text-indigo-600 focus:ring-indigo-300 ${hasError ? 'border-rose-300' : 'border-sky-300'} rounded`}
             />
             <span className="ml-2 text-sm text-slate-600">{fieldSchema.placeholder || 'Zaznacz'}</span>
           </div>
@@ -153,14 +152,14 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
         )}
         
         {hasError && (
-          <p className="text-red-500 text-sm mt-1">{fieldError}</p>
+          <p className="text-rose-500 text-sm mt-1">{fieldError}</p>
         )}
       </div>
     );
   };
 
   return (
-    <div className="mt-3 mx-auto bg-white rounded-lg border border-slate-200 shadow-sm p-6">
+    <div className="mt-3 mx-auto bg-white rounded-lg border border-sky-200 shadow-sm p-6">
       <h2 className="text-xl font-semibold text-slate-800 mb-3">{title}</h2>
       
       {description && (
@@ -178,12 +177,12 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
         
         {showRequiredHint && hasRequiredFields && (
           <p className="text-xs text-slate-500 mt-2 mb-4">
-            Pola oznaczone <span className="text-red-500">*</span> są wymagane
+            Pola oznaczone <span className="text-rose-500">*</span> są wymagane
           </p>
         )}
         
         {errors._form && (
-          <div className="my-4 p-4 bg-red-50 border border-red-200 rounded-md text-red-600">
+          <div className="my-4 p-4 bg-rose-50 border border-rose-200 rounded-md text-rose-600">
             <p>{errors._form}</p>
           </div>
         )}
@@ -191,7 +190,7 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
         <div className="mt-6">
           <button
             type="submit"
-            className="px-4 py-2 bg-slate-800 text-white rounded-md shadow-sm font-medium hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+            className="px-5 py-2.5 bg-indigo-600 text-white rounded-full shadow-sm font-medium hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2"
           >
             {submitLabel}
           </button>
