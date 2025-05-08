@@ -1,6 +1,6 @@
 // src/core/databaseProvider.ts
-import { StoredItem } from "../hooks/useIndexedDB";
 import localforage from "localforage";
+import { StoredItem } from "./useIndexedDB";
 
 // Inicjalizacja bazy danych
 const initializeDB = () => {

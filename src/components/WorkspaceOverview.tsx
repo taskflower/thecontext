@@ -3,8 +3,7 @@ import React, { useMemo, Suspense } from "react";
 import { useParams } from "react-router-dom";
 import type { AppConfig } from "../core/types";
 import AppLoading from "./AppLoading";
-import { preloadLayout } from "../preloadLayout";
-import { preloadComponent } from "../preloadComponent";
+import { preloadComponent, preloadLayout } from "../preload";
 
 const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
   const { workspaceSlug } = useParams<{ workspaceSlug: string }>();

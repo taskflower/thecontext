@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { FlowEngine } from '../core/engine';
 import type { AppConfig } from '../core/types';
 import AppLoading from './AppLoading';
-import { preloadLayout } from '../preloadLayout';
+import { preloadLayout } from '@/preload';
 
 const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
   const { workspaceSlug, scenarioSlug, stepIndex } = useParams<{ 

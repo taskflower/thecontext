@@ -1,8 +1,7 @@
 // src/_auth/AuthWrapper.tsx
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import SharedLoader from '@/components/SharedLoader';
-import { useAuth } from '@/hooks';
+import { useAuth } from './useAuth';
 
 interface AuthWrapperProps {
   children: React.ReactNode;
@@ -13,7 +12,7 @@ export const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   const location = useLocation();
 
   if (loading) {
-    return <SharedLoader message="Uwierzytelnianie..." size="lg" fullScreen />;
+    return <>Uwierzytelnianie</>;
   }
 
   if (!user) {

@@ -8,16 +8,5 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-  },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          // Tworzenie osobnych chunków dla szablonów
-          "template-default": ["./src/tpl/default/index.ts"],
-          "template-minimal": ["./src/tpl/minimal/index.ts"],
-        },
-      },
-    },
-  },
+  }
 });

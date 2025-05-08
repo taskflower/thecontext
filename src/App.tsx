@@ -1,9 +1,9 @@
 // src/App.tsx
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from './hooks';
 import type { AppConfig } from './core/types';
 import FlowRoutes from './components/FlowRoutes';
+import { AuthProvider } from './auth/useAuth';
 
 const App: React.FC<{ configUrl?: string; initialConfig?: AppConfig; }> = ({ configUrl = '/api/config', initialConfig }) => {
   const [config, setConfig] = useState<AppConfig | null>(initialConfig || null);

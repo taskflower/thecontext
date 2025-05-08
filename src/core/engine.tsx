@@ -1,19 +1,22 @@
 // src/core/engine.tsx
-import React, { Suspense, lazy, useMemo } from 'react';
-import { z, ZodTypeAny } from 'zod';
-import { useFlowStore } from './context';
-import { AppConfig, NodeConfig } from './types';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { Suspense, lazy, useMemo } from "react";
+import { z, ZodTypeAny } from "zod";
+import { useFlowStore } from "./context";
+import { AppConfig, NodeConfig } from "./types";
+import { useNavigate, useParams } from "react-router-dom";
 
-// Konwerter JSON Schema -> Zod
 function jsonToZod(schema: any): ZodTypeAny {
   if (!schema) return z.any();
   switch (schema.type) {
-    case 'string': return z.string();
-    case 'number': return z.number();
-    case 'boolean': return z.boolean();
-    case 'array': return z.array(schema.items ? jsonToZod(schema.items) : z.any());
-    case 'object': {
+    case "string":
+      return z.string();
+    case "number":
+      return z.number();
+    case "boolean":
+      return z.boolean();
+    case "array":
+      return z.array(schema.items ? jsonToZod(schema.items) : z.any());
+    case "object": {
       const props: Record<string, ZodTypeAny> = {};
       for (const key in schema.properties || {}) {
         props[key] = jsonToZod(schema.properties[key]);
@@ -34,34 +37,38 @@ function jsonToZod(schema: any): ZodTypeAny {
   }
 }
 
-// Renderuje pojedynczy krok
-// src/core/engine.tsx - fragment z NodeRenderer
-const NodeRenderer: React.FC<{ config: AppConfig; node: NodeConfig; onNext: () => void }> = ({ config, node, onNext }) => {
+const NodeRenderer: React.FC<{
+  config: AppConfig;
+  node: NodeConfig;
+  onNext: () => void;
+}> = ({ config, node, onNext }) => {
   const { get, set } = useFlowStore();
   const jsonSchema = useMemo(
-    () => config.workspaces[0]?.contextSchema.properties?.[node.contextSchemaPath] || {},
+    () =>
+      config.workspaces[0]?.contextSchema.properties?.[
+        node.contextSchemaPath
+      ] || {},
     [config.workspaces, node.contextSchemaPath]
   );
   const schema = useMemo(() => jsonToZod(jsonSchema), [jsonSchema]);
   const data = get(node.contextDataPath);
   const Component = lazy(() =>
-    import(`../themes/${config.tplDir}/components/${node.tplFile}`)
-      .catch(() => import('../themes/default/components/ErrorStep'))
+    import(`../themes/${config.tplDir}/components/${node.tplFile}`).catch(
+      () => import("../themes/default/components/ErrorStep")
+    )
   );
-  
-  // Pobieramy obecny scenariusz
-  const currentScenario = useMemo(() => 
-    config.scenarios.find(s => s.nodes.some(n => n.slug === node.slug)),
+
+  const currentScenario = useMemo(
+    () =>
+      config.scenarios.find((s) => s.nodes.some((n) => n.slug === node.slug)),
     [config.scenarios, node.slug]
   );
-  
-  // Przekaż dodatkowe atrybuty z konfiguracji węzła
+
   const attrs = {
-    ...node.attrs || {},
-    // Dodajemy parametry związane z bazą danych
+    ...(node.attrs || {}),
     saveToDB: node.saveToDB,
     scenarioName: currentScenario?.name,
-    nodeSlug: node.slug
+    nodeSlug: node.slug,
   };
 
   // Zmodyfikowana funkcja onSubmit - bez zmian
@@ -86,17 +93,24 @@ const NodeRenderer: React.FC<{ config: AppConfig; node: NodeConfig; onNext: () =
 };
 
 // Główny silnik aplikacji sterowany URL-em
-export const FlowEngine: React.FC<{ config: AppConfig; scenarioSlug: string; stepIdx: number }> = ({ config, scenarioSlug, stepIdx }) => {
+export const FlowEngine: React.FC<{
+  config: AppConfig;
+  scenarioSlug: string;
+  stepIdx: number;
+}> = ({ config, scenarioSlug, stepIdx }) => {
   const navigate = useNavigate();
   const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
 
   const scenario = useMemo(
-    () => config.scenarios.find(s => s.slug === scenarioSlug),
+    () => config.scenarios.find((s) => s.slug === scenarioSlug),
     [config.scenarios, scenarioSlug]
   );
   if (!scenario) return <div>Scenariusz nie znaleziony</div>;
 
-  const nodes = useMemo(() => [...scenario.nodes].sort((a, b) => a.order - b.order), [scenario.nodes]);
+  const nodes = useMemo(
+    () => [...scenario.nodes].sort((a, b) => a.order - b.order),
+    [scenario.nodes]
+  );
   const index = Math.min(Math.max(stepIdx, 0), nodes.length - 1);
   const node = nodes[index];
 

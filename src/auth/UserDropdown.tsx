@@ -1,7 +1,7 @@
 // src/components/UserDropdown.tsx
-import { useAuth } from "@/hooks";
 import React, { useState, useRef, useEffect, memo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "./useAuth";
 
 // Using memo to prevent unnecessary re-renders
 export const UserDropdown: React.FC = memo(() => {

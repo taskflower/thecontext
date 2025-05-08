@@ -1,6 +1,6 @@
 // src/themes/clean/components/LlmStep.tsx
 import { ZodType } from "zod";
-import { useAuth } from "@/hooks";
+import { useAuth } from "@/auth/useAuth";
 import { useLlm } from "../../../core/hooks/useLlm";
 
 type LlmStepProps<T> = {
