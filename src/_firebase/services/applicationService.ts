@@ -1,5 +1,5 @@
 // src/_firebase/services/applicationService.ts
-import { collection, doc, getDoc, getDocs, query, where, addDoc, deleteDoc, writeBatch } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs,  addDoc, writeBatch } from 'firebase/firestore';
 import { db } from '@/_firebase/config';
 import { Application } from '@/types';
 import { nodeService, scenarioService, workspaceService } from '.';

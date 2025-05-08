@@ -35,6 +35,7 @@ function jsonToZod(schema: any): ZodTypeAny {
 }
 
 // Renderuje pojedynczy krok
+// src/core/engine.tsx - fragment z NodeRenderer
 const NodeRenderer: React.FC<{ config: AppConfig; node: NodeConfig; onNext: () => void }> = ({ config, node, onNext }) => {
   const { get, set } = useFlowStore();
   const jsonSchema = useMemo(
@@ -47,16 +48,27 @@ const NodeRenderer: React.FC<{ config: AppConfig; node: NodeConfig; onNext: () =
     import(`../themes/${config.tplDir}/components/${node.tplFile}`)
       .catch(() => import('../themes/default/components/ErrorStep'))
   );
-  // Przekaż dodatkowe atrybuty z konfiguracji węzła (np. userMessage)
-  const attrs = node.attrs || {};
+  
+  // Pobieramy obecny scenariusz
+  const currentScenario = useMemo(() => 
+    config.scenarios.find(s => s.nodes.some(n => n.slug === node.slug)),
+    [config.scenarios, node.slug]
+  );
+  
+  // Przekaż dodatkowe atrybuty z konfiguracji węzła
+  const attrs = {
+    ...node.attrs || {},
+    // Dodajemy parametry związane z bazą danych
+    saveToDB: node.saveToDB,
+    scenarioName: currentScenario?.name,
+    nodeSlug: node.slug
+  };
 
-  // Zmodyfikowana funkcja onSubmit - zachowuje dane jeśli val jest null
+  // Zmodyfikowana funkcja onSubmit - bez zmian
   const handleSubmit = (val: any) => {
-    // Jeśli val nie jest null, zapisujemy do kontekstu
     if (val !== null) {
       set(node.contextDataPath, val);
     }
-    // Niezależnie od wartości val, przechodzimy do następnego kroku
     onNext();
   };
 

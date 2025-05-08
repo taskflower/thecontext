@@ -8,15 +8,23 @@ export interface NodeConfig {
   tplFile: string;
   order: number;
   attrs?: Record<string, any>;
+  saveToDB?: {
+    enabled: boolean;
+    provider: "indexedDB";
+    itemId?: string;
+    itemType: "lesson" | "quiz" | "project";
+    itemTitle?: string;
+    contentPath?: string;
+  };
 }
 
 export interface ScenarioConfig {
   slug: string;
+  workspaceSlug: string;
   name: string;
   description?: string;
   icon?: string;
   systemMessage?: string;
-  workspaceSlug: string;
   nodes: NodeConfig[];
 }
 

@@ -63,17 +63,21 @@ const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
 
   return (
     <Suspense fallback={<AppLoading message="Ładowanie workspace..." />}>
-      <AppLayout>
-        <Suspense fallback={<div className="p-4">Ładowanie widgetów...</div>}>
-          <WidgetsStep
-            widgets={widgets}
-            onSubmit={() => {}}
-            title={workspace.name}
-            subtitle={workspace.description}
-          />
-        </Suspense>
-      </AppLayout>
-    </Suspense>
+    <AppLayout>
+      <Suspense fallback={<div className="p-4">Ładowanie widgetów...</div>}>
+        <WidgetsStep
+          widgets={widgets}
+          onSubmit={() => {}}
+          title={workspace.name}
+          subtitle={workspace.description}
+          // Nie przekazujemy parametrów związanych z bazą danych
+          saveToDB={null}
+          scenarioName={null}
+          nodeSlug={null}
+        />
+      </Suspense>
+    </AppLayout>
+  </Suspense>
   );
 };
 

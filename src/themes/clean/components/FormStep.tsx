@@ -20,7 +20,7 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
   description,
   submitLabel = 'Dalej',
   showRequiredHint = true,
-  ...props
+
 }) => {
   const { 
     formData, 

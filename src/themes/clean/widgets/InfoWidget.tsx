@@ -16,7 +16,6 @@ export default function InfoWidget({
   icon,
   actionUrl,
   actionText = 'Więcej',
-  variant = 'default'
 }: InfoProps) {
   const renderIcon = () => {
     switch (icon) {

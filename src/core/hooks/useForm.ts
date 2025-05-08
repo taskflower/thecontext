@@ -57,7 +57,7 @@ export const useForm = <T>({
       if (jsonSchema && jsonSchema.properties) {
         const requiredFields = jsonSchema.required || [];
         
-        Object.entries(jsonSchema.properties).forEach(([field, fieldSchema]: [string, any]) => {
+        Object.entries(jsonSchema.properties).forEach(([field]: [string, any]) => {
           const isRequired = requiredFields.includes(field);
           const fieldValue = formData[field];
           

@@ -53,6 +53,7 @@ const config: AppConfig = {
   scenarios: [
     {
       slug: "analiza-produktowa",
+      workspaceSlug:"workspace-formdemo",
       name: "Analiza produktowa",
       description: "Generowanie rekomendacji produktów w określonym formacie JSON",
       icon: "shopping-cart",
@@ -123,14 +124,7 @@ const config: AppConfig = {
         }
       ]
     }
-  ],
-  templateSettings: {
-    tplDir: "default",
-    layoutFile: "Simple",
-    widgets: [
-      { tplFile: "ScenarioList" }
-    ]
-  }
+  ]
 };
 
 export default config;

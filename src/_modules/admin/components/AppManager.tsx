@@ -9,7 +9,7 @@ import ApplicationList from "./ApplicationList";
 const AppManager: React.FC = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   // Fetch applications list
   const fetchApplications = async () => {

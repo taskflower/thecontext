@@ -19,7 +19,7 @@ const SimpleLayout: React.FC<LayoutProps> = ({ children, context }) => {
   // Access contextual data
   const { workspace, scenario, stepIdx = 0, totalSteps = 0 } = context || {};
   const workspaceSlug = workspace?.slug;
-  const scenarioSlug = scenario?.slug;
+
 
   // Render UI elements only when scenario context is available
   const showScenarioUI = !!scenario;

@@ -1,3 +1,4 @@
+// src/themes/default/widgets/ErrorWidget.tsx
 import { AlertTriangle } from 'lucide-react';
 
 type ErrorProps = {
@@ -10,17 +11,17 @@ export default function ErrorWidget({
   componentName 
 }: ErrorProps) {
   return (
-    <div className="flex flex-col items-center justify-center p-6 text-center">
-      <AlertTriangle className="w-8 h-8 mb-3 text-amber-600" />
-      <h3 className="m-0 mb-2 text-red-700 font-medium">Błąd widgetu</h3>
+    <div data-name="error-widget" className="flex flex-col items-center justify-center p-4 text-center">
+      <AlertTriangle className="w-6 h-6 mb-2 text-amber-500" />
+      <h3 className="m-0 mb-2 text-red-600 font-medium text-sm">Błąd widgetu</h3>
       
       {componentName && (
-        <p className="mb-2 bg-gray-50 p-2 px-3 rounded-md text-sm border border-gray-200">
-          <code className="bg-gray-100 p-1 px-2 rounded-md font-mono text-xs">{componentName}</code>
+        <p className="mb-2 bg-gray-50 p-2 px-3 rounded text-xs border border-gray-200">
+          <code className="bg-gray-100 p-1 px-2 rounded font-mono text-xs">{componentName}</code>
         </p>
       )}
       
-      <p className="text-gray-700">{message}</p>
+      <p className="text-gray-600 text-xs">{message}</p>
     </div>
   );
 }

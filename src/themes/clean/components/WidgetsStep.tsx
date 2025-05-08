@@ -1,7 +1,7 @@
 // src/themes/clean/components/WidgetsStep.tsx
 import { lazy, Suspense } from "react";
 import { useFlow } from "../../../core/context";
-import { CheckSquare, Loader } from "lucide-react";
+import { CheckSquare } from "lucide-react";
 
 type WidgetConfig = {
   tplFile: string;
