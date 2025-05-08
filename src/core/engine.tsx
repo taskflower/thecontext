@@ -50,13 +50,23 @@ const NodeRenderer: React.FC<{ config: AppConfig; node: NodeConfig; onNext: () =
   // Przekaż dodatkowe atrybuty z konfiguracji węzła (np. userMessage)
   const attrs = node.attrs || {};
 
+  // Zmodyfikowana funkcja onSubmit - zachowuje dane jeśli val jest null
+  const handleSubmit = (val: any) => {
+    // Jeśli val nie jest null, zapisujemy do kontekstu
+    if (val !== null) {
+      set(node.contextDataPath, val);
+    }
+    // Niezależnie od wartości val, przechodzimy do następnego kroku
+    onNext();
+  };
+
   return (
     <Suspense fallback={<div>Ładowanie kroku...</div>}>
       <Component
         schema={schema}
         jsonSchema={jsonSchema}
         data={data}
-        onSubmit={(val: any) => { set(node.contextDataPath, val); onNext(); }}
+        onSubmit={handleSubmit}
         {...attrs}
       />
     </Suspense>

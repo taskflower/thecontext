@@ -1,9 +1,10 @@
 // src/debug/ContextDebugger.tsx
 import React, { useState, useEffect, useRef } from "react";
-import { Database, X, List, ArrowRight } from "lucide-react";
+import { Database, X, List, ArrowRight, Activity } from "lucide-react";
 import { useFlowStore } from "../core/context";
 import JsonTreeRenderer from "./components/JsonTreeRenderer";
 import SchemaTab from "./tabs/SchemaTab";
+import LogsTab from "./tabs/LogsTab"; // Import the new LogsTab component
 import { AppConfig } from "../core/types";
 
 export const ContextDebugger: React.FC<{ config?: AppConfig }> = ({
@@ -109,7 +110,6 @@ export const ContextDebugger: React.FC<{ config?: AppConfig }> = ({
       {/* Tabs */}
       <div className="border-b border-gray-200">
         <div className="flex">
-         
           <button
             className={`px-3 py-2 text-sm font-medium flex items-center transition-colors ${
               activeTab === "schema"
@@ -131,6 +131,17 @@ export const ContextDebugger: React.FC<{ config?: AppConfig }> = ({
           >
             <Database className="w-3.5 h-3.5 mr-1.5" />
             Dane
+          </button>
+          <button
+            className={`px-3 py-2 text-sm font-medium flex items-center transition-colors ${
+              activeTab === "logs"
+                ? "border-b-2 border-blue-600 text-blue-600"
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+            }`}
+            onClick={() => setActiveTab("logs")}
+          >
+            <Activity className="w-3.5 h-3.5 mr-1.5" />
+            Logs
           </button>
         </div>
       </div>
@@ -157,6 +168,7 @@ export const ContextDebugger: React.FC<{ config?: AppConfig }> = ({
             </div>
           </div>
         )}
+        {activeTab === "logs" && <LogsTab />}
       </div>
 
       {/* Footer */}

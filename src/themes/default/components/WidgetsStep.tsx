@@ -1,7 +1,8 @@
 // src/themes/default/components/WidgetsStep.tsx
 import { lazy, Suspense } from "react";
 import { useFlow } from "../../../core/context";
-import { CheckSquare, Loader } from "lucide-react";
+import { CheckSquare, Loader, ArrowRight } from "lucide-react";
+import { useParams } from "react-router-dom";
 
 type WidgetConfig = {
   tplFile: string;
@@ -25,6 +26,14 @@ export default function WidgetsStep({
   subtitle,
 }: WidgetsStepProps) {
   const { get } = useFlow();
+  // Get scenario and step index from URL params
+  const { scenarioSlug, stepIndex } = useParams<{ 
+    scenarioSlug: string; 
+    stepIndex: string 
+  }>();
+  
+  // Determine if we're on the last step (for button text)
+  const isLastStep = !scenarioSlug; // If no scenarioSlug, we're in workspace view (end of flow)
 
   const getColSpanClass = (colSpan?: 1 | 2 | 3 | "full") => {
     switch (colSpan) {
@@ -71,6 +80,14 @@ export default function WidgetsStep({
     );
   };
 
+  // Kluczowa zmiana: Zamiast przekazywać pusty obiekt,
+  // wywołujemy onNext bez modyfikowania kontekstu
+  const handleNext = () => {
+    // Wywołujemy onSubmit z null, co będzie sygnałem dla NodeRenderer,
+    // żeby tylko nawigował, bez zmiany kontekstu
+    onSubmit(null);
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-6">
       {(title || subtitle) && (
@@ -86,11 +103,20 @@ export default function WidgetsStep({
 
       <div className="flex justify-end">
         <button
-          onClick={() => onSubmit({})}
+          onClick={handleNext}
           className="px-5 py-3 rounded-md transition-colors text-base font-medium bg-gray-900 text-white hover:bg-gray-800 flex items-center"
         >
-          <CheckSquare className="w-4 h-4 mr-2" />
-          Zakończ
+          {isLastStep ? (
+            <>
+              <CheckSquare className="w-4 h-4 mr-2" />
+              Zakończ
+            </>
+          ) : (
+            <>
+              <ArrowRight className="w-4 h-4 mr-2" />
+              Dalej
+            </>
+          )}
         </button>
       </div>
     </div>
