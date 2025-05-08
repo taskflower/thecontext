@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { ZodType } from 'zod';
 import { Check, X, HelpCircle } from 'lucide-react';
-import { useFlow } from '../../../core/context';  // Dodajemy import hooka kontekstu
+import { useFlow } from '../../../core/context';
 
 type Question = {
   id: string;
@@ -35,8 +35,10 @@ type QuizStepProps<T> = {
   jsonSchema?: any;
   data?: any;
   onSubmit: (data: T) => void;
-  quizData: string | QuizData;  // Zmodyfikowane, aby obsługiwać zarówno string jak i obiekt
+  quizData: string | QuizData;
   showResults?: boolean;
+  calculateResults?: boolean; // Nowy prop do automatycznego obliczania wyników
+  submitLabel?: string;
 };
 
 export default function QuizStep<T>({
@@ -46,14 +48,14 @@ export default function QuizStep<T>({
   onSubmit,
   quizData: quizDataProp,
   showResults = false,
+  calculateResults = false, // Domyślnie false dla zgodności wstecznej
+  submitLabel = "Sprawdź wyniki"
 }: QuizStepProps<T>) {
-  // Dodajemy hook do pobierania danych z kontekstu
   const { get } = useFlow();
   
-  // Pobieramy dane quizu z kontekstu lub bezpośrednio z propsa
+  // Pobierz dane quizu z kontekstu lub propsa
   const quizData: QuizData = React.useMemo(() => {
     if (typeof quizDataProp === 'string') {
-      // Jeśli to string, próbujemy pobrać dane z kontekstu Flow
       const contextData = get(quizDataProp);
       if (contextData && typeof contextData === 'object') {
         return contextData as QuizData;
@@ -61,7 +63,6 @@ export default function QuizStep<T>({
       console.warn(`QuizStep: Nie można pobrać danych quizu z kontekstu "${quizDataProp}"`);
       return { title: 'Quiz', description: 'Brak danych quizu', questions: [] };
     }
-    // W przeciwnym razie używamy bezpośrednio przekazanego obiektu
     return quizDataProp as QuizData;
   }, [quizDataProp, get]);
 
@@ -103,6 +104,39 @@ export default function QuizStep<T>({
     }
   }, [currentQuestion, userAnswers]);
 
+  // Funkcja sprawdzająca poprawność odpowiedzi
+  const checkAnswerCorrectness = (question: Question, selectedOpts: string[], textAns: string): boolean => {
+    if (question.type === 'fill-in' || question.type === 'matching') {
+      return textAns.toLowerCase().trim() === (question.correctAnswer || '').toLowerCase().trim();
+    } else if (question.options) {
+      if (question.type === 'single-choice' || question.type === 'true-false') {
+        const selectedOption = question.options.find(opt => selectedOpts.includes(opt.id));
+        return selectedOption?.isCorrect || false;
+      } else if (question.type === 'multiple-choice') {
+        const correctOptions = question.options.filter(opt => opt.isCorrect).map(opt => opt.id);
+        return correctOptions.length === selectedOpts.length &&
+               correctOptions.every(id => selectedOpts.includes(id));
+      }
+    }
+    return false;
+  };
+
+  // Funkcja obliczająca końcowy wynik
+  const calculateFinalResults = (answers: UserAnswer[]): any => {
+    const score = answers.filter(a => a.isCorrect).length;
+    const maxScore = totalQuestions;
+    const percentage = Math.round((score / maxScore) * 100);
+    const timeTaken = Math.floor((Date.now() - timeStarted) / 1000);
+    
+    return {
+      answers,
+      score,
+      maxScore,
+      percentage,
+      timeTaken
+    };
+  };
+
   // Jeśli nie ma pytań, wyświetlamy komunikat informacyjny
   if (!quizData || !quizData.questions || quizData.questions.length === 0) {
     return (
@@ -120,12 +154,9 @@ export default function QuizStep<T>({
   }
 
   const handleOptionSelect = (optionId: string) => {
-    // Dla pytań jednokrotnego wyboru
     if (currentQuestion.type === 'single-choice' || currentQuestion.type === 'true-false') {
       setSelectedOptions([optionId]);
-    } 
-    // Dla pytań wielokrotnego wyboru
-    else if (currentQuestion.type === 'multiple-choice') {
+    } else if (currentQuestion.type === 'multiple-choice') {
       if (selectedOptions.includes(optionId)) {
         setSelectedOptions(selectedOptions.filter(id => id !== optionId));
       } else {
@@ -142,24 +173,7 @@ export default function QuizStep<T>({
     if (!currentQuestion) return;
 
     // Sprawdź poprawność odpowiedzi
-    let isCorrect = false;
-    
-    if (currentQuestion.type === 'fill-in' || currentQuestion.type === 'matching') {
-      isCorrect = textAnswer.toLowerCase().trim() === (currentQuestion.correctAnswer || '').toLowerCase().trim();
-    } else if (currentQuestion.options) {
-      // Dla single-choice i true-false
-      if (currentQuestion.type === 'single-choice' || currentQuestion.type === 'true-false') {
-        const selectedOption = currentQuestion.options.find(opt => selectedOptions.includes(opt.id));
-        isCorrect = selectedOption?.isCorrect || false;
-      } 
-      // Dla multiple-choice
-      else if (currentQuestion.type === 'multiple-choice') {
-        // Wszystkie zaznaczone opcje muszą być poprawne i wszystkie poprawne muszą być zaznaczone
-        const correctOptions = currentQuestion.options.filter(opt => opt.isCorrect).map(opt => opt.id);
-        isCorrect = correctOptions.length === selectedOptions.length &&
-                    correctOptions.every(id => selectedOptions.includes(id));
-      }
-    }
+    const isCorrect = checkAnswerCorrectness(currentQuestion, selectedOptions, textAnswer);
 
     // Aktualizuj stan odpowiedzi
     const answer: UserAnswer = {
@@ -198,22 +212,32 @@ export default function QuizStep<T>({
   };
 
   const completeQuiz = () => {
-    const timeTaken = Math.floor((Date.now() - timeStarted) / 1000);
-    const score = userAnswers.filter(a => a.isCorrect).length;
-    const maxScore = totalQuestions;
-    const percentage = Math.round((score / maxScore) * 100);
+    // Najpierw zapisujemy ostatnią odpowiedź
+    saveCurrentAnswer();
     
-    // Przygotuj wynik
-    const result = {
-      answers: userAnswers,
-      score,
-      maxScore,
-      percentage,
-      timeTaken
-    };
+    // Następnie obliczamy wyniki wszystkich odpowiedzi
+    const updatedAnswers = userAnswers.map(answer => {
+      const question = quizData.questions.find(q => q.id === answer.questionId);
+      if (question) {
+        return {
+          ...answer,
+          isCorrect: checkAnswerCorrectness(
+            question, 
+            answer.selectedOptions, 
+            answer.textAnswer || ''
+          )
+        };
+      }
+      return answer;
+    });
+    
+    // Obliczamy końcowy wynik
+    const results = calculateFinalResults(updatedAnswers);
     
     setQuizCompleted(true);
-    onSubmit(result as any);
+    
+    // Przekazujemy wyniki dalej
+    onSubmit(results as any);
   };
 
   const toggleExplanation = () => {
@@ -298,7 +322,7 @@ export default function QuizStep<T>({
               onClick={handleNextQuestion}
               className="px-5 py-2 bg-black text-white rounded text-sm font-medium hover:bg-gray-800"
             >
-              {isLastQuestion ? 'Zakończ' : 'Następne'}
+              {isLastQuestion ? submitLabel : 'Następne'}
             </button>
           </div>
         </div>

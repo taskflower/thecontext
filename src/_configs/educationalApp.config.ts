@@ -318,28 +318,7 @@ const config: AppConfig = {
           order: 2,
           attrs: {
             autoStart: true,
-            userMessage:
-              "Stwórz materiał edukacyjny dla następujących ustawień: Poziom edukacji: {{educationSettings.educationLevel}}, Przedmiot: {{educationSettings.subject}}, Dział tematyczny: {{educationSettings.topic}}, Poziom trudności: {{educationSettings.difficulty}}. Przygotuj kompletny materiał edukacyjny w stylu interaktywnej lekcji podobnej do platformy Duolingo. BARDZO WAŻNE: Zwróć dokładny poprawny JSON zgodny z następującym formatem:\n" +
-              "{\n" +
-              '  "title": "string - krótki, zwięzły tytuł lekcji",\n' +
-              '  "description": "string - opis lekcji wyjaśniający czego uczeń się nauczy",\n' +
-              '  "theory": "string - zwięzłe wyjaśnienie teorii, podzielone na akapity (używaj \\n jako separator)",\n' +
-              '  "keyDefinitions": [\n' +
-              "    {\n" +
-              '      "term": "string - termin lub pojęcie",\n' +
-              '      "definition": "string - definicja terminu",\n' +
-              '      "example": "string - przykład zastosowania"\n' +
-              "    }\n" +
-              "  ],\n" +
-              '  "examples": [\n' +
-              "    {\n" +
-              '      "problem": "string - treść zadania lub problemu",\n' +
-              '      "solution": "string - rozwiązanie problemu",\n' +
-              '      "explanation": "string - wyjaśnienie rozwiązania"\n' +
-              "    }\n" +
-              "  ]\n" +
-              "}\n\n" +
-              "Stwórz 3-5 kluczowych definicji i 3-5 przykładów. Upewnij się, że wszystkie pola są poprawnie wypełnione i odpowiedniego typu. Dostosuj treść do wybranego poziomu edukacji i trudności.",
+            userMessage: "Stwórz materiał edukacyjny dla: poziom {{educationSettings.educationLevel}}, przedmiot {{educationSettings.subject}}, dział {{educationSettings.topic}}, trudność {{educationSettings.difficulty}}. Zwróć JSON z polami: title, description, theory(z separatorami \\n), keyDefinitions[{term, definition, example}], examples[{problem, solution, explanation}]. Stwórz 3-5 definicji i 3-5 przykładów.",
           },
         },
         {
@@ -398,50 +377,7 @@ const config: AppConfig = {
           order: 4,
           attrs: {
             autoStart: true,
-            userMessage:
-              "Na podstawie wygenerowanej lekcji: {{lessonData.title}} - {{lessonData.description}} z teorią: {{lessonData.theory}} stwórz interaktywny quiz w stylu podobnym do Duolingo. Quiz powinien sprawdzać wiedzę z materiału i być dostosowany do poziomu: {{educationSettings.educationLevel}} z przedmiotu: {{educationSettings.subject}} na poziomie trudności: {{educationSettings.difficulty}}.\n\n" +
-              "BARDZO WAŻNE: Zwróć poprawny JSON, który MUSI spełniać WSZYSTKIE poniższe zasady:\n\n" +
-              "1. Dla pytań typu 'single-choice', 'multiple-choice' i 'true-false':\n" +
-              "   - Pole 'options' MUSI być tablicą obiektów, każdy z polami: 'id', 'text' i 'isCorrect'\n" +
-              "   - Pole 'correctAnswer' MUSI być pustym stringiem (\"\")\n\n" +
-              "2. Dla pytań typu 'fill-in' i 'matching':\n" +
-              "   - Pole 'options' MOŻE być pustą tablicą ([])\n" +
-              "   - Pole 'correctAnswer' MUSI być niepustym stringiem zawierającym prawidłową odpowiedź\n\n" +
-              "3. KAŻDE pytanie MUSI mieć WSZYSTKIE pola:\n" +
-              "   - 'id': string (np. 'q1')\n" +
-              "   - 'question': string z treścią pytania\n" +
-              "   - 'type': jeden z typów: 'single-choice', 'multiple-choice', 'true-false', 'fill-in', 'matching'\n" +
-              "   - 'options': tablica (nawet pusta dla 'fill-in' i 'matching')\n" +
-              "   - 'correctAnswer': string (pusty dla pytań wyboru, niepusty dla 'fill-in' i 'matching')\n" +
-              "   - 'explanation': string z wyjaśnieniem odpowiedzi\n\n" +
-              '4. NIE UŻYWAJ WARTOŚCI NULL - używaj pustych stringów "" lub pustych tablic []\n\n' +
-              "Przykład poprawnego formatu:\n" +
-              "{\n" +
-              '  "title": "Tytuł quizu",\n' +
-              '  "description": "Opis quizu",\n' +
-              '  "questions": [\n' +
-              "    {\n" +
-              '      "id": "q1",\n' +
-              '      "question": "Pytanie typu wybór?",\n' +
-              '      "type": "single-choice",\n' +
-              '      "options": [\n' +
-              '        { "id": "o1", "text": "Opcja 1", "isCorrect": true },\n' +
-              '        { "id": "o2", "text": "Opcja 2", "isCorrect": false }\n' +
-              "      ],\n" +
-              '      "correctAnswer": "",\n' +
-              '      "explanation": "Wyjaśnienie odpowiedzi"\n' +
-              "    },\n" +
-              "    {\n" +
-              '      "id": "q2",\n' +
-              '      "question": "Pytanie typu uzupełnij?",\n' +
-              '      "type": "fill-in",\n' +
-              '      "options": [],\n' +
-              '      "correctAnswer": "Poprawna odpowiedź",\n' +
-              '      "explanation": "Wyjaśnienie odpowiedzi"\n' +
-              "    }\n" +
-              "  ]\n" +
-              "}\n\n" +
-              "Wygeneruj od 5 do 8 różnych pytań obejmujących materiał z lekcji. PAMIĘTAJ: correctAnswer musi być PUSTYM STRINGIEM dla pytań typu single-choice, multiple-choice i true-false, a NIEPUSTYM STRINGIEM dla pytań typu fill-in i matching.",
+            userMessage: "Stwórz quiz na podstawie lekcji {{lessonData.title}} - {{lessonData.description}} na poziomie {{educationSettings.educationLevel}} z przedmiotu {{educationSettings.subject}}. Zwróć JSON z polami: title, description, questions[{id, question, type, options[{id, text, isCorrect}], correctAnswer, explanation}]. Dla pytań single-choice/multiple-choice/true-false: options wypełnij opcjami, correctAnswer=\"\". Dla fill-in/matching: options=[], correctAnswer=prawidłowa odpowiedź. Utwórz 5-8 pytań.",
           },
         },
         {
@@ -454,68 +390,23 @@ const config: AppConfig = {
           attrs: {
             quizData: "quizData",
             submitLabel: "Sprawdź wyniki",
-          },
-        },
-        {
-          slug: "calculate-score",
-          label: "Krok 6: Obliczanie wyników",
-          contextSchemaPath: "userAnswers",
-          contextDataPath: "userAnswers",
-          tplFile: "LlmStep",
-          order: 6,
-          attrs: {
-            autoStart: true,
-            userMessage:
-              "Oblicz wynik quizu. Quiz: {{quizData.questions}}. Odpowiedzi użytkownika: {{userAnswers.answers}}.\n\n" +
-              "BARDZO WAŻNE: Zwróć poprawny JSON według dokładnie poniższego formatu. NIE UŻYWAJ wartości null. Dla pustych pól użyj pustych stringów lub tablic.\n\n" +
-              "{\n" +
-              '  "answers": [\n' +
-              "    {\n" +
-              '      "questionId": "q1",\n' +
-              '      "selectedOptions": ["o1", "o2"],\n' +
-              '      "textAnswer": "",\n' +
-              '      "isCorrect": true\n' +
-              "    },\n" +
-              "    {\n" +
-              '      "questionId": "q2",\n' +
-              '      "selectedOptions": [],\n' +
-              '      "textAnswer": "odpowiedź użytkownika",\n' +
-              '      "isCorrect": false\n' +
-              "    }\n" +
-              "  ],\n" +
-              '  "score": 1,\n' +
-              '  "maxScore": 2,\n' +
-              '  "percentage": 50,\n' +
-              '  "timeTaken": 180\n' +
-              "}\n\n" +
-              "Pole 'answers' to tablica obiektów, każdy zawierający:\n" +
-              "- 'questionId': ID pytania\n" +
-              "- 'selectedOptions': tablica ID wybranych opcji (pusta [] dla pytań typu fill-in)\n" +
-              "- 'textAnswer': tekst odpowiedzi dla pytań typu fill-in (pusty string \"\" dla innych typów)\n" +
-              "- 'isCorrect': boolean (true/false) czy odpowiedź jest poprawna\n\n" +
-              "Pozostałe pola:\n" +
-              "- 'score': liczba poprawnych odpowiedzi\n" +
-              "- 'maxScore': maksymalna możliwa liczba punktów\n" +
-              "- 'percentage': procent poprawnych odpowiedzi (0-100)\n" +
-              "- 'timeTaken': czas wykonania quizu w sekundach (użyj losowej wartości między 120 a 300)\n\n" +
-              "Sposób oceniania odpowiedzi:\n" +
-              "- Dla pytań typu single-choice i true-false: odpowiedź jest poprawna, gdy wybrano DOKŁADNIE opcję oznaczoną jako poprawna\n" +
-              "- Dla pytań typu multiple-choice: odpowiedź jest poprawna, gdy wybrano WSZYSTKIE opcje oznaczone jako poprawne i ŻADNEJ niepoprawnej\n" +
-              "- Dla pytań typu fill-in i matching: odpowiedź jest poprawna, gdy textAnswer jest identyczny z correctAnswer (ignorując wielkość liter)",
+            calculateResults: true,
           },
         },
         {
           slug: "show-results",
-          label: "Krok 7: Wyniki quizu",
+          label: "Krok 6: Wyniki quizu",
           contextSchemaPath: "userAnswers",
           contextDataPath: "userAnswers",
           tplFile: "WidgetsStep",
-          order: 7,
+          order: 6,
           attrs: {
+            title: "Podsumowanie wyników quizu",
+            subtitle: "Sprawdź swoje odpowiedzi i wynik końcowy",
             widgets: [
               {
                 tplFile: "TitleWidget",
-                title: "Wyniki quizu",
+                title: "Wyniki quizu: {{lessonData.title}}",
                 level: 2,
                 colSpan: "full",
               },
@@ -540,93 +431,21 @@ const config: AppConfig = {
                 layout: "table",
                 colSpan: "full",
               },
+              {
+                tplFile: "InfoWidget",
+                title: "Podsumowanie",
+                data: "Gratulacje! Ukończyłeś lekcję i quiz z przedmiotu {{educationSettings.subject}} na temat {{educationSettings.topic}}.",
+                icon: "check",
+                colSpan: "full",
+              },
             ],
           },
-        },
-        {
-          slug: "save-results",
-          label: "Krok 8: Zapisywanie wyników",
-          contextSchemaPath: "savedLessons",
-          contextDataPath: "savedLessons",
-          tplFile: "LlmStep",
-          order: 8,
-          attrs: {
-            autoStart: true,
-            userMessage:
-              "Przygotuj dane do zapisania w bazie danych. Na podstawie: Poziom: {{educationSettings.educationLevel}}, Przedmiot: {{educationSettings.subject}}, Temat: {{educationSettings.topic}}, Lekcja: {{lessonData.title}}, Wynik quizu: {{userAnswers.percentage}}%. BARDZO WAŻNE: Zwróć dokładny poprawny JSON zgodny z następującym formatem:\n" +
-              "{\n" +
-              '  "id": "string - unikalny identyfikator lekcji (aktualny timestamp)",\n' +
-              '  "title": "string - tytuł lekcji",\n' +
-              '  "subject": "string - nazwa przedmiotu",\n' +
-              '  "level": "string - poziom edukacji",\n' +
-              '  "topic": "string - temat/dział",\n' +
-              '  "createdAt": "string - data utworzenia w formacie ISO (aktualna data)",\n' +
-              '  "lastAccessed": "string - data ostatniego dostępu w formacie ISO (aktualna data)",\n' +
-              '  "completionStatus": number - procent ukończenia (wynik z quizu w procentach)\n' +
-              "}\n\n" +
-              "Upewnij się, że wszystkie pola są poprawnie wypełnione i odpowiedniego typu. Dla pola id wygeneruj aktualny timestamp (np. Date.now()). Dla dat użyj formatu ISO (np. new Date().toISOString()).",
-          },
-        },
-        {
-          slug: "summary-final",
-          label: "Krok 9: Podsumowanie",
-          contextSchemaPath: "",
-          contextDataPath: "",
-          tplFile: "WidgetsStep",
-          order: 9,
           saveToDB: {
             enabled: true,
             provider: "indexedDB",
             itemType: "lesson",
             itemTitle: "{{lessonData.title}}",
             contentPath: "",
-          },
-          attrs: {
-            title: "Podsumowanie wygenerowanych materiałów",
-            subtitle: "Materiały zostały pomyślnie wygenerowane i zapisane",
-            widgets: [
-              {
-                tplFile: "TitleWidget",
-                title: "{{lessonData.title}}",
-                level: 1,
-                colSpan: "full",
-              },
-              {
-                tplFile: "InfoWidget",
-                title: "Przedmiot",
-                contextDataPath: "educationSettings.subject",
-                icon: "book",
-                colSpan: 1,
-              },
-              {
-                tplFile: "InfoWidget",
-                title: "Poziom",
-                contextDataPath: "educationSettings.educationLevel",
-                icon: "info",
-                colSpan: 1,
-              },
-              {
-                tplFile: "InfoWidget",
-                title: "Dział",
-                contextDataPath: "educationSettings.topic",
-                icon: "document",
-                colSpan: 1,
-              },
-              {
-                tplFile: "InfoWidget",
-                title: "Wynik quizu",
-                data: "{{userAnswers.percentage}}%",
-                icon: "star",
-                colSpan: 1,
-              },
-              {
-                tplFile: "InfoWidget",
-                title: "Lekcja zapisana",
-                data: "Materiały zostały zapisane lokalnie w bazie danych",
-                icon: "check",
-                colSpan: "full",
-              },
-            ],
           },
         },
       ],
