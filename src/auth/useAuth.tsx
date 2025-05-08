@@ -4,7 +4,7 @@ import {
   signInWithPopup, signOut, onAuthStateChanged, User, GoogleAuthProvider 
 } from '@firebase/auth';
 import { doc, getDoc, setDoc } from '@firebase/firestore';
-import { auth, googleProvider, db } from '@/_firebase/config';
+import { auth, db, googleProvider } from '@/provideDB/firebase/config';
 
 // Uproszczony typ użytkownika z tokenami
 interface UserWithTokens extends User {
