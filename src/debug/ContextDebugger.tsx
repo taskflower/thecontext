@@ -6,23 +6,25 @@ import JsonTreeRenderer from "./components/JsonTreeRenderer";
 import SchemaTab from "./tabs/SchemaTab";
 import { AppConfig } from "../core/types";
 
-export const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) => {
+export const ContextDebugger: React.FC<{ config?: AppConfig }> = ({
+  config,
+}) => {
   const [isVisible, setIsVisible] = useState(
     localStorage.getItem("debuggerVisible") === "true"
   );
-  const [activeTab, setActiveTab] = useState("data");
+  const [activeTab, setActiveTab] = useState("schema");
   const [expandedPaths, setExpandedPaths] = useState({});
-  
+
   const { data: contextData } = useFlowStore();
   const prevContextRef = useRef({});
   const nodeInfo = useFlowStore((state) => {
     // Attempt to extract current node and scenario info from context
-    const currentPath = state.data.currentPath || '';
-    const pathParts = currentPath.split('/');
+    const currentPath = state.data.currentPath || "";
+    const pathParts = currentPath.split("/");
     return {
       workspaceSlug: pathParts[1],
       scenarioSlug: pathParts[2],
-      stepIdx: pathParts[3] ? parseInt(pathParts[3]) : 0
+      stepIdx: pathParts[3] ? parseInt(pathParts[3]) : 0,
     };
   });
 
@@ -41,7 +43,7 @@ export const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) =>
         appContent.classList.remove("w-1/2");
       }
     }
-    
+
     prevContextRef.current = JSON.parse(JSON.stringify(contextData));
   }, [isVisible, contextData]);
 
@@ -107,17 +109,7 @@ export const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) =>
       {/* Tabs */}
       <div className="border-b border-gray-200">
         <div className="flex">
-          <button
-            className={`px-3 py-2 text-sm font-medium flex items-center transition-colors ${
-              activeTab === "data"
-                ? "border-b-2 border-blue-600 text-blue-600"
-                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-            }`}
-            onClick={() => setActiveTab("data")}
-          >
-            <Database className="w-3.5 h-3.5 mr-1.5" />
-            Dane
-          </button>
+         
           <button
             className={`px-3 py-2 text-sm font-medium flex items-center transition-colors ${
               activeTab === "schema"
@@ -129,19 +121,33 @@ export const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) =>
             <List className="w-3.5 h-3.5 mr-1.5" />
             Schema
           </button>
+          <button
+            className={`px-3 py-2 text-sm font-medium flex items-center transition-colors ${
+              activeTab === "data"
+                ? "border-b-2 border-blue-600 text-blue-600"
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+            }`}
+            onClick={() => setActiveTab("data")}
+          >
+            <Database className="w-3.5 h-3.5 mr-1.5" />
+            Dane
+          </button>
         </div>
       </div>
 
       {/* Tab content */}
       <div className="flex-1 overflow-hidden">
+        {activeTab === "schema" && (
+          <SchemaTab contextData={contextData} config={config} />
+        )}
         {activeTab === "data" && (
           <div className="p-4 h-full overflow-auto">
             <div className="rounded-md border border-gray-200 p-3 bg-gray-50 h-full overflow-auto">
               {Object.keys(contextData).length > 0 ? (
-                <JsonTreeRenderer 
-                  data={contextData} 
-                  expandedPaths={expandedPaths} 
-                  setExpandedPaths={setExpandedPaths} 
+                <JsonTreeRenderer
+                  data={contextData}
+                  expandedPaths={expandedPaths}
+                  setExpandedPaths={setExpandedPaths}
                 />
               ) : (
                 <div className="text-gray-500 italic text-center p-4">
@@ -150,13 +156,6 @@ export const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) =>
               )}
             </div>
           </div>
-        )}
-        {activeTab === "schema" && (
-          <SchemaTab 
-            
-            contextData={contextData}
-            config={config}
-          />
         )}
       </div>
 
