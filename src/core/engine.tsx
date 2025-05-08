@@ -1,57 +1,36 @@
 // src/core/engine.tsx
 import React, { Suspense, lazy, useMemo } from "react";
-import { z, ZodTypeAny } from "zod";
+import { ZodTypeAny } from "zod";
 import { useFlowStore } from "./context";
 import { AppConfig, NodeConfig } from "./types";
 import { useNavigate, useParams } from "react-router-dom";
+import { jsonToZod } from "./utils/jsonToZod";
 
-function jsonToZod(schema: any): ZodTypeAny {
-  if (!schema) return z.any();
-  switch (schema.type) {
-    case "string":
-      return z.string();
-    case "number":
-      return z.number();
-    case "boolean":
-      return z.boolean();
-    case "array":
-      return z.array(schema.items ? jsonToZod(schema.items) : z.any());
-    case "object": {
-      const props: Record<string, ZodTypeAny> = {};
-      for (const key in schema.properties || {}) {
-        props[key] = jsonToZod(schema.properties[key]);
-      }
-      let obj = z.object(props);
-      if (schema.required) {
-        obj = obj.extend(
-          schema.required.reduce((acc: any, key: string) => {
-            acc[key] = props[key];
-            return acc;
-          }, {})
-        );
-      }
-      return obj;
-    }
-    default:
-      return z.any();
-  }
-}
-
-const NodeRenderer: React.FC<{
+interface NodeRendererProps {
   config: AppConfig;
   node: NodeConfig;
   onNext: () => void;
-}> = ({ config, node, onNext }) => {
+}
+
+const NodeRenderer: React.FC<NodeRendererProps> = ({ config, node, onNext }) => {
   const { get, set } = useFlowStore();
-  const jsonSchema = useMemo(
+
+  // Pobieramy oryginalne jsonSchema z configu
+  const originalJsonSchema = useMemo(
     () =>
-      config.workspaces[0]?.contextSchema.properties?.[
-        node.contextSchemaPath
-      ] || {},
+      config.workspaces[0]?.contextSchema.properties?.[node.contextSchemaPath] ??
+      {},
     [config.workspaces, node.contextSchemaPath]
   );
-  const schema = useMemo(() => jsonToZod(jsonSchema), [jsonSchema]);
+
+  // Zamieniamy je raz na Zod (cache’owane wewnątrz jsonToZod)
+  const zodSchema: ZodTypeAny = useMemo(
+    () => jsonToZod(originalJsonSchema),
+    [originalJsonSchema]
+  );
+
   const data = get(node.contextDataPath);
+
   const Component = lazy(() =>
     import(`../themes/${config.tplDir}/components/${node.tplFile}`).catch(
       () => import("../themes/default/components/ErrorStep")
@@ -60,7 +39,9 @@ const NodeRenderer: React.FC<{
 
   const currentScenario = useMemo(
     () =>
-      config.scenarios.find((s) => s.nodes.some((n) => n.slug === node.slug)),
+      config.scenarios.find((s) =>
+        s.nodes.some((n) => n.slug === node.slug)
+      ),
     [config.scenarios, node.slug]
   );
 
@@ -71,7 +52,6 @@ const NodeRenderer: React.FC<{
     nodeSlug: node.slug,
   };
 
-  // Zmodyfikowana funkcja onSubmit - bez zmian
   const handleSubmit = (val: any) => {
     if (val !== null) {
       set(node.contextDataPath, val);
@@ -81,9 +61,10 @@ const NodeRenderer: React.FC<{
 
   return (
     <Suspense fallback={<div>Ładowanie kroku...</div>}>
+      {/* Przekazujemy oba schema i jsonSchema */}
       <Component
-        schema={schema}
-        jsonSchema={jsonSchema}
+        schema={zodSchema}
+        jsonSchema={originalJsonSchema}
         data={data}
         onSubmit={handleSubmit}
         {...attrs}
@@ -92,7 +73,6 @@ const NodeRenderer: React.FC<{
   );
 };
 
-// Główny silnik aplikacji sterowany URL-em
 export const FlowEngine: React.FC<{
   config: AppConfig;
   scenarioSlug: string;

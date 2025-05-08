@@ -35,21 +35,18 @@ const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
     );
   }
 
-  // Użyj ustawień tplDir i layoutFile z workspace
   const tplDir = workspace.templateSettings?.tplDir || config.tplDir;
   const layoutFile = workspace.templateSettings?.layoutFile || "Simple";
   const AppLayout = useMemo(
     () => preloadLayout(tplDir, layoutFile),
     [tplDir, layoutFile]
   );
-  
-  // Dynamicznie ładuj WidgetsStep z odpowiedniego szablonu
+
   const WidgetsStep = useMemo(
     () => preloadComponent(tplDir, "WidgetsStep"),
     [tplDir]
   );
 
-  // Przekaż do widgetu minimalne props
   const widgets = useMemo(
     () =>
       workspace.templateSettings?.widgets?.map((widget) => ({
@@ -62,21 +59,20 @@ const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
 
   return (
     <Suspense fallback={<AppLoading message="Ładowanie workspace..." />}>
-    <AppLayout>
-      <Suspense fallback={<div className="p-4">Ładowanie widgetów...</div>}>
-        <WidgetsStep
-          widgets={widgets}
-          onSubmit={() => {}}
-          title={workspace.name}
-          subtitle={workspace.description}
-          // Nie przekazujemy parametrów związanych z bazą danych
-          saveToDB={null}
-          scenarioName={null}
-          nodeSlug={null}
-        />
-      </Suspense>
-    </AppLayout>
-  </Suspense>
+      <AppLayout>
+        <Suspense fallback={<div className="p-4">Ładowanie widgetów...</div>}>
+          <WidgetsStep
+            widgets={widgets}
+            onSubmit={() => {}}
+            title={workspace.name}
+            subtitle={workspace.description}
+            saveToDB={null}
+            scenarioName={null}
+            nodeSlug={null}
+          />
+        </Suspense>
+      </AppLayout>
+    </Suspense>
   );
 };
 
