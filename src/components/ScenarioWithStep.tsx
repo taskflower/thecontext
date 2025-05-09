@@ -34,14 +34,13 @@ const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
 
   // Animacja przejścia między krokami
   useEffect(() => {
-    if (stepIdx !== prevIdx) {
-      setTransitioning(true);
-      const timer = setTimeout(() => {
-        setPrevIdx(stepIdx);
-        setTransitioning(false);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
+    if (stepIdx === prevIdx) return;
+    setTransitioning(true);
+    const t = setTimeout(() => {
+      setPrevIdx(stepIdx);
+      setTransitioning(false);
+    }, 250);
+    return () => clearTimeout(t);
   }, [stepIdx, prevIdx]);
 
   // Przygotuj dane kontekstowe dla layoutu
@@ -57,19 +56,13 @@ const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
   return (
     <Suspense fallback={<LoadingSpinner message="Ładowanie scenariusza..." />}>
       <AppLayout context={layoutContext}>
-        <div
-          className={`transition-all duration-200 ${
-            transitioning ? "opacity-0" : "opacity-100"
-          }`}
-        >
-          {!transitioning && scenarioSlug && (
-            <FlowEngine
-              config={config}
-              scenarioSlug={scenarioSlug}
-              stepIdx={stepIdx}
-            />
-          )}
-        </div>
+        {!transitioning && scenarioSlug && (
+          <FlowEngine
+            config={config}
+            scenarioSlug={scenarioSlug}
+            stepIdx={stepIdx}
+          />
+        )}
         {transitioning && (
           <LoadingSpinner message="Przechodzenie do kolejnego kroku..." />
         )}

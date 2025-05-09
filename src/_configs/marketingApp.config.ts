@@ -5,7 +5,7 @@ const config: AppConfig = {
   name: "Analiza Marketingowa Strony",
   description:
     "Analiza strony internetowej pod kątem przyszłych kampanii marketingowych",
-  tplDir: "clean",
+  tplDir: "default",
   workspaces: [
     {
       slug: "workspace-marketing",

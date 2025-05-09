@@ -1,11 +1,11 @@
 // src/main.tsx
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App"; // Poprawiony import
+import App from "./App"; 
 import "./index.css";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
-import config from "./_configs/educationalApp.config";
+import config from "./_configs/marketingApp.config";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

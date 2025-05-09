@@ -1,10 +1,11 @@
 // src/core/engine.tsx
-import React, { Suspense, lazy, useMemo } from "react";
+import React, { Suspense, useMemo } from "react";
 import { ZodTypeAny } from "zod";
 import { useFlowStore } from "./context";
 import { AppConfig, NodeConfig } from "./types";
 import { useNavigate, useParams } from "react-router-dom";
 import { jsonToZod } from "./utils/jsonToZod";
+import { preloadComponent } from "../preload";
 
 interface NodeRendererProps {
   config: AppConfig;
@@ -15,7 +16,6 @@ interface NodeRendererProps {
 const NodeRenderer: React.FC<NodeRendererProps> = ({ config, node, onNext }) => {
   const { get, set } = useFlowStore();
 
-  // Pobieramy oryginalne jsonSchema z configu
   const originalJsonSchema = useMemo(
     () =>
       config.workspaces[0]?.contextSchema.properties?.[node.contextSchemaPath] ??
@@ -23,7 +23,6 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({ config, node, onNext }) => 
     [config.workspaces, node.contextSchemaPath]
   );
 
-  // Zamieniamy je raz na Zod (cache’owane wewnątrz jsonToZod)
   const zodSchema: ZodTypeAny = useMemo(
     () => jsonToZod(originalJsonSchema),
     [originalJsonSchema]
@@ -31,11 +30,9 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({ config, node, onNext }) => 
 
   const data = get(node.contextDataPath);
 
-  const Component = lazy(() =>
-    import(`../themes/${config.tplDir}/components/${node.tplFile}`).catch(
-      () => import("../themes/default/components/ErrorStep")
-    )
-  );
+  const Component = useMemo(() => 
+    preloadComponent(config.tplDir, node.tplFile),
+  [config.tplDir, node.tplFile]);
 
   const currentScenario = useMemo(
     () =>
@@ -61,7 +58,6 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({ config, node, onNext }) => 
 
   return (
     <Suspense fallback={<div>Ładowanie kroku...</div>}>
-      {/* Przekazujemy oba schema i jsonSchema */}
       <Component
         schema={zodSchema}
         jsonSchema={originalJsonSchema}

@@ -1,7 +1,7 @@
 // src/core/context.tsx
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { get as getPath, set as setPath } from 'lodash';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { get as getPath, set as setPath } from "lodash";
 
 interface FlowState {
   data: Record<string, any>;
@@ -10,7 +10,6 @@ interface FlowState {
   logReset: () => void;
 }
 
-// Używamy middleware persist aby zachować dane między nawigacjami
 export const useFlowStore = create<FlowState>()(
   persist(
     (set, get) => ({
@@ -25,18 +24,17 @@ export const useFlowStore = create<FlowState>()(
       },
       logReset: () => {
         console.warn(
-          '[FlowStore] reset() was called - funkcja tylko loguje, nie czyści kontekstu'
+          "[FlowStore] reset() was called - funkcja tylko loguje, nie czyści kontekstu"
         );
-      }
+      },
     }),
     {
-      name: 'flow-storage', // nazwa pod którą dane będą przechowywane w localStorage
-      partialize: (state) => ({ data: state.data }), // zapisujemy tylko dane, nie funkcje
+      name: "flow-storage",
+      partialize: (state) => ({ data: state.data }), 
     }
   )
 );
 
-// Hook dla komponentów szablonów - wrapper nad useFlowStore
 export const useFlow = () => {
   const { get, set } = useFlowStore();
   return { get, set };

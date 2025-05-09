@@ -32,7 +32,7 @@ export const useLlm = <T>({
   autoStart = false,
   apiEndpoint,
   getToken,
-  user
+  user,
 }: LlmHookOptions<T>): LlmHookResult<T> => {
   const { get } = useFlow();
   const [isLoading, setIsLoading] = useState(false);
@@ -153,6 +153,6 @@ export const useLlm = <T>({
     started,
     processedUserMessage,
     startLlmProcess,
-    setStarted
+    setStarted,
   };
 };
