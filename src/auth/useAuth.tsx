@@ -1,10 +1,20 @@
 // src/hooks/useAuth.tsx
-import { useState, useEffect, useCallback, createContext, useContext } from 'react';
-import { 
-  signInWithPopup, signOut, onAuthStateChanged, User, GoogleAuthProvider 
-} from '@firebase/auth';
-import { doc, getDoc, setDoc } from '@firebase/firestore';
-import { auth, db, googleProvider } from '@/provideDB/firebase/config';
+import {
+  useState,
+  useEffect,
+  useCallback,
+  createContext,
+  useContext,
+} from "react";
+import {
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+  User,
+  GoogleAuthProvider,
+} from "@firebase/auth";
+import { doc, getDoc, setDoc } from "@firebase/firestore";
+import { auth, db, googleProvider } from "@/provideDB/firebase/config";
 
 // Uproszczony typ użytkownika z tokenami
 interface UserWithTokens extends User {
@@ -25,7 +35,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<UserWithTokens | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,8 +50,8 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
         try {
           const token = await currentUser.getIdToken(true);
           setJwtToken(token);
-          
-          const userDocRef = doc(db, 'users', currentUser.uid);
+
+          const userDocRef = doc(db, "users", currentUser.uid);
           const userDoc = await getDoc(userDocRef);
 
           let userData: UserWithTokens = { ...currentUser } as UserWithTokens;
@@ -52,7 +64,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
               displayName: currentUser.displayName,
               photoURL: currentUser.photoURL,
               createdAt: new Date(),
-              availableTokens: 5000
+              availableTokens: 5000,
             });
             userData.availableTokens = 5000;
           } else {
@@ -71,7 +83,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
         setUser(null);
         setJwtToken(null);
       }
-      
+
       setLoading(false);
     });
 
@@ -81,19 +93,19 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
   // Odświeżanie tokena
   useEffect(() => {
     if (!user) return;
-    
+
     const tokenRefreshInterval = setInterval(async () => {
       try {
         if (auth.currentUser) {
           const newToken = await auth.currentUser.getIdToken(true);
           setJwtToken(newToken);
-          setUser(prev => prev ? { ...prev, jwt: newToken } : null);
+          setUser((prev) => (prev ? { ...prev, jwt: newToken } : null));
         }
       } catch (error) {
         setError(error instanceof Error ? error.message : String(error));
       }
     }, 45 * 60 * 1000); // 45 minut
-    
+
     return () => clearInterval(tokenRefreshInterval);
   }, [user]);
 
@@ -102,13 +114,17 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
     try {
       setLoading(true);
       setError(null);
-      
+
       const result = await signInWithPopup(auth, googleProvider);
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const token = await result.user.getIdToken();
       setJwtToken(token);
-      
-      return { user: result.user, jwt: token, googleAccessToken: credential?.accessToken };
+
+      return {
+        user: result.user,
+        jwt: token,
+        googleAccessToken: credential?.accessToken,
+      };
     } catch (error) {
       setError(error instanceof Error ? error.message : String(error));
       throw error;
@@ -146,28 +162,33 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
   }, [jwtToken]);
 
   // Wykonanie żądania z autoryzacją
-  const fetchWithAuth = useCallback(async (url: string, options: RequestInit = {}) => {
-    const token = await getToken();
-    
-    return fetch(url, {
-      ...options,
-      headers: {
-        ...(options.headers || {}),
-        Authorization: token ? `Bearer ${token}` : '',
-      },
-    });
-  }, [getToken]);
+  const fetchWithAuth = useCallback(
+    async (url: string, options: RequestInit = {}) => {
+      const token = await getToken();
+
+      return fetch(url, {
+        ...options,
+        headers: {
+          ...(options.headers || {}),
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+      });
+    },
+    [getToken]
+  );
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      loading,
-      error,
-      signInWithGoogle,
-      logout,
-      getToken,
-      fetchWithAuth
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        error,
+        signInWithGoogle,
+        logout,
+        getToken,
+        fetchWithAuth,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -176,7 +197,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

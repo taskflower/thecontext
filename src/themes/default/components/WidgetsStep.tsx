@@ -4,7 +4,7 @@ import { CheckSquare } from "lucide-react";
 import { getDatabaseProvider } from "../../../provideDB/databaseProvider";
 import { useFlow } from "@/core";
 import { preloadWidget } from "@/preload";
-import { WidgetConfig, WidgetsStepProps } from "@/themes/themeTypes";
+import {  WidgetsStepProps } from "@/themes/themeTypes";
 import { getColSpanClass } from "@/core/utils/themesHelpers";
 
 // Lekki spinner dla widgetów (nie przykrywa całego layoutu)
