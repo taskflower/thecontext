@@ -1,11 +1,12 @@
 // src/themes/default/components/WidgetsStep.tsx
-import { Suspense, useMemo } from "react";
-import { CheckSquare, Loader } from "lucide-react";
+import React, { Suspense, useMemo } from "react";
+import { CheckSquare } from "lucide-react";
 import { getDatabaseProvider } from "../../../provideDB/databaseProvider";
 import { get as getPath } from "lodash";
 import { WidgetConfig, WidgetsStepProps } from "@/themes/themeTypes";
-import { preloadWidget } from "@/preload";
 import { useFlow } from "@/core";
+import { preloadWidget } from "@/preload";
+import { Loading } from "@/components";
 import { getColSpanClass } from "@/core/utils/themesHelpers";
 
 export default function WidgetsStep({
@@ -19,58 +20,38 @@ export default function WidgetsStep({
 }: WidgetsStepProps) {
   const { get } = useFlow();
 
+  // Prefetch i cache komponentów widgetów
+  const widgetComponents = useMemo(
+    () =>
+      widgets.map((widget) => ({
+        ...widget,
+        Component: preloadWidget(widget.tplDir || "default", widget.tplFile),
+      })),
+    [widgets]
+  );
+
   const dbProvider =
     saveToDB?.enabled && saveToDB.provider
       ? getDatabaseProvider(saveToDB.provider)
       : null;
 
-  const loadWidget = (widget: WidgetConfig) => {
-    const Widget = useMemo(() => 
-      preloadWidget("default", widget.tplFile),
-    [widget.tplFile]);
-
-    const data = widget.contextDataPath
-      ? get(widget.contextDataPath)
-      : undefined;
-
-    return (
-      <div
-        key={widget.tplFile + (widget.title || "")}
-        className={`bg-white rounded overflow-hidden shadow-sm border border-gray-100 h-full ${getColSpanClass(
-          widget.colSpan
-        )}`}
-      >
-        <Suspense
-          fallback={
-            <div className="flex items-center justify-center p-6 h-32">
-              <Loader className="w-4 h-4 text-gray-900 animate-spin" />
-              <span className="ml-2 text-gray-600 text-sm">
-                Ładowanie widgetu...
-              </span>
-            </div>
-          }
-        >
-          <Widget {...widget} data={data} />
-        </Suspense>
-      </div>
-    );
-  };
-
   const handleNext = async () => {
     if (saveToDB?.enabled && dbProvider) {
       try {
         const contentPath = saveToDB.contentPath || "";
-        const dataToSave = contentPath ? getPath(get(contentPath), "") : {};
+        const dataToSave = contentPath
+          ? getPath(get(contentPath), "")
+          : {};
 
-        await dbProvider.saveData(saveToDB, dataToSave, {
-          scenarioName,
-          nodeSlug,
-        });
+        await dbProvider.saveData(
+          saveToDB,
+          dataToSave,
+          { scenarioName, nodeSlug }
+        );
       } catch (error) {
         console.error("[WidgetsStep] Błąd podczas zapisywania do bazy:", error);
       }
     }
-
     onSubmit(null);
   };
 
@@ -79,15 +60,35 @@ export default function WidgetsStep({
       {(title || subtitle) && (
         <div className="mb-6">
           {title && (
-            <h2 className="text-xl font-medium text-gray-900 mb-2">{title}</h2>
+            <h2 className="text-xl font-medium text-gray-900 mb-2">
+              {title}
+            </h2>
           )}
-          {subtitle && <p className="text-gray-600 text-sm">{subtitle}</p>}
+          {subtitle && (
+            <p className="text-gray-600 text-sm">{subtitle}</p>
+          )}
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        {widgets.map(loadWidget)}
-      </div>
+      <Suspense fallback={<Loading message="Ładowanie widgetów..." />}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          {widgetComponents.map((widget) => {
+            const data = widget.contextDataPath
+              ? getPath(get(widget.contextDataPath), "")
+              : undefined;
+            return (
+              <div
+                key={widget.tplFile + (widget.title || "")}
+                className={`bg-white rounded overflow-hidden shadow-sm border border-gray-100 h-full ${getColSpanClass(
+                  widget.colSpan
+                )}`}
+              >
+                <widget.Component {...widget} data={data} />
+              </div>
+            );
+          })}
+        </div>
+      </Suspense>
 
       <div className="flex justify-end">
         <button
