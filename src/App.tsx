@@ -5,6 +5,7 @@ import type { AppConfig } from "./core/types";
 import { AppRoutes } from "./components/Routes";
 import { AuthProvider } from "./auth/useAuth";
 import AppLoading from "./components/Loading";
+import { ContextDebugger } from "./debug";
 
 const App: React.FC<{ configUrl?: string; initialConfig?: AppConfig }> = ({
   configUrl = "/api/config",
@@ -44,6 +45,7 @@ const App: React.FC<{ configUrl?: string; initialConfig?: AppConfig }> = ({
           <AppRoutes config={config} />
         </Suspense>
       </BrowserRouter>
+      <ContextDebugger config={config} />
     </AuthProvider>
   );
 };

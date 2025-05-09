@@ -5,7 +5,9 @@ import App from "./App";
 import "./index.css";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
-import config from "./_configs/marketingApp.config";
+//import config from "./_configs/marketingApp.config";
+ import config from "./_configs/googleAds.config";
+// import config from "./_configs/educationalApp.config";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
