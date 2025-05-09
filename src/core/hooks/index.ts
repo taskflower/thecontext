@@ -2,3 +2,4 @@
 export * from './useLlm';
 export * from './useForm';
 export * from './useFormSchema';
+export * from './useWidget';

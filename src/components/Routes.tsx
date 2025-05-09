@@ -1,9 +1,9 @@
 // src/components/FlowRoutes.tsx
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import type { AppConfig } from "../core/types";
-import WorkspaceOverview from "./WorkspaceOverview";
-import ScenarioWithStep from "./ScenarioWithStep";
+import { ScenarioWithStep, WorkspaceOverview } from ".";
+import { AppConfig } from "@/core";
+
 
 export const AppRoutes: React.FC<{ config: AppConfig }> = ({ config }) => {
   const defaultWorkspace = config.workspaces[0]?.slug || "";

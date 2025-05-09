@@ -1,5 +1,4 @@
 // src/themes/default/layouts/Dashboard.tsx
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   LayoutGrid, 
@@ -12,6 +11,7 @@ import {
   Bell
 } from "lucide-react";
 import { useAuth } from "../../../auth/useAuth";
+import { useState } from "react";
 
 interface LayoutContext {
   workspace: any;
@@ -33,8 +33,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { workspace } = context || {};
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const navigationItems = [
     { 

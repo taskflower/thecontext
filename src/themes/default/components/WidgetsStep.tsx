@@ -1,12 +1,12 @@
 // src/themes/default/components/WidgetsStep.tsx
 import { Suspense, useMemo } from "react";
-import { useFlow } from "../../../core/context";
 import { CheckSquare, Loader } from "lucide-react";
 import { getDatabaseProvider } from "../../../provideDB/databaseProvider";
 import { get as getPath } from "lodash";
-import { getColSpanClass } from "@/core/utils/themesHelpers";
 import { WidgetConfig, WidgetsStepProps } from "@/themes/themeTypes";
 import { preloadWidget } from "@/preload";
+import { useFlow } from "@/core";
+import { getColSpanClass } from "@/core/utils/themesHelpers";
 
 export default function WidgetsStep({
   widgets = [],

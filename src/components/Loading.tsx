@@ -1,5 +1,4 @@
 // src/components/AppLoading.tsx
-import React from "react";
 
 export const Loading: React.FC<{ message?: string }> = ({
   message = "Ładowanie aplikacji...",

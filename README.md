@@ -2,22 +2,11 @@ Powtarzalne „lazy + Suspense”
 
 W wielu miejscach (FlowRoutes, WidgetLoader, ScenarioWithStep, WorkspaceOverview, NodeRenderer, itd.) masz identyczny wzorzec:
 
-tsx
-Kopiuj
-Edytuj
-const X = React.lazy(...)
+
 <Suspense fallback={<AppLoading .../>}><X …/></Suspense>
 Sugestia: wydziel HOC lub komponent withLazy przyjmujący funkcję importu i ewentualny komponent fallback, żeby nie powtarzać tej logiki w każdym pliku.
 
----
-
-Nadmierne console.logi
-
-W WidgetLoader, preload.ts, FormStep itp. dużo logów „Ładowanie widgetu…”, które w prodzie nie są potrzebne.
-
-Sugestia: skonfiguruj logger dev/prod albo usuń zbędne console.log.
-
----
+----
 
 Boilerplate w formularzu (FormStep)
 
@@ -32,14 +21,6 @@ Redundancja w mapowaniu ikon
 W ListObjectWidget i ListTableWidget dwa razy definiujesz niemal tę samą mapę nazw ikon→komponenty Lucide.
 
 Sugestia: wyciągnij do wspólnego helpera lub IconFactory.
-
----
-
-Powtarzalne fallbacki Suspense
-
-Wiele różnych „skeletonów”/spinnerów tworzy się ręcznie. Masz już AppLoading, ale część spinnerów jest definiowana inline.
-
-Sugestia: ujednolić – używać AppLoading lub wspólnego <Spinner fallbackHeight={…} />.
 
 ---
 

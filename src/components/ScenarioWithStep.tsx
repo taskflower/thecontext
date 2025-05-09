@@ -1,10 +1,9 @@
 // src/components/ScenarioWithStep.tsx
-import React, { Suspense, useMemo, useState, useEffect } from "react";
+import { Suspense, useMemo, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { FlowEngine } from "../core/engine";
-import type { AppConfig } from "../core/types";
-import { Loading } from "./Loading";
 import { preloadLayout } from "@/preload";
+import { Loading } from ".";
+import { AppConfig, FlowEngine } from "@/core";
 
 const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
   const { workspaceSlug, scenarioSlug, stepIndex } = useParams<{

@@ -1,11 +1,10 @@
 // src/core/engine.tsx
-import React, { Suspense, useMemo } from "react";
+import { Suspense, useMemo } from "react";
 import { ZodTypeAny } from "zod";
-import { useFlowStore } from "./context";
-import { AppConfig, NodeConfig } from "./types";
 import { useNavigate, useParams } from "react-router-dom";
-import { jsonToZod } from "./utils/jsonToZod";
 import { preloadComponent } from "../preload";
+import { AppConfig, NodeConfig, useFlowStore } from ".";
+import { jsonToZod } from "./utils/jsonToZod";
 
 interface NodeRendererProps {
   config: AppConfig;
@@ -13,32 +12,36 @@ interface NodeRendererProps {
   onNext: () => void;
 }
 
-const NodeRenderer: React.FC<NodeRendererProps> = ({ config, node, onNext }) => {
+const NodeRenderer: React.FC<NodeRendererProps> = ({
+  config,
+  node,
+  onNext,
+}) => {
   const { get, set } = useFlowStore();
 
-  const originalJsonSchema = useMemo(
+  const jsonSchema = useMemo(
     () =>
-      config.workspaces[0]?.contextSchema.properties?.[node.contextSchemaPath] ??
-      {},
+      config.workspaces[0]?.contextSchema.properties?.[
+        node.contextSchemaPath
+      ] ?? {},
     [config.workspaces, node.contextSchemaPath]
   );
 
   const zodSchema: ZodTypeAny = useMemo(
-    () => jsonToZod(originalJsonSchema),
-    [originalJsonSchema]
+    () => jsonToZod(jsonSchema),
+    [jsonSchema]
   );
 
   const data = get(node.contextDataPath);
 
-  const Component = useMemo(() => 
-    preloadComponent(config.tplDir, node.tplFile),
-  [config.tplDir, node.tplFile]);
+  const Component = useMemo(
+    () => preloadComponent(config.tplDir, node.tplFile),
+    [config.tplDir, node.tplFile]
+  );
 
   const currentScenario = useMemo(
     () =>
-      config.scenarios.find((s) =>
-        s.nodes.some((n) => n.slug === node.slug)
-      ),
+      config.scenarios.find((s) => s.nodes.some((n) => n.slug === node.slug)),
     [config.scenarios, node.slug]
   );
 
@@ -60,7 +63,7 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({ config, node, onNext }) => 
     <Suspense fallback={<div>Ładowanie kroku...</div>}>
       <Component
         schema={zodSchema}
-        jsonSchema={originalJsonSchema}
+        jsonSchema={jsonSchema}
         data={data}
         onSubmit={handleSubmit}
         {...attrs}

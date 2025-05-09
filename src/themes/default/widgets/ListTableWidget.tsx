@@ -1,5 +1,5 @@
 // src/themes/default/widgets/ListTableWidget.tsx
-import React from "react";
+
 import {
   Star,
   Check,

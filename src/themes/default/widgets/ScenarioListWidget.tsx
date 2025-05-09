@@ -1,8 +1,9 @@
 // src/themes/default/widgets/ScenarioListWidget.tsx
-import React from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import { Play, CheckCircle, Hourglass } from 'lucide-react';
-import type { AppConfig } from '../../../core/types';
+import { useMemo } from 'react';
+import { AppConfig } from '@/core';
 
 type Scenario = {
   slug: string;
@@ -27,7 +28,7 @@ export default function ScenarioListWidget({
   const navigate = useNavigate();
 
   // Filtruj scenariusze dla tego workspace
-  const scenarios: Scenario[] = React.useMemo(
+  const scenarios: Scenario[] = useMemo(
     () => config.scenarios.filter(s => s.workspaceSlug === workspaceSlug),
     [config.scenarios, workspaceSlug]
   );

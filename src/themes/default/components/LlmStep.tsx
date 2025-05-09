@@ -1,7 +1,8 @@
 // src/themes/default/components/LlmStep.tsx
 import { ZodType } from "zod";
 import { useAuth } from "@/auth/useAuth";
-import { useLlm } from "../../../core/hooks/useLlm";
+import { useLlm } from "@/core";
+
 
 type LlmStepProps<T> = {
   schema: ZodType<T>;

@@ -1,9 +1,9 @@
 // src/components/WorkspaceOverview.tsx
-import React, { useMemo, Suspense } from "react";
+import { Suspense, useMemo } from "react";
 import { useParams } from "react-router-dom";
-import type { AppConfig } from "../core/types";
-import { Loading } from "./Loading";
 import { preloadComponent, preloadLayout } from "../preload";
+import { Loading } from ".";
+import { AppConfig } from "@/core";
 
 const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
   const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
@@ -30,6 +30,7 @@ const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
               Wróć do strony głównej
             </a>
           </div>
+          RetryClaude can make mistakes. Please double-check responses.
         </div>
       </div>
     );

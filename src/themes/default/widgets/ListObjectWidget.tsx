@@ -1,10 +1,11 @@
 // src/themes/default/widgets/ListObjectWidget.tsx
-import React from 'react';
+
 import { 
   Star, Check, Info, AlertTriangle, X, 
   Briefcase, Calculator, BarChart, 
   DollarSign, FileText
 } from 'lucide-react';
+import { useMemo } from 'react';
 
 // Typ dla przekazanych danych - może być obiekt lub tablica
 type DataType = Record<string, any> | any[];
@@ -36,7 +37,7 @@ export default function ListObjectWidget({
   }
   
   // Konwersja danych do tablicy elementów do wyświetlenia
-  const items = React.useMemo(() => {
+  const items = useMemo(() => {
     if (Array.isArray(data)) {
       return data.map((item, index) => {
         if (typeof item === 'object' && item !== null) {
