@@ -1,27 +1,35 @@
 // src/components/ScenarioWithStep.tsx
-import { Suspense, useMemo, useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import React, { Suspense, useMemo } from "react";
+import { useParams, Navigate } from "react-router-dom";
 import { preloadLayout } from "@/preload";
 import { Loading } from ".";
 import { AppConfig, FlowEngine } from "@/core";
 
 const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
-  const { workspaceSlug, scenarioSlug, stepIndex } = useParams<{
-    workspaceSlug: string;
-    scenarioSlug: string;
-    stepIndex: string;
+  // Używamy destrukturyzacji z wartościami domyślnymi, żeby TS miał pewność że to string
+  const {
+    workspaceSlug = "",
+    scenarioSlug = "",
+    stepIndex = "0",
+  } = useParams<{
+    workspaceSlug?: string;
+    scenarioSlug?: string;
+    stepIndex?: string;
   }>();
+
+  // Jeśli któryś z wymaganych parametrów jest pusty, przekieruj na główną
+  if (!workspaceSlug || !scenarioSlug) {
+    return <Navigate to="/" replace />;
+  }
+
   const stepIdx = Number.isNaN(Number(stepIndex))
     ? 0
-    : parseInt(stepIndex as string, 10);
-  const [transitioning, setTransitioning] = useState(false);
-  const [prevIdx, setPrevIdx] = useState(stepIdx);
+    : parseInt(stepIndex, 10);
 
   const workspace = useMemo(
     () => config.workspaces.find((w) => w.slug === workspaceSlug),
     [config.workspaces, workspaceSlug]
   );
-
   if (!workspace) return <div>Workspace nie znaleziony</div>;
 
   const tplDir = workspace.templateSettings?.tplDir || config.tplDir;
@@ -31,42 +39,29 @@ const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
     [tplDir, layoutFile]
   );
 
-  // Animacja przejścia między krokami
-  useEffect(() => {
-    if (stepIdx === prevIdx) return;
-    setTransitioning(true);
-    const t = setTimeout(() => {
-      setPrevIdx(stepIdx);
-      setTransitioning(false);
-    }, 250);
-    return () => clearTimeout(t);
-  }, [stepIdx, prevIdx]);
-
-  // Przygotuj dane kontekstowe dla layoutu
-  const scenario = config.scenarios.find((s) => s.slug === scenarioSlug);
-  const layoutContext = {
-    workspace,
-    scenario,
-    stepIdx,
-    totalSteps: scenario?.nodes.length || 0,
-    transitioning,
-  };
+  const scenario = useMemo(
+    () => config.scenarios.find((s) => s.slug === scenarioSlug),
+    [config.scenarios, scenarioSlug]
+  );
+  if (!scenario) return <div>Scenariusz nie znaleziony</div>;
 
   return (
-    <Suspense fallback={<Loading message="Ładowanie scenariusza..." />}>
-      <AppLayout context={layoutContext}>
-        {!transitioning && scenarioSlug && (
-          <FlowEngine
-            config={config}
-            scenarioSlug={scenarioSlug}
-            stepIdx={stepIdx}
-          />
-        )}
-        {transitioning && (
-          <Loading message="Przechodzenie do kolejnego kroku..." />
-        )}
-      </AppLayout>
-    </Suspense>
+    <AppLayout
+      context={{
+        workspace,
+        scenario,
+        stepIdx,
+        totalSteps: scenario.nodes.length,
+      }}
+    >
+      <Suspense fallback={<Loading message="Ładowanie kroku..." />}>
+        <FlowEngine
+          config={config}
+          scenarioSlug={scenarioSlug}
+          stepIdx={stepIdx}
+        />
+      </Suspense>
+    </AppLayout>
   );
 };
 

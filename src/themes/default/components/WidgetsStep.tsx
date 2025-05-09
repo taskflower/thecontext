@@ -1,13 +1,18 @@
 // src/themes/default/components/WidgetsStep.tsx
-import React, { Suspense, useMemo } from "react";
+import React, { useMemo } from "react";
 import { CheckSquare } from "lucide-react";
 import { getDatabaseProvider } from "../../../provideDB/databaseProvider";
-import { get as getPath } from "lodash";
-import { WidgetConfig, WidgetsStepProps } from "@/themes/themeTypes";
 import { useFlow } from "@/core";
 import { preloadWidget } from "@/preload";
-import { Loading } from "@/components";
+import { WidgetConfig, WidgetsStepProps } from "@/themes/themeTypes";
 import { getColSpanClass } from "@/core/utils/themesHelpers";
+
+// Lekki spinner dla widgetów (nie przykrywa całego layoutu)
+const WidgetLoading: React.FC = () => (
+  <div className="flex items-center justify-center h-32 bg-gray-50">
+    <div className="w-6 h-6 border-4 border-gray-300 border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 export default function WidgetsStep({
   widgets = [],
@@ -39,9 +44,7 @@ export default function WidgetsStep({
     if (saveToDB?.enabled && dbProvider) {
       try {
         const contentPath = saveToDB.contentPath || "";
-        const dataToSave = contentPath
-          ? getPath(get(contentPath), "")
-          : {};
+        const dataToSave = contentPath ? get(contentPath) : {};
 
         await dbProvider.saveData(
           saveToDB,
@@ -64,31 +67,28 @@ export default function WidgetsStep({
               {title}
             </h2>
           )}
-          {subtitle && (
-            <p className="text-gray-600 text-sm">{subtitle}</p>
-          )}
+          {subtitle && <p className="text-gray-600 text-sm">{subtitle}</p>}
         </div>
       )}
 
-      <Suspense fallback={<Loading message="Ładowanie widgetów..." />}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          {widgetComponents.map((widget) => {
-            const data = widget.contextDataPath
-              ? getPath(get(widget.contextDataPath), "")
-              : undefined;
-            return (
-              <div
-                key={widget.tplFile + (widget.title || "")}
-                className={`bg-white rounded overflow-hidden shadow-sm border border-gray-100 h-full ${getColSpanClass(
-                  widget.colSpan
-                )}`}
-              >
-                <widget.Component {...widget} data={data} />
-              </div>
-            );
-          })}
-        </div>
-      </Suspense>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        {widgetComponents.map((widget) => {
+          const data = widget.contextDataPath ? get(widget.contextDataPath) : undefined;
+          const WidgetComp = widget.Component;
+          return (
+            <div
+              key={widget.tplFile + (widget.title || "")}
+              className={`bg-white rounded overflow-hidden shadow-sm border border-gray-100 h-full ${getColSpanClass(
+                widget.colSpan
+              )}`}
+            >
+              <React.Suspense fallback={<WidgetLoading />}>
+                <WidgetComp {...widget} data={data} />
+              </React.Suspense>
+            </div>
+          );
+        })}
+      </div>
 
       <div className="flex justify-end">
         <button
