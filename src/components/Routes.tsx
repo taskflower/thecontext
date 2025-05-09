@@ -5,7 +5,7 @@ import type { AppConfig } from "../core/types";
 import WorkspaceOverview from "./WorkspaceOverview";
 import ScenarioWithStep from "./ScenarioWithStep";
 
-const FlowRoutes: React.FC<{ config: AppConfig }> = ({ config }) => {
+export const AppRoutes: React.FC<{ config: AppConfig }> = ({ config }) => {
   const defaultWorkspace = config.workspaces[0]?.slug || "";
 
   return (
@@ -33,4 +33,4 @@ const FlowRoutes: React.FC<{ config: AppConfig }> = ({ config }) => {
   );
 };
 
-export default FlowRoutes;
+export default AppRoutes;

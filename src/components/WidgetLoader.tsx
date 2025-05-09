@@ -1,7 +1,7 @@
 // src/components/WidgetLoader.tsx
 import React, { useMemo } from "react";
 import { Suspense } from "react";
-import LoadingSpinner from "./LoadingSpinner";
+import Loading from "./Loading";
 import { preloadWidget } from "../preload";
 
 const WidgetLoader: React.FC<{ tplDir: string; widget: any }> = React.memo(
@@ -11,7 +11,7 @@ const WidgetLoader: React.FC<{ tplDir: string; widget: any }> = React.memo(
     [tplDir, widget.tplFile]);
 
     return (
-      <Suspense fallback={<LoadingSpinner message="Ładowanie widgetu..." />}>
+      <Suspense fallback={<Loading message="Ładowanie widgetu..." />}>
         <WidgetComponent {...widget} componentName={widget.tplFile} />
       </Suspense>
     );

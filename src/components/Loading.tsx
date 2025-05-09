@@ -1,7 +1,7 @@
 // src/components/AppLoading.tsx
 import React from "react";
 
-const LoadingSpinner: React.FC<{ message?: string }> = ({
+export const Loading: React.FC<{ message?: string }> = ({
   message = "Ładowanie aplikacji...",
 }) => (
   <div className="absolute top-0 left-0 w-full flex items-center justify-center h-full bg-gray-50">
@@ -12,4 +12,4 @@ const LoadingSpinner: React.FC<{ message?: string }> = ({
   </div>
 );
 
-export default LoadingSpinner;
+export default Loading;

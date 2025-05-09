@@ -3,7 +3,7 @@ import React, { Suspense, useMemo, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { FlowEngine } from "../core/engine";
 import type { AppConfig } from "../core/types";
-import LoadingSpinner from "./LoadingSpinner";
+import { Loading } from "./Loading";
 import { preloadLayout } from "@/preload";
 
 const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
@@ -54,7 +54,7 @@ const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
   };
 
   return (
-    <Suspense fallback={<LoadingSpinner message="Ładowanie scenariusza..." />}>
+    <Suspense fallback={<Loading message="Ładowanie scenariusza..." />}>
       <AppLayout context={layoutContext}>
         {!transitioning && scenarioSlug && (
           <FlowEngine
@@ -64,7 +64,7 @@ const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
           />
         )}
         {transitioning && (
-          <LoadingSpinner message="Przechodzenie do kolejnego kroku..." />
+          <Loading message="Przechodzenie do kolejnego kroku..." />
         )}
       </AppLayout>
     </Suspense>

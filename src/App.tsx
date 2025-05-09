@@ -1,10 +1,10 @@
 // src/App.tsx
-import React, { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { BrowserRouter } from "react-router-dom";
 import type { AppConfig } from "./core/types";
-import FlowRoutes from "./components/FlowRoutes";
+import { AppRoutes } from "./components/Routes";
 import { AuthProvider } from "./auth/useAuth";
-import AppLoading from "./components/LoadingSpinner";
+import AppLoading from "./components/Loading";
 
 const App: React.FC<{ configUrl?: string; initialConfig?: AppConfig }> = ({
   configUrl = "/api/config",
@@ -41,7 +41,7 @@ const App: React.FC<{ configUrl?: string; initialConfig?: AppConfig }> = ({
     <AuthProvider>
       <BrowserRouter>
         <Suspense fallback={<AppLoading message="Ładowanie aplikacji..." />}>
-          <FlowRoutes config={config} />
+          <AppRoutes config={config} />
         </Suspense>
       </BrowserRouter>
     </AuthProvider>

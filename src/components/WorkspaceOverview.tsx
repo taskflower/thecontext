@@ -2,7 +2,7 @@
 import React, { useMemo, Suspense } from "react";
 import { useParams } from "react-router-dom";
 import type { AppConfig } from "../core/types";
-import LoadingSpinner from "./LoadingSpinner";
+import { Loading } from "./Loading";
 import { preloadComponent, preloadLayout } from "../preload";
 
 const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
@@ -58,9 +58,9 @@ const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
   );
 
   return (
-    <Suspense fallback={<LoadingSpinner message="Ładowanie workspace..." />}>
+    <Suspense fallback={<Loading message="Ładowanie workspace..." />}>
       <AppLayout>
-        <Suspense fallback={<LoadingSpinner message="Ładowanie widgetów..." />}>
+        <Suspense fallback={<Loading message="Ładowanie widgetów..." />}>
           <WidgetsStep
             widgets={widgets}
             onSubmit={() => {}}
