@@ -15,9 +15,6 @@ interface GoogleAdsCampaignCreatorProps {
 }
 
 export default function GoogleAdsCampaignCreator({
-  schema,
-  jsonSchema,
-  data,
   onSubmit,
   title = "Tworzenie kampanii Google Ads",
   description

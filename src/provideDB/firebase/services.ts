@@ -1,4 +1,4 @@
-import { db } from '../_firebase/config';
+import { db } from "./config";
 
 const firestore: any = db;
 
@@ -11,4 +11,4 @@ export const getDocument = async (collection: string, id: string) => {
 export const saveDocument = async (collection: string, data: any) => {
   const docRef = firestore.collection(collection).doc();
   await docRef.set(data);
-}
+};

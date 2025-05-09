@@ -1,6 +1,5 @@
 // src/themes/default/components/GoogleAdsDashboard.tsx
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/auth/useAuth';
 import { useFlow } from '@/core/context';
 import { 
   DollarSign, 
@@ -138,7 +137,6 @@ export default function GoogleAdsDashboard({
   const [error, setError] = useState<string | null>(null);
   const [campaignData, setCampaignData] = useState<any>(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  const { getToken } = useAuth();
   const { get } = useFlow();
 
   // Get data from context
