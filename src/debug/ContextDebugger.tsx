@@ -1,179 +1,188 @@
 // src/debug/ContextDebugger.tsx
-import React, { useState, useEffect, useRef } from "react";
-import { Database, X, List, ArrowRight, Activity } from "lucide-react";
+import React, { useState, useEffect, useRef, lazy, Suspense } from "react";
+import { Database, X, List, ArrowRight, Activity, User } from "lucide-react";
 import { useFlowStore } from "../core/context";
 import JsonTreeRenderer from "./components/JsonTreeRenderer";
-import SchemaTab from "./tabs/SchemaTab";
-import LogsTab from "./tabs/LogsTab"; // Import the new LogsTab component
 import { AppConfig } from "../core/types";
+import { useAuth } from "../auth/useAuth";
 
-export const ContextDebugger: React.FC<{ config?: AppConfig }> = ({
-  config,
-}) => {
-  const [isVisible, setIsVisible] = useState(
-    localStorage.getItem("debuggerVisible") === "true"
-  );
-  const [activeTab, setActiveTab] = useState("schema");
+// Lazy loading komponentów tab
+const SchemaTab = lazy(() => import("./tabs/SchemaTab"));
+const LogsTab = lazy(() => import("./tabs/LogsTab"));
+const UserTab = lazy(() => import("./tabs/UserTab"));
+
+// Komponent do wyświetlania ładowania
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center h-full p-4">
+    <div className="animate-pulse text-gray-500">Ładowanie...</div>
+  </div>
+);
+
+export const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) => {
+  const [isVisible, setIsVisible] = useState(localStorage.getItem("debuggerVisible") === "true");
+  const [activeTab, setActiveTab] = useState("user");
   const [expandedPaths, setExpandedPaths] = useState({});
-
+  const [loadedTabs, setLoadedTabs] = useState<string[]>(["user"]); // Śledzenie załadowanych zakładek
+  const { user, loading } = useAuth();
   const { data: contextData } = useFlowStore();
   const prevContextRef = useRef({});
-  const nodeInfo = useFlowStore((state) => {
-    // Attempt to extract current node and scenario info from context
-    const currentPath = state.data.currentPath || "";
-    const pathParts = currentPath.split("/");
+  
+  // Ekstrakcja informacji o ścieżce
+  const { workspaceSlug, scenarioSlug, stepIdx } = useFlowStore(state => {
+    const path = state.data.currentPath?.split("/") || [];
     return {
-      workspaceSlug: pathParts[1],
-      scenarioSlug: pathParts[2],
-      stepIdx: pathParts[3] ? parseInt(pathParts[3]) : 0,
+      workspaceSlug: path[1] || "",
+      scenarioSlug: path[2] || "",
+      stepIdx: path[3] ? parseInt(path[3]) : 0
     };
   });
 
-  // Track context changes and apply split screen layout
+  // Połączony efekt zarządzający widocznością i skrótem klawiaturowym
   useEffect(() => {
     localStorage.setItem("debuggerVisible", isVisible.toString());
-
-    // Apply layout classes
     const appContent = document.getElementById("app-content");
     if (appContent) {
-      if (isVisible) {
-        appContent.classList.add("w-1/2");
-        appContent.classList.remove("w-full");
-      } else {
-        appContent.classList.add("w-full");
-        appContent.classList.remove("w-1/2");
-      }
+      appContent.classList.toggle("w-1/2", isVisible);
+      appContent.classList.toggle("w-full", !isVisible);
     }
-
-    prevContextRef.current = JSON.parse(JSON.stringify(contextData));
-  }, [isVisible, contextData]);
-
-  // Keyboard shortcut
-  useEffect(() => {
+    
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && (e.key === "D" || e.key === "d")) {
         e.preventDefault();
-        setIsVisible((prev) => !prev);
+        setIsVisible(v => !v);
       }
     };
-
+    
     window.addEventListener("keydown", handleKeyDown);
+    prevContextRef.current = JSON.parse(JSON.stringify(contextData));
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [isVisible, contextData]);
 
-  // Toggle debugger
-  const toggleDebugger = () => setIsVisible((prev) => !prev);
+  // Efekt śledzący zmianę aktywnej zakładki
+  useEffect(() => {
+    // Dodaj aktywną zakładkę do listy załadowanych, jeśli jeszcze jej tam nie ma
+    if (!loadedTabs.includes(activeTab)) {
+      setLoadedTabs(prev => [...prev, activeTab]);
+    }
+  }, [activeTab, loadedTabs]);
 
-  // Render toggle button when debugger is hidden
+  // Przycisk toggle gdy debugger jest ukryty
   if (!isVisible) {
     return (
       <button
         className="fixed right-4 bottom-4 z-50 px-2.5 py-1.5 text-xs rounded-md bg-white text-gray-800 font-medium flex items-center shadow-md border border-gray-200 hover:bg-gray-50 transition-colors"
-        onClick={toggleDebugger}
+        onClick={() => setIsVisible(true)}
         title="Ctrl+Shift+D aby włączyć/wyłączyć debugger"
       >
-        <Database className="w-3.5 h-3.5 mr-1.5" />
-        Context Inspector
+        <Database className="w-3.5 h-3.5 mr-1.5" />Context Inspector
       </button>
     );
   }
 
-  // Render debugger
+  // Funkcja do zmiany aktywnej zakładki
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+  };
+
+  // Renderowanie zawartości aktywnej zakładki
+  const renderTabContent = () => {
+    // Renderuj tylko jeśli debugger jest widoczny
+    if (!isVisible) return null;
+
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <div className="h-full" style={{ display: activeTab === "user" ? "block" : "none" }}>
+          {loadedTabs.includes("user") && <UserTab />}
+        </div>
+        <div className="h-full" style={{ display: activeTab === "schema" ? "block" : "none" }}>
+          {loadedTabs.includes("schema") && <SchemaTab contextData={contextData} config={config} />}
+        </div>
+        <div className="h-full" style={{ display: activeTab === "data" ? "block" : "none" }}>
+          {loadedTabs.includes("data") && (
+            <div className="p-4 h-full overflow-auto">
+              <div className="rounded-md border border-gray-200 p-3 bg-gray-50 h-full overflow-auto">
+                {Object.keys(contextData).length > 0 ? (
+                  <JsonTreeRenderer
+                    data={contextData}
+                    expandedPaths={expandedPaths}
+                    setExpandedPaths={setExpandedPaths}
+                  />
+                ) : (
+                  <div className="text-gray-500 italic text-center p-4">Kontekst jest pusty</div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="h-full" style={{ display: activeTab === "logs" ? "block" : "none" }}>
+          {loadedTabs.includes("logs") && <LogsTab />}
+        </div>
+      </Suspense>
+    );
+  };
+
+  // Definicja przycisków zakładek
+  const tabs = [
+    { id: "user", label: "Użytkownik", icon: <User className="w-3.5 h-3.5 mr-1.5" />, always: true },
+    { id: "schema", label: "Schema", icon: <List className="w-3.5 h-3.5 mr-1.5" />, always: false },
+    { id: "data", label: "Dane", icon: <Database className="w-3.5 h-3.5 mr-1.5" />, always: false },
+    { id: "logs", label: "Logs", icon: <Activity className="w-3.5 h-3.5 mr-1.5" />, always: false }
+  ];
+
   return (
     <div className="fixed top-0 right-0 z-40 w-1/2 h-full bg-white border-l border-gray-200 shadow-xl flex flex-col">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-3 py-2 flex justify-between items-center">
         <div className="font-semibold flex items-center text-sm">
-          <Database className="w-4 h-4 mr-1.5" />
-          Context Inspector
+          <Database className="w-4 h-4 mr-1.5" />Context Inspector
         </div>
         <button
           className="p-1 rounded-md hover:bg-gray-100 text-gray-700"
-          onClick={toggleDebugger}
+          onClick={() => setIsVisible(false)}
           title="Ukryj debugger (Ctrl+Shift+D)"
         >
           <X className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Path info (optional) */}
-      {nodeInfo.scenarioSlug && (
+      {/* Path info */}
+      {scenarioSlug && (
         <div className="px-3 py-2 bg-gray-50 border-b border-gray-200 text-xs text-gray-600 flex items-center">
-          <span>{nodeInfo.workspaceSlug}</span>
+          <span>{workspaceSlug}</span>
           <ArrowRight className="w-3 h-3 mx-1" />
-          <span>{nodeInfo.scenarioSlug}</span>
+          <span>{scenarioSlug}</span>
           <ArrowRight className="w-3 h-3 mx-1" />
-          <span>Step {nodeInfo.stepIdx}</span>
+          <span>Step {stepIdx}</span>
         </div>
       )}
 
       {/* Tabs */}
       <div className="border-b border-gray-200">
         <div className="flex">
-          <button
-            className={`px-3 py-2 text-sm font-medium flex items-center transition-colors ${
-              activeTab === "schema"
-                ? "border-b-2 border-blue-600 text-blue-600"
-                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-            }`}
-            onClick={() => setActiveTab("schema")}
-          >
-            <List className="w-3.5 h-3.5 mr-1.5" />
-            Schema
-          </button>
-          <button
-            className={`px-3 py-2 text-sm font-medium flex items-center transition-colors ${
-              activeTab === "data"
-                ? "border-b-2 border-blue-600 text-blue-600"
-                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-            }`}
-            onClick={() => setActiveTab("data")}
-          >
-            <Database className="w-3.5 h-3.5 mr-1.5" />
-            Dane
-          </button>
-          <button
-            className={`px-3 py-2 text-sm font-medium flex items-center transition-colors ${
-              activeTab === "logs"
-                ? "border-b-2 border-blue-600 text-blue-600"
-                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-            }`}
-            onClick={() => setActiveTab("logs")}
-          >
-            <Activity className="w-3.5 h-3.5 mr-1.5" />
-            Logs
-          </button>
+          {tabs.map(tab => 
+            (tab.always || (!loading && user)) && (
+              <button
+                key={tab.id}
+                className={`px-3 py-2 text-sm font-medium flex items-center transition-colors ${
+                  activeTab === tab.id
+                    ? "border-b-2 border-blue-600 text-blue-600"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                }`}
+                onClick={() => handleTabChange(tab.id)}
+              >
+                {tab.icon}{tab.label}
+              </button>
+            )
+          )}
         </div>
       </div>
 
       {/* Tab content */}
-      <div className="flex-1 overflow-hidden">
-        {activeTab === "schema" && (
-          <SchemaTab contextData={contextData} config={config} />
-        )}
-        {activeTab === "data" && (
-          <div className="p-4 h-full overflow-auto">
-            <div className="rounded-md border border-gray-200 p-3 bg-gray-50 h-full overflow-auto">
-              {Object.keys(contextData).length > 0 ? (
-                <JsonTreeRenderer
-                  data={contextData}
-                  expandedPaths={expandedPaths}
-                  setExpandedPaths={setExpandedPaths}
-                />
-              ) : (
-                <div className="text-gray-500 italic text-center p-4">
-                  Kontekst jest pusty
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-        {activeTab === "logs" && <LogsTab />}
-      </div>
+      <div className="flex-1 overflow-hidden">{renderTabContent()}</div>
 
       {/* Footer */}
       <div className="bg-gray-50 border-t border-gray-200 px-3 py-1.5 text-xs text-gray-500">
-        <div>Skrót: Ctrl+Shift+D (pokaż/ukryj)</div>
+        Skrót: Ctrl+Shift+D (pokaż/ukryj)
       </div>
     </div>
   );

@@ -1,12 +1,13 @@
 // src/components/UserDropdown.tsx
-import React, { useState, useRef, useEffect, memo } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "./useAuth";
+import { useAuthContext } from "../auth/AuthContext";
+import { User } from "../auth/useAuth";
+import '../_firebase/config'; // Import to ensure Firebase is initialized
 
-// Using memo to prevent unnecessary re-renders
-export const UserDropdown: React.FC = memo(() => {
+const UserDropdown: React.FC = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuthContext();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -41,8 +42,8 @@ export const UserDropdown: React.FC = memo(() => {
 
   const handleLogout = async () => {
     try {
-      setIsOpen(false); // Close dropdown first
-      await logout();
+      setIsOpen(false);
+      await signOut();
       navigate("/login");
     } catch (error) {
       console.error("Logout failed", error);
@@ -52,7 +53,7 @@ export const UserDropdown: React.FC = memo(() => {
   return (
     <div className="relative" ref={dropdownRef}>
       <button
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={() => setIsOpen(!isOpen)}
         className="flex items-center space-x-2 focus:outline-none"
         aria-expanded={isOpen}
         aria-haspopup="true"
@@ -63,9 +64,11 @@ export const UserDropdown: React.FC = memo(() => {
 
         <div className="text-left">
           <div className="font-medium">{user.displayName || user.email}</div>
-          <div className="text-xs text-gray-600">
-            Tokens: {user.availableTokens?.toLocaleString() || 0}
-          </div>
+          {user.availableTokens !== undefined && (
+            <div className="text-xs text-gray-600">
+              Tokens: {user.availableTokens.toLocaleString()}
+            </div>
+          )}
         </div>
       </button>
 
@@ -76,9 +79,11 @@ export const UserDropdown: React.FC = memo(() => {
               {user.displayName || "User"}
             </p>
             <p className="text-sm text-gray-500 truncate">{user.email}</p>
-            <p className="text-sm text-gray-500">
-              Tokens: {user.availableTokens?.toLocaleString() || 0}
-            </p>
+            {user.availableTokens !== undefined && (
+              <p className="text-sm text-gray-500">
+                Tokens: {user.availableTokens.toLocaleString()}
+              </p>
+            )}
           </div>
 
           <div className="py-1">
@@ -93,6 +98,6 @@ export const UserDropdown: React.FC = memo(() => {
       )}
     </div>
   );
-});
+};
 
 export default UserDropdown;

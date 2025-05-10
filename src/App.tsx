@@ -1,9 +1,8 @@
-// src/App.tsx
 import { useState, useEffect, Suspense } from "react";
 import { BrowserRouter } from "react-router-dom";
 import type { AppConfig } from "./core/types";
 import { AppRoutes } from "./components/Routes";
-import { AuthProvider } from "./auth/useAuth";
+import { AuthProvider } from "./auth/AuthContext"; 
 import AppLoading from "./components/Loading";
 import { ContextDebugger } from "./debug";
 
