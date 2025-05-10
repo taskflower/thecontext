@@ -1,20 +1,9 @@
 // src/themes/default/components/LlmStep.tsx
-import { ZodType } from "zod";
+
 import { useAuth } from "@/auth/useAuth";
 import { useLlm } from "@/core";
+import { LlmStepProps } from "@/themes/themeTypes";
 import { useEffect } from "react";
-
-type LlmStepProps<T> = {
-  schema: ZodType<T>;
-  jsonSchema?: any;
-  data?: T;
-  onSubmit: (data: T) => void;
-  userMessage: string;
-  systemMessage?: string;
-  showResults?: boolean;
-  autoStart?: boolean;
-  apiEndpoint?: string;
-};
 
 export default function LlmStep<T>({
   schema,
@@ -23,7 +12,7 @@ export default function LlmStep<T>({
   onSubmit,
   userMessage,
   systemMessage,
-  showResults = false, // Zmieniono domyślną wartość na false
+  showResults = false, 
   autoStart = false,
   apiEndpoint,
 }: LlmStepProps<T>) {
@@ -62,7 +51,9 @@ export default function LlmStep<T>({
     return (
       <div className="flex items-center justify-center p-6">
         <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin mr-2"></div>
-        <span className="text-gray-900 text-sm font-medium">Przetwarzanie...</span>
+        <span className="text-gray-900 text-sm font-medium">
+          Przetwarzanie...
+        </span>
       </div>
     );
   }
@@ -83,7 +74,7 @@ export default function LlmStep<T>({
   }
 
   if (result && !showResults) {
-    return null; 
+    return null;
   }
 
   // Ten blok zostanie wykonany tylko jeśli showResults jest true
@@ -111,7 +102,7 @@ export default function LlmStep<T>({
       </p>
       <button
         onClick={startLlmProcess}
-        className="mt-4 px-5 py-2.5 rounded transition-colors text-sm font-medium bg-black text-white hover:bg-gray-800"
+        className="w-full mt-4 px-5 py-2.5 rounded transition-colors text-sm font-medium bg-black text-white hover:bg-gray-800"
       >
         Rozpocznij
       </button>

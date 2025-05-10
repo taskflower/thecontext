@@ -38,14 +38,17 @@ const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
   );
   if (!scenario) return <div>Scenariusz nie znaleziony</div>;
 
+  // Utworzenie kontekstu z informacjami o bieżącym kroku i całkowitej liczbie kroków
+  const layoutContext = {
+    workspace,
+    scenario,
+    stepIdx,
+    totalSteps: scenario.nodes.length,
+  };
+
   return (
     <AppLayout
-      context={{
-        workspace,
-        scenario,
-        stepIdx,
-        totalSteps: scenario.nodes.length,
-      }}
+      context={layoutContext}
     >
       <Suspense fallback={<Loading message="Ładowanie kroku..." />}>
         <FlowEngine

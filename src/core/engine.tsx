@@ -10,12 +10,16 @@ interface NodeRendererProps {
   config: AppConfig;
   node: NodeConfig;
   onNext: () => void;
+  stepIdx: number;
+  totalSteps: number;
 }
 
 const NodeRenderer: React.FC<NodeRendererProps> = ({
   config,
   node,
   onNext,
+  stepIdx,
+  totalSteps,
 }) => {
   const { get, set } = useFlowStore();
 
@@ -50,6 +54,15 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({
     saveToDB: node.saveToDB,
     scenarioName: currentScenario?.name,
     nodeSlug: node.slug,
+    // Przekazujemy kontekst do komponentu
+    context: {
+      stepIdx,
+      totalSteps,
+      workspace: config.workspaces.find(w => 
+        w.slug === currentScenario?.workspaceSlug
+      ),
+      scenario: currentScenario
+    }
   };
 
   const handleSubmit = (val: any) => {
@@ -92,6 +105,7 @@ export const FlowEngine: React.FC<{
   );
   const index = Math.min(Math.max(stepIdx, 0), nodes.length - 1);
   const node = nodes[index];
+  const totalSteps = nodes.length;
 
   const handleNext = () => {
     if (index < nodes.length - 1) {
@@ -101,5 +115,13 @@ export const FlowEngine: React.FC<{
     }
   };
 
-  return <NodeRenderer config={config} node={node} onNext={handleNext} />;
+  return (
+    <NodeRenderer 
+      config={config} 
+      node={node} 
+      onNext={handleNext} 
+      stepIdx={index}
+      totalSteps={totalSteps}
+    />
+  );
 };

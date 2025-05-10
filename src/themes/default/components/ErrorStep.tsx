@@ -1,11 +1,8 @@
 // src/themes/default/components/ErrorStep.tsx
+import { ErrorStepProps } from '@/themes/themeTypes';
 import { AlertTriangle } from 'lucide-react';
 
-type ErrorStepProps = {
-  error?: string;
-  componentName?: string;
-  onSubmit: (data: any) => void;
-};
+
 
 export default function ErrorStep({ 
   error = 'Wystąpił nieoczekiwany błąd', 
