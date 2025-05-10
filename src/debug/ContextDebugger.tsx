@@ -70,7 +70,7 @@ export const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) =>
   if (!isVisible) {
     return (
       <button
-        className="fixed right-4 bottom-4 z-50 px-2.5 py-1.5 text-xs rounded-md bg-white text-gray-800 font-medium flex items-center shadow-md border border-gray-200 hover:bg-gray-50 transition-colors"
+        className="fixed right-4 bottom-4 z-50 px-2.5 py-1.5 text-xs rounded-md bg-white text-gray-800 font-semibold flex items-center shadow-md border border-gray-200 hover:bg-gray-50 transition-colors"
         onClick={() => setIsVisible(true)}
         title="Ctrl+Shift+D aby włączyć/wyłączyć debugger"
       >
@@ -163,7 +163,7 @@ export const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) =>
             (tab.always || (!loading && user)) && (
               <button
                 key={tab.id}
-                className={`px-3 py-2 text-sm font-medium flex items-center transition-colors ${
+                className={`px-3 py-2 text-sm font-semibold flex items-center transition-colors ${
                   activeTab === tab.id
                     ? "border-b-2 border-blue-600 text-blue-600"
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"

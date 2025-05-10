@@ -121,10 +121,10 @@ export default function LessonStep<T>({
         </div>
         
         <div className="p-5 border border-gray-200 rounded-lg bg-white mb-4">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">{definition.term}</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">{definition.term}</h3>
           <p className="text-gray-700 mb-4">{definition.definition}</p>
           <div className="bg-gray-50 p-3 rounded border border-gray-100">
-            <p className="text-sm text-gray-600 mb-1 font-medium">Przykład:</p>
+            <p className="text-sm text-gray-600 mb-1 font-semibold">Przykład:</p>
             <p className="text-gray-700">{definition.example}</p>
           </div>
         </div>
@@ -171,17 +171,17 @@ export default function LessonStep<T>({
         
         <div className="p-5 border border-gray-200 rounded-lg bg-white mb-4">
           <div className="border-l-4 border-blue-500 pl-4 mb-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Problem</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Problem</h3>
             <p className="text-gray-700">{example.problem}</p>
           </div>
           
           <div className="border-l-4 border-green-500 pl-4 mb-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Rozwiązanie</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Rozwiązanie</h3>
             <p className="text-gray-700">{example.solution}</p>
           </div>
           
           <div className="border-l-4 border-amber-500 pl-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Wyjaśnienie</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Wyjaśnienie</h3>
             <p className="text-gray-700">{example.explanation}</p>
           </div>
         </div>
@@ -203,13 +203,13 @@ export default function LessonStep<T>({
 
   return (
     <div className="pt-6">
-      <h2 className="text-xl font-medium text-gray-900 mb-2">{title}</h2>
+      <h2 className="text-xl font-semibold text-gray-900 mb-2">{title}</h2>
       <p className="text-gray-600 mb-6 text-sm">{description}</p>
       
       <div className="flex border-b border-gray-200 mb-6">
         <button
           onClick={() => setActiveTab('theory')}
-          className={`py-3 px-4 flex items-center text-sm font-medium ${
+          className={`py-3 px-4 flex items-center text-sm font-semibold ${
             activeTab === 'theory' 
               ? 'text-black border-b-2 border-black' 
               : 'text-gray-500 hover:text-gray-700'
@@ -220,7 +220,7 @@ export default function LessonStep<T>({
         </button>
         <button
           onClick={() => setActiveTab('definitions')}
-          className={`py-3 px-4 flex items-center text-sm font-medium ${
+          className={`py-3 px-4 flex items-center text-sm font-semibold ${
             activeTab === 'definitions' 
               ? 'text-black border-b-2 border-black' 
               : 'text-gray-500 hover:text-gray-700'
@@ -231,7 +231,7 @@ export default function LessonStep<T>({
         </button>
         <button
           onClick={() => setActiveTab('examples')}
-          className={`py-3 px-4 flex items-center text-sm font-medium ${
+          className={`py-3 px-4 flex items-center text-sm font-semibold ${
             activeTab === 'examples' 
               ? 'text-black border-b-2 border-black' 
               : 'text-gray-500 hover:text-gray-700'
@@ -254,7 +254,7 @@ export default function LessonStep<T>({
             // Tutaj można zaimplementować eksport lekcji
             alert('Funkcja pobierania lekcji jest niedostępna w demo');
           }}
-          className="px-4 py-2 border border-gray-200 rounded text-sm font-medium flex items-center text-gray-600 hover:bg-gray-50"
+          className="px-4 py-2 border border-gray-200 rounded text-sm font-semibold flex items-center text-gray-600 hover:bg-gray-50"
         >
           <Download className="w-4 h-4 mr-2" />
           Pobierz lekcję
@@ -262,7 +262,7 @@ export default function LessonStep<T>({
         
         <button
           onClick={handleNext}
-          className="px-5 py-2.5 rounded transition-colors text-sm font-medium bg-black text-white hover:bg-gray-800 flex items-center"
+          className="px-5 py-2.5 rounded transition-colors text-sm font-semibold bg-black text-white hover:bg-gray-800 flex items-center"
         >
           <PlayCircle className="w-4 h-4 mr-2" />
           {submitLabel}

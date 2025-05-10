@@ -52,7 +52,7 @@ export default function ListTableWidget({
     <div className="h-full">
       {title && (
         <div className="p-4 border-b border-sky-100">
-          <h3 className="text-base font-medium text-slate-800">{title}</h3>
+          <h3 className="text-base font-semibold text-slate-800">{title}</h3>
         </div>
       )}
       
@@ -62,9 +62,9 @@ export default function ListTableWidget({
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-sky-200 bg-sky-50">
-                  <th className="p-3 text-xs font-medium text-slate-500">Nazwa</th>
-                  <th className="p-3 text-xs font-medium text-slate-500">Opis</th>
-                  <th className="p-3 text-xs font-medium text-slate-500 text-right">Wartość</th>
+                  <th className="p-3 text-xs font-semibold text-slate-500">Nazwa</th>
+                  <th className="p-3 text-xs font-semibold text-slate-500">Opis</th>
+                  <th className="p-3 text-xs font-semibold text-slate-500 text-right">Wartość</th>
                 </tr>
               </thead>
               <tbody>
@@ -73,13 +73,13 @@ export default function ListTableWidget({
                     <td className="p-3">
                       <div className="flex items-center">
                         {renderIcon(item.icon)}
-                        <span className="font-medium text-slate-700">{item.name}</span>
+                        <span className="font-semibold text-slate-700">{item.name}</span>
                       </div>
                     </td>
                     <td className="p-3 text-sm text-slate-500">
                       {item.description || '-'}
                     </td>
-                    <td className="p-3 text-right font-medium text-indigo-600">
+                    <td className="p-3 text-right font-semibold text-indigo-600">
                       {item.value !== undefined ? item.value : '-'}
                     </td>
                   </tr>

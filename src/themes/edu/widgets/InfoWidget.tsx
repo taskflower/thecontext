@@ -43,7 +43,7 @@ export default function InfoWidget({
       <div className="p-4 border-b border-sky-100">
         <div className="flex items-center">
           {renderIcon()}
-          {title && <h3 className="text-base font-medium ml-2 text-slate-800">{title}</h3>}
+          {title && <h3 className="text-base font-semibold ml-2 text-slate-800">{title}</h3>}
         </div>
       </div>
       
@@ -57,7 +57,7 @@ export default function InfoWidget({
             {actionUrl && (
               <a 
                 href={actionUrl} 
-                className="mt-4 inline-flex items-center text-indigo-600 hover:text-indigo-800 font-medium text-sm"
+                className="mt-4 inline-flex items-center text-indigo-600 hover:text-indigo-800 font-semibold text-sm"
                 target="_blank"
                 rel="noopener noreferrer"
               >

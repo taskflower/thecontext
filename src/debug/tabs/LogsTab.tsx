@@ -219,12 +219,12 @@ const LogsTab: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Path</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Old Value</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">New Value</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Time</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Source</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Path</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Old Value</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">New Value</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">

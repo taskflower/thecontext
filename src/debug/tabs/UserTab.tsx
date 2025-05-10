@@ -80,7 +80,7 @@ const UserTab: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center h-full p-4">
         <div className="text-center mb-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
             Zaloguj się do Context Inspector
           </h3>
           <p className="text-gray-600 mb-4">
@@ -88,7 +88,7 @@ const UserTab: React.FC = () => {
           </p>
           <button
             onClick={handleGoogleLogin}
-            className="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center justify-center w-full"
+            className="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-semibold text-gray-700 hover:bg-gray-50 flex items-center justify-center w-full"
           >
             <svg
               className="w-5 h-5 mr-2"
@@ -147,7 +147,7 @@ const UserTab: React.FC = () => {
             </div>
           )}
           <div>
-            <h3 className="font-medium text-lg">{user.displayName || 'Użytkownik'}</h3>
+            <h3 className="font-semibold text-lg">{user.displayName || 'Użytkownik'}</h3>
             <p className="text-gray-600">{user.email}</p>
           </div>
         </div>
@@ -156,25 +156,25 @@ const UserTab: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <tbody className="bg-white divide-y divide-gray-200">
               <tr>
-                <td className="px-4 py-3 text-sm font-medium text-gray-500">ID użytkownika</td>
+                <td className="px-4 py-3 text-sm font-semibold text-gray-500">ID użytkownika</td>
                 <td className="px-4 py-3 text-sm text-gray-900 font-mono">{user.uid}</td>
               </tr>
               <tr>
-                <td className="px-4 py-3 text-sm font-medium text-gray-500">Email zweryfikowany</td>
+                <td className="px-4 py-3 text-sm font-semibold text-gray-500">Email zweryfikowany</td>
                 <td className="px-4 py-3 text-sm text-gray-900">
                   {user.emailVerified ? (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800">
                       Tak
                     </span>
                   ) : (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
                       Nie
                     </span>
                   )}
                 </td>
               </tr>
               <tr>
-                <td className="px-4 py-3 text-sm font-medium text-gray-500">Dostawca</td>
+                <td className="px-4 py-3 text-sm font-semibold text-gray-500">Dostawca</td>
                 <td className="px-4 py-3 text-sm text-gray-900">
                   {user.providerData && user.providerData.length > 0 ? (
                     user.providerData[0].providerId
@@ -184,7 +184,7 @@ const UserTab: React.FC = () => {
                 </td>
               </tr>
               <tr>
-                <td className="px-4 py-3 text-sm font-medium text-gray-500">Utworzony</td>
+                <td className="px-4 py-3 text-sm font-semibold text-gray-500">Utworzony</td>
                 <td className="px-4 py-3 text-sm text-gray-900">
                   {user.metadata?.creationTime ? (
                     new Date(user.metadata.creationTime).toLocaleString('pl-PL')
@@ -194,7 +194,7 @@ const UserTab: React.FC = () => {
                 </td>
               </tr>
               <tr>
-                <td className="px-4 py-3 text-sm font-medium text-gray-500">Ostatnie logowanie</td>
+                <td className="px-4 py-3 text-sm font-semibold text-gray-500">Ostatnie logowanie</td>
                 <td className="px-4 py-3 text-sm text-gray-900">
                   {user.metadata?.lastSignInTime ? (
                     new Date(user.metadata.lastSignInTime).toLocaleString('pl-PL')
@@ -211,7 +211,7 @@ const UserTab: React.FC = () => {
       {/* Authentication Token Section */}
       <div className="border rounded-md overflow-hidden">
         <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-          <h3 className="text-sm font-medium text-gray-700">Authentication Token (dla LLM API)</h3>
+          <h3 className="text-sm font-semibold text-gray-700">Authentication Token (dla LLM API)</h3>
         </div>
         
         <div className="p-4">
@@ -223,7 +223,7 @@ const UserTab: React.FC = () => {
               <button
                 onClick={handleLoadToken}
                 disabled={loadingToken}
-                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-semibold rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 {loadingToken ? (
                   <>
@@ -266,7 +266,7 @@ const UserTab: React.FC = () => {
                 <button
                   onClick={handleLoadToken}
                   disabled={loadingToken}
-                  className="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 hover:text-blue-900"
+                  className="inline-flex items-center px-2 py-1 text-xs font-semibold text-blue-700 hover:text-blue-900"
                 >
                   {loadingToken ? (
                     <>

@@ -296,7 +296,7 @@ export default function GoogleAdsDashboard({
         <div className="bg-white p-4 rounded shadow-sm border border-gray-100">
           <div className="flex items-center space-x-2 mb-1">
             <MousePointer className="w-4 h-4 text-blue-500" />
-            <h4 className="text-sm font-medium text-gray-700">CTR</h4>
+            <h4 className="text-sm font-semibold text-gray-700">CTR</h4>
           </div>
           <p className="text-xl font-semibold text-gray-900">{(ctr * 100).toFixed(2)}%</p>
           <p className="text-xs text-gray-500 mt-2">
@@ -307,7 +307,7 @@ export default function GoogleAdsDashboard({
         <div className="bg-white p-4 rounded shadow-sm border border-gray-100">
           <div className="flex items-center space-x-2 mb-1">
             <DollarSign className="w-4 h-4 text-green-500" />
-            <h4 className="text-sm font-medium text-gray-700">Avg. CPC</h4>
+            <h4 className="text-sm font-semibold text-gray-700">Avg. CPC</h4>
           </div>
           <p className="text-xl font-semibold text-gray-900">{(averageCpc / 1000000).toFixed(2)} PLN</p>
           <p className="text-xs text-gray-500 mt-2">
@@ -318,7 +318,7 @@ export default function GoogleAdsDashboard({
         <div className="bg-white p-4 rounded shadow-sm border border-gray-100">
           <div className="flex items-center space-x-2 mb-1">
             <TrendingUp className="w-4 h-4 text-purple-500" />
-            <h4 className="text-sm font-medium text-gray-700">Conversions</h4>
+            <h4 className="text-sm font-semibold text-gray-700">Conversions</h4>
           </div>
           <p className="text-xl font-semibold text-gray-900">{(conversionRate * 100).toFixed(2)}%</p>
           <p className="text-xs text-gray-500 mt-2">
@@ -378,7 +378,7 @@ export default function GoogleAdsDashboard({
         {recommendations.map(rec => (
           <div key={rec.id} className="bg-white p-4 rounded border border-gray-100 shadow-sm">
             <div className="flex justify-between items-start">
-              <h4 className="text-sm font-medium text-gray-900">{rec.title}</h4>
+              <h4 className="text-sm font-semibold text-gray-900">{rec.title}</h4>
               {getImpactBadge(rec.impact)}
             </div>
             <p className="text-xs text-gray-600 mt-2">{rec.description}</p>
@@ -393,7 +393,7 @@ export default function GoogleAdsDashboard({
     return (
       <div className="flex flex-col items-center justify-center p-8 space-y-4">
         <RefreshCw className="w-8 h-8 text-blue-500 animate-spin" />
-        <h2 className="text-xl font-medium text-gray-900">{title}</h2>
+        <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
         <p className="text-gray-600 text-center max-w-md">
           Loading campaign data. This may take a moment...
         </p>
@@ -406,13 +406,13 @@ export default function GoogleAdsDashboard({
     return (
       <div className="flex flex-col items-center justify-center p-8 space-y-4">
         <AlertTriangle className="w-12 h-12 text-red-500" />
-        <h2 className="text-xl font-medium text-red-700">Error loading data</h2>
+        <h2 className="text-xl font-semibold text-red-700">Error loading data</h2>
         <div className="bg-red-50 p-4 rounded border border-red-200 text-red-800 text-sm max-w-lg">
           <p>{error}</p>
         </div>
         <button
           onClick={fetchCampaignData}
-          className="mt-6 px-5 py-2.5 rounded transition-colors text-sm font-medium bg-black text-white hover:bg-gray-800"
+          className="mt-6 px-5 py-2.5 rounded transition-colors text-sm font-semibold bg-black text-white hover:bg-gray-800"
         >
           Try again
         </button>
@@ -427,11 +427,11 @@ export default function GoogleAdsDashboard({
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-lg shadow-xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Edit campaign</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Edit campaign</h3>
           
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
                 Campaign name
               </label>
               <input
@@ -443,7 +443,7 @@ export default function GoogleAdsDashboard({
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
                 Daily budget (PLN)
               </label>
               <input
@@ -460,7 +460,7 @@ export default function GoogleAdsDashboard({
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
                 Campaign status
               </label>
               <select
@@ -477,7 +477,7 @@ export default function GoogleAdsDashboard({
             </div>
             
             <div className="pt-4 border-t border-gray-200">
-              <h4 className="text-sm font-medium text-gray-700 mb-2">Advanced options</h4>
+              <h4 className="text-sm font-semibold text-gray-700 mb-2">Advanced options</h4>
               
               <div className="bg-blue-50 border border-blue-100 rounded p-3 mb-4">
                 <p className="text-xs text-blue-700">
@@ -537,7 +537,7 @@ export default function GoogleAdsDashboard({
       <div className="p-6 border-b border-gray-100">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-xl font-medium text-gray-900">{title}</h2>
+            <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
             {description && <p className="text-gray-500 text-sm mt-1">{description}</p>}
           </div>
           
@@ -581,9 +581,9 @@ export default function GoogleAdsDashboard({
               <div className={`w-3 h-3 rounded-full ${
                 campaignData?.status === 'ENABLED' ? 'bg-green-500' : 'bg-yellow-500'
               }`}></div>
-              <h3 className="text-sm font-medium text-gray-700">Status</h3>
+              <h3 className="text-sm font-semibold text-gray-700">Status</h3>
             </div>
-            <p className="text-base font-medium text-gray-900">
+            <p className="text-base font-semibold text-gray-900">
               {campaignData?.status === 'ENABLED' ? 'Active' : 'Paused'}
             </p>
             <p className="text-xs text-gray-500 mt-2">
@@ -597,9 +597,9 @@ export default function GoogleAdsDashboard({
           <div className="bg-white p-4 rounded shadow-sm border border-gray-100">
             <div className="flex items-center space-x-2 mb-2">
               <DollarSign className="w-4 h-4 text-blue-500" />
-              <h3 className="text-sm font-medium text-gray-700">Daily budget</h3>
+              <h3 className="text-sm font-semibold text-gray-700">Daily budget</h3>
             </div>
-            <p className="text-base font-medium text-gray-900">
+            <p className="text-base font-semibold text-gray-900">
               {campaignData?.budget?.amountMicros 
                 ? (campaignData.budget.amountMicros / 1000000).toFixed(2) 
                 : '0.00'} PLN
@@ -613,9 +613,9 @@ export default function GoogleAdsDashboard({
           <div className="bg-white p-4 rounded shadow-sm border border-gray-100">
             <div className="flex items-center space-x-2 mb-2">
               <Eye className="w-4 h-4 text-indigo-500" />
-              <h3 className="text-sm font-medium text-gray-700">Impressions</h3>
+              <h3 className="text-sm font-semibold text-gray-700">Impressions</h3>
             </div>
-            <p className="text-base font-medium text-gray-900">
+            <p className="text-base font-semibold text-gray-900">
               {campaignData?.metrics?.impressions?.toLocaleString() || '0'}
             </p>
             <p className="text-xs text-gray-500 mt-2">
@@ -627,9 +627,9 @@ export default function GoogleAdsDashboard({
           <div className="bg-white p-4 rounded shadow-sm border border-gray-100">
             <div className="flex items-center space-x-2 mb-2">
               <MousePointer className="w-4 h-4 text-green-500" />
-              <h3 className="text-sm font-medium text-gray-700">Clicks</h3>
+              <h3 className="text-sm font-semibold text-gray-700">Clicks</h3>
             </div>
-            <p className="text-base font-medium text-gray-900">
+            <p className="text-base font-semibold text-gray-900">
               {campaignData?.metrics?.clicks?.toLocaleString() || '0'}
             </p>
             <p className="text-xs text-gray-500 mt-2">
@@ -644,7 +644,7 @@ export default function GoogleAdsDashboard({
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden h-full">
               <div className="p-4 border-b border-gray-100">
-                <h3 className="font-medium text-gray-900">Performance metrics</h3>
+                <h3 className="font-semibold text-gray-900">Performance metrics</h3>
               </div>
               <div className="p-4">
                 {renderPerformanceIndicators()}
@@ -656,22 +656,22 @@ export default function GoogleAdsDashboard({
           <div>
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden h-full">
               <div className="p-4 border-b border-gray-100">
-                <h3 className="font-medium text-gray-900">Campaign summary</h3>
+                <h3 className="font-semibold text-gray-900">Campaign summary</h3>
               </div>
               <div className="divide-y divide-gray-100">
                 <div className="flex justify-between py-3 px-4">
                   <span className="text-sm text-gray-500">Campaign ID</span>
-                  <span className="text-sm font-medium text-gray-900">{campaignData?.id || campaignCreationResult?.campaignId || 'N/A'}</span>
+                  <span className="text-sm font-semibold text-gray-900">{campaignData?.id || campaignCreationResult?.campaignId || 'N/A'}</span>
                 </div>
                 
                 <div className="flex justify-between py-3 px-4">
                   <span className="text-sm text-gray-500">Campaign name</span>
-                  <span className="text-sm font-medium text-gray-900">{campaignData?.name || campaignBasic?.campaignName || 'N/A'}</span>
+                  <span className="text-sm font-semibold text-gray-900">{campaignData?.name || campaignBasic?.campaignName || 'N/A'}</span>
                 </div>
                 
                 <div className="flex justify-between py-3 px-4">
                   <span className="text-sm text-gray-500">Campaign type</span>
-                  <span className="text-sm font-medium text-gray-900">
+                  <span className="text-sm font-semibold text-gray-900">
                     {campaignData?.advertisingChannelType === 'SEARCH' ? 'Search' : 
                      campaignData?.advertisingChannelType === 'DISPLAY' ? 'Display network' : 
                      campaignData?.advertisingChannelType === 'VIDEO' ? 'Video' : 
@@ -683,7 +683,7 @@ export default function GoogleAdsDashboard({
                 
                 <div className="flex justify-between py-3 px-4">
                   <span className="text-sm text-gray-500">Start date</span>
-                  <span className="text-sm font-medium text-gray-900">
+                  <span className="text-sm font-semibold text-gray-900">
                     {campaignData?.startDate ? 
                       `${campaignData.startDate.slice(0, 4)}-${campaignData.startDate.slice(4, 6)}-${campaignData.startDate.slice(6, 8)}` :
                       campaignBasic?.campaignStartDate || 'N/A'}
@@ -692,7 +692,7 @@ export default function GoogleAdsDashboard({
                 
                 <div className="flex justify-between py-3 px-4">
                   <span className="text-sm text-gray-500">End date</span>
-                  <span className="text-sm font-medium text-gray-900">
+                  <span className="text-sm font-semibold text-gray-900">
                     {campaignData?.endDate ? 
                       `${campaignData.endDate.slice(0, 4)}-${campaignData.endDate.slice(4, 6)}-${campaignData.endDate.slice(6, 8)}` :
                       campaignBasic?.campaignEndDate || 'No end date'}
@@ -710,7 +710,7 @@ export default function GoogleAdsDashboard({
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden h-full">
               <div className="p-4 border-b border-gray-100">
                 <div className="flex justify-between items-center">
-                  <h3 className="font-medium text-gray-900">Campaign performance</h3>
+                  <h3 className="font-semibold text-gray-900">Campaign performance</h3>
                   <div className="inline-flex rounded-md shadow-sm text-xs">
                     <button className="py-1 px-2 border border-r-0 border-gray-300 rounded-l-md bg-white text-gray-700 hover:bg-gray-50">
                       7 days
@@ -734,7 +734,7 @@ export default function GoogleAdsDashboard({
           <div>
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden h-full">
               <div className="p-4 border-b border-gray-100">
-                <h3 className="font-medium text-gray-900">Recommendations</h3>
+                <h3 className="font-semibold text-gray-900">Recommendations</h3>
               </div>
               <div className="p-4">
                 {renderRecommendations()}
@@ -747,7 +747,7 @@ export default function GoogleAdsDashboard({
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-8">
           <div className="p-4 border-b border-gray-100">
             <div className="flex justify-between items-center">
-              <h3 className="font-medium text-gray-900">Keywords</h3>
+              <h3 className="font-semibold text-gray-900">Keywords</h3>
               <button className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800">
                 <Search className="w-3 h-3 mr-1" />
                 Manage keywords
@@ -758,22 +758,22 @@ export default function GoogleAdsDashboard({
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Keyword
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Impressions
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Clicks
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     CTR
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Avg. CPC
                   </th>
                 </tr>
@@ -783,7 +783,7 @@ export default function GoogleAdsDashboard({
                 {['sports shoes', 'men\'s footwear', 'shoe promotion', 'cheap shoes', 'best shoes']
                   .map((keyword: string, index: number) => (
                   <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                       {keyword}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -814,7 +814,7 @@ export default function GoogleAdsDashboard({
         <div className="flex justify-end">
           <button
             onClick={() => onSubmit(campaignData || {})}
-            className="px-5 py-2.5 rounded transition-colors text-sm font-medium bg-black text-white hover:bg-gray-800"
+            className="px-5 py-2.5 rounded transition-colors text-sm font-semibold bg-black text-white hover:bg-gray-800"
           >
             Done
           </button>

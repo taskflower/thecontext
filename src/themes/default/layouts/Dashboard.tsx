@@ -82,7 +82,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   <button
                     key={item.name}
                     onClick={() => handleNavigation(item.href)}
-                    className="text-gray-700 hover:text-gray-900 hover:bg-gray-50 px-3 py-2 rounded-md text-sm font-medium flex items-center"
+                    className="text-gray-700 hover:text-gray-900 hover:bg-gray-50 px-3 py-2 rounded-md text-sm font-semibold flex items-center"
                   >
                     {item.icon}
                     <span className="ml-2">{item.name}</span>
@@ -132,7 +132,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
                     <div className="py-1">
                       <div className="block px-4 py-2 text-sm text-gray-900 border-b border-gray-100">
-                        <p className="font-medium">{user?.displayName || 'Użytkownik'}</p>
+                        <p className="font-semibold">{user?.displayName || 'Użytkownik'}</p>
                         <p className="text-gray-500 text-xs mt-1">{user?.email || ''}</p>
                       </div>
                       <button 
@@ -184,7 +184,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 <button
                   key={item.name}
                   onClick={() => handleNavigation(item.href)}
-                  className="flex items-center text-gray-700 hover:text-gray-900 hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium w-full"
+                  className="flex items-center text-gray-700 hover:text-gray-900 hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-semibold w-full"
                 >
                   {item.icon}
                   <span className="ml-3">{item.name}</span>

@@ -48,7 +48,7 @@ export default function ScenarioListWidget({
 
   return (
     <div className="p-4">
-      {title && <h3 className="text-base font-medium mb-3">{title}</h3>}
+      {title && <h3 className="text-base font-semibold mb-3">{title}</h3>}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {scenarios.map(s => (
           <div
@@ -63,7 +63,7 @@ export default function ScenarioListWidget({
             <div className="p-4 pb-3">
               <div className="h-10 md:h-16"></div>
               <div className="flex justify-between items-start">
-                <h3 className="text-sm font-medium break-words">
+                <h3 className="text-sm font-semibold break-words">
                   {s.name}
                 </h3>
               </div>
@@ -81,7 +81,7 @@ export default function ScenarioListWidget({
             <div className="flex items-center p-4 pt-2">
               {isActive(s.status) ? (
                 <button 
-                  className="inline-flex items-center justify-center rounded font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-400 bg-blue-600 text-white hover:bg-blue-700 h-8 px-3 w-full gap-1.5 text-xs py-1.5"
+                  className="inline-flex items-center justify-center rounded font-semibold transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-400 bg-blue-600 text-white hover:bg-blue-700 h-8 px-3 w-full gap-1.5 text-xs py-1.5"
                   disabled={isActive(s.status)}
                 >
                   <Play className="h-3 w-3" />

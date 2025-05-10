@@ -360,7 +360,7 @@ export default function GoogleAdsCampaignMonitor({
     return (
       <div className="flex flex-col items-center justify-center p-8 space-y-4">
         <RefreshCw className="w-8 h-8 text-blue-500 animate-spin" />
-        <h2 className="text-xl font-medium text-gray-900">{title}</h2>
+        <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
         <p className="text-gray-600 text-center max-w-md">
           Loading campaign data. This may take a moment...
         </p>
@@ -373,13 +373,13 @@ export default function GoogleAdsCampaignMonitor({
     return (
       <div className="flex flex-col items-center justify-center p-8 space-y-4">
         <AlertTriangle className="w-12 h-12 text-red-500" />
-        <h2 className="text-xl font-medium text-red-700">Error loading data</h2>
+        <h2 className="text-xl font-semibold text-red-700">Error loading data</h2>
         <div className="bg-red-50 p-4 rounded border border-red-200 text-red-800 text-sm max-w-lg">
           <p>{error}</p>
         </div>
         <button
           onClick={fetchCampaigns}
-          className="mt-6 px-5 py-2.5 rounded transition-colors text-sm font-medium bg-black text-white hover:bg-gray-800"
+          className="mt-6 px-5 py-2.5 rounded transition-colors text-sm font-semibold bg-black text-white hover:bg-gray-800"
         >
           Try again
         </button>
@@ -395,7 +395,7 @@ export default function GoogleAdsCampaignMonitor({
       <div className="p-6 border-b border-gray-100">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-xl font-medium text-gray-900">{title}</h2>
+            <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
             {description && (
               <p className="text-gray-500 text-sm mt-1">{description}</p>
             )}
@@ -482,9 +482,9 @@ export default function GoogleAdsCampaignMonitor({
           <div className="bg-white p-4 rounded shadow-sm border border-gray-100">
             <div className="flex items-center space-x-2 mb-2">
               <Eye className="w-4 h-4 text-indigo-500" />
-              <h3 className="text-sm font-medium text-gray-700">Impressions</h3>
+              <h3 className="text-sm font-semibold text-gray-700">Impressions</h3>
             </div>
-            <p className="text-base font-medium text-gray-900">
+            <p className="text-base font-semibold text-gray-900">
               {totals.impressions.toLocaleString()}
             </p>
             <p className="text-xs text-gray-500 mt-2">
@@ -496,9 +496,9 @@ export default function GoogleAdsCampaignMonitor({
           <div className="bg-white p-4 rounded shadow-sm border border-gray-100">
             <div className="flex items-center space-x-2 mb-2">
               <MousePointer className="w-4 h-4 text-green-500" />
-              <h3 className="text-sm font-medium text-gray-700">Clicks</h3>
+              <h3 className="text-sm font-semibold text-gray-700">Clicks</h3>
             </div>
-            <p className="text-base font-medium text-gray-900">
+            <p className="text-base font-semibold text-gray-900">
               {totals.clicks.toLocaleString()}
             </p>
             <p className="text-xs text-gray-500 mt-2">
@@ -510,9 +510,9 @@ export default function GoogleAdsCampaignMonitor({
           <div className="bg-white p-4 rounded shadow-sm border border-gray-100">
             <div className="flex items-center space-x-2 mb-2">
               <TrendingUp className="w-4 h-4 text-blue-500" />
-              <h3 className="text-sm font-medium text-gray-700">Average CTR</h3>
+              <h3 className="text-sm font-semibold text-gray-700">Average CTR</h3>
             </div>
-            <p className="text-base font-medium text-gray-900">
+            <p className="text-base font-semibold text-gray-900">
               {(totals.ctr * 100).toFixed(2)}%
             </p>
             <p className="text-xs text-gray-500 mt-2">
@@ -524,9 +524,9 @@ export default function GoogleAdsCampaignMonitor({
           <div className="bg-white p-4 rounded shadow-sm border border-gray-100">
             <div className="flex items-center space-x-2 mb-2">
               <DollarSign className="w-4 h-4 text-red-500" />
-              <h3 className="text-sm font-medium text-gray-700">Total cost</h3>
+              <h3 className="text-sm font-semibold text-gray-700">Total cost</h3>
             </div>
-            <p className="text-base font-medium text-gray-900">
+            <p className="text-base font-semibold text-gray-900">
               {(totals.cost / 1000000).toFixed(2)} PLN
             </p>
             <p className="text-xs text-gray-500 mt-2">
@@ -539,7 +539,7 @@ export default function GoogleAdsCampaignMonitor({
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-8">
           <div className="p-4 border-b border-gray-100">
             <div className="flex justify-between items-center">
-              <h3 className="font-medium text-gray-900">Campaign list</h3>
+              <h3 className="font-semibold text-gray-900">Campaign list</h3>
               <p className="text-sm text-gray-500">
                 Showing {filteredCampaigns.length} of {campaigns.length}{" "}
                 campaigns
@@ -550,7 +550,7 @@ export default function GoogleAdsCampaignMonitor({
           {campaigns.length === 0 ? (
             <div className="p-8 flex flex-col items-center justify-center text-center">
               <Search className="w-12 h-12 text-gray-300 mb-4" />
-              <h4 className="text-gray-500 font-medium mb-2">
+              <h4 className="text-gray-500 font-semibold mb-2">
                 No campaigns found
               </h4>
               <p className="text-sm text-gray-400 max-w-md mb-6">
@@ -572,49 +572,49 @@ export default function GoogleAdsCampaignMonitor({
                   <tr>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
                     >
                       Campaign name
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
                     >
                       Status
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
                     >
                       Budget
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
                     >
                       Impressions
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
                     >
                       Clicks
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
                     >
                       CTR
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
                     >
                       Avg. CPC
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
                     >
                       Actions
                     </th>
@@ -626,7 +626,7 @@ export default function GoogleAdsCampaignMonitor({
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div>
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-semibold text-gray-900">
                               {campaign.name}
                             </div>
                             <div className="text-xs text-gray-500">
@@ -676,7 +676,7 @@ export default function GoogleAdsCampaignMonitor({
                           : "0.00"}{" "}
                         PLN
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-semibold">
                         <button
                           onClick={() => {
                             // Navigate to campaign details
@@ -703,7 +703,7 @@ export default function GoogleAdsCampaignMonitor({
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-8">
           <div className="p-4 border-b border-gray-100">
             <div className="flex justify-between items-center">
-              <h3 className="font-medium text-gray-900">
+              <h3 className="font-semibold text-gray-900">
                 Campaign performance over time
               </h3>
               <div className="inline-flex rounded-md shadow-sm text-xs">
@@ -724,7 +724,7 @@ export default function GoogleAdsCampaignMonitor({
             {campaigns.length === 0 ? (
               <div className="flex flex-col items-center justify-center text-center h-full">
                 <BarChart className="w-12 h-12 text-gray-300 mb-4" />
-                <h4 className="text-gray-500 font-medium">
+                <h4 className="text-gray-500 font-semibold">
                   No data to display
                 </h4>
                 <p className="text-sm text-gray-400 max-w-md">
@@ -806,7 +806,7 @@ export default function GoogleAdsCampaignMonitor({
 
           <button
             onClick={() => onSubmit({ action: "done" })}
-            className="px-5 py-2.5 rounded transition-colors text-sm font-medium bg-black text-white hover:bg-gray-800"
+            className="px-5 py-2.5 rounded transition-colors text-sm font-semibold bg-black text-white hover:bg-gray-800"
           >
             Done
           </button>

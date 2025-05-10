@@ -89,7 +89,7 @@ export const JsonTreeRenderer: React.FC<JsonTreeRendererProps> = ({
             return (
               <div key={key} className="relative py-1">
                 <div className="flex flex-wrap items-start">
-                  <span className="font-medium text-gray-800 mr-2">
+                  <span className="font-semibold text-gray-800 mr-2">
                     {isArray ? `[${key}]` : key}:
                   </span>
 

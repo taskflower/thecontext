@@ -20,7 +20,6 @@ const config: AppConfig = {
             tplFile: "TitleWidget",
             title: "Generator Materiałów Edukacyjnych",
             subtitle: "Wybierz scenariusz do uruchomienia",
-            level: 1,
             colSpan: "full",
           },
           {
@@ -275,7 +274,6 @@ const config: AppConfig = {
               {
                 tplFile: "TitleWidget",
                 title: "Podsumowanie wybranych ustawień",
-                level: 2,
                 colSpan: "full",
               },
               {
@@ -334,7 +332,6 @@ const config: AppConfig = {
                 tplFile: "TitleWidget",
                 title: "Wygenerowana lekcja",
                 contextDataPath: "lessonData.title",
-                level: 2,
                 colSpan: "full",
               },
               {
@@ -407,7 +404,6 @@ const config: AppConfig = {
               {
                 tplFile: "TitleWidget",
                 title: "Wyniki quizu: {{lessonData.title}}",
-                level: 2,
                 colSpan: "full",
               },
               {

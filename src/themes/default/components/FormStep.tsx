@@ -58,9 +58,9 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
 
     return (
       <div key={fieldName} className="my-4 space-y-2">
-        <label className="text-sm font-medium text-gray-900">
+        <label className="text-sm font-semibold text-gray-900">
           {title} {required && <span className="text-red-500">*</span>}
-        </label>
+        </label>  
 
         {description && <p className="text-sm text-gray-500">{description}</p>}
 
@@ -174,7 +174,7 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
 
   return (
     <div className="pt-6">
-      <h2 className="text-xl font-medium text-gray-900 mb-3">{title}</h2>
+      <h2 className="text-xl text-gray-900 mb-3">{title}</h2>
 
       {description && (
         <p className="text-gray-600 mb-6 text-sm">{description}</p>
@@ -204,7 +204,7 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
         <div className="mt-6">
           <button
             type="submit"
-            className="px-5 py-2.5 rounded transition-colors text-sm font-medium w-full bg-black text-white hover:bg-gray-800"
+            className="px-5 py-2.5 rounded transition-colors text-sm font-semibold w-full bg-black text-white hover:bg-gray-800"
           >
             {submitLabel}
           </button>

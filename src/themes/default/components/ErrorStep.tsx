@@ -12,7 +12,7 @@ export default function ErrorStep({
   return (
     <div className="flex flex-col items-center justify-center p-8 text-center min-h-[300px]">
       <AlertTriangle className="w-12 h-12 mb-4 text-amber-500" />
-      <h2 className="m-0 mb-4 text-xl font-medium text-red-600">Błąd komponentu</h2>
+      <h2 className="m-0 mb-4 text-xl text-red-600">Błąd komponentu</h2>
       
       {componentName && (
         <p className="mb-4 bg-gray-100 p-3 px-4 rounded text-sm border border-gray-200">
@@ -25,7 +25,7 @@ export default function ErrorStep({
       <div>
         <button 
           onClick={() => onSubmit({})}
-          className="px-5 py-3 rounded transition-colors text-base font-medium bg-black text-white hover:bg-gray-800"
+          className="px-5 py-3 rounded transition-colors text-base font-semibold bg-black text-white hover:bg-gray-800"
         >
           Kontynuuj
         </button>

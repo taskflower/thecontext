@@ -50,7 +50,7 @@ export default function ScenarioListWidget({
                     {s.icon}
                   </div>
                 )}
-                <h4 className="font-medium text-lg text-slate-800 group-hover:text-indigo-700">{s.name}</h4>
+                <h4 className="font-semibold text-lg text-slate-800 group-hover:text-indigo-700">{s.name}</h4>
               </div>
               
               {s.description && (
@@ -60,7 +60,7 @@ export default function ScenarioListWidget({
               )}
               
               <div className="flex justify-end">
-                <div className="inline-flex items-center text-sm font-medium text-indigo-600 group-hover:text-indigo-800">
+                <div className="inline-flex items-center text-sm font-semibold text-indigo-600 group-hover:text-indigo-800">
                   Rozpocznij <ArrowRight className="ml-1 w-4 h-4" />
                 </div>
               </div>

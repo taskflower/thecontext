@@ -57,7 +57,7 @@ export default function LlmStep<T>({
           <p className="mb-6 text-slate-600">Kliknij przycisk, aby rozpocząć przetwarzanie LLM</p>
           <button 
             onClick={() => setStarted(true)}
-            className="px-5 py-2.5 bg-indigo-600 text-white rounded-full shadow-sm font-medium hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2"
+            className="px-5 py-2.5 bg-indigo-600 text-white rounded-full shadow-sm font-semibold hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2"
           >
             Rozpocznij
           </button>
@@ -71,7 +71,7 @@ export default function LlmStep<T>({
       <div className="mt-3 mx-auto bg-white rounded-lg border border-sky-200 shadow-sm p-6">
         <div className="flex items-center justify-center py-12">
           <div className="w-6 h-6 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mr-3"></div>
-          <span className="text-indigo-600 font-medium">Przetwarzanie...</span>
+          <span className="text-indigo-600 font-semibold">Przetwarzanie...</span>
         </div>
       </div>
     );
@@ -85,7 +85,7 @@ export default function LlmStep<T>({
           <p className="text-rose-600 mb-4">{error}</p>
           <button 
             onClick={startLlmProcess}
-            className="px-5 py-2.5 bg-indigo-600 text-white rounded-full shadow-sm font-medium hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2"
+            className="px-5 py-2.5 bg-indigo-600 text-white rounded-full shadow-sm font-semibold hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2"
           >
             Spróbuj ponownie
           </button>
@@ -110,7 +110,7 @@ export default function LlmStep<T>({
   return (
     <div className="mt-3 mx-auto bg-white rounded-lg border border-sky-200 shadow-sm p-6">
       <div className="p-4 bg-sky-50 text-slate-700 rounded-md border border-sky-200 text-sm">
-        <h3 className="font-medium mb-2">
+        <h3 className="font-semibold mb-2">
           Kliknij przycisk, aby rozpocząć przetwarzanie LLM
         </h3>
         <p className="text-sm mb-4">
@@ -119,7 +119,7 @@ export default function LlmStep<T>({
         </p>
         <button
           onClick={startLlmProcess}
-          className="px-5 py-2.5 bg-indigo-600 text-white rounded-full shadow-sm font-medium hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2"
+          className="px-5 py-2.5 bg-indigo-600 text-white rounded-full shadow-sm font-semibold hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2"
         >
           Rozpocznij
         </button>

@@ -28,7 +28,7 @@ export default function ListObjectWidget({
     return (
       <div className="h-full">
         {title && <div className="p-4 border-b border-slate-100">
-          <h3 className="text-base font-medium text-slate-800">{title}</h3>
+          <h3 className="text-base font-semibold text-slate-800">{title}</h3>
         </div>}
         <div className="p-4">
           <div className="py-6 text-center text-slate-500 bg-slate-50 rounded-md border border-slate-200 text-sm">
@@ -107,7 +107,7 @@ export default function ListObjectWidget({
     return (
       <div className="h-full">
         {title && <div className="p-4 border-b border-slate-100">
-          <h3 className="text-base font-medium text-slate-800">{title}</h3>
+          <h3 className="text-base font-semibold text-slate-800">{title}</h3>
         </div>}
         
         {items.length > 0 ? (
@@ -120,7 +120,7 @@ export default function ListObjectWidget({
                     <div className="text-sm text-slate-700">{item.name}</div>
                   </div>
                   {item.value !== undefined && item.value !== '' && (
-                    <div className="text-sm font-medium text-slate-600 ml-2">{item.value}</div>
+                    <div className="text-sm font-semibold text-slate-600 ml-2">{item.value}</div>
                   )}
                 </div>
                 {item.description && (
@@ -145,7 +145,7 @@ export default function ListObjectWidget({
     return (
       <div className="h-full">
         {title && <div className="p-4 border-b border-slate-100">
-          <h3 className="text-base font-medium text-slate-800">{title}</h3>
+          <h3 className="text-base font-semibold text-slate-800">{title}</h3>
         </div>}
         
         {items.length > 0 ? (
@@ -153,8 +153,8 @@ export default function ListObjectWidget({
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-slate-100">
-                  <th className="p-3 text-xs font-medium text-slate-500">Nazwa</th>
-                  <th className="p-3 text-xs font-medium text-slate-500 text-right">Wartość</th>
+                  <th className="p-3 text-xs font-semibold text-slate-500">Nazwa</th>
+                  <th className="p-3 text-xs font-semibold text-slate-500 text-right">Wartość</th>
                 </tr>
               </thead>
               <tbody>
@@ -166,7 +166,7 @@ export default function ListObjectWidget({
                         <span className="text-sm text-slate-700">{item.name}</span>
                       </div>
                     </td>
-                    <td className="p-3 text-right text-sm font-medium text-slate-600">
+                    <td className="p-3 text-right text-sm font-semibold text-slate-600">
                       {item.value !== undefined && item.value !== '' ? item.value : '-'}
                     </td>
                   </tr>
@@ -189,7 +189,7 @@ export default function ListObjectWidget({
   return (
     <div className="h-full">
       {title && <div className="p-4 border-b border-slate-100">
-        <h3 className="text-base font-medium text-slate-800">{title}</h3>
+        <h3 className="text-base font-semibold text-slate-800">{title}</h3>
       </div>}
       
       <div className="p-4">
@@ -203,7 +203,7 @@ export default function ListObjectWidget({
                 <div className="p-3">
                   <div className="flex items-center mb-1">
                     {renderIcon(item.icon)}
-                    <h4 className="text-sm font-medium text-slate-800">{item.name}</h4>
+                    <h4 className="text-sm font-semibold text-slate-800">{item.name}</h4>
                   </div>
                   
                   {item.description && item.description !== '' && (
@@ -212,7 +212,7 @@ export default function ListObjectWidget({
                   
                   {item.value !== undefined && item.value !== '' && (
                     <div className="pt-2 border-t border-slate-100 text-right">
-                      <span className="text-xs font-medium text-slate-600">{item.value}</span>
+                      <span className="text-xs font-semibold text-slate-600">{item.value}</span>
                     </div>
                   )}
                 </div>

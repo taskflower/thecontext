@@ -13,7 +13,7 @@ export default function ErrorWidget({
   return (
     <div data-name="error-widget" className="flex flex-col items-center justify-center p-4 text-center">
       <AlertTriangle className="w-6 h-6 mb-2 text-amber-500" />
-      <h3 className="m-0 mb-2 text-red-600 font-medium text-sm">Błąd widgetu</h3>
+      <h3 className="m-0 mb-2 text-red-600 font-semibold text-sm">Błąd widgetu</h3>
       
       {componentName && (
         <p className="mb-2 bg-gray-50 p-2 px-3 rounded text-xs border border-gray-200">

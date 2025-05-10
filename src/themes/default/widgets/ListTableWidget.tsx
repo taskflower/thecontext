@@ -54,7 +54,7 @@ export default function CardTableWidget({
   return (
     <div className="h-full">
       {title && <div className="p-4 border-b border-gray-100">
-        <h3 className="m-0 text-sm font-medium text-gray-900">{title}</h3>
+        <h3 className="m-0 text-sm font-semibold text-gray-900">{title}</h3>
       </div>}
 
       {data.length > 0 ? (
@@ -62,9 +62,9 @@ export default function CardTableWidget({
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="p-3 text-xs font-medium text-gray-500">Nazwa</th>
-                <th className="p-3 text-xs font-medium text-gray-500">Opis</th>
-                <th className="p-3 text-xs font-medium text-gray-500 text-right">
+                <th className="p-3 text-xs font-semibold text-gray-500">Nazwa</th>
+                <th className="p-3 text-xs font-semibold text-gray-500">Opis</th>
+                <th className="p-3 text-xs font-semibold text-gray-500 text-right">
                   Wartość
                 </th>
               </tr>
@@ -86,7 +86,7 @@ export default function CardTableWidget({
                   <td className="p-3 text-xs text-gray-500">
                     {item.description || "-"}
                   </td>
-                  <td className="p-3 text-right text-sm font-medium text-gray-600">
+                  <td className="p-3 text-right text-sm font-semibold text-gray-600">
                     {item.value !== undefined ? item.value : "-"}
                   </td>
                 </tr>

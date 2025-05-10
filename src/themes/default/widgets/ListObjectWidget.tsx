@@ -29,7 +29,7 @@ const WidgetHeader = React.memo(({ title }: { title?: string }) => {
   if (!title) return null;
   return (
     <div className="p-4 border-b border-gray-100">
-      <h3 className="mt-0 mb-0 text-sm font-medium text-gray-900">{title}</h3>
+      <h3 className="mt-0 mb-0 text-sm font-semibold text-gray-900">{title}</h3>
     </div>
   );
 });
@@ -110,7 +110,7 @@ const ListObjectWidget = React.memo(({
   if (!data) {
     return (
       <div className="p-4 h-full">
-        {title && <h3 className="mt-0 mb-3 text-sm font-medium text-gray-900">{title}</h3>}
+        {title && <h3 className="mt-0 mb-3 text-sm font-semibold text-gray-900">{title}</h3>}
         <EmptyState emptyMessage={emptyMessage} />
       </div>
     );
@@ -135,7 +135,7 @@ const ListObjectWidget = React.memo(({
                     <div className="text-sm text-gray-700">{item.name}</div>
                   </div>
                   {item.value !== undefined && item.value !== '' && (
-                    <div className="text-sm font-medium text-gray-600 ml-2">{item.value}</div>
+                    <div className="text-sm font-semibold text-gray-600 ml-2">{item.value}</div>
                   )}
                 </div>
                 {item.description && (
@@ -162,8 +162,8 @@ const ListObjectWidget = React.memo(({
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-gray-100">
-                  <th className="p-3 text-xs font-medium text-gray-500">Nazwa</th>
-                  <th className="p-3 text-xs font-medium text-gray-500 text-right">Wartość</th>
+                  <th className="p-3 text-xs font-semibold text-gray-500">Nazwa</th>
+                  <th className="p-3 text-xs font-semibold text-gray-500 text-right">Wartość</th>
                 </tr>
               </thead>
               <tbody>
@@ -175,7 +175,7 @@ const ListObjectWidget = React.memo(({
                         <span className="text-sm text-gray-700">{item.name}</span>
                       </div>
                     </td>
-                    <td className="p-3 text-right text-sm font-medium text-gray-600">
+                    <td className="p-3 text-right text-sm font-semibold text-gray-600">
                       {item.value !== undefined && item.value !== '' ? item.value : '-'}
                     </td>
                   </tr>
@@ -206,7 +206,7 @@ const ListObjectWidget = React.memo(({
                 <div className="p-3">
                   <div className="flex items-center mb-1">
                     {renderIcon(item.icon)}
-                    <h4 className="m-0 text-sm font-medium text-gray-800">{item.name}</h4>
+                    <h4 className="m-0 text-sm font-semibold text-gray-800">{item.name}</h4>
                   </div>
                   
                   {item.description && item.description !== '' && (
@@ -215,7 +215,7 @@ const ListObjectWidget = React.memo(({
                   
                   {item.value !== undefined && item.value !== '' && (
                     <div className="pt-2 border-t border-gray-50 text-right">
-                      <span className="text-xs font-medium text-gray-600">{item.value}</span>
+                      <span className="text-xs font-semibold text-gray-600">{item.value}</span>
                     </div>
                   )}
                 </div>

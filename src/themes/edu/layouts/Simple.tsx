@@ -62,7 +62,7 @@ const SimpleLayout: React.FC<LayoutProps> = ({ children, context }) => {
                   style={{ width: `${((stepIdx + 1) / totalSteps) * 100}%` }}
                 />
               </div>
-              <div className="text-sm font-medium text-slate-500">
+              <div className="text-sm font-semibold text-slate-500">
                 {stepIdx + 1} / {totalSteps}
               </div>
             </div>

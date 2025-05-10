@@ -40,6 +40,8 @@ export type LlmStepProps<T> = {
   showResults?: boolean;
   autoStart?: boolean;
   apiEndpoint?: string;
+  title?: string;
+  description?: string;
 };
 
 export type ErrorStepProps = {

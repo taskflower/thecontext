@@ -55,7 +55,7 @@ const SimpleLayout: React.FC<LayoutProps> = ({ children, context }) => {
                 </h2>
               </div>
               <div className="mb-3">
-                <h3 className="font-medium text-sm text-gray-900">
+                <h3 className="font-semibold text-sm text-gray-900">
                   Krok {stepIdx + 1}: {scenario?.steps?.[stepIdx]?.title || ''}
                 </h3>
               </div>

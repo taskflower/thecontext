@@ -161,13 +161,13 @@ export default function QuizStep<T>({
   if (!quizData || !quizData.questions || quizData.questions.length === 0) {
     return (
       <div className="py-6 text-center">
-        <h2 className="text-xl font-medium mb-4">Brak pytań quizowych</h2>
+        <h2 className="text-xl font-semibold mb-4">Brak pytań quizowych</h2>
         <p className="text-gray-600 mb-6">
           Nie można załadować pytań quizowych. Sprawdź konfigurację.
         </p>
         <button
           onClick={() => onSubmit({} as T)}
-          className="px-5 py-2.5 bg-black text-white rounded text-sm font-medium hover:bg-gray-800"
+          className="px-5 py-2.5 bg-black text-white rounded text-sm font-semibold hover:bg-gray-800"
         >
           Kontynuuj
         </button>
@@ -286,7 +286,7 @@ export default function QuizStep<T>({
 
     return (
       <>
-        <h3 className="text-lg font-medium mb-4">{currentQuestion.question}</h3>
+        <h3 className="text-lg font-semibold mb-4">{currentQuestion.question}</h3>
 
         {(currentQuestion.type === "single-choice" ||
           currentQuestion.type === "multiple-choice" ||
@@ -336,7 +336,7 @@ export default function QuizStep<T>({
 
         {showExplanation && currentQuestion.explanation && (
           <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded text-blue-800 text-sm">
-            <p className="font-medium mb-1">Wyjaśnienie:</p>
+            <p className="font-semibold mb-1">Wyjaśnienie:</p>
             <p>{currentQuestion.explanation}</p>
           </div>
         )}
@@ -344,7 +344,7 @@ export default function QuizStep<T>({
         <div className="flex justify-between mt-6">
           <button
             onClick={toggleExplanation}
-            className="px-4 py-2 border border-gray-200 rounded text-sm font-medium flex items-center text-gray-600 hover:bg-gray-50"
+            className="px-4 py-2 border border-gray-200 rounded text-sm font-semibold flex items-center text-gray-600 hover:bg-gray-50"
           >
             <HelpCircle className="w-4 h-4 mr-2" />
             {showExplanation ? "Ukryj wyjaśnienie" : "Pokaż wyjaśnienie"}
@@ -354,7 +354,7 @@ export default function QuizStep<T>({
             {currentQuestionIdx > 0 && (
               <button
                 onClick={handlePrevQuestion}
-                className="px-4 py-2 border border-gray-200 rounded text-sm font-medium mr-2 hover:bg-gray-50"
+                className="px-4 py-2 border border-gray-200 rounded text-sm font-semibold mr-2 hover:bg-gray-50"
               >
                 Wstecz
               </button>
@@ -362,7 +362,7 @@ export default function QuizStep<T>({
 
             <button
               onClick={handleNextQuestion}
-              className="px-5 py-2 bg-black text-white rounded text-sm font-medium hover:bg-gray-800"
+              className="px-5 py-2 bg-black text-white rounded text-sm font-semibold hover:bg-gray-800"
             >
               {isLastQuestion ? submitLabel : "Następne"}
             </button>
@@ -377,11 +377,11 @@ export default function QuizStep<T>({
       {!quizCompleted && (
         <>
           <div className="mb-6">
-            <h2 className="text-xl font-medium mb-2">{quizData.title}</h2>
+            <h2 className="text-xl font-semibold mb-2">{quizData.title}</h2>
             <p className="text-gray-600 text-sm">{quizData.description}</p>
 
             <div className="flex items-center justify-between mt-4 mb-2">
-              <span className="text-sm font-medium">
+              <span className="text-sm font-semibold">
                 Pytanie {currentQuestionIdx + 1} z {totalQuestions}
               </span>
               <span className="text-sm text-gray-500">
@@ -408,7 +408,7 @@ export default function QuizStep<T>({
 
       {quizCompleted && showResults && (
         <div className="text-center py-8">
-          <h2 className="text-xl font-medium mb-2">Quiz ukończony!</h2>
+          <h2 className="text-xl font-semibold mb-2">Quiz ukończony!</h2>
           <p className="text-gray-600 mb-6">
             Twoje odpowiedzi zostały zapisane.
           </p>

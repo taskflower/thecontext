@@ -58,12 +58,12 @@ const UserDropdown: React.FC = () => {
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
-        <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-700 font-medium">
+        <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-700 font-semibold">
           {user.displayName ? user.displayName[0].toUpperCase() : "U"}
         </div>
 
         <div className="text-left">
-          <div className="font-medium">{user.displayName || user.email}</div>
+          <div className="font-semibold">{user.displayName || user.email}</div>
           {user.availableTokens !== undefined && (
             <div className="text-xs text-gray-600">
               Tokens: {user.availableTokens.toLocaleString()}
@@ -75,7 +75,7 @@ const UserDropdown: React.FC = () => {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-56 origin-top-right bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
           <div className="px-4 py-3">
-            <p className="text-sm font-medium text-gray-900">
+            <p className="text-sm font-semibold text-gray-900">
               {user.displayName || "User"}
             </p>
             <p className="text-sm text-gray-500 truncate">{user.email}</p>

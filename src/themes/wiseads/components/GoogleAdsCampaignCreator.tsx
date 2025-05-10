@@ -142,7 +142,7 @@ export default function GoogleAdsCampaignCreator({
     return (
       <div className="flex flex-col items-center justify-center p-8 space-y-4">
         <Loader className="w-8 h-8 text-blue-500 animate-spin" />
-        <h2 className="text-xl font-medium text-gray-900">{title}</h2>
+        <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
         <p className="text-gray-600 text-center max-w-md">
           {description || "Trwa tworzenie kampanii reklamowej Google Ads. To może potrwać kilka chwil..."}
         </p>
@@ -155,13 +155,13 @@ export default function GoogleAdsCampaignCreator({
     return (
       <div className="flex flex-col items-center justify-center p-8 space-y-4">
         <XCircle className="w-12 h-12 text-red-500" />
-        <h2 className="text-xl font-medium text-red-700">Błąd tworzenia kampanii</h2>
+        <h2 className="text-xl font-semibold text-red-700">Błąd tworzenia kampanii</h2>
         <div className="bg-red-50 p-4 rounded border border-red-200 text-red-800 text-sm max-w-lg">
           <p>{error}</p>
         </div>
         <button
           onClick={() => onSubmit(result)}
-          className="mt-6 px-5 py-2.5 rounded transition-colors text-sm font-medium bg-black text-white hover:bg-gray-800"
+          className="mt-6 px-5 py-2.5 rounded transition-colors text-sm font-semibold bg-black text-white hover:bg-gray-800"
         >
           Kontynuuj
         </button>
@@ -173,13 +173,13 @@ export default function GoogleAdsCampaignCreator({
   return (
     <div className="flex flex-col items-center justify-center p-8 space-y-4">
       <Check className="w-12 h-12 text-green-500" />
-      <h2 className="text-xl font-medium text-green-700">Kampania utworzona pomyślnie</h2>
+      <h2 className="text-xl font-semibold text-green-700">Kampania utworzona pomyślnie</h2>
       <div className="bg-green-50 p-4 rounded border border-green-200 text-green-800 text-sm max-w-lg">
         <p>Twoja kampania reklamowa w Google Ads została utworzona pomyślnie.</p>
       </div>
       <button
         onClick={() => onSubmit(result)}
-        className="mt-6 px-5 py-2.5 rounded transition-colors text-sm font-medium bg-black text-white hover:bg-gray-800"
+        className="mt-6 px-5 py-2.5 rounded transition-colors text-sm font-semibold bg-black text-white hover:bg-gray-800"
       >
         Kontynuuj
       </button>

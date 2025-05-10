@@ -145,7 +145,7 @@ export default function WidgetsStep({
         
         <button
           onClick={handleNext}
-          className="px-5 py-2.5 bg-indigo-600 text-white rounded-full shadow-sm font-medium hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 flex items-center ml-auto"
+          className="px-5 py-2.5 bg-indigo-600 text-white rounded-full shadow-sm font-semibold hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 flex items-center ml-auto"
         >
           {isLastStep ? (
             <>

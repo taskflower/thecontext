@@ -17,13 +17,6 @@ const config: AppConfig = {
         layoutFile: "Simple",
         widgets: [
           {
-            tplFile: "TitleWidget",
-            title: "Analiza Marketingowa Strony",
-            subtitle: "Wybierz scenariusz do uruchomienia",
-            level: 1,
-            colSpan: "full",
-          },
-          {
             tplFile: "InfoWidget",
             title: "Jak to działa?",
             data: "Narzędzie analizuje podaną stronę internetową i przygotowuje szczegółowy opis marketingowy, który może być wykorzystany w przyszłych kampaniach.",
@@ -185,6 +178,7 @@ const config: AppConfig = {
           tplFile: "LlmStep",
           order: 2,
           attrs: {
+            title: "Analiza strony na podstawie URL",
             autoStart: true,
             userMessage:
               "Przeanalizuj stronę pod adresem {{website-data.url}} i przygotuj szczegółowe streszczenie jej zawartości. Zwróć JSON z następującymi polami:\n" +
@@ -205,7 +199,6 @@ const config: AppConfig = {
               {
                 tplFile: "TitleWidget",
                 title: "Podsumowanie strony",
-                level: 2,
                 colSpan: "full",
               },
               {
@@ -259,12 +252,6 @@ const config: AppConfig = {
           order: 5,
           attrs: {
             widgets: [
-              {
-                tplFile: "TitleWidget",
-                title: "Podsumowanie opisu marketingowego",
-                level: 2,
-                colSpan: "full",
-              },
               {
                 tplFile: "InfoWidget",
                 title: "Branża",
@@ -338,7 +325,6 @@ const config: AppConfig = {
               {
                 tplFile: "TitleWidget",
                 title: "Wyniki analizy marketingowej",
-                level: 1,
                 colSpan: "full",
               },
               {
@@ -432,7 +418,6 @@ const config: AppConfig = {
               {
                 tplFile: "TitleWidget",
                 title: "Plan kampanii Google Ads",
-                level: 2,
                 colSpan: "full",
               },
               {

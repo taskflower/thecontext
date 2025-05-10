@@ -36,21 +36,21 @@ export default function InfoWidget({
       {(title || icon) && (
         <div className="flex items-center p-4 border-b border-gray-100">
           {renderIcon()}
-          {title && <h3 className="m-0 ml-2 text-sm font-medium text-gray-800">{title}</h3>}
+          {title && <h3 className="m-0 ml-2 text-sm font-semibold text-gray-800">{title}</h3>}
         </div>
       )}
       
       <div className="p-4">
         {data !== undefined ? (
           <div className="flex flex-col">
-            <p className="m-0 break-words text-base font-medium text-gray-700">
+            <p className="m-0 break-words text-base text-gray-700">
               {String(data)}
             </p>
             
             {actionUrl && (
               <a 
                 href={actionUrl} 
-                className="mt-3 inline-flex items-center text-xs font-medium text-gray-600 hover:text-gray-900"
+                className="mt-3 inline-flex items-center text-xs text-gray-600 hover:text-gray-900"
                 target="_blank"
                 rel="noopener noreferrer"
               >

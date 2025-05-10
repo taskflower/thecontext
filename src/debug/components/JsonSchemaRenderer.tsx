@@ -152,7 +152,7 @@ const SchemaNode: React.FC<NodeProps> = ({ name, schema, required = false, paren
           </div>
           <div className="pl-1 py-1 flex-grow">
             <div className="flex items-center">
-              <span className="font-medium">{name}</span>
+              <span className="font-semibold">{name}</span>
               {typeLabel && <span className="ml-2 text-gray-500 text-sm">{typeLabel}</span>}
               {statusBadges}
               <ValueBadge value={value} />
@@ -166,9 +166,9 @@ const SchemaNode: React.FC<NodeProps> = ({ name, schema, required = false, paren
               {schema.pattern && <ConstraintBadge>pattern: {schema.pattern}</ConstraintBadge>}
               {schema.multipleOf !== undefined && <ConstraintBadge>multiple of {schema.multipleOf}</ConstraintBadge>}
             </div>
-            {schema.enum && schema.enum.length > 0 && <div className="mt-1"><span className="text-xs font-medium">Values:</span> <div className="flex flex-wrap mt-1">{schema.enum.map((v,i)=><span key={i} className="bg-gray-100 rounded-sm px-2 py-1 text-xs mr-1 mb-1 border border-gray-200">{String(v)}</span>)}</div></div>}
-            {schema.default !== undefined && <div className="mt-1"><span className="text-xs font-medium">Default:</span> <span className="bg-gray-100 rounded-sm px-2 py-1 text-xs border border-gray-200">{String(schema.default)}</span></div>}
-            {schema.examples && schema.examples.length > 0 && <div className="mt-1"><span className="text-xs font-medium">Examples:</span> <div className="flex flex-wrap mt-1">{schema.examples.map((ex,i)=><span key={i} className="bg-gray-100 rounded-sm px-2 py-1 text-xs mr-1 mb-1 border border-gray-200">{String(ex)}</span>)}</div></div>}
+            {schema.enum && schema.enum.length > 0 && <div className="mt-1"><span className="text-xs font-semibold">Values:</span> <div className="flex flex-wrap mt-1">{schema.enum.map((v,i)=><span key={i} className="bg-gray-100 rounded-sm px-2 py-1 text-xs mr-1 mb-1 border border-gray-200">{String(v)}</span>)}</div></div>}
+            {schema.default !== undefined && <div className="mt-1"><span className="text-xs font-semibold">Default:</span> <span className="bg-gray-100 rounded-sm px-2 py-1 text-xs border border-gray-200">{String(schema.default)}</span></div>}
+            {schema.examples && schema.examples.length > 0 && <div className="mt-1"><span className="text-xs font-semibold">Examples:</span> <div className="flex flex-wrap mt-1">{schema.examples.map((ex,i)=><span key={i} className="bg-gray-100 rounded-sm px-2 py-1 text-xs mr-1 mb-1 border border-gray-200">{String(ex)}</span>)}</div></div>}
           </div>
         </div>
       </div>
@@ -185,7 +185,7 @@ const SchemaNode: React.FC<NodeProps> = ({ name, schema, required = false, paren
         <div className="pl-1 flex-grow">
           <div className="flex items-center cursor-pointer py-1" onClick={() => setIsExpanded(!isExpanded)}>
             <span className="mr-2 text-gray-500 inline-block w-3 text-center transform transition-transform" style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}>›</span>
-            <span className="font-medium">{name}</span>
+            <span className="font-semibold">{name}</span>
             {typeLabel && <span className="ml-2 text-gray-500 text-sm">{typeLabel}</span>}
             {statusBadges}
             <ValueBadge value={value} />
@@ -195,9 +195,9 @@ const SchemaNode: React.FC<NodeProps> = ({ name, schema, required = false, paren
             {isArray && <div className="mb-2 flex flex-wrap">{schema.minItems !== undefined && <ConstraintBadge>{`>= ${schema.minItems} items`}</ConstraintBadge>}{schema.maxItems !== undefined && <ConstraintBadge>{`<= ${schema.maxItems} items`}</ConstraintBadge>}</div>}
             {schema.properties && <div className="mb-3">{Object.entries(schema.properties).map(([k,child],i,arr)=><SchemaNode key={k} name={k} schema={child as JsonSchema} required={schema.required?.includes(k)} parentType={schema.type as string} isLastSibling={i===arr.length-1} path={path ? `${path}.${k}` : k} contextData={contextData}/> )}</div>}
             {typeLabel.includes('array') && schema.items && <div className="mb-3"><SchemaNode name="items" schema={schema.items as JsonSchema} parentType="array" isLastSibling path={`${path}[0]`} contextData={contextData}/></div>}
-            {schema.anyOf && <div className="mb-3"><div className="text-sm font-medium mb-1">Any of:</div>{schema.anyOf.map((sub,i,arr)=><SchemaNode key={`anyOf-${i}`} name={`Option ${i+1}`} schema={sub} isLastSibling={i===arr.length-1} path={path} contextData={contextData}/> )}</div>}
-            {schema.oneOf && <div className="mb-3"><div className="text-sm font-medium mb-1">One of:</div>{schema.oneOf.map((sub,i,arr)=><SchemaNode key={`oneOf-${i}`} name={`Option ${i+1}`} schema={sub} isLastSibling={i===arr.length-1} path={path} contextData={contextData}/> )}</div>}
-            {schema.allOf && <div className="mb-3"><div className="text-sm font-medium mb-1">All of:</div>{schema.allOf.map((sub,i,arr)=><SchemaNode key={`allOf-${i}`} name={`AllOf ${i+1}`} schema={sub} isLastSibling={i===arr.length-1} path={path} contextData={contextData}/> )}</div>}
+            {schema.anyOf && <div className="mb-3"><div className="text-sm font-semibold mb-1">Any of:</div>{schema.anyOf.map((sub,i,arr)=><SchemaNode key={`anyOf-${i}`} name={`Option ${i+1}`} schema={sub} isLastSibling={i===arr.length-1} path={path} contextData={contextData}/> )}</div>}
+            {schema.oneOf && <div className="mb-3"><div className="text-sm font-semibold mb-1">One of:</div>{schema.oneOf.map((sub,i,arr)=><SchemaNode key={`oneOf-${i}`} name={`Option ${i+1}`} schema={sub} isLastSibling={i===arr.length-1} path={path} contextData={contextData}/> )}</div>}
+            {schema.allOf && <div className="mb-3"><div className="text-sm font-semibold mb-1">All of:</div>{schema.allOf.map((sub,i,arr)=><SchemaNode key={`allOf-${i}`} name={`AllOf ${i+1}`} schema={sub} isLastSibling={i===arr.length-1} path={path} contextData={contextData}/> )}</div>}
           </div>}
         </div>
       </div>
@@ -211,7 +211,7 @@ export const JsonSchemaRenderer: React.FC<SchemaRendererProps> = ({ schema, root
   const isArrayRoot = schema.type === 'array';
   return isArrayRoot ? (
     <div className="p-2">
-      <div className="bg-gray-50 px-3 py-2 mb-2 font-medium rounded-sm border border-gray-200">
+      <div className="bg-gray-50 px-3 py-2 mb-2 font-semibold rounded-sm border border-gray-200">
         <div className="flex items-center">
           <span>Array of:</span>
           {schema.minItems!==undefined && <ConstraintBadge>{`>= ${schema.minItems} items`}</ConstraintBadge>}

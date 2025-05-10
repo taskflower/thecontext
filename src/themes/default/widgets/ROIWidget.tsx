@@ -29,7 +29,7 @@ export default function ROIWidget({
   return (
     <div className="h-full">
       <div className="p-4 border-b border-gray-100">
-        <h3 className="m-0 text-sm font-medium text-gray-900">{title}</h3>
+        <h3 className="m-0 text-sm font-semibold text-gray-900">{title}</h3>
       </div>
       
       <div className="p-4">
@@ -40,7 +40,7 @@ export default function ROIWidget({
             </div>
             <div>
               <p className="text-xs text-gray-500">ROI</p>
-              <p className={`text-base font-medium ${roiColor}`}>{roi}%</p>
+              <p className={`text-base font-semibold ${roiColor}`}>{roi}%</p>
             </div>
           </div>
           
@@ -50,7 +50,7 @@ export default function ROIWidget({
             </div>
             <div>
               <p className="text-xs text-gray-500">Zysk</p>
-              <p className="text-base font-medium">{profits.toLocaleString('pl-PL')} PLN</p>
+              <p className="text-base font-semibold">{profits.toLocaleString('pl-PL')} PLN</p>
             </div>
           </div>
           
@@ -60,7 +60,7 @@ export default function ROIWidget({
             </div>
             <div>
               <p className="text-xs text-gray-500">Inwestycja</p>
-              <p className="text-base font-medium">{investment.toLocaleString('pl-PL')} PLN</p>
+              <p className="text-base font-semibold">{investment.toLocaleString('pl-PL')} PLN</p>
             </div>
           </div>
         </div>
