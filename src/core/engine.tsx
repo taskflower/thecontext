@@ -54,7 +54,6 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({
     saveToDB: node.saveToDB,
     scenarioName: currentScenario?.name,
     nodeSlug: node.slug,
-    // Przekazujemy kontekst do komponentu
     context: {
       stepIdx,
       totalSteps,
