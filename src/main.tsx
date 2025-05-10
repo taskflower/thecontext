@@ -5,8 +5,11 @@ import App from "./App";
 import "./index.css";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
-import config from "./_configs/marketingApp.config";
+// Import konkretnej konfiguracji
+import config from "./_configs/marketingApp/config";
 
+// W przypadku, gdy chcemy użyć innej konfiguracji, wystarczy zmienić import:
+// import config from "./_configs/salesApp/config";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
