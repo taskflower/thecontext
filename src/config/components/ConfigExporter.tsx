@@ -1,6 +1,6 @@
 // src/components/ConfigExporter.tsx
 import React, { useState } from "react";
-import config from "../_configs/marketingApp/config"; // Importuj domyślną konfigurację
+import config from "../../_configs/marketingApp/config"; // Importuj domyślną konfigurację
 
 interface ConfigExporterProps {
   // Opcjonalna własna konfiguracja - jeśli nie podana, użyje domyślnej

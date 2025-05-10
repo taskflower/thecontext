@@ -1,24 +1,19 @@
 // src/services/ConfigManagerService.ts
+
+import { AppConfig, NodeConfig, ScenarioConfig, WorkspaceConfig } from "@/core";
+import { db } from "@/provideDB/firebase/config";
 import {
-  collection,
   addDoc,
-  setDoc,
-  getDoc,
-  doc,
+  collection,
   deleteDoc,
-  updateDoc,
-  query,
-  where,
-  getDocs,
+  doc,
   Firestore,
+  getDoc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
 } from "firebase/firestore";
-import { db } from "../provideDB/firebase/config";
-import {
-  AppConfig,
-  WorkspaceConfig,
-  ScenarioConfig,
-  NodeConfig,
-} from "../core/types";
 
 /**
  * Serwis do zarządzania konfiguracją aplikacji w Firebase

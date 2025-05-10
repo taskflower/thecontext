@@ -65,7 +65,7 @@ export class ConfigService {
       throw new Error("Nie można załadować konfiguracji lokalnej");
     }
   }
-
+  
   /**
    * Pobiera konfigurację z Firebase
    */

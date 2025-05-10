@@ -1,7 +1,7 @@
 // src/components/AdvancedConfigManager.tsx
 import React, { useState, useEffect } from "react";
-import defaultConfig from "../_configs/marketingApp/config"; // Importuj domyślną konfigurację
-import { AppConfig } from "../core/types";
+import defaultConfig from "../../_configs/marketingApp/config"; // Importuj domyślną konfigurację
+import { AppConfig } from "../../core/types";
 
 interface AdvancedConfigManagerProps {
   // Opcjonalnie przekazana konfiguracja zamiast domyślnej
