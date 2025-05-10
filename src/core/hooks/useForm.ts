@@ -14,7 +14,6 @@ interface UseFormResult<T> {
   handleChange: (field: string, value: any) => void;
   validateForm: () => boolean;
   resetForm: () => void;
-  data?: T; 
 }
 
 export const useForm = <T>({
@@ -48,27 +47,12 @@ export const useForm = <T>({
     }
   };
 
-  // Walidacja formularza
+  // Walidacja formularza - zoptymalizowana wersja wykorzystująca tylko jedną metodę walidacji
   const validateForm = (): boolean => {
     try {
-      // Prosta walidacja - sprawdź wymagane pola
       const newErrors: Record<string, string> = {};
       
-      // Jeśli mamy jsonSchema, używamy go do walidacji
-      if (jsonSchema && jsonSchema.properties) {
-        const requiredFields = jsonSchema.required || [];
-        
-        Object.entries(jsonSchema.properties).forEach(([field]: [string, any]) => {
-          const isRequired = requiredFields.includes(field);
-          const fieldValue = formData[field];
-          
-          if (isRequired && (fieldValue === undefined || fieldValue === '' || fieldValue === null)) {
-            newErrors[field] = 'To pole jest wymagane';
-          }
-        });
-      }
-      
-      // Jeśli mamy schemat Zod, używamy go również do walidacji
+      // Priorytetyzujemy walidację Zod dla spójności i mocy
       if (schema) {
         try {
           schema.parse(formData);
@@ -81,6 +65,19 @@ export const useForm = <T>({
             });
           }
         }
+      } 
+      // Dodatkowa walidacja wymaganych pól z JSON Schema tylko gdy nie mamy błędów z Zod
+      else if (jsonSchema && jsonSchema.properties && Object.keys(newErrors).length === 0) {
+        const requiredFields = jsonSchema.required || [];
+        
+        Object.entries(jsonSchema.properties).forEach(([field]: [string, any]) => {
+          const isRequired = requiredFields.includes(field);
+          const fieldValue = formData[field];
+          
+          if (isRequired && (fieldValue === undefined || fieldValue === '' || fieldValue === null)) {
+            newErrors[field] = 'To pole jest wymagane';
+          }
+        });
       }
       
       setErrors(newErrors);

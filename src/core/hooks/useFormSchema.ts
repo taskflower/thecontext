@@ -23,10 +23,14 @@ interface UseFormSchemaOptions<T> {
   initialData?: T;
 }
 
-interface UseFormSchemaResult<T> extends ReturnType<typeof useForm> {
+interface UseFormSchemaResult<T> {
+  formData: Record<string, any>;
+  errors: Record<string, string>;
+  handleChange: (field: string, value: any) => void;
+  validateForm: () => boolean;
+  resetForm: () => void;
   fieldSchemas: Record<string, FieldSchema>;
   hasRequiredFields: boolean;
-  data?: T; 
 }
 
 export const useFormSchema = <T>({
