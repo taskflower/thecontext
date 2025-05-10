@@ -2,7 +2,7 @@
 import { ZodType } from "zod";
 import { useAuth } from "@/auth/useAuth";
 import { useLlm } from "@/core";
-
+import { useEffect } from "react";
 
 type LlmStepProps<T> = {
   schema: ZodType<T>;
@@ -23,7 +23,7 @@ export default function LlmStep<T>({
   onSubmit,
   userMessage,
   systemMessage,
-  showResults = true,
+  showResults = false, // Zmieniono domyślną wartość na false
   autoStart = false,
   apiEndpoint,
 }: LlmStepProps<T>) {
@@ -41,9 +41,11 @@ export default function LlmStep<T>({
       user,
     });
 
-  if (result && data !== result) {
-    onSubmit(result);
-  }
+  useEffect(() => {
+    if (result && data !== result) {
+      onSubmit(result);
+    }
+  }, [result, data, onSubmit]);
 
   if (!started) {
     return (
@@ -80,6 +82,11 @@ export default function LlmStep<T>({
     );
   }
 
+  if (result && !showResults) {
+    return null; 
+  }
+
+  // Ten blok zostanie wykonany tylko jeśli showResults jest true
   if (result && showResults) {
     return (
       <div className="p-4 bg-green-50 rounded border border-green-200">
