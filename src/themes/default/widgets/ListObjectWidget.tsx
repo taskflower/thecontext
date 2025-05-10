@@ -1,11 +1,10 @@
 // src/themes/default/widgets/ListObjectWidget.tsx
-
+import React, { useMemo } from 'react';
 import { 
   Star, Check, Info, AlertTriangle, X, 
   Briefcase, Calculator, BarChart, 
   DollarSign, FileText
 } from 'lucide-react';
-import { useMemo } from 'react';
 
 // Typ dla przekazanych danych - może być obiekt lub tablica
 type DataType = Record<string, any> | any[];
@@ -17,95 +16,114 @@ type ListObjectWidgetProps = {
   layout?: 'grid' | 'list' | 'table';
 };
 
-export default function ListObjectWidget({ 
+// Komponenty pomocnicze - memoizowane dla lepszej wydajności
+const EmptyState = React.memo(({ emptyMessage }: { emptyMessage: string }) => (
+  <div className="p-4">
+    <div className="py-4 text-center text-gray-500 bg-gray-50 rounded border border-gray-200 text-xs">
+      {emptyMessage}
+    </div>
+  </div>
+));
+
+const WidgetHeader = React.memo(({ title }: { title?: string }) => {
+  if (!title) return null;
+  return (
+    <div className="p-4 border-b border-gray-100">
+      <h3 className="mt-0 mb-0 text-sm font-medium text-gray-900">{title}</h3>
+    </div>
+  );
+});
+
+// Wykrywanie ikon - wyodrębnione do funkcji aby uniknąć powtarzania
+const renderIcon = (icon?: string) => {
+  if (!icon) return null;
+  
+  const iconMap: Record<string, React.ReactNode> = {
+    'star': <Star className="w-4 h-4 text-amber-500" />,
+    'check': <Check className="w-4 h-4 text-green-500" />,
+    'info': <Info className="w-4 h-4 text-blue-500" />,
+    'warning': <AlertTriangle className="w-4 h-4 text-amber-500" />,
+    'error': <X className="w-4 h-4 text-red-500" />,
+    'briefcase': <Briefcase className="w-4 h-4 text-indigo-500" />,
+    'calculator': <Calculator className="w-4 h-4 text-purple-500" />,
+    'chart': <BarChart className="w-4 h-4 text-gray-500" />,
+    'money': <DollarSign className="w-4 h-4 text-green-500" />,
+    'document': <FileText className="w-4 h-4 text-gray-500" />,
+  };
+  
+  return (
+    <div className="flex-shrink-0 mr-2">
+      {iconMap[icon] || icon}
+    </div>
+  );
+};
+
+// Konwersja danych wyodrębniona do osobnej funkcji
+const convertDataToItems = (data: DataType) => {
+  if (Array.isArray(data)) {
+    return data.map((item, index) => {
+      if (typeof item === 'object' && item !== null) {
+        return {
+          id: item.id || `item-${index}`,
+          name: item.name || `Element ${index + 1}`,
+          description: item.description || '',
+          icon: item.icon || '',
+          value: item.value || ''
+        };
+      } else {
+        return {
+          id: `item-${index}`,
+          name: String(item),
+          description: '',
+          icon: '',
+          value: ''
+        };
+      }
+    });
+  } else if (typeof data === 'object') {
+    return Object.entries(data).map(([key, value], index) => {
+      const valueStr = typeof value === 'object' && value !== null
+        ? JSON.stringify(value)
+        : String(value);
+        
+      return {
+        id: `item-${index}`,
+        name: key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1'),
+        description: '',
+        icon: '',
+        value: valueStr
+      };
+    });
+  }
+  return [];
+};
+
+// Memoizowany główny komponent
+const ListObjectWidget = React.memo(({ 
   title, 
   data, 
   emptyMessage = 'Brak elementów do wyświetlenia',
   layout = 'list' // Zmiana domyślnego układu na listę dla większej spójności
-}: ListObjectWidgetProps) {
+}: ListObjectWidgetProps) => {
   
   // Sprawdzenie czy dane istnieją
   if (!data) {
     return (
       <div className="p-4 h-full">
         {title && <h3 className="mt-0 mb-3 text-sm font-medium text-gray-900">{title}</h3>}
-        <div className="py-4 text-center text-gray-500 bg-gray-50 rounded border border-gray-200 text-xs">
-          {emptyMessage}
-        </div>
+        <EmptyState emptyMessage={emptyMessage} />
       </div>
     );
   }
   
-  // Konwersja danych do tablicy elementów do wyświetlenia
-  const items = useMemo(() => {
-    if (Array.isArray(data)) {
-      return data.map((item, index) => {
-        if (typeof item === 'object' && item !== null) {
-          return {
-            id: item.id || `item-${index}`,
-            name: item.name || `Element ${index + 1}`,
-            description: item.description || '',
-            icon: item.icon || '',
-            value: item.value || ''
-          };
-        } else {
-          return {
-            id: `item-${index}`,
-            name: String(item),
-            description: '',
-            icon: '',
-            value: ''
-          };
-        }
-      });
-    } else if (typeof data === 'object') {
-      return Object.entries(data).map(([key, value], index) => {
-        const valueStr = typeof value === 'object' && value !== null
-          ? JSON.stringify(value)
-          : String(value);
-          
-        return {
-          id: `item-${index}`,
-          name: key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1'),
-          description: '',
-          icon: '',
-          value: valueStr
-        };
-      });
-    }
-    return [];
-  }, [data]);
-
-  const renderIcon = (icon?: string) => {
-    if (!icon) return null;
-    
-    const iconMap: Record<string, React.ReactNode> = {
-      'star': <Star className="w-4 h-4 text-amber-500" />,
-      'check': <Check className="w-4 h-4 text-green-500" />,
-      'info': <Info className="w-4 h-4 text-blue-500" />,
-      'warning': <AlertTriangle className="w-4 h-4 text-amber-500" />,
-      'error': <X className="w-4 h-4 text-red-500" />,
-      'briefcase': <Briefcase className="w-4 h-4 text-indigo-500" />,
-      'calculator': <Calculator className="w-4 h-4 text-purple-500" />,
-      'chart': <BarChart className="w-4 h-4 text-gray-500" />,
-      'money': <DollarSign className="w-4 h-4 text-green-500" />,
-      'document': <FileText className="w-4 h-4 text-gray-500" />,
-    };
-    
-    return (
-      <div className="flex-shrink-0 mr-2">
-        {iconMap[icon] || icon}
-      </div>
-    );
-  };
+  // useMemo dla konwersji danych - unikamy przeliczania przy każdym renderze
+  const items = useMemo(() => convertDataToItems(data), [data]);
 
   // Widok listy (domyślny)
   if (layout === 'list') {
     return (
       <div className="h-full">
-        {title && <div className="p-4 border-b border-gray-100">
-          <h3 className="mt-0 mb-0 text-sm font-medium text-gray-900">{title}</h3>
-        </div>}
+        <WidgetHeader title={title} />
         
         {items.length > 0 ? (
           <div className="divide-y divide-gray-100">
@@ -127,11 +145,7 @@ export default function ListObjectWidget({
             ))}
           </div>
         ) : (
-          <div className="p-4">
-            <div className="py-4 text-center text-gray-500 bg-gray-50 rounded border border-gray-200 text-xs">
-              {emptyMessage}
-            </div>
-          </div>
+          <EmptyState emptyMessage={emptyMessage} />
         )}
       </div>
     );
@@ -141,9 +155,7 @@ export default function ListObjectWidget({
   if (layout === 'table') {
     return (
       <div className="h-full">
-        {title && <div className="p-4 border-b border-gray-100">
-          <h3 className="mt-0 mb-0 text-sm font-medium text-gray-900">{title}</h3>
-        </div>}
+        <WidgetHeader title={title} />
         
         {items.length > 0 ? (
           <div className="overflow-x-auto">
@@ -172,11 +184,7 @@ export default function ListObjectWidget({
             </table>
           </div>
         ) : (
-          <div className="p-4">
-            <div className="py-4 text-center text-gray-500 bg-gray-50 rounded border border-gray-200 text-xs">
-              {emptyMessage}
-            </div>
-          </div>
+          <EmptyState emptyMessage={emptyMessage} />
         )}
       </div>
     );
@@ -185,9 +193,7 @@ export default function ListObjectWidget({
   // Widok 'grid'
   return (
     <div className="h-full">
-      {title && <div className="p-4 border-b border-gray-100">
-        <h3 className="mt-0 mb-0 text-sm font-medium text-gray-900">{title}</h3>
-      </div>}
+      <WidgetHeader title={title} />
       
       <div className="p-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -224,4 +230,6 @@ export default function ListObjectWidget({
       </div>
     </div>
   );
-}
+});
+
+export default ListObjectWidget;

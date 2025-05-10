@@ -4,17 +4,44 @@ import { CheckSquare } from "lucide-react";
 import { getDatabaseProvider } from "../../../provideDB/databaseProvider";
 import { useFlow } from "@/core";
 import { preloadWidget } from "@/preload";
-import {  WidgetsStepProps } from "@/themes/themeTypes";
+import { WidgetsStepProps } from "@/themes/themeTypes";
 import { getColSpanClass } from "@/core/utils/themesHelpers";
 
 // Lekki spinner dla widgetów (nie przykrywa całego layoutu)
-const WidgetLoading: React.FC = () => (
+const WidgetLoading: React.FC = React.memo(() => (
   <div className="flex items-center justify-center h-32 bg-gray-50">
     <div className="w-6 h-6 border-4 border-gray-300 border-t-transparent rounded-full animate-spin" />
   </div>
-);
+));
 
-export default function WidgetsStep({
+// Zoptymalizowany komponent widgetu
+const WidgetContainer = React.memo(({ 
+  widget, 
+  data, 
+  tplDir 
+}: { 
+  widget: any, 
+  data: any, 
+  tplDir: string 
+}) => {
+  const WidgetComp = useMemo(() => preloadWidget(tplDir, widget.tplFile), [tplDir, widget.tplFile]);
+  
+  return (
+    <div
+      key={widget.tplFile + (widget.title || "")}
+      className={`bg-white rounded overflow-hidden shadow-sm border border-gray-100 h-full ${getColSpanClass(
+        widget.colSpan
+      )}`}
+    >
+      <React.Suspense fallback={<WidgetLoading />}>
+        <WidgetComp {...widget} data={data} />
+      </React.Suspense>
+    </div>
+  );
+});
+
+// Główny komponent, teraz również memoizowany
+const WidgetsStep: React.FC<WidgetsStepProps> = React.memo(({
   widgets = [],
   onSubmit,
   title = "Podsumowanie",
@@ -22,27 +49,16 @@ export default function WidgetsStep({
   saveToDB,
   scenarioName,
   nodeSlug,
-}: WidgetsStepProps) {
+}: WidgetsStepProps) => {
   const { get } = useFlow();
 
   // Prefetch i cache komponentów widgetów
-  const widgetComponents = useMemo(
-    () =>
-      widgets.map((widget) => ({
-        ...widget,
-        Component: preloadWidget(widget.tplDir || "default", widget.tplFile),
-      })),
-    [widgets]
-  );
-
-  const dbProvider =
-    saveToDB?.enabled && saveToDB.provider
-      ? getDatabaseProvider(saveToDB.provider)
-      : null;
+  const tplDir = useMemo(() => widgets[0]?.tplDir || "default", [widgets]);
 
   const handleNext = async () => {
-    if (saveToDB?.enabled && dbProvider) {
+    if (saveToDB?.enabled && saveToDB.provider) {
       try {
+        const dbProvider = getDatabaseProvider(saveToDB.provider);
         const contentPath = saveToDB.contentPath || "";
         const dataToSave = contentPath ? get(contentPath) : {};
 
@@ -72,20 +88,15 @@ export default function WidgetsStep({
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        {widgetComponents.map((widget) => {
+        {widgets.map((widget) => {
           const data = widget.contextDataPath ? get(widget.contextDataPath) : undefined;
-          const WidgetComp = widget.Component;
           return (
-            <div
+            <WidgetContainer 
               key={widget.tplFile + (widget.title || "")}
-              className={`bg-white rounded overflow-hidden shadow-sm border border-gray-100 h-full ${getColSpanClass(
-                widget.colSpan
-              )}`}
-            >
-              <React.Suspense fallback={<WidgetLoading />}>
-                <WidgetComp {...widget} data={data} />
-              </React.Suspense>
-            </div>
+              widget={widget} 
+              data={data} 
+              tplDir={tplDir} 
+            />
           );
         })}
       </div>
@@ -101,4 +112,6 @@ export default function WidgetsStep({
       </div>
     </div>
   );
-}
+});
+
+export default WidgetsStep;
