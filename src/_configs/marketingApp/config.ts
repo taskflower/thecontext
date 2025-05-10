@@ -1,6 +1,6 @@
 // src/_configs/marketingApp/config.ts
 import { AppConfig } from "../../core/types";
-import { marketingWorkspace } from "./marketingApp/workspaces/marketing.workspace";
+import { marketingWorkspace } from "./workspaces/marketing.workspace";
 import { googleAdsCampaignScenario } from "./scenarios/googleads-campaign.scenario";
 import { websiteAnalysisScenario } from "./scenarios/website-analysis.scenario";
 
