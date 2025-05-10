@@ -74,6 +74,9 @@ const WidgetsStep: React.FC<WidgetsStepProps> = React.memo(({
     onSubmit(null);
   };
 
+  // Sprawdzenie czy komponent jest używany w kontekście scenariusza czy workspace
+  const isScenarioContext = Boolean(scenarioName && nodeSlug);
+
   return (
     <div className="max-w-6xl mx-auto">
       {(title || subtitle) && (
@@ -101,15 +104,18 @@ const WidgetsStep: React.FC<WidgetsStepProps> = React.memo(({
         })}
       </div>
 
-      <div className="flex justify-end">
-        <button
-          onClick={handleNext}
-          className="px-5 py-2.5 rounded transition-colors text-sm font-medium bg-black text-white hover:bg-gray-800 flex items-center"
-        >
-          <CheckSquare className="w-4 h-4 mr-2" />
-          Zakończ
-        </button>
-      </div>
+      {/* Przycisk "Zakończ" wyświetlany tylko w kontekście scenariusza */}
+      {isScenarioContext && (
+        <div className="flex justify-end">
+          <button
+            onClick={handleNext}
+            className="px-5 py-2.5 rounded transition-colors text-sm font-medium bg-black text-white hover:bg-gray-800 flex items-center"
+          >
+            <CheckSquare className="w-4 h-4 mr-2" />
+            Zakończ
+          </button>
+        </div>
+      )}
     </div>
   );
 });

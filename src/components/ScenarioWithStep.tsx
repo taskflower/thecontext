@@ -6,7 +6,6 @@ import { Loading } from ".";
 import { AppConfig, FlowEngine } from "@/core";
 
 const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
-  // Używamy destrukturyzacji z wartościami domyślnymi, żeby TS miał pewność że to string
   const {
     workspaceSlug = "",
     scenarioSlug = "",
@@ -17,14 +16,11 @@ const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
     stepIndex?: string;
   }>();
 
-  // Jeśli któryś z wymaganych parametrów jest pusty, przekieruj na główną
   if (!workspaceSlug || !scenarioSlug) {
     return <Navigate to="/" replace />;
   }
 
-  const stepIdx = Number.isNaN(Number(stepIndex))
-    ? 0
-    : parseInt(stepIndex, 10);
+  const stepIdx = Number.isNaN(Number(stepIndex)) ? 0 : parseInt(stepIndex, 10);
 
   const workspace = useMemo(
     () => config.workspaces.find((w) => w.slug === workspaceSlug),
@@ -32,12 +28,9 @@ const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
   );
   if (!workspace) return <div>Workspace nie znaleziony</div>;
 
-  const tplDir = workspace.templateSettings?.tplDir || config.tplDir;
-  const layoutFile = workspace.templateSettings?.layoutFile || "Simple";
-  const AppLayout = useMemo(
-    () => preloadLayout(tplDir, layoutFile),
-    [tplDir, layoutFile]
-  );
+  const tpl = workspace.templateSettings?.tplDir || config.tplDir;
+  const layout = workspace.templateSettings?.layoutFile || "Simple";
+  const AppLayout = useMemo(() => preloadLayout(tpl, layout), [tpl, layout]);
 
   const scenario = useMemo(
     () => config.scenarios.find((s) => s.slug === scenarioSlug),

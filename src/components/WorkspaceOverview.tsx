@@ -30,7 +30,6 @@ const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
               Wróć do strony głównej
             </a>
           </div>
-          RetryClaude can make mistakes. Please double-check responses.
         </div>
       </div>
     );
@@ -67,6 +66,7 @@ const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
             onSubmit={() => {}}
             title={workspace.name}
             subtitle={workspace.description}
+            // Nie przekazujemy saveToDB, scenarioName ani nodeSlug, aby komponent wiedział, że jest używany w kontekście workspace
             saveToDB={null}
             scenarioName={null}
             nodeSlug={null}
