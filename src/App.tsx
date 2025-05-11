@@ -42,7 +42,7 @@ const AppContent: React.FC = () => {
         </Routes>
         {usingFirebase && <FirebaseAppIndicator />}
       </BrowserRouter>
-      <ContextDebugger />
+      <ContextDebugger config={config}/>
     </ThemeProvider>
   );
 };
