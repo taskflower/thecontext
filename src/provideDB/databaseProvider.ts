@@ -1,4 +1,4 @@
-// src/core/databaseProvider.ts
+// src/provideDB/databaseProvider.ts
 import localforage from "localforage";
 import { StoredItem } from "./indexedDB/useIndexedDB";
 
