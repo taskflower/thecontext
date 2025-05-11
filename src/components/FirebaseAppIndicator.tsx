@@ -5,6 +5,7 @@ import { Database } from 'lucide-react';
 
 /**
  * Komponent wyświetlający wskaźnik, że aplikacja korzysta z konfiguracji Firebase
+ * Zmodyfikowany, aby wykrywać aplikację Firebase niezależnie od ścieżki
  */
 const FirebaseAppIndicator: React.FC = () => {
   const [appId, setAppId] = useState<string | null>(null);
@@ -13,11 +14,28 @@ const FirebaseAppIndicator: React.FC = () => {
 
   useEffect(() => {
     // Sprawdź, czy jesteśmy na ścieżce z Firebase
-    const regex = /^\/app\/([^\/]+)/;
-    const match = location.pathname.match(regex);
+    const path = location.pathname;
     
-    if (match && match[1]) {
-      setAppId(match[1]);
+    // Sprawdź zarówno format /app/{appId} jak i potencjalnie zapisany w localStorage
+    const regexAppPath = /^\/app\/([^\/]+)/;
+    const matchAppPath = path.match(regexAppPath);
+    
+    // Spróbuj pobrać z localStorage, jeśli używamy go do zapisywania ostatnio używanego appId
+    const storedAppId = localStorage.getItem('lastFirebaseAppId');
+    
+    if (matchAppPath && matchAppPath[1]) {
+      // Znaleziono w ścieżce URL
+      const foundAppId = matchAppPath[1];
+      setAppId(foundAppId);
+      setIsVisible(true);
+      
+      // Zapisz do localStorage do późniejszego wykorzystania
+      localStorage.setItem('lastFirebaseAppId', foundAppId);
+    } else if (storedAppId) {
+      // Używamy zapisanego appId, ale musimy sprawdzić, czy używamy go teraz
+      // To wymaga informacji z kontekstu aplikacji, którą możemy dodać później
+      // Na razie zakładamy, że jeśli jest zapisany, to jest używany
+      setAppId(storedAppId);
       setIsVisible(true);
     } else {
       setAppId(null);

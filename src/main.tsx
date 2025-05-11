@@ -5,10 +5,7 @@ import App from "./App";
 import "./index.css";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
-// Opcjonalne preładowanie konfiguracji
-import config from "./_configs/marketingApp/config";
-// Ustawiamy globalną zmienną z domyślną konfiguracją
-window.__APP_CONFIG__ = config;
+
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
