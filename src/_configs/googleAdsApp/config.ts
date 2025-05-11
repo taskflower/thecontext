@@ -7,7 +7,7 @@ import { createSearchCampaignScenario } from "./scenarios/create-search-campaign
 const config: AppConfig = {
   name: "Google Ads Kampanie",
   description: "Tworzenie i zarządzanie kampaniami Google Ads",
-  tplDir: "default",
+  tplDir: "clean",
   workspaces: [googleAdsWorkspace],
   scenarios: [monitorCampaignsScenario, createSearchCampaignScenario],
 };

@@ -1,13 +1,14 @@
 // src/App.tsx
-import React from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./auth/AuthContext";
-import AppLoading from "./components/Loading";
-import WorkspaceOverview from "./components/WorkspaceOverview";
-import ScenarioWithStep from "./components/ScenarioWithStep";
-import FirebaseAppIndicator from "./components/FirebaseAppIndicator";
-import { useAppConfig } from "./config/useAppConfig";
-import { ContextDebugger } from "./debug";
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './auth/AuthContext';
+import AppLoading from './components/Loading';
+import WorkspaceOverview from './components/WorkspaceOverview';
+import ScenarioWithStep from './components/ScenarioWithStep';
+import FirebaseAppIndicator from './components/FirebaseAppIndicator';
+import { useAppConfig } from './config/useAppConfig';
+import { ContextDebugger } from './debug';
+import { ThemeProvider } from '@/themes/ThemeContext';
 
 const AppContent: React.FC = () => {
   const { config, loading, error, usingFirebase } = useAppConfig();
@@ -18,42 +19,37 @@ const AppContent: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="p-6 bg-white rounded-lg shadow">
           <h2 className="text-xl font-bold text-red-600">
-            {error || "Brak konfiguracji"}
+            {error || 'Brak konfiguracji'}
           </h2>
         </div>
       </div>
     );
   }
 
-  // Ustaw domyślny workspace na pierwszy
-  const defaultWorkspace = config.workspaces[0]?.slug || "";
+  const defaultWorkspace = config.workspaces[0]?.slug || '';
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route
-          path="/"
-          element={<Navigate to={`/${defaultWorkspace}`} replace />}
-        />
-        <Route
-          path="/:workspaceSlug"
-          element={<WorkspaceOverview config={config} />}
-        />
-        <Route
-          path="/:workspaceSlug/:scenarioSlug/:stepIndex"
-          element={<ScenarioWithStep config={config} />}
-        />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-      {usingFirebase && <FirebaseAppIndicator />}
-    </BrowserRouter>
+    <ThemeProvider value={config.tplDir}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Navigate to={`/${defaultWorkspace}`} replace />} />
+          <Route path="/:workspaceSlug" element={<WorkspaceOverview config={config} />} />
+          <Route
+            path="/:workspaceSlug/:scenarioSlug/:stepIndex"
+            element={<ScenarioWithStep config={config} />}
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+        {usingFirebase && <FirebaseAppIndicator />}
+      </BrowserRouter>
+      <ContextDebugger />
+    </ThemeProvider>
   );
 };
 
 const App: React.FC = () => (
   <AuthProvider>
     <AppContent />
-    <ContextDebugger />
   </AuthProvider>
 );
 

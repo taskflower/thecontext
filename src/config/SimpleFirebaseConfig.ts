@@ -8,7 +8,7 @@ import { db } from '../provideDB/firebase/config';
  */
 export class SimpleConfigLoader {
   async loadLocalConfig(): Promise<AppConfig> {
-    const { default: config } = await import('../_configs/marketingApp/config');
+    const { default: config } = await import('../_configs/energyGrantApp/config');
     // Dodajemy źródło konfiguracji
     (config as any)._source = { type: 'local' };
     return config;
