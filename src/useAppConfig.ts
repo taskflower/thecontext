@@ -1,7 +1,7 @@
 // src/hooks/useAppConfig.ts
 import { useState, useEffect } from 'react';
 import { AppConfig } from '@/core/types';
-import { simpleConfigLoader } from '@/SimpleFirebaseConfig';
+import { configLoader } from '@/SimpleFirebaseConfig';
 
 interface UseAppConfigResult {
   config: AppConfig | null;
@@ -33,7 +33,7 @@ export function useAppConfig(): UseAppConfigResult {
       try {
         if (appId) {
           // Fetch z Firebase
-          const fbConfig = await simpleConfigLoader.loadFirebaseConfigWithId(appId);
+          const fbConfig = await configLoader.loadConfig(appId);
           if (!canceled) {
             setConfig(fbConfig);
             console.log('[useAppConfig] (Firebase) workspaces:', fbConfig.workspaces);
@@ -42,7 +42,7 @@ export function useAppConfig(): UseAppConfigResult {
           }
         } else {
           // Fetch lokalny
-          const localConfig = await simpleConfigLoader.loadLocalConfig();
+          const localConfig = await configLoader.loadDefaultConfig();
           if (!canceled) {
             setConfig(localConfig);
             console.log('[useAppConfig] (Local) workspaces:', localConfig.workspaces);

@@ -8,7 +8,7 @@ interface UseFormOptions<T> {
   initialData?: T;
 }
 
-interface UseFormResult<T> {
+interface UseFormResult {
   formData: Record<string, any>;
   errors: Record<string, string>;
   handleChange: (field: string, value: any) => void;
@@ -20,7 +20,7 @@ export const useForm = <T>({
   schema,
   jsonSchema,
   initialData,
-}: UseFormOptions<T>): UseFormResult<T> => {
+}: UseFormOptions<T>): UseFormResult => {
   const [formData, setFormData] = useState<Record<string, any>>(initialData || {});
   const [errors, setErrors] = useState<Record<string, string>>({});
 

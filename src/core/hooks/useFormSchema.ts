@@ -23,7 +23,7 @@ interface UseFormSchemaOptions<T> {
   initialData?: T;
 }
 
-interface UseFormSchemaResult<T> {
+interface UseFormSchemaResult {
   formData: Record<string, any>;
   errors: Record<string, string>;
   handleChange: (field: string, value: any) => void;
@@ -37,7 +37,7 @@ export const useFormSchema = <T>({
   schema,
   jsonSchema,
   initialData
-}: UseFormSchemaOptions<T>): UseFormSchemaResult<T> => {
+}: UseFormSchemaOptions<T>): UseFormSchemaResult => {
   // Użyj podstawowego hooka useForm
   const formHook = useForm<T>({
     schema,

@@ -167,7 +167,7 @@ export default function PortfolioPreviewWidget({
               
               {images.length > 0 ? (
                 <div className="grid grid-cols-2 gap-2">
-                  {images.map((image, index) => (
+                  {images.map((index) => (
                     <div 
                       key={index} 
                       className="aspect-square bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center border border-gray-200"

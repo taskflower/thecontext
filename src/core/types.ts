@@ -12,7 +12,7 @@ export interface NodeConfig {
     enabled: boolean;
     provider: "indexedDB";
     itemId?: string;
-    itemType: "lesson" | "quiz" | "project";
+    itemType: string;
     itemTitle?: string;
     contentPath?: string;
   };
@@ -26,6 +26,7 @@ export interface ScenarioConfig {
   icon?: string;
   systemMessage?: string;
   nodes: NodeConfig[];
+  roleAccess?: string[];
 }
 
 export interface WorkspaceConfig {

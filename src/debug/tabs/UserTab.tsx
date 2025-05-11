@@ -1,5 +1,5 @@
 // src/debug/tabs/UserTab.tsx
-import React, { useState, useEffect } from 'react';
+import  { useState} from 'react';
 import { User as UserIcon, LogOut, RefreshCw, Eye, EyeOff, Copy, Check } from 'lucide-react';
 import { useAuth } from '../../auth/useAuth';
 
