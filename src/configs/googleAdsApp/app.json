@@ -1,14 +1,18 @@
-
 {
-    "name": "Google Ads Kampanie",
-    "description": "Tworzenie i zarządzanie kampaniami Google Ads",
-    "tplDir": "clean",
-    "workspaces": [
-      { "$ref": "./workspaces/googleads.workspace.json" }
-    ],
-    "scenarios": [
-      { "$ref": "./scenarios/create-search-campaign.scenario.json" },
-      { "$ref": "./scenarios/monitor-campaigns.scenario.json" }
-    ]
-  }
-  
+  "name": "Google Ads Kampanie",
+  "description": "Tworzenie i zarządzanie kampaniami Google Ads",
+  "tplDir": "clean",
+  "workspaces": [
+    {
+      "id": "workspace-google-ads"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "create-search-campaign"
+    },
+    {
+      "id": "monitor-campaigns"
+    }
+  ]
+}

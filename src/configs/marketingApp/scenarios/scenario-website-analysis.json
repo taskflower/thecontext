@@ -1,0 +1,239 @@
+{
+    "id": "scenario-website-analysis",
+    "slug": "scenario-website-analysis",
+    "workspaceSlug": "workspace-marketing",
+    "name": "Analiza Strony WWW",
+    "description": "Analiza strony i przygotowanie opisu marketingowego",
+    "icon": "search",
+    "nodes": [
+      {
+        "slug": "collect-url",
+        "label": "Krok 1: Adres strony",
+        "contextSchemaPath": "website-data",
+        "contextDataPath": "website-data",
+        "tplFile": "FormStep",
+        "order": 0,
+        "attrs": {
+          "title": "Podaj adres URL strony do analizy",
+          "schemaPath": "schemas.form.website",
+          "submitLabel": "Dalej"
+        }
+      },
+      {
+        "slug": "summary-url",
+        "label": "Podsumowanie adresu",
+        "contextSchemaPath": "website-data",
+        "contextDataPath": "website-data",
+        "tplFile": "WidgetsStep",
+        "order": 1,
+        "attrs": {
+          "widgets": [
+            {
+              "tplFile": "InfoWidget",
+              "title": "Adres do analizy",
+              "contextDataPath": "website-data.url",
+              "icon": "info",
+              "colSpan": "full"
+            }
+          ]
+        }
+      },
+      {
+        "slug": "analyze-website",
+        "label": "Krok 2: Analiza strony",
+        "contextSchemaPath": "website-summary",
+        "contextDataPath": "website-summary",
+        "tplFile": "LlmStep",
+        "order": 2,
+        "attrs": {
+          "title": "Analiza strony na podstawie URL",
+          "autoStart": true,
+          "userMessage": "Przeanalizuj stronę pod adresem {{website-data.url}} i przygotuj szczegółowe streszczenie jej zawartości. Zwróć JSON z następującymi polami:\n- summary (string): szczegółowe streszczenie zawartości strony w jednym paragrafie.\n- keywords (array of strings): lista 5-10 najbardziej trafnych słów kluczowych dla tej strony, każde słowo jako osobny string w tablicy.\n- mainTopics (array of strings): lista 3-5 głównych tematów poruszanych na stronie, każdy temat jako osobny string w tablicy."
+        }
+      },
+      {
+        "slug": "summary-website",
+        "label": "Podsumowanie analizy strony",
+        "contextSchemaPath": "website-summary",
+        "contextDataPath": "website-summary",
+        "tplFile": "WidgetsStep",
+        "order": 3,
+        "attrs": {
+          "widgets": [
+            {
+              "tplFile": "TitleWidget",
+              "title": "Podsumowanie strony",
+              "colSpan": "full"
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Streszczenie strony",
+              "contextDataPath": "website-summary.summary",
+              "icon": "document",
+              "colSpan": 2
+            },
+            {
+              "tplFile": "ListObjectWidget",
+              "title": "Słowa kluczowe",
+              "contextDataPath": "website-summary.keywords",
+              "layout": "grid",
+              "colSpan": 1
+            },
+            {
+              "tplFile": "ListObjectWidget",
+              "title": "Główne tematy",
+              "contextDataPath": "website-summary.mainTopics",
+              "layout": "grid",
+              "colSpan": "full"
+            }
+          ]
+        }
+      },
+      {
+        "slug": "create-marketing",
+        "label": "Krok 3: Opis marketingowy",
+        "contextSchemaPath": "marketing-description",
+        "contextDataPath": "marketing-description",
+        "tplFile": "LlmStep",
+        "order": 4,
+        "attrs": {
+          "autoStart": true,
+          "userMessage": "Na podstawie analizy: {{website-summary.summary}} i słów kluczowych: {{website-summary.keywords}} przygotuj kompletny opis marketingowy. Zwróć dokładny JSON z następującymi polami:\n- marketingDescription (string): opis marketingowy o długości 150-200 słów\n- industry (string): określenie branży, której dotyczy strona\n- targetAudience (string): określenie głównej grupy docelowej strony\n- suggestedChannels (array of objects): lista 3-5 sugerowanych kanałów marketingowych, każdy obiekt powinien zawierać pola: id (string), name (string), description (string), icon (string - użyj jednej z wartości: star, check, info, warning, briefcase, calculator, chart, money, document)\n- metrics (array of objects): lista 3-5 kluczowych metryk marketingowych, każdy obiekt powinien zawierać pola: label (string), value (number), prefix (string), suffix (string), change (number)"
+        }
+      },
+      {
+        "slug": "summary-marketing",
+        "label": "Podsumowanie opisu marketingowego",
+        "contextSchemaPath": "marketing-description",
+        "contextDataPath": "marketing-description",
+        "tplFile": "WidgetsStep",
+        "order": 5,
+        "attrs": {
+          "widgets": [
+            {
+              "tplFile": "InfoWidget",
+              "title": "Branża",
+              "contextDataPath": "marketing-description.industry",
+              "icon": "briefcase",
+              "colSpan": 1
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Grupa docelowa",
+              "contextDataPath": "marketing-description.targetAudience",
+              "icon": "info",
+              "colSpan": 1
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Opis marketingowy",
+              "contextDataPath": "marketing-description.marketingDescription",
+              "icon": "document",
+              "colSpan": "full"
+            },
+            {
+              "tplFile": "ListObjectWidget",
+              "title": "Sugerowane kanały",
+              "contextDataPath": "marketing-description.suggestedChannels",
+              "layout": "grid",
+              "colSpan": 2
+            },
+            {
+              "tplFile": "ListTableWidget",
+              "title": "Metryki marketingowe",
+              "contextDataPath": "marketing-description.metrics",
+              "colSpan": 1
+            }
+          ]
+        }
+      },
+      {
+        "slug": "edit-industry",
+        "label": "Krok 4: Edytuj branżę",
+        "contextSchemaPath": "marketing-description",
+        "contextDataPath": "marketing-description",
+        "tplFile": "FormStep",
+        "order": 6,
+        "attrs": {
+          "title": "Edycja branży",
+          "jsonSchema": {
+            "type": "object",
+            "properties": { "industry": { "type": "string", "title": "Branża" } },
+            "required": ["industry"]
+          },
+          "submitLabel": "Zapisz"
+        }
+      },
+      {
+        "slug": "summary",
+        "label": "Krok 5: Podsumowanie",
+        "tplFile": "WidgetsStep",
+        "order": 7,
+        "saveToDB": {
+          "enabled": true,
+          "provider": "indexedDB",
+          "itemType": "project",
+          "itemTitle": "Analiza WWW - Podsumowanie",
+          "contentPath": "marketing-description"
+        },
+        "attrs": {
+          "widgets": [
+            {
+              "tplFile": "TitleWidget",
+              "title": "Wyniki analizy marketingowej",
+              "colSpan": "full"
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Analizowana strona",
+              "contextDataPath": "website-data.url",
+              "icon": "info",
+              "colSpan": 1
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Branża",
+              "contextDataPath": "marketing-description.industry",
+              "icon": "briefcase",
+              "colSpan": 1
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Grupa docelowa",
+              "contextDataPath": "marketing-description.targetAudience",
+              "icon": "star",
+              "colSpan": 1
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Opis marketingowy",
+              "contextDataPath": "marketing-description.marketingDescription",
+              "icon": "document",
+              "colSpan": "full"
+            },
+            {
+              "tplFile": "ListObjectWidget",
+              "title": "Słowa kluczowe",
+              "contextDataPath": "website-summary.keywords",
+              "layout": "grid",
+              "colSpan": 1
+            },
+            {
+              "tplFile": "ListObjectWidget",
+              "title": "Sugerowane kanały",
+              "contextDataPath": "marketing-description.suggestedChannels",
+              "layout": "grid",
+              "colSpan": 2
+            },
+            {
+              "tplFile": "ListTableWidget",
+              "title": "Metryki marketingowe",
+              "contextDataPath": "marketing-description.metrics",
+              "colSpan": "full"
+            }
+          ]
+        }
+      }
+    ]
+  }
+  
