@@ -1,6 +1,6 @@
 // src/debug/ContextDebugger.tsx
 import React, { useState, useEffect, useRef, lazy, Suspense } from "react";
-import { Database, X, List, ArrowRight, Activity, User } from "lucide-react";
+import { Database, X, List, ArrowRight, Activity, User, Globe } from "lucide-react";
 import { useFlowStore } from "../core/context";
 import JsonTreeRenderer from "./components/JsonTreeRenderer";
 import { AppConfig } from "../core/types";
@@ -10,6 +10,7 @@ import { useAuth } from "../auth/useAuth";
 const SchemaTab = lazy(() => import("./tabs/SchemaTab"));
 const LogsTab = lazy(() => import("./tabs/LogsTab"));
 const UserTab = lazy(() => import("./tabs/UserTab"));
+const FirebaseAppsTab = lazy(() => import("./tabs/FirebaseAppsTab"));
 
 // Komponent do wyświetlania ładowania
 const LoadingFallback = () => (
@@ -94,6 +95,9 @@ export const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) =>
         <div className="h-full" style={{ display: activeTab === "user" ? "block" : "none" }}>
           {loadedTabs.includes("user") && <UserTab />}
         </div>
+        <div className="h-full" style={{ display: activeTab === "firebase" ? "block" : "none" }}>
+          {loadedTabs.includes("firebase") && <FirebaseAppsTab />}
+        </div>
         <div className="h-full" style={{ display: activeTab === "schema" ? "block" : "none" }}>
           {loadedTabs.includes("schema") && <SchemaTab contextData={contextData} config={config} />}
         </div>
@@ -124,6 +128,7 @@ export const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) =>
   // Definicja przycisków zakładek
   const tabs = [
     { id: "user", label: "Użytkownik", icon: <User className="w-3.5 h-3.5 mr-1.5" />, always: true },
+    { id: "firebase", label: "Firebase", icon: <Globe className="w-3.5 h-3.5 mr-1.5" />, always: false },
     { id: "schema", label: "Schema", icon: <List className="w-3.5 h-3.5 mr-1.5" />, always: false },
     { id: "data", label: "Dane", icon: <Database className="w-3.5 h-3.5 mr-1.5" />, always: false },
     { id: "logs", label: "Logs", icon: <Activity className="w-3.5 h-3.5 mr-1.5" />, always: false }

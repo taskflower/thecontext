@@ -7,6 +7,7 @@ interface CacheState {
   components: Record<string, React.LazyExoticComponent<React.ComponentType<any>>>;
   add: (key: string, comp: React.LazyExoticComponent<React.ComponentType<any>>) => void;
 }
+
 const useComponentCache = create<CacheState>((set) => ({
   components: {},
   add: (key, comp) => set((state) => ({ components: { ...state.components, [key]: comp } })),
@@ -16,12 +17,17 @@ const useComponentCache = create<CacheState>((set) => ({
 const componentModules = import.meta.glob(
   "./themes/*/components/*.tsx"
 ) as Record<string, () => Promise<{ default: React.ComponentType<any> }>>;
+
 const layoutModules = import.meta.glob(
   "./themes/*/layouts/*.tsx"
 ) as Record<string, () => Promise<{ default: React.ComponentType<any> }>>;
-const widgetModules = import.meta.glob(
-  "./themes/*/widgets/*.tsx"
-) as Record<string, () => Promise<{ default: React.ComponentType<any> }>>;
+
+// UWAGA: Dodajemy obsługę widgetów zarówno z katalogu widgets jak i components
+const widgetModules = {
+  ...import.meta.glob("./themes/*/widgets/*.tsx"),
+  // Dodajemy też komponenty jako możliwe widgety (wiele aplikacji używa komponentów jako widgetów)
+  ...import.meta.glob("./themes/*/components/*.tsx")
+} as Record<string, () => Promise<{ default: React.ComponentType<any> }>>;
 
 function getOrLoad(
   key: string,
@@ -40,11 +46,35 @@ function resolveModule(
   subDir: string,
   file: string
 ) {
+  // Próbujemy najpierw w podanym katalogu
   const path = `./themes/${tplDir}/${subDir}/${file}.tsx`;
   if (modules[path]) return modules[path];
-  // fallback do default
+  
+  // Jeśli nie znaleziono i to jest widget, próbujemy w components
+  if (subDir === "widgets") {
+    const componentPath = `./themes/${tplDir}/components/${file}.tsx`;
+    if (modules[componentPath]) return modules[componentPath];
+  }
+  
+  // Próbujemy w default theme
   const fallback = `./themes/default/${subDir}/${file}.tsx`;
   if (modules[fallback]) return modules[fallback];
+  
+  // Jeśli to widget i nie znaleziono w default/widgets, próbujemy default/components
+  if (subDir === "widgets") {
+    const defaultComponentPath = `./themes/default/components/${file}.tsx`;
+    if (modules[defaultComponentPath]) return modules[defaultComponentPath];
+  }
+  
+  // Logujemy błąd z więcej informacji
+  console.error(`Nie znaleziono modułu: ${file} w katalogu ${subDir} dla szablonu ${tplDir}`);
+  console.error(`Sprawdzone ścieżki:`, 
+    path, 
+    subDir === "widgets" ? `./themes/${tplDir}/components/${file}.tsx` : null,
+    fallback,
+    subDir === "widgets" ? `./themes/default/components/${file}.tsx` : null
+  );
+  
   throw new Error(`Module not found: ${path}`);
 }
 
