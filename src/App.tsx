@@ -6,7 +6,7 @@ import AppLoading from './components/Loading';
 import WorkspaceOverview from './components/WorkspaceOverview';
 import ScenarioWithStep from './components/ScenarioWithStep';
 import FirebaseAppIndicator from './components/FirebaseAppIndicator';
-import { useAppConfig } from './config/useAppConfig';
+import { useAppConfig } from './useAppConfig';
 import { ContextDebugger } from './debug';
 import { ThemeProvider } from '@/themes/ThemeContext';
 

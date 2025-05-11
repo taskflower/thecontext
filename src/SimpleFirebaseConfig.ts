@@ -1,14 +1,14 @@
 // src/config/SimpleFirebaseConfig.ts
-import { AppConfig } from '../core/types';
+import { AppConfig } from './core/types';
 import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
-import { db } from '../provideDB/firebase/config';
+import { db } from './provideDB/firebase/config';
 
 /**
  * Loader konfiguracji: najpierw local, potem Firebase
  */
 export class SimpleConfigLoader {
   async loadLocalConfig(): Promise<AppConfig> {
-    const { default: config } = await import('../_configs/marketingApp/config');
+    const { default: config } = await import('./_configs/marketingApp/config');
     // Dodajemy źródło konfiguracji
     (config as any)._source = { type: 'local' };
     return config;

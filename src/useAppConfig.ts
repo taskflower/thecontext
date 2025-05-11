@@ -1,7 +1,7 @@
 // src/hooks/useAppConfig.ts
 import { useState, useEffect } from 'react';
 import { AppConfig } from '@/core/types';
-import { simpleConfigLoader } from '@/config/SimpleFirebaseConfig';
+import { simpleConfigLoader } from '@/SimpleFirebaseConfig';
 
 /**
  * Hook ładujący konfigurację aplikacji wyłącznie lokalnie,
