@@ -1,7 +1,7 @@
 // src/debug/tabs/ExporterTab.tsx
 
 import React, { useState, useMemo } from 'react';
-import { Download, CheckCircle, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Download,  RefreshCw } from 'lucide-react';
 import { AppConfig } from '../../core/types';
 import { createDatabaseProvider, SaveToDBOptions } from '@/provideDB/databaseProvider';
 

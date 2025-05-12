@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { createDatabaseProvider, DatabaseOperations } from '@/provideDB/databaseProvider';
-import { CheckCircle, AlertTriangle } from 'lucide-react';
+
 
 const FirebaseAppsTab: React.FC = () => {
   const dbProvider = useMemo<DatabaseOperations>(

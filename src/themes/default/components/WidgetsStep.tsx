@@ -6,7 +6,7 @@ import { preloadWidget } from '@/preload';
 import { WidgetsStepProps } from '@/themes/themeTypes';
 import { getColSpanClass } from '@/core/utils/themesHelpers';
 import { useTheme } from '@/themes/ThemeContext';
-import { getDatabaseProvider } from '@/provideDB/databaseProvider';
+import { getDatabaseProvider, SaveToDBOptions } from '@/provideDB/databaseProvider';
 
 // Lekki spinner dla widgetów
 const WidgetLoading: React.FC = React.memo(() => (
@@ -41,15 +41,18 @@ const WidgetContainer = React.memo(
 const WidgetsStep: React.FC<WidgetsStepProps> = React.memo(
   ({ widgets = [], onSubmit, title = 'Podsumowanie', subtitle, saveToDB, scenarioName, nodeSlug, context }) => {
     const { get } = useFlow();
-    const tplDir = useTheme();  // użycie kontekstu motywu
+    const tplDir = useTheme();
 
     const handleNext = async () => {
       if (saveToDB?.enabled && saveToDB.provider) {
         try {
-          const dbProvider = getDatabaseProvider(saveToDB.provider);
-          const contentPath = saveToDB.contentPath || '';
-          const dataToSave = contentPath ? get(contentPath) : {};
-          await dbProvider.saveData(saveToDB, dataToSave, { scenarioName, nodeSlug });
+          const dbProvider = getDatabaseProvider(saveToDB.provider, saveToDB.contentPath);
+          const dataToSave = saveToDB.contentPath ? get(saveToDB.contentPath) : {};
+          const options: SaveToDBOptions = {
+            ...saveToDB,
+            additionalInfo: { scenarioName, nodeSlug }
+          };
+          await dbProvider.saveData(options, dataToSave);
         } catch (error) {
           console.error('[WidgetsStep] Błąd podczas zapisywania do bazy:', error);
         }
