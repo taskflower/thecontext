@@ -4,7 +4,7 @@ import { useForm } from './useForm';
 import { ZodType } from 'zod';
 
 interface FieldSchema {
-  isArray: { value: any; label: string; }[] | undefined;
+  isArray?: boolean;
   type: string;
   title: string;
   description?: string;
@@ -14,6 +14,7 @@ interface FieldSchema {
   max?: number;
   step?: number;
   placeholder?: string;
+  
   // Dodatkowe meta-dane pola, pomocne przy renderowaniu
   fieldType: 'text' | 'number' | 'checkbox' | 'select' | 'textarea' | 'date' | 'email' | 'password';
 }
