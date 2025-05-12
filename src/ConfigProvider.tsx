@@ -32,6 +32,7 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const slug = (params.get('config') || 'energyGrantApp').trim();
+    // const slug = (params.get('config') || 'marketingApp').trim();
     setConfigId(slug);
 
     // Prepare import globs for JSON configs

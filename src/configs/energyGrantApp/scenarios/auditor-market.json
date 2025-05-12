@@ -52,8 +52,8 @@
         {
             "slug": "points-purchase-auditor",
             "label": "Krok 2: Zakup punktów",
-            "contextSchemaPath": "points-purchase",
-            "contextDataPath": "points-purchase",
+            "contextSchemaPath": "points-purchase-form",
+            "contextDataPath": "points-purchase-form",
             "tplFile": "FormStep",
             "order": 2,
             "attrs": {
@@ -68,10 +68,22 @@
                             "minimum": 1,
                             "maximum": 100,
                             "default": 5
+                        },
+                        "termsConsent": { 
+                            "type": "boolean", 
+                            "title": "Zapoznałem się z regulaminem giełdy i akceptuję jego warunki", 
+                            "default": false 
+                        },
+                        "paymentConsent": { 
+                            "type": "boolean", 
+                            "title": "Wyrażam zgodę na obciążenie mojego konta kwotą wynikającą z liczby zakupionych punktów", 
+                            "default": false 
                         }
                     },
                     "required": [
-                        "pointsAmount"
+                        "pointsAmount",
+                        "termsConsent",
+                        "paymentConsent"
                     ]
                 },
                 "submitLabel": "Przejdź do płatności"
@@ -86,7 +98,7 @@
             "order": 3,
             "attrs": {
                 "autoStart": true,
-                "userMessage": "Oblicz cenę za zakup punktów: {{points-purchase.pointsAmount}}. Cena to 15 PLN za punkt dla audytorów. Zwróć JSON z polem price zawierającym obliczoną cenę."
+                "userMessage": "Oblicz cenę za zakup punktów: {{points-purchase-form.pointsAmount}}. Cena to 15 PLN za punkt dla audytorów. Zwróć JSON z polami: pointsAmount (skopiuj z danych wejściowych) i price zawierającym obliczoną cenę."
             }
         },
         {

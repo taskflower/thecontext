@@ -9,8 +9,8 @@
         {
             "slug": "auditor-order-form",
             "label": "Krok 1: Formularz zapotrzebowania",
-            "contextSchemaPath": "order-request",
-            "contextDataPath": "order-request",
+            "contextSchemaPath": "order-request-form-auditor",
+            "contextDataPath": "order-request-form-auditor",
             "tplFile": "FormStep",
             "order": 0,
             "attrs": {
@@ -72,6 +72,11 @@
                         "comments": {
                             "type": "string",
                             "title": "Uwagi dodatkowe"
+                        },
+                        "authorized": {
+                            "type": "boolean",
+                            "title": "Potwierdzam, że jestem uprawniony do przekazania powyższych danych oraz wyrażam zgodę na ich przetwarzanie w celu realizacji audytu energetycznego",
+                            "default": false
                         }
                     },
                     "required": [
@@ -80,7 +85,8 @@
                         "city",
                         "phone",
                         "buildingType",
-                        "buildingArea"
+                        "buildingArea",
+                        "authorized"
                     ]
                 },
                 "submitLabel": "Opublikuj zapotrzebowanie"
@@ -95,7 +101,10 @@
             "order": 1,
             "attrs": {
                 "autoStart": true,
-                "userMessage": "Ustaw typ zlecenia na 'auditor' na podstawie danych z formularza. Zwróć JSON zawierający pole orderType o wartości 'auditor'."
+                "showResults": true,
+                "title": "Przetwarzanie danych zapotrzebowania",
+                "description": "Twoje zapotrzebowanie jest przygotowywane do publikacji...",
+                "userMessage": "Przekształć dane z formularza do formatu zapotrzebowań. Formatuj odpowiedź jako dokładny JSON z tymi polami:\n\n- orderType: zawsze \"auditor\"\n- address: skopiuj wartość z {{order-request-form-auditor.address}}\n- postalCode: skopiuj wartość z {{order-request-form-auditor.postalCode}}\n- city: skopiuj wartość z {{order-request-form-auditor.city}}\n- phone: skopiuj wartość z {{order-request-form-auditor.phone}}\n- buildingType: skopiuj wartość z {{order-request-form-auditor.buildingType}}\n- buildingArea: skopiuj wartość z {{order-request-form-auditor.buildingArea}}\n- constructionYear: skopiuj wartość z {{order-request-form-auditor.constructionYear}}\n- urgency: skopiuj wartość z {{order-request-form-auditor.urgency}}\n- comments: skopiuj wartość z {{order-request-form-auditor.comments}}\n\nZwróć tylko JSON bez dodatkowego tekstu. Upewnij się, że wszystkie pola są poprawnie skopiowane, szczególnie pola typu number i null."
             }
         },
         {
