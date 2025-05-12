@@ -1,31 +1,30 @@
 {
-    "id": "sell-gold",
-    "slug": "sell-gold",
-    "workspaceSlug": "workspace-goldsaver",
-    "name": "Sprzedaż złota",
-    "description": "Odrsprzedaż zgromadzonego złota",
-    "icon": "dollar-sign",
-    "nodes": [
-      {
-        "slug": "sell-form",
-        "label": "Formularz sprzedaży",
-        "tplFile": "FormStep",
-        "order": 0,
-        "contextSchemaPath": "sell-form",
-        "contextDataPath": "sell-form",
-        "attrs": {
-          "title": "Sprzedaj złoto",
-          "jsonSchema": {
-            "type": "object",
-            "properties": {
-              "amountGrams": { "type": "number", "title": "Ilość (g)", "minimum": 0.1 },
-              "destination": { "type": "string", "title": "Konto bankowe" }
-            },
-            "required": ["amountGrams","destination"]
+  "id": "sell-gold",
+  "slug": "sell-gold",
+  "workspaceSlug": "workspace-goldsaver",
+  "name": "Sprzedaż złota",
+  "description": "Odrsprzedaż zgromadzonego złota",
+  "icon": "dollar-sign",
+  "nodes": [
+    {
+      "slug": "sell-form",
+      "label": "Formularz sprzedaży",
+      "tplFile": "FormStep",
+      "order": 0,
+      "contextSchemaPath": "sell-form",
+      "contextDataPath": "sell-form",
+      "attrs": {
+        "title": "Sprzedaj złoto",
+        "jsonSchema": {
+          "type": "object",
+          "properties": {
+            "amountGrams": { "type": "number", "title": "Ilość (g)" },
+            "destination": { "type": "string", "title": "Konto bankowe" }
           },
-          "submitLabel": "Oblicz wartość"
-        }
+          "required": ["amountGrams","destination"]
+        },
+        "submitLabel": "Oblicz wartość"
       }
-    ]
-  }
-  
+    }
+  ]
+}
