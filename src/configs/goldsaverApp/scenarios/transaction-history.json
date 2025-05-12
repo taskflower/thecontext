@@ -1,0 +1,23 @@
+{
+    "id": "transaction-history",
+    "slug": "transaction-history",
+    "workspaceSlug": "workspace-goldsaver",
+    "name": "Historia transakcji",
+    "description": "Przeglądaj historię zakupów i sprzedaży",
+    "icon": "archive",
+    "nodes": [
+      {
+        "slug": "transactions-list",
+        "label": "Lista transakcji",
+        "tplFile": "WidgetsStep",
+        "order": 0,
+        "contextSchemaPath": "account.transactions",
+        "contextDataPath": "account.transactions",
+        "attrs": {
+          "widgets": [
+            { "tplFile": "TransactionsWidget", "title": "Transakcje", "contextDataPath": "account.transactions", "colSpan": "full" }
+          ]
+        }
+      }
+    ]
+  }

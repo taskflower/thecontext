@@ -1,0 +1,94 @@
+{
+    "id": "workspace-goldsaver",
+    "slug": "workspace-goldsaver",
+    "name": "GoldSaver",
+    "description": "Panel użytkownika GoldSaver",
+    "icon": "home",
+    "templateSettings": {
+      "layoutFile": "Dashboard",
+      "widgets": [
+        {
+          "tplFile": "InfoWidget",
+          "title": "Witaj w GoldSaver",
+          "data": "Zarabiaj na oszczędnościach w złocie. Wybierz opcję z menu, aby zacząć.",
+          "icon": "info",
+          "colSpan": "full"
+        },
+        {
+          "tplFile": "ScenarioListWidget",
+          "title": "Opcje",
+          "colSpan": "full"
+        }
+      ]
+    },
+    "contextSchema": {
+      "type": "object",
+      "properties": {
+        "user-data": {
+          "type": "object",
+          "properties": {
+            "role": { "type": "string", "enum": ["user"] }
+          }
+        },
+        "account": {
+          "type": "object",
+          "properties": {
+            "balance": { "type": "number" },
+            "transactions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "date": { "type": "string" },
+                  "type": { "type": "string" },
+                  "amount": { "type": "number" }
+                }
+              }
+            },
+            "bars": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "weight": { "type": "number" },
+                  "status": { "type": "string" }
+                }
+              }
+            },
+            "invoices": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "number": { "type": "string" },
+                  "date": { "type": "string" },
+                  "url": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "purchase-form": {
+          "type": "object",
+          "properties": {
+            "amountGrams": { "type": "number" },
+            "paymentMethod": { "type": "string" },
+            "price": { "type": "number" }
+          }
+        },
+        "analytics": {
+          "type": "object",
+          "properties": {
+            "balanceHistory": { "type": "array", "items": { "type": "object", "properties": { "date": { "type": "string" }, "value": { "type": "number" } } } },
+            "profitHistory": { "type": "array", "items": { "type": "object", "properties": { "date": { "type": "string" }, "profit": { "type": "number" } } } }
+          }
+        },
+        "exchange-form": { "type": "object", "properties": { "barId": { "type": "string" }, "coinType": { "type": "string" } } },
+        "sell-form": { "type": "object", "properties": { "amountGrams": { "type": "number" }, "destination": { "type": "string" } } },
+        "support": { "type": "object", "properties": { "messages": { "type": "array", "items": { "type": "object" } } } }
+      }
+    }
+  }

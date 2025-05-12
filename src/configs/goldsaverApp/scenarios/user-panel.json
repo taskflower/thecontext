@@ -1,0 +1,24 @@
+{
+    "id": "user-panel",
+    "slug": "user-panel",
+    "workspaceSlug": "workspace-goldsaver",
+    "name": "Panel użytkownika",
+    "description": "Przegląd stanu konta, salda i najnowszych operacji",
+    "icon": "user",
+    "nodes": [
+      {
+        "slug": "overview",
+        "label": "Podsumowanie",
+        "contextSchemaPath": "user-data",
+        "contextDataPath": "user-data",
+        "tplFile": "WidgetsStep",
+        "order": 0,
+        "attrs": {
+          "widgets": [
+            { "tplFile": "BalanceWidget", "title": "Stan konta", "contextDataPath": "account.balance", "colSpan": "full" },
+            { "tplFile": "RecentTransactionsWidget", "title": "Ostatnie transakcje", "contextDataPath": "account.transactions", "colSpan": "full" }
+          ]
+        }
+      }
+    ]
+  }

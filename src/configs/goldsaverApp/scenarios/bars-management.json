@@ -1,0 +1,23 @@
+{
+    "id": "bars-management",
+    "slug": "bars-management",
+    "workspaceSlug": "workspace-goldsaver",
+    "name": "Zarządzanie sztabkami",
+    "description": "Odbiór, przechowywanie i odsprzedaż sztabek",
+    "icon": "archive",
+    "nodes": [
+      {
+        "slug": "bars-list",
+        "label": "Moje sztabki",
+        "tplFile": "WidgetsStep",
+        "order": 0,
+        "contextSchemaPath": "account.bars",
+        "contextDataPath": "account.bars",
+        "attrs": {
+          "widgets": [
+            { "tplFile": "BarsWidget", "title": "Sztabki", "contextDataPath": "account.bars", "colSpan": "full" }
+          ]
+        }
+      }
+    ]
+  }

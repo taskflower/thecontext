@@ -1,0 +1,23 @@
+{
+    "id": "support-center",
+    "slug": "support-center",
+    "workspaceSlug": "workspace-goldsaver",
+    "name": "Centrum wsparcia",
+    "description": "Pomoc i obsługa klienta",
+    "icon": "help-circle",
+    "nodes": [
+      {
+        "slug": "support-chat",
+        "label": "Chat z obsługą",
+        "tplFile": "WidgetsStep",
+        "order": 0,
+        "contextSchemaPath": "support.messages",
+        "contextDataPath": "support.messages",
+        "attrs": {
+          "widgets": [
+            { "tplFile": "ChatWidget", "title": "Wsparcie", "colSpan": "full" }
+          ]
+        }
+      }
+    ]
+  }
