@@ -1,0 +1,17 @@
+{
+    "name": "Program Dotacji Energetycznych",
+    "description": "Platforma łącząca beneficjentów, wykonawców i audytorów w programie dotacji energetycznych",
+    "tplDir": "energygrant",
+    "workspaces": [
+      { "id": "workspace-energygrant" }
+    ],
+    "scenarios": [
+      { "id": "contact-operator" },
+      { "id": "find-contractor" },
+      { "id": "contractor-market" },
+      { "id": "find-auditor" },
+      { "id": "auditor-market" },
+      { "id": "beneficiary-orders" },
+      { "id": "portfolio" }
+    ]
+  }

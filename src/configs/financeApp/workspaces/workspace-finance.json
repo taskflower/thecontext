@@ -1,0 +1,78 @@
+
+{
+    "id": "workspace-finance",
+    "slug": "workspace-finance",
+    "name": "Finanse Projektu",
+    "description": "Zbieranie i analiza danych finansowych",
+    "icon": "briefcase",
+    "templateSettings": {
+      "layoutFile": "Simple",
+      "widgets": [
+        {
+          "tplFile": "ScenarioListWidget",
+          "title": "Dostępne scenariusze",
+          "colSpan": "full"
+        }
+      ]
+    },
+    "contextSchema": {
+      "type": "object",
+      "properties": {
+        "financial-data": {
+          "type": "object",
+          "properties": {
+            "revenue": {
+              "type": "number",
+              "title": "Przychody (PLN)"
+            },
+            "costs": {
+              "type": "number",
+              "title": "Koszty (PLN)"
+            }
+          },
+          "required": ["revenue", "costs"]
+        },
+        "productSuggestion": {
+          "type": "object",
+          "properties": {
+            "budgetFit": {
+              "type": "string",
+              "description": "Ocena dopasowania do budżetu"
+            },
+            "roi": {
+              "type": "number",
+              "description": "Procent zwrotu z inwestycji"
+            },
+            "profits": {
+              "type": "number",
+              "description": "Zysk w PLN"
+            },
+            "investment": {
+              "type": "number",
+              "description": "Wartość inwestycji w PLN"
+            },
+            "recommendations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" },
+                  "description": { "type": "string" },
+                  "icon": { "type": "string" },
+                  "value": { "type": "string" }
+                },
+                "required": ["id", "name", "description"]
+              }
+            }
+          },
+          "required": ["budgetFit", "roi", "profits", "investment", "recommendations"]
+        },
+        "summary-data": {
+          "type": "object",
+          "properties": {}
+        }
+      }
+    }
+  }
+  

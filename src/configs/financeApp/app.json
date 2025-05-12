@@ -1,0 +1,15 @@
+{
+    "name": "Analiza Finansowa - test",
+    "description": "Prosta analiza finansowa projektu",
+    "tplDir": "default",
+    "workspaces": [
+        {
+            "id": "workspace-finance"
+        }
+    ],
+    "scenarios": [
+        {
+            "id": "scenario-roi"
+        }
+    ]
+}

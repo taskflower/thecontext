@@ -1,0 +1,90 @@
+
+{
+    "id":"beneficiary-orders",
+    "slug":"beneficiary-orders",
+    "workspaceSlug":"workspace-energygrant",
+    "name":"Panel Zleceń Beneficjenta",
+    "description":"Zarządzaj swoimi zleceniami, przeglądaj oferty i wystawiaj opinie",
+    "icon":"folder",
+    "nodes":[
+      {
+        "slug":"orders-listing",
+        "label":"Lista zleceń",
+        "contextSchemaPath":"beneficiary-orders",
+        "contextDataPath":"beneficiary-orders",
+        "tplFile":"LlmStep",
+        "order":0,
+        "attrs":{
+          "autoStart":true,
+          "userMessage":"Wygeneruj przykładową listę zleceń dla beneficjenta. Zwróć JSON z polem 'orders' zawierającym tablicę 4 obiektów, każdy z polami: id (string), type (enum: 'contractor' lub 'auditor'), status (enum: 'active','in_progress','completed'), created (string w formacie daty), scope (string z opisem zakresu prac lub typu audytu), offers (tablica obiektów zawierających pola: id, providerId, providerName, price, description, isAccepted)."
+        }
+      },
+      {
+        "slug":"orders-dashboard",
+        "label":"Przegląd zleceń",
+        "contextSchemaPath":"beneficiary-orders",
+        "contextDataPath":"beneficiary-orders",
+        "tplFile":"WidgetsStep",
+        "order":1,
+        "attrs":{
+          "widgets":[
+            { "tplFile":"TitleWidget","title":"Panel zleceń","subtitle":"Przeglądaj swoje zlecenia, oferty wykonawców i audytorów","colSpan":"full" },
+            { "tplFile":"OrdersTabsWidget","contextDataPath":"beneficiary-orders.orders","colSpan":"full" }
+          ]
+        }
+      },
+      {
+        "slug":"order-details",
+        "label":"Szczegóły zlecenia",
+        "contextSchemaPath":"beneficiary-orders",
+        "contextDataPath":"beneficiary-orders",
+        "tplFile":"WidgetsStep",
+        "order":2,
+        "attrs":{
+          "widgets":[
+            { "tplFile":"TitleWidget","title":"Szczegóły zlecenia","subtitle":"Przeglądaj szczegóły zlecenia i oferty","colSpan":"full" },
+            { "tplFile":"OrderDetailsFullWidget","contextDataPath":"beneficiary-orders.orders[0]","colSpan":"full" }
+          ]
+        }
+      },
+      {
+        "slug":"order-rating",
+        "label":"Ocena realizacji",
+        "contextSchemaPath":"order-rating",
+        "contextDataPath":"order-rating",
+        "tplFile":"FormStep",
+        "order":3,
+        "attrs":{
+          "title":"Ocena realizacji zlecenia",
+          "description":"Podziel się swoją opinią na temat realizacji zlecenia",
+          "jsonSchema":{
+            "type":"object",
+            "properties":{
+              "rating":{ "type":"number","title":"Ocena (1-5)","minimum":1,"maximum":5 },
+              "comment":{ "type":"string","title":"Komentarz","description":"Opisz swoje doświadczenia z realizacją zlecenia" },
+              "recommendationLevel":{ "type":"string","title":"Poziom rekomendacji","enum":["Zdecydowanie polecam","Raczej polecam","Neutralnie","Raczej nie polecam","Zdecydowanie nie polecam"] },
+              "publicReview":{ "type":"boolean","title":"Zgadzam się na publikację tej opinii" }
+            },
+            "required":["rating","recommendationLevel","publicReview"]
+          },
+          "submitLabel":"Zapisz opinię"
+        }
+      },
+      {
+        "slug":"rating-confirmation",
+        "label":"Potwierdzenie oceny",
+        "contextSchemaPath":"order-rating",
+        "contextDataPath":"order-rating",
+        "tplFile":"WidgetsStep",
+        "order":4,
+        "attrs":{
+          "widgets":[
+            { "tplFile":"TitleWidget","title":"Dziękujemy za Twoją opinię","subtitle":"Twoja opinia pomoże innym beneficjentom w wyborze odpowiedniego wykonawcy lub audytora","colSpan":"full" },
+            { "tplFile":"RatingDisplayWidget","contextDataPath":"order-rating","colSpan":"full" },
+            { "tplFile":"OrdersTabsWidget","contextDataPath":"beneficiary-orders.orders","colSpan":"full" }
+          ]
+        }
+      }
+    ]
+  }
+  
