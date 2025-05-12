@@ -30,7 +30,7 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
   } = useFormSchema({ schema, jsonSchema, initialData: data });
 
   // Tymczasowe przechowywanie nowego tagu przed dodaniem do listy
-  const [newTag, setNewTag] = useState("");
+  const [, setNewTag] = useState("");
 
   useEffect(() => {
     console.log(`[FormStep:${nodeSlug}] formData:`, formData);
