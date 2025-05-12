@@ -1,9 +1,10 @@
 // src/components/WorkspaceOverview.tsx
-import { Suspense, useMemo } from "react";
+import React, { Suspense, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { preloadComponent, preloadLayout } from "../preload";
 import { Loading } from ".";
 import { AppConfig } from "@/core";
+import { ThemeProvider } from "../themes/ThemeContext";
 
 const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
   const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
@@ -58,22 +59,23 @@ const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
   );
 
   return (
-    <Suspense fallback={<Loading message="Ładowanie workspace..." />}>
-      <AppLayout>
-        <Suspense fallback={<Loading message="Ładowanie widgetów..." />}>
-          <WidgetsStep
-            widgets={widgets}
-            onSubmit={() => {}}
-            title={workspace.name}
-            subtitle={workspace.description}
-            // Nie przekazujemy saveToDB, scenarioName ani nodeSlug, aby komponent wiedział, że jest używany w kontekście workspace
-            saveToDB={null}
-            scenarioName={null}
-            nodeSlug={null}
-          />
-        </Suspense>
-      </AppLayout>
-    </Suspense>
+    <ThemeProvider value={tplDir}>
+      <Suspense fallback={<Loading message="Ładowanie workspace..." />}>
+        <AppLayout>
+          <Suspense fallback={<Loading message="Ładowanie widgetów..." />}>
+            <WidgetsStep
+              widgets={widgets}
+              onSubmit={() => {}}
+              title={workspace.name}
+              subtitle={workspace.description}
+              saveToDB={null}
+              scenarioName={null}
+              nodeSlug={null}
+            />
+          </Suspense>
+        </AppLayout>
+      </Suspense>
+    </ThemeProvider>
   );
 };
 

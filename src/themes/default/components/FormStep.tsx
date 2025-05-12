@@ -173,7 +173,7 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
   };
 
   return (
-    <div className="pt-6">
+    <div className="pt-6">DEFAULT
       <h2 className="text-xl text-gray-900 mb-3">{title}</h2>
 
       {description && (

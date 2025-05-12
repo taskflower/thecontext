@@ -73,12 +73,10 @@ export const preloadLayout = (tplDir: string, layoutFile: string) => {
 };
 
 export const preloadWidget = (tplDir: string, widgetFile: string) => {
-  // Debug: log incoming tplDir
-  console.log(`[FlowApp] preloadWidget called with tplDir=${tplDir}, widgetFile=${widgetFile}`);
   const key = `widget:${tplDir}/${widgetFile}`;
-  if (!useComponentCache.getState().components[key]) {
-    console.log(`[FlowApp] Ładowanie widgetu: ${widgetFile}`);
-  }
-  const loader = () => resolveModule(widgetModules, tplDir, "widgets", widgetFile)();
-  return getOrLoad(key, loader);
+  return getOrLoad(key, () =>
+    // najpierw próba załadowania z katalogu tplDir, 
+    // jeśli nie ma – fallback do default
+    resolveModule(widgetModules, tplDir, "widgets", widgetFile)()
+  );
 };

@@ -4,6 +4,7 @@ import { useParams, Navigate } from "react-router-dom";
 import { preloadLayout } from "@/preload";
 import { Loading } from ".";
 import { AppConfig, FlowEngine } from "@/core";
+import { ThemeProvider } from "@/themes/ThemeContext";
 
 const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
   const {
@@ -38,7 +39,6 @@ const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
   );
   if (!scenario) return <div>Scenariusz nie znaleziony</div>;
 
-  // Utworzenie kontekstu z informacjami o bieżącym kroku i całkowitej liczbie kroków
   const layoutContext = {
     workspace,
     scenario,
@@ -47,17 +47,17 @@ const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
   };
 
   return (
-    <AppLayout
-      context={layoutContext}
-    >
-      <Suspense fallback={<Loading message="Ładowanie kroku..." />}>
-        <FlowEngine
-          config={config}
-          scenarioSlug={scenarioSlug}
-          stepIdx={stepIdx}
-        />
-      </Suspense>
-    </AppLayout>
+    <ThemeProvider value={tpl}>
+      <AppLayout context={layoutContext}>
+        <Suspense fallback={<Loading message="Ładowanie kroku..." />}>
+          <FlowEngine
+            config={config}
+            scenarioSlug={scenarioSlug}
+            stepIdx={stepIdx}
+          />
+        </Suspense>
+      </AppLayout>
+    </ThemeProvider>
   );
 };
 
