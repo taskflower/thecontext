@@ -4,6 +4,7 @@ import { useForm } from './useForm';
 import { ZodType } from 'zod';
 
 interface FieldSchema {
+  isArray: { value: any; label: string; }[] | undefined;
   type: string;
   title: string;
   description?: string;

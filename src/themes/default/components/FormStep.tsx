@@ -1,6 +1,6 @@
 // src/themes/default/components/FormStep.tsx
 import { TemplateComponentProps, useFormSchema } from "@/core";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 interface EnhancedFormStepProps extends TemplateComponentProps {
   jsonSchema?: any;
@@ -18,7 +18,7 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
   title = "Formularz",
   description,
   submitLabel = "Dalej",
-  nodeSlug, // Dodane, żeby wiedzieć, który node generuje błędy
+  nodeSlug,
 }) => {
   const {
     formData,
@@ -29,7 +29,9 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
     hasRequiredFields,
   } = useFormSchema({ schema, jsonSchema, initialData: data });
 
-  // Dodane szczegółowe logi diagnostyczne
+  // Tymczasowe przechowywanie nowego tagu przed dodaniem do listy
+  const [newTag, setNewTag] = useState("");
+
   useEffect(() => {
     console.log(`[FormStep:${nodeSlug}] formData:`, formData);
     console.log(`[FormStep:${nodeSlug}] errors:`, errors);
@@ -50,6 +52,29 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
     }
   };
 
+  // Funkcja obsługująca dodawanie tagów
+  const handleAddTag = (fieldName: string, tag: string) => {
+    if (!tag.trim()) return;
+    
+    // Upewnij się, że formData[fieldName] jest tablicą
+    const currentTags = Array.isArray(formData[fieldName]) ? formData[fieldName] : [];
+    
+    // Dodaj tag tylko jeśli nie istnieje już w tablicy
+    if (!currentTags.includes(tag)) {
+      const updatedTags = [...currentTags, tag];
+      handleChange(fieldName, updatedTags);
+    }
+    
+    setNewTag("");
+  };
+
+  // Funkcja obsługująca usuwanie tagów
+  const handleRemoveTag = (fieldName: string, tagToRemove: string) => {
+    const currentTags = Array.isArray(formData[fieldName]) ? formData[fieldName] : [];
+    const updatedTags = currentTags.filter(tag => tag !== tagToRemove);
+    handleChange(fieldName, updatedTags);
+  };
+
   const renderField = (fieldName: string) => {
     const fieldSchema = fieldSchemas[fieldName];
     if (!fieldSchema) return null;
@@ -57,6 +82,58 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
     const { fieldType, title, required, description, options } = fieldSchema;
     const fieldValue = formData[fieldName];
     const fieldError = errors[fieldName];
+
+    // Specjalna obsługa pola typu array (tags/multi-select)
+    if (fieldSchema.isArray && options) {
+      return (
+        <div key={fieldName} className="my-4 space-y-2">
+          <label className="text-sm font-semibold text-gray-900">
+            {title} {required && <span className="text-red-500">*</span>}
+          </label>
+          {description && <p className="text-sm text-gray-500">{description}</p>}
+          
+          <div className="flex flex-wrap gap-2 mb-2">
+            {Array.isArray(fieldValue) && fieldValue.map((tag) => (
+              <span 
+                key={tag} 
+                className="bg-gray-200 text-gray-800 text-sm px-2 py-1 rounded-full flex items-center"
+              >
+                {tag}
+                <button
+                  type="button"
+                  className="ml-1 text-gray-500 hover:text-gray-700"
+                  onClick={() => handleRemoveTag(fieldName, tag)}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+          
+          <div className="flex">
+            <select
+              value=""
+              onChange={(e) => {
+                if (e.target.value) {
+                  handleAddTag(fieldName, e.target.value);
+                  e.target.value = ""; // Reset select po dodaniu
+                }
+              }}
+              className="w-full border rounded-l border-gray-200 px-3 py-2 text-sm hover:border-gray-300 focus:outline-none"
+            >
+              <option value="">-- Wybierz usługę --</option>
+              {options.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          {fieldError && <p className="text-red-500 text-xs">{fieldError}</p>}
+        </div>
+      );
+    }
 
     return (
       <div key={fieldName} className="my-4 space-y-2">

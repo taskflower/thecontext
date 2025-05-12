@@ -38,8 +38,8 @@
     {
       "slug": "contractor-order-preset",
       "label": "Ustawienie typu zlecenia",
-      "contextSchemaPath": "order-request",
-      "contextDataPath": "order-request",
+      "contextSchemaPath": "order-request-contractor",
+      "contextDataPath": "order-request-contractor",
       "tplFile": "LlmStep",
       "order": 1,
       "attrs": {
@@ -47,14 +47,14 @@
         "showResults": true,
         "title": "Przetwarzanie danych zlecenia",
         "description": "Twoje zlecenie jest przygotowywane do publikacji...",
-        "userMessage": "Przekształć dane z formularza do formatu zleceń. Formatuj odpowiedź jako dokładny JSON z tymi polami:\n\n- orderType: zawsze \"contractor\"\n- address: skopiuj wartość z {{order-request-form-contractor.address}}\n- postalCode: skopiuj wartość z {{order-request-form-contractor.postalCode}}\n- city: skopiuj wartość z {{order-request-form-contractor.city}}\n- phone: skopiuj wartość z {{order-request-form-contractor.phone}}\n- scope: skopiuj wartość z {{order-request-form-contractor.scope}}\n- scopeDescription: skopiuj wartość z {{order-request-form-contractor.scopeDescription}}\n- hasAudit: skopiuj wartość z {{order-request-form-contractor.hasAudit}}\n- auditFile: skopiuj wartość z {{order-request-form-contractor.auditFile}}\n- comments: skopiuj wartość z {{order-request-form-contractor.comments}}\n\nZwróć tylko JSON bez dodatkowego tekstu. Upewnij się, że wszystkie pola są poprawnie skopiowane, szczególnie pola typu boolean i null."
+        "userMessage": "Utwórz obiekt zlecenia z typem \"contractor\" na podstawie danych formularza:\n\n```json\n{{order-request-form-contractor}}\n```\n\nZwróć JSON z poniższymi polami. Po prostu ustaw orderType=\"contractor\" i skopiuj pozostałe wartości z formularza.\n\n- orderType: zawsze \"contractor\"\n- address: skopiuj z formularza\n- postalCode: skopiuj z formularza\n- city: skopiuj z formularza\n- phone: skopiuj z formularza\n- scope: skopiuj z formularza\n- scopeDescription: skopiuj z formularza\n- hasAudit: skopiuj wartość boolean z formularza\n- auditFile: skopiuj z formularza\n- comments: skopiuj z formularza\n\nZwróć tylko czysty JSON, bez komentarzy."
       }
     },
     {
       "slug": "contractor-order-summary",
       "label": "Krok 2: Podsumowanie zlecenia",
-      "contextSchemaPath": "order-request",
-      "contextDataPath": "order-request",
+      "contextSchemaPath": "order-request-contractor",
+      "contextDataPath": "order-request-contractor",
       "tplFile": "WidgetsStep",
       "order": 2,
       "saveToDB": {
@@ -62,15 +62,15 @@
         "provider": "indexedDB",
         "itemType": "order",
         "itemTitle": "Zlecenie dla wykonawcy",
-        "contentPath": "order-request"
+        "contentPath": "order-request-contractor"
       },
       "attrs": {
         "widgets": [
           { "tplFile": "TitleWidget", "title": "Zlecenie zostało opublikowane", "subtitle": "Twoje zlecenie jest już widoczne na giełdzie wykonawców. Zainteresowani wykonawcy będą mogli się z Tobą skontaktować.", "colSpan": "full" },
-          { "tplFile": "InfoWidget", "title": "Lokalizacja", "contextDataPath": "order-request.city", "icon": "map-pin", "colSpan": 1 },
-          { "tplFile": "InfoWidget", "title": "Zakres prac", "contextDataPath": "order-request.scope", "icon": "tool", "colSpan": 1 },
-          { "tplFile": "InfoWidget", "title": "Audyt energetyczny", "data": "{{order-request.hasAudit ? 'Załączony' : 'Brak'}}", "icon": "file-text", "colSpan": 1 },
-          { "tplFile": "OrderDetailsWidget", "contextDataPath": "order-request", "colSpan": "full" }
+          { "tplFile": "InfoWidget", "title": "Lokalizacja", "contextDataPath": "order-request-contractor.city", "icon": "map-pin", "colSpan": 1 },
+          { "tplFile": "InfoWidget", "title": "Zakres prac", "contextDataPath": "order-request-contractor.scope", "icon": "tool", "colSpan": 1 },
+          { "tplFile": "InfoWidget", "title": "Audyt energetyczny", "data": "{{order-request-contractor.hasAudit ? 'Załączony' : 'Brak'}}", "icon": "file-text", "colSpan": 1 },
+          { "tplFile": "OrderDetailsWidget", "contextDataPath": "order-request-contractor", "colSpan": "full" }
         ]
       }
     }
