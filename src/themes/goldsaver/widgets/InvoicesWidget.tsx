@@ -4,7 +4,7 @@ import { Download, FileText, FileDown } from 'lucide-react';
 export default function InvoicesWidget({ data = [] }: { data: any[] }) {
   // Grupowanie faktur po miesiącach
   const groupInvoicesByMonth = () => {
-    const groups: Record<string, any[]> = {};
+    const groups: Record<string, { label: string; invoices: any[] }> = {};
     
     if (!data || data.length === 0) return groups;
     

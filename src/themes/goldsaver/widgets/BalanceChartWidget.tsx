@@ -1,6 +1,15 @@
 // src/themes/goldsaver/widgets/BalanceChartWidget.tsx
 import { useState } from 'react';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Line, LineChart, ReferenceLine } from 'recharts';
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  ReferenceLine,
+} from 'recharts';
 
 export default function BalanceChartWidget({ data = [] }: { data: any[] }) {
   const [timeRange, setTimeRange] = useState('month'); // 'week', 'month', 'year', 'all'
@@ -22,7 +31,7 @@ export default function BalanceChartWidget({ data = [] }: { data: any[] }) {
   
   // Funkcja generująca przykładowe dane, gdy faktyczne nie są dostępne
   const generateMockData = () => {
-    const mockData = [];
+    const mockData: { date: string; value: number }[] = [];
     const now = new Date();
     
     for (let i = 30; i >= 0; i--) {
@@ -40,7 +49,7 @@ export default function BalanceChartWidget({ data = [] }: { data: any[] }) {
       
       mockData.push({
         date: formattedDate,
-        value: baseValue + randomFactor
+        value: baseValue + randomFactor,
       });
     }
     
@@ -60,7 +69,7 @@ export default function BalanceChartWidget({ data = [] }: { data: any[] }) {
               { label: 'T', value: 'week', tooltip: 'Tydzień' },
               { label: 'M', value: 'month', tooltip: 'Miesiąc' },
               { label: 'R', value: 'year', tooltip: 'Rok' },
-              { label: 'C', value: 'all', tooltip: 'Cały okres' }
+              { label: 'C', value: 'all', tooltip: 'Cały okres' },
             ].map(option => (
               <button
                 key={option.value}
@@ -87,6 +96,7 @@ export default function BalanceChartWidget({ data = [] }: { data: any[] }) {
                   <stop offset="95%" stopColor="#FCD34D" stopOpacity={0}/>
                 </linearGradient>
               </defs>
+              
               <XAxis 
                 dataKey="date" 
                 tick={{ fontSize: 12 }} 
@@ -102,6 +112,7 @@ export default function BalanceChartWidget({ data = [] }: { data: any[] }) {
               />
               <CartesianGrid vertical={false} stroke="#E5E7EB" strokeDasharray="3 3" />
               <ReferenceLine y={0} stroke="#9CA3AF" strokeWidth={1} strokeDasharray="3 3" />
+              
               <Tooltip 
                 formatter={(value: number) => [`${value.toLocaleString('pl-PL')} PLN`, value >= 0 ? 'Zysk' : 'Strata']}
                 labelFormatter={(label) => `Data: ${label}`}
@@ -113,13 +124,14 @@ export default function BalanceChartWidget({ data = [] }: { data: any[] }) {
                   borderColor: '#E5E7EB'
                 }}
               />
-              <Line 
-                type="monotone" 
-                dataKey="profit" 
-                stroke="#0EA5E9"
+              
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke="#FCD34D"
+                fill="url(#colorValue)"
                 strokeWidth={2}
-                dot={{ r: 1 }}
-                activeDot={{ r: 5, strokeWidth: 0 }}
+                dot={false}
               />
             </AreaChart>
           </ResponsiveContainer>

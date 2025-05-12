@@ -136,7 +136,7 @@ export default function ProfitChartWidget({ data = [] }: { data: any[] }) {
     };
   };
 
-  const stats = calculateStats();
+  const stats:any = calculateStats();
   const isProfitable = stats.totalProfit >= 0;
 
   // Formatowanie liczb do wyświetlenia
