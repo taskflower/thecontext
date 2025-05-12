@@ -1,4 +1,5 @@
 // src/debug/tabs/ExporterTab.tsx
+
 import React, { useState, useMemo } from 'react';
 import { Download, CheckCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 import { AppConfig } from '../../core/types';
@@ -13,7 +14,10 @@ type ExportStatus = 'idle' | 'exporting' | 'success' | 'error';
 const ExporterTab: React.FC<ExporterTabProps> = ({ config }) => {
   const [status, setStatus] = useState<ExportStatus>('idle');
   const [logs, setLogs] = useState<string[]>([]);
-  const dbProvider = useMemo(() => createDatabaseProvider('firebase'), []);
+  const dbProvider = useMemo(
+    () => createDatabaseProvider('firebase', 'application_configs'),
+    []
+  );
 
   const addLog = (message: string) => {
     setLogs(prev => [...prev, message]);
@@ -35,8 +39,10 @@ const ExporterTab: React.FC<ExporterTabProps> = ({ config }) => {
 
       const options: SaveToDBOptions = {
         enabled: true,
+        provider: 'firebase',
         itemType: 'project',
         itemTitle: config.name,
+        contentPath: 'application_configs',
         additionalInfo: { workspacesCount, scenariosCount, nodesCount }
       };
       await dbProvider.saveData(options, config);
@@ -53,14 +59,10 @@ const ExporterTab: React.FC<ExporterTabProps> = ({ config }) => {
   return (
     <div className="h-full overflow-auto p-4">
       <div className="bg-white rounded-md shadow-sm border border-gray-200 overflow-hidden">
-        {/* Nagłówek */}
         <div className="p-4 bg-gray-50 border-b border-gray-200">
           <h3 className="text-sm font-semibold text-gray-800">Eksporter konfiguracji</h3>
-          <p className="text-xs text-gray-600 mt-1">
-            Zapisuje konfigurację aplikacji do Firestore.
-          </p>
+          <p className="text-xs text-gray-600 mt-1">Zapisuje konfigurację aplikacji do Firestore.</p>
         </div>
-        {/* Przycisk */}
         <div className="p-4 border-b border-gray-200">
           <button
             onClick={exportConfig}
@@ -72,33 +74,17 @@ const ExporterTab: React.FC<ExporterTabProps> = ({ config }) => {
             }`}
           >
             {status === 'exporting' ? (
-              <>
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Zapisywanie...
-              </>
+              <><RefreshCw className="h-4 w-4 mr-2 animate-spin" />Zapisywanie...</>
             ) : (
-              <>
-                <Download className="h-4 w-4 mr-2" />
-                Zapisz konfigurację
-              </>
+              <><Download className="h-4 w-4 mr-2" />Zapisz konfigurację</>
             )}
           </button>
         </div>
-        {/* Logi */}
         {logs.length > 0 && (
           <div className="p-4 border-b border-gray-200">
-            <h3 className="text-xs font-semibold text-gray-700 mb-2 flex items-center">
-              <span>Logi</span>
-              {status === 'success' && <CheckCircle className="w-3 h-3 ml-1.5 text-green-600" />}
-              {status === 'error'   && <AlertTriangle className="w-3 h-3 ml-1.5 text-red-600" />}
-            </h3>
-            <div
-              id="logs-container"
-              className="bg-gray-900 text-gray-200 p-2 rounded h-40 overflow-y-auto text-xs font-mono"
-            >
-              {logs.map((log, i) => (
-                <div key={i} className="mb-1 leading-tight">{log}</div>
-              ))}
+            <h3 className="text-xs font-semibold text-gray-700 mb-2 flex items-center">Logi</h3>
+            <div id="logs-container" className="bg-gray-900 text-gray-200 p-2 rounded h-40 overflow-y-auto text-xs font-mono">
+              {logs.map((log, i) => <div key={i} className="mb-1 leading-tight">{log}</div>)}
             </div>
           </div>
         )}

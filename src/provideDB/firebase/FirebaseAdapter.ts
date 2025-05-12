@@ -1,42 +1,43 @@
 // src/provideDB/firebase/FirebaseAdapter.ts
+
 import { DatabaseOperations, SaveToDBOptions } from '../databaseProvider';
 import { FirebaseProvider } from './FirebaseProvider';
 import { FirestoreItem } from './FirebaseRepository';
 
 export class FirebaseAdapter implements DatabaseOperations {
-  private provider = new FirebaseProvider();
+  private collectionPath: string;
 
-  async saveData(
-    options: SaveToDBOptions,
-    data: any
-  ): Promise<void> {
-    if (!options.enabled) return;
-
-    // Budujemy meta tylko z wartościami, które są zdefiniowane
-    const meta: Partial<FirestoreItem> = {
-      type: options.itemType,
-      title: options.itemTitle
-    };
-    if (options.itemId) {
-      meta.id = options.itemId;
-    }
-    if (options.additionalInfo) {
-      meta.additionalInfo = options.additionalInfo;
-    }
-
-    // payload to nasz główny obiekt
-    await this.provider.save(data, meta as Omit<FirestoreItem, 'payload'> & { payload?: any });
+  constructor(collectionPath: string = 'items') {
+    this.collectionPath = collectionPath;
   }
 
+  async saveData(options: SaveToDBOptions, data: any): Promise<void> {
+    if (!options.enabled) return;
+    const provider = new FirebaseProvider(this.collectionPath);
+
+    // Upewniamy się, że typ dokumentu odpowiada interfejsowi
+    const docToSave: Omit<FirestoreItem, 'id'> = {
+      payload: data,
+      // dodatkowe pola jeśli zdefiniowane
+      ...(options.itemType ? { type: options.itemType } : {}),
+      ...(options.itemTitle ? { title: options.itemTitle } : {}),
+      ...(options.additionalInfo ? { additionalInfo: options.additionalInfo } : {})
+    };
+
+    await provider.save(docToSave);
+  }
   async retrieveData(id: string): Promise<any> {
-    return await this.provider.retrieve(id);
+    const provider = new FirebaseProvider(this.collectionPath);
+    return await provider.get(id);
   }
 
   async listItems(itemType?: string): Promise<any[]> {
-    return await this.provider.list(itemType);
+    const provider = new FirebaseProvider(this.collectionPath);
+    return await provider.list(itemType);
   }
 
   async deleteItem(id: string): Promise<void> {
-    await this.provider.delete(id);
+    const provider = new FirebaseProvider(this.collectionPath);
+    await provider.delete(id);
   }
 }

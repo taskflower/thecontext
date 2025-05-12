@@ -1,24 +1,28 @@
 // src/provideDB/firebase/FirebaseProvider.ts
 
-import { AppRepository, FirestoreItem } from './FirebaseRepository';
+import { FirestoreItem } from './FirebaseRepository';
+import { AppRepository } from './FirebaseRepository';
 
 export class FirebaseProvider {
-  private repository = new AppRepository('items');
+  private repo: AppRepository;
 
-  async save(data: any, options: Omit<FirestoreItem, 'payload'> & { payload?: any }): Promise<void> {
-    // Tworzymy doc z opcjami + payload
-    await this.repository.create({ ...options, payload: data });
+  constructor(collectionPath: string) {
+    this.repo = new AppRepository(collectionPath);
   }
 
-  async retrieve(id: string): Promise<any | null> {
-    return await this.repository.getById(id);
+  async save(item: Omit<FirestoreItem, 'id'>): Promise<string> {
+    return await this.repo.create(item);
   }
 
-  async list(type?: string): Promise<any[]> {
-    return await this.repository.list(type);
+  async get(id: string): Promise<FirestoreItem | null> {
+    return await this.repo.getById(id);
+  }
+
+  async list(type?: string): Promise<FirestoreItem[]> {
+    return await this.repo.list(type);
   }
 
   async delete(id: string): Promise<void> {
-    await this.repository.delete(id);
+    return await this.repo.delete(id);
   }
 }
