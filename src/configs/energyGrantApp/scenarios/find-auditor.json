@@ -93,33 +93,18 @@
             }
         },
         {
-            "slug": "auditor-order-preset",
-            "label": "Ustawienie typu zlecenia",
-            "contextSchemaPath": "order-request",
-            "contextDataPath": "order-request",
-            "tplFile": "LlmStep",
-            "order": 1,
-            "attrs": {
-                "autoStart": true,
-                "showResults": true,
-                "title": "Przetwarzanie danych zapotrzebowania",
-                "description": "Twoje zapotrzebowanie jest przygotowywane do publikacji...",
-                "userMessage": "Przekształć dane z formularza do formatu zapotrzebowań. Formatuj odpowiedź jako dokładny JSON z tymi polami:\n\n- orderType: zawsze \"auditor\"\n- address: skopiuj wartość z {{order-request-form-auditor.address}}\n- postalCode: skopiuj wartość z {{order-request-form-auditor.postalCode}}\n- city: skopiuj wartość z {{order-request-form-auditor.city}}\n- phone: skopiuj wartość z {{order-request-form-auditor.phone}}\n- buildingType: skopiuj wartość z {{order-request-form-auditor.buildingType}}\n- buildingArea: skopiuj wartość z {{order-request-form-auditor.buildingArea}}\n- constructionYear: skopiuj wartość z {{order-request-form-auditor.constructionYear}}\n- urgency: skopiuj wartość z {{order-request-form-auditor.urgency}}\n- comments: skopiuj wartość z {{order-request-form-auditor.comments}}\n\nZwróć tylko JSON bez dodatkowego tekstu. Upewnij się, że wszystkie pola są poprawnie skopiowane, szczególnie pola typu number i null."
-            }
-        },
-        {
             "slug": "auditor-order-summary",
             "label": "Krok 2: Podsumowanie zapotrzebowania",
-            "contextSchemaPath": "order-request",
-            "contextDataPath": "order-request",
+            "contextSchemaPath": "order-request-form-auditor",
+            "contextDataPath": "order-request-form-auditor",
             "tplFile": "WidgetsStep",
-            "order": 2,
+            "order": 1,
             "saveToDB": {
                 "enabled": true,
                 "provider": "indexedDB",
                 "itemType": "order",
                 "itemTitle": "Zapotrzebowanie na audyt",
-                "contentPath": "order-request"
+                "contentPath": "order-request-form-auditor"
             },
             "attrs": {
                 "widgets": [
@@ -132,27 +117,28 @@
                     {
                         "tplFile": "InfoWidget",
                         "title": "Lokalizacja",
-                        "contextDataPath": "order-request.city",
+                        "contextDataPath": "order-request-form-auditor.city",
                         "icon": "map-pin",
                         "colSpan": 1
                     },
                     {
                         "tplFile": "InfoWidget",
                         "title": "Typ budynku",
-                        "contextDataPath": "order-request.buildingType",
+                        "contextDataPath": "order-request-form-auditor.buildingType",
                         "icon": "home",
                         "colSpan": 1
                     },
                     {
                         "tplFile": "InfoWidget",
                         "title": "Powierzchnia",
-                        "data": "{{order-request.buildingArea}} m²",
+                        "contextDataPath": "order-request-form-auditor.buildingArea",
+                        "data": null,
                         "icon": "square",
                         "colSpan": 1
                     },
                     {
                         "tplFile": "OrderDetailsWidget",
-                        "contextDataPath": "order-request",
+                        "contextDataPath": "order-request-form-auditor",
                         "colSpan": "full"
                     }
                 ]
