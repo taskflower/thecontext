@@ -1,5 +1,6 @@
 // src/themes/goldsaver/components/common/Footer.tsx
 import React from "react";
+import { Link } from "react-router-dom";
 
 export const Footer: React.FC = () => {
   return (
@@ -7,15 +8,15 @@ export const Footer: React.FC = () => {
       <div className="flex justify-between items-center max-w-7xl mx-auto">
         <p>© 2025 GoldSaver. Wszystkie prawa zastrzeżone.</p>
         <div className="flex space-x-4">
-          <a href="#" className="hover:text-gray-700">
+          <Link to="/workspace-pages/regulamin" className="hover:text-gray-700">
             Regulamin
-          </a>
-          <a href="#" className="hover:text-gray-700">
+          </Link>
+          <Link to="/workspace-pages/polityka-prywatnosci" className="hover:text-gray-700">
             Polityka prywatności
-          </a>
-          <a href="#" className="hover:text-gray-700">
+          </Link>
+          <Link to="/workspace-pages/kontakt" className="hover:text-gray-700">
             Kontakt
-          </a>
+          </Link>
         </div>
       </div>
     </footer>

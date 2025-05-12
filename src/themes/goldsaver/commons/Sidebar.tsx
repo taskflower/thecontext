@@ -19,7 +19,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   menuItems,
   currentSegment,
   navigateTo,
-  goldPrice,
   onSettings,
   onLogout,
 }) => {
@@ -31,7 +30,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <Logo />
       </div>
 
-      <GoldPriceIndicator price={goldPrice.price} change={goldPrice.change} />
+      <GoldPriceIndicator  />
 
       <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
         {menuItems.map((item) => (

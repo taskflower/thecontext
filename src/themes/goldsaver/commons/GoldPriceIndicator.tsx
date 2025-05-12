@@ -11,6 +11,22 @@ interface GoldPriceData {
   date: string;
 }
 
+// Skeleton component to maintain consistent height during loading
+const GoldPriceSkeleton: React.FC<{ variant: "compact" | "full" }> = ({ variant }) => {
+  return (
+    <div className={`${variant === "full" ? "px-6 py-4" : "p-3"} bg-yellow-50 border-b border-yellow-100`}>
+      <div className="flex justify-between items-center">
+        <div>
+          <div className="h-3 w-24 bg-gray-200 rounded animate-pulse mb-2"></div>
+          <div className={`h-${variant === "full" ? "6" : "5"} w-28 bg-gray-200 rounded animate-pulse mb-2`}></div>
+          <div className="h-3 w-20 bg-gray-200 rounded animate-pulse"></div>
+        </div>
+        <div className="h-5 w-16 bg-gray-200 rounded animate-pulse"></div>
+      </div>
+    </div>
+  );
+};
+
 export const GoldPriceIndicator: React.FC<GoldPriceProps> = ({ 
   variant = "full" 
 }) => {
@@ -115,13 +131,7 @@ export const GoldPriceIndicator: React.FC<GoldPriceProps> = ({
   }, []);
 
   if (loading) {
-    return (
-      <div className={`${variant === "full" ? "px-6 py-4" : "p-3"} bg-yellow-50 border-b border-yellow-100`}>
-        <div className="flex justify-between items-center">
-          <p className="text-xs text-gray-500">Ładowanie danych...</p>
-        </div>
-      </div>
-    );
+    return <GoldPriceSkeleton variant={variant} />;
   }
 
   if (error) {
