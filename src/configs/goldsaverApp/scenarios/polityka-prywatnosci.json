@@ -1,0 +1,28 @@
+{
+    "id": "polityka-prywatnosci",
+    "slug": "polityka-prywatnosci",
+    "workspaceSlug": "workspace-podrtron",
+    "name": "Polityka prywatności",
+    "description": "Zasady ochrony danych osobowych",
+    "icon": "shield",
+    "nodes": [
+      {
+        "slug": "content",
+        "label": "Polityka prywatności",
+        "tplFile": "WidgetsStep",
+        "order": 0,
+        "contextSchemaPath": "page.polityka",
+        "contextDataPath": "page.polityka",
+        "attrs": {
+          "widgets": [
+            {
+              "tplFile": "InfoWidget",
+              "title": "Polityka prywatności",
+              "data": "<wstaw tutaj treść polityki prywatności>",
+              "colSpan": "full"
+            }
+          ]
+        }
+      }
+    ]
+  }
