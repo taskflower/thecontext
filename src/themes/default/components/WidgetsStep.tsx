@@ -1,12 +1,12 @@
 // src/themes/default/components/WidgetsStep.tsx
 import React, { useMemo } from 'react';
 import { CheckSquare, ArrowRight } from 'lucide-react';
-import { getDatabaseProvider } from '../../../provideDB/databaseProvider';
 import { useFlow } from '@/core';
 import { preloadWidget } from '@/preload';
 import { WidgetsStepProps } from '@/themes/themeTypes';
 import { getColSpanClass } from '@/core/utils/themesHelpers';
 import { useTheme } from '@/themes/ThemeContext';
+import { getDatabaseProvider } from '@/provideDB/databaseProvider';
 
 // Lekki spinner dla widgetów
 const WidgetLoading: React.FC = React.memo(() => (
@@ -30,7 +30,7 @@ const WidgetContainer = React.memo(
           widget.colSpan
         )}`}
       >
-        <React.Suspense fallback={<WidgetLoading />}>  
+        <React.Suspense fallback={<WidgetLoading />}>
           <WidgetComp {...widget} data={data} />
         </React.Suspense>
       </div>

@@ -1,12 +1,10 @@
 // src/provideDB/firebase/config.ts
-import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
-// import { Analytics, getAnalytics, isSupported } from "firebase/analytics";
+import { initializeApp } from 'firebase/app';
+import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
-
-
+// Konfiguracja Firebase z pliku środowiskowego (w pliku .env)
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -23,21 +21,5 @@ const app = initializeApp(firebaseConfig);
 // Inicjalizacja usług Firebase
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
-// Dodajemy scope'y dla Google Drive
-// googleProvider.addScope("https://www.googleapis.com/auth/drive.file");
-
 export const db = getFirestore(app);
 export const storage = getStorage(app);
-
-// Bezpieczna inicjalizacja Analytics (tylko gdy jest wspierane w środowisku)
-// export let analytics: Analytics;
-// Inicjalizacja Analytics w sposób asynchroniczny
-// (async () => {
-//   try { 
-//     if (await isSupported()) {
-//       analytics = getAnalytics(app);
-//     }
-//   } catch (error) {
-//     console.warn("Firebase Analytics not supported in this environment", error);
-//   }
-// })();

@@ -1,0 +1,69 @@
+// src/provideDB/firebase/FirebaseRepository.ts
+
+import { db } from './config';
+import {
+  collection,
+  doc,
+  addDoc,
+  setDoc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  deleteDoc,
+  CollectionReference,
+  DocumentData
+} from 'firebase/firestore';
+
+export interface FirestoreItem {
+  id?: string;
+  type?: string;
+  title?: string;
+  additionalInfo?: Record<string, any>;
+  payload: any;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export class AppRepository<T extends FirestoreItem = FirestoreItem> {
+  private collectionRef: CollectionReference<DocumentData>;
+  private static readonly COLLECTION_NAME = 'items';
+
+  constructor(collectionPath: string) {
+    this.collectionRef = collection(db, collectionPath);
+  }
+
+  async create(item: T): Promise<string> {
+    const now = new Date().toISOString();
+    const data = { ...(item as any), createdAt: now, updatedAt: now };
+    const docRef = await addDoc(this.collectionRef, data);
+    return docRef.id;
+  }
+
+  async update(id: string, item: Partial<T>): Promise<void> {
+    const now = new Date().toISOString();
+    const data = { ...(item as any), updatedAt: now };
+    const docRef = doc(db, AppRepository.COLLECTION_NAME, id);
+    await setDoc(docRef, data, { merge: true });
+  }
+
+  async getById(id: string): Promise<T | null> {
+    const docRef = doc(db, AppRepository.COLLECTION_NAME, id);
+    const snap = await getDoc(docRef);
+    return snap.exists() ? (snap.data() as T) : null;
+  }
+
+  async list(filterType?: string): Promise<T[]> {
+    let q = this.collectionRef as any;
+    if (filterType) {
+      q = query(this.collectionRef, where('type', '==', filterType));
+    }
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...(d.data() as T) }));
+  }
+
+  async delete(id: string): Promise<void> {
+    const docRef = doc(db, AppRepository.COLLECTION_NAME, id);
+    await deleteDoc(docRef);
+  }
+}
