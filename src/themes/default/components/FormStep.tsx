@@ -18,7 +18,6 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
   title = "Formularz",
   description,
   submitLabel = "Dalej",
-  showRequiredHint = true,
   nodeSlug, // Dodane, żeby wiedzieć, który node generuje błędy
 }) => {
   const {
