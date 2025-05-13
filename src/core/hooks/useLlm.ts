@@ -40,7 +40,6 @@ export const useLlm = <T>({
   const [result, setResult] = useState<T | null>(null);
   const [started, setStarted] = useState(autoStart);
 
-  // Zastępuje zmienne w userMessage
   const processTemplateString = useCallback(
     (str: string) =>
       str.replace(/{{([^}]+)}}/g, (_, path) => {
@@ -62,7 +61,6 @@ export const useLlm = <T>({
     setError(null);
 
     try {
-      // Komunikaty: najpierw ewentualny systemMessage, potem userMessage
       const messages: { role: string; content: string }[] = [];
       if (jsonSchema) {
         messages.push({
@@ -116,7 +114,6 @@ export const useLlm = <T>({
 
       const { result: llmResult } = await response.json();
 
-      // Walidacja Zod
       if (schema) {
         const validation = schema.safeParse(llmResult);
         if (!validation.success) {

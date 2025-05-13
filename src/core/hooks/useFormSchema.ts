@@ -40,14 +40,12 @@ export const useFormSchema = <T>({
   jsonSchema,
   initialData
 }: UseFormSchemaOptions<T>): UseFormSchemaResult => {
-  // Użyj podstawowego hooka useForm
   const formHook = useForm<T>({
     schema,
     jsonSchema,
     initialData
   });
 
-  // Utwórz schematy pól na podstawie jsonSchema
   const fieldSchemas = useMemo(() => {
     const schemas: Record<string, FieldSchema> = {};
     
@@ -55,7 +53,6 @@ export const useFormSchema = <T>({
       const requiredFields = jsonSchema.required || [];
       
       Object.entries(jsonSchema.properties).forEach(([field, propSchema]: [string, any]) => {
-        // Podstawowe informacje o polu
         const isRequired = requiredFields.includes(field);
         const fieldType = mapJsonTypeToFieldType(propSchema.type, propSchema.format, propSchema.enum);
         
@@ -70,8 +67,7 @@ export const useFormSchema = <T>({
           step: propSchema.multipleOf,
           placeholder: propSchema.example
         };
-        
-        // Jeśli pole ma zdefiniowane opcje (enum)
+
         if (propSchema.enum && propSchema.enum.length > 0) {
           schemas[field].options = propSchema.enum.map((value: any, index: number) => ({
             value,
@@ -84,7 +80,6 @@ export const useFormSchema = <T>({
     return schemas;
   }, [jsonSchema]);
   
-  // Sprawdź, czy formularz ma wymagane pola
   const hasRequiredFields = useMemo(() => {
     return Object.values(fieldSchemas).some(schema => schema.required);
   }, [fieldSchemas]);
@@ -96,7 +91,6 @@ export const useFormSchema = <T>({
   };
 };
 
-// Funkcja pomocnicza do mapowania typów JSON Schema na typy pól
 function mapJsonTypeToFieldType(
   type?: string, 
   format?: string, 
@@ -122,5 +116,5 @@ function mapJsonTypeToFieldType(
     return 'text';
   }
   
-  return 'text'; // Domyślny typ
+  return 'text'; 
 }

@@ -46,7 +46,6 @@ const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
   const tpl = workspace.templateSettings?.tplDir || config.tplDir;
   const layout = workspace.templateSettings?.layoutFile || "Simple";
   
-  // Tutaj jest kluczowa zmiana - wyraźnie typujemy AppLayout jako komponent przyjmujący LayoutProps
   const AppLayout = useMemo(
     () => preload.layout(tpl, layout) as ComponentType<LayoutProps>,
     [tpl, layout, preload]

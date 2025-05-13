@@ -1,7 +1,6 @@
 // src/core/utils/jsonToZod.ts
 import { z, ZodTypeAny } from "zod";
 
-// WeakMap do cache’owania schematów
 const zodCache = new WeakMap<any, ZodTypeAny>();
 
 export function jsonToZod(schema: any): ZodTypeAny {
