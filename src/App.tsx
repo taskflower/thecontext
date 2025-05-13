@@ -1,79 +1,64 @@
 // src/App.tsx
-import React, { lazy, memo } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
-import {
-  ConfigIndicator,
-  Loading,
-  WorkspaceOverview,
-  withSuspense,
-  WorkspaceLayout,
-  ScenarioLayout,
-} from "@/components";
-import { ConfigProvider, useConfig } from "./ConfigProvider";
-import { ContextDebugger } from "./debug";
+import { BrowserRouter } from 'react-router-dom';
+import { ConfigProvider, useConfig } from './ConfigProvider';
+import AppRouter from './AppRouter';
+import ConfigIndicator from './components/ConfigIndicator';
+import { ErrorBoundary, Loading } from './components';
+import { ContextDebugger } from './debug';
 
-// Komponent aplikacji - zoptymalizowany z memo
-const RawAppContent: React.FC = memo(() => {
-  const { config, loading, error, configId } = useConfig();
-  
-  if (loading) return <Loading message="Ładowanie konfiguracji..." />;
-  if (error) return <div className="p-4 text-red-600">Błąd: {error}</div>;
-  if (!config) return <div className="p-4 text-gray-700">Brak konfiguracji</div>;
+function App() {
+  return (
+    <ErrorBoundary>
+      <BrowserRouter>
+        <ConfigProvider>
+          <>
+            <AppContent />
+          </>
+        </ConfigProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
+  );
+}
+
+// Rozdzielamy renderowanie na osobny komponent, aby uniknąć problemów z kontekstem
+const AppContent = () => {
+  const { config, configId, configType, loading, error } = useConfig();
+
+  if (loading) {
+    return <Loading message="Ładowanie aplikacji..." />;
+  }
+
+  // Pokazujemy błąd, jeśli występuje
+  if (error || !config) {
+    return (
+      <div className="p-4 text-red-600">
+        <h1 className="text-xl font-bold">Błąd ładowania aplikacji</h1>
+        <p>{error || "Nie można załadować konfiguracji aplikacji"}</p>
+      </div>
+    );
+  }
+
+  // Zapewniamy, że configType jest jednym z dozwolonych typów
+  const validConfigType: "local" | "firebase" | "documentdb" = 
+    (configType === 'firebase' || configType === 'documentdb') 
+      ? configType as "firebase" | "documentdb"
+      : 'local';
 
   return (
-    <Router>
-      <ConfigIndicator configId={configId!} configType={null!} config={config} />
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Navigate
-              to={`/${configId}/${config.workspaces[0].slug}`}
-              replace
-            />
-          }
+    <>
+      <AppRouter />
+      <ContextDebugger config={config}/>
+      
+      {/* Bezpośrednio renderujemy ConfigIndicator zamiast przez wrapper */}
+      {configId && (
+        <ConfigIndicator 
+          configId={configId} 
+          configType={validConfigType}
+          config={config} 
         />
-        {/* Używamy zagnieżdżonych ścieżek z wspólnym layoutem */}
-        <Route
-          path="/:configId/:workspaceSlug"
-          element={<WorkspaceLayout config={config} />}
-        >
-          {/* Route dla widoku workspace */}
-          <Route index element={<WorkspaceOverview config={config} />} />
-          {/* Route dla scenariuszy */}
-          <Route
-            path=":scenarioSlug/:stepIndex?"
-            element={<ScenarioLayout config={config} />}
-          />
-        </Route>
-        <Route
-          path="*"
-          element={<div className="p-4">Strona nie znaleziona</div>}
-        />
-      </Routes>
-      <ContextDebugger config={config} />
-    </Router>
+      )}
+    </>
   );
-});
-
-// Lazy-loading głównego komponentu aplikacji
-const LazyAppContent = lazy(
-  () => Promise.resolve({ default: RawAppContent })
-);
-
-// Komponent z obsługą Suspense
-const AppContent = withSuspense(LazyAppContent, "Ładowanie…");
-
-// Główny komponent aplikacji
-export const App = memo(() => (
-  <ConfigProvider>
-    <AppContent />
-  </ConfigProvider>
-));
+};
 
 export default App;

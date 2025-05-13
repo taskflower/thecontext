@@ -20,7 +20,6 @@ interface NodeRendererProps {
   totalSteps: number;
 }
 
-// Komponent NodeRenderer zoptymalizowany z memo
 const NodeRenderer: React.FC<NodeRendererProps> = memo(({
   config,
   node,
@@ -30,7 +29,6 @@ const NodeRenderer: React.FC<NodeRendererProps> = memo(({
 }) => {
   const { get, set } = useFlowStore();
   
-  // Memoizacja schematów JSON i Zod
   const jsonSchema = useMemo(
     () =>
       config.workspaces[0]?.contextSchema.properties?.[
@@ -42,13 +40,11 @@ const NodeRenderer: React.FC<NodeRendererProps> = memo(({
   const zodSchema = useMemo(() => jsonToZod(jsonSchema), [jsonSchema]);
   const data = get(node.contextDataPath);
 
-  // Pobieranie komponentu szablonu
   const Component = useComponent<TemplateComponentProps>(
     config.tplDir,
     node.tplFile
   );
 
-  // Memoizacja znalezionego scenariusza
   const currentScenario = useMemo(
     () =>
       config.scenarios.find((s) =>
@@ -57,13 +53,11 @@ const NodeRenderer: React.FC<NodeRendererProps> = memo(({
     [config.scenarios, node.slug]
   );
 
-  // Memoizacja handlera przesyłania
   const handleSubmit = useMemo(() => (val: any) => {
     if (val !== null) set(node.contextDataPath, val);
     onNext();
   }, [node.contextDataPath, set, onNext]);
 
-  // Memoizacja właściwości komponentu
   const componentProps = useMemo<TemplateComponentProps>(() => ({
     schema: zodSchema,
     jsonSchema,
@@ -79,7 +73,6 @@ const NodeRenderer: React.FC<NodeRendererProps> = memo(({
   return <Component {...componentProps} />;
 });
 
-// Komponent FlowEngine zoptymalizowany z memo
 export const FlowEngine: React.FC<{ 
   config: AppConfig; 
   scenarioSlug: string; 
@@ -88,23 +81,18 @@ export const FlowEngine: React.FC<{
   const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
   const { toScenarioStep, toScenarioList } = useAppNavigation();
 
-  // Memoizacja znalezionego scenariusza
   const scenario = useMemo(() => 
     config.scenarios.find((s) => s.slug === scenarioSlug),
     [config.scenarios, scenarioSlug]
   );
   
   if (!scenario) return <div>Scenariusz nie znaleziony</div>;
-
-  // Memoizacja posortowanych węzłów
   const nodes = useMemo(() => 
     [...scenario.nodes].sort((a, b) => a.order - b.order),
     [scenario.nodes]
   );
   
   const index = Math.min(Math.max(stepIdx, 0), nodes.length - 1);
-
-  // Memoizacja handlera następnego kroku
   const handleNext = useMemo(() => () => {
     if (index < nodes.length - 1)
       toScenarioStep(workspaceSlug!, scenarioSlug, index + 1);

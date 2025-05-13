@@ -1,7 +1,6 @@
 // src/core/fallback-components.tsx
 import React from 'react';
 
-// Komponent zastępczy dla nieznalezionych komponentów
 export const NotFoundComponent: React.FC<any> = ({ 
   componentType = 'component',
   componentName = 'Unknown', 
@@ -30,12 +29,10 @@ export const NotFoundComponent: React.FC<any> = ({
   );
 };
 
-// Zastępczy widget
 export const NotFoundWidget: React.FC<any> = (props) => (
   <NotFoundComponent componentType="widget" {...props} />
 );
 
-// Zastępczy layout
 export const NotFoundLayout: React.FC<any> = ({ children, ...props }) => (
   <div className="min-h-screen">
     <div className="p-4 bg-red-100 mb-4">

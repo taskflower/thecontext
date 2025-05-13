@@ -1,4 +1,4 @@
-// src/ConfigProvider.tsx - zoptymalizowana implementacja
+// src/ConfigProvider.tsx
 import React, {
   createContext,
   useContext,
@@ -7,7 +7,6 @@ import React, {
   lazy,
 } from "react";
 import type { AppConfig, WorkspaceConfig, ScenarioConfig } from "@/core/types";
-
 
 const NotFoundComponent = (props: any) => (
   <div className="fallback">
