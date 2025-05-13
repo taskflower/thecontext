@@ -7,7 +7,7 @@ interface FlowState {
   data: Record<string, any>;
   get: (path: string) => any;
   set: (path: string, value: any) => void;
-  logReset: () => void;
+  reset: () => void;
 }
 
 export const useFlowStore = create<FlowState>()(
@@ -22,20 +22,18 @@ export const useFlowStore = create<FlowState>()(
           return { data: newData };
         });
       },
-      logReset: () => {
-        console.warn(
-          "[FlowStore] reset() was called - funkcja tylko loguje, nie czyści kontekstu"
-        );
+      reset: () => {
+        set({ data: {} });
       },
     }),
     {
       name: "flow-storage",
-      partialize: (state) => ({ data: state.data }), 
+      partialize: (state) => ({ data: state.data }),
     }
   )
 );
 
 export const useFlow = () => {
-  const { get, set } = useFlowStore();
-  return { get, set };
+  const { get, set, reset } = useFlowStore();
+  return { get, set, reset };
 };

@@ -1,72 +1,116 @@
-import React, {createContext, useContext, useEffect, useState, lazy} from "react";
-import create from "zustand";
-import type {AppConfig, WorkspaceConfig, ScenarioConfig} from '@/core/types';
-
-const moduleTypes = ['component', 'layout', 'widget'] as const;
-type ModuleType = typeof moduleTypes[number];
+// src/ConfigProvider.tsx
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  lazy,
+} from "react";
+import { create } from "zustand";
+import type { AppConfig, WorkspaceConfig, ScenarioConfig } from "@/core/types";
 
 const useComponentCache = create<{
   components: Record<string, React.LazyExoticComponent<any>>;
-  getOrCreate: (key: string, loader: () => Promise<any>) => React.LazyExoticComponent<any>;
+  getOrCreate: (
+    key: string,
+    loader: () => Promise<any>
+  ) => React.LazyExoticComponent<any>;
 }>((set, get) => ({
   components: {},
-  getOrCreate: (k, l) => {
-    const c = get().components; if(c[k]) return c[k];
-    const comp = lazy(l); set(s => ({components: {...s.components, [k]: comp}}));
-    return comp;
-  }
+  getOrCreate: (key, loader) => {
+    const { components } = get();
+    if (components[key]) return components[key];
+
+    const component = lazy(loader);
+    set((state) => ({ components: { ...state.components, [key]: component } }));
+    return component;
+  },
 }));
 
-const modules = {
+type ModuleType = "component" | "layout" | "widget";
+
+const modules: Record<ModuleType, Record<string, () => Promise<any>>> = {
   component: import.meta.glob("./themes/*/components/*.tsx"),
   layout: import.meta.glob("./themes/*/layouts/*.tsx"),
-  widget: import.meta.glob("./themes/*/widgets/*.tsx")
+  widget: import.meta.glob("./themes/*/widgets/*.tsx"),
 };
 
-const preload = (t: ModuleType, d: string, n: string) => useComponentCache.getState().getOrCreate(
-  `${t}:${d}/${n}`, () => {
-    const p = [`./themes/${d}/${t}s/${n}.tsx`, `./themes/default/${t}s/${n}.tsx`].find(p => modules[t][p]);
-    if(!p) throw new Error(`Module not found: ${n} in ${d}`); return modules[t][p]();
-  }
-);
+const loadModule = (type: ModuleType, tplDir: string, name: string) => {
+  const cacheKey = `${type}:${tplDir}/${name}`;
+
+  const { getOrCreate } = useComponentCache.getState();
+
+  return getOrCreate(cacheKey, () => {
+    const paths = [
+      `./themes/${tplDir}/${type}s/${name}.tsx`,
+      `./themes/default/${type}s/${name}.tsx`,
+    ];
+
+    const path = paths.find((p) => modules[type][p]);
+    if (!path)
+      throw new Error(`Module not found: ${name} in ${tplDir} (${type})`);
+
+    return modules[type][path]();
+  });
+};
 
 export const preloadModules = {
-  component: (t: string, n: string) => preload('component', t, n),
-  layout: (t: string, n: string) => preload('layout', t, n),
-  widget: (t: string, n: string) => preload('widget', t, n)
+  component: (tplDir: string, name: string) =>
+    loadModule("component", tplDir, name),
+  layout: (tplDir: string, name: string) => loadModule("layout", tplDir, name),
+  widget: (tplDir: string, name: string) => loadModule("widget", tplDir, name),
 };
 
-export const getConfigIdFromURL = (): string => 
-  window.location.pathname.split('/').filter(Boolean)[0] || 'energyGrantApp';
+export const getConfigIdFromURL = (): string =>
+  window.location.pathname.split("/").filter(Boolean)[0] || "energyGrantApp";
 
-export const loadJsonConfigs = async (s: string): Promise<AppConfig> => {
-  const cfgs = {
-    app: import.meta.glob<Record<string, any>>('./configs/*/app.json', {as: 'json'}),
-    ws: import.meta.glob<Record<string, any>>('./configs/*/workspaces/*.json', {as: 'json'}),
-    sc: import.meta.glob<Record<string, any>>('./configs/*/scenarios/*.json', {as: 'json'})
+export const loadJsonConfigs = async (slug: string): Promise<AppConfig> => {
+  const configs = {
+    app: import.meta.glob<Record<string, any>>("./configs/*/app.json", {
+      as: "json",
+    }),
+    ws: import.meta.glob<Record<string, any>>("./configs/*/workspaces/*.json", {
+      as: "json",
+    }),
+    sc: import.meta.glob<Record<string, any>>("./configs/*/scenarios/*.json", {
+      as: "json",
+    }),
   };
-  
-  const p = `./configs/${s}/app.json`;
-  const app = await cfgs.app[p]?.() || (() => {throw new Error(`Missing: ${p}`);})();
 
-  const load = async <T extends object>(
-    items: Array<{id: string}>, 
-    t: 'workspaces' | 'scenarios'
-  ): Promise<Array<T & {slug: string}>> => Promise.all(
-    items.map(async ({id}) => {
-      const path = `./configs/${s}/${t}/${id}.json`;
-      const data = await (t === 'workspaces' ? cfgs.ws : cfgs.sc)[path]?.() || 
-        (() => {throw new Error(`Missing ${t}: ${path}`);})();
-      return {...data, slug: id} as T & {slug: string};
-    })
-  );
+  const appPath = `./configs/${slug}/app.json`;
+  const appLoader = configs.app[appPath];
+  if (!appLoader) throw new Error(`Missing config: ${appPath}`);
+  const app = await appLoader();
 
-  const [ws, sc] = await Promise.all([
-    load<WorkspaceConfig>(app.workspaces, 'workspaces'),
-    load<ScenarioConfig>(app.scenarios, 'scenarios')
+  const loadItems = async <T extends object>(
+    items: Array<{ id: string }>,
+    type: "workspaces" | "scenarios"
+  ): Promise<Array<T & { slug: string }>> => {
+    const configType = type === "workspaces" ? configs.ws : configs.sc;
+
+    return Promise.all(
+      items.map(async ({ id }) => {
+        const path = `./configs/${slug}/${type}/${id}.json`;
+        const loader = configType[path];
+        if (!loader) throw new Error(`Missing ${type}: ${path}`);
+        const data = (await loader()) as T;
+        return { ...data, slug: id };
+      })
+    );
+  };
+
+  const [workspaces, scenarios] = await Promise.all([
+    loadItems<WorkspaceConfig>(app.workspaces, "workspaces"),
+    loadItems<ScenarioConfig>(app.scenarios, "scenarios"),
   ]);
 
-  return {name: app.name, description: app.description, tplDir: app.tplDir, workspaces: ws, scenarios: sc};
+  return {
+    name: app.name,
+    description: app.description,
+    tplDir: app.tplDir,
+    workspaces,
+    scenarios,
+  };
 };
 
 interface ConfigContextValue {
@@ -79,33 +123,61 @@ interface ConfigContextValue {
 }
 
 const ConfigContext = createContext<ConfigContextValue>({
-  config: null, configType: null, configId: null,
-  loading: false, error: null, preload: preloadModules
+  config: null,
+  configType: null,
+  configId: null,
+  loading: false,
+  error: null,
+  preload: preloadModules,
 });
 
-export const ConfigProvider: React.FC<{children: React.ReactNode}> = ({children}) => {
-  const [s, setS] = useState<{
+export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [state, setState] = useState<{
     config: AppConfig | null;
     configType: "local" | "firebase" | "documentdb" | null;
     configId: string | null;
     loading: boolean;
     error: string | null;
-  }>({config: null, configType: null, configId: null, loading: true, error: null});
+  }>({
+    config: null,
+    configType: null,
+    configId: null,
+    loading: true,
+    error: null,
+  });
 
   useEffect(() => {
     const slug = getConfigIdFromURL();
+
     (async () => {
       try {
-        setS({config: await loadJsonConfigs(slug), configType: "documentdb", 
-              configId: slug, loading: false, error: null});
-      } catch (e) {
-        console.error("Config error", e);
-        setS(c => ({...c, configId: slug, loading: false, error: "Failed to load"}));
+        const config = await loadJsonConfigs(slug);
+        setState({
+          config,
+          configType: "documentdb",
+          configId: slug,
+          loading: false,
+          error: null,
+        });
+      } catch (error) {
+        console.error("Config error", error);
+        setState((current) => ({
+          ...current,
+          configId: slug,
+          loading: false,
+          error: "Failed to load config",
+        }));
       }
     })();
   }, []);
 
-  return <ConfigContext.Provider value={{...s, preload: preloadModules}}>{children}</ConfigContext.Provider>;
+  return (
+    <ConfigContext.Provider value={{ ...state, preload: preloadModules }}>
+      {children}
+    </ConfigContext.Provider>
+  );
 };
 
 export const useConfig = () => useContext(ConfigContext);
