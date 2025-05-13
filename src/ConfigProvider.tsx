@@ -1,6 +1,6 @@
 // src/ConfigProvider.tsx
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { AppConfig, WorkspaceConfig, ScenarioConfig } from './core/types';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useMemo } from 'react';
+import { AppConfig, WorkspaceConfig, ScenarioConfig } from '@/core/types';
 
 interface ConfigContextValue {
   config: AppConfig | null;
@@ -22,6 +22,57 @@ interface ConfigProviderProps {
   children: ReactNode;
 }
 
+const getConfigIdFromURL = (): string => {
+  const pathSegments = window.location.pathname.split('/').filter(Boolean);
+  return pathSegments[0] || 'energyGrantApp';
+};
+
+const loadJsonConfigs = async (
+  slug: string, 
+  appImports: Record<string, () => Promise<any>>,
+  wsImports: Record<string, () => Promise<any>>,
+  scImports: Record<string, () => Promise<any>>
+): Promise<AppConfig> => {
+  // Load app.json
+  const appPath = `./configs/${slug}/app.json`;
+  const appLoader = appImports[appPath] as (() => Promise<any>);
+  if (!appLoader) throw new Error(`Missing config file: ${appPath}`);
+  const appData = await appLoader();
+
+  // Load workspaces
+  const workspaces: WorkspaceConfig[] = await Promise.all(
+    appData.workspaces.map(async (wsRef: { id: string }) => {
+      const workspaceId = wsRef.id;
+      const wsPath = `./configs/${slug}/workspaces/${workspaceId}.json`;
+      const wsLoader = wsImports[wsPath] as (() => Promise<any>);
+      if (!wsLoader) throw new Error(`Missing workspace: ${wsPath}`);
+      const wsRaw = (await wsLoader()) as Omit<WorkspaceConfig, 'slug'>;
+      return { ...wsRaw, slug: workspaceId };
+    })
+  );
+
+  // Load scenarios
+  const scenarios: ScenarioConfig[] = await Promise.all(
+    appData.scenarios.map(async (scRef: { id: string }) => {
+      const scenarioId = scRef.id;
+      const scPath = `./configs/${slug}/scenarios/${scenarioId}.json`;
+      const scLoader = scImports[scPath] as (() => Promise<any>);
+      if (!scLoader) throw new Error(`Missing scenario: ${scPath}`);
+      const scRaw = (await scLoader()) as Omit<ScenarioConfig, 'slug'>;
+      return { ...scRaw, slug: scenarioId };
+    })
+  );
+
+  // Build configuration
+  return {
+    name: appData.name,
+    description: appData.description,
+    tplDir: appData.tplDir,
+    workspaces,
+    scenarios,
+  };
+};
+
 export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [configType, setConfigType] = useState<'local' | 'firebase' | 'documentdb' | null>(null);
@@ -30,14 +81,9 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Odczytaj configId z pierwszego segmentu URL
-    const pathSegments = window.location.pathname.split('/').filter(Boolean);
-    const slug = pathSegments[0] || 'energyGrantApp';
-    console.log(`[ConfigProvider] URL segments:`, pathSegments);
-    console.log(`[ConfigProvider] Determined configId slug: ${slug}`);
+    const slug = getConfigIdFromURL();
     setConfigId(slug);
 
-    // Import globs dla JSONów
     const appImports = import.meta.glob('./configs/*/app.json', { as: 'json' });
     const wsImports = import.meta.glob('./configs/*/workspaces/*.json', { as: 'json' });
     const scImports = import.meta.glob('./configs/*/scenarios/*.json', { as: 'json' });
@@ -45,62 +91,13 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
     const loadConfig = async () => {
       try {
         setLoading(true);
-        console.log('[ConfigProvider] Starting loadConfig');
-
-        // Ładuj app.json
-        const appPath = `./configs/${slug}/app.json`;
-        console.log(`[ConfigProvider] Loading app JSON from: ${appPath}`);
-        const appLoader = appImports[appPath] as (() => Promise<any>);
-        if (!appLoader) throw new Error(`Brak pliku konfiguracji: ${appPath}`);
-        const appData = await appLoader();
-        console.log('[ConfigProvider] Loaded appData:', appData);
-
-        // Load workspaces
-        const workspaces: WorkspaceConfig[] = [];
-        for (const wsRef of appData.workspaces) {
-          const workspaceId = wsRef.id;
-          const wsPath = `./configs/${slug}/workspaces/${workspaceId}.json`;
-          console.log(`[ConfigProvider] Loading workspace JSON from: ${wsPath}`);
-          const wsLoader = wsImports[wsPath] as (() => Promise<any>);
-          if (!wsLoader) throw new Error(`Brak workspace: ${wsPath}`);
-          const wsRaw = (await wsLoader()) as Omit<WorkspaceConfig, 'slug'>;
-          console.log('[ConfigProvider] wsRaw:', wsRaw);
-          console.log(`[ConfigProvider] Assigning workspace.slug = ${workspaceId}`);
-          workspaces.push({ ...wsRaw, slug: workspaceId });
-        }
-        console.log('[ConfigProvider] Workspaces loaded:', workspaces.map(w => w.slug));
-
-        // Load scenarios
-        const scenarios: ScenarioConfig[] = [];
-        for (const scRef of appData.scenarios) {
-          const scenarioId = scRef.id;
-          const scPath = `./configs/${slug}/scenarios/${scenarioId}.json`;
-          console.log(`[ConfigProvider] Loading scenario JSON from: ${scPath}`);
-          const scLoader = scImports[scPath] as (() => Promise<any>);
-          if (!scLoader) throw new Error(`Brak scenariusza: ${scPath}`);
-          const scRaw = (await scLoader()) as Omit<ScenarioConfig, 'slug'>;
-          console.log('[ConfigProvider] scRaw:', scRaw);
-          console.log(`[ConfigProvider] Assigning scenario.slug = ${scenarioId}`);
-          scenarios.push({ ...scRaw, slug: scenarioId });
-        }
-        console.log('[ConfigProvider] Scenarios loaded:', scenarios.map(s => s.slug));
-
-        // Zbuduj konfigurację
-        const appConfig: AppConfig = {
-          name: appData.name,
-          description: appData.description,
-          tplDir: appData.tplDir,
-          workspaces,
-          scenarios,
-        };
-        console.log('[ConfigProvider] Final appConfig:', appConfig);
-
+        const appConfig = await loadJsonConfigs(slug, appImports, wsImports, scImports);
         setConfig(appConfig);
         setConfigType('documentdb');
         setError(null);
       } catch (err: any) {
-        console.error('Błąd ładowania konfiguracji', err);
-        setError('Nie udało się załadować konfiguracji');
+        console.error('Configuration loading error', err);
+        setError('Failed to load configuration');
       } finally {
         setLoading(false);
       }
@@ -109,8 +106,17 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
     loadConfig();
   }, []);
 
+  // Memoize the context value to prevent unnecessary rerenders
+  const contextValue = useMemo(() => ({
+    config,
+    configType,
+    configId,
+    loading,
+    error
+  }), [config, configType, configId, loading, error]);
+
   return (
-    <ConfigContext.Provider value={{ config, configType, configId, loading, error }}>
+    <ConfigContext.Provider value={contextValue}>
       {children}
     </ConfigContext.Provider>
   );

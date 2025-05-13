@@ -1,17 +1,17 @@
 // src/App.tsx
-import React from "react";
+import React, { memo } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
 } from "react-router-dom";
-import AppLoading from "./components/Loading";
-import { ConfigProvider, useConfig } from "./ConfigProvider";
-import WorkspaceOverview from "./components/WorkspaceOverview";
-import ScenarioWithStep from "./components/ScenarioWithStep";
+import { ConfigProvider, useConfig } from "@/ConfigProvider";
+import { AppLoading, ScenarioWithStep, WorkspaceOverview } from "@/components";
+import { AppConfig } from "@/core";
 import { ContextDebugger } from "./debug";
 import ConfigIndicator from "./components/ConfigIndicator";
+
 
 export const App: React.FC = () => (
   <ConfigProvider>
@@ -19,13 +19,47 @@ export const App: React.FC = () => (
   </ConfigProvider>
 );
 
+// Separated loading states into their own components
+const LoadingState = memo(({ message }: { message: string }) => (
+  <AppLoading message={message} />
+));
+
+const ErrorState = memo(({ error }: { error: string }) => (
+  <div className="p-4 text-red-600">Błąd: {error}</div>
+));
+
+const NoConfigState = memo(() => (
+  <div className="p-4 text-gray-700">Brak konfiguracji</div>
+));
+
+// Main app routing
+const AppRoutes = memo(({ config, configId }: { config: AppConfig, configId: string | null }) => (
+  <Routes>
+    <Route
+      path="/"
+      element={<Navigate to={`/${configId}/${config.workspaces[0].slug}`} replace />}
+    />
+    <Route
+      path="/:configId/:workspaceSlug"
+      element={<WorkspaceOverview config={config} />}
+    />
+    <Route
+      path="/:configId/:workspaceSlug/:scenarioSlug/:stepIndex?"
+      element={<ScenarioWithStep config={config} />}
+    />
+    <Route
+      path="*"
+      element={<div className="p-4">Strona nie znaleziona</div>}
+    />
+  </Routes>
+));
+
 const AppWithConfig: React.FC = () => {
   const { config, loading, error, configId, configType } = useConfig();
 
-  if (loading) return <AppLoading message="Ładowanie konfiguracji..." />;
-  if (error) return <div className="p-4 text-red-600">Błąd: {error}</div>;
-  if (!config)
-    return <div className="p-4 text-gray-700">Brak konfiguracji</div>;
+  if (loading) return <LoadingState message="Ładowanie konfiguracji..." />;
+  if (error) return <ErrorState error={error} />;
+  if (!config) return <NoConfigState />;
 
   return (
     <Router>
@@ -35,24 +69,7 @@ const AppWithConfig: React.FC = () => {
         configType={configType} 
         config={config} 
       />
-      <Routes>
-        <Route
-          path="/"
-          element={<Navigate to={`/${configId}/${config.workspaces[0].slug}`} replace />}
-        />
-        <Route
-          path="/:configId/:workspaceSlug"
-          element={<WorkspaceOverview config={config} />}
-        />
-        <Route
-          path="/:configId/:workspaceSlug/:scenarioSlug/:stepIndex?"
-          element={<ScenarioWithStep config={config} />}
-        />
-        <Route
-          path="*"
-          element={<div className="p-4">Strona nie znaleziona</div>}
-        />
-      </Routes>
+      <AppRoutes config={config} configId={configId} />
     </Router>
   );
 };
