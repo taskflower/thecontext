@@ -1,7 +1,7 @@
 import { ZodType } from "zod";
 export type WidgetConfig = {
   tplFile: string;
-  title?: string;
+  title: string;
   contextDataPath?: string;
   colSpan?: 1 | 2 | 3 | "full";
   [key: string]: any;
