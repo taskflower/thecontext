@@ -1,10 +1,10 @@
 // src/App.tsx
-import { BrowserRouter } from 'react-router-dom';
-import { ConfigProvider, useConfig } from './ConfigProvider';
-import AppRouter from './AppRouter';
-import ConfigIndicator from './components/ConfigIndicator';
-import { ErrorBoundary, Loading } from './components';
-import { ContextDebugger } from './debug';
+import { BrowserRouter } from "react-router-dom";
+import { ConfigProvider, useConfig } from "./ConfigProvider";
+import AppRouter from "./AppRouter";
+import ConfigIndicator from "./components/ConfigIndicator";
+import { ErrorBoundary, Loading } from "./components";
+import { ContextDebugger } from "./debug";
 
 function App() {
   return (
@@ -20,7 +20,6 @@ function App() {
   );
 }
 
-// Rozdzielamy renderowanie na osobny komponent, aby uniknąć problemów z kontekstem
 const AppContent = () => {
   const { config, configId, configType, loading, error } = useConfig();
 
@@ -28,7 +27,6 @@ const AppContent = () => {
     return <Loading message="Ładowanie aplikacji..." />;
   }
 
-  // Pokazujemy błąd, jeśli występuje
   if (error || !config) {
     return (
       <div className="p-4 text-red-600">
@@ -38,23 +36,20 @@ const AppContent = () => {
     );
   }
 
-  // Zapewniamy, że configType jest jednym z dozwolonych typów
-  const validConfigType: "local" | "firebase" | "documentdb" = 
-    (configType === 'firebase' || configType === 'documentdb') 
-      ? configType as "firebase" | "documentdb"
-      : 'local';
+  const validConfigType: "local" | "firebase" | "documentdb" =
+    configType === "firebase" || configType === "documentdb"
+      ? (configType as "firebase" | "documentdb")
+      : "local";
 
   return (
     <>
       <AppRouter />
-      <ContextDebugger config={config}/>
-      
-      {/* Bezpośrednio renderujemy ConfigIndicator zamiast przez wrapper */}
+      <ContextDebugger config={config} />
       {configId && (
-        <ConfigIndicator 
-          configId={configId} 
+        <ConfigIndicator
+          configId={configId}
           configType={validConfigType}
-          config={config} 
+          config={config}
         />
       )}
     </>
