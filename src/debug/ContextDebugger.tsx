@@ -1,6 +1,6 @@
 // src/debug/ContextDebugger.tsx
 import React, { useState, useEffect, useRef, lazy, Suspense } from "react";
-import { Database, X, List, ArrowRight, Activity, User, Globe, Upload, FolderOutput } from "lucide-react";
+import { Database, X, List, ArrowRight, Activity, User, Globe, Upload, Settings} from "lucide-react";
 import { useFlowStore } from "../core/context";
 import JsonTreeRenderer from "./components/JsonTreeRenderer";
 import { AppConfig } from "../core/types";
@@ -76,7 +76,7 @@ export const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) =>
         onClick={() => setIsVisible(true)}
         title="Ctrl+Shift+D aby włączyć/wyłączyć debugger"
       >
-        <FolderOutput className="w-3.5 h-3.5" />
+        <Settings className="w-3.5 h-3.5" />
       </button>
     );
   }
