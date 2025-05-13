@@ -5,6 +5,7 @@ import {
   Routes,
   Route,
   Navigate,
+  Outlet,
 } from "react-router-dom";
 import {
   ConfigIndicator,
@@ -13,6 +14,7 @@ import {
   withSuspense,
 } from "@/components";
 import { ConfigProvider, useConfig } from "./ConfigProvider";
+import WorkspaceLayout from "@/components/WorkspaceLayout";
 import ScenarioLayout from "@/components/ScenarioLayout";
 import { ContextDebugger } from "./debug";
 
@@ -35,14 +37,19 @@ const RawAppContent: React.FC = () => {
             />
           }
         />
+        {/* Używamy teraz zagnieżdżonych ścieżek z wspólnym layoutem */}
         <Route
           path="/:configId/:workspaceSlug"
-          element={<WorkspaceOverview config={config} />}
-        />
-        <Route
-          path="/:configId/:workspaceSlug/:scenarioSlug/:stepIndex?"
-          element={<ScenarioLayout config={config} />}
-        />
+          element={<WorkspaceLayout config={config} />}
+        >
+          {/* Route dla widoku workspace */}
+          <Route index element={<WorkspaceOverview config={config} />} />
+          {/* Route dla scenariuszy */}
+          <Route
+            path=":scenarioSlug/:stepIndex?"
+            element={<ScenarioLayout config={config} />}
+          />
+        </Route>
         <Route
           path="*"
           element={<div className="p-4">Strona nie znaleziona</div>}
@@ -61,7 +68,6 @@ const AppContent = withSuspense(LazyAppContent, "Ładowanie…");
 export const App = () => (
   <ConfigProvider>
     <AppContent />
-    
   </ConfigProvider>
 );
 
