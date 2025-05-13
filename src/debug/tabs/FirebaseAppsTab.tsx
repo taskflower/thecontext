@@ -1,7 +1,8 @@
 // src/debug/tabs/FirebaseAppsTab.tsx
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { createDatabaseProvider, DatabaseOperations } from '@/provideDB/databaseProvider';
+import { useConfig } from '@/ConfigProvider';
 
 interface FirebaseAppsTabProps {}
 
@@ -13,6 +14,8 @@ const FirebaseAppsTab: React.FC<FirebaseAppsTabProps> = () => {
   const [configs, setConfigs] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const navigate = useNavigate();
+  const { loadConfig } = useConfig();
 
   const fetchConfigs = async () => {
     try {
@@ -43,6 +46,17 @@ const FirebaseAppsTab: React.FC<FirebaseAppsTabProps> = () => {
       newSet.has(id) ? newSet.delete(id) : newSet.add(id);
       return newSet;
     });
+  };
+
+  // Funkcja do otwierania konfiguracji
+  const openConfig = async (configId: string, workspaceSlug: string) => {
+    try {
+      await loadConfig(configId);
+      navigate(`/${configId}/${workspaceSlug}`);
+    } catch (e) {
+      console.error('Błąd ładowania konfiguracji:', e);
+      setError('Nie udało się załadować konfiguracji');
+    }
   };
 
   useEffect(() => {
@@ -89,12 +103,12 @@ const FirebaseAppsTab: React.FC<FirebaseAppsTabProps> = () => {
                     {expandedIds.has(cfg.id) ? 'Ukryj szczegóły' : 'Szczegóły'}
                   </button>
                   {defaultWorkspace && (
-                    <Link
-                      to={`/${cfg.id}/${defaultWorkspace}`}
+                    <button
+                      onClick={() => openConfig(cfg.id, defaultWorkspace)}
                       className="px-2 py-1 text-xs font-medium bg-green-100 rounded hover:bg-green-200"
                     >
                       Otwórz
-                    </Link>
+                    </button>
                   )}
                   <button
                     onClick={() => deleteConfig(cfg.id)}

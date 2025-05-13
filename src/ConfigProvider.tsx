@@ -5,7 +5,9 @@ import React, {
   useEffect,
   useState,
   lazy,
+  useCallback,
 } from "react";
+import { useLocation } from "react-router-dom";
 import type { AppConfig, WorkspaceConfig, ScenarioConfig } from "@/core/types";
 
 const NotFoundComponent = (props: any) => (
@@ -68,8 +70,8 @@ export const preloadModules = {
   widget: (tplDir: string, name: string) => loadModule("widget", tplDir, name),
 };
 
-export const getConfigIdFromURL = () =>
-  window.location.pathname.split("/").filter(Boolean)[0] || "energyGrantApp";
+export const getConfigIdFromURL = (path: string) =>
+  path.split("/").filter(Boolean)[0] || "energyGrantApp";
 
 const configCache = new Map<string, Promise<AppConfig>>();
 
@@ -128,13 +130,7 @@ export const loadJsonConfigs = async (slug: string): Promise<AppConfig> => {
       } as AppConfig;
     } catch (error) {
       console.error("Error loading config:", error);
-      return {
-        name: "Aplikacja awaryjna",
-        description: "Wystąpił błąd podczas ładowania konfiguracji",
-        tplDir: "default",
-        workspaces: [] as WorkspaceConfig[],
-        scenarios: [] as ScenarioConfig[],
-      } as AppConfig;
+      throw error; // Rzuć błąd dalej, aby obsłużyć go w loadConfig
     }
   })();
 
@@ -149,6 +145,7 @@ const ConfigContext = createContext<{
   loading: boolean;
   error: string | null;
   preload: typeof preloadModules;
+  loadConfig: (configId: string) => Promise<void>;
 }>({
   config: null,
   configType: null,
@@ -156,9 +153,11 @@ const ConfigContext = createContext<{
   loading: false,
   error: null,
   preload: preloadModules,
+  loadConfig: async () => {},
 });
 
 export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
+  const location = useLocation();
   const [state, setState] = useState({
     config: null as AppConfig | null,
     configType: null as string | null,
@@ -167,67 +166,67 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
     error: null as string | null,
   });
 
-  useEffect(() => {
-    const slug = getConfigIdFromURL();
-    let isMounted = true;
+  const loadConfig = useCallback(async (slug: string) => {
+    setState(current => ({
+      ...current,
+      loading: true,
+      error: null
+    }));
 
-    (async () => {
+    try {
+      // Najpierw próbujemy załadować konfigurację z JSON
+      const config = await loadJsonConfigs(slug);
+      setState({
+        config,
+        configType: "documentdb",
+        configId: slug,
+        loading: false,
+        error: null,
+      });
+    } catch (err) {
       try {
-        const config = await loadJsonConfigs(slug);
-        if (isMounted) {
+        // Jeśli nie ma JSON, próbujemy załadować z Firebase
+        const { FirebaseAdapter } = await import(
+          "./provideDB/firebase/FirebaseAdapter"
+        );
+        const adapter = new FirebaseAdapter("application_configs");
+        const saved = await adapter.retrieveData(slug);
+
+        if (saved?.payload) {
           setState({
-            config,
-            configType: "documentdb",
+            config: saved.payload as AppConfig,
+            configType: "firebase",
             configId: slug,
             loading: false,
             error: null,
           });
+          return;
         }
-      } catch (err) {
-        if (!isMounted) return;
 
-        try {
-          const { FirebaseAdapter } = await import(
-            "./provideDB/firebase/FirebaseAdapter"
-          );
-          const saved = await new FirebaseAdapter(
-            "application_configs"
-          ).retrieveData(slug);
-
-          if (!isMounted) return;
-
-          if (saved?.payload) {
-            setState({
-              config: saved.payload as AppConfig,
-              configType: "firebase",
-              configId: slug,
-              loading: false,
-              error: null,
-            });
-            return;
-          }
-
-          throw new Error("Brak payload w dokumencie Firestore");
-        } catch (fbErr) {
-          if (isMounted) {
-            setState((current) => ({
-              ...current,
-              configId: slug,
-              loading: false,
-              error: "Nie udało się załadować konfiguracji",
-            }));
-          }
-        }
+        throw new Error("Brak payload w dokumencie Firestore");
+      } catch (fbErr: any) {
+        setState(current => ({
+          ...current,
+          configId: slug,
+          loading: false,
+          error: `Nie udało się załadować konfiguracji: ${fbErr?.message || "Nieznany błąd"}`,
+        }));
       }
-    })();
-
-    return () => {
-      isMounted = false;
-    };
+    }
   }, []);
 
+  // Efekt, który reaguje na zmiany w URL
+  useEffect(() => {
+    const slug = getConfigIdFromURL(location.pathname);
+    
+    // Jeśli ID konfiguracji się zmieniło, ładujemy nową konfigurację
+    if (slug !== state.configId || state.config === null) {
+      loadConfig(slug);
+    }
+  }, [location.pathname, state.configId, state.config, loadConfig]);
+
   return (
-    <ConfigContext.Provider value={{ ...state, preload: preloadModules }}>
+    <ConfigContext.Provider value={{ ...state, preload: preloadModules, loadConfig }}>
       {children}
     </ConfigContext.Provider>
   );
