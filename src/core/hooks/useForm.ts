@@ -1,6 +1,6 @@
 // src/core/hooks/useForm.ts
 import { useState, useEffect } from "react";
-import { ZodType } from "zod";
+import { ZodType } from 'zod';
 
 interface UseFormOptions<T> {
   schema: ZodType<T>;
@@ -16,14 +16,8 @@ interface UseFormResult {
   resetForm: () => void;
 }
 
-export const useForm = <T>({
-  schema,
-  jsonSchema,
-  initialData,
-}: UseFormOptions<T>): UseFormResult => {
-  const [formData, setFormData] = useState<Record<string, any>>(
-    initialData || {}
-  );
+export const useForm = <T>({ schema, jsonSchema, initialData }: UseFormOptions<T>): UseFormResult => {
+  const [formData, setFormData] = useState<Record<string, any>>(initialData || {});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -34,8 +28,8 @@ export const useForm = <T>({
   }, [initialData]);
 
   const handleChange = (field: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    setErrors(prev => {
       const e = { ...prev };
       delete e[field];
       return e;
@@ -48,12 +42,10 @@ export const useForm = <T>({
       (jsonSchema.required || []).forEach((field: string) => {
         const prop = jsonSchema.properties[field] || {};
         const val = formData[field];
-        if (prop.type === "boolean") {
-          if (val !== true) {
-            newErrors[field] = "To pole jest wymagane";
-          }
-        } else if (val == null || val === "") {
-          newErrors[field] = "To pole jest wymagane";
+        if (prop.type === 'boolean') {
+          if (val !== true) newErrors[field] = 'To pole jest wymagane';
+        } else if (val == null || val === '') {
+          newErrors[field] = 'To pole jest wymagane';
         }
       });
     }
@@ -63,7 +55,7 @@ export const useForm = <T>({
     } catch (e: any) {
       if (Array.isArray(e.errors)) {
         e.errors.forEach((err: any) => {
-          const fieldPath = err.path.join(".");
+          const fieldPath = err.path.join('.');
           newErrors[fieldPath] = err.message;
         });
       }

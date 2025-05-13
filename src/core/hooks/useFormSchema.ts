@@ -1,7 +1,7 @@
 // src/core/hooks/useFormSchema.ts
-import { useMemo } from 'react';
-import { ZodType } from 'zod';
-import { useForm } from '.';
+import { useMemo } from "react";
+import { ZodType } from "zod";
+import { useForm } from ".";
 
 interface FieldSchema {
   isArray?: boolean;
@@ -14,7 +14,15 @@ interface FieldSchema {
   max?: number;
   step?: number;
   placeholder?: string;
-  fieldType: 'text' | 'number' | 'checkbox' | 'select' | 'textarea' | 'date' | 'email' | 'password';
+  fieldType:
+    | "text"
+    | "number"
+    | "checkbox"
+    | "select"
+    | "textarea"
+    | "date"
+    | "email"
+    | "password";
 }
 
 interface UseFormSchemaOptions<T> {
@@ -36,83 +44,77 @@ interface UseFormSchemaResult {
 export const useFormSchema = <T>({
   schema,
   jsonSchema,
-  initialData
+  initialData,
 }: UseFormSchemaOptions<T>): UseFormSchemaResult => {
-  const formHook = useForm<T>({
-    schema,
-    jsonSchema,
-    initialData
-  });
+  const formHook = useForm<T>({ schema, jsonSchema, initialData });
 
   const fieldSchemas = useMemo(() => {
     const schemas: Record<string, FieldSchema> = {};
-    
     if (jsonSchema && jsonSchema.properties) {
       const requiredFields = jsonSchema.required || [];
-      
-      Object.entries(jsonSchema.properties).forEach(([field, propSchema]: [string, any]) => {
-        const isRequired = requiredFields.includes(field);
-        const fieldType = mapJsonTypeToFieldType(propSchema.type, propSchema.format, propSchema.enum);
-        
-        schemas[field] = {
-          type: propSchema.type || 'string',
-          title: propSchema.title || field,
-          description: propSchema.description,
-          required: isRequired,
-          fieldType,
-          min: propSchema.minimum,
-          max: propSchema.maximum,
-          step: propSchema.multipleOf,
-          placeholder: propSchema.example
-        };
-
-        if (propSchema.enum && propSchema.enum.length > 0) {
-          schemas[field].options = propSchema.enum.map((value: any, index: number) => ({
-            value,
-            label: propSchema.enumNames?.[index] || String(value)
-          }));
+      Object.entries(jsonSchema.properties).forEach(
+        ([field, propSchema]: [string, any]) => {
+          const isRequired = requiredFields.includes(field);
+          const fieldType = mapJsonTypeToFieldType(
+            propSchema.type,
+            propSchema.format,
+            propSchema.enum
+          );
+          schemas[field] = {
+            type: propSchema.type || "string",
+            title: propSchema.title || field,
+            description: propSchema.description,
+            required: isRequired,
+            fieldType,
+            min: propSchema.minimum,
+            max: propSchema.maximum,
+            step: propSchema.multipleOf,
+            placeholder: propSchema.example,
+          };
+          if (propSchema.enum && propSchema.enum.length > 0) {
+            schemas[field].options = propSchema.enum.map(
+              (value: any, index: number) => ({
+                value,
+                label: propSchema.enumNames?.[index] || String(value),
+              })
+            );
+          }
         }
-      });
+      );
     }
-    
     return schemas;
   }, [jsonSchema]);
-  
-  const hasRequiredFields = useMemo(() => {
-    return Object.values(fieldSchemas).some(schema => schema.required);
-  }, [fieldSchemas]);
-  
-  return {
-    ...formHook,
-    fieldSchemas,
-    hasRequiredFields
-  };
+
+  const hasRequiredFields = useMemo(
+    () => Object.values(fieldSchemas).some((schema) => schema.required),
+    [fieldSchemas]
+  );
+
+  return { ...formHook, fieldSchemas, hasRequiredFields };
 };
 
 function mapJsonTypeToFieldType(
-  type?: string, 
-  format?: string, 
+  type?: string,
+  format?: string,
   hasEnum?: any[]
-): 'text' | 'number' | 'checkbox' | 'select' | 'textarea' | 'date' | 'email' | 'password' {
-  if (hasEnum && hasEnum.length > 0) {
-    return 'select';
+):
+  | "text"
+  | "number"
+  | "checkbox"
+  | "select"
+  | "textarea"
+  | "date"
+  | "email"
+  | "password" {
+  if (hasEnum && hasEnum.length > 0) return "select";
+  if (type === "boolean") return "checkbox";
+  if (type === "number" || type === "integer") return "number";
+  if (type === "string") {
+    if (format === "date") return "date";
+    if (format === "email") return "email";
+    if (format === "password") return "password";
+    if (format === "textarea") return "textarea";
+    return "text";
   }
-  
-  if (type === 'boolean') {
-    return 'checkbox';
-  }
-  
-  if (type === 'number' || type === 'integer') {
-    return 'number';
-  }
-  
-  if (type === 'string') {
-    if (format === 'date') return 'date';
-    if (format === 'email') return 'email';
-    if (format === 'password') return 'password';
-    if (format === 'textarea') return 'textarea';
-    return 'text';
-  }
-  
-  return 'text'; 
+  return "text";
 }

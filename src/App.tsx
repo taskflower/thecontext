@@ -28,7 +28,7 @@ const RawAppContent: React.FC = () => {
       <ContextDebugger config={config} />
       <ConfigIndicator
         configId={configId!}
-        configType={configType}
+        configType={configType!}
         config={config}
       />
       <Routes>

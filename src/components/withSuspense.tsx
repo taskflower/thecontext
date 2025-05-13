@@ -1,14 +1,14 @@
 // src/components/withSuspense.tsx
-import { Suspense } from 'react';
-import { Loading } from '.';
+import { Suspense } from "react";
+import { Loading } from ".";
 
 export function withSuspense<P extends {}>(
-  Component: React.ComponentType<P>,
-  message = '…'
+  Comp: React.ComponentType<P>,
+  message = "…"
 ): React.FC<P> {
   const Suspended: React.FC<P> = (props) => (
     <Suspense fallback={<Loading message={message} />}>
-      <Component {...props} />
+      <Comp {...props} />
     </Suspense>
   );
   return Suspended;

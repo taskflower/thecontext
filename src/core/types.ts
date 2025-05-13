@@ -71,3 +71,4 @@ export interface WidgetProps {
   data?: any;
   [key: string]: any;
 }
+export type FCWithChildren<P = {}> = React.FC<P & { children?: React.ReactNode }>;

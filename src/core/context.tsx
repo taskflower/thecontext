@@ -3,7 +3,6 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { getPath, setPath } from ".";
 
-
 interface FlowState {
   data: Record<string, any>;
   get: (path: string) => any;

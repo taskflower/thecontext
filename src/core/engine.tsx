@@ -71,11 +71,7 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({
   return <Component {...componentProps} />;
 };
 
-export const FlowEngine: React.FC<{
-  config: AppConfig;
-  scenarioSlug: string;
-  stepIdx: number;
-}> = ({ config, scenarioSlug, stepIdx }) => {
+export const FlowEngine: React.FC<{ config: AppConfig; scenarioSlug: string; stepIdx: number; }> = ({ config, scenarioSlug, stepIdx }) => {
   const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
   const { toScenarioStep, toScenarioList } = useAppNavigation();
 
