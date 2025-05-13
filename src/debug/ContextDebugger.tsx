@@ -8,7 +8,6 @@ import { useAuth } from "../auth/useAuth";
 
 // Lazy loading komponentów tab
 const SchemaTab = lazy(() => import("./tabs/SchemaTab"));
-const LogsTab = lazy(() => import("./tabs/LogsTab"));
 const UserTab = lazy(() => import("./tabs/UserTab"));
 const FirebaseAppsTab = lazy(() => import("./tabs/FirebaseAppsTab"));
 const ExporterTab = lazy(() => import("./tabs/ExporterTab"));
@@ -119,9 +118,6 @@ export const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) =>
             </div>
           )}
         </div>
-        <div className="h-full" style={{ display: activeTab === "logs" ? "block" : "none" }}>
-          {loadedTabs.includes("logs") && <LogsTab />}
-        </div>
         {/* Nowa zakładka dla eksportera */}
         <div className="h-full" style={{ display: activeTab === "exporter" ? "block" : "none" }}>
           {loadedTabs.includes("exporter") && config && <ExporterTab config={config} />}
@@ -133,11 +129,10 @@ export const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) =>
   // Definicja przycisków zakładek
   const tabs = [
     { id: "user", label: "Użytkownik", icon: <User className="w-3.5 h-3.5 mr-1.5" />, always: true },
-    { id: "firebase", label: "Firebase", icon: <Globe className="w-3.5 h-3.5 mr-1.5" />, always: false },
+   
     { id: "schema", label: "Schema", icon: <List className="w-3.5 h-3.5 mr-1.5" />, always: false },
     { id: "data", label: "Dane", icon: <Database className="w-3.5 h-3.5 mr-1.5" />, always: false },
-    { id: "logs", label: "Logs", icon: <Activity className="w-3.5 h-3.5 mr-1.5" />, always: false },
-    // Dodajemy nową zakładkę dla eksportera Firebase
+    { id: "firebase", label: "Apps", icon: <Globe className="w-3.5 h-3.5 mr-1.5" />, always: false },
     { id: "exporter", label: "Eksport", icon: <Upload className="w-3.5 h-3.5 mr-1.5" />, always: false }
   ];
 
