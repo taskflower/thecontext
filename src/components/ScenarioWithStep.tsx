@@ -1,21 +1,15 @@
 // src/components/ScenarioWithStep.tsx
-import React, { Suspense, useMemo } from "react";
+import React from "react";
 import { useParams, Navigate } from "react-router-dom";
-import { Loading } from ".";
 import { AppConfig, FlowEngine, useLayout } from "@/core";
 import { ThemeProvider } from "@/themes/ThemeContext";
+import { withSuspense } from "./withSuspense";
 
-interface LayoutProps {
-  children?: React.ReactNode;
-  context?: {
-    workspace: any;
-    scenario: any;
-    stepIdx: number;
-    totalSteps: number;
-  };
+interface ScenarioWithStepProps {
+  config: AppConfig;
 }
 
-const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
+const RawScenarioWithStep: React.FC<ScenarioWithStepProps> = ({ config }) => {
   const {
     configId,
     workspaceSlug = "",
@@ -33,23 +27,14 @@ const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
   }
 
   const stepIdx = Number.isNaN(Number(stepIndex)) ? 0 : parseInt(stepIndex, 10);
-
-  const workspace = useMemo(
-    () => config.workspaces.find((w) => w.slug === workspaceSlug),
-    [config.workspaces, workspaceSlug]
-  );
+  const workspace = config.workspaces.find((w) => w.slug === workspaceSlug);
   if (!workspace) return <div>Workspace nie znaleziony</div>;
 
   const tpl = workspace.templateSettings?.tplDir || config.tplDir;
   const layout = workspace.templateSettings?.layoutFile || "Simple";
+  const AppLayout = useLayout<{ children?: React.ReactNode; context?: any }>(tpl, layout);
 
-  // Używamy zoptymalizowanego hooka useLayout
-  const AppLayout = useLayout<LayoutProps>(tpl, layout);
-
-  const scenario = useMemo(
-    () => config.scenarios.find((s) => s.slug === scenarioSlug),
-    [config.scenarios, scenarioSlug]
-  );
+  const scenario = config.scenarios.find((s) => s.slug === scenarioSlug);
   if (!scenario) return <div>Scenariusz nie znaleziony</div>;
 
   const layoutContext = {
@@ -62,16 +47,13 @@ const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
   return (
     <ThemeProvider value={tpl}>
       <AppLayout context={layoutContext}>
-        <Suspense fallback={<Loading message="Ładowanie kroku..." />}>
-          <FlowEngine
-            config={config}
-            scenarioSlug={scenarioSlug}
-            stepIdx={stepIdx}
-          />
-        </Suspense>
+        <FlowEngine config={config} scenarioSlug={scenarioSlug} stepIdx={stepIdx} />
       </AppLayout>
     </ThemeProvider>
   );
 };
 
-export default ScenarioWithStep;
+export default withSuspense(
+  React.lazy(() => Promise.resolve({ default: RawScenarioWithStep })),
+  'Ładowanie kroku…'
+);

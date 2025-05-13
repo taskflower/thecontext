@@ -1,16 +1,19 @@
 // src/components/WidgetLoader.tsx
-import React, { Suspense } from "react";
-import { useWidget } from "@/core";
-import { Loading } from ".";
+import React from 'react';
+import { useWidget } from '@/core';
+import { withSuspense } from './withSuspense';
 
-const WidgetLoader: React.FC<{ tplDir: string; widget: any }> = ({ tplDir, widget }) => {
+interface WidgetLoaderProps {
+  tplDir: string;
+  widget: any;
+}
+
+const RawWidgetLoader: React.FC<WidgetLoaderProps> = ({ tplDir, widget }) => {
   const Widget = useWidget(tplDir, widget.tplFile);
-  
-  return (
-    <Suspense fallback={<Loading message="Ładowanie widgetu..." />}>
-      <Widget {...widget} componentName={widget.tplFile} />
-    </Suspense>
-  );
+  return <Widget {...widget} componentName={widget.tplFile} />;
 };
 
-export default WidgetLoader;
+export default withSuspense(
+  React.lazy(() => Promise.resolve({ default: RawWidgetLoader })),
+  'Ładowanie widgetu…'
+);

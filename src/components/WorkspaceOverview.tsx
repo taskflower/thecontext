@@ -1,27 +1,17 @@
 // src/components/WorkspaceOverview.tsx
-import React, { Suspense } from "react";
-import { useParams } from "react-router-dom";
-import { Loading } from ".";
+import React from "react";
+import { useParams, Link } from "react-router-dom";
 import { AppConfig, TemplateComponentProps, useLayout, useComponent } from "@/core";
 import { ThemeProvider } from "@/themes/ThemeContext";
+import { withSuspense } from "./withSuspense";
 
-interface LayoutProps {
-  children?: React.ReactNode;
+interface WorkspaceOverviewProps {
+  config: AppConfig;
 }
 
-interface WidgetsStepProps extends TemplateComponentProps {
-  widgets: any[];
-  title?: string;
-  subtitle?: string;
-  saveToDB: any;
-  scenarioName: string | null;
-  nodeSlug: string | null;
-}
-
-const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
-  const { configId, workspaceSlug } = useParams<{ configId: string, workspaceSlug: string }>();
+const RawWorkspaceOverview: React.FC<WorkspaceOverviewProps> = ({ config }) => {
+  const { configId, workspaceSlug } = useParams<{ configId: string; workspaceSlug: string }>();
   const workspace = config.workspaces.find((w) => w.slug === workspaceSlug);
-
   if (!workspace) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -33,12 +23,12 @@ const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
             Przepraszamy, ale workspace "{workspaceSlug}" nie istnieje.
           </p>
           <div className="flex justify-center">
-            <a
-              href={`/${configId}`}
+            <Link
+              to={`/${configId}`}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               Wróć do strony głównej
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -47,35 +37,35 @@ const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
 
   const tplDir = workspace.templateSettings?.tplDir || config.tplDir;
   const layoutFile = workspace.templateSettings?.layoutFile || "Simple";
+  const AppLayout = useLayout<{ children?: React.ReactNode }>(tplDir, layoutFile);
+  const WidgetsStep = useComponent<TemplateComponentProps>(tplDir, "WidgetsStep");
 
-  const AppLayout = useLayout<LayoutProps>(tplDir, layoutFile);
-  const WidgetsStep = useComponent<WidgetsStepProps>(tplDir, "WidgetsStep");
-
-  const widgets = workspace.templateSettings?.widgets?.map((widget) => ({
-    ...widget,
+  const widgets = (workspace.templateSettings?.widgets || []).map((w: any) => ({
+    ...w,
     config,
     workspaceSlug,
-  })) || [];
+  }));
 
   return (
     <ThemeProvider value={tplDir}>
-      <Suspense fallback={<Loading message="Ładowanie workspace..." />}>
-        <AppLayout>
-          <WidgetsStep
-            widgets={widgets}
-            onSubmit={() => {}}
-            title={workspace.name}
-            subtitle={workspace.description}
-            saveToDB={null}
-            scenarioName={null}
-            nodeSlug={null}
-            schema={null} 
-            data={null}  
-          />
-        </AppLayout>
-      </Suspense>
+      <AppLayout>
+        <WidgetsStep
+          widgets={widgets}
+          onSubmit={() => {}}
+          title={workspace.name}
+          subtitle={workspace.description}
+          saveToDB={null}
+          scenarioName={null}
+          nodeSlug={null}
+          schema={null}
+          data={null}
+        />
+      </AppLayout>
     </ThemeProvider>
   );
 };
 
-export default WorkspaceOverview;
+export default withSuspense(
+  React.lazy(() => Promise.resolve({ default: RawWorkspaceOverview })),
+  'Ładowanie workspace…'
+);

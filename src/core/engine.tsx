@@ -1,9 +1,15 @@
 // src/core/engine.tsx
-import React, { Suspense, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
-import { AppConfig, NodeConfig, useFlowStore, TemplateComponentProps, useComponent } from '.';
-import { jsonToZod } from './utils/jsonToZod';
-import { useAppNavigation } from './navigation';
+import React, { useMemo } from "react";
+import { useParams } from "react-router-dom";
+import {
+  AppConfig,
+  NodeConfig,
+  useFlowStore,
+  TemplateComponentProps,
+  useComponent,
+} from ".";
+import { jsonToZod } from "./utils/jsonToZod";
+import { useAppNavigation } from "./navigation";
 
 interface NodeRendererProps {
   config: AppConfig;
@@ -21,7 +27,6 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({
   totalSteps,
 }) => {
   const { get, set } = useFlowStore();
-
   const jsonSchema = useMemo(
     () =>
       config.workspaces[0]?.contextSchema.properties?.[
@@ -29,12 +34,13 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({
       ] ?? {},
     [config.workspaces, node.contextSchemaPath]
   );
-
   const zodSchema = useMemo(() => jsonToZod(jsonSchema), [jsonSchema]);
   const data = get(node.contextDataPath);
-  
-  // Używamy zoptymalizowanego hooka useComponent
-  const Component = useComponent<TemplateComponentProps>(config.tplDir, node.tplFile);
+
+  const Component = useComponent<TemplateComponentProps>(
+    config.tplDir,
+    node.tplFile
+  );
 
   const currentScenario = useMemo(
     () =>
@@ -45,38 +51,23 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({
   );
 
   const handleSubmit = (val: any) => {
-    if (val !== null) {
-      set(node.contextDataPath, val);
-    }
+    if (val !== null) set(node.contextDataPath, val);
     onNext();
-  };
-
-  const context = {
-    stepIdx,
-    totalSteps,
-    workspace: config.workspaces.find(
-      (w) => w.slug === currentScenario?.workspaceSlug
-    ),
-    scenario: currentScenario,
   };
 
   const componentProps: TemplateComponentProps = {
     schema: zodSchema,
-    jsonSchema: jsonSchema,
-    data: data,
+    jsonSchema,
+    data,
     onSubmit: handleSubmit,
     ...(node.attrs || {}),
     saveToDB: node.saveToDB,
     scenarioName: currentScenario?.name,
     nodeSlug: node.slug,
-    context: context,
+    context: { stepIdx, totalSteps, workspace: null, scenario: null },
   };
 
-  return (
-    <Suspense fallback={<div>Ładowanie kroku...</div>}>
-      <Component {...componentProps} />
-    </Suspense>
-  );
+  return <Component {...componentProps} />;
 };
 
 export const FlowEngine: React.FC<{
@@ -87,25 +78,16 @@ export const FlowEngine: React.FC<{
   const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
   const { toScenarioStep, toScenarioList } = useAppNavigation();
 
-  const scenario = useMemo(
-    () => config.scenarios.find((s) => s.slug === scenarioSlug),
-    [config.scenarios, scenarioSlug]
-  );
+  const scenario = config.scenarios.find((s) => s.slug === scenarioSlug);
   if (!scenario) return <div>Scenariusz nie znaleziony</div>;
 
-  const nodes = useMemo(
-    () => [...scenario.nodes].sort((a, b) => a.order - b.order),
-    [scenario.nodes]
-  );
+  const nodes = [...scenario.nodes].sort((a, b) => a.order - b.order);
   const index = Math.min(Math.max(stepIdx, 0), nodes.length - 1);
-  const totalSteps = nodes.length;
 
   const handleNext = () => {
-    if (index < totalSteps - 1) {
+    if (index < nodes.length - 1)
       toScenarioStep(workspaceSlug!, scenarioSlug, index + 1);
-    } else {
-      toScenarioList(workspaceSlug!);
-    }
+    else toScenarioList(workspaceSlug!);
   };
 
   return (
@@ -114,7 +96,7 @@ export const FlowEngine: React.FC<{
       node={nodes[index]}
       onNext={handleNext}
       stepIdx={index}
-      totalSteps={totalSteps}
+      totalSteps={nodes.length}
     />
   );
 };
