@@ -1,9 +1,10 @@
 // src/debug/tabs/ExporterTab.tsx
-
 import React, { useState, useMemo } from 'react';
-import { Download,  RefreshCw } from 'lucide-react';
-import { AppConfig } from '../../core/types';
-import { createDatabaseProvider, SaveToDBOptions } from '@/provideDB/databaseProvider';
+import { Download, RefreshCw } from 'lucide-react';
+import { AppConfig } from '@/core/types';
+import { createDatabaseProvider } from '@/provideDB/databaseProvider';
+import type { SaveToDBOptions } from '@/provideDB/databaseProvider';
+import { useConfig } from '@/ConfigProvider';
 
 interface ExporterTabProps {
   config: AppConfig;
@@ -12,6 +13,7 @@ interface ExporterTabProps {
 type ExportStatus = 'idle' | 'exporting' | 'success' | 'error';
 
 const ExporterTab: React.FC<ExporterTabProps> = ({ config }) => {
+  const { configId } = useConfig();
   const [status, setStatus] = useState<ExportStatus>('idle');
   const [logs, setLogs] = useState<string[]>([]);
   const dbProvider = useMemo(
@@ -22,7 +24,9 @@ const ExporterTab: React.FC<ExporterTabProps> = ({ config }) => {
   const addLog = (message: string) => {
     setLogs(prev => [...prev, message]);
     const container = document.getElementById('logs-container');
-    if (container) setTimeout(() => { container.scrollTop = container.scrollHeight; }, 10);
+    if (container) {
+      setTimeout(() => { container.scrollTop = container.scrollHeight; }, 10);
+    }
   };
 
   const exportConfig = async () => {
@@ -35,14 +39,14 @@ const ExporterTab: React.FC<ExporterTabProps> = ({ config }) => {
       const scenariosCount = config.scenarios.length;
       const nodesCount = config.scenarios.reduce((sum, s) => sum + s.nodes.length, 0);
       addLog(`📊 Statystyki: ${workspacesCount} workspace'ów, ${scenariosCount} scenariuszy, ${nodesCount} węzłów`);
-      addLog(`📝 Zapis do Firestore...`);
+      addLog(`📝 Zapis do Firestore pod ID "${configId}"…`);
 
-      const options: SaveToDBOptions = {
+      const options: SaveToDBOptions & { id: string } = {
         enabled: true,
         provider: 'firebase',
         itemType: 'project',
         itemTitle: config.name,
-        contentPath: 'application_configs',
+        id: configId!,  // Użycie slug jako ID dokumentu
         additionalInfo: { workspacesCount, scenariosCount, nodesCount }
       };
       await dbProvider.saveData(options, config);

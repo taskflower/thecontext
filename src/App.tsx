@@ -14,6 +14,7 @@ import {
 } from "@/components";
 import { ConfigProvider, useConfig } from "./ConfigProvider";
 import ScenarioLayout from "@/components/ScenarioLayout";
+import { ContextDebugger } from "./debug";
 
 const RawAppContent: React.FC = () => {
   const { config, loading, error, configId } = useConfig();
@@ -47,6 +48,7 @@ const RawAppContent: React.FC = () => {
           element={<div className="p-4">Strona nie znaleziona</div>}
         />
       </Routes>
+      <ContextDebugger config={config} />
     </Router>
   );
 };
@@ -59,6 +61,7 @@ const AppContent = withSuspense(LazyAppContent, "Ładowanie…");
 export const App = () => (
   <ConfigProvider>
     <AppContent />
+    
   </ConfigProvider>
 );
 

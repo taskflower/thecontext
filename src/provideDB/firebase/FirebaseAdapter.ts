@@ -1,43 +1,62 @@
 // src/provideDB/firebase/FirebaseAdapter.ts
-
-import { DatabaseOperations, SaveToDBOptions } from '../databaseProvider';
-import { FirebaseProvider } from './FirebaseProvider';
-import { FirestoreItem } from './FirebaseRepository';
+import { SaveToDBOptions, DatabaseOperations } from "../databaseProvider";
+import { db } from "./config";
+import {
+  collection,
+  doc,
+  setDoc,
+  getDoc,
+  deleteDoc,
+  query,
+  where,
+  getDocs,
+  CollectionReference,
+} from "firebase/firestore";
 
 export class FirebaseAdapter implements DatabaseOperations {
-  private collectionPath: string;
+  private collRef: CollectionReference;
 
-  constructor(collectionPath: string = 'items') {
-    this.collectionPath = collectionPath;
+  constructor(collectionPath: string = "items") {
+    this.collRef = collection(db, collectionPath);
   }
 
-  async saveData(options: SaveToDBOptions, data: any): Promise<void> {
+  /** 
+   * Zapisuje dokument pod konkretnym ID (options.id) albo generuje nowy 
+   * - dzięki temu ConfigProvider.retrieveData(slug) zadziała poprawnie 
+   */
+  async saveData(options: SaveToDBOptions & { id?: string }, data: any): Promise<void> {
     if (!options.enabled) return;
-    const provider = new FirebaseProvider(this.collectionPath);
-
-    // Upewniamy się, że typ dokumentu odpowiada interfejsowi
-    const docToSave: Omit<FirestoreItem, 'id'> = {
-      payload: data,
-      // dodatkowe pola jeśli zdefiniowane
-      ...(options.itemType ? { type: options.itemType } : {}),
-      ...(options.itemTitle ? { title: options.itemTitle } : {}),
-      ...(options.additionalInfo ? { additionalInfo: options.additionalInfo } : {})
+    const id = options.id ?? undefined;
+    const ref = id ? doc(this.collRef, id) : doc(this.collRef);
+    const now = new Date().toISOString();
+    const payload = {
+      payload:        data,
+      type:           options.itemType,
+      title:          options.itemTitle,
+      additionalInfo: options.additionalInfo,
+      createdAt:      now,
+      updatedAt:      now,
     };
-
-    await provider.save(docToSave);
+    await setDoc(ref, payload, { merge: true });
   }
+
   async retrieveData(id: string): Promise<any> {
-    const provider = new FirebaseProvider(this.collectionPath);
-    return await provider.get(id);
+    const ref = doc(this.collRef, id);
+    const snap = await getDoc(ref);
+    return snap.exists() ? { id: snap.id, ...(snap.data() as any) } : null;
   }
 
   async listItems(itemType?: string): Promise<any[]> {
-    const provider = new FirebaseProvider(this.collectionPath);
-    return await provider.list(itemType);
+    let q = this.collRef as any;
+    if (itemType) {
+      q = query(this.collRef, where("type", "==", itemType));
+    }
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...(d.data() as any) }));
   }
 
   async deleteItem(id: string): Promise<void> {
-    const provider = new FirebaseProvider(this.collectionPath);
-    await provider.delete(id);
+    const ref = doc(this.collRef, id);
+    await deleteDoc(ref);
   }
 }
