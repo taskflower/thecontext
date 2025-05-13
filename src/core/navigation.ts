@@ -1,7 +1,7 @@
+// src/core/navigation.ts
 import { useConfig } from "@/ConfigProvider";
 import { useNavigate } from "react-router-dom";
 
-// src/core/navigation.ts
 export const useAppNavigation = () => {
     const navigate = useNavigate();
     const { configId } = useConfig();

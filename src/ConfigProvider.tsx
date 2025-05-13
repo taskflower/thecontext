@@ -13,7 +13,6 @@ interface ConfigContextValue {
   configId: string | null;
   loading: boolean;
   error: string | null;
-  // Expose preload functions
   preload: typeof preloadModules;
 }
 
@@ -41,7 +40,7 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
   // nie będą działać w tym komponencie bezpośrednio
 
   useEffect(() => {
-    const slug = getConfigIdFromURL(); // Używamy funkcji z preload.ts, która korzysta z window.location
+    const slug = getConfigIdFromURL();
     setConfigId(slug);
 
     const loadConfig = async () => {
@@ -62,14 +61,12 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
     loadConfig();
   }, []);
 
-  // Memoize the context value to prevent unnecessary rerenders
   const contextValue = useMemo(() => ({
     config,
     configType,
     configId,
     loading,
     error,
-    // Include preload object in context
     preload: preloadModules
   }), [config, configType, configId, loading, error]);
 
@@ -80,10 +77,8 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
   );
 };
 
-// Enhanced hook that provides both config and preloading capabilities
 export const useConfig = () => useContext(ConfigContext);
 
-// Hook do użycia wewnątrz komponentów pod <Router>, który pobiera parametr configId z URL
 export const useRouteConfigId = (): string => {
   const params = useParams<{ configId: string }>();
   return params.configId || '';

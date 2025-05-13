@@ -19,7 +19,6 @@ export const App: React.FC = () => (
   </ConfigProvider>
 );
 
-// Separated loading states into their own components
 const LoadingState = memo(({ message }: { message: string }) => (
   <AppLoading message={message} />
 ));
@@ -32,7 +31,6 @@ const NoConfigState = memo(() => (
   <div className="p-4 text-gray-700">Brak konfiguracji</div>
 ));
 
-// Main app routing
 const AppRoutes = memo(({ config, configId }: { config: AppConfig, configId: string | null }) => (
   <Routes>
     <Route
