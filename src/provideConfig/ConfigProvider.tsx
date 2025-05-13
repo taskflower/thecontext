@@ -1,15 +1,17 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
-import { AppConfig } from '@/core/types';
-import { 
-  preloadModules,
-  getConfigIdFromURL,
-  loadJsonConfigs
-} from './preload';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+  useMemo,
+} from "react";
+import { AppConfig } from "@/core/types";
+import { getConfigIdFromURL, loadJsonConfigs, preloadModules } from ".";
 
 interface ConfigContextValue {
   config: AppConfig | null;
-  configType: 'local' | 'firebase' | 'documentdb' | null;
+  configType: "local" | "firebase" | "documentdb" | null;
   configId: string | null;
   loading: boolean;
   error: string | null;
@@ -22,7 +24,7 @@ const ConfigContext = createContext<ConfigContextValue>({
   configId: null,
   loading: false,
   error: null,
-  preload: preloadModules
+  preload: preloadModules,
 });
 
 interface ConfigProviderProps {
@@ -31,13 +33,15 @@ interface ConfigProviderProps {
 
 export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
   const [config, setConfig] = useState<AppConfig | null>(null);
-  const [configType, setConfigType] = useState<'local' | 'firebase' | 'documentdb' | null>(null);
+  const [configType, setConfigType] = useState<
+    "local" | "firebase" | "documentdb" | null
+  >(null);
   const [configId, setConfigId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  
-  // Zwróć uwagę: ConfigProvider działa przed Router, więc useParams/useLocation
-  // nie będą działać w tym komponencie bezpośrednio
+
+  // Important note: ConfigProvider works before Router, so useParams/useLocation
+  // will not work directly in this component
 
   useEffect(() => {
     const slug = getConfigIdFromURL();
@@ -48,11 +52,11 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
         setLoading(true);
         const appConfig = await loadJsonConfigs(slug);
         setConfig(appConfig);
-        setConfigType('documentdb');
+        setConfigType("documentdb");
         setError(null);
       } catch (err: any) {
-        console.error('Configuration loading error', err);
-        setError('Failed to load configuration');
+        console.error("Configuration loading error", err);
+        setError("Failed to load configuration");
       } finally {
         setLoading(false);
       }
@@ -61,14 +65,17 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
     loadConfig();
   }, []);
 
-  const contextValue = useMemo(() => ({
-    config,
-    configType,
-    configId,
-    loading,
-    error,
-    preload: preloadModules
-  }), [config, configType, configId, loading, error]);
+  const contextValue = useMemo(
+    () => ({
+      config,
+      configType,
+      configId,
+      loading,
+      error,
+      preload: preloadModules,
+    }),
+    [config, configType, configId, loading, error]
+  );
 
   return (
     <ConfigContext.Provider value={contextValue}>
@@ -78,4 +85,3 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
 };
 
 export const useConfig = () => useContext(ConfigContext);
-
