@@ -3,8 +3,8 @@ import { lazy, Suspense } from "react";
 import { useFlow } from "../../../core/context";
 import { CheckSquare, ArrowRight, Database } from "lucide-react";
 import { useParams } from "react-router-dom";
-import { get as getPath } from 'lodash';
 import { getDatabaseProvider, SaveToDBOptions } from '@/provideDB/databaseProvider';
+import { getPath } from "@/core";
 
 type WidgetConfig = {
   tplFile: string;

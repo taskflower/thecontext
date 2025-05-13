@@ -1,6 +1,8 @@
 // src/debug/components/JsonSchemaRenderer.tsx
+import { getPath } from '@/core';
 import React, { useState } from 'react';
-import get from 'lodash/get';
+
+
 
 export type JsonSchema = {
   title?: string;
@@ -121,7 +123,7 @@ const ConstraintBadge: React.FC<{ children: React.ReactNode }> = ({ children }) 
 const SchemaNode: React.FC<NodeProps> = ({ name, schema, required = false, parentType, isLastSibling = false, path, contextData }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const typeLabel = getTypeLabel(schema);
-  const value = path ? get(contextData, path) : contextData;
+  const value = path ? getPath(contextData, path) : contextData;
 
   const statusBadges = [] as React.ReactNode[];
   if (schema.readOnly) statusBadges.push(<span key="ro" className="text-xs text-gray-500 ml-2">read-only</span>);

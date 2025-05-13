@@ -13,7 +13,6 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        // Funkcyjny podział na chunki, omija problem z "firebase" entry
         manualChunks(id: string) {
           if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
             return 'react-vendor';
@@ -21,14 +20,17 @@ export default defineConfig({
           if (id.includes('node_modules/firebase/')) {
             return 'firebase-vendor';
           }
+          if (id.includes('node_modules/localforage/')) {
+            return 'localforage-vendor';
+          }
+          if (id.includes('node_modules/react-hook-form/')) {
+            return 'react-hook-form-vendor';
+          }
           if (id.includes('node_modules/recharts')) {
             return 'recharts-vendor';
           }
           if (id.includes('node_modules/lucide-react')) {
             return 'lucide-vendor';
-          }
-          if (id.includes('node_modules/lodash')) {
-            return 'lodash-vendor';
           }
           if (id.includes('node_modules/zod')) {
             return 'zod-vendor';

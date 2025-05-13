@@ -1,6 +1,6 @@
 // src/debug/ContextDebugger.tsx
 import React, { useState, useEffect, useRef, lazy, Suspense } from "react";
-import { Database, X, List, ArrowRight, Activity, User, Globe, Upload, Settings} from "lucide-react";
+import { Database, X, List, ArrowRight, User, Globe, Upload, Settings} from "lucide-react";
 import { useFlowStore } from "../core/context";
 import JsonTreeRenderer from "./components/JsonTreeRenderer";
 import { AppConfig } from "../core/types";
