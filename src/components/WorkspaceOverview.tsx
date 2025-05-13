@@ -1,11 +1,9 @@
 // src/components/WorkspaceOverview.tsx
-import React, { Suspense, useMemo, ComponentType } from "react";
+import React, { Suspense, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { Loading } from ".";
-import { AppConfig, TemplateComponentProps } from "@/core";
+import { AppConfig, TemplateComponentProps, useLayout, useComponent } from "@/core";
 import { ThemeProvider } from "@/themes/ThemeContext";
-import { useConfig } from "@/ConfigProvider";
-
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -21,7 +19,6 @@ interface WidgetsStepProps extends TemplateComponentProps {
 }
 
 const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
-  const { preload } = useConfig();
   const { configId, workspaceSlug } = useParams<{ configId: string, workspaceSlug: string }>();
   
   const workspace = useMemo(
@@ -55,15 +52,9 @@ const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
   const tplDir = workspace.templateSettings?.tplDir || config.tplDir;
   const layoutFile = workspace.templateSettings?.layoutFile || "Simple";
 
-  const AppLayout = useMemo(
-    () => preload.layout(tplDir, layoutFile) as ComponentType<LayoutProps>,
-    [tplDir, layoutFile, preload]
-  );
-  
-  const WidgetsStep = useMemo(
-    () => preload.component(tplDir, "WidgetsStep") as ComponentType<WidgetsStepProps>,
-    [tplDir, preload]
-  );
+  // Używamy zoptymalizowanych hooków useLayout i useComponent
+  const AppLayout = useLayout<LayoutProps>(tplDir, layoutFile);
+  const WidgetsStep = useComponent<WidgetsStepProps>(tplDir, "WidgetsStep");
 
   const widgets = useMemo(
     () =>

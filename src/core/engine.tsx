@@ -1,12 +1,9 @@
 // src/core/engine.tsx
-import React, { Suspense, useMemo, ComponentType } from 'react';
+import React, { Suspense, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { AppConfig, NodeConfig, useFlowStore, TemplateComponentProps } from '.';
+import { AppConfig, NodeConfig, useFlowStore, TemplateComponentProps, useComponent } from '.';
 import { jsonToZod } from './utils/jsonToZod';
 import { useAppNavigation } from './navigation';
-import { useConfig } from '@/ConfigProvider';
-
-
 
 interface NodeRendererProps {
   config: AppConfig;
@@ -24,7 +21,6 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({
   totalSteps,
 }) => {
   const { get, set } = useFlowStore();
-  const { preload } = useConfig();
 
   const jsonSchema = useMemo(
     () =>
@@ -36,10 +32,9 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({
 
   const zodSchema = useMemo(() => jsonToZod(jsonSchema), [jsonSchema]);
   const data = get(node.contextDataPath);
-  const Component = useMemo(
-    () => preload.component(config.tplDir, node.tplFile) as ComponentType<TemplateComponentProps>,
-    [config.tplDir, node.tplFile, preload]
-  );
+  
+  // Używamy zoptymalizowanego hooka useComponent
+  const Component = useComponent<TemplateComponentProps>(config.tplDir, node.tplFile);
 
   const currentScenario = useMemo(
     () =>
