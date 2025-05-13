@@ -1,12 +1,27 @@
 // src/components/WorkspaceOverview.tsx
-import React, { Suspense, useMemo } from "react";
+import React, { Suspense, useMemo, ComponentType } from "react";
 import { useParams } from "react-router-dom";
-import { preloadComponent, preloadLayout } from "../preload";
+
 import { Loading } from ".";
-import { AppConfig } from "@/core";
-import { ThemeProvider } from "../themes/ThemeContext";
+import { AppConfig, TemplateComponentProps } from "@/core";
+import { ThemeProvider } from "@/themes/ThemeContext";
+import { useConfig } from "@/ConfigProvider";
+
+interface LayoutProps {
+  children?: React.ReactNode;
+}
+
+interface WidgetsStepProps extends TemplateComponentProps {
+  widgets: any[];
+  title?: string;
+  subtitle?: string;
+  saveToDB: any;
+  scenarioName: string | null;
+  nodeSlug: string | null;
+}
 
 const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
+  const { preload } = useConfig();
   const { configId, workspaceSlug } = useParams<{ configId: string, workspaceSlug: string }>();
   
   const workspace = useMemo(
@@ -39,14 +54,15 @@ const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
 
   const tplDir = workspace.templateSettings?.tplDir || config.tplDir;
   const layoutFile = workspace.templateSettings?.layoutFile || "Simple";
-  const AppLayout = useMemo(
-    () => preloadLayout(tplDir, layoutFile),
-    [tplDir, layoutFile]
-  );
 
+  const AppLayout = useMemo(
+    () => preload.layout(tplDir, layoutFile) as ComponentType<LayoutProps>,
+    [tplDir, layoutFile, preload]
+  );
+  
   const WidgetsStep = useMemo(
-    () => preloadComponent(tplDir, "WidgetsStep"),
-    [tplDir]
+    () => preload.component(tplDir, "WidgetsStep") as ComponentType<WidgetsStepProps>,
+    [tplDir, preload]
   );
 
   const widgets = useMemo(
@@ -72,6 +88,8 @@ const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
               saveToDB={null}
               scenarioName={null}
               nodeSlug={null}
+              schema={null} 
+              data={null}  
             />
           </Suspense>
         </AppLayout>

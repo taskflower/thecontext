@@ -1,12 +1,24 @@
 // src/components/ScenarioWithStep.tsx
-import React, { Suspense, useMemo } from "react";
+import React, { Suspense, useMemo, ComponentType } from "react";
 import { useParams, Navigate } from "react-router-dom";
-import { preloadLayout } from "@/preload";
 import { Loading } from ".";
 import { AppConfig, FlowEngine } from "@/core";
 import { ThemeProvider } from "@/themes/ThemeContext";
+import { useConfig } from "@/ConfigProvider";
+
+// Definicja interfejsu dla props layoutu
+interface LayoutProps {
+  children?: React.ReactNode;
+  context?: {
+    workspace: any;
+    scenario: any;
+    stepIdx: number;
+    totalSteps: number;
+  };
+}
 
 const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
+  const { preload } = useConfig();
   const {
     configId,
     workspaceSlug = "",
@@ -33,7 +45,12 @@ const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
 
   const tpl = workspace.templateSettings?.tplDir || config.tplDir;
   const layout = workspace.templateSettings?.layoutFile || "Simple";
-  const AppLayout = useMemo(() => preloadLayout(tpl, layout), [tpl, layout]);
+  
+  // Tutaj jest kluczowa zmiana - wyraźnie typujemy AppLayout jako komponent przyjmujący LayoutProps
+  const AppLayout = useMemo(
+    () => preload.layout(tpl, layout) as ComponentType<LayoutProps>,
+    [tpl, layout, preload]
+  );
 
   const scenario = useMemo(
     () => config.scenarios.find((s) => s.slug === scenarioSlug),

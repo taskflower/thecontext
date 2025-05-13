@@ -2,11 +2,12 @@
 import React, { useMemo } from 'react';
 import { CheckSquare, ArrowRight } from 'lucide-react';
 import { useFlow } from '@/core';
-import { preloadWidget } from '@/preload';
+
 import { WidgetsStepProps } from '@/themes/themeTypes';
 import { getColSpanClass } from '@/core/utils/themesHelpers';
 import { useTheme } from '@/themes/ThemeContext';
 import { getDatabaseProvider, SaveToDBOptions } from '@/provideDB/databaseProvider';
+import { useConfig } from '@/ConfigProvider';
 
 // Lekki spinner dla widgetów
 const WidgetLoading: React.FC = React.memo(() => (
@@ -18,9 +19,11 @@ const WidgetLoading: React.FC = React.memo(() => (
 // Kontener dla pojedynczego widgetu
 const WidgetContainer = React.memo(
   ({ widget, data, tplDir }: { widget: any; data: any; tplDir: string }) => {
+    const { preload } = useConfig();
+    
     const WidgetComp = useMemo(
-      () => preloadWidget(tplDir, widget.tplFile),
-      [tplDir, widget.tplFile]
+      () => preload.widget(tplDir, widget.tplFile),
+      [preload, tplDir, widget.tplFile]
     );
 
     return (

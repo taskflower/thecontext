@@ -1,10 +1,10 @@
 // src/core/engine.tsx
-import React, { Suspense, useMemo } from 'react';
+import React, { Suspense, useMemo, ComponentType } from 'react';
 import { useParams } from 'react-router-dom';
-import { preloadComponent } from '../preload';
-import { AppConfig, NodeConfig, useFlowStore } from '.';
+import { AppConfig, NodeConfig, useFlowStore, TemplateComponentProps } from '.';
 import { jsonToZod } from './utils/jsonToZod';
 import { useAppNavigation } from './navigation';
+import { useConfig } from '@/ConfigProvider';
 
 interface NodeRendererProps {
   config: AppConfig;
@@ -22,6 +22,7 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({
   totalSteps,
 }) => {
   const { get, set } = useFlowStore();
+  const { preload } = useConfig();
 
   const jsonSchema = useMemo(
     () =>
@@ -32,12 +33,10 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({
   );
 
   const zodSchema = useMemo(() => jsonToZod(jsonSchema), [jsonSchema]);
-
   const data = get(node.contextDataPath);
-
   const Component = useMemo(
-    () => preloadComponent(config.tplDir, node.tplFile),
-    [config.tplDir, node.tplFile]
+    () => preload.component(config.tplDir, node.tplFile) as ComponentType<TemplateComponentProps>,
+    [config.tplDir, node.tplFile, preload]
   );
 
   const currentScenario = useMemo(
@@ -48,21 +47,6 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({
     [config.scenarios, node.slug]
   );
 
-  const attrs = {
-    ...(node.attrs || {}),
-    saveToDB: node.saveToDB,
-    scenarioName: currentScenario?.name,
-    nodeSlug: node.slug,
-    context: {
-      stepIdx,
-      totalSteps,
-      workspace: config.workspaces.find(
-        (w) => w.slug === currentScenario?.workspaceSlug
-      ),
-      scenario: currentScenario,
-    },
-  };
-
   const handleSubmit = (val: any) => {
     if (val !== null) {
       set(node.contextDataPath, val);
@@ -70,15 +54,30 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({
     onNext();
   };
 
+  const context = {
+    stepIdx,
+    totalSteps,
+    workspace: config.workspaces.find(
+      (w) => w.slug === currentScenario?.workspaceSlug
+    ),
+    scenario: currentScenario,
+  };
+
+  const componentProps: TemplateComponentProps = {
+    schema: zodSchema,
+    jsonSchema: jsonSchema,
+    data: data,
+    onSubmit: handleSubmit,
+    ...(node.attrs || {}),
+    saveToDB: node.saveToDB,
+    scenarioName: currentScenario?.name,
+    nodeSlug: node.slug,
+    context: context,
+  };
+
   return (
     <Suspense fallback={<div>Ładowanie kroku...</div>}>
-      <Component
-        schema={zodSchema}
-        jsonSchema={jsonSchema}
-        data={data}
-        onSubmit={handleSubmit}
-        {...attrs}
-      />
+      <Component {...componentProps} />
     </Suspense>
   );
 };

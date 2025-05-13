@@ -1,6 +1,11 @@
-// src/ConfigProvider.tsx
 import React, { createContext, useContext, useEffect, useState, ReactNode, useMemo } from 'react';
-import { AppConfig, WorkspaceConfig, ScenarioConfig } from '@/core/types';
+import { useParams } from 'react-router-dom';
+import { AppConfig } from '@/core/types';
+import { 
+  preloadModules,
+  getConfigIdFromURL,
+  loadJsonConfigs
+} from './preload';
 
 interface ConfigContextValue {
   config: AppConfig | null;
@@ -8,6 +13,8 @@ interface ConfigContextValue {
   configId: string | null;
   loading: boolean;
   error: string | null;
+  // Expose preload functions
+  preload: typeof preloadModules;
 }
 
 const ConfigContext = createContext<ConfigContextValue>({
@@ -16,62 +23,12 @@ const ConfigContext = createContext<ConfigContextValue>({
   configId: null,
   loading: false,
   error: null,
+  preload: preloadModules
 });
 
 interface ConfigProviderProps {
   children: ReactNode;
 }
-
-const getConfigIdFromURL = (): string => {
-  const pathSegments = window.location.pathname.split('/').filter(Boolean);
-  return pathSegments[0] || 'energyGrantApp';
-};
-
-const loadJsonConfigs = async (
-  slug: string, 
-  appImports: Record<string, () => Promise<any>>,
-  wsImports: Record<string, () => Promise<any>>,
-  scImports: Record<string, () => Promise<any>>
-): Promise<AppConfig> => {
-  // Load app.json
-  const appPath = `./configs/${slug}/app.json`;
-  const appLoader = appImports[appPath] as (() => Promise<any>);
-  if (!appLoader) throw new Error(`Missing config file: ${appPath}`);
-  const appData = await appLoader();
-
-  // Load workspaces
-  const workspaces: WorkspaceConfig[] = await Promise.all(
-    appData.workspaces.map(async (wsRef: { id: string }) => {
-      const workspaceId = wsRef.id;
-      const wsPath = `./configs/${slug}/workspaces/${workspaceId}.json`;
-      const wsLoader = wsImports[wsPath] as (() => Promise<any>);
-      if (!wsLoader) throw new Error(`Missing workspace: ${wsPath}`);
-      const wsRaw = (await wsLoader()) as Omit<WorkspaceConfig, 'slug'>;
-      return { ...wsRaw, slug: workspaceId };
-    })
-  );
-
-  // Load scenarios
-  const scenarios: ScenarioConfig[] = await Promise.all(
-    appData.scenarios.map(async (scRef: { id: string }) => {
-      const scenarioId = scRef.id;
-      const scPath = `./configs/${slug}/scenarios/${scenarioId}.json`;
-      const scLoader = scImports[scPath] as (() => Promise<any>);
-      if (!scLoader) throw new Error(`Missing scenario: ${scPath}`);
-      const scRaw = (await scLoader()) as Omit<ScenarioConfig, 'slug'>;
-      return { ...scRaw, slug: scenarioId };
-    })
-  );
-
-  // Build configuration
-  return {
-    name: appData.name,
-    description: appData.description,
-    tplDir: appData.tplDir,
-    workspaces,
-    scenarios,
-  };
-};
 
 export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
   const [config, setConfig] = useState<AppConfig | null>(null);
@@ -79,19 +36,18 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
   const [configId, setConfigId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Zwróć uwagę: ConfigProvider działa przed Router, więc useParams/useLocation
+  // nie będą działać w tym komponencie bezpośrednio
 
   useEffect(() => {
-    const slug = getConfigIdFromURL();
+    const slug = getConfigIdFromURL(); // Używamy funkcji z preload.ts, która korzysta z window.location
     setConfigId(slug);
-
-    const appImports = import.meta.glob('./configs/*/app.json', { as: 'json' });
-    const wsImports = import.meta.glob('./configs/*/workspaces/*.json', { as: 'json' });
-    const scImports = import.meta.glob('./configs/*/scenarios/*.json', { as: 'json' });
 
     const loadConfig = async () => {
       try {
         setLoading(true);
-        const appConfig = await loadJsonConfigs(slug, appImports, wsImports, scImports);
+        const appConfig = await loadJsonConfigs(slug);
         setConfig(appConfig);
         setConfigType('documentdb');
         setError(null);
@@ -112,7 +68,9 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
     configType,
     configId,
     loading,
-    error
+    error,
+    // Include preload object in context
+    preload: preloadModules
   }), [config, configType, configId, loading, error]);
 
   return (
@@ -122,4 +80,11 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
   );
 };
 
+// Enhanced hook that provides both config and preloading capabilities
 export const useConfig = () => useContext(ConfigContext);
+
+// Hook do użycia wewnątrz komponentów pod <Router>, który pobiera parametr configId z URL
+export const useRouteConfigId = (): string => {
+  const params = useParams<{ configId: string }>();
+  return params.configId || '';
+};
