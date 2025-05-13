@@ -1,7 +1,7 @@
 // src/core/hooks/useFormSchema.ts
 import { useMemo } from 'react';
-import { useForm } from './useForm';
 import { ZodType } from 'zod';
+import { useForm } from '.';
 
 interface FieldSchema {
   isArray?: boolean;

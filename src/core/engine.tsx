@@ -7,8 +7,9 @@ import {
   useFlowStore,
   TemplateComponentProps,
   useComponent,
+  jsonToZod,
 } from ".";
-import { jsonToZod } from "./utils/jsonToZod";
+
 import { useAppNavigation } from "./navigation";
 
 interface NodeRendererProps {

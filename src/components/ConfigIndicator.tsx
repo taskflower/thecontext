@@ -1,5 +1,4 @@
 // src/components/ConfigIndicator.tsx
-import React from 'react';
 import { Database, File } from 'lucide-react';
 
 interface ConfigIndicatorProps {

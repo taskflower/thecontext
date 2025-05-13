@@ -1,7 +1,8 @@
 // src/core/hooks/useLlm.ts
 import { useState, useCallback, useMemo } from "react";
 import { ZodType } from "zod";
-import { useFlow } from "../context";
+import { useFlow } from "..";
+
 
 interface LlmHookOptions<T> {
   schema: ZodType<T>;

@@ -1,7 +1,8 @@
 // src/core/context.tsx
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { get as getPath, set as setPath } from "lodash";
+import { getPath, setPath } from "./utils";
+
 
 interface FlowState {
   data: Record<string, any>;
