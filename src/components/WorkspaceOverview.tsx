@@ -1,11 +1,10 @@
 // src/components/WorkspaceOverview.tsx
 import React, { Suspense, useMemo, ComponentType } from "react";
 import { useParams } from "react-router-dom";
-
 import { Loading } from ".";
 import { AppConfig, TemplateComponentProps } from "@/core";
 import { ThemeProvider } from "@/themes/ThemeContext";
-import { useConfig } from "@/ConfigProvider";
+import { useConfig } from "@/provideConfig";
 
 interface LayoutProps {
   children?: React.ReactNode;

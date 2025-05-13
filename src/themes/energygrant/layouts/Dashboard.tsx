@@ -15,8 +15,8 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useFlow } from '@/core';
-import { useConfig } from '@/ConfigProvider';
 import { useAppNavigation } from '@/core/navigation';
+import { useConfig } from '@/provideConfig';
 
 interface LayoutContext {
   workspace?: { slug: string; name?: string };

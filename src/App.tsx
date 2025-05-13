@@ -6,11 +6,12 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import { ConfigProvider, useConfig } from "@/ConfigProvider";
+
 import { AppLoading, ScenarioWithStep, WorkspaceOverview } from "@/components";
 import { AppConfig } from "@/core";
 import { ContextDebugger } from "./debug";
 import ConfigIndicator from "./components/ConfigIndicator";
+import ConfigProvider, { useConfig } from "@/provideConfig";
 
 
 export const App: React.FC = () => (

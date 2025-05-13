@@ -4,7 +4,8 @@ import { useParams, Navigate } from "react-router-dom";
 import { Loading } from ".";
 import { AppConfig, FlowEngine } from "@/core";
 import { ThemeProvider } from "@/themes/ThemeContext";
-import { useConfig } from "@/ConfigProvider";
+import { useConfig } from "@/provideConfig";
+
 
 // Definicja interfejsu dla props layoutu
 interface LayoutProps {

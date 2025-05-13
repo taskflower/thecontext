@@ -79,7 +79,3 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
 
 export const useConfig = () => useContext(ConfigContext);
 
-export const useRouteConfigId = (): string => {
-  const params = useParams<{ configId: string }>();
-  return params.configId || '';
-};

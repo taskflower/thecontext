@@ -2,12 +2,12 @@
 import React, { useMemo } from 'react';
 import { CheckSquare, ArrowRight } from 'lucide-react';
 import { useFlow } from '@/core';
-
 import { WidgetsStepProps } from '@/themes/themeTypes';
 import { getColSpanClass } from '@/core/utils/themesHelpers';
 import { useTheme } from '@/themes/ThemeContext';
 import { getDatabaseProvider, SaveToDBOptions } from '@/provideDB/databaseProvider';
-import { useConfig } from '@/ConfigProvider';
+import { useConfig } from '@/provideConfig';
+
 
 // Lekki spinner dla widgetów
 const WidgetLoading: React.FC = React.memo(() => (
