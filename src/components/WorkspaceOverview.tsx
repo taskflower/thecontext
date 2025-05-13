@@ -1,5 +1,5 @@
 // src/components/WorkspaceOverview.tsx
-import React from "react";
+import React, { memo } from "react";
 import { useParams } from "react-router-dom";
 import { AppConfig, TemplateComponentProps, useComponent } from "@/core";
 import { withSuspense } from ".";
@@ -8,7 +8,7 @@ interface WorkspaceOverviewProps {
   config: AppConfig;
 }
 
-const RawWorkspaceOverview: React.FC<WorkspaceOverviewProps> = ({ config }) => {
+const RawWorkspaceOverview: React.FC<WorkspaceOverviewProps> = memo(({ config }) => {
   const { workspaceSlug = "" } = useParams<{ workspaceSlug: string }>();
   
   const workspace = config.workspaces.find((w) => w.slug === workspaceSlug);
@@ -38,7 +38,7 @@ const RawWorkspaceOverview: React.FC<WorkspaceOverviewProps> = ({ config }) => {
       data={null}
     />
   );
-};
+});
 
 export default withSuspense(
   React.lazy(() => Promise.resolve({ default: RawWorkspaceOverview })),

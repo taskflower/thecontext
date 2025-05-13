@@ -1,25 +1,26 @@
 // src/App.tsx
-import React from "react";
+import React, { lazy, Suspense, memo } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
-  Outlet,
 } from "react-router-dom";
 import {
   ConfigIndicator,
   Loading,
   WorkspaceOverview,
   withSuspense,
+  WorkspaceLayout,
+  ScenarioLayout,
 } from "@/components";
 import { ConfigProvider, useConfig } from "./ConfigProvider";
-import WorkspaceLayout from "@/components/WorkspaceLayout";
-import ScenarioLayout from "@/components/ScenarioLayout";
 import { ContextDebugger } from "./debug";
 
-const RawAppContent: React.FC = () => {
+// Komponent aplikacji - zoptymalizowany z memo
+const RawAppContent: React.FC = memo(() => {
   const { config, loading, error, configId } = useConfig();
+  
   if (loading) return <Loading message="Ładowanie konfiguracji..." />;
   if (error) return <div className="p-4 text-red-600">Błąd: {error}</div>;
   if (!config) return <div className="p-4 text-gray-700">Brak konfiguracji</div>;
@@ -37,7 +38,7 @@ const RawAppContent: React.FC = () => {
             />
           }
         />
-        {/* Używamy teraz zagnieżdżonych ścieżek z wspólnym layoutem */}
+        {/* Używamy zagnieżdżonych ścieżek z wspólnym layoutem */}
         <Route
           path="/:configId/:workspaceSlug"
           element={<WorkspaceLayout config={config} />}
@@ -58,17 +59,21 @@ const RawAppContent: React.FC = () => {
       <ContextDebugger config={config} />
     </Router>
   );
-};
+});
 
-const LazyAppContent = React.lazy(
+// Lazy-loading głównego komponentu aplikacji
+const LazyAppContent = lazy(
   () => Promise.resolve({ default: RawAppContent })
 );
+
+// Komponent z obsługą Suspense
 const AppContent = withSuspense(LazyAppContent, "Ładowanie…");
 
-export const App = () => (
+// Główny komponent aplikacji
+export const App = memo(() => (
   <ConfigProvider>
     <AppContent />
   </ConfigProvider>
-);
+));
 
 export default App;

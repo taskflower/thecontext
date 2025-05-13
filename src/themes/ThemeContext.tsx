@@ -1,10 +1,13 @@
 // src/themes/ThemeContext.tsx
-import { createContext, useContext } from "react";
+import React, { createContext, useContext } from "react";
 
-/**
- * Kontekst motywu przekazujący katalog tplDir wszystkim komponentom.
- */
 const ThemeContext = createContext<string>("default");
 
-export const ThemeProvider = ThemeContext.Provider;
-export const useTheme = (): string => useContext(ThemeContext);
+export const ThemeProvider: React.FC<{
+  value: string;
+  children: React.ReactNode;
+}> = ({ value, children }) => (
+  <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+);
+
+export const useTheme = () => useContext(ThemeContext);

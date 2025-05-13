@@ -1,5 +1,5 @@
 // src/components/ScenarioLayout.tsx
-import React, { Suspense } from "react";
+import React, { Suspense, memo, useMemo } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { AppConfig, FlowEngine } from "@/core";
 import { useConfig } from "@/ConfigProvider";
@@ -9,7 +9,7 @@ interface ScenarioLayoutProps {
   config: AppConfig;
 }
 
-const ScenarioLayout: React.FC<ScenarioLayoutProps> = ({ config }) => {
+const ScenarioLayout: React.FC<ScenarioLayoutProps> = memo(({ config }) => {
   const { configId } = useConfig();
   const {
     workspaceSlug = "",
@@ -21,13 +21,24 @@ const ScenarioLayout: React.FC<ScenarioLayoutProps> = ({ config }) => {
     stepIndex?: string;
   }>();
 
+  // Memoizacja ścieżki nawigacji
+  const redirectPath = useMemo(() => 
+    `/${configId}/${workspaceSlug || ""}`, 
+    [configId, workspaceSlug]
+  );
+
   if (!workspaceSlug || !scenarioSlug) {
-    return <Navigate to={`/${configId}/${workspaceSlug || ""}`} replace />;
+    return <Navigate to={redirectPath} replace />;
   }
 
-  const scenario = config.scenarios.find(
-    (s) => s.slug === scenarioSlug && s.workspaceSlug === workspaceSlug
+  // Memoizacja znalezionego scenariusza
+  const scenario = useMemo(() => 
+    config.scenarios.find(
+      (s) => s.slug === scenarioSlug && s.workspaceSlug === workspaceSlug
+    ),
+    [config.scenarios, scenarioSlug, workspaceSlug]
   );
+
   if (!scenario) {
     return <div>Scenariusz nie znaleziony</div>;
   }
@@ -43,6 +54,6 @@ const ScenarioLayout: React.FC<ScenarioLayoutProps> = ({ config }) => {
       />
     </Suspense>
   );
-};
+});
 
 export default ScenarioLayout;

@@ -1,5 +1,5 @@
 // src/core/hooks/useFormSchema.ts
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { ZodType } from "zod";
 import { useForm } from ".";
 
@@ -41,58 +41,7 @@ interface UseFormSchemaResult {
   hasRequiredFields: boolean;
 }
 
-export const useFormSchema = <T>({
-  schema,
-  jsonSchema,
-  initialData,
-}: UseFormSchemaOptions<T>): UseFormSchemaResult => {
-  const formHook = useForm<T>({ schema, jsonSchema, initialData });
-
-  const fieldSchemas = useMemo(() => {
-    const schemas: Record<string, FieldSchema> = {};
-    if (jsonSchema && jsonSchema.properties) {
-      const requiredFields = jsonSchema.required || [];
-      Object.entries(jsonSchema.properties).forEach(
-        ([field, propSchema]: [string, any]) => {
-          const isRequired = requiredFields.includes(field);
-          const fieldType = mapJsonTypeToFieldType(
-            propSchema.type,
-            propSchema.format,
-            propSchema.enum
-          );
-          schemas[field] = {
-            type: propSchema.type || "string",
-            title: propSchema.title || field,
-            description: propSchema.description,
-            required: isRequired,
-            fieldType,
-            min: propSchema.minimum,
-            max: propSchema.maximum,
-            step: propSchema.multipleOf,
-            placeholder: propSchema.example,
-          };
-          if (propSchema.enum && propSchema.enum.length > 0) {
-            schemas[field].options = propSchema.enum.map(
-              (value: any, index: number) => ({
-                value,
-                label: propSchema.enumNames?.[index] || String(value),
-              })
-            );
-          }
-        }
-      );
-    }
-    return schemas;
-  }, [jsonSchema]);
-
-  const hasRequiredFields = useMemo(
-    () => Object.values(fieldSchemas).some((schema) => schema.required),
-    [fieldSchemas]
-  );
-
-  return { ...formHook, fieldSchemas, hasRequiredFields };
-};
-
+// Funkcja pomocnicza do mapowania typów JSON na typy pól formularza
 function mapJsonTypeToFieldType(
   type?: string,
   format?: string,
@@ -118,3 +67,65 @@ function mapJsonTypeToFieldType(
   }
   return "text";
 }
+
+// Zoptymalizowany hook do generowania i zarządzania schematem formularza
+export const useFormSchema = <T>({
+  schema,
+  jsonSchema,
+  initialData,
+}: UseFormSchemaOptions<T>): UseFormSchemaResult => {
+  // Użycie bazowego hooka formularza
+  const formHook = useForm<T>({ schema, jsonSchema, initialData });
+
+  // Memoizacja schematów pól formularza
+  const fieldSchemas = useMemo(() => {
+    const schemas: Record<string, FieldSchema> = {};
+    
+    if (jsonSchema && jsonSchema.properties) {
+      const requiredFields = jsonSchema.required || [];
+      
+      Object.entries(jsonSchema.properties).forEach(
+        ([field, propSchema]: [string, any]) => {
+          const isRequired = requiredFields.includes(field);
+          const fieldType = mapJsonTypeToFieldType(
+            propSchema.type,
+            propSchema.format,
+            propSchema.enum
+          );
+          
+          // Tworzenie schematu pola
+          schemas[field] = {
+            type: propSchema.type || "string",
+            title: propSchema.title || field,
+            description: propSchema.description,
+            required: isRequired,
+            fieldType,
+            min: propSchema.minimum,
+            max: propSchema.maximum,
+            step: propSchema.multipleOf,
+            placeholder: propSchema.example,
+          };
+          
+          // Dodanie opcji dla pól typu select
+          if (propSchema.enum && propSchema.enum.length > 0) {
+            schemas[field].options = propSchema.enum.map(
+              (value: any, index: number) => ({
+                value,
+                label: propSchema.enumNames?.[index] || String(value),
+              })
+            );
+          }
+        }
+      );
+    }
+    return schemas;
+  }, [jsonSchema]);
+
+  // Memoizacja flagi oznaczającej czy formularz ma wymagane pola
+  const hasRequiredFields = useMemo(
+    () => Object.values(fieldSchemas).some((schema) => schema.required),
+    [fieldSchemas]
+  );
+
+  return { ...formHook, fieldSchemas, hasRequiredFields };
+};

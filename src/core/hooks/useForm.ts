@@ -1,5 +1,5 @@
 // src/core/hooks/useForm.ts
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ZodType } from 'zod';
 
 interface UseFormOptions<T> {
@@ -20,6 +20,7 @@ export const useForm = <T>({ schema, jsonSchema, initialData }: UseFormOptions<T
   const [formData, setFormData] = useState<Record<string, any>>(initialData || {});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Efekt aktualizujący dane formularza przy zmianie initialData
   useEffect(() => {
     if (initialData) {
       setFormData(initialData);
@@ -27,17 +28,21 @@ export const useForm = <T>({ schema, jsonSchema, initialData }: UseFormOptions<T
     }
   }, [initialData]);
 
-  const handleChange = (field: string, value: any) => {
+  // Zoptymalizowana obsługa zmiany pola
+  const handleChange = useCallback((field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setErrors(prev => {
       const e = { ...prev };
       delete e[field];
       return e;
     });
-  };
+  }, []);
 
-  const validateForm = (): boolean => {
+  // Zoptymalizowana walidacja formularza
+  const validateForm = useCallback((): boolean => {
     const newErrors: Record<string, string> = {};
+    
+    // Walidacja wymaganych pól na podstawie schematu JSON
     if (jsonSchema?.properties) {
       (jsonSchema.required || []).forEach((field: string) => {
         const prop = jsonSchema.properties[field] || {};
@@ -50,6 +55,7 @@ export const useForm = <T>({ schema, jsonSchema, initialData }: UseFormOptions<T
       });
     }
 
+    // Walidacja z użyciem Zod
     try {
       schema.parse(formData);
     } catch (e: any) {
@@ -63,12 +69,13 @@ export const useForm = <T>({ schema, jsonSchema, initialData }: UseFormOptions<T
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [schema, jsonSchema, formData]);
 
-  const resetForm = () => {
+  // Zoptymalizowane resetowanie formularza
+  const resetForm = useCallback(() => {
     setFormData(initialData || {});
     setErrors({});
-  };
+  }, [initialData]);
 
   return { formData, errors, handleChange, validateForm, resetForm };
 };

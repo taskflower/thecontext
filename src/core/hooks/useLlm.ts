@@ -3,7 +3,6 @@ import { useState, useCallback, useMemo } from "react";
 import { ZodType } from "zod";
 import { useFlow } from "..";
 
-
 interface LlmHookOptions<T> {
   schema: ZodType<T>;
   jsonSchema?: any;
@@ -41,6 +40,7 @@ export const useLlm = <T>({
   const [result, setResult] = useState<T | null>(null);
   const [started, setStarted] = useState(autoStart);
 
+  // Memoizacja funkcji do przetwarzania templatu
   const processTemplateString = useCallback(
     (str: string) =>
       str.replace(/{{([^}]+)}}/g, (_, path) => {
@@ -50,11 +50,13 @@ export const useLlm = <T>({
     [get]
   );
 
+  // Memoizacja przetworzonej wiadomości użytkownika
   const processedUserMessage = useMemo(
     () => processTemplateString(userMessage),
     [processTemplateString, userMessage]
   );
 
+  // Memoizacja funkcji startującej proces LLM
   const startLlmProcess = useCallback(async () => {
     if (isLoading) return;
     setStarted(true);
@@ -62,7 +64,10 @@ export const useLlm = <T>({
     setError(null);
 
     try {
+      // Przygotowanie wiadomości do LLM
       const messages: { role: string; content: string }[] = [];
+      
+      // Dodanie schematu JSON jeśli istnieje
       if (jsonSchema) {
         messages.push({
           role: "system",
@@ -71,14 +76,19 @@ export const useLlm = <T>({
           )}`,
         });
       }
+      
+      // Dodanie wiadomości systemowej jeśli istnieje
       if (systemMessage) {
         messages.push({
           role: "system",
           content: processTemplateString(systemMessage),
         });
       }
+      
+      // Dodanie wiadomości użytkownika
       messages.push({ role: "user", content: processedUserMessage });
 
+      // Przygotowanie ładunku do wysłania
       const payload = {
         messages,
         generationConfig: jsonSchema
@@ -86,12 +96,14 @@ export const useLlm = <T>({
           : { temperature: 0.7 },
       };
 
+      // Pobranie tokenu autoryzacji
       const token = await getToken();
       if (!token || !user)
         throw new Error(
           token ? "Użytkownik nie zalogowany" : "Brak tokenu autoryzacji"
         );
 
+      // Wywołanie API
       const response = await fetch(
         apiEndpoint ||
           `${
@@ -106,6 +118,8 @@ export const useLlm = <T>({
           body: JSON.stringify({ ...payload, userId: user.uid }),
         }
       );
+      
+      // Obsługa błędów HTTP
       if (!response.ok) {
         const errInfo = await response.json();
         throw new Error(
@@ -113,8 +127,10 @@ export const useLlm = <T>({
         );
       }
 
+      // Parsowanie odpowiedzi
       const { result: llmResult } = await response.json();
 
+      // Walidacja schematu jeśli istnieje
       if (schema) {
         const validation = schema.safeParse(llmResult);
         if (!validation.success) {

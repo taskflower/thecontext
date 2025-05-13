@@ -1,5 +1,5 @@
 // src/components/ScenarioWithStep.tsx
-import React, { Suspense } from "react";
+import React, { Suspense, memo } from "react";
 import { FlowEngine } from "@/core";
 import Loading from "./Loading";
 
@@ -7,7 +7,7 @@ interface ScenarioWithStepProps {
   config: any;
 }
 
-const ScenarioWithStep: React.FC<ScenarioWithStepProps> = ({ config }) => {
+const ScenarioWithStep: React.FC<ScenarioWithStepProps> = memo(({ config }) => {
   return (
     <Suspense fallback={<Loading message="Ładowanie kroku…" />}>
       <FlowEngine
@@ -17,6 +17,6 @@ const ScenarioWithStep: React.FC<ScenarioWithStepProps> = ({ config }) => {
       />
     </Suspense>
   );
-};
+});
 
 export default ScenarioWithStep;

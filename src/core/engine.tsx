@@ -1,5 +1,5 @@
 // src/core/engine.tsx
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import {
   AppConfig,
@@ -20,7 +20,8 @@ interface NodeRendererProps {
   totalSteps: number;
 }
 
-const NodeRenderer: React.FC<NodeRendererProps> = ({
+// Komponent NodeRenderer zoptymalizowany z memo
+const NodeRenderer: React.FC<NodeRendererProps> = memo(({
   config,
   node,
   onNext,
@@ -28,6 +29,8 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({
   totalSteps,
 }) => {
   const { get, set } = useFlowStore();
+  
+  // Memoizacja schematów JSON i Zod
   const jsonSchema = useMemo(
     () =>
       config.workspaces[0]?.contextSchema.properties?.[
@@ -35,14 +38,17 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({
       ] ?? {},
     [config.workspaces, node.contextSchemaPath]
   );
+  
   const zodSchema = useMemo(() => jsonToZod(jsonSchema), [jsonSchema]);
   const data = get(node.contextDataPath);
 
+  // Pobieranie komponentu szablonu
   const Component = useComponent<TemplateComponentProps>(
     config.tplDir,
     node.tplFile
   );
 
+  // Memoizacja znalezionego scenariusza
   const currentScenario = useMemo(
     () =>
       config.scenarios.find((s) =>
@@ -51,12 +57,14 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({
     [config.scenarios, node.slug]
   );
 
-  const handleSubmit = (val: any) => {
+  // Memoizacja handlera przesyłania
+  const handleSubmit = useMemo(() => (val: any) => {
     if (val !== null) set(node.contextDataPath, val);
     onNext();
-  };
+  }, [node.contextDataPath, set, onNext]);
 
-  const componentProps: TemplateComponentProps = {
+  // Memoizacja właściwości komponentu
+  const componentProps = useMemo<TemplateComponentProps>(() => ({
     schema: zodSchema,
     jsonSchema,
     data,
@@ -66,26 +74,42 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({
     scenarioName: currentScenario?.name,
     nodeSlug: node.slug,
     context: { stepIdx, totalSteps, workspace: null, scenario: null },
-  };
+  }), [zodSchema, jsonSchema, data, handleSubmit, node, currentScenario, stepIdx, totalSteps]);
 
   return <Component {...componentProps} />;
-};
+});
 
-export const FlowEngine: React.FC<{ config: AppConfig; scenarioSlug: string; stepIdx: number; }> = ({ config, scenarioSlug, stepIdx }) => {
+// Komponent FlowEngine zoptymalizowany z memo
+export const FlowEngine: React.FC<{ 
+  config: AppConfig; 
+  scenarioSlug: string; 
+  stepIdx: number; 
+}> = memo(({ config, scenarioSlug, stepIdx }) => {
   const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
   const { toScenarioStep, toScenarioList } = useAppNavigation();
 
-  const scenario = config.scenarios.find((s) => s.slug === scenarioSlug);
+  // Memoizacja znalezionego scenariusza
+  const scenario = useMemo(() => 
+    config.scenarios.find((s) => s.slug === scenarioSlug),
+    [config.scenarios, scenarioSlug]
+  );
+  
   if (!scenario) return <div>Scenariusz nie znaleziony</div>;
 
-  const nodes = [...scenario.nodes].sort((a, b) => a.order - b.order);
+  // Memoizacja posortowanych węzłów
+  const nodes = useMemo(() => 
+    [...scenario.nodes].sort((a, b) => a.order - b.order),
+    [scenario.nodes]
+  );
+  
   const index = Math.min(Math.max(stepIdx, 0), nodes.length - 1);
 
-  const handleNext = () => {
+  // Memoizacja handlera następnego kroku
+  const handleNext = useMemo(() => () => {
     if (index < nodes.length - 1)
       toScenarioStep(workspaceSlug!, scenarioSlug, index + 1);
     else toScenarioList(workspaceSlug!);
-  };
+  }, [index, nodes.length, workspaceSlug, scenarioSlug, toScenarioStep, toScenarioList]);
 
   return (
     <NodeRenderer
@@ -96,4 +120,4 @@ export const FlowEngine: React.FC<{ config: AppConfig; scenarioSlug: string; ste
       totalSteps={nodes.length}
     />
   );
-};
+});

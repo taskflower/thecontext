@@ -1,6 +1,7 @@
 // src/components/ConfigIndicator.tsx
 import { FCWithChildren } from "@/core";
 import { Database, File } from "lucide-react";
+import { memo } from "react";
 
 interface Props {
   configId: string;
@@ -8,7 +9,7 @@ interface Props {
   config: { workspaces: any[]; scenarios: any[] };
 }
 
-const ConfigIndicator: FCWithChildren<Props> = ({
+const ConfigIndicator: FCWithChildren<Props> = memo(({
   configId,
   configType,
   config,
@@ -42,6 +43,6 @@ const ConfigIndicator: FCWithChildren<Props> = ({
       </span>
     </div>
   );
-};
+});
 
 export default ConfigIndicator;

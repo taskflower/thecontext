@@ -1,5 +1,4 @@
 // src/components/Loading.tsx
-
 import { FCWithChildren } from "@/core";
 
 const Loading: FCWithChildren<{ message?: string }> = ({ message = "Ładowanie..." }) => (

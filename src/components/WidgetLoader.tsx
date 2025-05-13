@@ -1,5 +1,5 @@
 // src/components/WidgetLoader.tsx
-import React from 'react';
+import React, { memo } from 'react';
 import { useWidget } from '@/core';
 import { withSuspense } from '.';
 
@@ -8,10 +8,10 @@ interface WidgetLoaderProps {
   widget: any;
 }
 
-const RawWidgetLoader: React.FC<WidgetLoaderProps> = ({ tplDir, widget }) => {
+const RawWidgetLoader: React.FC<WidgetLoaderProps> = memo(({ tplDir, widget }) => {
   const Widget = useWidget(tplDir, widget.tplFile);
   return <Widget {...widget} componentName={widget.tplFile} />;
-};
+});
 
 export default withSuspense(
   React.lazy(() => Promise.resolve({ default: RawWidgetLoader })),
