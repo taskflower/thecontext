@@ -1,5 +1,5 @@
 // src/components/WorkspaceOverview.tsx
-import React, { Suspense, useMemo } from "react";
+import React, { Suspense } from "react";
 import { useParams } from "react-router-dom";
 import { Loading } from ".";
 import { AppConfig, TemplateComponentProps, useLayout, useComponent } from "@/core";
@@ -21,10 +21,8 @@ interface WidgetsStepProps extends TemplateComponentProps {
 const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
   const { configId, workspaceSlug } = useParams<{ configId: string, workspaceSlug: string }>();
   
-  const workspace = useMemo(
-    () => config.workspaces.find((w) => w.slug === workspaceSlug),
-    [config.workspaces, workspaceSlug]
-  );
+  // Znajdź workspace bezpośrednio bez useMemo
+  const workspace = config.workspaces.find((w) => w.slug === workspaceSlug);
 
   if (!workspace) {
     return (
@@ -52,37 +50,32 @@ const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
   const tplDir = workspace.templateSettings?.tplDir || config.tplDir;
   const layoutFile = workspace.templateSettings?.layoutFile || "Simple";
 
-  // Używamy zoptymalizowanych hooków useLayout i useComponent
+  // Używamy hooków do załadowania komponentów
   const AppLayout = useLayout<LayoutProps>(tplDir, layoutFile);
   const WidgetsStep = useComponent<WidgetsStepProps>(tplDir, "WidgetsStep");
 
-  const widgets = useMemo(
-    () =>
-      workspace.templateSettings?.widgets?.map((widget) => ({
-        ...widget,
-        config,
-        workspaceSlug,
-      })) || [],
-    [workspace, config, workspaceSlug]
-  );
+  // Przygotowanie widgetów z props
+  const widgets = workspace.templateSettings?.widgets?.map((widget) => ({
+    ...widget,
+    config,
+    workspaceSlug,
+  })) || [];
 
   return (
     <ThemeProvider value={tplDir}>
       <Suspense fallback={<Loading message="Ładowanie workspace..." />}>
         <AppLayout>
-          <Suspense fallback={<Loading message="Ładowanie widgetów..." />}>
-            <WidgetsStep
-              widgets={widgets}
-              onSubmit={() => {}}
-              title={workspace.name}
-              subtitle={workspace.description}
-              saveToDB={null}
-              scenarioName={null}
-              nodeSlug={null}
-              schema={null} 
-              data={null}  
-            />
-          </Suspense>
+          <WidgetsStep
+            widgets={widgets}
+            onSubmit={() => {}}
+            title={workspace.name}
+            subtitle={workspace.description}
+            saveToDB={null}
+            scenarioName={null}
+            nodeSlug={null}
+            schema={null} 
+            data={null}  
+          />
         </AppLayout>
       </Suspense>
     </ThemeProvider>

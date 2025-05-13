@@ -6,26 +6,10 @@ import React, {
   useState,
   lazy,
 } from "react";
-import { create } from "zustand";
 import type { AppConfig, WorkspaceConfig, ScenarioConfig } from "@/core/types";
 
-const useComponentCache = create<{
-  components: Record<string, React.LazyExoticComponent<any>>;
-  getOrCreate: (
-    key: string,
-    loader: () => Promise<any>
-  ) => React.LazyExoticComponent<any>;
-}>((set, get) => ({
-  components: {},
-  getOrCreate: (key, loader) => {
-    const { components } = get();
-    if (components[key]) return components[key];
-
-    const component = lazy(loader);
-    set((state) => ({ components: { ...state.components, [key]: component } }));
-    return component;
-  },
-}));
+// Prosta mapa cache zamiast zustand store
+const componentCache = new Map<string, React.LazyExoticComponent<any>>();
 
 type ModuleType = "component" | "layout" | "widget";
 
@@ -37,26 +21,28 @@ const modules: Record<ModuleType, Record<string, () => Promise<any>>> = {
 
 const loadModule = (type: ModuleType, tplDir: string, name: string) => {
   const cacheKey = `${type}:${tplDir}/${name}`;
-
-  const { getOrCreate } = useComponentCache.getState();
-
-  return getOrCreate(cacheKey, () => {
-    const paths = [
-      `./themes/${tplDir}/${type}s/${name}.tsx`,
-      `./themes/default/${type}s/${name}.tsx`,
-    ];
-
-    const path = paths.find((p) => modules[type][p]);
-    if (!path)
-      throw new Error(`Module not found: ${name} in ${tplDir} (${type})`);
-
-    return modules[type][path]();
-  });
+  
+  if (componentCache.has(cacheKey)) {
+    return componentCache.get(cacheKey)!;
+  }
+  
+  const paths = [
+    `./themes/${tplDir}/${type}s/${name}.tsx`,
+    `./themes/default/${type}s/${name}.tsx`,
+  ];
+  
+  const path = paths.find((p) => modules[type][p]);
+  if (!path) {
+    throw new Error(`Module not found: ${name} in ${tplDir} (${type})`);
+  }
+  
+  const component = lazy(() => modules[type][path]());
+  componentCache.set(cacheKey, component);
+  return component;
 };
 
 export const preloadModules = {
-  component: (tplDir: string, name: string) =>
-    loadModule("component", tplDir, name),
+  component: (tplDir: string, name: string) => loadModule("component", tplDir, name),
   layout: (tplDir: string, name: string) => loadModule("layout", tplDir, name),
   widget: (tplDir: string, name: string) => loadModule("widget", tplDir, name),
 };

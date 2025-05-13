@@ -1,7 +1,7 @@
-// src/components/AppLoading.tsx
+// src/components/Loading.tsx
 
 export const Loading: React.FC<{ message?: string }> = ({
-  message = "Ładowanie aplikacji...",
+  message = "Ładowanie...",
 }) => (
   <div className="absolute top-0 left-0 w-full flex items-center justify-center h-full bg-gray-50">
     <div className="p-6 rounded-lg">

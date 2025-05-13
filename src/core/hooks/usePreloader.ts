@@ -11,14 +11,16 @@ export const usePreloader = <P = any>(
   const { preload } = useConfig();
 
   return useMemo(() => {
-    if (type === "component")
-      return preload.component(tplDir, name) as ComponentType<P>;
-    if (type === "layout")
-      return preload.layout(tplDir, name) as ComponentType<P>;
-    if (type === "widget")
-      return preload.widget(tplDir, name) as ComponentType<P>;
-
-    throw new Error(`Nieznany typ modułu: ${type}`);
+    switch (type) {
+      case "component":
+        return preload.component(tplDir, name) as ComponentType<P>;
+      case "layout":
+        return preload.layout(tplDir, name) as ComponentType<P>;
+      case "widget":
+        return preload.widget(tplDir, name) as ComponentType<P>;
+      default:
+        throw new Error(`Nieznany typ modułu: ${type}`);
+    }
   }, [type, tplDir, name, preload]);
 };
 
