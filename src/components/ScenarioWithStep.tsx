@@ -1,15 +1,15 @@
 // src/components/ScenarioWithStep.tsx
-import React from "react";
+import React, { Suspense } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { AppConfig, FlowEngine, useLayout } from "@/core";
 import { ThemeProvider } from "@/themes/ThemeContext";
-import { withSuspense } from ".";
+import Loading from "./Loading";
 
 interface ScenarioWithStepProps {
   config: AppConfig;
 }
 
-const RawScenarioWithStep: React.FC<ScenarioWithStepProps> = ({ config }) => {
+const ScenarioWithStep: React.FC<ScenarioWithStepProps> = ({ config }) => {
   const {
     configId,
     workspaceSlug = "",
@@ -31,8 +31,11 @@ const RawScenarioWithStep: React.FC<ScenarioWithStepProps> = ({ config }) => {
   if (!workspace) return <div>Workspace nie znaleziony</div>;
 
   const tpl = workspace.templateSettings?.tplDir || config.tplDir;
-  const layout = workspace.templateSettings?.layoutFile || "Simple";
-  const AppLayout = useLayout<{ children?: React.ReactNode; context?: any }>(tpl, layout);
+  const layoutFile = workspace.templateSettings?.layoutFile || "Simple";
+  const AppLayout = useLayout<{ children?: React.ReactNode; context?: any }>(
+    tpl,
+    layoutFile
+  );
 
   const scenario = config.scenarios.find((s) => s.slug === scenarioSlug);
   if (!scenario) return <div>Scenariusz nie znaleziony</div>;
@@ -47,13 +50,17 @@ const RawScenarioWithStep: React.FC<ScenarioWithStepProps> = ({ config }) => {
   return (
     <ThemeProvider value={tpl}>
       <AppLayout context={layoutContext}>
-        <FlowEngine config={config} scenarioSlug={scenarioSlug} stepIdx={stepIdx} />
+        {/* Spinner tylko dla dynamicznego ładowania kroków */}
+        <Suspense fallback={<Loading message="Ładowanie kroku…" />}>
+          <FlowEngine
+            config={config}
+            scenarioSlug={scenarioSlug}
+            stepIdx={stepIdx}
+          />
+        </Suspense>
       </AppLayout>
     </ThemeProvider>
   );
 };
 
-export default withSuspense(
-  React.lazy(() => Promise.resolve({ default: RawScenarioWithStep })),
-  'Ładowanie kroku…'
-);
+export default ScenarioWithStep;
