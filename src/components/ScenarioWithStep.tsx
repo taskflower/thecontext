@@ -1,7 +1,7 @@
 // src/components/ScenarioWithStep.tsx
 import React, { Suspense, memo } from "react";
 import { FlowEngine } from "@/core";
-import Loading from "./Loading";
+import { Loading } from ".";
 
 interface ScenarioWithStepProps {
   config: any;

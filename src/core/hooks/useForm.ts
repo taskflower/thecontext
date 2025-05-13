@@ -20,7 +20,6 @@ export const useForm = <T>({ schema, jsonSchema, initialData }: UseFormOptions<T
   const [formData, setFormData] = useState<Record<string, any>>(initialData || {});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Efekt aktualizujący dane formularza przy zmianie initialData
   useEffect(() => {
     if (initialData) {
       setFormData(initialData);
@@ -28,7 +27,6 @@ export const useForm = <T>({ schema, jsonSchema, initialData }: UseFormOptions<T
     }
   }, [initialData]);
 
-  // Zoptymalizowana obsługa zmiany pola
   const handleChange = useCallback((field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setErrors(prev => {
@@ -38,11 +36,8 @@ export const useForm = <T>({ schema, jsonSchema, initialData }: UseFormOptions<T
     });
   }, []);
 
-  // Zoptymalizowana walidacja formularza
   const validateForm = useCallback((): boolean => {
     const newErrors: Record<string, string> = {};
-    
-    // Walidacja wymaganych pól na podstawie schematu JSON
     if (jsonSchema?.properties) {
       (jsonSchema.required || []).forEach((field: string) => {
         const prop = jsonSchema.properties[field] || {};
@@ -55,7 +50,6 @@ export const useForm = <T>({ schema, jsonSchema, initialData }: UseFormOptions<T
       });
     }
 
-    // Walidacja z użyciem Zod
     try {
       schema.parse(formData);
     } catch (e: any) {
@@ -71,7 +65,6 @@ export const useForm = <T>({ schema, jsonSchema, initialData }: UseFormOptions<T
     return Object.keys(newErrors).length === 0;
   }, [schema, jsonSchema, formData]);
 
-  // Zoptymalizowane resetowanie formularza
   const resetForm = useCallback(() => {
     setFormData(initialData || {});
     setErrors({});

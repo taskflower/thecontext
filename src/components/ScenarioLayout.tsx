@@ -21,7 +21,6 @@ const ScenarioLayout: React.FC<ScenarioLayoutProps> = memo(({ config }) => {
     stepIndex?: string;
   }>();
 
-  // Memoizacja ścieżki nawigacji
   const redirectPath = useMemo(() => 
     `/${configId}/${workspaceSlug || ""}`, 
     [configId, workspaceSlug]
@@ -31,7 +30,6 @@ const ScenarioLayout: React.FC<ScenarioLayoutProps> = memo(({ config }) => {
     return <Navigate to={redirectPath} replace />;
   }
 
-  // Memoizacja znalezionego scenariusza
   const scenario = useMemo(() => 
     config.scenarios.find(
       (s) => s.slug === scenarioSlug && s.workspaceSlug === workspaceSlug

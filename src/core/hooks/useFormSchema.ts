@@ -68,16 +68,13 @@ function mapJsonTypeToFieldType(
   return "text";
 }
 
-// Zoptymalizowany hook do generowania i zarządzania schematem formularza
 export const useFormSchema = <T>({
   schema,
   jsonSchema,
   initialData,
 }: UseFormSchemaOptions<T>): UseFormSchemaResult => {
-  // Użycie bazowego hooka formularza
   const formHook = useForm<T>({ schema, jsonSchema, initialData });
 
-  // Memoizacja schematów pól formularza
   const fieldSchemas = useMemo(() => {
     const schemas: Record<string, FieldSchema> = {};
     
@@ -93,7 +90,6 @@ export const useFormSchema = <T>({
             propSchema.enum
           );
           
-          // Tworzenie schematu pola
           schemas[field] = {
             type: propSchema.type || "string",
             title: propSchema.title || field,
@@ -106,7 +102,6 @@ export const useFormSchema = <T>({
             placeholder: propSchema.example,
           };
           
-          // Dodanie opcji dla pól typu select
           if (propSchema.enum && propSchema.enum.length > 0) {
             schemas[field].options = propSchema.enum.map(
               (value: any, index: number) => ({
@@ -121,7 +116,6 @@ export const useFormSchema = <T>({
     return schemas;
   }, [jsonSchema]);
 
-  // Memoizacja flagi oznaczającej czy formularz ma wymagane pola
   const hasRequiredFields = useMemo(
     () => Object.values(fieldSchemas).some((schema) => schema.required),
     [fieldSchemas]

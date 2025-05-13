@@ -9,13 +9,11 @@ import React, {
 } from "react";
 import type { AppConfig, WorkspaceConfig, ScenarioConfig } from "@/core/types";
 
-// Obiekt cache dla komponentów
 const componentCache = new Map<string, React.LazyExoticComponent<any>>();
 
 type ModuleType = "component" | "layout" | "widget";
 type ModuleImport = () => Promise<{ default: React.ComponentType<any> }>;
 
-// Cache dla zaimportowanych modułów
 const moduleImports: Record<ModuleType, Record<string, ModuleImport>> = {
   component: import.meta.glob<{ default: React.ComponentType<any> }>(
     "./themes/*/components/*.tsx"
@@ -28,36 +26,28 @@ const moduleImports: Record<ModuleType, Record<string, ModuleImport>> = {
   ),
 };
 
-// Funkcja pomocnicza do ładowania i cachowania modułów
 const loadModule = (type: ModuleType, tplDir: string, name: string) => {
   const cacheKey = `${type}:${tplDir}/${name}`;
 
-  // Sprawdzenie czy komponent jest już w cache
   if (componentCache.has(cacheKey)) {
     return componentCache.get(cacheKey)!;
   }
 
-  // Przygotowanie ścieżek do modułów - próba w katalogu szablonu i katalogu domyślnym
   const paths = [
     `./themes/${tplDir}/${type}s/${name}.tsx`,
     `./themes/default/${type}s/${name}.tsx`,
   ];
 
-  // Znalezienie pierwszej dostępnej ścieżki
   const path = paths.find((p) => moduleImports[type][p]);
   if (!path) {
     throw new Error(`Module not found: ${name} in ${tplDir} (${type})`);
   }
 
-  // Leniwe ładowanie komponentu
   const component = lazy(() => moduleImports[type][path]());
-
-  // Zapisanie do cache i zwrócenie
   componentCache.set(cacheKey, component);
   return component;
 };
 
-// Obiekt preloadModules zoptymalizowany
 export const preloadModules = {
   component: (tplDir: string, name: string) =>
     loadModule("component", tplDir, name),
@@ -65,21 +55,16 @@ export const preloadModules = {
   widget: (tplDir: string, name: string) => loadModule("widget", tplDir, name),
 };
 
-// Pomocnicza funkcja do pobrania configId z URL
 export const getConfigIdFromURL = (): string =>
   window.location.pathname.split("/").filter(Boolean)[0] || "energyGrantApp";
 
-// Cache dla załadowanych konfiguracji
 const configCache = new Map<string, Promise<AppConfig>>();
 
-// Zoptymalizowana funkcja do ładowania konfiguracji JSON
 export const loadJsonConfigs = async (slug: string): Promise<AppConfig> => {
-  // Sprawdzenie czy konfiguracja jest już ładowana lub załadowana
   if (configCache.has(slug)) {
     return configCache.get(slug)!;
   }
 
-  // Importy modułów konfiguracyjnych
   const configs = {
     app: import.meta.glob<Record<string, any>>("./configs/*/app.json", {
       as: "json",
@@ -92,16 +77,12 @@ export const loadJsonConfigs = async (slug: string): Promise<AppConfig> => {
     }),
   };
 
-  // Ścieżka do pliku app.json
   const appPath = `./configs/${slug}/app.json`;
   const appLoader = configs.app[appPath];
   if (!appLoader) throw new Error(`Missing config: ${appPath}`);
 
-  // Tworzenie promesa konfiguracji
   const configPromise = (async () => {
     const app = await appLoader();
-
-    // Funkcja do ładowania elementów konfiguracji (workspaces, scenarios)
     const loadItems = async <T extends object>(
       items: Array<{ id: string }>,
       type: "workspaces" | "scenarios"
@@ -118,13 +99,11 @@ export const loadJsonConfigs = async (slug: string): Promise<AppConfig> => {
       );
     };
 
-    // Równoległe ładowanie workspaces i scenarios
     const [workspaces, scenarios] = await Promise.all([
       loadItems<WorkspaceConfig>(app.workspaces, "workspaces"),
       loadItems<ScenarioConfig>(app.scenarios, "scenarios"),
     ]);
 
-    // Zwrócenie kompletnej konfiguracji
     return {
       name: app.name,
       description: app.description,
@@ -134,12 +113,10 @@ export const loadJsonConfigs = async (slug: string): Promise<AppConfig> => {
     };
   })();
 
-  // Zapisanie promesa do cache
   configCache.set(slug, configPromise);
   return configPromise;
 };
 
-// Interfejs kontekstu konfiguracji
 interface ConfigContextValue {
   config: AppConfig | null;
   configType: "local" | "firebase" | "documentdb" | null;
@@ -149,7 +126,6 @@ interface ConfigContextValue {
   preload: typeof preloadModules;
 }
 
-// Utworzenie kontekstu z wartościami domyślnymi
 const ConfigContext = createContext<ConfigContextValue>({
   config: null,
   configType: null,
@@ -159,7 +135,6 @@ const ConfigContext = createContext<ConfigContextValue>({
   preload: preloadModules,
 });
 
-// Dostawca kontekstu konfiguracji
 export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -172,14 +147,12 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({
     preload: preloadModules,
   });
 
-  // Efekt ładowania konfiguracji przy montowaniu
   useEffect(() => {
     const slug = getConfigIdFromURL();
     let isMounted = true;
 
     (async () => {
       try {
-        // 1) Spróbuj załadować lokalnie
         const config = await loadJsonConfigs(slug);
         if (isMounted) {
           setState({
@@ -197,7 +170,6 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({
         if (!isMounted) return;
 
         try {
-          // 2) Fallback do Firestore
           const { FirebaseAdapter } = await import(
             "./provideDB/firebase/FirebaseAdapter"
           );
@@ -234,17 +206,12 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       }
     })();
-
-    // Czyszczenie efektu
     return () => {
       isMounted = false;
     };
   }, []);
 
-  // Stabilna wartość preload
   const preload = useMemo(() => preloadModules, []);
-
-  // Zoptymalizowana wartość kontekstu - unika zbędnych rerenderów
   const contextValue = useMemo(
     () => ({
       ...state,
@@ -260,5 +227,4 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-// Hook do korzystania z kontekstu konfiguracji
 export const useConfig = () => useContext(ConfigContext);

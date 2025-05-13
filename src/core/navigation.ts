@@ -7,7 +7,6 @@ export const useAppNavigation = () => {
   const navigate = useNavigate();
   const { configId } = useConfig();
 
-  // Zoptymalizowane memoizowane funkcje nawigacji
   const toWorkspace = useCallback(
     (workspaceSlug: string) => navigate(`/${configId}/${workspaceSlug}`),
     [navigate, configId]

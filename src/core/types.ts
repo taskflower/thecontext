@@ -1,4 +1,3 @@
-// Definicje typów dla całego flow-app-builder
 
 export interface NodeConfig {
   slug: string;

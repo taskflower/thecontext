@@ -1,6 +1,6 @@
 // src/components/withSuspense.tsx
 import React, { Suspense } from "react";
-import Loading from "./Loading";
+import { Loading } from ".";
 
 export function withSuspense<P extends {}>(
   Comp: React.ComponentType<P>,
