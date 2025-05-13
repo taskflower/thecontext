@@ -11,6 +11,7 @@ import { ConfigProvider, useConfig } from "./ConfigProvider";
 import WorkspaceOverview from "./components/WorkspaceOverview";
 import ScenarioWithStep from "./components/ScenarioWithStep";
 import { ContextDebugger } from "./debug";
+import ConfigIndicator from "./components/ConfigIndicator";
 
 export const App: React.FC = () => (
   <ConfigProvider>
@@ -19,7 +20,7 @@ export const App: React.FC = () => (
 );
 
 const AppWithConfig: React.FC = () => {
-  const { config, loading, error } = useConfig();
+  const { config, loading, error, configId, configType } = useConfig();
 
   if (loading) return <AppLoading message="Ładowanie konfiguracji..." />;
   if (error) return <div className="p-4 text-red-600">Błąd: {error}</div>;
@@ -29,17 +30,22 @@ const AppWithConfig: React.FC = () => {
   return (
     <Router>
       <ContextDebugger config={config} />
+      <ConfigIndicator 
+        configId={configId} 
+        configType={configType} 
+        config={config} 
+      />
       <Routes>
         <Route
           path="/"
-          element={<Navigate to={`/${config.workspaces[0].slug}`} replace />}
+          element={<Navigate to={`/${configId}/${config.workspaces[0].slug}`} replace />}
         />
         <Route
-          path="/:workspaceSlug"
+          path="/:configId/:workspaceSlug"
           element={<WorkspaceOverview config={config} />}
         />
         <Route
-          path="/:workspaceSlug/:scenarioSlug/:stepIndex?"
+          path="/:configId/:workspaceSlug/:scenarioSlug/:stepIndex?"
           element={<ScenarioWithStep config={config} />}
         />
         <Route

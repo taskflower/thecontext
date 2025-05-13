@@ -8,17 +8,19 @@ import { ThemeProvider } from "@/themes/ThemeContext";
 
 const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
   const {
+    configId,
     workspaceSlug = "",
     scenarioSlug = "",
     stepIndex = "0",
   } = useParams<{
+    configId?: string,
     workspaceSlug?: string;
     scenarioSlug?: string;
     stepIndex?: string;
   }>();
 
   if (!workspaceSlug || !scenarioSlug) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={`/${configId}`} replace />;
   }
 
   const stepIdx = Number.isNaN(Number(stepIndex)) ? 0 : parseInt(stepIndex, 10);

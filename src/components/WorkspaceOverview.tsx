@@ -7,7 +7,8 @@ import { AppConfig } from "@/core";
 import { ThemeProvider } from "../themes/ThemeContext";
 
 const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
-  const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
+  const { configId, workspaceSlug } = useParams<{ configId: string, workspaceSlug: string }>();
+  
   const workspace = useMemo(
     () => config.workspaces.find((w) => w.slug === workspaceSlug),
     [config.workspaces, workspaceSlug]
@@ -25,7 +26,7 @@ const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
           </p>
           <div className="flex justify-center">
             <a
-              href="/"
+              href={`/${configId}`}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               Wróć do strony głównej

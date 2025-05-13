@@ -30,13 +30,14 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    // const slug = (params.get('config') || 'energyGrantApp').trim();
-    const slug = (params.get('config') || 'goldsaverApp').trim();
-    // const slug = (params.get('config') || 'marketingApp').trim();
+    // Odczytaj configId z pierwszego segmentu URL
+    const pathSegments = window.location.pathname.split('/').filter(Boolean);
+    const slug = pathSegments[0] || 'energyGrantApp';
+    console.log(`[ConfigProvider] URL segments:`, pathSegments);
+    console.log(`[ConfigProvider] Determined configId slug: ${slug}`);
     setConfigId(slug);
 
-    // Prepare import globs for JSON configs
+    // Import globs dla JSONów
     const appImports = import.meta.glob('./configs/*/app.json', { as: 'json' });
     const wsImports = import.meta.glob('./configs/*/workspaces/*.json', { as: 'json' });
     const scImports = import.meta.glob('./configs/*/scenarios/*.json', { as: 'json' });
@@ -44,41 +45,55 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
     const loadConfig = async () => {
       try {
         setLoading(true);
-        // Load app.json via Vite glob
+        console.log('[ConfigProvider] Starting loadConfig');
+
+        // Ładuj app.json
         const appPath = `./configs/${slug}/app.json`;
+        console.log(`[ConfigProvider] Loading app JSON from: ${appPath}`);
         const appLoader = appImports[appPath] as (() => Promise<any>);
         if (!appLoader) throw new Error(`Brak pliku konfiguracji: ${appPath}`);
-        const appJson = await appLoader();
+        const appData = await appLoader();
+        console.log('[ConfigProvider] Loaded appData:', appData);
 
-        // Load workspaces - w trybie dokumentowej bazy danych zamiast $ref używamy id
+        // Load workspaces
         const workspaces: WorkspaceConfig[] = [];
-        for (const wsRef of appJson.workspaces) {
+        for (const wsRef of appData.workspaces) {
           const workspaceId = wsRef.id;
           const wsPath = `./configs/${slug}/workspaces/${workspaceId}.json`;
+          console.log(`[ConfigProvider] Loading workspace JSON from: ${wsPath}`);
           const wsLoader = wsImports[wsPath] as (() => Promise<any>);
           if (!wsLoader) throw new Error(`Brak workspace: ${wsPath}`);
-          const wsJson = await wsLoader();
-          workspaces.push(wsJson as WorkspaceConfig);
+          const wsRaw = (await wsLoader()) as Omit<WorkspaceConfig, 'slug'>;
+          console.log('[ConfigProvider] wsRaw:', wsRaw);
+          console.log(`[ConfigProvider] Assigning workspace.slug = ${workspaceId}`);
+          workspaces.push({ ...wsRaw, slug: workspaceId });
         }
+        console.log('[ConfigProvider] Workspaces loaded:', workspaces.map(w => w.slug));
 
-        // Load scenarios - w trybie dokumentowej bazy danych zamiast $ref używamy id
+        // Load scenarios
         const scenarios: ScenarioConfig[] = [];
-        for (const scRef of appJson.scenarios) {
+        for (const scRef of appData.scenarios) {
           const scenarioId = scRef.id;
           const scPath = `./configs/${slug}/scenarios/${scenarioId}.json`;
+          console.log(`[ConfigProvider] Loading scenario JSON from: ${scPath}`);
           const scLoader = scImports[scPath] as (() => Promise<any>);
           if (!scLoader) throw new Error(`Brak scenariusza: ${scPath}`);
-          const scJson = await scLoader();
-          scenarios.push(scJson as ScenarioConfig);
+          const scRaw = (await scLoader()) as Omit<ScenarioConfig, 'slug'>;
+          console.log('[ConfigProvider] scRaw:', scRaw);
+          console.log(`[ConfigProvider] Assigning scenario.slug = ${scenarioId}`);
+          scenarios.push({ ...scRaw, slug: scenarioId });
         }
+        console.log('[ConfigProvider] Scenarios loaded:', scenarios.map(s => s.slug));
 
+        // Zbuduj konfigurację
         const appConfig: AppConfig = {
-          name: appJson.name,
-          description: appJson.description,
-          tplDir: appJson.tplDir,
+          name: appData.name,
+          description: appData.description,
+          tplDir: appData.tplDir,
           workspaces,
           scenarios,
         };
+        console.log('[ConfigProvider] Final appConfig:', appConfig);
 
         setConfig(appConfig);
         setConfigType('documentdb');

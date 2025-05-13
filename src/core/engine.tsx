@@ -1,10 +1,10 @@
 // src/core/engine.tsx
-import { Suspense, useMemo } from "react";
-import { ZodTypeAny } from "zod";
-import { useNavigate, useParams } from "react-router-dom";
-import { preloadComponent } from "../preload";
-import { AppConfig, NodeConfig, useFlowStore } from ".";
-import { jsonToZod } from "./utils/jsonToZod";
+import React, { Suspense, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+import { preloadComponent } from '../preload';
+import { AppConfig, NodeConfig, useFlowStore } from '.';
+import { jsonToZod } from './utils/jsonToZod';
+import { useAppNavigation } from './navigation';
 
 interface NodeRendererProps {
   config: AppConfig;
@@ -31,10 +31,7 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({
     [config.workspaces, node.contextSchemaPath]
   );
 
-  const zodSchema: ZodTypeAny = useMemo(
-    () => jsonToZod(jsonSchema),
-    [jsonSchema]
-  );
+  const zodSchema = useMemo(() => jsonToZod(jsonSchema), [jsonSchema]);
 
   const data = get(node.contextDataPath);
 
@@ -45,7 +42,9 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({
 
   const currentScenario = useMemo(
     () =>
-      config.scenarios.find((s) => s.nodes.some((n) => n.slug === node.slug)),
+      config.scenarios.find((s) =>
+        s.nodes.some((n) => n.slug === node.slug)
+      ),
     [config.scenarios, node.slug]
   );
 
@@ -57,11 +56,11 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({
     context: {
       stepIdx,
       totalSteps,
-      workspace: config.workspaces.find(w => 
-        w.slug === currentScenario?.workspaceSlug
+      workspace: config.workspaces.find(
+        (w) => w.slug === currentScenario?.workspaceSlug
       ),
-      scenario: currentScenario
-    }
+      scenario: currentScenario,
+    },
   };
 
   const handleSubmit = (val: any) => {
@@ -89,8 +88,8 @@ export const FlowEngine: React.FC<{
   scenarioSlug: string;
   stepIdx: number;
 }> = ({ config, scenarioSlug, stepIdx }) => {
-  const navigate = useNavigate();
   const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
+  const { toScenarioStep, toScenarioList } = useAppNavigation();
 
   const scenario = useMemo(
     () => config.scenarios.find((s) => s.slug === scenarioSlug),
@@ -103,22 +102,21 @@ export const FlowEngine: React.FC<{
     [scenario.nodes]
   );
   const index = Math.min(Math.max(stepIdx, 0), nodes.length - 1);
-  const node = nodes[index];
   const totalSteps = nodes.length;
 
   const handleNext = () => {
-    if (index < nodes.length - 1) {
-      navigate(`/${workspaceSlug}/${scenarioSlug}/${index + 1}`);
+    if (index < totalSteps - 1) {
+      toScenarioStep(workspaceSlug!, scenarioSlug, index + 1);
     } else {
-      navigate(`/${workspaceSlug}`);
+      toScenarioList(workspaceSlug!);
     }
   };
 
   return (
-    <NodeRenderer 
-      config={config} 
-      node={node} 
-      onNext={handleNext} 
+    <NodeRenderer
+      config={config}
+      node={nodes[index]}
+      onNext={handleNext}
       stepIdx={index}
       totalSteps={totalSteps}
     />

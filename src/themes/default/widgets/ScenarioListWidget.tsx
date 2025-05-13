@@ -1,9 +1,8 @@
 // src/themes/default/widgets/ScenarioListWidget.tsx
-
-import { useNavigate } from 'react-router-dom';
-import { Play, CheckCircle, Hourglass } from 'lucide-react';
 import { useMemo } from 'react';
+import { Play, CheckCircle, Hourglass } from 'lucide-react';
 import { AppConfig } from '@/core';
+import { useAppNavigation } from '@/core/navigation';
 
 type Scenario = {
   slug: string;
@@ -25,7 +24,7 @@ export default function ScenarioListWidget({
   config,
   workspaceSlug
 }: ScenarioListWidgetProps) {
-  const navigate = useNavigate();
+  const { toScenarioStep } = useAppNavigation();
 
   // Filtruj scenariusze dla tego workspace
   const scenarios: Scenario[] = useMemo(
@@ -48,12 +47,12 @@ export default function ScenarioListWidget({
 
   return (
     <div className="p-4">
-      {title && <h3 className="text-base font-semibold mb-3">{title}</h3>}
+      {title && <h3 className="text-base font-semibold mb-3">{title}</h3>}      
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {scenarios.map(s => (
           <div
             key={s.slug}
-            onClick={() => navigate(`/${workspaceSlug}/${s.slug}/0`)}
+            onClick={() => toScenarioStep(workspaceSlug, s.slug, 0)}
             className={`rounded border bg-white shadow-sm overflow-hidden transition-all ${
               isActive(s.status) 
                 ? 'ring-1 ring-blue-500' 
