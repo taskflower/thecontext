@@ -20,8 +20,6 @@ interface WidgetsStepProps extends TemplateComponentProps {
 
 const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
   const { configId, workspaceSlug } = useParams<{ configId: string, workspaceSlug: string }>();
-  
-  // Znajdź workspace bezpośrednio bez useMemo
   const workspace = config.workspaces.find((w) => w.slug === workspaceSlug);
 
   if (!workspace) {
@@ -50,11 +48,9 @@ const WorkspaceOverview: React.FC<{ config: AppConfig }> = ({ config }) => {
   const tplDir = workspace.templateSettings?.tplDir || config.tplDir;
   const layoutFile = workspace.templateSettings?.layoutFile || "Simple";
 
-  // Używamy hooków do załadowania komponentów
   const AppLayout = useLayout<LayoutProps>(tplDir, layoutFile);
   const WidgetsStep = useComponent<WidgetsStepProps>(tplDir, "WidgetsStep");
 
-  // Przygotowanie widgetów z props
   const widgets = workspace.templateSettings?.widgets?.map((widget) => ({
     ...widget,
     config,

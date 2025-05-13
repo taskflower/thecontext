@@ -5,8 +5,6 @@ import { Loading } from ".";
 import { AppConfig, FlowEngine, useLayout } from "@/core";
 import { ThemeProvider } from "@/themes/ThemeContext";
 
-
-// Definicja interfejsu dla props layoutu
 interface LayoutProps {
   children?: React.ReactNode;
   context?: {

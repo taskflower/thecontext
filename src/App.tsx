@@ -12,7 +12,6 @@ import { ContextDebugger } from "./debug";
 import ConfigIndicator from "./components/ConfigIndicator";
 import { ConfigProvider, useConfig } from "./ConfigProvider";
 
-// Proste komponenty dla stanów aplikacji
 const ErrorState = ({ error }: { error: string }) => (
   <div className="p-4 text-red-600">Błąd: {error}</div>
 );
@@ -21,7 +20,6 @@ const NoConfigState = () => (
   <div className="p-4 text-gray-700">Brak konfiguracji</div>
 );
 
-// Główny komponent aplikacji
 const AppContent = () => {
   const { config, loading, error, configId, configType } = useConfig();
 

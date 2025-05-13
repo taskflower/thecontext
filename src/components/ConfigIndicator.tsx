@@ -5,7 +5,7 @@ import { Database, File } from 'lucide-react';
 interface ConfigIndicatorProps {
   configId: string | null;
   configType: 'local' | 'firebase' | 'documentdb' | null;
-  config: any; // AppConfig
+  config: any; 
 }
 
 const ConfigIndicator: React.FC<ConfigIndicatorProps> = ({ 

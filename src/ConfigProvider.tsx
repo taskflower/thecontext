@@ -8,7 +8,6 @@ import React, {
 } from "react";
 import type { AppConfig, WorkspaceConfig, ScenarioConfig } from "@/core/types";
 
-// Prosta mapa cache zamiast zustand store
 const componentCache = new Map<string, React.LazyExoticComponent<any>>();
 
 type ModuleType = "component" | "layout" | "widget";
