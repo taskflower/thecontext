@@ -9,28 +9,21 @@ import {
 import {
   ConfigIndicator,
   Loading,
-  ScenarioWithStep,
-  withSuspense,
   WorkspaceOverview,
+  withSuspense,
 } from "@/components";
-import { ContextDebugger } from "./debug";
 import { ConfigProvider, useConfig } from "./ConfigProvider";
+import ScenarioLayout from "@/components/ScenarioLayout";
 
 const RawAppContent: React.FC = () => {
-  const { config, loading, error, configId, configType } = useConfig();
+  const { config, loading, error, configId } = useConfig();
   if (loading) return <Loading message="Ładowanie konfiguracji..." />;
   if (error) return <div className="p-4 text-red-600">Błąd: {error}</div>;
-  if (!config)
-    return <div className="p-4 text-gray-700">Brak konfiguracji</div>;
+  if (!config) return <div className="p-4 text-gray-700">Brak konfiguracji</div>;
 
   return (
     <Router>
-      <ContextDebugger config={config} />
-      <ConfigIndicator
-        configId={configId!}
-        configType={configType!}
-        config={config}
-      />
+      <ConfigIndicator configId={configId!} configType={null!} config={config} />
       <Routes>
         <Route
           path="/"
@@ -47,7 +40,7 @@ const RawAppContent: React.FC = () => {
         />
         <Route
           path="/:configId/:workspaceSlug/:scenarioSlug/:stepIndex?"
-          element={<ScenarioWithStep config={config} />}
+          element={<ScenarioLayout config={config} />}
         />
         <Route
           path="*"
@@ -58,8 +51,8 @@ const RawAppContent: React.FC = () => {
   );
 };
 
-const LazyAppContent = React.lazy(() =>
-  Promise.resolve({ default: RawAppContent })
+const LazyAppContent = React.lazy(
+  () => Promise.resolve({ default: RawAppContent })
 );
 const AppContent = withSuspense(LazyAppContent, "Ładowanie…");
 
