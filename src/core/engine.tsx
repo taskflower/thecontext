@@ -4,7 +4,8 @@ import { useParams } from 'react-router-dom';
 import { AppConfig, NodeConfig, useFlowStore, TemplateComponentProps } from '.';
 import { jsonToZod } from './utils/jsonToZod';
 import { useAppNavigation } from './navigation';
-import { useConfig } from '@/provideConfig';
+import { useConfig } from '@/ConfigProvider';
+
 
 
 interface NodeRendererProps {

@@ -11,7 +11,8 @@ import { AppLoading, ScenarioWithStep, WorkspaceOverview } from "@/components";
 import { AppConfig } from "@/core";
 import { ContextDebugger } from "./debug";
 import ConfigIndicator from "./components/ConfigIndicator";
-import ConfigProvider, { useConfig } from "@/provideConfig";
+import { ConfigProvider, useConfig } from "./ConfigProvider";
+
 
 
 export const App: React.FC = () => (

@@ -16,7 +16,8 @@ import {
 import { useState, useEffect } from 'react';
 import { useFlow } from '@/core';
 import { useAppNavigation } from '@/core/navigation';
-import { useConfig } from '@/provideConfig';
+import { useConfig } from '@/ConfigProvider';
+
 
 interface LayoutContext {
   workspace?: { slug: string; name?: string };

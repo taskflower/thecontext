@@ -1,5 +1,6 @@
 // src/core/hooks/useWidget.ts
-import { useConfig } from "@/provideConfig";
+
+import { useConfig } from "@/ConfigProvider";
 import { useMemo } from "react";
 
 export const useWidget = (tplDir: string, widgetFile: string) => {

@@ -4,8 +4,7 @@ import { useParams, Navigate } from "react-router-dom";
 import { Loading } from ".";
 import { AppConfig, FlowEngine } from "@/core";
 import { ThemeProvider } from "@/themes/ThemeContext";
-import { useConfig } from "@/provideConfig";
-
+import { useConfig } from "@/ConfigProvider";
 
 // Definicja interfejsu dla props layoutu
 interface LayoutProps {
@@ -26,7 +25,7 @@ const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
     scenarioSlug = "",
     stepIndex = "0",
   } = useParams<{
-    configId?: string,
+    configId?: string;
     workspaceSlug?: string;
     scenarioSlug?: string;
     stepIndex?: string;
@@ -46,7 +45,7 @@ const ScenarioWithStep: React.FC<{ config: AppConfig }> = ({ config }) => {
 
   const tpl = workspace.templateSettings?.tplDir || config.tplDir;
   const layout = workspace.templateSettings?.layoutFile || "Simple";
-  
+
   const AppLayout = useMemo(
     () => preload.layout(tpl, layout) as ComponentType<LayoutProps>,
     [tpl, layout, preload]

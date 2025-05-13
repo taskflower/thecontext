@@ -6,7 +6,8 @@ import { WidgetsStepProps } from '@/themes/themeTypes';
 import { getColSpanClass } from '@/core/utils/themesHelpers';
 import { useTheme } from '@/themes/ThemeContext';
 import { getDatabaseProvider, SaveToDBOptions } from '@/provideDB/databaseProvider';
-import { useConfig } from '@/provideConfig';
+import { useConfig } from '@/ConfigProvider';
+
 
 
 // Lekki spinner dla widgetów
