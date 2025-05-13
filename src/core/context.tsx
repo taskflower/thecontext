@@ -1,7 +1,7 @@
 // src/core/context.tsx
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { getPath, setPath } from "./utils";
+import { getPath, setPath } from ".";
 
 
 interface FlowState {

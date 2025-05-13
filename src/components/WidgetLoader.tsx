@@ -1,7 +1,7 @@
 // src/components/WidgetLoader.tsx
 import React from 'react';
 import { useWidget } from '@/core';
-import { withSuspense } from './withSuspense';
+import { withSuspense } from '.';
 
 interface WidgetLoaderProps {
   tplDir: string;

@@ -3,7 +3,7 @@ import React from "react";
 import { useParams, Link } from "react-router-dom";
 import { AppConfig, TemplateComponentProps, useLayout, useComponent } from "@/core";
 import { ThemeProvider } from "@/themes/ThemeContext";
-import { withSuspense } from "./withSuspense";
+import { withSuspense } from ".";
 
 interface WorkspaceOverviewProps {
   config: AppConfig;

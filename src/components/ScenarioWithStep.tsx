@@ -3,7 +3,7 @@ import React from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { AppConfig, FlowEngine, useLayout } from "@/core";
 import { ThemeProvider } from "@/themes/ThemeContext";
-import { withSuspense } from "./withSuspense";
+import { withSuspense } from ".";
 
 interface ScenarioWithStepProps {
   config: AppConfig;
