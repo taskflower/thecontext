@@ -1,24 +1,28 @@
 {
-    "id": "invoices",
-    "slug": "invoices",
-    "workspaceSlug": "workspace-goldsaver",
-    "name": "Faktury",
-    "description": "Pobieraj faktury za transakcje",
-    "icon": "file-text",
-    "nodes": [
-      {
-        "slug": "invoice-list",
-        "label": "Lista faktur",
-        "tplFile": "WidgetsStep",
-        "order": 0,
-        "contextSchemaPath": "account.invoices",
-        "contextDataPath": "account.invoices",
-        "attrs": {
-          "widgets": [
-            { "tplFile": "InvoicesWidget", "title": "Faktury", "contextDataPath": "account.invoices", "colSpan": "full" }
-          ]
-        }
+  "id": "invoices",
+  "slug": "invoices",
+  "workspaceSlug": "workspace-goldsaver",
+  "name": "Faktury",
+  "description": "Pobieraj faktury za transakcje",
+  "icon": "file-text",
+  "nodes": [
+    {
+      "slug": "invoice-list",
+      "label": "Lista faktur",
+      "tplFile": "WidgetsStep",
+      "order": 0,
+      "contextSchemaPath": "account.invoices",
+      "contextDataPath": "account.invoices",
+      "attrs": {
+        "widgets": [
+          {
+            "tplFile": "InvoicesWidget",
+            "title": "Faktury",
+            "contextDataPath": "account.invoices",
+            "colSpan": "full"
+          }
+        ]
       }
-    ]
-  }
-  
+    }
+  ]
+}

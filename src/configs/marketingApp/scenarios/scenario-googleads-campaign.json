@@ -1,68 +1,393 @@
 {
-    "id": "scenario-googleads-campaign",
-    "slug": "scenario-googleads-campaign",
-    "workspaceSlug": "workspace-marketing",
-    "name": "Przygotuj kampanię Google Ads",
-    "description": "Na podstawie zebranych danych generuj plan kampanii Google Ads",
-    "icon": "chart",
-    "nodes": [
-      {
-        "slug": "create-campaign-googleads",
-        "label": "Krok 1: Generuj kampanię",
-        "contextSchemaPath": "campaign-data",
-        "contextDataPath": "campaign-data",
-        "tplFile": "LlmStep",
-        "order": 0,
-        "attrs": {
-          "autoStart": true,
-          "userMessage": "Wykorzystaj dane: URL={{website-data.url}}, opis={{marketing-description.marketingDescription}}, branża={{marketing-description.industry}}, grupa={{marketing-description.targetAudience}}. Przygotuj plan kampanii Google Ads. Zwróć dokładny JSON z następującymi polami:\n- adGroups (array of objects): lista 3-5 grup reklam, każdy obiekt powinien mieć pola: id (string), name (string), description (string), icon (string - użyj jednej z wartości: star, check, info, warning, briefcase, calculator, chart, money, document)\n- keywords (array of strings): lista 10-15 słów kluczowych dla kampanii\n- budget (number): proponowany miesięczny budżet kampanii w PLN\n- roi (object): prognozowana efektywność kampanii, obiekt powinien zawierać pola: roi (number - procent ROI), profits (number - szacowane zyski w PLN), investment (number - wysokość inwestycji w PLN)"
-        }
-      },
-      {
-        "slug": "campaign-summary",
-        "label": "Krok 2: Podsumowanie kampanii",
-        "contextSchemaPath": "campaign-data",
-        "contextDataPath": "campaign-data",
-        "tplFile": "WidgetsStep",
-        "order": 1,
-        "attrs": {
-          "widgets": [
-            {
-              "tplFile": "TitleWidget",
-              "title": "Plan kampanii Google Ads",
-              "colSpan": "full"
+  "id": "scenario-googleads-campaign",
+  "slug": "scenario-googleads-campaign",
+  "workspaceSlug": "workspace-marketing",
+  "name": "Przygotuj kampanię Google Ads",
+  "description": "Na podstawie zebranych danych utwórz kampanię Google Ads z wykorzystaniem formularzy i API",
+  "icon": "chart",
+  "nodes": [
+    {
+      "slug": "campaign-budget-form",
+      "label": "Krok 1: Utwórz budżet kampanii",
+      "contextSchemaPath": "campaign-data.budget",
+      "contextDataPath": "campaign-data.budget",
+      "tplFile": "FormStep",
+      "order": 0,
+      "attrs": {
+        "title": "Utwórz budżet kampanii",
+        "description": "Aby utworzyć kampanię, najpierw określ jej budżet",
+        "jsonSchema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "Nazwa budżetu",
+              "default": "Budżet kampanii {{website-data.url}}"
             },
-            {
-              "tplFile": "ListObjectWidget",
-              "title": "Grupy reklam",
-              "contextDataPath": "campaign-data.adGroups",
-              "layout": "grid",
-              "colSpan": 2
+            "amount": {
+              "type": "number",
+              "title": "Kwota budżetu (PLN)",
+              "minimum": 100,
+              "default": 1000
             },
-            {
-              "tplFile": "ROIWidget",
-              "title": "Analiza ROI",
-              "contextDataPath": "campaign-data.roi",
-              "colSpan": 1
+            "deliveryMethod": {
+              "type": "string",
+              "title": "Metoda dostarczania",
+              "enum": [
+                "STANDARD",
+                "ACCELERATED"
+              ],
+              "default": "STANDARD"
             },
-            {
-              "tplFile": "ListObjectWidget",
-              "title": "Słowa kluczowe",
-              "contextDataPath": "campaign-data.keywords",
-              "layout": "grid",
-              "colSpan": 2
-            },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Budżet kampanii",
-              "contextDataPath": "campaign-data.budget",
-              "icon": "money",
-              "actionText": "Kalkulacja",
-              "actionUrl": "https://ads.google.com/home/tools/budget-calculator/",
-              "colSpan": 1
+            "explicitlyShared": {
+              "type": "boolean",
+              "title": "Budżet współdzielony",
+              "default": false
             }
+          },
+          "required": [
+            "name",
+            "amount",
+            "deliveryMethod"
           ]
-        }
+        },
+        "submitLabel": "Utwórz budżet"
       }
-    ]
-  }
+    },
+    {
+      "slug": "create-budget-api",
+      "label": "Tworzenie budżetu w Google Ads",
+      "contextSchemaPath": "campaign-data.budget",
+      "contextDataPath": "campaign-data.budget",
+      "tplFile": "ApiStep",
+      "order": 1,
+      "attrs": {
+        "title": "Tworzenie budżetu w Google Ads",
+        "description": "Trwa tworzenie budżetu w systemie Google Ads",
+        "apiEndpoint": "/api/v1/services/googleads/campaign-budgets",
+        "method": "POST",
+        "requestTemplate": {
+          "name": "{{campaign-data.budget.name}}",
+          "amountMicros": "{{campaign-data.budget.amount * 1000000}}",
+          "deliveryMethod": "{{campaign-data.budget.deliveryMethod}}",
+          "explicitlyShared": "{{campaign-data.budget.explicitlyShared}}"
+        },
+        "responseTransform": "response => { return { ...response.data, budgetId: response.data.results[0].resource_name.split('/').pop() } }",
+        "autoSubmit": true
+      }
+    },
+    {
+      "slug": "campaign-form",
+      "label": "Krok 2: Utwórz kampanię",
+      "contextSchemaPath": "campaign-data.campaign",
+      "contextDataPath": "campaign-data.campaign",
+      "tplFile": "FormStep",
+      "order": 2,
+      "attrs": {
+        "title": "Utwórz kampanię Google Ads",
+        "description": "Określ podstawowe parametry kampanii",
+        "jsonSchema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "Nazwa kampanii",
+              "default": "Kampania dla {{website-data.url}}"
+            },
+            "status": {
+              "type": "string",
+              "title": "Status kampanii",
+              "enum": [
+                "ENABLED",
+                "PAUSED"
+              ],
+              "default": "PAUSED"
+            },
+            "advertisingChannelType": {
+              "type": "string",
+              "title": "Typ kanału reklamowego",
+              "enum": [
+                "SEARCH",
+                "DISPLAY",
+                "VIDEO",
+                "SHOPPING"
+              ],
+              "default": "SEARCH"
+            },
+            "biddingStrategyType": {
+              "type": "string",
+              "title": "Strategia licytacji",
+              "enum": [
+                "MAXIMIZE_CONVERSIONS",
+                "MAXIMIZE_CONVERSION_VALUE",
+                "TARGET_CPA",
+                "TARGET_ROAS"
+              ],
+              "default": "MAXIMIZE_CONVERSIONS"
+            },
+            "targetCpa": {
+              "type": "number",
+              "title": "Docelowy koszt pozyskania (dla TARGET_CPA)",
+              "minimum": 1
+            },
+            "targetRoas": {
+              "type": "number",
+              "title": "Docelowy ROAS % (dla TARGET_ROAS)",
+              "minimum": 0.1
+            },
+            "startDate": {
+              "type": "string",
+              "title": "Data rozpoczęcia (YYYYMMDD)",
+              "pattern": "^[0-9]{8}$"
+            }
+          },
+          "required": [
+            "name",
+            "status",
+            "advertisingChannelType",
+            "biddingStrategyType"
+          ]
+        },
+        "submitLabel": "Utwórz kampanię"
+      }
+    },
+    {
+      "slug": "create-campaign-api",
+      "label": "Tworzenie kampanii w Google Ads",
+      "contextSchemaPath": "campaign-data.campaign",
+      "contextDataPath": "campaign-data.campaign",
+      "tplFile": "ApiStep",
+      "order": 3,
+      "attrs": {
+        "title": "Tworzenie kampanii w Google Ads",
+        "description": "Trwa tworzenie kampanii w systemie Google Ads",
+        "apiEndpoint": "/api/v1/services/googleads/campaign",
+        "method": "POST",
+        "requestTemplate": {
+          "name": "{{campaign-data.campaign.name}}",
+          "status": "{{campaign-data.campaign.status}}",
+          "advertisingChannelType": "{{campaign-data.campaign.advertisingChannelType}}",
+          "biddingStrategyType": "{{campaign-data.campaign.biddingStrategyType}}",
+          "campaignBudgetId": "{{campaign-data.budget.budgetId}}",
+          "targetCpaMicros": "{{campaign-data.campaign.targetCpa ? campaign-data.campaign.targetCpa * 1000000 : null}}",
+          "targetRoas": "{{campaign-data.campaign.targetRoas}}",
+          "startDate": "{{campaign-data.campaign.startDate}}"
+        },
+        "responseTransform": "response => { return { ...response.data, campaignId: response.data.results[0].resource_name.split('/').pop() } }",
+        "autoSubmit": true
+      }
+    },
+    {
+      "slug": "ad-groups-form",
+      "label": "Krok 3: Utwórz grupy reklam",
+      "contextSchemaPath": "campaign-data.adGroups",
+      "contextDataPath": "campaign-data.adGroups",
+      "tplFile": "FormStep",
+      "order": 4,
+      "attrs": {
+        "title": "Utwórz grupy reklam",
+        "description": "Dodaj grupy reklam do swojej kampanii",
+        "jsonSchema": {
+          "type": "object",
+          "properties": {
+            "groups": {
+              "type": "array",
+              "title": "Grupy reklam",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "groups"
+          ]
+        },
+        "schema": {
+          "groups": {
+            "isArray": true,
+            "title": "Dodaj grupę reklam",
+            "fieldType": "text",
+            "placeholder": "Wpisz nazwę grupy reklam",
+            "description": "Dodaj od 2 do 5 grup reklam do swojej kampanii",
+            "options": [
+              {
+                "value": "Produkty główne",
+                "label": "Produkty główne"
+              },
+              {
+                "value": "Usługi podstawowe",
+                "label": "Usługi podstawowe"
+              },
+              {
+                "value": "Oferta promocyjna",
+                "label": "Oferta promocyjna"
+              },
+              {
+                "value": "Marka",
+                "label": "Marka"
+              },
+              {
+                "value": "Konkurencja",
+                "label": "Konkurencja"
+              }
+            ],
+            "required": true
+          }
+        },
+        "submitLabel": "Dodaj grupy reklam"
+      }
+    },
+    {
+      "slug": "create-adgroups-api",
+      "label": "Tworzenie grup reklam w Google Ads",
+      "contextSchemaPath": "campaign-data.adGroups",
+      "contextDataPath": "campaign-data.adGroups",
+      "tplFile": "ApiStep",
+      "order": 5,
+      "attrs": {
+        "title": "Tworzenie grup reklam w Google Ads",
+        "description": "Trwa tworzenie grup reklam w systemie Google Ads",
+        "apiEndpoint": "/api/v1/services/googleads/ad-groups-batch",
+        "method": "POST",
+        "requestTemplate": {
+          "campaignId": "{{campaign-data.campaign.campaignId}}",
+          "adGroups": "{{campaign-data.adGroups.groups.map(name => ({ name: name, status: 'ENABLED', type: 'SEARCH_STANDARD' }))}}"
+        },
+        "responseTransform": "response => { return { ...response.data, results: response.data.results.map(result => ({ id: result.resource_name.split('/').pop(), name: result.name })) } }",
+        "autoSubmit": true
+      }
+    },
+    {
+      "slug": "keywords-form",
+      "label": "Krok 4: Dodaj słowa kluczowe",
+      "contextSchemaPath": "campaign-data.keywords",
+      "contextDataPath": "campaign-data.keywords",
+      "tplFile": "FormStep",
+      "order": 6,
+      "attrs": {
+        "title": "Dodaj słowa kluczowe",
+        "description": "Dodaj słowa kluczowe do swoich grup reklam",
+        "jsonSchema": {
+          "type": "object",
+          "properties": {
+            "keywordsList": {
+              "type": "array",
+              "title": "Słowa kluczowe",
+              "items": {
+                "type": "string"
+              }
+            },
+            "matchType": {
+              "type": "string",
+              "title": "Typ dopasowania",
+              "enum": [
+                "BROAD",
+                "PHRASE",
+                "EXACT"
+              ],
+              "default": "BROAD"
+            }
+          },
+          "required": [
+            "keywordsList",
+            "matchType"
+          ]
+        },
+        "schema": {
+          "keywordsList": {
+            "isArray": true,
+            "title": "Dodaj słowo kluczowe",
+            "fieldType": "text",
+            "placeholder": "Wpisz słowo kluczowe",
+            "description": "Dodaj od 5 do 15 słów kluczowych do swojej kampanii (np. \"marketing internetowy\", \"kampanie reklamowe\")",
+            "options": [],
+            "required": true
+          },
+          "matchType": {
+            "title": "Typ dopasowania",
+            "fieldType": "select",
+            "options": [
+              {
+                "value": "BROAD",
+                "label": "Szerokie"
+              },
+              {
+                "value": "PHRASE",
+                "label": "Frazowe"
+              },
+              {
+                "value": "EXACT",
+                "label": "Dokładne"
+              }
+            ],
+            "required": true
+          }
+        },
+        "submitLabel": "Dodaj słowa kluczowe"
+      }
+    },
+    {
+      "slug": "campaign-summary",
+      "label": "Krok 5: Podsumowanie kampanii",
+      "contextSchemaPath": "campaign-data",
+      "contextDataPath": "campaign-data",
+      "tplFile": "WidgetsStep",
+      "order": 7,
+      "attrs": {
+        "title": "Podsumowanie kampanii Google Ads",
+        "subtitle": "Poniżej znajduje się podsumowanie utworzonej kampanii Google Ads",
+        "widgets": [
+          {
+            "tplFile": "TitleWidget",
+            "title": "Plan kampanii Google Ads",
+            "colSpan": "full"
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Nazwa kampanii",
+            "contextDataPath": "campaign-data.campaign.name",
+            "icon": "info",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Status kampanii",
+            "contextDataPath": "campaign-data.campaign.status",
+            "icon": "info",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Budżet kampanii",
+            "contextDataPath": "campaign-data.budget.amount",
+            "icon": "money",
+            "actionText": "Kalkulacja",
+            "actionUrl": "https://ads.google.com/home/tools/budget-calculator/",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "ListObjectWidget",
+            "title": "Grupy reklam",
+            "contextDataPath": "campaign-data.adGroups.groups",
+            "layout": "grid",
+            "colSpan": 2
+          },
+          {
+            "tplFile": "ListObjectWidget",
+            "title": "Słowa kluczowe",
+            "contextDataPath": "campaign-data.keywords.keywordsList",
+            "layout": "grid",
+            "colSpan": 2
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Typ dopasowania słów kluczowych",
+            "contextDataPath": "campaign-data.keywords.matchType",
+            "icon": "info",
+            "colSpan": 1
+          }
+        ]
+      }
+    }
+  ]
+}
