@@ -43,6 +43,10 @@
               "type": "boolean",
               "title": "Budżet współdzielony",
               "default": false
+            },
+            "amountMicros": {
+              "type": "number",
+              "title": "Kwota w mikrojednostkach (wypełniane automatycznie)"
             }
           },
           "required": [
@@ -51,7 +55,17 @@
             "deliveryMethod"
           ]
         },
-        "submitLabel": "Utwórz budżet"
+        "submitLabel": "Utwórz budżet",
+        "postProcess": {
+          "enabled": true,
+          "operations": [
+            {
+              "path": "campaign-data.budget.amountMicros",
+              "action": "calculate",
+              "formula": "campaign-data.budget.amount * 1000000"
+            }
+          ]
+        }
       }
     },
     {
@@ -66,14 +80,7 @@
         "description": "Trwa tworzenie budżetu w systemie Google Ads",
         "apiEndpoint": "/api/v1/services/googleads/campaign-budgets",
         "method": "POST",
-        "requestTemplate": {
-          "name": "{{campaign-data.budget.name}}",
-          "amountMicros": "{{campaign-data.budget.amount * 1000000}}",
-          "deliveryMethod": "{{campaign-data.budget.deliveryMethod}}",
-          "explicitlyShared": "{{campaign-data.budget.explicitlyShared}}"
-        },
-        "responseTransform": "response => { return { ...response.data, budgetId: response.data.results[0].resource_name.split('/').pop() } }",
-        "autoSubmit": true
+        "payloadDataPath": "campaign-data.budget"
       }
     },
     {
@@ -139,6 +146,12 @@
               "type": "string",
               "title": "Data rozpoczęcia (YYYYMMDD)",
               "pattern": "^[0-9]{8}$"
+            },
+            "campaignBudgetId": {
+              "type": "string"
+            },
+            "targetCpaMicros": {
+              "type": "number"
             }
           },
           "required": [
@@ -148,7 +161,22 @@
             "biddingStrategyType"
           ]
         },
-        "submitLabel": "Utwórz kampanię"
+        "submitLabel": "Utwórz kampanię",
+        "postProcess": {
+          "enabled": true,
+          "operations": [
+            {
+              "path": "campaign-data.campaign.campaignBudgetId",
+              "action": "copy",
+              "source": "campaign-data.budget.budgetId"
+            },
+            {
+              "path": "campaign-data.campaign.targetCpaMicros",
+              "action": "calculate",
+              "formula": "campaign-data.campaign.targetCpa ? campaign-data.campaign.targetCpa * 1000000 : null"
+            }
+          ]
+        }
       }
     },
     {
@@ -161,20 +189,9 @@
       "attrs": {
         "title": "Tworzenie kampanii w Google Ads",
         "description": "Trwa tworzenie kampanii w systemie Google Ads",
-        "apiEndpoint": "/api/v1/services/googleads/campaign",
+        "apiEndpoint": "/api/v1/services/googleads/campaigns",
         "method": "POST",
-        "requestTemplate": {
-          "name": "{{campaign-data.campaign.name}}",
-          "status": "{{campaign-data.campaign.status}}",
-          "advertisingChannelType": "{{campaign-data.campaign.advertisingChannelType}}",
-          "biddingStrategyType": "{{campaign-data.campaign.biddingStrategyType}}",
-          "campaignBudgetId": "{{campaign-data.budget.budgetId}}",
-          "targetCpaMicros": "{{campaign-data.campaign.targetCpa ? campaign-data.campaign.targetCpa * 1000000 : null}}",
-          "targetRoas": "{{campaign-data.campaign.targetRoas}}",
-          "startDate": "{{campaign-data.campaign.startDate}}"
-        },
-        "responseTransform": "response => { return { ...response.data, campaignId: response.data.results[0].resource_name.split('/').pop() } }",
-        "autoSubmit": true
+        "payloadDataPath": "campaign-data.campaign"
       }
     },
     {
@@ -195,6 +212,20 @@
               "title": "Grupy reklam",
               "items": {
                 "type": "string"
+              }
+            },
+            "campaignId": {
+              "type": "string"
+            },
+            "adGroupsData": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "status": { "type": "string" },
+                  "type": { "type": "string" }
+                }
               }
             }
           },
@@ -234,7 +265,23 @@
             "required": true
           }
         },
-        "submitLabel": "Dodaj grupy reklam"
+        "submitLabel": "Dodaj grupy reklam",
+        "postProcess": {
+          "enabled": true,
+          "operations": [
+            {
+              "path": "campaign-data.adGroups.campaignId",
+              "action": "copy",
+              "source": "campaign-data.campaign.campaignId"
+            },
+            {
+              "path": "campaign-data.adGroups.adGroupsData",
+              "action": "transform",
+              "source": "campaign-data.adGroups.groups",
+              "transformer": "groups.map(name => ({ name, status: 'ENABLED', type: 'SEARCH_STANDARD' }))"
+            }
+          ]
+        }
       }
     },
     {
@@ -249,12 +296,7 @@
         "description": "Trwa tworzenie grup reklam w systemie Google Ads",
         "apiEndpoint": "/api/v1/services/googleads/ad-groups-batch",
         "method": "POST",
-        "requestTemplate": {
-          "campaignId": "{{campaign-data.campaign.campaignId}}",
-          "adGroups": "{{campaign-data.adGroups.groups.map(name => ({ name: name, status: 'ENABLED', type: 'SEARCH_STANDARD' }))}}"
-        },
-        "responseTransform": "response => { return { ...response.data, results: response.data.results.map(result => ({ id: result.resource_name.split('/').pop(), name: result.name })) } }",
-        "autoSubmit": true
+        "payloadDataPath": "campaign-data.adGroups"
       }
     },
     {
