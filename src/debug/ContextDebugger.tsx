@@ -104,10 +104,12 @@ export const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) =>
 
   const tabs = [
     { id: "user", label: "Użytkownik", icon: <User className="w-3.5 h-3.5 mr-1.5" />, always: true },
+    { id: "firebase", label: "Aplikacje", icon: <Globe className="w-3.5 h-3.5 mr-1.5" />, always: false },
+    { id: "page", label: "Widoki", icon: <Layers className="w-3.5 h-3.5 mr-1.5" />, always: true },
     { id: "schema", label: "Schema", icon: <List className="w-3.5 h-3.5 mr-1.5" />, always: false },
     { id: "data", label: "Dane", icon: <Database className="w-3.5 h-3.5 mr-1.5" />, always: false },
-    { id: "firebase", label: "Apps", icon: <Globe className="w-3.5 h-3.5 mr-1.5" />, always: false },
-    { id: "page", label: "Strona", icon: <Layers className="w-3.5 h-3.5 mr-1.5" />, always: true },
+    
+   
     { id: "exporter", label: "Eksport", icon: <Upload className="w-3.5 h-3.5 mr-1.5" />, always: false }
   ];
 
@@ -115,7 +117,7 @@ export const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) =>
     <div className="fixed top-0 right-0 z-40 w-1/2 h-full bg-white border-l border-gray-200 shadow-xl flex flex-col">
       <div className="bg-white border-b border-gray-200 px-3 py-2 flex justify-between items-center">
         <div className="font-semibold flex items-center text-sm">
-          <Database className="w-4 h-4 mr-1.5" />Context Inspector
+          <Settings className="w-4 h-4 mr-1.5" />RevertContext settings
         </div>
         <button
           className="p-1 rounded-md hover:bg-gray-100 text-gray-700"

@@ -8,7 +8,7 @@ import {
   BarChart4,
   Check,
   Layers,
-  Settings,
+ Box
 } from "lucide-react";
 import { PageTabConfig, SelectedItems } from "./types";
 
@@ -51,12 +51,12 @@ export const PageTree: React.FC<PageTreeProps> = ({
   return (
     <div className="col-span-4 bg-white rounded-md border border-gray-200 overflow-hidden">
       {/* Header */}
-      <div className=" p-3 border-b border-gray-200">
+      <div className=" p-2 border-b border-gray-200">
         <div
           onClick={() => navigate(`/${actualConfigId}`)}
-          className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center cursor-pointer"
+          className="text-sm font-medium hover:text-blue-800 flex items-center cursor-pointer"
         >
-          <Settings className="h-5 w-5 mr-2 flex-shrink-0" />
+          <Box className="h-4 w-4 mr-2 flex-shrink-0" />
           <span className="truncate">{config.name || actualConfigId}</span>
         </div>
       </div>

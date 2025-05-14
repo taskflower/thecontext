@@ -1,25 +1,33 @@
-// src/debug/tabs/FirebaseAppsTab.tsx
+// src/debug/tabs/AppsTab.tsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Box, ArrowRight } from 'lucide-react';
 import { createDatabaseProvider, DatabaseOperations } from '@/provideDB/databaseProvider';
 import { useConfig } from '@/ConfigProvider';
 
-interface FirebaseAppsTabProps {}
+interface FirebaseConfig {
+  id: string;
+  title?: string;
+  type?: string;
+  payload?: any;
+}
 
-const FirebaseAppsTab: React.FC<FirebaseAppsTabProps> = () => {
+export const AppsTab: React.FC = () => {
   const dbProvider = useMemo<DatabaseOperations>(
     () => createDatabaseProvider('firebase', 'application_configs'),
     []
   );
-  const [configs, setConfigs] = useState<any[]>([]);
+  const [configs, setConfigs] = useState<FirebaseConfig[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { loadConfig } = useConfig();
 
   const fetchConfigs = async () => {
     try {
-      const list = dbProvider.listItems ? await dbProvider.listItems('project') : [];
+      const list = dbProvider.listItems
+        ? await dbProvider.listItems('project')
+        : [];
       setConfigs(list);
       setError(null);
     } catch (e: any) {
@@ -28,31 +36,10 @@ const FirebaseAppsTab: React.FC<FirebaseAppsTabProps> = () => {
     }
   };
 
-  const deleteConfig = async (id: string) => {
-    if (!window.confirm('Czy na pewno chcesz usunąć tę konfigurację?')) return;
+  const openConfig = async (cfgId: string) => {
     try {
-      if (!dbProvider.deleteItem) throw new Error('deleteItem nie jest zaimplementowane');
-      await dbProvider.deleteItem(id);
-      await fetchConfigs();
-    } catch (e: any) {
-      console.error('Błąd usuwania konfiguracji:', e);
-      setError(e.message || 'nieznany błąd');
-    }
-  };
-
-  const toggleDetails = (id: string) => {
-    setExpandedIds(prev => {
-      const newSet = new Set(prev);
-      newSet.has(id) ? newSet.delete(id) : newSet.add(id);
-      return newSet;
-    });
-  };
-
-  // Funkcja do otwierania konfiguracji
-  const openConfig = async (configId: string, workspaceSlug: string) => {
-    try {
-      await loadConfig(configId);
-      navigate(`/${configId}/${workspaceSlug}`);
+      await loadConfig(cfgId);
+      navigate(`/${cfgId}`);
     } catch (e) {
       console.error('Błąd ładowania konfiguracji:', e);
       setError('Nie udało się załadować konfiguracji');
@@ -63,79 +50,77 @@ const FirebaseAppsTab: React.FC<FirebaseAppsTabProps> = () => {
     fetchConfigs();
   }, []);
 
+  const selectedConfig = configs.find(c => c.id === selectedId);
+
   return (
-    <div className="p-4">
-      <div className="flex space-x-2 mb-4">
-        <button
-          onClick={fetchConfigs}
-          className="px-3 py-1 text-xs font-medium bg-gray-200 rounded hover:bg-gray-300"
-        >
-          Odśwież
-        </button>
-      </div>
-
-      {error && (
-        <div className="text-red-600 text-sm mb-2">
-          Błąd: {error}
+    <div className="grid grid-cols-12 gap-4 p-4">
+      {/* Sidebar list */}
+      <div className="col-span-4 bg-white rounded-md border border-gray-200 overflow-auto max-h-[calc(100vh-180px)]">
+        <div className="p-2 border-b border-gray-200">
+          <div className="text-sm font-medium hover:text-blue-800 flex items-center">
+            <Box className="h-4 w-4 mr-2 flex-shrink-0" />
+            <span>Konfiguracje</span>
+          </div>
         </div>
-      )}
-
-      <div className="space-y-2">
-        {configs.map(cfg => {
-          const defaultWorkspace =
-            cfg.payload?.workspaces?.[0]?.slug ?? '';
-          return (
-            <div key={cfg.id} className="p-3 border rounded shadow-sm">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="font-medium">
-                    {cfg.title || cfg.payload?.name}
-                  </h4>
-                  <p className="text-xs text-gray-600">
-                    Typ: {cfg.type}
-                  </p>
-                </div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => toggleDetails(cfg.id)}
-                    className="px-2 py-1 text-xs font-medium bg-blue-100 rounded hover:bg-blue-200"
-                  >
-                    {expandedIds.has(cfg.id) ? 'Ukryj szczegóły' : 'Szczegóły'}
-                  </button>
-                  {defaultWorkspace && (
+        <div className="p-2">
+          {error && <div className="text-red-600 text-sm mb-2">Błąd: {error}</div>}
+          {configs.length === 0 && !error && (
+            <p className="text-xs text-gray-500">Brak zapisanych konfiguracji.</p>
+          )}
+          <div className="space-y-2">
+            {configs.map(cfg => {
+              const isSelected = cfg.id === selectedId;
+              return (
+                <div
+                  key={cfg.id}
+                  className={`p-3 border rounded shadow-sm cursor-pointer ${
+                    isSelected ? 'border-blue-300 bg-blue-50' : 'border-gray-200 bg-white'
+                  }`}
+                  onClick={() => setSelectedId(cfg.id)}
+                >
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h4 className="font-medium text-xs text-gray-700">
+                        {cfg.title || cfg.payload?.name || cfg.id}
+                      </h4>
+                      <p className="text-[10px] text-gray-500">Typ: {cfg.type}</p>
+                    </div>
                     <button
-                      onClick={() => openConfig(cfg.id, defaultWorkspace)}
-                      className="px-2 py-1 text-xs font-medium bg-green-100 rounded hover:bg-green-200"
+                      onClick={e => { e.stopPropagation(); openConfig(cfg.id); }}
+                      className="flex items-center px-2 py-1 text-[10px] font-medium bg-green-100 rounded hover:bg-green-200"
                     >
+                      <ArrowRight className="h-4 w-4 mr-1 flex-shrink-0" />
                       Otwórz
                     </button>
-                  )}
-                  <button
-                    onClick={() => deleteConfig(cfg.id)}
-                    className="px-2 py-1 text-xs font-medium bg-red-100 rounded hover:bg-red-200"
-                  >
-                    Usuń
-                  </button>
+                  </div>
                 </div>
-              </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
 
-              {expandedIds.has(cfg.id) && (
-                <pre className="mt-2 bg-gray-100 p-2 rounded text-xs font-mono overflow-auto max-h-48">
-                  {JSON.stringify(cfg.payload, null, 2)}
-                </pre>
-              )}
+      {/* Details panel */}
+      <div className="col-span-8 bg-white rounded-md border border-gray-100 shadow-sm p-4 overflow-auto max-h-[calc(100vh-180px)]">
+        {selectedConfig ? (
+          <>
+            <div className="border-b border-gray-100 pb-2 mb-2">
+              <h2 className="text-sm font-medium text-gray-700">
+                {selectedConfig.title || selectedConfig.id}
+              </h2>
             </div>
-          );
-        })}
-
-        {configs.length === 0 && !error && (
-          <p className="text-xs text-gray-500">
-            Brak zapisanych konfiguracji.
-          </p>
+            <div className="bg-gray-50 rounded p-3 overflow-auto text-xs font-mono text-gray-700">
+              <pre>{JSON.stringify(selectedConfig.payload, null, 2)}</pre>
+            </div>
+          </>
+        ) : (
+          <div className="text-xs text-gray-500 italic">
+            Wybierz konfigurację z listy po lewej stronie
+          </div>
         )}
       </div>
     </div>
   );
 };
 
-export default FirebaseAppsTab;
+export default AppsTab;

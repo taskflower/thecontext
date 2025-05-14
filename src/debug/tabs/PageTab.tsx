@@ -1,10 +1,11 @@
+// src/debug/tabs/PageTab.tsx
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { PageDetails } from "./pageTabComp/PageDetails";
 import { PageTree } from "./pageTabComp/PageTree";
 import { PageTabProps, SelectedItems } from "./pageTabComp/types";
 
-export const PageTab: React.FC<PageTabProps> = ({ config }) => {
+const PageTab: React.FC<PageTabProps> = ({ config }) => {
   const { workspace, scenario, step } = useParams<{
     workspace?: string;
     scenario?: string;
@@ -56,13 +57,7 @@ export const PageTab: React.FC<PageTabProps> = ({ config }) => {
   // Obsługa kliknięcia na obszar roboczy
   const handleWorkspaceClick = (slug: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    
-    const newSelected: SelectedItems = {
-      workspace: slug,
-      scenario: null,
-      step: undefined,
-    };
-    
+    const newSelected: SelectedItems = { workspace: slug, scenario: null, step: undefined };
     setSelectedItems(newSelected);
     navigate(`/${configId}/${slug}`);
   };
@@ -74,13 +69,7 @@ export const PageTab: React.FC<PageTabProps> = ({ config }) => {
     e: React.MouseEvent
   ) => {
     e.stopPropagation();
-    
-    const newSelected: SelectedItems = {
-      workspace: workspaceSlug,
-      scenario: scenarioSlug,
-      step: undefined,
-    };
-    
+    const newSelected: SelectedItems = { workspace: workspaceSlug, scenario: scenarioSlug, step: undefined };
     setSelectedItems(newSelected);
     navigate(`/${configId}/${workspaceSlug}/${scenarioSlug}`);
   };
@@ -93,13 +82,7 @@ export const PageTab: React.FC<PageTabProps> = ({ config }) => {
     e: React.MouseEvent
   ) => {
     e.stopPropagation();
-    
-    const newSelected: SelectedItems = {
-      workspace: workspaceSlug,
-      scenario: scenarioSlug,
-      step: stepIdx,
-    };
-    
+    const newSelected: SelectedItems = { workspace: workspaceSlug, scenario: scenarioSlug, step: stepIdx };
     setSelectedItems(newSelected);
     navigate(`/${configId}/${workspaceSlug}/${scenarioSlug}/${stepIdx}`);
   };
@@ -107,17 +90,17 @@ export const PageTab: React.FC<PageTabProps> = ({ config }) => {
   // Obsługa rozwijania/zwijania obszaru roboczego
   const handleToggleWorkspace = (slug: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setExpandedWorkspace(expandedWorkspace === slug ? null : slug);
+    setExpandedWorkspace(prev => (prev === slug ? null : slug));
   };
 
   // Obsługa rozwijania/zwijania scenariusza
   const handleToggleScenario = (slug: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setExpandedScenario(expandedScenario === slug ? null : slug);
+    setExpandedScenario(prev => (prev === slug ? null : slug));
   };
 
   return (
-    <div className="grid grid-cols-12 gap-4 p-4">
+    <div className="grid grid-cols-12 gap-4 p-4 h-full">
       <PageTree
         config={config}
         selectedItems={selectedItems}
@@ -129,11 +112,9 @@ export const PageTab: React.FC<PageTabProps> = ({ config }) => {
         onScenarioClick={handleScenarioClick}
         onStepClick={handleStepClick}
       />
-      
-      <PageDetails 
-        config={config} 
-        selectedItems={selectedItems}
-      />
+      <div className="col-span-8 bg-white rounded-md shadow-sm h-full overflow-auto">
+        <PageDetails config={config} selectedItems={selectedItems} />
+      </div>
     </div>
   );
 };

@@ -12,7 +12,7 @@ export const ConfigDetails: React.FC<ConfigDetailProps> = ({ config }) => {
       </div>
       
       <div className="p-2">
-        <div className="bg-gray-50 rounded p-2 overflow-auto max-h-[300px] text-xs font-mono text-gray-700">
+        <div className="bg-gray-50 rounded p-2 overflow-auto text-xs font-mono text-gray-700">
           <pre>{JSON.stringify(config, null, 2)}</pre>
         </div>
       </div>
