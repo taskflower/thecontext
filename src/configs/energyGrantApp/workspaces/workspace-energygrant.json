@@ -14,9 +14,15 @@
         "icon": "info",
         "colSpan": "full"
       },
+     
       {
         "tplFile": "RoleInfoWidget",
         "title": "Role w systemie",
+        "colSpan": "full"
+      },
+      {
+        "tplFile": "WorkspacesListWidget",
+        "title": "Dostępne obszary robocze",
         "colSpan": "full"
       },
       {

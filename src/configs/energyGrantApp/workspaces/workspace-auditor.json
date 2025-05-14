@@ -1,0 +1,139 @@
+{
+  "id": "workspace-auditor",
+  "slug": "workspace-auditor",
+  "name": "Panel Audytora",
+  "description": "Zarządzanie profilem audytora energetycznego",
+  "icon": "clipboard-check",
+  "templateSettings": {
+    "layoutFile": "Dashboard",
+    "widgets": [
+      {
+        "tplFile": "InfoWidget",
+        "title": "Witaj w Panelu Audytora",
+        "data": "Kompletny profil pozwoli Ci na skuteczne pozyskiwanie zleceń na audyty energetyczne.",
+        "icon": "info",
+        "colSpan": "full"
+      },
+      {
+        "tplFile": "InfoWidget",
+        "title": "Twoje punkty dostępu",
+        "data": "0",
+        "icon": "tag",
+        "colSpan": 1
+      },
+      {
+        "tplFile": "InfoWidget",
+        "title": "Status profilu",
+        "data": "Uzupełnij profil, aby zwiększyć swoje szanse na zdobycie zlecenia",
+        "icon": "user-check",
+        "colSpan": 1
+      },
+      {
+        "tplFile": "WorkspacesListWidget",
+        "title": "Dostępne obszary robocze",
+        "colSpan": "full"
+      },
+      {
+        "tplFile": "ScenarioListWidget",
+        "title": "Dostępne scenariusze",
+        "colSpan": "full"
+      },
+      {
+        "tplFile": "ListObjectWidget",
+        "title": "Twój profil audytora",
+        "contextDataPath": "auditor-profile",
+        "layout": "table",
+        "colSpan": "full"
+      }
+     
+    ]
+  },
+  "contextSchema": {
+    "type": "object",
+    "properties": {
+      "auditor-profile": {
+        "type": "object",
+        "properties": {
+          "companyName": { "type": "string", "title": "Nazwa firmy" },
+          "nip": { "type": "string", "title": "NIP" },
+          "address": { "type": "string", "title": "Adres" },
+          "postalCode": { "type": "string", "title": "Kod pocztowy" },
+          "city": { "type": "string", "title": "Miejscowość" },
+          "phone": { "type": "string", "title": "Telefon" },
+          "email": { "type": "string", "title": "E-mail" },
+          "website": { "type": "string", "title": "Strona www" },
+          "description": { "type": "string", "title": "Opis działalności" },
+          "certificateNumber": { "type": "string", "title": "Numer certyfikatu" },
+          "certificateExpiry": { "type": "string", "title": "Data ważności certyfikatu" },
+          "specializations": { 
+            "type": "array", 
+            "items": { "type": "string" }, 
+            "title": "Specjalizacje" 
+          },
+          "experience": { "type": "number", "title": "Lata doświadczenia" },
+          "areasCovered": { 
+            "type": "array", 
+            "items": { "type": "string" }, 
+            "title": "Obsługiwane rejony" 
+          },
+          "completedAudits": { "type": "number", "title": "Liczba wykonanych audytów" },
+          "projectGallery": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "title": { "type": "string" },
+                "description": { "type": "string" },
+                "imagePath": { "type": "string" }
+              }
+            },
+            "title": "Galeria projektów"
+          }
+        }
+      },
+      "auditor-market-preview": {
+        "type": "object",
+        "properties": {
+          "listings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "postalCode": { "type": "string" },
+                "city": { "type": "string" },
+                "scope": { "type": "string" },
+                "hasAudit": { "type": "boolean" },
+                "isVerified": { "type": "boolean" },
+                "views": { "type": "number" },
+                "created": { "type": "string" },
+                "type": { "type": "string" }
+              }
+            }
+          },
+          "purchasedPoints": { "type": "number" },
+          "unlockedListings": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "auditor-points-purchase-form": {
+        "type": "object",
+        "properties": {
+          "pointsAmount": { "type": "number", "title": "Liczba punktów" },
+          "termsConsent": { "type": "boolean", "title": "Zgoda na regulamin" },
+          "paymentConsent": { "type": "boolean", "title": "Zgoda na płatność" }
+        }
+      },
+      "auditor-points-purchase": {
+        "type": "object",
+        "properties": {
+          "pointsAmount": { "type": "number", "title": "Liczba punktów" },
+          "price": { "type": "number", "title": "Cena" }
+        }
+      }
+    }
+  }
+}
