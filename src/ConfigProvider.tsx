@@ -130,7 +130,7 @@ export const loadJsonConfigs = async (slug: string): Promise<AppConfig> => {
       } as AppConfig;
     } catch (error) {
       console.error("Error loading config:", error);
-      throw error; // Rzuć błąd dalej, aby obsłużyć go w loadConfig
+      throw error; 
     }
   })();
 

@@ -4,12 +4,9 @@ import { useWidget } from '@/core';
 import { withSuspense } from '.';
 import { NotFoundWidget } from '@/core/fallback-components';
 
-interface WidgetLoaderProps {
-  tplDir: string;
-  widget: any;
-}
 
-const RawWidgetLoader: React.FC<WidgetLoaderProps> = memo(({ tplDir, widget }) => {
+const RawWidgetLoader: React.FC<{ tplDir: string, widget: any }> = memo(({ tplDir, widget }) => {
+
   const [error, setError] = useState<Error | null>(null);
   
   // Bezpieczne pobieranie widgetu

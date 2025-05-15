@@ -2,18 +2,11 @@
 import { FCWithChildren } from "@/core";
 import { memo } from "react";
 import I from "./I";
+import { useConfig } from "@/ConfigProvider";
 
-interface Props {
-  configId: string;
-  configType: "local" | "firebase";
-  config: { workspaces: any[]; scenarios: any[] };
-}
-
-const ConfigIndicator: FCWithChildren<Props> = memo(({
-  configId,
-  configType,
-  config,
-}) => {
+const ConfigIndicator: FCWithChildren = memo(() => {
+  const { configId, configType, config } = useConfig();
+  
   const isFirebase = configType === "firebase";
   const iconName = "database";
   const colors = isFirebase

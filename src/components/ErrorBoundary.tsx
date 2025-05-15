@@ -1,6 +1,6 @@
 // src/components/ErrorBoundary.tsx
 import { FCWithChildren } from "@/core";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { I } from ".";
 
 export const ErrorBoundary: FCWithChildren<{ fallback?: React.ReactNode }> = ({
@@ -15,6 +15,7 @@ export const ErrorBoundary: FCWithChildren<{ fallback?: React.ReactNode }> = ({
     window.addEventListener("error", handler);
     return () => window.removeEventListener("error", handler);
   }, []);
+
   if (hasError) {
     return (
       <div className="flex items-center justify-center w-full h-screen bg-gray-50">

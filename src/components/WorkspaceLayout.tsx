@@ -7,7 +7,7 @@ import Loading from "./Loading";
 import React from "react";
 
 const WorkspaceLayout = memo(() => {
-  const { config } = useConfig();
+  const { config } = useConfig(); // useConfig() wywołane na najwyższym poziomie
   const { workspaceSlug = "" } = useParams<{ workspaceSlug?: string }>();
 
   if (!workspaceSlug) return <div>Brak workspace</div>;
@@ -20,10 +20,9 @@ const WorkspaceLayout = memo(() => {
 
   const tpl = workspace.templateSettings?.tplDir || config!.tplDir;
   const layoutFile = workspace.templateSettings?.layoutFile || "Simple";
-  const AppLayout = React.useMemo(
-    () => useConfig().preload.layout(tpl, layoutFile),
-    [tpl, layoutFile]
-  ) as React.ComponentType<any>;
+  
+  // Teraz useConfig() nie jest używane w useMemo, tylko na poziomie funkcji
+  const AppLayout = useConfig().preload.layout(tpl, layoutFile) as React.ComponentType<any>;
 
   return (
     <ThemeProvider value={tpl}>

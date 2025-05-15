@@ -1,14 +1,12 @@
 // src/components/WorkspaceOverview.tsx
 import React, { memo } from "react";
 import { useParams } from "react-router-dom";
-import { AppConfig, TemplateComponentProps, useComponent } from "@/core";
+import { useConfig } from "@/ConfigProvider";
+import { useComponent } from "@/core";
 import { withSuspense } from ".";
 
-interface WorkspaceOverviewProps {
-  config: AppConfig;
-}
-
-const RawWorkspaceOverview: React.FC<WorkspaceOverviewProps> = memo(({ config }) => {
+const RawWorkspaceOverview: React.FC = memo(() => {
+  const { config } = useConfig();
   const { workspaceSlug = "" } = useParams<{ workspaceSlug: string }>();
   
   const workspace = config.workspaces.find((w) => w.slug === workspaceSlug);
@@ -17,7 +15,7 @@ const RawWorkspaceOverview: React.FC<WorkspaceOverviewProps> = memo(({ config })
   }
 
   const tplDir = workspace.templateSettings?.tplDir || config.tplDir;
-  const WidgetsStep = useComponent<TemplateComponentProps>(tplDir, "WidgetsStep");
+  const WidgetsStep = useComponent(tplDir, "WidgetsStep");
 
   const widgets = (workspace.templateSettings?.widgets || []).map((w: any) => ({
     ...w,

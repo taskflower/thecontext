@@ -2,12 +2,10 @@
 import React, { Suspense, memo } from "react";
 import { FlowEngine } from "@/core";
 import { Loading } from ".";
+import { useConfig } from "@/ConfigProvider";
 
-interface ScenarioWithStepProps {
-  config: any;
-}
-
-const ScenarioWithStep: React.FC<ScenarioWithStepProps> = memo(({ config }) => {
+const ScenarioWithStep: React.FC = memo(() => {
+  const { config } = useConfig();
   return (
     <Suspense fallback={<Loading message="Ładowanie kroku…" />}>
       <FlowEngine
