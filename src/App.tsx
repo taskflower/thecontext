@@ -18,7 +18,7 @@ function App() {
 }
 
 const AppContent = () => {
-  const { config, configId, configType, loading, error } = useConfig();
+  const { config, configId, loading, error } = useConfig();
 
   if (loading) {
     return <Loading message="Ładowanie aplikacji..." />;
