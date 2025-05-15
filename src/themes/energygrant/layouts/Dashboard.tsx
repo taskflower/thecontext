@@ -1,5 +1,5 @@
 // src/components/DashboardLayout.tsx
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useFlow } from "@/core";
 import { useConfig } from "@/ConfigProvider";
 import { I } from "@/components";
@@ -24,7 +24,10 @@ const DashboardLayout: React.FC<Props> = ({ children, context }) => {
   const { toScenarioStep } = useAppNavigation();
   const navigate = useNavigate();
 
-  const userRole = useMemo(() => get("user-data")?.role ?? "beneficjent", [get]);
+  const userRole = useMemo(
+    () => get("user-data")?.role ?? "beneficjent",
+    [get]
+  );
   const [activeScenario, setActiveScenario] = useState<string | null>(
     () => context?.scenario?.slug ?? null
   );
@@ -73,7 +76,9 @@ const DashboardLayout: React.FC<Props> = ({ children, context }) => {
           {icon && (
             <I
               name={icon}
-              className={`${active ? "text-green-600" : "text-gray-400"} w-4 h-4`}
+              className={`${
+                active ? "text-green-600" : "text-gray-400"
+              } w-4 h-4`}
             />
           )}
           <span className="ml-3 font-medium">{label}</span>
@@ -96,7 +101,6 @@ const DashboardLayout: React.FC<Props> = ({ children, context }) => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Poprawione aside - zdefiniowano wysokość i zachowanie przewijania */}
       <aside className="sticky top-0 h-screen w-80 bg-white border-r border-gray-200 hidden md:flex md:flex-col shadow-sm overflow-y-auto">
         <header className="flex-shrink-0 px-6 py-5 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-green-700">
