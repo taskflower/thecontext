@@ -15,8 +15,6 @@ interface ConfigIndicatorProps {
 
 const ConfigIndicator: FCWithChildren<ConfigIndicatorProps> = memo(({ configId, configType, config }) => {
   const configContext = useConfig();
-  
-  // Use props if provided, otherwise fall back to context
   const id = configId || configContext.configId || "";
   const type = configType || configContext.configType || "local";
   const cfg = config || configContext.config || { workspaces: [], scenarios: [] };
