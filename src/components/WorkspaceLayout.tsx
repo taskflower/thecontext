@@ -23,7 +23,7 @@ const WorkspaceLayout = memo(() => {
   const AppLayout = React.useMemo(
     () => useConfig().preload.layout(tpl, layoutFile),
     [tpl, layoutFile]
-  );
+  ) as React.ComponentType<any>;
 
   return (
     <ThemeProvider value={tpl}>
