@@ -1,4 +1,4 @@
-// src/ConfigProvider.tsx
+// src/ConfigProvider.tsx (Refactored)
 import React, {
   createContext,
   useContext,
@@ -10,35 +10,31 @@ import React, {
 import { useLocation } from "react-router-dom";
 import type { AppConfig, WorkspaceConfig, ScenarioConfig } from "@/core/types";
 
+// Fallback component for missing modules
 const NotFoundComponent = (props: any) => (
   <div className="fallback">
-    Nie znaleziono: {props.componentType} {props.componentName} w szablonie{" "}
-    {props.tplDir}
+    Nie znaleziono: {props.componentType} {props.componentName} w szablonie {props.tplDir}
   </div>
 );
 
+// Component cache and module imports
 const componentCache = new Map<string, React.LazyExoticComponent<any>>();
 const moduleImports = {
-  component: import.meta.glob<{ default: React.ComponentType<any> }>(
-    "./themes/*/components/*.tsx"
-  ),
-  layout: import.meta.glob<{ default: React.ComponentType<any> }>(
-    "./themes/*/layouts/*.tsx"
-  ),
-  widget: import.meta.glob<{ default: React.ComponentType<any> }>(
-    "./themes/*/widgets/*.tsx"
-  ),
+  component: import.meta.glob<{ default: React.ComponentType<any> }>("./themes/*/components/*.tsx"),
+  layout: import.meta.glob<{ default: React.ComponentType<any> }>("./themes/*/layouts/*.tsx"),
+  widget: import.meta.glob<{ default: React.ComponentType<any> }>("./themes/*/widgets/*.tsx"),
 };
 
+// Load component module
 const loadModule = (
   type: "component" | "layout" | "widget",
   tplDir: string,
   name: string
 ) => {
   const cacheKey = `${type}:${tplDir}/${name}`;
-
   if (componentCache.has(cacheKey)) return componentCache.get(cacheKey)!;
 
+  // Try to find module in template directory or fallback to default
   const paths = [
     `./themes/${tplDir}/${type}s/${name}.tsx`,
     `./themes/default/${type}s/${name}.tsx`,
@@ -47,56 +43,50 @@ const loadModule = (
   const path = paths.find((p) => moduleImports[type][p]);
   const component = path
     ? lazy(moduleImports[type][path])
-    : lazy(() =>
-        Promise.resolve({
-          default: (props: any) => (
-            <NotFoundComponent
-              componentName={name}
-              tplDir={tplDir}
-              componentType={type}
-              {...props}
-            />
-          ),
-        })
-      );
+    : lazy(() => Promise.resolve({
+        default: (props: any) => (
+          <NotFoundComponent componentName={name} tplDir={tplDir} componentType={type} {...props} />
+        ),
+      }));
+      
   componentCache.set(cacheKey, component);
   return component;
 };
 
+// Preload module exports
 export const preloadModules = {
-  component: (tplDir: string, name: string) =>
-    loadModule("component", tplDir, name),
+  component: (tplDir: string, name: string) => loadModule("component", tplDir, name),
   layout: (tplDir: string, name: string) => loadModule("layout", tplDir, name),
   widget: (tplDir: string, name: string) => loadModule("widget", tplDir, name),
 };
 
+// Extract config ID from URL
 export const getConfigIdFromURL = (path: string) =>
   path.split("/").filter(Boolean)[0] || "energyGrantApp";
 
+// Config cache
 const configCache = new Map<string, Promise<AppConfig>>();
 
+// Load JSON configs
 export const loadJsonConfigs = async (slug: string): Promise<AppConfig> => {
   if (configCache.has(slug)) return configCache.get(slug)!;
 
+  // Import all config files
   const configs = {
-    app: import.meta.glob<Record<string, any>>("./configs/*/app.json", {
-      as: "json",
-    }),
-    ws: import.meta.glob<Record<string, any>>("./configs/*/workspaces/*.json", {
-      as: "json",
-    }),
-    sc: import.meta.glob<Record<string, any>>("./configs/*/scenarios/*.json", {
-      as: "json",
-    }),
+    app: import.meta.glob<Record<string, any>>("./configs/*/app.json", { as: "json" }),
+    ws: import.meta.glob<Record<string, any>>("./configs/*/workspaces/*.json", { as: "json" }),
+    sc: import.meta.glob<Record<string, any>>("./configs/*/scenarios/*.json", { as: "json" }),
   };
 
   const configPromise = (async () => {
     try {
+      // Load app config
       const appPath = `./configs/${slug}/app.json`;
       const appLoader = configs.app[appPath];
       if (!appLoader) throw new Error(`Missing config: ${appPath}`);
-
       const app = await appLoader();
+
+      // Helper to load config items
       const loadItems = async <T extends object>(
         items: Array<{ id: string }>,
         type: "workspaces" | "scenarios"
@@ -116,11 +106,13 @@ export const loadJsonConfigs = async (slug: string): Promise<AppConfig> => {
         );
       };
 
+      // Load workspaces and scenarios
       const [workspaces, scenarios] = await Promise.all([
         loadItems<WorkspaceConfig>(app.workspaces || [], "workspaces"),
         loadItems<ScenarioConfig>(app.scenarios || [], "scenarios"),
       ]);
 
+      // Return complete config
       return {
         name: app.name || "Aplikacja",
         description: app.description || "",
@@ -138,6 +130,7 @@ export const loadJsonConfigs = async (slug: string): Promise<AppConfig> => {
   return configPromise;
 };
 
+// Config context
 const ConfigContext = createContext<{
   config: AppConfig | null;
   configType: string | null;
@@ -156,6 +149,7 @@ const ConfigContext = createContext<{
   loadConfig: async () => {},
 });
 
+// Config provider component
 export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const [state, setState] = useState({
@@ -166,6 +160,7 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
     error: null as string | null,
   });
 
+  // Load configuration from JSON or Firebase
   const loadConfig = useCallback(async (slug: string) => {
     setState(current => ({
       ...current,
@@ -174,7 +169,7 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
     }));
 
     try {
-      // Najpierw próbujemy załadować konfigurację z JSON
+      // Try to load from JSON first
       const config = await loadJsonConfigs(slug);
       setState({
         config,
@@ -184,11 +179,9 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
         error: null,
       });
     } catch (err) {
+      // If JSON fails, try Firebase
       try {
-        // Jeśli nie ma JSON, próbujemy załadować z Firebase
-        const { FirebaseAdapter } = await import(
-          "./provideDB/firebase/FirebaseAdapter"
-        );
+        const { FirebaseAdapter } = await import("./provideDB/firebase/FirebaseAdapter");
         const adapter = new FirebaseAdapter("application_configs");
         const saved = await adapter.retrieveData(slug);
 
@@ -215,11 +208,9 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
-  // Efekt, który reaguje na zmiany w URL
+  // Load config when URL changes
   useEffect(() => {
     const slug = getConfigIdFromURL(location.pathname);
-    
-    // Jeśli ID konfiguracji się zmieniło, ładujemy nową konfigurację
     if (slug !== state.configId || state.config === null) {
       loadConfig(slug);
     }

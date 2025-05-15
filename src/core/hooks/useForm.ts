@@ -1,4 +1,4 @@
-// src/core/hooks/useForm.ts
+// src/core/hooks/useForm.ts (Refactored)
 import { useState, useEffect, useCallback } from "react";
 import { ZodType } from 'zod';
 
@@ -16,10 +16,13 @@ interface UseFormResult {
   resetForm: () => void;
 }
 
-export const useForm = <T>({ schema, jsonSchema, initialData }: UseFormOptions<T>): UseFormResult => {
+export const useForm = <T>({ 
+  schema, 
+  jsonSchema, 
+  initialData 
+}: UseFormOptions<T>): UseFormResult => {
   const [formData, setFormData] = useState<Record<string, any>>(initialData || {});
   const [errors, setErrors] = useState<Record<string, string>>({});
-
   useEffect(() => {
     if (initialData) {
       setFormData(initialData);
@@ -42,6 +45,7 @@ export const useForm = <T>({ schema, jsonSchema, initialData }: UseFormOptions<T
       (jsonSchema.required || []).forEach((field: string) => {
         const prop = jsonSchema.properties[field] || {};
         const val = formData[field];
+        
         if (prop.type === 'boolean') {
           if (val !== true) newErrors[field] = 'To pole jest wymagane';
         } else if (val == null || val === '') {
