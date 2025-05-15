@@ -4,10 +4,24 @@ import { memo } from "react";
 import I from "./I";
 import { useConfig } from "@/ConfigProvider";
 
-const ConfigIndicator: FCWithChildren = memo(() => {
-  const { configId, configType, config } = useConfig();
+interface ConfigIndicatorProps {
+  configId?: string;
+  configType?: "firebase" | "local";
+  config?: {
+    workspaces: any[];
+    scenarios: any[];
+  };
+}
+
+const ConfigIndicator: FCWithChildren<ConfigIndicatorProps> = memo(({ configId, configType, config }) => {
+  const configContext = useConfig();
   
-  const isFirebase = configType === "firebase";
+  // Use props if provided, otherwise fall back to context
+  const id = configId || configContext.configId || "";
+  const type = configType || configContext.configType || "local";
+  const cfg = config || configContext.config || { workspaces: [], scenarios: [] };
+  
+  const isFirebase = type === "firebase";
   const iconName = "database";
   const colors = isFirebase
     ? ["bg-blue-100", "text-blue-800", "border-blue-200"]
@@ -22,9 +36,9 @@ const ConfigIndicator: FCWithChildren = memo(() => {
     >
       <I name={iconName} className={`w-3.5 h-3.5 mr-1.5 ${colors[1]}`} />
       <span>
-        {label}: <span className="font-mono">{configId.slice(0, 8)}…</span>
+        {label}: <span className="font-mono">{id.slice(0, 8)}…</span>
         <span className="text-xs opacity-60 ml-2">
-          ({config.workspaces.length} ws, {config.scenarios.length} sc)
+          ({cfg.workspaces.length} ws, {cfg.scenarios.length} sc)
         </span>
       </span>
     </div>

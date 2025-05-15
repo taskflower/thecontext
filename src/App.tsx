@@ -2,8 +2,7 @@
 import { BrowserRouter } from "react-router-dom";
 import { ConfigProvider, useConfig } from "./ConfigProvider";
 import AppRouter from "./AppRouter";
-import ConfigIndicator from "./components/ConfigIndicator";
-import { ErrorBoundary, Loading } from "./components";
+import { ConfigIndicator, ErrorBoundary, Loading } from "./components";
 import { ContextDebugger } from "./debug";
 
 function App() {
@@ -11,9 +10,7 @@ function App() {
     <ErrorBoundary>
       <BrowserRouter>
         <ConfigProvider>
-          <>
-            <AppContent />
-          </>
+          <AppContent />
         </ConfigProvider>
       </BrowserRouter>
     </ErrorBoundary>
@@ -36,20 +33,11 @@ const AppContent = () => {
     );
   }
 
-  const validConfigType: "local" | "firebase" =
-    configType === "firebase" ? "firebase" : "local";
-
   return (
     <>
       <AppRouter />
       <ContextDebugger config={config} />
-      {configId && (
-        <ConfigIndicator
-          configId={configId}
-          configType={validConfigType}
-          config={config}
-        />
-      )}
+      {configId && <ConfigIndicator />}
     </>
   );
 };

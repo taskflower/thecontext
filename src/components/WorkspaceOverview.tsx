@@ -4,10 +4,14 @@ import { useParams } from "react-router-dom";
 import { useConfig } from "@/ConfigProvider";
 import { useComponent } from "@/core";
 import { withSuspense } from ".";
+import { Loading } from ".";
 
 const RawWorkspaceOverview: React.FC = memo(() => {
   const { config } = useConfig();
   const { workspaceSlug = "" } = useParams<{ workspaceSlug: string }>();
+  
+  // Early return if config is not loaded
+  if (!config) return <Loading message="Ładowanie konfiguracji..." />;
   
   const workspace = config.workspaces.find((w) => w.slug === workspaceSlug);
   if (!workspace) {

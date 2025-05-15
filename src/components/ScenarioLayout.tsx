@@ -17,6 +17,9 @@ const ScenarioLayout: React.FC = memo(() => {
     stepIndex?: string;
   }>();
 
+  // Early return if config is not loaded
+  if (!config) return <Loading message="Ładowanie konfiguracji..." />;
+
   const redirectPath = useMemo(
     () => `/${configId}/${workspaceSlug || ""}`,
     [configId, workspaceSlug]
