@@ -1,24 +1,19 @@
-// src/components/WidgetLoader.tsx (z obsługą błędów)
+// src/components/WidgetLoader.tsx (Refactored)
 import React, { memo, useState, useEffect } from 'react';
 import { useWidget } from '@/core';
 import { withSuspense } from '.';
 import { NotFoundWidget } from '@/core/fallback-components';
 
-
-const RawWidgetLoader: React.FC<{ tplDir: string, widget: any }> = memo(({ tplDir, widget }) => {
-
+const RawWidgetLoader = memo(({ tplDir, widget }: { tplDir: string, widget: any }) => {
   const [error, setError] = useState<Error | null>(null);
   
-  // Bezpieczne pobieranie widgetu
+  // Safely fetch the widget component
   const Widget = useWidget(tplDir, widget.tplFile);
   
-  // Obsługa błędów podczas renderowania
-  useEffect(() => {
-    // Reset błędu przy zmianie widgetu
-    setError(null);
-  }, [tplDir, widget.tplFile]);
+  // Reset error when widget changes
+  useEffect(() => setError(null), [tplDir, widget.tplFile]);
   
-  // Obsługa błędów w renderowaniu
+  // Show error fallback if rendering failed
   if (error) {
     return (
       <NotFoundWidget 
@@ -30,24 +25,19 @@ const RawWidgetLoader: React.FC<{ tplDir: string, widget: any }> = memo(({ tplDi
     );
   }
   
-  // Bezpieczne renderowanie widgetu z obsługą błędów
+  // Safely render widget with error handling
   try {
     return <Widget {...widget} componentName={widget.tplFile} />;
   } catch (err) {
-    // Jeśli błąd wystąpił podczas renderowania, zapisujemy go i wyświetlamy fallback
+    // Log error and schedule error state update
     console.error(`Error rendering widget ${widget.tplFile}:`, err);
-    const error = err instanceof Error ? err : new Error(String(err));
-    
-    // W następnym cyklu renderowania wyświetlimy komponent zastępczy
-    // Używamy setTimeout, aby uniknąć błędu "Cannot update during an existing state transition"
-    setTimeout(() => setError(error), 0);
-    
-    // Zwracamy null, aby uniknąć błędów podczas obecnego renderowania
-    return null;
+    const newError = err instanceof Error ? err : new Error(String(err));
+    setTimeout(() => setError(newError), 0);
+    return null; // Return null to avoid render errors
   }
 });
 
-// Dodanie obsługi Suspense
+// Add Suspense handling
 export default withSuspense(
   React.lazy(() => Promise.resolve({ default: RawWidgetLoader })),
   'Ładowanie widgetu…'
