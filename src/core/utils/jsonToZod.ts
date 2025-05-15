@@ -30,7 +30,6 @@ export function jsonToZod(schema: any): ZodTypeAny {
       for (const key in schema.properties || {}) {
         props[key] = jsonToZod(schema.properties[key]);
       }
-
       let obj = z.object(props);
       if (Array.isArray(schema.required)) {
         const req: Record<string, ZodTypeAny> = {};
@@ -39,7 +38,6 @@ export function jsonToZod(schema: any): ZodTypeAny {
         }
         obj = obj.extend(req);
       }
-
       result = obj;
       break;
     default:

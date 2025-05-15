@@ -10,10 +10,10 @@ const RawWorkspaceOverview: React.FC = memo(() => {
   const { config } = useConfig();
   const { workspaceSlug = "" } = useParams<{ workspaceSlug: string }>();
   if (!config) return <Loading message="Ładowanie konfiguracji..." />;
-  
+
   const workspace = config.workspaces.find((w) => w.slug === workspaceSlug);
   if (!workspace) {
-    return <div>Workspace nie znaleziony</div>;
+    return <>Workspace nie znaleziony</>;
   }
 
   const tplDir = workspace.templateSettings?.tplDir || config.tplDir;
@@ -42,5 +42,5 @@ const RawWorkspaceOverview: React.FC = memo(() => {
 
 export default withSuspense(
   React.lazy(() => Promise.resolve({ default: RawWorkspaceOverview })),
-  'Ładowanie workspace…'
+  "Ładowanie workspace…"
 );

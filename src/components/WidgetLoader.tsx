@@ -18,7 +18,6 @@ const RawWidgetLoader = memo(({ tplDir, widget }: { tplDir: string, widget: any 
       />
     );
   }
-  
   try {
     return <Widget {...widget} componentName={widget.tplFile} />;
   } catch (err) {
