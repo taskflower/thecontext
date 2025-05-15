@@ -11,10 +11,10 @@ const WorkspaceLayout = memo(() => {
   const { workspaceSlug = "" } = useParams<{ workspaceSlug?: string }>();
 
   if (!config) return <Loading message="Ładowanie konfiguracji..." />;
-  if (!workspaceSlug) return <div>Brak workspace</div>;
+  if (!workspaceSlug) return <>Brak workspace</>;
 
   const workspace = config.workspaces.find((w) => w.slug === workspaceSlug);
-  if (!workspace) return <div>Workspace nie znaleziony</div>;
+  if (!workspace) return <>Workspace nie znaleziony</>;
   const tpl = workspace.templateSettings?.tplDir || config.tplDir;
   const layoutFile = workspace.templateSettings?.layoutFile || "Simple";
   const AppLayout = preload.layout(tpl, layoutFile) as React.ComponentType<any>;
@@ -22,8 +22,8 @@ const WorkspaceLayout = memo(() => {
   return (
     <ThemeProvider value={tpl}>
       {React.createElement(
-        AppLayout, 
-        { context: { workspace } }, 
+        AppLayout,
+        { context: { workspace } },
         <Suspense fallback={<Loading message="Ładowanie zawartości…" />}>
           <Outlet />
         </Suspense>
