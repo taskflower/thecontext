@@ -36,10 +36,8 @@ const AppContent = () => {
     );
   }
 
-  const validConfigType: "local" | "firebase" | "documentdb" =
-    configType === "firebase" || configType === "documentdb"
-      ? (configType as "firebase" | "documentdb")
-      : "local";
+  const validConfigType: "local" | "firebase" =
+    configType === "firebase" ? "firebase" : "local";
 
   return (
     <>

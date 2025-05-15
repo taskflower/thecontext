@@ -1,10 +1,11 @@
+// src/components/ConfigIndicator.tsx
 import { FCWithChildren } from "@/core";
 import { memo } from "react";
 import I from "./I";
 
 interface Props {
   configId: string;
-  configType: "local" | "firebase" | "documentdb";
+  configType: "local" | "firebase";
   config: { workspaces: any[]; scenarios: any[] };
 }
 
@@ -14,18 +15,11 @@ const ConfigIndicator: FCWithChildren<Props> = memo(({
   config,
 }) => {
   const isFirebase = configType === "firebase";
-  const isDocDB = configType === "documentdb";
-  const iconName = isFirebase ? "database" : isDocDB ? "database" : "file";
+  const iconName = "database";
   const colors = isFirebase
     ? ["bg-blue-100", "text-blue-800", "border-blue-200"]
-    : isDocDB
-    ? ["bg-purple-100", "text-purple-800", "border-purple-200"]
     : ["bg-green-100", "text-green-800", "border-green-200"];
-  const label = isFirebase
-    ? "Firebase App"
-    : isDocDB
-    ? "DocumentDB App"
-    : "Local Config";
+  const label = isFirebase ? "Firebase App" : "Local Config";
 
   return (
     <div

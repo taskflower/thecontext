@@ -1,44 +1,33 @@
 // src/components/WorkspaceLayout.tsx
 import { Suspense, memo, useMemo } from "react";
 import { useParams, Outlet } from "react-router-dom";
-import { AppConfig, useLayout } from "@/core";
+import { useConfig } from "@/ConfigProvider";
 import { ThemeProvider } from "@/themes/ThemeContext";
-import { Loading } from ".";
+import Loading from "./Loading";
+import React from "react";
 
-
-interface WorkspaceLayoutProps {
-  config: AppConfig;
-}
-
-const WorkspaceLayout: React.FC<WorkspaceLayoutProps> = memo(({ config }) => {
+const WorkspaceLayout = memo(() => {
+  const { config } = useConfig();
   const { workspaceSlug = "" } = useParams<{ workspaceSlug?: string }>();
 
-  if (!workspaceSlug) {
-    return <div>Brak workspace</div>;
-  }
+  if (!workspaceSlug) return <div>Brak workspace</div>;
 
-  const workspace = useMemo(() => 
-    config.workspaces.find((w) => w.slug === workspaceSlug),
-    [config.workspaces, workspaceSlug]
+  const workspace = useMemo(
+    () => config?.workspaces.find((w) => w.slug === workspaceSlug),
+    [config, workspaceSlug]
   );
+  if (!workspace) return <div>Workspace nie znaleziony</div>;
 
-  if (!workspace) {
-    return <div>Workspace nie znaleziony</div>;
-  }
-
-  const tpl = workspace.templateSettings?.tplDir || config.tplDir;
+  const tpl = workspace.templateSettings?.tplDir || config!.tplDir;
   const layoutFile = workspace.templateSettings?.layoutFile || "Simple";
-  
-  const AppLayout = useLayout<{ children?: React.ReactNode; context?: any }>(
-    tpl,
-    layoutFile
+  const AppLayout = React.useMemo(
+    () => useConfig().preload.layout(tpl, layoutFile),
+    [tpl, layoutFile]
   );
-
-  const layoutContext = useMemo(() => ({ workspace }), [workspace]);
 
   return (
     <ThemeProvider value={tpl}>
-      <AppLayout context={layoutContext}>
+      <AppLayout context={{ workspace }}>
         <Suspense fallback={<Loading message="Ładowanie zawartości…" />}>
           <Outlet />
         </Suspense>

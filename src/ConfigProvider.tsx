@@ -178,7 +178,7 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
       const config = await loadJsonConfigs(slug);
       setState({
         config,
-        configType: "documentdb",
+        configType: "local",
         configId: slug,
         loading: false,
         error: null,
