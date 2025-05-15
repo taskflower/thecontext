@@ -99,24 +99,12 @@
             }
         },
         {
-            "slug": "points-calculation-auditor-workspace",
-            "label": "Obliczenie ceny",
-            "contextSchemaPath": "auditor-points-purchase",
-            "contextDataPath": "auditor-points-purchase",
-            "tplFile": "LlmStep",
-            "order": 3,
-            "attrs": {
-                "autoStart": true,
-                "userMessage": "Oblicz cenę za zakup punktów: {{auditor-points-purchase-form.pointsAmount}}. Cena to 15 PLN za punkt dla audytorów. Zwróć JSON z polami: pointsAmount (skopiuj z danych wejściowych) i price zawierającym obliczoną cenę."
-            }
-        },
-        {
             "slug": "payment-summary-auditor-workspace",
             "label": "Krok 3: Podsumowanie i płatność",
             "contextSchemaPath": "auditor-points-purchase",
             "contextDataPath": "auditor-points-purchase",
             "tplFile": "WidgetsStep",
-            "order": 4,
+            "order": 3,
             "attrs": {
                 "widgets": [
                     {
@@ -127,14 +115,14 @@
                     {
                         "tplFile": "InfoWidget",
                         "title": "Liczba punktów",
-                        "contextDataPath": "auditor-points-purchase.pointsAmount",
+                        "contextDataPath": "auditor-points-purchase-form.pointsAmount",
                         "icon": "tag",
                         "colSpan": 1
                     },
                     {
                         "tplFile": "InfoWidget",
                         "title": "Do zapłaty",
-                        "contextDataPath": "auditor-points-purchase.price",
+                        "data": "{{auditor-points-purchase-form.pointsAmount * 15}} PLN",
                         "icon": "credit-card",
                         "colSpan": 1
                     },
@@ -152,7 +140,7 @@
             "contextSchemaPath": "auditor-points-purchase",
             "contextDataPath": "auditor-points-purchase",
             "tplFile": "WidgetsStep",
-            "order": 5,
+            "order": 4,
             "attrs": {
                 "widgets": [
                     {
@@ -164,7 +152,7 @@
                     {
                         "tplFile": "InfoWidget",
                         "title": "Zakupione punkty",
-                        "contextDataPath": "auditor-points-purchase.pointsAmount",
+                        "contextDataPath": "auditor-points-purchase-form.pointsAmount",
                         "icon": "check",
                         "colSpan": "full"
                     },

@@ -1,0 +1,109 @@
+{
+    "id": "user-welcome",
+    "slug": "user-welcome",
+    "workspaceSlug": "workspace-user-auth",
+    "name": "Ekran powitalny",
+    "description": "Ekran powitalny po rejestracji lub logowaniu",
+    "icon": "home",
+    "nodes": [
+      {
+        "slug": "welcome-user-fetch",
+        "label": "Pobieranie danych użytkownika",
+        "contextSchemaPath": "user-data",
+        "contextDataPath": "user-data",
+        "tplFile": "LlmStep",
+        "order": 0,
+        "attrs": {
+          "autoStart": true,
+          "userMessage": "Symuluj pobranie danych zalogowanego użytkownika. Zwróć obiekt JSON z polami: email ('jan.kowalski@example.com'), firstName ('Jan'), lastName ('Kowalski'), points (100), role ('beneficjent'), isLoggedIn (true), lastLoginDate (aktualna data w formacie ISO). Zwróć tylko czysty obiekt JSON."
+        }
+      },
+      {
+        "slug": "welcome-screen",
+        "label": "Ekran powitalny",
+        "contextSchemaPath": "user-data",
+        "contextDataPath": "user-data",
+        "tplFile": "WidgetsStep",
+        "order": 1,
+        "attrs": {
+          "title": "Witaj w systemie!",
+          "subtitle": "Oto Twój panel użytkownika",
+          "widgets": [
+            {
+              "tplFile": "TitleWidget",
+              "title": "Witaj, {{user-data.firstName}}!",
+              "subtitle": "Cieszymy się, że jesteś z nami. Oto kilka informacji, które mogą Ci się przydać.",
+              "colSpan": "full"
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Twoje punkty",
+              "contextDataPath": "user-data.points",
+              "icon": "tag",
+              "colSpan": 1
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Rola w systemie",
+              "contextDataPath": "user-data.role",
+              "icon": "briefcase",
+              "colSpan": 1
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Ostatnie logowanie",
+              "contextDataPath": "user-data.lastLoginDate",
+              "icon": "clock",
+              "colSpan": 1
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Co możesz zrobić?",
+              "data": "Uzupełnij swój profil, aby zwiększyć swoje szanse na zdobycie zleceń lub dotacji.",
+              "icon": "info",
+              "colSpan": "full"
+            }
+          ]
+        }
+      },
+      {
+        "slug": "welcome-tiles",
+        "label": "Kafelki funkcji",
+        "contextSchemaPath": "user-data",
+        "contextDataPath": "user-data",
+        "tplFile": "WidgetsStep",
+        "order": 2,
+        "attrs": {
+          "widgets": [
+            {
+              "tplFile": "TitleWidget",
+              "title": "Dostępne funkcje",
+              "subtitle": "Wybierz, co chcesz zrobić",
+              "colSpan": "full"
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Uzupełnij profil",
+              "data": "Dodaj więcej informacji do swojego profilu, aby zwiększyć swoje szanse na sukces.",
+              "icon": "user",
+              "colSpan": 1
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Przeglądaj oferty",
+              "data": "Znajdź oferty dopasowane do Twojej roli w systemie.",
+              "icon": "search",
+              "colSpan": 1
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Sprawdź status punktów",
+              "data": "Zobacz, jak możesz wykorzystać swoje punkty w systemie.",
+              "icon": "bar-chart",
+              "colSpan": 1
+            }
+          ]
+        }
+      }
+    ]
+  }

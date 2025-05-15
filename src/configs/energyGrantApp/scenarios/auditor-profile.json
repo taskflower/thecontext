@@ -1,239 +1,300 @@
 {
-    "id": "auditor-profile",
-    "slug": "auditor-profile",
-    "workspaceSlug": "workspace-auditor",
-    "name": "Uzupełnij profil audytora",
-    "description": "Formularz krokowy do utworzenia kompletnego profilu audytora energetycznego",
-    "icon": "user-check",
-    "nodes": [
-      {
-        "slug": "auditor-basic-data",
-        "label": "Krok 1: Podstawowe informacje",
-        "contextSchemaPath": "auditor-profile",
-        "contextDataPath": "auditor-profile",
-        "tplFile": "FormStep",
-        "order": 0,
-        "attrs": {
-          "title": "Podstawowe informacje o audytorze",
-          "description": "Wprowadź podstawowe dane Twojej firmy audytorskiej",
-          "jsonSchema": {
-            "type": "object",
-            "properties": {
-              "companyName": {
-                "type": "string",
-                "title": "Nazwa firmy"
-              },
-              "nip": {
-                "type": "string",
-                "title": "NIP",
-                "pattern": "^[0-9]{10}$"
-              },
-              "address": {
-                "type": "string",
-                "title": "Adres siedziby"
-              },
-              "postalCode": {
-                "type": "string",
-                "title": "Kod pocztowy",
-                "pattern": "^[0-9]{2}-[0-9]{3}$"
-              },
-              "city": {
-                "type": "string",
-                "title": "Miejscowość"
-              },
-              "phone": {
-                "type": "string",
-                "title": "Telefon kontaktowy"
-              },
-              "email": {
-                "type": "string",
-                "title": "E-mail kontaktowy",
-                "format": "email"
-              },
-              "website": {
-                "type": "string",
-                "title": "Strona internetowa"
-              }
+  "id": "auditor-profile",
+  "slug": "auditor-profile",
+  "workspaceSlug": "workspace-auditor",
+  "name": "Uzupełnij profil audytora",
+  "description": "Formularz krokowy do utworzenia kompletnego profilu audytora energetycznego",
+  "icon": "user-check",
+  "nodes": [
+    {
+      "slug": "auditor-basic-data",
+      "label": "Krok 1: Podstawowe informacje",
+      "contextSchemaPath": "portfolio",
+      "contextDataPath": "portfolio",
+      "tplFile": "FormStep",
+      "order": 0,
+      "attrs": {
+        "title": "Podstawowe informacje o audytorze",
+        "description": "Wprowadź podstawowe dane Twojej firmy audytorskiej",
+        "jsonSchema": {
+          "type": "object",
+          "properties": {
+            "companyName": {
+              "type": "string",
+              "title": "Nazwa firmy"
             },
-            "required": ["companyName", "nip", "address", "postalCode", "city", "phone", "email"]
-          },
-          "submitLabel": "Dalej"
-        }
-      },
-      {
-        "slug": "auditor-qualifications",
-        "label": "Krok 2: Kwalifikacje",
-        "contextSchemaPath": "auditor-profile",
-        "contextDataPath": "auditor-profile",
-        "tplFile": "FormStep",
-        "order": 1,
-        "attrs": {
-          "title": "Kwalifikacje i doświadczenie",
-          "description": "Wprowadź informacje o Twoich kwalifikacjach i doświadczeniu",
-          "jsonSchema": {
-            "type": "object",
-            "properties": {
-              "description": {
-                "type": "string",
-                "title": "Opis działalności",
-                "description": "Opisz swoją działalność, doświadczenie i specjalizację"
-              },
-              "experience": {
-                "type": "number",
-                "title": "Lata doświadczenia",
-                "minimum": 0
-              },
-              "completedAudits": {
-                "type": "number",
-                "title": "Liczba wykonanych audytów",
-                "minimum": 0
-              },
-              "certificateNumber": {
-                "type": "string",
-                "title": "Numer certyfikatu/uprawnień"
-              },
-              "certificateExpiry": {
-                "type": "string",
-                "title": "Data ważności certyfikatu",
-                "format": "date"
-              },
-              "specializations": {
-                "type": "array",
-                "title": "Specjalizacje",
-                "items": {
-                  "type": "string",
-                  "enum": [
-                    "Audyt energetyczny budynków mieszkalnych",
-                    "Audyt energetyczny budynków użyteczności publicznej",
-                    "Audyt energetyczny budynków przemysłowych",
-                    "Świadectwa charakterystyki energetycznej",
-                    "Audyt efektywności energetycznej przedsiębiorstw",
-                    "Audyt systemów grzewczych",
-                    "Audyt systemów chłodzenia",
-                    "Audyt systemów wentylacji",
-                    "Audyt fotowoltaiki",
-                    "Audyt termomodernizacyjny",
-                    "Audyt oświetlenia"
-                  ]
-                },
-                "uniqueItems": true
-              },
-              "areasCovered": {
-                "type": "array",
-                "title": "Obsługiwane rejony",
-                "items": {
-                  "type": "string"
-                },
-                "uniqueItems": true
-              }
-            },
-            "required": ["description", "experience", "certificateNumber", "specializations", "areasCovered"]
-          },
-          "submitLabel": "Zakończ"
-        }
-      },
-      {
-        "slug": "auditor-summary",
-        "label": "Podsumowanie profilu",
-        "contextSchemaPath": "auditor-profile",
-        "contextDataPath": "auditor-profile",
-        "tplFile": "WidgetsStep",
-        "order": 2,
-        "saveToDB": {
-          "enabled": true,
-          "provider": "indexedDB",
-          "itemType": "profile",
-          "itemTitle": "Profil audytora",
-          "contentPath": "auditor-profile"
-        },
-        "attrs": {
-          "title": "Podsumowanie profilu audytora",
-          "widgets": [
-            {
-              "tplFile": "TitleWidget",
-              "title": "Twój profil audytora",
-              "subtitle": "Poniżej znajduje się podsumowanie wprowadzonych danych",
-              "colSpan": "full"
-            },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Nazwa firmy",
-              "contextDataPath": "auditor-profile.companyName",
-              "icon": "info",
-              "colSpan": 1
-            },
-            {
-              "tplFile": "InfoWidget",
+            "nip": {
+              "type": "string",
               "title": "NIP",
-              "contextDataPath": "auditor-profile.nip",
-              "icon": "info",
-              "colSpan": 1
+              "pattern": "^[0-9]{10}$"
             },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Kontakt",
-              "contextDataPath": "auditor-profile.email",
-              "icon": "mail",
-              "colSpan": 1
+            "address": {
+              "type": "string",
+              "title": "Adres siedziby"
             },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Adres",
-              "data": "{{auditor-profile.address}}, {{auditor-profile.postalCode}} {{auditor-profile.city}}",
-              "icon": "map-pin",
-              "colSpan": 1
+            "postalCode": {
+              "type": "string",
+              "title": "Kod pocztowy",
+              "pattern": "^[0-9]{2}-[0-9]{3}$"
             },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Lata doświadczenia",
-              "contextDataPath": "auditor-profile.experience",
-              "icon": "check",
-              "colSpan": 1
+            "city": {
+              "type": "string",
+              "title": "Miejscowość"
             },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Liczba wykonanych audytów",
-              "contextDataPath": "auditor-profile.completedAudits",
-              "icon": "briefcase",
-              "colSpan": 1
+            "phone": {
+              "type": "string",
+              "title": "Telefon kontaktowy"
             },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Numer certyfikatu",
-              "contextDataPath": "auditor-profile.certificateNumber",
-              "icon": "document",
-              "colSpan": 1
+            "email": {
+              "type": "string",
+              "title": "E-mail kontaktowy",
+              "format": "email"
             },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Data ważności certyfikatu",
-              "contextDataPath": "auditor-profile.certificateExpiry",
-              "icon": "calendar",
-              "colSpan": 1
+            "website": {
+              "type": "string",
+              "title": "Strona internetowa"
             },
-            {
-              "tplFile": "ListObjectWidget",
-              "title": "Specjalizacje",
-              "contextDataPath": "auditor-profile.specializations",
-              "layout": "grid",
-              "colSpan": 1
-            },
-            {
-              "tplFile": "ListObjectWidget",
-              "title": "Obsługiwane obszary",
-              "contextDataPath": "auditor-profile.areasCovered", 
-              "layout": "grid",
-              "colSpan": 1
-            },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Opis działalności",
-              "contextDataPath": "auditor-profile.description",
-              "icon": "document",
-              "colSpan": "full"
+            "profileConsent": {
+              "type": "boolean",
+              "title": "Potwierdzam, że jestem uprawniony do publikacji tych danych w serwisie oraz wyrażam zgodę na ich przetwarzanie w celu prezentacji profilu firmy",
+              "default": false
             }
-          ]
-        }
+          },
+          "required": ["companyName", "nip", "address", "postalCode", "city", "phone", "email", "profileConsent"]
+        },
+        "submitLabel": "Dalej"
       }
-    ]
-  }
+    },
+    {
+      "slug": "auditor-qualifications",
+      "label": "Krok 2: Kwalifikacje",
+      "contextSchemaPath": "portfolio",
+      "contextDataPath": "portfolio",
+      "tplFile": "FormStep",
+      "order": 1,
+      "attrs": {
+        "title": "Kwalifikacje i doświadczenie",
+        "description": "Wprowadź informacje o Twoich kwalifikacjach i doświadczeniu",
+        "jsonSchema": {
+          "type": "object",
+          "properties": {
+            "description": {
+              "type": "string",
+              "title": "Opis działalności",
+              "description": "Opisz swoją działalność, doświadczenie i specjalizację"
+            },
+            "experience": {
+              "type": "number",
+              "title": "Lata doświadczenia",
+              "minimum": 0
+            },
+            "completedAudits": {
+              "type": "number",
+              "title": "Liczba wykonanych audytów",
+              "minimum": 0
+            },
+            "certificateNumber": {
+              "type": "string",
+              "title": "Numer certyfikatu/uprawnień"
+            },
+            "certificateExpiry": {
+              "type": "string",
+              "title": "Data ważności certyfikatu",
+              "format": "date"
+            },
+            "specializations": {
+              "type": "array",
+              "title": "Specjalizacje",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "Audyt energetyczny budynków mieszkalnych",
+                  "Audyt energetyczny budynków użyteczności publicznej",
+                  "Audyt energetyczny budynków przemysłowych",
+                  "Świadectwa charakterystyki energetycznej",
+                  "Audyt efektywności energetycznej przedsiębiorstw",
+                  "Audyt systemów grzewczych",
+                  "Audyt systemów chłodzenia",
+                  "Audyt systemów wentylacji",
+                  "Audyt fotowoltaiki",
+                  "Audyt termomodernizacyjny",
+                  "Audyt oświetlenia"
+                ]
+              },
+              "uniqueItems": true
+            },
+            "areasCovered": {
+              "type": "array",
+              "title": "Obsługiwane rejony",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            },
+            "certificateConsent": {
+              "type": "boolean",
+              "title": "Oświadczam, że posiadam wszystkie wymagane prawem certyfikaty i uprawnienia do wykonywania deklarowanych usług",
+              "default": false
+            }
+          },
+          "required": ["description", "experience", "certificateNumber", "specializations", "areasCovered", "certificateConsent"]
+        },
+        "submitLabel": "Dalej"
+      }
+    },
+    {
+      "slug": "auditor-images",
+      "label": "Krok 3: Galeria realizacji",
+      "contextSchemaPath": "portfolio",
+      "contextDataPath": "portfolio",
+      "tplFile": "FormStep",
+      "order": 2,
+      "attrs": {
+        "title": "Galeria realizacji",
+        "description": "Opisz swoje realizacje, które pokazują jakość Twojej pracy",
+        "jsonSchema": {
+          "type": "object",
+          "properties": {
+            "imageDescription": {
+              "type": "string",
+              "title": "Opis realizacji",
+              "description": "Opisz przykładowe realizacje, które wykonałeś. Te informacje będą widoczne w Twoim profilu."
+            }
+          }
+        },
+        "submitLabel": "Dalej"
+      }
+    },
+    {
+      "slug": "auditor-terms-consent",
+      "label": "Krok 4: Akceptacja regulaminu",
+      "contextSchemaPath": "portfolio",
+      "contextDataPath": "portfolio",
+      "tplFile": "FormStep",
+      "order": 3,
+      "attrs": {
+        "title": "Akceptacja regulaminu",
+        "description": "Przed publikacją profilu zapoznaj się z regulaminem serwisu",
+        "jsonSchema": {
+          "type": "object",
+          "properties": {
+            "termsConsent": {
+              "type": "boolean",
+              "title": "Oświadczam, że zapoznałem się z regulaminem serwisu i akceptuję jego warunki",
+              "default": false
+            },
+            "verificationConsent": {
+              "type": "boolean",
+              "title": "Wyrażam zgodę na weryfikację podanych danych przez operatora programu",
+              "default": false
+            }
+          },
+          "required": ["termsConsent", "verificationConsent"]
+        },
+        "submitLabel": "Opublikuj profil"
+      }
+    },
+    {
+      "slug": "auditor-summary",
+      "label": "Podsumowanie profilu",
+      "contextSchemaPath": "portfolio",
+      "contextDataPath": "portfolio",
+      "tplFile": "WidgetsStep",
+      "order": 4,
+      "saveToDB": {
+        "enabled": true,
+        "provider": "indexedDB",
+        "itemType": "portfolio",
+        "itemTitle": "Profil audytora",
+        "contentPath": "portfolio"
+      },
+      "attrs": {
+        "widgets": [
+          {
+            "tplFile": "TitleWidget",
+            "title": "Twój profil audytora",
+            "subtitle": "Poniżej znajduje się podsumowanie wprowadzonych danych",
+            "colSpan": "full"
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Nazwa firmy",
+            "contextDataPath": "portfolio.companyName",
+            "icon": "info",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "NIP",
+            "contextDataPath": "portfolio.nip",
+            "icon": "info",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Kontakt",
+            "contextDataPath": "portfolio.email",
+            "icon": "mail",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Adres",
+            "data": "{{portfolio.address}}, {{portfolio.postalCode}} {{portfolio.city}}",
+            "icon": "map-pin",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Lata doświadczenia",
+            "contextDataPath": "portfolio.experience",
+            "icon": "check",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Liczba wykonanych audytów",
+            "contextDataPath": "portfolio.completedAudits",
+            "icon": "briefcase",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Numer certyfikatu",
+            "contextDataPath": "portfolio.certificateNumber",
+            "icon": "document",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Data ważności certyfikatu",
+            "contextDataPath": "portfolio.certificateExpiry",
+            "icon": "calendar",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "ListObjectWidget",
+            "title": "Specjalizacje",
+            "contextDataPath": "portfolio.specializations",
+            "layout": "grid",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "ListObjectWidget",
+            "title": "Obsługiwane obszary",
+            "contextDataPath": "portfolio.areasCovered", 
+            "layout": "grid",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Opis działalności",
+            "contextDataPath": "portfolio.description",
+            "icon": "document",
+            "colSpan": "full"
+          }
+        ]
+      }
+    }
+  ]
+}

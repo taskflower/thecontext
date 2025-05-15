@@ -4,7 +4,8 @@
     "tplDir": "energygrant",
     "workspaces": [
       { "id": "workspace-energygrant" },
-      { "id": "workspace-auditor" }
+      { "id": "workspace-auditor" },
+      { "id": "workspace-user-auth" }
     ],
     "scenarios": [
       { "id": "contact-operator" },
@@ -15,6 +16,9 @@
       { "id": "beneficiary-orders" },
       { "id": "portfolio" },
       { "id": "auditor-profile" },
-      { "id": "auditor-points-purchase" }
+      { "id": "auditor-points-purchase" },
+      { "id": "user-registration" },
+      { "id": "user-welcome" },
+      { "id": "user-profile" }
     ]
   }

@@ -41,7 +41,7 @@
       {
         "tplFile": "ListObjectWidget",
         "title": "Twój profil audytora",
-        "contextDataPath": "auditor-profile",
+        "contextDataPath": "portfolio",
         "layout": "table",
         "colSpan": "full"
       }
@@ -51,7 +51,7 @@
   "contextSchema": {
     "type": "object",
     "properties": {
-      "auditor-profile": {
+      "portfolio": {
         "type": "object",
         "properties": {
           "companyName": { "type": "string", "title": "Nazwa firmy" },
@@ -63,6 +63,8 @@
           "email": { "type": "string", "title": "E-mail" },
           "website": { "type": "string", "title": "Strona www" },
           "description": { "type": "string", "title": "Opis działalności" },
+          "experience": { "type": "number", "title": "Lata doświadczenia" },
+          "completedAudits": { "type": "number", "title": "Liczba wykonanych audytów" },
           "certificateNumber": { "type": "string", "title": "Numer certyfikatu" },
           "certificateExpiry": { "type": "string", "title": "Data ważności certyfikatu" },
           "specializations": { 
@@ -70,26 +72,26 @@
             "items": { "type": "string" }, 
             "title": "Specjalizacje" 
           },
-          "experience": { "type": "number", "title": "Lata doświadczenia" },
           "areasCovered": { 
             "type": "array", 
             "items": { "type": "string" }, 
             "title": "Obsługiwane rejony" 
           },
-          "completedAudits": { "type": "number", "title": "Liczba wykonanych audytów" },
-          "projectGallery": {
+          "images": {
             "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": { "type": "string" },
-                "title": { "type": "string" },
-                "description": { "type": "string" },
-                "imagePath": { "type": "string" }
-              }
-            },
-            "title": "Galeria projektów"
-          }
+            "items": { "type": "string" },
+            "title": "Zdjęcia realizacji"
+          },
+          "imageDescription": { "type": "string", "title": "Opis realizacji" },
+          "portfolioType": {
+            "type": "string",
+            "enum": ["auditor"],
+            "default": "auditor"
+          },
+          "profileConsent": { "type": "boolean", "title": "Zgoda profilowa" },
+          "certificateConsent": { "type": "boolean", "title": "Zgoda certyfikatowa" },
+          "termsConsent": { "type": "boolean", "title": "Zgoda na regulamin" },
+          "verificationConsent": { "type": "boolean", "title": "Zgoda na weryfikację" }
         }
       },
       "auditor-market-preview": {

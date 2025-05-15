@@ -68,8 +68,16 @@ export default function WorkspacesWidget({
               >
                 <div className="p-4 flex-grow">
                   <div className="flex justify-between items-start mb-3">
-                    <I name="folder" className="text-gray-400" />
-                    <span className="text-xs text-gray-600">
+                    {isActive ? (
+                      <span className="px-2 py-0.5 rounded-sm text-xs font-medium bg-green-100 text-green-800">
+                        Aktywny
+                      </span>
+                    ) : (
+                      <span></span>
+                    )}
+
+                    <span className="text-xs text-gray-600 flex items-center gap-1">
+                      <I name="folder" />
                       {scenarioCounts[workspace.slug] || 0} scenariuszy
                     </span>
                   </div>
@@ -78,11 +86,6 @@ export default function WorkspacesWidget({
                     <h3 className="text-sm font-semibold text-gray-800">
                       {workspace.name}
                     </h3>
-                    {isActive && (
-                      <span className="px-2 py-0.5 rounded-sm text-xs font-medium bg-green-100 text-green-800">
-                        Aktywny
-                      </span>
-                    )}
                   </div>
 
                   {workspace.description && (
