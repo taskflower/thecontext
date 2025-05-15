@@ -5,7 +5,7 @@ const load: Record<string, Promise<string>> = {};
 
 export const I = ({
   name,
-  className = "inline-block w-4 h-4 text-gray-500 fill-current stroke-current",
+  className = "w-4 h-4 text-gray-500 fill-current stroke-current",
   fallback = null,
   ...props
 }: {
@@ -21,30 +21,32 @@ export const I = ({
     if (svg) return; // Already loaded
     if (!load[name]) {
       load[name] = fetch(`/icons/${name}.svg`)
-        .then(res => res.ok ? res.text() : Promise.reject())
-        .then(text => {
+        .then((res) => (res.ok ? res.text() : Promise.reject()))
+        .then((text) => {
           const cleanedSvg = text
-            .replace(/width="([^"]*)"/g, '')
-            .replace(/height="([^"]*)"/g, '')
+            .replace(/width="([^"]*)"/g, "")
+            .replace(/height="([^"]*)"/g, "")
             .replace(/<svg/g, '<svg preserveAspectRatio="xMidYMid meet"');
-          
+
           cache[name] = cleanedSvg;
           return cleanedSvg;
         });
     }
     let mounted = true;
     load[name]
-      .then(text => mounted && setSvg(text))
+      .then((text) => mounted && setSvg(text))
       .catch(() => mounted && setError(true));
 
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [name, svg]);
   if (!svg && !error) return fallback || null;
   if (error) return null;
 
   return (
     <i
-      className={className}
+      className={`inline-block ${className}`}
       {...props}
       dangerouslySetInnerHTML={{ __html: svg }}
     />
