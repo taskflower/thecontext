@@ -1,8 +1,8 @@
 import React, { useState, lazy, Suspense, useMemo, useCallback } from "react";
-import { LuIcon } from "../components/LuIcon";
 import { useFlowStore } from "../core/context";
 import { AppConfig } from "../core/types";
 import { useAuth } from "../auth/useAuth";
+import { I } from "@/components";
 
 // Lazy loading komponentów zakładek
 const SchemaTab = lazy(() => import("./tabs/SchemaTab"));
@@ -85,7 +85,7 @@ const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) => {
         onClick={() => setIsVisible(true)}
         title="Ctrl+Shift+D: pokaż/ukryj debugger"
       >
-        <LuIcon name="settings" size={14} />
+        <I name="settings" className="w-4 h-4 mr-1" />
       </button>
     );
   }
@@ -94,7 +94,7 @@ const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) => {
     <div className="fixed top-0 right-0 z-40 w-1/2 h-full bg-white border-l border-gray-200 shadow-xl flex flex-col">
       <div className="bg-white border-b border-gray-200 px-3 py-2 flex justify-between items-center">
         <div className="font-semibold flex items-center text-sm">
-          <LuIcon name="settings" size={16} className="mr-1.5" />
+          <I name="settings" className="mr-1.5" />
           RevertContext settings
         </div>
         <button
@@ -102,7 +102,7 @@ const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) => {
           onClick={() => setIsVisible(false)}
           title="Ukryj debugger"
         >
-          <LuIcon name="x" size={16} />
+          <I name="x" />
         </button>
       </div>
 
@@ -120,8 +120,7 @@ const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) => {
                   }`}
                   onClick={() => handleTabClick(tab.id)}
                 >
-                  {/* @ts-ignore */}
-                  <LuIcon name={tab.icon} size={14} className="mr-1.5" />
+                  <I name={tab.icon} />
                   {tab.label}
                 </button>
               )

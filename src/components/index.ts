@@ -8,3 +8,4 @@ export { default as WorkspaceOverview } from "./WorkspaceOverview";
 export { withSuspense } from "./withSuspense";
 export { default as ScenarioLayout } from "./ScenarioLayout";
 export { default as WorkspaceLayout } from "./WorkspaceLayout";
+export { default as I } from "./I";

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useAppNavigation } from "@/core/navigation";
 import { useParams } from "react-router-dom";
 import { getScenarioCounts, type AppConfig } from "@/core";
-import LuIcon from "@/components/LuIcon";
+import I from "@/components/I";
 
 type Workspace = {
   slug: string;
@@ -68,7 +68,7 @@ export default function WorkspacesWidget({
               >
                 <div className="p-4 flex-grow">
                   <div className="flex justify-between items-start mb-3">
-                    <LuIcon name="folder" className="text-gray-400" />
+                    <I name="folder" className="text-gray-400" />
                     <span className="text-xs text-gray-600">
                       {scenarioCounts[workspace.slug] || 0} scenariuszy
                     </span>
