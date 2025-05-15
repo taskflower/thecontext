@@ -4,7 +4,7 @@
     "workspaceSlug": "workspace-energygrant",
     "name": "Giełda Audytorów",
     "description": "Przeglądaj zapotrzebowania na audyty i wykupuj punkty dostępu do pełnych danych kontaktowych",
-    "icon": "clipboard",
+    "icon": "search",
     "nodes": [
         {
             "slug": "market-listings-auditors",

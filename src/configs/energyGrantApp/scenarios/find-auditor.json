@@ -4,7 +4,7 @@
     "workspaceSlug": "workspace-energygrant",
     "name": "Wyszukiwarka Audytorów",
     "description": "Formularz zapotrzebowania na audyt energetyczny",
-    "icon": "clipboard-check",
+    "icon": "user-search",
     "nodes": [
         {
             "slug": "auditor-order-form",

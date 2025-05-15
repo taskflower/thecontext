@@ -4,7 +4,7 @@
   "workspaceSlug": "workspace-energygrant",
   "name": "Kontakt z Operatorem",
   "description": "Kalkulator zdolności, formularz zgłoszeniowy i chat z operatorem",
-  "icon": "mail",
+  "icon": "phone-call",
   "nodes": [
     {
       "slug": "grant-calculator",

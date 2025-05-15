@@ -4,7 +4,7 @@
     "workspaceSlug": "workspace-auditor",
     "name": "Zakup punktów dostępu",
     "description": "Wykup punkty, aby uzyskać dostęp do danych kontaktowych zleceniodawców",
-    "icon": "credit-card",
+    "icon": "shopping-bag",
     "nodes": [
         {
             "slug": "auditor-market-preview",

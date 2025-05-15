@@ -4,7 +4,7 @@
     "workspaceSlug": "workspace-auditor",
     "name": "Uzupełnij profil audytora",
     "description": "Formularz krokowy do utworzenia kompletnego profilu audytora energetycznego",
-    "icon": "clipboard-check",
+    "icon": "user-check",
     "nodes": [
       {
         "slug": "auditor-basic-data",

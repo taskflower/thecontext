@@ -5,7 +5,7 @@
     "workspaceSlug":"workspace-energygrant",
     "name":"Panel Zleceń Beneficjenta",
     "description":"Zarządzaj swoimi zleceniami, przeglądaj oferty i wystawiaj opinie",
-    "icon":"folder",
+    "icon":"clipboard-list",
     "nodes":[
       {
         "slug":"orders-listing",

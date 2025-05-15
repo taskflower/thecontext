@@ -4,7 +4,7 @@
   "workspaceSlug": "workspace-energygrant",
   "name": "Wyszukiwarka Wykonawców",
   "description": "Formularz zlecenia do publikacji na giełdzie wykonawców",
-  "icon": "hammer",
+  "icon": "wrench",
   "nodes": [
     {
       "slug": "contractor-order-form",
