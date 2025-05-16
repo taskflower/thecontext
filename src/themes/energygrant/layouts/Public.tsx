@@ -6,7 +6,7 @@ import { useDarkMode } from "../utils/ThemeUtils";
 import { Footer } from "../common/Footer";
 import { HousePlug } from "lucide-react";
 
-const LoginPage: React.FC = () => {
+const Public: React.FC = () => {
   const { darkMode, toggleDarkMode } = useDarkMode();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -345,4 +345,4 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage;
+export default Public;

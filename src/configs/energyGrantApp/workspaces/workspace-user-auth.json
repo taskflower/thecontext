@@ -5,7 +5,7 @@
   "description": "Zarządzaj swoim kontem, profilem i ustawieniami",
   "icon": "user",
   "templateSettings": {
-    "layoutFile": "AuthLayout",
+    "layoutFile": "Public",
     "widgets": []
   },
   "contextSchema": {

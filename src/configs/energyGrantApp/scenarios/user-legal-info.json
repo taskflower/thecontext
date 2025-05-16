@@ -1,7 +1,7 @@
 {
     "id": "user-welcome",
     "slug": "user-welcome",
-    "workspaceSlug": "workspace-user-auth",
+    "workspaceSlug": "workspace-user-legal-ingo",
     "name": "Ekran powitalny",
     "description": "Ekran powitalny po rejestracji lub logowaniu",
     "icon": "home",

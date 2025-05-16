@@ -15,9 +15,23 @@
       "order": 0,
       "attrs": {
         "widgets": [
-         
           {
-            "tplFile": "GoogleAuthWidget",
+            "tplFile": "TitleWidget",
+            "title": "Rejestracja użytkownika",
+            "subtitle": "Wybierz sposób rejestracji w systemie",
+            "colSpan": "full"
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Rejestracja za pomocą Google",
+            "data": "Kliknij przycisk poniżej, aby zarejestrować się za pomocą konta Google.",
+            "icon": "info",
+            "actionUrl": "#google-login",
+            "actionText": "Zarejestruj się przez Google",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "InfoWidget",
             "title": "Rejestracja za pomocą formularza",
             "data": "Możesz również zarejestrować się wypełniając formularz z danymi.",
             "icon": "info",

@@ -55,13 +55,10 @@
       "id": "beneficiary-orders"
     },
     {
-      "id": "user-profile"
+      "id": "user-legal-info"
     },
     {
       "id": "user-registration"
-    },
-    {
-      "id": "user-welcome"
     }
   ]
 }
