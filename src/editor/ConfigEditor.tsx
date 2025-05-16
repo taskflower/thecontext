@@ -1,6 +1,6 @@
-// Zaktualizowany src/editor/ConfigEditor.tsx
-import React, { useState } from "react";
-import { FileCog, FileText, AlertTriangle } from "lucide-react";
+// src/editor/ConfigEditor.tsx
+import React, { useReducer } from "react";
+import { FileCog, AlertTriangle } from "lucide-react";
 import { FirebaseAdapter } from "@/provideDB/firebase/FirebaseAdapter";
 import { AppConfig, WorkspaceConfig, ScenarioConfig } from "@/core/types";
 import { AppConfigEditor } from "./components/AppConfigEditor";
@@ -9,403 +9,284 @@ import { ScenarioEditor } from "./components/ScenarioEditor";
 import { EditorHeader } from "./components/EditorHeader";
 import { EditorSidebar } from "./components/EditorSidebar";
 
-// Typy sekcji w edytorze
+// Typy sekcji oraz akcji
 type EditorSection = "app" | "workspace" | "scenario";
+type ListType = "workspaces" | "scenarios";
 
-// Interfejs dla obiektu edycji
-interface EditorState {
-    section: "app" | "workspace" | "scenario";
-    configId: string;
-    selectedWorkspace?: string;
-    selectedScenario?: string;
-    config: AppConfig | null;
-    workspaces: WorkspaceConfig[];
-    scenarios: ScenarioConfig[];
-    isDirty: boolean;
-    error: string | null;
+type Action =
+  | { type: "setError"; error: string | null }
+  | { type: "markClean" }
+  | {
+      type: "setSection";
+      section: EditorSection;
+      workspace?: string;
+      scenario?: string;
+    }
+  | {
+      type: "crud";
+      list: ListType;
+      op: "add" | "update" | "delete";
+      item?: any;
+      slug?: string;
+    };
+
+interface State {
+  section: EditorSection;
+  selectedWorkspace?: string;
+  selectedScenario?: string;
+  config: AppConfig;
+  workspaces: WorkspaceConfig[];
+  scenarios: ScenarioConfig[];
+  isDirty: boolean;
+  error: string | null;
+}
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "setError":
+      return { ...state, error: action.error };
+    case "markClean":
+      return { ...state, isDirty: false };
+    case "setSection":
+      return {
+        ...state,
+        section: action.section,
+        selectedWorkspace: action.workspace,
+        selectedScenario: action.scenario,
+      };
+    case "crud": {
+      const { list, op, item, slug } = action;
+      let arr = [...state[list]];
+      if (op === "add" && item) {
+        arr.push(item);
+      } else if (op === "update" && slug && item) {
+        arr = arr.map((x) => (x.slug === slug ? { ...x, ...item } : x));
+      } else if (op === "delete" && slug) {
+        arr = arr.filter((x) => x.slug !== slug);
+      }
+      return {
+        ...state,
+        [list]: arr,
+        config: { ...state.config, ...{ [list]: arr } },
+        isDirty: true,
+      } as State;
+    }
+    default:
+      return state;
   }
+}
 
-// Propsy dla ConfigEditor
-interface ConfigEditorProps {
+interface Props {
   initialConfig: AppConfig;
   configId: string;
 }
-
-export const ConfigEditor: React.FC<ConfigEditorProps> = ({
-  initialConfig,
-  configId,
-}) => {
-  
-
-  // Stan edytora, inicjalizowany z propsów
-  const [state, setState] = useState<EditorState>({
+export const ConfigEditor: React.FC<Props> = ({ initialConfig, configId }) => {
+  const [
+    {
+      section,
+      selectedWorkspace,
+      selectedScenario,
+      config,
+      workspaces,
+      scenarios,
+      isDirty,
+      error,
+    },
+    dispatch,
+  ] = useReducer(reducer, {
     section: "app",
-    configId: configId,
     config: initialConfig,
     workspaces: initialConfig.workspaces || [],
     scenarios: initialConfig.scenarios || [],
     isDirty: false,
     error: null,
-  });
+  } as State);
 
-  // Firebase adapter
-  const [dbAdapter] = useState(
-    () => new FirebaseAdapter("application_configs")
-  );
+  const db = new FirebaseAdapter("application_configs");
 
-  // Zapisz konfigurację do Firebase
   const saveConfig = async () => {
-    if (!state.config) return;
-
     try {
-      setState((prev) => ({ ...prev, error: null }));
-
-      await dbAdapter.saveData(
+      dispatch({ type: "setError", error: null });
+      await db.saveData(
         {
           enabled: true,
-          provider: 'firebase',
+          provider: "firebase",
           itemType: "project",
-          itemTitle: state.config.name || "Nowa konfiguracja",
-          id: state.configId,
+          itemTitle: config.name || "Nowa konfiguracja",
+          id: configId,
         },
-        state.config
+        config
       );
-
-      setState((prev) => ({ ...prev, isDirty: false }));
+      dispatch({ type: "markClean" });
     } catch (err: any) {
-      console.error("Błąd zapisywania konfiguracji:", err);
-      setState((prev) => ({
-        ...prev,
-        error: `Błąd zapisywania konfiguracji: ${
-          err.message || "Nieznany błąd"
-        }`,
-      }));
+      dispatch({ type: "setError", error: err.message || "Błąd zapisu" });
     }
   };
 
-  // Reszta kodu ConfigEditor pozostaje bez zmian
-  // (aktualizacja konfiguracji aplikacji, workspace'ów, scenariuszy itd.)
-
-  // Aktualizacja konfiguracji aplikacji
-  const updateAppConfig = (updatedConfig: Partial<AppConfig>) => {
-    setState((prev) => ({
-      ...prev,
-      config: prev.config ? { ...prev.config, ...updatedConfig } : null,
-      isDirty: true,
-    }));
-  };
-
-  // Aktualizacja workspace
-  const updateWorkspace = (
-    workspaceSlug: string,
-    updatedWorkspace: Partial<WorkspaceConfig>
-  ) => {
-    setState((prev) => {
-      if (!prev.config) return prev;
-
-      const updatedWorkspaces = prev.workspaces.map((ws) =>
-        ws.slug === workspaceSlug ? { ...ws, ...updatedWorkspace } : ws
-      );
-
-      return {
-        ...prev,
-        workspaces: updatedWorkspaces,
-        config: {
-          ...prev.config,
-          workspaces: updatedWorkspaces,
-        },
-        isDirty: true,
-      };
-    });
-  };
-
-  // Dodawanie nowego workspace
+  // CRUD helpers
   const addWorkspace = () => {
-    const newSlug = `workspace-${Date.now()}`;
-    const newWorkspace: WorkspaceConfig = {
-      slug: newSlug,
-      name: "Nowa przestrzeń robocza",
-      description: "Opis nowej przestrzeni roboczej",
-      templateSettings: {
-        layoutFile: "Simple",
-        widgets: [],
-      },
-      contextSchema: {
-        type: "object",
-        properties: {},
-      },
+    const newWs: WorkspaceConfig = {
+      slug: `ws-${Date.now()}`,
+      name: "Nowa przestrzeń",
+      description: "",
+      templateSettings: { layoutFile: "Simple", widgets: [] },
+      contextSchema: { type: "object", properties: {} },
     };
-
-    setState((prev) => {
-      if (!prev.config) return prev;
-
-      const updatedWorkspaces = [...prev.workspaces, newWorkspace];
-
-      return {
-        ...prev,
-        workspaces: updatedWorkspaces,
-        config: {
-          ...prev.config,
-          workspaces: updatedWorkspaces,
-        },
-        isDirty: true,
-        section: "workspace",
-        selectedWorkspace: newSlug,
-      };
+    dispatch({ type: "crud", list: "workspaces", op: "add", item: newWs });
+    dispatch({
+      type: "setSection",
+      section: "workspace",
+      workspace: newWs.slug,
     });
   };
 
-  // Usuwanie workspace
-  const deleteWorkspace = (workspaceSlug: string) => {
-    if (
-      !confirm(
-        `Czy na pewno chcesz usunąć przestrzeń "${workspaceSlug}"? Ta operacja jest nieodwracalna.`
-      )
-    ) {
-      return;
-    }
-
-    setState((prev) => {
-      if (!prev.config) return prev;
-
-      // Usuń workspace
-      const updatedWorkspaces = prev.workspaces.filter(
-        (ws) => ws.slug !== workspaceSlug
-      );
-
-      // Usuń scenariusze powiązane z workspace
-      const updatedScenarios = prev.scenarios.filter(
-        (sc) => sc.workspaceSlug !== workspaceSlug
-      );
-
-      return {
-        ...prev,
-        workspaces: updatedWorkspaces,
-        scenarios: updatedScenarios,
-        config: {
-          ...prev.config,
-          workspaces: updatedWorkspaces,
-          scenarios: updatedScenarios,
-        },
-        section: "app",
-        selectedWorkspace: undefined,
-        isDirty: true,
-      };
+  const updateWorkspace = (slug: string, updates: Partial<WorkspaceConfig>) =>
+    dispatch({
+      type: "crud",
+      list: "workspaces",
+      op: "update",
+      slug,
+      item: updates,
     });
+
+  const deleteWorkspace = (slug: string) => {
+    if (!confirm(`Usuń przestrzeń "${slug}"?`)) return;
+    dispatch({ type: "crud", list: "workspaces", op: "delete", slug });
+    dispatch({ type: "setSection", section: "app" });
   };
 
-  // Aktualizacja scenariusza
-  const updateScenario = (
-    scenarioSlug: string,
-    updatedScenario: Partial<ScenarioConfig>
-  ) => {
-    setState((prev) => {
-      if (!prev.config) return prev;
-
-      const updatedScenarios = prev.scenarios.map((sc) =>
-        sc.slug === scenarioSlug ? { ...sc, ...updatedScenario } : sc
-      );
-
-      return {
-        ...prev,
-        scenarios: updatedScenarios,
-        config: {
-          ...prev.config,
-          scenarios: updatedScenarios,
-        },
-        isDirty: true,
-      };
-    });
-  };
-
-  // Dodawanie nowego scenariusza
   const addScenario = (workspaceSlug: string) => {
-    const newSlug = `scenario-${Date.now()}`;
-    const newScenario: ScenarioConfig = {
-      slug: newSlug,
+    const newSc: ScenarioConfig = {
+      slug: `sc-${Date.now()}`,
       name: "Nowy scenariusz",
-      description: "Opis nowego scenariusza",
+      description: "",
       workspaceSlug,
       nodes: [],
     };
-
-    setState((prev) => {
-      if (!prev.config) return prev;
-
-      const updatedScenarios = [...prev.scenarios, newScenario];
-
-      return {
-        ...prev,
-        scenarios: updatedScenarios,
-        config: {
-          ...prev.config,
-          scenarios: updatedScenarios,
-        },
-        isDirty: true,
-        section: "scenario",
-        selectedScenario: newSlug,
-      };
+    dispatch({ type: "crud", list: "scenarios", op: "add", item: newSc });
+    dispatch({
+      type: "setSection",
+      section: "scenario",
+      workspace: workspaceSlug,
+      scenario: newSc.slug,
     });
   };
 
-  // Usuwanie scenariusza
-  const deleteScenario = (scenarioSlug: string) => {
-    if (
-      !confirm(
-        `Czy na pewno chcesz usunąć scenariusz "${scenarioSlug}"? Ta operacja jest nieodwracalna.`
-      )
-    ) {
-      return;
-    }
+  const updateScenario = (slug: string, updates: Partial<ScenarioConfig>) =>
+    dispatch({
+      type: "crud",
+      list: "scenarios",
+      op: "update",
+      slug,
+      item: updates,
+    });
 
-    setState((prev) => {
-      if (!prev.config) return prev;
-
-      const updatedScenarios = prev.scenarios.filter(
-        (sc) => sc.slug !== scenarioSlug
-      );
-
-      return {
-        ...prev,
-        scenarios: updatedScenarios,
-        config: {
-          ...prev.config,
-          scenarios: updatedScenarios,
-        },
-        section: "workspace",
-        selectedScenario: undefined,
-        isDirty: true,
-      };
+  const deleteScenario = (slug: string) => {
+    if (!confirm(`Usuń scenariusz "${slug}"?`)) return;
+    dispatch({ type: "crud", list: "scenarios", op: "delete", slug });
+    dispatch({
+      type: "setSection",
+      section: "workspace",
+      workspace: selectedWorkspace,
     });
   };
 
-  // Zmiana aktywnej sekcji
-  const changeSection = (
-    section: EditorSection,
-    workspaceSlug?: string,
-    scenarioSlug?: string
-  ) => {
-    setState((prev) => ({
-      ...prev,
-      section,
-      selectedWorkspace: workspaceSlug,
-      selectedScenario: scenarioSlug,
-    }));
-  };
-
-  // Aktualnie wybrany workspace
-  const selectedWorkspace = state.workspaces.find(
-    (ws) => ws.slug === state.selectedWorkspace
-  );
-
-  // Aktualnie wybrany scenariusz
-  const selectedScenario = state.scenarios.find(
-    (sc) => sc.slug === state.selectedScenario
-  );
-
-  // Scenariusze dla wybranego workspace
-  const scenariosForWorkspace = state.selectedWorkspace
-    ? state.scenarios.filter(
-        (sc) => sc.workspaceSlug === state.selectedWorkspace
-      )
-    : [];
-
-  // Renderowanie odpowiedniego edytora w zależności od wybranej sekcji
-  const renderActiveEditor = () => {
-    if (!state.config) {
-      return (
-        <div className="flex flex-col items-center justify-center h-full text-gray-500">
-          <FileText className="h-16 w-16 mb-4" />
-          <p>Ładowanie konfiguracji...</p>
-        </div>
-      );
-    }
-
-    switch (state.section) {
+  const renderEditor = () => {
+    if (!config) return <div>Ładowanie...</div>;
+    switch (section) {
       case "app":
         return (
           <AppConfigEditor
-            config={state.config}
-            workspaces={state.workspaces}
-            scenarios={state.scenarios}
-            onUpdate={updateAppConfig}
+            config={config}
+            workspaces={workspaces}
+            scenarios={scenarios}
+            onUpdate={(u) =>
+              dispatch({
+                type: "crud",
+                list: "workspaces",
+                op: "update",
+                slug: "",
+                item: u,
+              })
+            }
           />
         );
       case "workspace":
-        return selectedWorkspace ? (
+        const ws = workspaces.find((w) => w.slug === selectedWorkspace);
+        return ws ? (
           <WorkspaceEditor
-            workspace={selectedWorkspace}
-            onUpdate={(updates) =>
-              updateWorkspace(selectedWorkspace.slug, updates)
-            }
-            onAddScenario={() => addScenario(selectedWorkspace.slug)}
-            scenarios={scenariosForWorkspace}
-            onEditScenario={(scenarioSlug) =>
-              changeSection("scenario", state.selectedWorkspace, scenarioSlug)
+            workspace={ws}
+            scenarios={scenarios.filter((s) => s.workspaceSlug === ws.slug)}
+            onUpdate={(u) => updateWorkspace(ws.slug, u)}
+            onAddScenario={() => addScenario(ws.slug)}
+            onEditScenario={(s) =>
+              dispatch({
+                type: "setSection",
+                section: "scenario",
+                workspace: ws.slug,
+                scenario: s,
+              })
             }
             onDeleteScenario={deleteScenario}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-gray-500">
-            <FileCog className="h-16 w-16 mb-4" />
-            <p>Wybierz przestrzeń roboczą z listy po lewej stronie</p>
+          <div className="flex items-center justify-center h-full text-gray-500">
+            <FileCog />
+            <p>Wybierz workspace</p>
           </div>
         );
       case "scenario":
-        return selectedScenario ? (
+        const sc = scenarios.find((s) => s.slug === selectedScenario);
+        return sc ? (
           <ScenarioEditor
-            scenario={selectedScenario}
-            onUpdate={(updates) =>
-              updateScenario(selectedScenario.slug, updates)
-            }
+            scenario={sc}
+            onUpdate={(u) => updateScenario(sc.slug, u)}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-gray-500">
-            <FileCog className="h-16 w-16 mb-4" />
-            <p>Wybierz scenariusz z listy po lewej stronie</p>
+          <div className="flex items-center justify-center h-full text-gray-500">
+            <FileCog />
+            <p>Wybierz scenariusz</p>
           </div>
         );
-      default:
-        return null;
     }
   };
 
   return (
     <div className="h-screen flex flex-col bg-gray-100">
-      {/* Header z tytułem i przyciskami akcji */}
       <EditorHeader
-        title={state.config?.name || "Edytor konfiguracji"}
-        configId={state.configId}
-        isDirty={state.isDirty}
+        title={config.name || "Edytor"}
+        configId={configId}
+        isDirty={isDirty}
         onSave={saveConfig}
       />
-
-      {/* Główny kontener */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar z drzewem konfiguracji */}
-        <div className="w-64 bg-white border-r border-gray-200 flex-shrink-0 overflow-auto">
+        <div className="w-64 bg-white border-r overflow-auto">
           <EditorSidebar
-            workspaces={state.workspaces}
-            scenarios={state.scenarios}
-            activeSection={state.section}
-            selectedWorkspace={state.selectedWorkspace}
-            selectedScenario={state.selectedScenario}
-            onChangeSection={changeSection}
+            workspaces={workspaces}
+            scenarios={scenarios}
+            activeSection={section}
+            selectedWorkspace={selectedWorkspace}
+            selectedScenario={selectedScenario}
+            onChangeSection={(sec, ws, sc) =>
+              dispatch({
+                type: "setSection",
+                section: sec,
+                workspace: ws,
+                scenario: sc,
+              })
+            }
             onAddWorkspace={addWorkspace}
             onDeleteWorkspace={deleteWorkspace}
           />
         </div>
-
-        {/* Obszar edycji */}
-        <div className="flex-1 overflow-auto p-6">
-          {state.error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md flex items-center text-red-600">
-              <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0" />
-              <p className="text-sm">{state.error}</p>
+        <div className="flex-1 p-6 overflow-auto">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-600 flex items-center">
+              <AlertTriangle />
+              <p>{error}</p>
             </div>
           )}
-
-          {renderActiveEditor()}
+          {renderEditor()}
         </div>
       </div>
     </div>
