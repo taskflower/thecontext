@@ -7,17 +7,11 @@ import { getColSpanClass } from '@/core/utils/themesHelpers';
 import { useTheme } from '@/themes/ThemeContext';
 import { getDatabaseProvider, SaveToDBOptions } from '@/provideDB/databaseProvider';
 import { useConfig } from '@/ConfigProvider';
+import Loader from "@/themes/default/commons/Loader";
+import ActionButton from "@/themes/default/commons/ActionButton";
 
+const WidgetLoading: React.FC = React.memo(() => <Loader />);
 
-
-// Lekki spinner dla widgetów
-const WidgetLoading: React.FC = React.memo(() => (
-  <div className="flex items-center justify-center h-32 bg-gray-50">
-    <div className="w-6 h-6 border-4 border-gray-300 border-t-transparent rounded-full animate-spin" />
-  </div>
-));
-
-// Kontener dla pojedynczego widgetu
 const WidgetContainer = React.memo(
   ({ widget, data, tplDir }: { widget: any; data: any; tplDir: string }) => {
     const { preload } = useConfig();
@@ -96,13 +90,11 @@ const WidgetsStep: React.FC<WidgetsStepProps> = React.memo(
 
         {scenarioName && nodeSlug && (
           <div className="flex justify-end">
-            <button
+            <ActionButton
+              label={nextButtonLabel}
               onClick={handleNext}
-              className="px-5 py-2.5 rounded transition-colors text-sm font-semibold bg-black text-white hover:bg-gray-800 flex items-center"
-            >
-              <NextButtonIcon className="w-4 h-4 mr-2" />
-              {nextButtonLabel}
-            </button>
+              icon={<NextButtonIcon className="w-4 h-4 mr-2" />}
+            />
           </div>
         )}
       </div>

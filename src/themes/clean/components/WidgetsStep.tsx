@@ -1,138 +1,111 @@
-// src/themes/clean/components/WidgetsStep.tsx
-import { lazy, Suspense } from "react";
-import { useFlow } from "../../../core/context";
-import { CheckSquare, ArrowRight, Database } from "lucide-react";
-import { useParams } from "react-router-dom";
+// src/themes/default/components/WidgetsStep.tsx
+import React, { useMemo } from 'react';
+import { CheckSquare, ArrowRight } from 'lucide-react';
+import { useFlow } from '@/core';
+import { WidgetsStepProps } from '@/themes/themeTypes';
+import { getColSpanClass } from '@/core/utils/themesHelpers';
+import { useTheme } from '@/themes/ThemeContext';
 import { getDatabaseProvider, SaveToDBOptions } from '@/provideDB/databaseProvider';
-import { getPath } from "@/core";
+import { useConfig } from '@/ConfigProvider';
+import ActionButton from "@/themes/default/commons/ActionButton";  // Import ActionButton
 
-type WidgetConfig = {
-  tplFile: string;
-  title?: string;
-  contextDataPath?: string;
-  colSpan?: 1 | 2 | 3 | "full";
-  [key: string]: any;
-};
+// Lekki spinner dla widgetów
+const WidgetLoading: React.FC = React.memo(() => (
+  <div className="flex items-center justify-center h-32 bg-gray-50">
+    <div className="w-6 h-6 border-4 border-gray-300 border-t-transparent rounded-full animate-spin" />
+  </div>
+));
 
-type WidgetsStepProps = {
-  widgets: WidgetConfig[];
-  onSubmit: (data: any) => void;
-  title?: string;
-  subtitle?: string;
-  saveToDB?: {
-    enabled: boolean;
-    provider: "indexedDB";
-    itemId?: string;
-    itemType: "lesson" | "quiz" | "project";
-    itemTitle?: string;
-    contentPath?: string;
-  } | null;
-  scenarioName?: string | null;
-  nodeSlug?: string | null;
-};
-
-export default function WidgetsStep({
-  widgets = [],
-  onSubmit,
-  title = "Podsumowanie",
-  subtitle,
-  saveToDB,
-  scenarioName,
-  nodeSlug,
-}: WidgetsStepProps) {
-  const { get } = useFlow();
-  const { scenarioSlug, stepIndex } = useParams<{ scenarioSlug: string; stepIndex: string }>();
-
-  // Inicjalizacja providera tylko gdy włączone
-  const dbProvider = (saveToDB?.enabled && saveToDB.provider)
-    ? getDatabaseProvider(saveToDB.provider, saveToDB.contentPath)
-    : null;
-
-  const isLastStep = !scenarioSlug;
-
-  const getColSpanClass = (colSpan?: 1 | 2 | 3 | "full") => {
-    switch (colSpan) {
-      case 1: return "col-span-1";
-      case 2: return "col-span-2";
-      case 3: return "col-span-3";
-      case "full": return "col-span-full";
-      default: return "col-span-1";
-    }
-  };
-
-  const loadWidget = (widget: WidgetConfig) => {
-    const Widget = lazy(() =>
-      import(`../widgets/${widget.tplFile}`).catch(() => import("../widgets/ErrorWidget"))
+// Kontener dla pojedynczego widgetu
+const WidgetContainer = React.memo(
+  ({ widget, data, tplDir }: { widget: any; data: any; tplDir: string }) => {
+    const { preload } = useConfig();
+    
+    const WidgetComp = useMemo(
+      () => preload.widget(tplDir, widget.tplFile),
+      [preload, tplDir, widget.tplFile]
     );
-    const data = widget.contextDataPath ? get(widget.contextDataPath) : undefined;
+
     return (
       <div
-        key={widget.tplFile + (widget.title || "")}
-        className={`h-full ${getColSpanClass(widget.colSpan)} bg-white rounded-lg border border-sky-200 shadow-sm overflow-hidden`}
+        key={widget.tplFile + (widget.title || '')}
+        className={`bg-white rounded overflow-hidden shadow-sm border border-gray-100 h-full ${getColSpanClass(
+          widget.colSpan
+        )}`}
       >
-        <Suspense
-          fallback={
-            <div className="flex items-center justify-center h-32">
-              <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-              <span className="ml-3 text-slate-600">Ładowanie widgetu...</span>
-            </div>
-          }
-        >
-          <Widget {...widget} data={data} />
-        </Suspense>
+        <React.Suspense fallback={<WidgetLoading />}>
+          <WidgetComp {...widget} data={data} />
+        </React.Suspense>
       </div>
     );
-  };
+  }
+);
 
-  const handleNext = async () => {
-    if (saveToDB?.enabled && dbProvider) {
-      try {
-        const contentPath = saveToDB.contentPath || '';
-        const dataToSave = contentPath ? getPath(get(contentPath), '') : {};
-        const options: SaveToDBOptions = {
-          ...saveToDB,
-          additionalInfo: { scenarioName, nodeSlug, scenarioSlug, stepIndex }
-        };
-        await dbProvider.saveData(options, dataToSave);
-      } catch (error) {
-        console.error("[WidgetsStep] Błąd podczas zapisywania do bazy:", error);
+const WidgetsStep: React.FC<WidgetsStepProps> = React.memo(
+  ({ widgets = [], onSubmit, title = 'Podsumowanie', subtitle, saveToDB, scenarioName, nodeSlug, context }) => {
+    const { get } = useFlow();
+    const tplDir = useTheme();
+
+    const handleNext = async () => {
+      if (saveToDB?.enabled && saveToDB.provider) {
+        try {
+          const dbProvider = getDatabaseProvider(saveToDB.provider, saveToDB.contentPath);
+          const dataToSave = saveToDB.contentPath ? get(saveToDB.contentPath) : {};
+          const options: SaveToDBOptions = {
+            ...saveToDB,
+            additionalInfo: { scenarioName, nodeSlug }
+          };
+          await dbProvider.saveData(options, dataToSave);
+        } catch (error) {
+          console.error('[WidgetsStep] Błąd podczas zapisywania do bazy:', error);
+        }
       }
-    }
-    onSubmit(null);
-  };
+      onSubmit(null);
+    };
 
-  return (
-    <div className="max-w-6xl mx-auto py-6 border-t border-sky-200">
-      {(title || subtitle) && (
-        <div className="mb-8">
-          {title && <h2 className="text-2xl font-semibold text-slate-800 mb-2">{title}</h2>}
-          {subtitle && <p className="text-slate-600">{subtitle}</p>}
-        </div>
-      )}
+    const { stepIdx, totalSteps } = context || {};
+    const isLastStep = typeof stepIdx === 'number' && typeof totalSteps === 'number'
+      ? stepIdx === totalSteps - 1
+      : true;
+    const nextButtonLabel = isLastStep ? 'Zakończ' : 'Dalej';
+    const NextButtonIcon = isLastStep ? CheckSquare : ArrowRight;
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {widgets.map(loadWidget)}
-      </div>
-
-      <div className="flex justify-between items-center">
-        {saveToDB?.enabled && (
-          <div className="text-xs text-emerald-600 flex items-center">
-            <Database className="w-3 h-3 mr-1" />
-            Dane zostaną zapisane lokalnie po kliknięciu przycisku
+    return (
+      <div className="max-w-6xl mx-auto pt-6 ">
+        {(title || subtitle) && (
+          <div className="mb-6">
+            {title && <h2 className="text-xl text-gray-900 mb-3">{title}</h2>}
+            {subtitle && <p className="text-gray-600 text-sm">{subtitle}</p>}
           </div>
         )}
 
-        <button
-          onClick={handleNext}
-          className="px-5 py-2.5 bg-indigo-600 text-white rounded-full shadow-sm font-semibold hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 flex items-center ml-auto"
-        >
-          {isLastStep ? (
-            <><CheckSquare className="w-4 h-4 mr-2" />Zakończ</>
-          ) : (
-            <><ArrowRight className="w-4 h-4 mr-2" />Dalej</>
-          )}
-        </button>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          {widgets.map(widget => {
+            const data = widget.contextDataPath ? get(widget.contextDataPath) : undefined;
+            return (
+              <WidgetContainer
+                key={widget.tplFile + (widget.title || '')}
+                widget={widget}
+                data={data}
+                tplDir={tplDir}
+              />
+            );
+          })}
+        </div>
+
+        {scenarioName && nodeSlug && (
+          <div className="flex justify-end">
+            <ActionButton
+              label={nextButtonLabel}
+              onClick={handleNext}
+              icon={<NextButtonIcon className="w-4 h-4 mr-2" />}
+              variant="full"  // Rozciągnięty przycisk
+            />
+          </div>
+        )}
       </div>
-    </div>
-  );
-}
+    );
+  }
+);
+
+export default WidgetsStep;
