@@ -95,10 +95,14 @@ export default function WorkspacesWidget({
                   )}
                 </div>
 
-                <div className="mt-auto px-4 py-3 text-center border-t border-gray-100 bg-gray-50">
+                <div
+                  className={`${
+                    isActive ? "bg-zinc-600" : "bg-gray-50"
+                  } mt-auto px-4 py-3 text-center border-t border-gray-100 `}
+                >
                   {isActive ? (
-                    <span className="text-xs text-gray-600 font-medium">
-                      Obecnie wybrany
+                    <span className="text-xs text-gray-100 font-medium">
+                      Obecnie wybrany 
                     </span>
                   ) : (
                     <button

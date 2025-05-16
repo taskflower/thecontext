@@ -5,7 +5,7 @@
     "description": "Zarządzaj swoim kontem, profilem i ustawieniami",
     "icon": "user",
     "templateSettings": {
-      "layoutFile": "Dashboard",
+      "layoutFile": "AuthLayout",
       "widgets": [
         {
           "tplFile": "InfoWidget",
