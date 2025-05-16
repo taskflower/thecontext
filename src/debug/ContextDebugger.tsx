@@ -3,6 +3,9 @@ import { useFlowStore } from "../core/context";
 import { AppConfig } from "../core/types";
 import { useAuth } from "../auth/useAuth";
 import { I } from "@/components";
+// Importujemy useConfig i EditConfigButton
+import { useConfig } from "@/ConfigProvider";
+import { EditConfigButton } from "./EditConfigButton";
 
 // Lazy loading komponentów zakładek
 const SchemaTab = lazy(() => import("./tabs/SchemaTab"));
@@ -25,6 +28,8 @@ const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) => {
   const [activeTab, setActiveTab] = useState("user");
   const { user, loading } = useAuth();
   const { data: contextData } = useFlowStore();
+  // Dodajemy useConfig hook
+  const { configId, configType } = useConfig();
 
   const tabs = useMemo(
     () => [
@@ -134,8 +139,22 @@ const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) => {
         </Suspense>
       </div>
 
-      <div className="bg-gray-50 border-t border-gray-200 px-3 py-1.5 text-xs text-gray-500">
-        Skrót klawiszowy: Ctrl+Shift+D
+      {/* Zmodyfikowany dolny pasek z informacją o konfiguracji */}
+      <div className="bg-gray-50 border-t border-gray-200 px-3 py-2 text-xs flex justify-between items-center">
+        {configId && (
+          <>
+            <EditConfigButton />
+            <div className="text-gray-700 flex items-center">
+              <span className="mr-1.5">Config:</span>
+              <span className="border px-2 py-0.5 rounded bg-white">{configId}</span>
+              {configType && (
+                <span className="ml-1.5 bg-blue-600 text-white px-1.5 py-0.5 rounded-sm">
+                  {configType}
+                </span>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

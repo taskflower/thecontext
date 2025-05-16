@@ -34,12 +34,7 @@ export const ScenarioEditor: React.FC<ScenarioEditorProps> = ({
         title: "Ikona",
         enum: ["search", "chart", "info", "money", "briefcase", "calculator"],
         default: "info",
-      },
-      tplDir: {
-        type: "string",
-        title: "Katalog szablonu",
-        default: "default",
-      },
+      }
     },
     required: ["name"],
   };
@@ -248,7 +243,7 @@ export const ScenarioEditor: React.FC<ScenarioEditorProps> = ({
                       key={node.slug || index}
                       className="border border-gray-200 rounded-md overflow-hidden"
                     >
-                      <div className="bg-gray-50 border-b border-gray-200 p-2 flex items-center justify-between">
+                      <div className="bg-lime-100 border-b border-gray-200 p-2 flex items-center justify-between">
                         <div className="flex items-center">
                           <span className="w-5 h-5 bg-blue-100 rounded-full text-xs flex items-center justify-center mr-2 text-blue-800">
                             {index + 1}

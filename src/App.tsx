@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ConfigProvider, useConfig } from "./ConfigProvider";
 import AppRouter from "./AppRouter";
 import EditorApp from "./editor/EditorApp"; // Import nowego komponentu
-import { ConfigIndicator, ErrorBoundary, Loading } from "./components";
+import { ErrorBoundary, Loading } from "./components";
 import { ContextDebugger } from "./debug";
 
 function App() {
@@ -28,7 +28,7 @@ function App() {
 
 // Komponent dla normalnej aplikacji
 const NormalApp = () => {
-  const { config, configId, loading, error } = useConfig();
+  const { config,  loading, error } = useConfig();
 
   if (loading) {
     return <Loading message="Ładowanie aplikacji..." />;
@@ -47,7 +47,7 @@ const NormalApp = () => {
     <>
       <AppRouter />
       <ContextDebugger config={config} />
-      {configId && <ConfigIndicator />}
+     
     </>
   );
 };

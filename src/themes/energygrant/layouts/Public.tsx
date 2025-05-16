@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode } from "react";
 import { useDarkMode } from "../utils/ThemeUtils";
 import { Footer } from "../common/Footer";
 import { HousePlug } from "lucide-react";

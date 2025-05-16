@@ -1,5 +1,5 @@
 // src/components/index.ts
-export { default as ConfigIndicator } from "./ConfigIndicator";
+
 export { ErrorBoundary } from "./ErrorBoundary";
 export { default as Loading } from "./Loading";
 export { default as ScenarioWithStep } from "./ScenarioWithStep";
