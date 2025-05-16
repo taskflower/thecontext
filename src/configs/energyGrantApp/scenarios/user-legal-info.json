@@ -1,109 +1,193 @@
 {
-    "id": "user-welcome",
-    "slug": "user-welcome",
-    "workspaceSlug": "workspace-user-legal-ingo",
-    "name": "Ekran powitalny",
-    "description": "Ekran powitalny po rejestracji lub logowaniu",
-    "icon": "home",
-    "nodes": [
-      {
-        "slug": "welcome-user-fetch",
-        "label": "Pobieranie danych użytkownika",
-        "contextSchemaPath": "user-data",
-        "contextDataPath": "user-data",
-        "tplFile": "LlmStep",
-        "order": 0,
-        "attrs": {
-          "autoStart": true,
-          "userMessage": "Symuluj pobranie danych zalogowanego użytkownika. Zwróć obiekt JSON z polami: email ('jan.kowalski@example.com'), firstName ('Jan'), lastName ('Kowalski'), points (100), role ('beneficjent'), isLoggedIn (true), lastLoginDate (aktualna data w formacie ISO). Zwróć tylko czysty obiekt JSON."
-        }
-      },
-      {
-        "slug": "welcome-screen",
-        "label": "Ekran powitalny",
-        "contextSchemaPath": "user-data",
-        "contextDataPath": "user-data",
-        "tplFile": "WidgetsStep",
-        "order": 1,
-        "attrs": {
-          "title": "Witaj w systemie!",
-          "subtitle": "Oto Twój panel użytkownika",
-          "widgets": [
-            {
-              "tplFile": "TitleWidget",
-              "title": "Witaj, {{user-data.firstName}}!",
-              "subtitle": "Cieszymy się, że jesteś z nami. Oto kilka informacji, które mogą Ci się przydać.",
-              "colSpan": "full"
-            },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Twoje punkty",
-              "contextDataPath": "user-data.points",
-              "icon": "tag",
-              "colSpan": 1
-            },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Rola w systemie",
-              "contextDataPath": "user-data.role",
-              "icon": "briefcase",
-              "colSpan": 1
-            },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Ostatnie logowanie",
-              "contextDataPath": "user-data.lastLoginDate",
-              "icon": "clock",
-              "colSpan": 1
-            },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Co możesz zrobić?",
-              "data": "Uzupełnij swój profil, aby zwiększyć swoje szanse na zdobycie zleceń lub dotacji.",
-              "icon": "info",
-              "colSpan": "full"
-            }
-          ]
-        }
-      },
-      {
-        "slug": "welcome-tiles",
-        "label": "Kafelki funkcji",
-        "contextSchemaPath": "user-data",
-        "contextDataPath": "user-data",
-        "tplFile": "WidgetsStep",
-        "order": 2,
-        "attrs": {
-          "widgets": [
-            {
-              "tplFile": "TitleWidget",
-              "title": "Dostępne funkcje",
-              "subtitle": "Wybierz, co chcesz zrobić",
-              "colSpan": "full"
-            },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Uzupełnij profil",
-              "data": "Dodaj więcej informacji do swojego profilu, aby zwiększyć swoje szanse na sukces.",
-              "icon": "user",
-              "colSpan": 1
-            },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Przeglądaj oferty",
-              "data": "Znajdź oferty dopasowane do Twojej roli w systemie.",
-              "icon": "search",
-              "colSpan": 1
-            },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Sprawdź status punktów",
-              "data": "Zobacz, jak możesz wykorzystać swoje punkty w systemie.",
-              "icon": "bar-chart",
-              "colSpan": 1
-            }
-          ]
-        }
+  "id": "user-legal-info",
+  "slug": "user-legal-info",
+  "workspaceSlug": "workspace-user-legal-info",
+  "name": "Informacje prawne",
+  "description": "Regulamin, polityka prywatności i inne informacje prawne",
+  "icon": "file-text",
+  "nodes": [
+    {
+      "slug": "legal-info-welcome",
+      "label": "Wprowadzenie",
+      "contextSchemaPath": "legal-info",
+      "contextDataPath": "legal-info",
+      "tplFile": "WidgetsStep",
+      "order": 0,
+      "attrs": {
+        "title": "Informacje prawne",
+        "subtitle": "Regulamin, polityka prywatności i inne informacje dotyczące korzystania z systemu",
+        "widgets": [
+          {
+            "tplFile": "TitleWidget",
+            "title": "Informacje prawne",
+            "subtitle": "Poniżej znajdziesz wszystkie istotne informacje dotyczące korzystania z naszego systemu dotacji energetycznych",
+            "colSpan": "full"
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Dlaczego to ważne?",
+            "data": "Zapoznanie się z informacjami prawnymi jest istotne dla zrozumienia swoich praw i obowiązków w ramach korzystania z programu dotacji energetycznych.",
+            "icon": "info",
+            "colSpan": "full"
+          }
+        ]
       }
-    ]
-  }
+    },
+    {
+      "slug": "terms-of-service",
+      "label": "Regulamin serwisu",
+      "contextSchemaPath": "legal-info",
+      "contextDataPath": "legal-info",
+      "tplFile": "WidgetsStep",
+      "order": 1,
+      "attrs": {
+        "title": "Regulamin serwisu",
+        "widgets": [
+          {
+            "tplFile": "TitleWidget",
+            "title": "Regulamin serwisu",
+            "subtitle": "Zasady korzystania z programu dotacji energetycznych",
+            "colSpan": "full"
+          },
+          {
+            "tplFile": "LegalTermsWidget",
+            "colSpan": "full"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "privacy-policy",
+      "label": "Polityka prywatności",
+      "contextSchemaPath": "legal-info",
+      "contextDataPath": "legal-info",
+      "tplFile": "WidgetsStep",
+      "order": 2,
+      "attrs": {
+        "title": "Polityka prywatności",
+        "widgets": [
+          {
+            "tplFile": "TitleWidget",
+            "title": "Polityka prywatności",
+            "subtitle": "Informacje o przetwarzaniu danych osobowych",
+            "colSpan": "full"
+          },
+          {
+            "tplFile": "PrivacyPolicyWidget",
+            "colSpan": "full"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "cookies-policy",
+      "label": "Polityka cookies",
+      "contextSchemaPath": "legal-info",
+      "contextDataPath": "legal-info",
+      "tplFile": "WidgetsStep",
+      "order": 3,
+      "attrs": {
+        "title": "Polityka cookies",
+        "widgets": [
+          {
+            "tplFile": "TitleWidget",
+            "title": "Polityka cookies",
+            "subtitle": "Informacje o wykorzystywaniu plików cookies",
+            "colSpan": "full"
+          },
+          {
+            "tplFile": "CookiesPolicyWidget",
+            "colSpan": "full"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "consent-management",
+      "label": "Zarządzanie zgodami",
+      "contextSchemaPath": "legal-info",
+      "contextDataPath": "legal-info",
+      "tplFile": "WidgetsStep",
+      "order": 4,
+      "attrs": {
+        "title": "Zarządzanie zgodami",
+        "widgets": [
+          {
+            "tplFile": "TitleWidget",
+            "title": "Zarządzanie zgodami",
+            "subtitle": "Tutaj możesz zarządzać swoimi zgodami na przetwarzanie danych osobowych",
+            "colSpan": "full"
+          },
+          {
+            "tplFile": "ConsentManagementWidget",
+            "initialConsents": "{{legal-info}}",
+            "colSpan": "full"
+          }
+        ]
+      },
+      "saveToDB": {
+        "enabled": true,
+        "provider": "indexedDB",
+        "itemType": "userConsents",
+        "itemTitle": "Zgody użytkownika",
+        "contentPath": "legal-info"
+      }
+    },
+    {
+      "slug": "consent-summary",
+      "label": "Podsumowanie zgód",
+      "contextSchemaPath": "legal-info",
+      "contextDataPath": "legal-info",
+      "tplFile": "WidgetsStep",
+      "order": 5,
+      "attrs": {
+        "title": "Podsumowanie zgód",
+        "widgets": [
+          {
+            "tplFile": "TitleWidget",
+            "title": "Twoje zgody zostały zaktualizowane",
+            "subtitle": "Dziękujemy za zarządzanie swoimi zgodami",
+            "colSpan": "full"
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Zgoda na regulamin",
+            "data": "{{legal-info.termsConsent ? 'Zaakceptowano' : 'Brak akceptacji'}}",
+            "icon": "file-text",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Zgoda na politykę prywatności",
+            "data": "{{legal-info.privacyConsent ? 'Zaakceptowano' : 'Brak akceptacji'}}",
+            "icon": "shield",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Zgoda marketingowa",
+            "data": "{{legal-info.marketingConsent ? 'Wyrażono zgodę' : 'Nie wyrażono zgody'}}",
+            "icon": "mail",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Zgoda na analitykę",
+            "data": "{{legal-info.analyticsConsent ? 'Wyrażono zgodę' : 'Nie wyrażono zgody'}}",
+            "icon": "bar-chart",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Co dalej?",
+            "data": "Możesz w każdej chwili wrócić do tego ekranu, aby zaktualizować swoje zgody.",
+            "icon": "info",
+            "colSpan": "full",
+            "actionText": "Powrót do panelu użytkownika",
+            "actionUrl": "/dashboard"
+          }
+        ]
+      }
+    }
+  ]
+}

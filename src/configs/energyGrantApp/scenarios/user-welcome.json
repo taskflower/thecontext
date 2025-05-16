@@ -1,0 +1,223 @@
+{
+    "id": "user-welcome",
+    "slug": "user-welcome",
+    "workspaceSlug": "workspace-user-auth",
+    "name": "Ekran powitalny",
+    "description": "Ekran powitalny po rejestracji lub logowaniu",
+    "icon": "home",
+    "nodes": [
+      {
+        "slug": "welcome-user-fetch",
+        "label": "Pobieranie danych użytkownika",
+        "contextSchemaPath": "user-data",
+        "contextDataPath": "user-data",
+        "tplFile": "LlmStep",
+        "order": 0,
+        "attrs": {
+          "autoStart": true,
+          "userMessage": "Symuluj pobranie danych zalogowanego użytkownika. Zwróć obiekt JSON z polami: email ('jan.kowalski@example.com'), firstName ('Jan'), lastName ('Kowalski'), points (100), role ('beneficjent'), isLoggedIn (true), lastLoginDate (aktualna data w formacie ISO). Zwróć tylko czysty obiekt JSON."
+        }
+      },
+      {
+        "slug": "welcome-screen",
+        "label": "Ekran powitalny",
+        "contextSchemaPath": "user-data",
+        "contextDataPath": "user-data",
+        "tplFile": "WidgetsStep",
+        "order": 1,
+        "attrs": {
+          "title": "Witaj w systemie!",
+          "subtitle": "Oto Twój panel użytkownika",
+          "widgets": [
+            {
+              "tplFile": "TitleWidget",
+              "title": "Witaj, {{user-data.firstName}}!",
+              "subtitle": "Cieszymy się, że jesteś z nami. Oto kilka informacji, które mogą Ci się przydać.",
+              "colSpan": "full"
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Twoje punkty",
+              "contextDataPath": "user-data.points",
+              "icon": "award",
+              "colSpan": 1
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Rola w systemie",
+              "contextDataPath": "user-data.role",
+              "icon": "briefcase",
+              "colSpan": 1
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Ostatnie logowanie",
+              "contextDataPath": "user-data.lastLoginDate",
+              "icon": "clock",
+              "colSpan": 1
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Co możesz zrobić?",
+              "data": "Uzupełnij swój profil, aby zwiększyć swoje szanse na zdobycie zleceń lub dotacji.",
+              "icon": "info",
+              "colSpan": "full"
+            }
+          ]
+        }
+      },
+      {
+        "slug": "welcome-role-specific",
+        "label": "Informacje specyficzne dla roli",
+        "contextSchemaPath": "user-data",
+        "contextDataPath": "user-data",
+        "tplFile": "WidgetsStep",
+        "order": 2,
+        "attrs": {
+          "title": "Informacje dla roli: {{user-data.role}}",
+          "widgets": [
+            {
+              "tplFile": "TitleWidget",
+              "title": "Funkcje dostępne dla Twojej roli",
+              "subtitle": "Jako {{user-data.role}} masz dostęp do następujących funkcji:",
+              "colSpan": "full"
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "{{ user-data.role === 'beneficjent' ? 'Kalkulator zdolności do dotacji' : user-data.role === 'wykonawca' ? 'Giełda zleceń' : user-data.role === 'audytor' ? 'Zlecenia audytów' : 'Panel administracyjny' }}",
+              "data": "{{ user-data.role === 'beneficjent' ? 'Sprawdź, na jakie dotacje możesz liczyć.' : user-data.role === 'wykonawca' ? 'Przeglądaj dostępne zlecenia i składaj swoje oferty.' : user-data.role === 'audytor' ? 'Przeglądaj zlecenia audytów energetycznych.' : 'Zarządzaj systemem i użytkownikami.' }}",
+              "icon": "{{ user-data.role === 'beneficjent' ? 'calculator' : user-data.role === 'wykonawca' ? 'list' : user-data.role === 'audytor' ? 'clipboard' : 'settings' }}",
+              "colSpan": 1
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "{{ user-data.role === 'beneficjent' ? 'Zlecanie audytów' : user-data.role === 'wykonawca' ? 'Zarządzanie portfolio' : user-data.role === 'audytor' ? 'Składanie ofert' : 'Weryfikacja wniosków' }}",
+              "data": "{{ user-data.role === 'beneficjent' ? 'Zamów audyt energetyczny swojego domu.' : user-data.role === 'wykonawca' ? 'Zarządzaj swoim portfolio usług i referencjami.' : user-data.role === 'audytor' ? 'Składaj oferty na wykonanie audytów energetycznych.' : 'Weryfikuj i oceniaj wnioski o dotacje.' }}",
+              "icon": "{{ user-data.role === 'beneficjent' ? 'search' : user-data.role === 'wykonawca' ? 'briefcase' : user-data.role === 'audytor' ? 'edit' : 'check-square' }}",
+              "colSpan": 1
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "{{ user-data.role === 'beneficjent' ? 'Kontakt z wykonawcami' : user-data.role === 'wykonawca' ? 'Kontakt z beneficjentem' : user-data.role === 'audytor' ? 'Zarządzanie portfolio' : 'Moderacja zleceń' }}",
+              "data": "{{ user-data.role === 'beneficjent' ? 'Znajdź i kontaktuj się z wykonawcami.' : user-data.role === 'wykonawca' ? 'Kontaktuj się z beneficjentami dotacji.' : user-data.role === 'audytor' ? 'Zarządzaj swoim portfolio i kwalifikacjami.' : 'Moderuj zlecenia w systemie.' }}",
+              "icon": "{{ user-data.role === 'beneficjent' ? 'message-square' : user-data.role === 'wykonawca' ? 'message-square' : user-data.role === 'audytor' ? 'briefcase' : 'edit' }}",
+              "colSpan": 1
+            }
+          ]
+        }
+      },
+      {
+        "slug": "welcome-tiles",
+        "label": "Kafelki funkcji",
+        "contextSchemaPath": "user-data",
+        "contextDataPath": "user-data",
+        "tplFile": "WidgetsStep",
+        "order": 3,
+        "attrs": {
+          "widgets": [
+            {
+              "tplFile": "TitleWidget",
+              "title": "Dostępne funkcje",
+              "subtitle": "Wybierz, co chcesz zrobić",
+              "colSpan": "full"
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Uzupełnij profil",
+              "data": "Dodaj więcej informacji do swojego profilu, aby zwiększyć swoje szanse na sukces.",
+              "icon": "user",
+              "colSpan": 1,
+              "actionText": "Edytuj profil",
+              "actionUrl": "#edit-profile"
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Przeglądaj oferty",
+              "data": "Znajdź oferty dopasowane do Twojej roli w systemie.",
+              "icon": "search",
+              "colSpan": 1,
+              "actionText": "Zobacz oferty",
+              "actionUrl": "#browse-offers"
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Sprawdź status punktów",
+              "data": "Zobacz, jak możesz wykorzystać swoje punkty w systemie.",
+              "icon": "award",
+              "colSpan": 1,
+              "actionText": "Sprawdź punkty",
+              "actionUrl": "#check-points"
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Informacje prawne",
+              "data": "Zapoznaj się z regulaminem, polityką prywatności i innymi informacjami prawnymi.",
+              "icon": "file-text",
+              "colSpan": "full",
+              "actionText": "Zobacz informacje prawne",
+              "actionUrl": "/workspace-user-legal-info"
+            }
+          ]
+        }
+      },
+      {
+        "slug": "welcome-redirect",
+        "label": "Przekierowanie do dedykowanego panelu",
+        "contextSchemaPath": "user-data",
+        "contextDataPath": "user-data",
+        "tplFile": "WidgetsStep",
+        "order": 4,
+        "attrs": {
+          "title": "Przejdź do dedykowanego panelu",
+          "widgets": [
+            {
+              "tplFile": "TitleWidget",
+              "title": "Gotowy do pracy?",
+              "subtitle": "Przejdź do dedykowanego panelu użytkownika dla swojej roli",
+              "colSpan": "full"
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Panel Beneficjenta",
+              "data": "Zarządzaj swoim wnioskiem o dotację, zleceniami i ofertami",
+              "icon": "home",
+              "colSpan": "full",
+              "actionText": "Przejdź do Panelu Beneficjenta",
+              "actionUrl": "/workspace-beneficiary",
+              "hidden": "{{user-data.role !== 'beneficjent'}}"
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Panel Wykonawcy",
+              "data": "Zarządzaj zleceniami, ofertami i portfolio usług",
+              "icon": "tool",
+              "colSpan": "full",
+              "actionText": "Przejdź do Panelu Wykonawcy",
+              "actionUrl": "/workspace-executor",
+              "hidden": "{{user-data.role !== 'wykonawca'}}"
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Panel Audytora",
+              "data": "Zarządzanie profilem audytora energetycznego",
+              "icon": "clipboard-check",
+              "colSpan": "full",
+              "actionText": "Przejdź do Panelu Audytora",
+              "actionUrl": "/workspace-auditor",
+              "hidden": "{{user-data.role !== 'audytor'}}"
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "Panel Operatora",
+              "data": "Zarządzaj systemem, weryfikuj wnioski i moderuj zlecenia",
+              "icon": "settings",
+              "colSpan": "full",
+              "actionText": "Przejdź do Panelu Operatora",
+              "actionUrl": "/workspace-operator",
+              "hidden": "{{user-data.role !== 'operator'}}"
+            }
+          ]
+        }
+      }
+    ]
+  }

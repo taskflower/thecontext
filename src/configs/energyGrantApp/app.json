@@ -4,7 +4,10 @@
   "tplDir": "energygrant",
   "workspaces": [
     {
-      "id": "workspace-ai-publisher"
+      "id": "workspace-user-auth"
+    },
+    {
+      "id": "workspace-user-legal-info"
     },
     {
       "id": "workspace-auditor"
@@ -13,52 +16,33 @@
       "id": "workspace-beneficiary"
     },
     {
-      "id": "workspace-user-auth"
+      "id": "workspace-executor"
+    },
+    {
+      "id": "workspace-operator"
     }
   ],
   "scenarios": [
     {
-      "id": "ai-publisher-contact-operator"
+      "id": "user-registration"
     },
     {
-      "id": "ai-publisher-contractor-market"
-    },
-    {
-      "id": "ai-publisher-find-auditor"
-    },
-    {
-      "id": "ai-publisher-find-contractor"
-    },
-   
-    {
-      "id": "ai-publisher-portfolio"
-    },
-    {
-      "id": "auditor-market"
-    },
-    {
-      "id": "auditor-points-purchase"
-    },
-    {
-      "id": "auditor-profile"
-    },
-    {
-      "id": "beneficiary-contact-operator"
-    },
-    {
-      "id": "beneficiary-find-auditor"
-    },
-    {
-      "id": "beneficiary-find-contractor"
-    },
-    {
-      "id": "beneficiary-orders"
+      "id": "user-welcome"
     },
     {
       "id": "user-legal-info"
     },
     {
-      "id": "user-registration"
+      "id": "auditor-dashboard"
+    },
+    {
+      "id": "beneficiary-dashboard"
+    },
+    {
+      "id": "executor-dashboard"
+    },
+    {
+      "id": "operator-dashboard"
     }
   ]
 }

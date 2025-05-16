@@ -1,0 +1,44 @@
+{
+  "id": "workspace-user-legal-info",
+  "slug": "workspace-user-legal-info",
+  "name": "Informacje prawne",
+  "description": "Regulamin, polityka prywatności i inne informacje prawne",
+  "icon": "file-text",
+  "templateSettings": {
+    "layoutFile": "Public",
+    "widgets": [
+      {
+        "tplFile": "LegalInfoWidget",
+        "termsUrl": "#terms",
+        "privacyUrl": "#privacy",
+        "colSpan": "full"
+      }
+    ]
+  },
+  "contextSchema": {
+    "type": "object",
+    "properties": {
+      "legal-info": {
+        "type": "object",
+        "properties": {
+          "termsConsent": {
+            "type": "boolean",
+            "title": "Zgoda na regulamin"
+          },
+          "privacyConsent": {
+            "type": "boolean",
+            "title": "Zgoda na politykę prywatności"
+          },
+          "marketingConsent": {
+            "type": "boolean",
+            "title": "Zgoda marketingowa"
+          },
+          "analyticsConsent": {
+            "type": "boolean",
+            "title": "Zgoda na analizę aktywności"
+          }
+        }
+      }
+    }
+  }
+}

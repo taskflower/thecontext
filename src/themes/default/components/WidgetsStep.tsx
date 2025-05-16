@@ -72,7 +72,7 @@ const WidgetsStep: React.FC<WidgetsStepProps> = React.memo(
     const NextButtonIcon = isLastStep ? CheckSquare : ArrowRight;
 
     return (
-      <div className="max-w-6xl mx-auto pt-6">
+      <div className="max-w-6xl mx-auto pt-6 ">
         {(title || subtitle) && (
           <div className="mb-6">
             {title && <h2 className="text-xl text-gray-900 mb-3">{title}</h2>}

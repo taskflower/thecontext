@@ -9,8 +9,8 @@
     {
       "slug": "registration-options",
       "label": "Opcje rejestracji",
-      "contextSchemaPath": "registration-data",
-      "contextDataPath": "registration-data",
+      "contextSchemaPath": "user-data",
+      "contextDataPath": "user-data",
       "tplFile": "WidgetsStep",
       "order": 0,
       "attrs": {
@@ -22,20 +22,9 @@
             "colSpan": "full"
           },
           {
-            "tplFile": "InfoWidget",
-            "title": "Rejestracja za pomocą Google",
-            "data": "Kliknij przycisk poniżej, aby zarejestrować się za pomocą konta Google.",
-            "icon": "info",
-            "actionUrl": "#google-login",
-            "actionText": "Zarejestruj się przez Google",
-            "colSpan": 1
-          },
-          {
-            "tplFile": "InfoWidget",
-            "title": "Rejestracja za pomocą formularza",
-            "data": "Możesz również zarejestrować się wypełniając formularz z danymi.",
-            "icon": "info",
-            "colSpan": 1
+            "tplFile": "RegisterWidget",
+            "redirectUrl": "#role-selection",
+            "colSpan": "full"
           }
         ]
       }
@@ -43,63 +32,99 @@
     {
       "slug": "google-auth-mock",
       "label": "Rejestracja z Google",
-      "contextSchemaPath": "registration-data",
-      "contextDataPath": "registration-data",
+      "contextSchemaPath": "user-data",
+      "contextDataPath": "user-data",
       "tplFile": "LlmStep",
       "order": 1,
       "attrs": {
         "title": "Autoryzacja Google",
         "autoStart": true,
-        "userMessage": "Symuluj dane użytkownika otrzymane z Google. Zwróć obiekt JSON z polami: email (losowy email), firstName, lastName (losowe imię i nazwisko), role (domyślnie 'beneficjent'). Uwaga: zwróć tylko obiekt JSON bez dodatkowego formatowania czy komentarzy."
+        "userMessage": "Symuluj dane użytkownika otrzymane z Google. Zwróć obiekt JSON z polami: email (losowy email), firstName, lastName (losowe imię i nazwisko). Uwaga: zwróć tylko obiekt JSON bez dodatkowego formatowania czy komentarzy."
+      }
+    },
+    {
+      "slug": "role-selection",
+      "label": "Wybór roli",
+      "contextSchemaPath": "user-data",
+      "contextDataPath": "user-data",
+      "tplFile": "WidgetsStep",
+      "order": 2,
+      "attrs": {
+        "title": "Wybierz swoją rolę w systemie",
+        "subtitle": "Określ, w jaki sposób chcesz korzystać z programu dotacji energetycznych",
+        "widgets": [
+          {
+            "tplFile": "TitleWidget",
+            "title": "{{user-data.firstName}}, wybierz swoją rolę w systemie",
+            "subtitle": "Od wybranej roli zależą funkcje dostępne w Twoim panelu użytkownika",
+            "colSpan": "full"
+          },
+          {
+            "tplFile": "RoleSelectionWidget",
+            "onChange": "role",
+            "selectedRole": "{{user-data.role}}",
+            "colSpan": "full"
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Informacja",
+            "data": "Wybór roli możesz zmienić później w ustawieniach konta. Potwierdź wybór, aby przejść dalej.",
+            "icon": "info",
+            "colSpan": "full",
+            "actionText": "Potwierdzam wybór roli",
+            "actionUrl": "#legal-info"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "legal-info",
+      "label": "Informacje prawne",
+      "contextSchemaPath": "user-data",
+      "contextDataPath": "user-data",
+      "tplFile": "WidgetsStep",
+      "order": 3,
+      "attrs": {
+        "title": "Informacje prawne",
+        "subtitle": "Zapoznaj się z regulaminem i polityką prywatności",
+        "widgets": [
+          {
+            "tplFile": "TitleWidget",
+            "title": "Akceptacja warunków",
+            "subtitle": "Aby kontynuować, zapoznaj się z regulaminem i polityką prywatności",
+            "colSpan": "full"
+          },
+          {
+            "tplFile": "LegalTermsWidget",
+            "colSpan": "full"
+          },
+          {
+            "tplFile": "PrivacyPolicyWidget",
+            "colSpan": "full"
+          }
+        ]
       }
     },
     {
       "slug": "registration-consent",
       "label": "Zgody rejestracyjne",
-      "contextSchemaPath": "registration-data",
-      "contextDataPath": "registration-data",
-      "tplFile": "FormStep",
-      "order": 2,
+      "contextSchemaPath": "user-data",
+      "contextDataPath": "user-data",
+      "tplFile": "WidgetsStep",
+      "order": 4,
       "attrs": {
-        "title": "Zgody i wybór roli",
-        "description": "Aby dokończyć rejestrację, zapoznaj się z regulaminem i wybierz swoją rolę w systemie",
-        "jsonSchema": {
-          "type": "object",
-          "properties": {
-            "role": {
-              "type": "string",
-              "title": "Wybierz swoją rolę w systemie",
-              "enum": [
-                "beneficjent",
-                "wykonawca",
-                "audytor",
-                "operator"
-              ],
-              "default": "beneficjent"
-            },
-            "termsConsent": {
-              "type": "boolean",
-              "title": "Zapoznałem się z regulaminem serwisu i akceptuję jego warunki",
-              "default": false
-            },
-            "privacyConsent": {
-              "type": "boolean",
-              "title": "Zapoznałem się z polityką prywatności i wyrażam zgodę na przetwarzanie moich danych osobowych",
-              "default": false
-            },
-            "marketingConsent": {
-              "type": "boolean",
-              "title": "Wyrażam zgodę na otrzymywanie informacji marketingowych (opcjonalnie)",
-              "default": false
-            }
+        "widgets": [
+          {
+            "tplFile": "TitleWidget",
+            "title": "Zgody i potwierdzenia",
+            "subtitle": "Aby dokończyć rejestrację, potwierdź akceptację warunków",
+            "colSpan": "full"
           },
-          "required": [
-            "role",
-            "termsConsent",
-            "privacyConsent"
-          ]
-        },
-        "submitLabel": "Zakończ rejestrację"
+          {
+            "tplFile": "ConsentManagementWidget",
+            "colSpan": "full"
+          }
+        ]
       }
     },
     {
@@ -108,10 +133,10 @@
       "contextSchemaPath": "user-data",
       "contextDataPath": "user-data",
       "tplFile": "LlmStep",
-      "order": 3,
+      "order": 5,
       "attrs": {
         "autoStart": true,
-        "userMessage": "Na podstawie danych rejestracyjnych utwórz obiekt użytkownika. Pobierz email, firstName, lastName i role z {{registration-data}}. Dodaj pola: points (wartość 100), isLoggedIn (true), lastLoginDate (aktualna data). Zwróć jako czysty obiekt JSON."
+        "userMessage": "Na podstawie danych rejestracyjnych utwórz obiekt użytkownika. Pobierz email, firstName, lastName i role z {{user-data}}. Dodaj pola: points (wartość 100), isLoggedIn (true), lastLoginDate (aktualna data). Zwróć jako czysty obiekt JSON."
       },
       "saveToDB": {
         "enabled": true,
@@ -127,14 +152,79 @@
       "contextSchemaPath": "user-data",
       "contextDataPath": "user-data",
       "tplFile": "WidgetsStep",
-      "order": 4,
+      "order": 6,
       "attrs": {
+        "title": "Rejestracja zakończona pomyślnie",
+        "subtitle": "Twoje konto zostało utworzone",
         "widgets": [
           {
-            "tplFile": "GoogleAuthWidget",
+            "tplFile": "TitleWidget",
+            "title": "Witaj, {{user-data.firstName}}!",
+            "subtitle": "Twoje konto zostało utworzone pomyślnie. Oto podsumowanie:",
             "colSpan": "full"
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Adres email",
+            "contextDataPath": "user-data.email",
+            "icon": "mail",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Imię i nazwisko",
+            "data": "{{user-data.firstName}} {{user-data.lastName}}",
+            "icon": "user",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Rola w systemie",
+            "contextDataPath": "user-data.role",
+            "icon": "briefcase",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Punkty startowe",
+            "contextDataPath": "user-data.points",
+            "icon": "award",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Co dalej?",
+            "data": "Możesz teraz przejść do swojego panelu użytkownika i rozpocząć korzystanie z systemu dotacji energetycznych.",
+            "icon": "info",
+            "colSpan": "full",
+            "actionText": "Przejdź do panelu użytkownika",
+            "actionUrl": "/dashboard"
           }
         ]
+      }
+    },
+    {
+      "slug": "registration-redirect",
+      "label": "Przekierowanie do panelu",
+      "contextSchemaPath": "user-data",
+      "contextDataPath": "user-data",
+      "tplFile": "LlmStep",
+      "order": 7,
+      "attrs": {
+        "autoStart": true,
+        "userMessage": "Na podstawie roli użytkownika {{user-data.role}} określ ścieżkę przekierowania. Zwróć obiekt JSON z polem redirectUrl, które będzie miało wartość: dla 'beneficjent' - '/workspace-beneficiary', dla 'audytor' - '/workspace-auditor', dla 'wykonawca' - '/workspace-executor', dla 'operator' - '/workspace-operator'."
+      }
+    },
+    {
+      "slug": "registration-redirect-action",
+      "label": "Wykonanie przekierowania",
+      "contextSchemaPath": "user-data",
+      "contextDataPath": "user-data",
+      "tplFile": "ActionStep",
+      "order": 8,
+      "attrs": {
+        "actionType": "redirect",
+        "actionUrl": "{{redirectUrl}}"
       }
     }
   ]
