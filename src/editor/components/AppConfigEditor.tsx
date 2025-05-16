@@ -10,101 +10,69 @@ interface AppConfigEditorProps {
   config: AppConfig;
   workspaces: WorkspaceConfig[];
   scenarios: ScenarioConfig[];
-  onUpdate: (updatedConfig: Partial<AppConfig>) => void;
+  onUpdate: (updated: Partial<AppConfig>) => void;
 }
 
 export const AppConfigEditor: React.FC<AppConfigEditorProps> = ({
   config,
   workspaces,
   scenarios,
-  onUpdate
+  onUpdate,
 }) => {
-  const [activeTab, setActiveTab] = useState<"form" | "json">("form");
-  
-  // Generuj formularz schema dla głównej konfiguracji
-  const formSchema = {
+  const [tab, setTab] = useState<"form"|"json">("form");
+
+  const schema = {
     type: "object",
     properties: {
-      name: { 
-        type: "string", 
-        title: "Nazwa aplikacji",
-      },
-      description: { 
-        type: "string", 
-        title: "Opis aplikacji"
-      },
-      tplDir: { 
-        type: "string", 
-        title: "Katalog szablonu",
-        default: "default"
-      },
-      defaultWorkspace: { 
-        type: "string", 
-        title: "Domyślna przestrzeń robocza",
+      name: { type: "string", title: "Nazwa aplikacji" },
+      description: { type: "string", title: "Opis aplikacji" },
+      tplDir: { type: "string", title: "Katalog szablonu" },
+      defaultWorkspace: {
+        type: "string",
+        title: "Domyślna przestrzeń",
         enum: workspaces.map(w => w.slug),
-        enumNames: workspaces.map(w => w.name || w.slug)
+        enumNames: workspaces.map(w => w.name || w.slug),
       },
-      defaultScenario: { 
-        type: "string", 
+      defaultScenario: {
+        type: "string",
         title: "Domyślny scenariusz",
         enum: scenarios.map(s => s.slug),
-        enumNames: scenarios.map(s => s.name || s.slug)
-      }
+        enumNames: scenarios.map(s => s.name || s.slug),
+      },
     },
-    required: ["name", "tplDir"]
-  };
-  
-  // Obsługa zmian w formularzu
-  const handleFormChange = (formData: any) => {
-    onUpdate(formData);
-  };
-  
-  // Obsługa zmian w edytorze JSON
-  const handleJsonChange = (jsonData: any) => {
-    // Usuń workspaces i scenarios z edytora JSON, żeby nie duplikować
-    const { workspaces: _, scenarios: __, ...appConfig } = jsonData;
-    onUpdate(appConfig);
+    required: ["name","tplDir"],
   };
 
-  const tabOptions = [
-    { id: "form", label: "Formularz" },
-    { id: "json", label: "JSON" }
-  ];
-  
   return (
-    <EditorCard 
-      title="Konfiguracja aplikacji" 
-      description="Edytuj podstawowe ustawienia aplikacji"
-    >
-      <EditorTabs 
-        activeTab={activeTab}
-        options={tabOptions}
-        onChange={(tab) => setActiveTab(tab as "form" | "json")}
+    <EditorCard title="Konfiguracja aplikacji">
+      <EditorTabs
+        activeTab={tab}
+        options={[{id:"form",label:"Formularz"},{id:"json",label:"JSON"}]}
+        onChange={t => setTab(t as any)}
       />
-      
       <div className="p-4">
-        {activeTab === "form" ? (
-          <FormEditor 
-            schema={formSchema}
+        {tab==="form" ? (
+          <FormEditor
+            schema={schema}
             formData={{
               name: config.name,
               description: config.description,
               tplDir: config.tplDir,
               defaultWorkspace: config.defaultWorkspace,
-              defaultScenario: config.defaultScenario
+              defaultScenario: config.defaultScenario,
             }}
-            onChange={handleFormChange}
+            onChange={(data) => onUpdate(data)}
           />
         ) : (
-          <JsonEditor 
+          <JsonEditor
             value={{
               name: config.name,
               description: config.description,
               tplDir: config.tplDir,
               defaultWorkspace: config.defaultWorkspace,
-              defaultScenario: config.defaultScenario
+              defaultScenario: config.defaultScenario,
             }}
-            onChange={handleJsonChange}
+            onChange={onUpdate}
           />
         )}
       </div>

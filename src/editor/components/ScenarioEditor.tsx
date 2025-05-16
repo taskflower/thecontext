@@ -3,10 +3,11 @@ import React, { useState } from "react";
 import { ScenarioConfig, NodeConfig } from "@/core/types";
 import { JsonEditor } from "./common/JsonEditor";
 import { FormEditor } from "./common/FormEditor";
-import { NodeEditor } from "./scenario/NodeEditor";
 import { EditorTabs } from "./common/EditorTabs";
 import { EditorCard } from "./common/EditorCard";
-import { PlusCircle, Trash2, MoveUp, MoveDown } from "lucide-react";
+import { PlusCircle } from "lucide-react";
+import { NodeEditor } from "./scenario/NodeEditor";
+
 
 interface ScenarioEditorProps {
   scenario: ScenarioConfig;
@@ -19,271 +20,134 @@ export const ScenarioEditor: React.FC<ScenarioEditorProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<"form" | "nodes" | "json">("form");
 
-  // Generuj formularz schema dla scenariusza
   const formSchema = {
     type: "object",
     properties: {
-      name: {
-        type: "string",
-        title: "Nazwa scenariusza",
-      },
-      description: {
-        type: "string",
-        title: "Opis scenariusza",
-      },
+      name: { type: "string", title: "Nazwa scenariusza" },
+      description: { type: "string", title: "Opis scenariusza" },
       icon: {
         type: "string",
         title: "Ikona",
-        enum: ["search", "chart", "info", "money", "briefcase", "calculator"],
-        default: "info",
-      }
+        enum: ["search","chart","info","money","briefcase","calculator"],
+      },
     },
     required: ["name"],
   };
 
-  // Obsługa zmian w formularzu
-  const handleFormChange = (formData: any) => {
-    onUpdate(formData);
-  };
-
-  // Obsługa zmian w edytorze JSON
-  const handleJsonChange = (jsonData: any) => {
-    onUpdate(jsonData);
-  };
-
-  // Dodaj nowy krok (node) do scenariusza
+  // helperzy CRUD kroków
   const addNode = () => {
     const nodes = scenario.nodes || [];
-    const maxOrder =
-      nodes.length > 0 ? Math.max(...nodes.map((n) => n.order || 0)) : -1;
-
+    const maxOrder = nodes.length ? Math.max(...nodes.map(n => n.order)) : -1;
     const newNode: NodeConfig = {
       slug: `step-${Date.now()}`,
-      label: `Nowy krok ${nodes.length + 1}`,
-      description: "Opis nowego kroku",
+      label: `Nowy krok ${nodes.length+1}`,
+      description: "",
       tplFile: "FormStep",
       order: maxOrder + 1,
       contextSchemaPath: "",
       contextDataPath: "",
-      attrs: {
-        title: `Nowy krok ${nodes.length + 1}`,
-        description: "Opis nowego kroku",
-      },
+      attrs: { title: `Nowy krok ${nodes.length+1}`, description: "" },
     };
-
-    onUpdate({
-      nodes: [...nodes, newNode],
-    });
+    onUpdate({ nodes: [...nodes, newNode] });
   };
-
-  // Aktualizuj krok
-  const updateNode = (index: number, updatedNode: Partial<NodeConfig>) => {
-    const nodes = [...(scenario.nodes || [])];
-    nodes[index] = { ...nodes[index], ...updatedNode };
-
+  const updateNodes = (nodes: NodeConfig[]) =>
     onUpdate({ nodes });
+
+  const move = (i: number, dir: -1|1) => {
+    const nodes = [...(scenario.nodes||[])];
+    const j = i+dir;
+    if (j<0||j>=nodes.length) return;
+    [nodes[i],nodes[j]] = [nodes[j],nodes[i]];
+    updateNodes(nodes.map((n,idx)=>({...n,order:idx})));
+  };
+  const remove = (i: number) => {
+    if (!confirm("Usuń krok?")) return;
+    const nodes = (scenario.nodes||[]).filter((_,idx)=>idx!==i)
+      .map((n,idx)=>({...n,order:idx}));
+    updateNodes(nodes);
   };
 
-  // Usuń krok
-  const deleteNode = (index: number) => {
-    if (
-      !confirm(
-        "Czy na pewno chcesz usunąć ten krok? Ta operacja jest nieodwracalna."
-      )
-    ) {
-      return;
-    }
-
-    const nodes = (scenario.nodes || []).filter((_, i) => i !== index);
-
-    // Zaktualizuj numerację order
-    const updatedNodes = nodes.map((node, i) => ({
-      ...node,
-      order: i,
-    }));
-
-    onUpdate({ nodes: updatedNodes });
-  };
-
-  // Przesuń krok w górę
-  const moveNodeUp = (index: number) => {
-    if (index === 0) return;
-
-    const nodes = [...(scenario.nodes || [])];
-    const node = nodes[index];
-    const prevNode = nodes[index - 1];
-
-    // Zamień order
-    const nodeOrder = node.order || 0;
-    const prevNodeOrder = prevNode.order || 0;
-
-    nodes[index] = { ...node, order: prevNodeOrder };
-    nodes[index - 1] = { ...prevNode, order: nodeOrder };
-
-    // Posortuj według order
-    const sortedNodes = [...nodes].sort(
-      (a, b) => (a.order || 0) - (b.order || 0)
-    );
-
-    onUpdate({ nodes: sortedNodes });
-  };
-
-  // Przesuń krok w dół
-  const moveNodeDown = (index: number) => {
-    const nodes = [...(scenario.nodes || [])];
-    if (index === nodes.length - 1) return;
-
-    const node = nodes[index];
-    const nextNode = nodes[index + 1];
-
-    // Zamień order
-    const nodeOrder = node.order || 0;
-    const nextNodeOrder = nextNode.order || 0;
-
-    nodes[index] = { ...node, order: nextNodeOrder };
-    nodes[index + 1] = { ...nextNode, order: nodeOrder };
-
-    // Posortuj według order
-    const sortedNodes = [...nodes].sort(
-      (a, b) => (a.order || 0) - (b.order || 0)
-    );
-
-    onUpdate({ nodes: sortedNodes });
-  };
-
-  // Posortowane kroki według order
-  const sortedNodes = [...(scenario.nodes || [])].sort(
-    (a, b) => (a.order || 0) - (b.order || 0)
-  );
-
-  const tabOptions = [
-    { id: "form", label: "Podstawowe" },
-    { id: "nodes", label: "Kroki (Nodes)" },
-    { id: "json", label: "JSON" }
-  ];
+  const sorted = [...(scenario.nodes||[])].sort((a,b)=>a.order-b.order);
 
   return (
-    <div className="space-y-6">
-      <EditorCard
-        title={`Scenariusz: ${scenario.name || scenario.slug}`}
-        description={scenario.description || "Brak opisu"}
-      >
-        <EditorTabs 
-          activeTab={activeTab}
-          options={tabOptions}
-          onChange={(tab) => setActiveTab(tab as "form" | "nodes" | "json")}
-        />
+    <EditorCard
+      title={`Scenariusz: ${scenario.name}`}
+      description={scenario.description}
+    >
+      <EditorTabs
+        activeTab={activeTab}
+        options={[
+          { id:"form", label:"Podstawowe" },
+          { id:"nodes", label:"Kroki" },
+          { id:"json", label:"JSON" },
+        ]}
+        onChange={t=>setActiveTab(t as any)}
+      />
 
-        <div className="p-4">
-          {activeTab === "form" && (
-            <FormEditor
-              schema={formSchema}
-              formData={{
-                name: scenario.name,
-                description: scenario.description,
-                icon: scenario.icon,
-              }}
-              onChange={handleFormChange}
-            />
-          )}
+      <div className="p-4">
+        {activeTab==="form" && (
+          <FormEditor
+            schema={formSchema}
+            formData={{
+              name: scenario.name,
+              description: scenario.description,
+              icon: scenario.icon,
+            }}
+            onChange={onUpdate}
+          />
+        )}
 
-          {activeTab === "nodes" && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-medium text-gray-700">
-                  Kroki scenariusza
-                </h3>
-                <button
-                  className="flex items-center text-xs text-blue-600 hover:text-blue-800"
-                  onClick={addNode}
-                >
-                  <PlusCircle className="h-3.5 w-3.5 mr-1" />
-                  Dodaj krok
-                </button>
-              </div>
-
-              {sortedNodes.length === 0 ? (
-                <div className="text-sm text-gray-500 bg-gray-50 p-4 rounded-md text-center">
-                  Brak zdefiniowanych kroków. Kliknij "Dodaj krok" aby
-                  rozpocząć.
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {sortedNodes.map((node, index) => (
-                    <div
-                      key={node.slug || index}
-                      className="border border-gray-200 rounded-md overflow-hidden"
-                    >
-                      <div className="bg-lime-100 border-b border-gray-200 p-2 flex items-center justify-between">
-                        <div className="flex items-center">
-                          <span className="w-5 h-5 bg-blue-100 rounded-full text-xs flex items-center justify-center mr-2 text-blue-800">
-                            {index + 1}
-                          </span>
-                          <span className="font-medium text-sm">
-                            {node.label || `Krok ${index + 1}`}
-                          </span>
-                          <span className="ml-2 text-xs text-gray-500">
-                            ({node.tplFile})
-                          </span>
-                        </div>
-
-                        <div className="flex items-center space-x-1">
-                          <button
-                            onClick={() => moveNodeUp(index)}
-                            disabled={index === 0}
-                            className={`p-1 rounded ${
-                              index === 0
-                                ? "text-gray-300 cursor-not-allowed"
-                                : "text-gray-500 hover:bg-gray-200"
-                            }`}
-                            title="Przesuń w górę"
-                          >
-                            <MoveUp className="h-4 w-4" />
-                          </button>
-
-                          <button
-                            onClick={() => moveNodeDown(index)}
-                            disabled={index === sortedNodes.length - 1}
-                            className={`p-1 rounded ${
-                              index === sortedNodes.length - 1
-                                ? "text-gray-300 cursor-not-allowed"
-                                : "text-gray-500 hover:bg-gray-200"
-                            }`}
-                            title="Przesuń w dół"
-                          >
-                            <MoveDown className="h-4 w-4" />
-                          </button>
-
-                          <button
-                            onClick={() => deleteNode(index)}
-                            className="p-1 text-gray-500 hover:text-red-600 hover:bg-gray-200 rounded"
-                            title="Usuń krok"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="p-3">
-                        <NodeEditor
-                          node={node}
-                          onUpdate={(updatedNode) =>
-                            updateNode(index, updatedNode)
-                          }
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+        {activeTab==="nodes" && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="font-medium">Kroki</h3>
+              <button
+                className="flex items-center text-sm text-blue-600 hover:text-blue-800"
+                onClick={addNode}
+              >
+                <PlusCircle className="w-4 h-4 mr-1"/> Dodaj krok
+              </button>
             </div>
-          )}
 
-          {activeTab === "json" && (
-            <JsonEditor value={scenario} onChange={handleJsonChange} />
-          )}
-        </div>
-      </EditorCard>
-    </div>
+            {sorted.length===0
+              ? <div className="text-gray-500 italic p-4 bg-gray-50 rounded text-center">
+                  Brak kroków
+                </div>
+              : sorted.map((node, idx)=>(
+                  <div key={node.slug} className="border rounded-md overflow-hidden">
+                    <NodeEditor
+                      node={node}
+                      onUpdate={u=>{
+                        const nodes = [...sorted];
+                        nodes[idx] = {...nodes[idx],...u};
+                        updateNodes(nodes);
+                      }}
+                    />
+                    <div className="p-2 flex justify-end space-x-2 text-xs">
+                      <button onClick={()=>move(idx,-1)} disabled={idx===0}>
+                        ▲
+                      </button>
+                      <button onClick={()=>move(idx,1)} disabled={idx===sorted.length-1}>
+                        ▼
+                      </button>
+                      <button className="text-red-600" onClick={()=>remove(idx)}>
+                        🗑
+                      </button>
+                    </div>
+                  </div>
+                ))
+            }
+          </div>
+        )}
+
+        {activeTab==="json" && (
+          <JsonEditor
+            value={scenario}
+            onChange={onUpdate}
+            height="600px"
+          />
+        )}
+      </div>
+    </EditorCard>
   );
 };

@@ -1,288 +1,100 @@
 // src/editor/components/WorkspaceEditor.tsx
 import React, { useState } from "react";
-import { WorkspaceConfig, ScenarioConfig, TemplateSettings } from "@/core/types";
+import { WorkspaceConfig, ScenarioConfig } from "@/core/types";
 import { JsonEditor } from "./common/JsonEditor";
 import { FormEditor } from "./common/FormEditor";
-import { Widget } from "./workspace/Widget";
 import { EditorTabs } from "./common/EditorTabs";
 import { EditorCard } from "./common/EditorCard";
-import { PlusCircle, Layers, Trash2 } from "lucide-react";
 
 interface WorkspaceEditorProps {
   workspace: WorkspaceConfig;
-  onUpdate: (updatedWorkspace: Partial<WorkspaceConfig>) => void;
-  onAddScenario: () => void;
   scenarios: ScenarioConfig[];
-  onEditScenario: (scenarioSlug: string) => void;
-  onDeleteScenario: (scenarioSlug: string) => void;
+  onUpdate: (updated: Partial<WorkspaceConfig>) => void;
+  onAddScenario: () => void;
+  onEditScenario: (slug: string) => void;
+  onDeleteScenario: (slug: string) => void;
 }
 
 export const WorkspaceEditor: React.FC<WorkspaceEditorProps> = ({
   workspace,
+  scenarios,
   onUpdate,
   onAddScenario,
-  scenarios,
   onEditScenario,
-  onDeleteScenario
+  onDeleteScenario,
 }) => {
-  const [activeTab, setActiveTab] = useState<"form" | "widgets" | "json">("form");
-  
-  // Generuj formularz schema dla workspace
-  const formSchema = {
+  const [tab, setTab] = useState<"form"|"widgets"|"json">("form");
+
+  const schema = {
     type: "object",
     properties: {
-      name: { 
-        type: "string", 
-        title: "Nazwa przestrzeni"
-      },
-      description: { 
-        type: "string", 
-        title: "Opis przestrzeni"
-      },
-      icon: { 
-        type: "string", 
+      name: { type: "string", title: "Nazwa przestrzeni" },
+      description: { type: "string", title: "Opis przestrzeni" },
+      icon: {
+        type: "string",
         title: "Ikona",
-        enum: ["search", "chart", "info", "money", "briefcase", "calculator"],
-        default: "info"
+        enum: ["search","chart","info","money","briefcase","calculator"],
       },
-      tplDir: { 
-        type: "string", 
-        title: "Katalog szablonu",
-        default: "default"
-      }
+      tplDir: { type: "string", title: "Katalog szablonu" },
     },
-    required: ["name"]
+    required: ["name"],
   };
-  
-  // Obsługa zmian w formularzu
-  const handleFormChange = (formData: any) => {
-    onUpdate(formData);
-  };
-  
-  // Obsługa zmian w edytorze JSON
-  const handleJsonChange = (jsonData: any) => {
-    onUpdate(jsonData);
-  };
-  
-  // Dodaj widget do workspace
-  const addWidget = () => {
-    const templateSettings = workspace.templateSettings || { widgets: [], layoutFile: '' };
-    const widgets = templateSettings.widgets || [];
-    
-    const newWidget = {
-      title: "Nowy widget",
-      tplFile: "InfoWidget",
-      data: "Treść widgetu",
-      icon: "info",
-      colSpan: 1
-    };
-    
-    onUpdate({
-      templateSettings: {
-        ...templateSettings,
-        layoutFile: templateSettings.layoutFile || '', 
-        widgets: [...widgets, newWidget]
-      }
-    });
-  };
-  
-  // Aktualizuj widget
-  const updateWidget = (index: number, updatedWidget: any) => {
-    const templateSettings = workspace.templateSettings || { 
-      widgets: [], 
-      layoutFile: 'Simple' 
-    };
-    const widgets = templateSettings.widgets || [];
-    
-    const updatedWidgets = [...widgets];
-    updatedWidgets[index] = { ...updatedWidgets[index], ...updatedWidget };
-    
-    onUpdate({
-      templateSettings: {
-        ...templateSettings,
-        layoutFile: templateSettings.layoutFile || 'Simple', 
-        widgets: updatedWidgets
-      }
-    });
-  };
-  
-  // Usuń widget
-  const deleteWidget = (index: number) => {
-    const templateSettings = workspace.templateSettings || { widgets: [] };
-    const widgets = templateSettings.widgets || [];
-    
-    const updatedWidgets = widgets.filter((_, i) => i !== index);
-    
-    onUpdate({
-      templateSettings: {
-        ...templateSettings,
-        layoutFile: (templateSettings as TemplateSettings).layoutFile || 'Simple',
-        widgets: updatedWidgets
-      }
-    });
-  };
-  
-  // Aktualizuj layout
-  const updateLayout = (layoutFile: string) => {
-    const templateSettings = workspace.templateSettings || { widgets: [] };
-    
-    onUpdate({
-      templateSettings: {
-        ...templateSettings,
-        layoutFile
-      }
-    });
-  };
-  
-  const widgets = workspace.templateSettings?.widgets || [];
 
-  const tabOptions = [
-    { id: "form", label: "Podstawowe" },
-    { id: "widgets", label: "Widgety" },
-    { id: "json", label: "JSON" }
-  ];
-  
   return (
-    <div className="space-y-6">
-      <EditorCard
-        title={`Przestrzeń: ${workspace.name || workspace.slug}`}
-        description={workspace.description || "Brak opisu"}
-      >
-        <EditorTabs 
-          activeTab={activeTab}
-          options={tabOptions}
-          onChange={(tab) => setActiveTab(tab as "form" | "widgets" | "json")}
-        />
-        
-        <div className="p-4">
-          {activeTab === "form" && (
-            <FormEditor 
-              schema={formSchema}
-              formData={{
-                name: workspace.name,
-                description: workspace.description,
-                icon: workspace.icon,
-                tplDir: workspace.templateSettings?.tplDir || ''
-              }}
-              onChange={handleFormChange}
-            />
-          )}
-          
-          {activeTab === "widgets" && (
-            <div className="space-y-4">
-              {/* Layout selector */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Układ przestrzeni
-                </label>
-                <select 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                  value={workspace.templateSettings?.layoutFile || "Simple"}
-                  onChange={(e) => updateLayout(e.target.value)}
-                >
-                  <option value="Simple">Simple</option>
-                  <option value="Dashboard">Dashboard</option>
-                  <option value="SidebarLayout">SidebarLayout</option>
-                </select>
-              </div>
-              
-              {/* Widgety */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-medium text-gray-700">Widgety</h3>
-                  <button
-                    className="flex items-center text-xs text-blue-600 hover:text-blue-800"
-                    onClick={addWidget}
-                  >
-                    <PlusCircle className="h-3.5 w-3.5 mr-1" />
-                    Dodaj widget
-                  </button>
-                </div>
-                
-                {widgets.length === 0 ? (
-                  <div className="text-sm text-gray-500 bg-gray-50 p-4 rounded-md text-center">
-                    Brak zdefiniowanych widgetów
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {widgets.map((widget, index) => (
-                      <Widget 
-                        key={index}
-                        widget={widget}
-                        index={index}
-                        onUpdate={(updatedWidget) => updateWidget(index, updatedWidget)}
-                        onDelete={() => deleteWidget(index)}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-          
-          {activeTab === "json" && (
-            <JsonEditor 
-              value={workspace}
-              onChange={handleJsonChange}
-            />
-          )}
-        </div>
-      </EditorCard>
-      
-      {/* Scenariusze */}
+    <EditorCard title={`Przestrzeń: ${workspace.name}`}>
+      <EditorTabs
+        activeTab={tab}
+        options={[
+          {id:"form",label:"Podstawowe"},
+          {id:"widgets",label:"Widgety"},
+          {id:"json",label:"JSON"},
+        ]}
+        onChange={t => setTab(t as any)}
+      />
+      <div className="p-4">
+        {tab==="form" && (
+          <FormEditor
+            schema={schema}
+            formData={{
+              name: workspace.name,
+              description: workspace.description,
+              icon: workspace.icon,
+              tplDir: workspace.templateSettings?.tplDir || "",
+            }}
+            onChange={onUpdate}
+          />
+        )}
+        {tab==="widgets" && (
+          <div className="text-gray-500 italic">Tu widgety…</div>
+        )}
+        {tab==="json" && (
+          <JsonEditor
+            value={workspace}
+            onChange={onUpdate}
+          />
+        )}
+      </div>
+
       <EditorCard title="Scenariusze">
-        <div className="border-b border-gray-200 p-4 flex items-center justify-between">
-          <div />
-          <button
-            className="flex items-center text-sm text-blue-600 hover:text-blue-800"
-            onClick={onAddScenario}
-          >
-            <PlusCircle className="h-4 w-4 mr-1" />
+        <div className="flex justify-end p-4">
+          <button onClick={onAddScenario} className="text-blue-600 hover:underline">
             Dodaj scenariusz
           </button>
         </div>
-        
-        <div className="p-4">
-          {scenarios.length === 0 ? (
-            <div className="text-sm text-gray-500 bg-gray-50 p-4 rounded-md text-center">
-              Brak zdefiniowanych scenariuszy dla tej przestrzeni
+        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+          {scenarios.map(s => (
+            <div key={s.slug} className="border p-3 rounded flex justify-between">
+              <div onClick={() => onEditScenario(s.slug)} className="cursor-pointer">
+                <h4 className="font-medium">{s.name}</h4>
+                <p className="text-xs text-gray-500">{s.description}</p>
+              </div>
+              <button onClick={() => onDeleteScenario(s.slug)} className="text-red-600">
+                Usuń
+              </button>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {scenarios.map(scenario => (
-                <div
-                  key={scenario.slug}
-                  className="border border-gray-200 rounded-md p-3 hover:border-blue-300 cursor-pointer"
-                  onClick={() => onEditScenario(scenario.slug)}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <h3 className="text-sm font-medium text-gray-800 flex items-center">
-                      <Layers className="h-4 w-4 mr-1.5 text-gray-500" />
-                      {scenario.name || scenario.slug}
-                    </h3>
-                    <button
-                      className="text-gray-400 hover:text-red-600"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDeleteScenario(scenario.slug);
-                      }}
-                      title="Usuń scenariusz"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                  <p className="text-xs text-gray-500 line-clamp-2">
-                    {scenario.description || "Brak opisu"}
-                  </p>
-                  <div className="mt-2 text-xs text-gray-400">
-                    {scenario.nodes?.length || 0} kroków
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          ))}
         </div>
       </EditorCard>
-    </div>
+    </EditorCard>
   );
 };
