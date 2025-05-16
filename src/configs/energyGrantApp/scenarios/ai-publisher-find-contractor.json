@@ -1,7 +1,7 @@
 {
   "id": "find-contractor",
   "slug": "find-contractor",
-  "workspaceSlug": "workspace-energygrant",
+  "workspaceSlug": "workspace-ai-publisher",
   "name": "Wyszukiwarka Wykonawców",
   "description": "Formularz zlecenia do publikacji na giełdzie wykonawców",
   "icon": "wrench",
