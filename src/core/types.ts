@@ -1,4 +1,3 @@
-
 export interface NodeConfig {
   slug: string;
   label: string;
@@ -55,7 +54,9 @@ export interface AppConfig {
   tplDir: string;
   workspaces: WorkspaceConfig[];
   scenarios: ScenarioConfig[];
-
+  // Nowe pola dla domyślnego workspace i scenariusza
+  defaultWorkspace?: string;
+  defaultScenario?: string;
 }
 
 export interface TemplateComponentProps<T = any> {

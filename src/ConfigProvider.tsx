@@ -83,6 +83,7 @@ export const getConfigIdFromURL = (path: string) =>
 const configCache = new Map<string, Promise<AppConfig>>();
 
 // Load JSON configs
+// Fragment funkcji loadJsonConfigs w ConfigProvider.tsx
 export const loadJsonConfigs = async (slug: string): Promise<AppConfig> => {
   if (configCache.has(slug)) return configCache.get(slug)!;
 
@@ -133,13 +134,15 @@ export const loadJsonConfigs = async (slug: string): Promise<AppConfig> => {
         loadItems<ScenarioConfig>(app.scenarios || [], "scenarios"),
       ]);
 
-      // Return complete config
+      // Return complete config with defaultWorkspace and defaultScenario if provided
       return {
         name: app.name || "Aplikacja",
         description: app.description || "",
         tplDir: app.tplDir || "default",
         workspaces: workspaces as WorkspaceConfig[],
         scenarios: scenarios as ScenarioConfig[],
+        defaultWorkspace: app.defaultWorkspace || undefined,
+        defaultScenario: app.defaultScenario || undefined
       } as AppConfig;
     } catch (error) {
       console.error("Error loading config:", error);

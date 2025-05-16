@@ -1,6 +1,6 @@
 // src/AppRouter.tsx
-import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import React, { useMemo } from "react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useConfig } from "./ConfigProvider";
 import {
   WorkspaceLayout,
@@ -10,16 +10,54 @@ import {
 
 const AppRouter: React.FC = () => {
   const { config, configId } = useConfig();
+  const location = useLocation();
+
   if (!config || !configId) return null;
-  const defaultWorkspace = config.workspaces[0]?.slug;
+
+  // Wybierz domyślny workspace (użyj defaultWorkspace z konfiguracji lub pierwszy workspace z listy)
+  const defaultWorkspace =
+    config.defaultWorkspace || config.workspaces[0]?.slug;
+
+  // Funkcja do ustalania domyślnej ścieżki bazowej na podstawie configId
+  const getDefaultPath = useMemo(() => {
+    // Podstawowa ścieżka do workspace
+    let basePath = `/${configId}/${defaultWorkspace}`;
+
+    // Jeśli podano domyślny scenariusz, sprawdź czy istnieje i należy do domyślnego workspace
+    if (config.defaultScenario) {
+      const defaultScenario = config.scenarios.find(
+        (s) =>
+          s.slug === config.defaultScenario &&
+          s.workspaceSlug === defaultWorkspace
+      );
+
+      if (defaultScenario) {
+        // Dodaj domyślny scenariusz do ścieżki
+        basePath = `${basePath}/${defaultScenario.slug}/0`;
+      }
+    }
+
+    return basePath;
+  }, [configId, config, defaultWorkspace]);
+
+  // Sprawdź, czy jesteśmy dokładnie na ścieżce /:configId
+  // Jeśli tak, to musimy przekierować do domyślnej ścieżki
+  const shouldRedirectToDefault = location.pathname === `/${configId}`;
 
   return (
     <Routes>
       <Route path="/" element={<Navigate to={`/${configId}`} replace />} />
+
+      {/* Przekieruj z "/:configId" na domyślną ścieżkę */}
       <Route
         path="/:configId"
-        element={<Navigate to={`/${configId}/${defaultWorkspace}`} replace />}
+        element={
+          shouldRedirectToDefault ? (
+            <Navigate to={getDefaultPath} replace />
+          ) : null
+        }
       />
+
       <Route path="/:configId/:workspaceSlug" element={<WorkspaceLayout />}>
         <Route index element={<WorkspaceOverview />} />
         <Route path=":scenarioSlug">
