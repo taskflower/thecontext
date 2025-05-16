@@ -1,10 +1,9 @@
 // src/components/WorkspaceLayout.tsx
-import { Suspense, memo } from "react";
+import React, { Suspense, memo } from "react";
 import { useParams, Outlet } from "react-router-dom";
 import { useConfig } from "@/ConfigProvider";
 import { ThemeProvider } from "@/themes/ThemeContext";
 import Loading from "./Loading";
-import React from "react";
 
 const WorkspaceLayout = memo(() => {
   const { config, preload } = useConfig();
@@ -20,15 +19,19 @@ const WorkspaceLayout = memo(() => {
   const AppLayout = preload.layout(tpl, layoutFile) as React.ComponentType<any>;
 
   return (
-    <ThemeProvider value={tpl}>
-      {React.createElement(
-        AppLayout,
-        { context: { workspace } },
-        <Suspense fallback={<Loading message="Ładowanie zawartości…" />}>
-          <Outlet />
-        </Suspense>
-      )}
-    </ThemeProvider>
+    // Łapiemy lazy-ładowanie layoutu
+    <Suspense fallback={<Loading message="Ładowanie layoutu…" />}>
+      <ThemeProvider value={tpl}>
+        {React.createElement(
+          AppLayout,
+          { context: { workspace } },
+          // Łapiemy ładowanie zawartości w Outlet
+          <Suspense fallback={<Loading message="Ładowanie zawartości…" />}>
+            <Outlet />
+          </Suspense>
+        )}
+      </ThemeProvider>
+    </Suspense>
   );
 });
 

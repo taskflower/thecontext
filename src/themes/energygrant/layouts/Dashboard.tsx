@@ -1,11 +1,14 @@
-// src/components/DashboardLayout.tsx
-import { useMemo, useState } from "react";
+// src/themes/energygrant/layouts/Dashboard.tsx
+import React, { useMemo, useState } from "react";
 import { useFlow } from "@/core";
 import { useConfig } from "@/ConfigProvider";
 import { I } from "@/components";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAppNavigation } from "@/core/navigation";
 import { ChevronRight } from "lucide-react";
+import { useDarkMode } from "../utils/ThemeUtils";
+import { Footer } from "../common/Footer";
+
 
 interface LayoutContext {
   workspace?: { slug: string; name?: string };
@@ -23,6 +26,7 @@ const DashboardLayout: React.FC<Props> = ({ children, context }) => {
   const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
   const { toScenarioStep } = useAppNavigation();
   const navigate = useNavigate();
+  const { darkMode } = useDarkMode();
 
   const userRole = useMemo(
     () => get("user-data")?.role ?? "beneficjent",
@@ -67,8 +71,8 @@ const DashboardLayout: React.FC<Props> = ({ children, context }) => {
     const active = slug ? slug === activeScenario : !activeScenario;
     const classes = `w-full flex items-center justify-between px-4 py-3 text-sm rounded-lg transition-colors ${
       active
-        ? "bg-green-50 text-green-700 border border-green-100"
-        : "text-gray-700 hover:bg-gray-50 hover:text-green-600"
+        ? (darkMode ? "bg-green-900 text-green-400 border border-green-800" : "bg-green-50 text-green-700 border border-green-100")
+        : (darkMode ? "text-gray-300 hover:bg-gray-800 hover:text-green-400" : "text-gray-700 hover:bg-gray-50 hover:text-green-600")
     }`;
     return (
       <button onClick={() => handleNav(slug)} className={classes}>
@@ -77,13 +81,15 @@ const DashboardLayout: React.FC<Props> = ({ children, context }) => {
             <I
               name={icon}
               className={`${
-                active ? "text-green-600" : "text-gray-400"
+                active 
+                  ? (darkMode ? "text-green-400" : "text-green-600") 
+                  : (darkMode ? "text-gray-500" : "text-gray-400")
               } w-4 h-4`}
             />
           )}
           <span className="ml-3 font-medium">{label}</span>
         </div>
-        {active && <ChevronRight className="h-4 w-4 text-green-600" />}
+        {active && <ChevronRight className={`h-4 w-4 ${darkMode ? "text-green-400" : "text-green-600"}`} />}
       </button>
     );
   };
@@ -100,35 +106,38 @@ const DashboardLayout: React.FC<Props> = ({ children, context }) => {
   if (!workspaceSlug) return null;
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <aside className="sticky top-0 h-screen w-80 bg-white border-r border-gray-200 hidden md:flex md:flex-col shadow-sm overflow-y-auto">
-        <header className="flex-shrink-0 px-6 py-5 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-green-700">
+    <div className={`flex min-h-screen ${darkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
+      {/* Lewy panel boczny */}
+      <aside className={`sticky top-0 h-screen w-80 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-r shadow-sm hidden md:flex md:flex-col overflow-y-auto`}>
+        <header className={`flex-shrink-0 px-6 py-5 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+          <h2 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-green-700'}`}>
             {context?.workspace?.name ?? "Program Dotacji Energetycznych"}
           </h2>
-          <p className="text-xs text-gray-500 mt-1">Panel {userRole}</p>
+          <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>Panel {userRole}</p>
         </header>
         <div className="flex-grow overflow-y-auto">
           <Navigation />
         </div>
-        <footer className="flex-shrink-0 p-4 border-t border-gray-200">
-          <p className="text-xs text-green-700 bg-green-50 p-3 rounded-lg border border-green-100">
+        <footer className={`flex-shrink-0 p-4 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+          <p className={`text-xs ${darkMode ? 'text-green-600 bg-gray-800 border-green-800' : 'text-green-700 bg-green-50 border-green-100'} p-3 rounded-lg border`}>
             Potrzebujesz pomocy? Skontaktuj się z operatorem programu.
           </p>
         </footer>
       </aside>
+
+      {/* Główna zawartość */}
       <div className="flex-1 flex flex-col">
-        <header className="bg-white shadow-sm border-b border-gray-200 md:hidden">
+        <header className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-sm border-b md:hidden`}>
           <div className="flex items-center justify-between px-4 py-3">
             <div>
-              <h2 className="text-lg font-semibold text-green-700">
+              <h2 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-green-700'}`}>
                 {context?.workspace?.name ?? "Program Dotacji Energetycznych"}
               </h2>
-              <p className="text-xs text-gray-500">Panel {userRole}</p>
+              <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Panel {userRole}</p>
             </div>
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="p-2 rounded-md text-gray-500 hover:text-green-600 hover:bg-gray-100"
+              className={`p-2 rounded-md ${darkMode ? 'text-gray-300 hover:text-white hover:bg-gray-700' : 'text-gray-500 hover:text-green-600 hover:bg-gray-100'}`}
             >
               <I name={mobileOpen ? "x" : "menu"} />
             </button>
@@ -140,9 +149,7 @@ const DashboardLayout: React.FC<Props> = ({ children, context }) => {
             {children}
           </div>
         </main>
-        <div className="bg-white border-t border-gray-200 py-4 text-center text-xs text-gray-500">
-          © 2025 Program Dotacji Energetycznych. Wszystkie prawa zastrzeżone.
-        </div>
+        <Footer darkMode={darkMode} />
       </div>
     </div>
   );
