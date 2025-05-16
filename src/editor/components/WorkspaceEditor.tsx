@@ -23,7 +23,7 @@ export const WorkspaceEditor: React.FC<WorkspaceEditorProps> = ({
   onEditScenario,
   onDeleteScenario,
 }) => {
-  const [tab, setTab] = useState<"form"|"widgets"|"json">("form");
+  const [tab, setTab] = useState<"form" | "widgets" | "json">("form");
 
   const schema = {
     type: "object",
@@ -33,7 +33,7 @@ export const WorkspaceEditor: React.FC<WorkspaceEditorProps> = ({
       icon: {
         type: "string",
         title: "Ikona",
-        enum: ["search","chart","info","money","briefcase","calculator"],
+        enum: ["search", "chart", "info", "money", "briefcase", "calculator"],
       },
       tplDir: { type: "string", title: "Katalog szablonu" },
     },
@@ -45,14 +45,14 @@ export const WorkspaceEditor: React.FC<WorkspaceEditorProps> = ({
       <EditorTabs
         activeTab={tab}
         options={[
-          {id:"form",label:"Podstawowe"},
-          {id:"widgets",label:"Widgety"},
-          {id:"json",label:"JSON"},
+          { id: "form", label: "Podstawowe" },
+          { id: "widgets", label: "Widgety" },
+          { id: "json", label: "JSON" },
         ]}
-        onChange={t => setTab(t as any)}
+        onChange={(t) => setTab(t as any)}
       />
       <div className="p-4">
-        {tab==="form" && (
+        {tab === "form" && (
           <FormEditor
             schema={schema}
             formData={{
@@ -64,31 +64,38 @@ export const WorkspaceEditor: React.FC<WorkspaceEditorProps> = ({
             onChange={onUpdate}
           />
         )}
-        {tab==="widgets" && (
+        {tab === "widgets" && (
           <div className="text-gray-500 italic">Tu widgety…</div>
         )}
-        {tab==="json" && (
-          <JsonEditor
-            value={workspace}
-            onChange={onUpdate}
-          />
-        )}
+        {tab === "json" && <JsonEditor value={workspace} onChange={onUpdate} />}
       </div>
 
       <EditorCard title="Scenariusze">
         <div className="flex justify-end p-4">
-          <button onClick={onAddScenario} className="text-blue-600 hover:underline">
+          <button
+            onClick={onAddScenario}
+            className="text-blue-600 hover:underline"
+          >
             Dodaj scenariusz
           </button>
         </div>
         <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-          {scenarios.map(s => (
-            <div key={s.slug} className="border p-3 rounded flex justify-between">
-              <div onClick={() => onEditScenario(s.slug)} className="cursor-pointer">
+          {scenarios.map((s) => (
+            <div
+              key={s.slug}
+              className="border p-3 rounded flex justify-between"
+            >
+              <div
+                onClick={() => onEditScenario(s.slug)}
+                className="cursor-pointer"
+              >
                 <h4 className="font-medium">{s.name}</h4>
                 <p className="text-xs text-gray-500">{s.description}</p>
               </div>
-              <button onClick={() => onDeleteScenario(s.slug)} className="text-red-600">
+              <button
+                onClick={() => onDeleteScenario(s.slug)}
+                className="text-red-600"
+              >
                 Usuń
               </button>
             </div>
