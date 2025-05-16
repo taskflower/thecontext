@@ -1,12 +1,7 @@
-// src/themes/default/commons/form/FieldRenderer.tsx
+// src/themes/default/components/commons/form/FieldRenderer.tsx
 import React from "react";
-import TagsField from "./TagsField";
-import CheckboxField from "./CheckboxField";
-import TextField from "./TextField";
-import NumberField from "./NumberField";
-import TextareaField from "./TextareaField";
-import SelectField from "./SelectField";
 import { FieldSchema } from "./fieldTypes";
+
 
 interface FieldRendererProps {
   name: string;
@@ -15,6 +10,14 @@ interface FieldRendererProps {
   error?: string;
   handleChange: (name: string, value: any) => void;
   nodeSlug: string;
+  components: {
+    TagsField: React.FC<any>;
+    CheckboxField: React.FC<any>;
+    TextField: React.FC<any>;
+    NumberField: React.FC<any>;
+    TextareaField: React.FC<any>;
+    SelectField: React.FC<any>;
+  };
 }
 
 const FieldRenderer: React.FC<FieldRendererProps> = ({
@@ -24,7 +27,17 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
   error,
   handleChange,
   nodeSlug,
+  components,
 }) => {
+  const {
+    TagsField,
+    CheckboxField,
+    TextField,
+    NumberField,
+    TextareaField,
+    SelectField,
+  } = components;
+
   const common = {
     fieldName: name,
     fieldSchema,

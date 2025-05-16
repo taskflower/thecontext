@@ -1,6 +1,22 @@
 // src/themes/default/components/FormStep.tsx
+import React from "react";
 import { TemplateComponentProps, useFormSchema } from "@/core";
 import FieldRenderer from "../commons/form/FieldRenderer";
+import TagsField from "../commons/form/TagsField";
+import CheckboxField from "../commons/form/CheckboxField";
+import TextField from "../commons/form/TextField";
+import NumberField from "../commons/form/NumberField";
+import TextareaField from "../commons/form/TextareaField";
+import SelectField from "../commons/form/SelectField";
+
+const fieldComponents = {
+  TagsField,
+  CheckboxField,
+  TextField,
+  NumberField,
+  TextareaField,
+  SelectField,
+};
 
 interface EnhancedFormStepProps extends TemplateComponentProps {
   jsonSchema?: any;
@@ -53,6 +69,7 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
             error={errors[name]}
             handleChange={handleChange}
             nodeSlug={nodeSlug}
+            components={fieldComponents}
           />
         ))}
         {hasRequiredFields && (
