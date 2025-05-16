@@ -12,7 +12,9 @@ interface NodeEditorProps {
 }
 
 export const NodeEditor: React.FC<NodeEditorProps> = ({ node, onUpdate }) => {
-  const [activeTab, setActiveTab] = useState<"basic" | "attrs" | "schema" | "json">("basic");
+  const [activeTab, setActiveTab] = useState<
+    "basic" | "attrs" | "schema" | "json"
+  >("basic");
 
   const stepTemplates = [
     "FormStep",
@@ -33,9 +35,19 @@ export const NodeEditor: React.FC<NodeEditorProps> = ({ node, onUpdate }) => {
               properties: {
                 label: { type: "string", title: "Etykieta kroku" },
                 slug: { type: "string", title: "Identyfikator kroku" },
-                tplFile: { type: "string", title: "Szablon kroku", enum: stepTemplates },
-                contextSchemaPath: { type: "string", title: "Ścieżka schematu kontekstu" },
-                contextDataPath: { type: "string", title: "Ścieżka danych kontekstu" },
+                tplFile: {
+                  type: "string",
+                  title: "Szablon kroku",
+                  enum: stepTemplates,
+                },
+                contextSchemaPath: {
+                  type: "string",
+                  title: "Ścieżka schematu kontekstu",
+                },
+                contextDataPath: {
+                  type: "string",
+                  title: "Ścieżka danych kontekstu",
+                },
               },
             }}
             formData={node}
@@ -48,8 +60,14 @@ export const NodeEditor: React.FC<NodeEditorProps> = ({ node, onUpdate }) => {
         let schema: any = { type: "object", properties: base };
 
         if (node.tplFile === "FormStep") {
-          schema.properties.submitLabel = { type: "string", title: "Etykieta przycisku" };
-          schema.properties.jsonSchema = { type: "object", title: "JSON Schema" };
+          schema.properties.submitLabel = {
+            type: "string",
+            title: "Etykieta przycisku",
+          };
+          schema.properties.jsonSchema = {
+            type: "object",
+            title: "JSON Schema",
+          };
         } else if (node.tplFile === "ApiStep") {
           schema.properties = {
             ...base,
@@ -70,8 +88,14 @@ export const NodeEditor: React.FC<NodeEditorProps> = ({ node, onUpdate }) => {
             items: { type: "string" },
           };
         } else if (node.tplFile === "LlmStep") {
-          schema.properties.autoStart = { type: "boolean", title: "Auto Start" };
-          schema.properties.userMessage = { type: "string", title: "Wiadomość użytkownika" };
+          schema.properties.autoStart = {
+            type: "boolean",
+            title: "Auto Start",
+          };
+          schema.properties.userMessage = {
+            type: "string",
+            title: "Wiadomość użytkownika",
+          };
         }
 
         return (
@@ -100,7 +124,10 @@ export const NodeEditor: React.FC<NodeEditorProps> = ({ node, onUpdate }) => {
                     },
                     itemType: { type: "string", title: "Typ elementu" },
                     itemTitle: { type: "string", title: "Tytuł elementu" },
-                    contentPath: { type: "string", title: "Ścieżka zawartości" },
+                    contentPath: {
+                      type: "string",
+                      title: "Ścieżka zawartości",
+                    },
                   },
                 },
               },

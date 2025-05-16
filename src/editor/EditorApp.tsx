@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import { FirebaseAdapter } from "@/provideDB/firebase/FirebaseAdapter";
 import { AppConfig } from "@/core/types";
 import ConfigEditor from "./ConfigEditor";
 import { Loading } from "@/components";
+import { useParams } from "react-router-dom";
 
 export const EditorApp: React.FC = () => {
   const { configId } = useParams<{ configId: string }>();
-  const nav = useNavigate();
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [cfg, setCfg] = useState<AppConfig | null>(null);
