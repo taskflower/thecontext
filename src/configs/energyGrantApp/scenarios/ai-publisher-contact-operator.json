@@ -1,6 +1,6 @@
 {
-  "id": "contact-operator",
-  "slug": "contact-operator",
+  "id": "ai-publisher-contact-operator",
+  "slug": "ai-publisher-contact-operator",
   "workspaceSlug": "workspace-ai-publisher",
   "name": "Kontakt z Operatorem",
   "description": "Kalkulator zdolności, formularz zgłoszeniowy i chat z operatorem",

@@ -21,9 +21,30 @@
     },
     {
       "id": "workspace-operator"
+    },
+    {
+      "id": "workspace-ai-publisher"
     }
   ],
   "scenarios": [
+    {
+      "id": "ai-publisher-contact-operator"
+    },
+    {
+      "id": "ai-publisher-contractor-market"
+    },
+    {
+      "id": "ai-publisher-find-auditor"
+    },
+    {
+      "id": "ai-publisher-find-contractor"
+    },
+    {
+      "id": "ai-publisher-portfolio"
+    },
+    {
+      "id": "find-contractor"
+    },
     {
       "id": "user-registration"
     },

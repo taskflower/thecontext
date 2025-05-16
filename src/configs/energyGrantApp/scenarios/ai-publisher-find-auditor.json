@@ -1,6 +1,6 @@
 {
-    "id": "find-auditor",
-    "slug": "find-auditor",
+    "id": "ai-publisher-find-auditor",
+    "slug": "ai-publisher-find-auditor",
     "workspaceSlug": "workspace-ai-publisher",
     "name": "Wyszukiwarka Audytorów",
     "description": "Formularz zapotrzebowania na audyt energetyczny",
