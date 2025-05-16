@@ -1,6 +1,7 @@
 export interface NodeConfig {
   slug: string;
   label: string;
+  description?: string;
   contextSchemaPath: string;
   contextDataPath: string;
   tplFile: string;

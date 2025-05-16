@@ -7,7 +7,6 @@ import {
   PlusCircle, 
   Trash2, 
   Layers, 
-  FileText, 
   Settings, 
   Building2,
   Box

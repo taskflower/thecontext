@@ -1,13 +1,13 @@
 // src/themes/default/widgets/WidgetWrapperApi.tsx
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/auth/useAuth';
-import { useFlow } from '@/core';
-import { Loading } from '@/components';
-import { RefreshCw } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "@/auth/useAuth";
+import { useFlow } from "@/core";
+import { Loading } from "@/components";
+import { RefreshCw } from "lucide-react";
 
 export interface WidgetWrapperApiProps<T> {
   apiEndpoint: string;
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   payloadDataPath?: string;
   responseDataPath?: string; // Ścieżka, gdzie zapisać odpowiedź w kontekście
   responseTransform?: (response: any) => T;
@@ -20,17 +20,17 @@ export interface WidgetWrapperApiProps<T> {
 
 export default function WidgetWrapperApi<T>({
   apiEndpoint,
-  method = 'GET',
+  method = "GET",
   payloadDataPath,
   responseDataPath,
   responseTransform = (res) => res,
-  transformErrors = (err) => err.message || 'Wystąpił nieznany błąd',
+  transformErrors = (err) => err.message || "Wystąpił nieznany błąd",
   widget: WrappedWidget,
   widgetProps = {},
-  mockData = null,
+
   skipAuth = false,
 }: WidgetWrapperApiProps<T>) {
-  const { getToken, user, isAuthenticated } = useAuth();
+  const { getToken, user } = useAuth();
   const { get, set } = useFlow();
   const [data, setData] = useState<T | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -40,127 +40,138 @@ export default function WidgetWrapperApi<T>({
   const fetchData = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       // Sprawdzamy autentykację tylko jeśli nie pomijamy jej
       if (!skipAuth) {
         const token = await getToken();
         // Sprawdzamy token i użytkownika
         if (!token) {
-          console.warn('[WidgetWrapperApi] Brak tokenu autoryzacji');
-          
-          // Jeśli mamy dane mockowe, użyjmy ich zamiast wyrzucać błąd
-          if (mockData) {
-            console.log('[WidgetWrapperApi] Używam danych mockowych zamiast API');
-            setData(mockData);
-            if (responseDataPath) {
-              set(responseDataPath, mockData);
-            }
-            setIsLoading(false);
-            return;
-          }
-          
-          throw new Error('Brak tokenu autoryzacji. Zaloguj się, aby korzystać z tej funkcji.');
+          console.warn("[WidgetWrapperApi] Brak tokenu autoryzacji");
+
+          throw new Error(
+            "Brak tokenu autoryzacji. Zaloguj się, aby korzystać z tej funkcji."
+          );
         }
-        
+
         if (!user) {
-          console.warn('[WidgetWrapperApi] Brak zalogowanego użytkownika');
-          
-          // Podobnie jak wyżej, użyjmy danych mockowych jeśli są dostępne
-          if (mockData) {
-            console.log('[WidgetWrapperApi] Używam danych mockowych zamiast API');
-            setData(mockData);
-            if (responseDataPath) {
-              set(responseDataPath, mockData);
-            }
-            setIsLoading(false);
-            return;
-          }
-          
-          throw new Error('Użytkownik nie zalogowany. Zaloguj się, aby korzystać z tej funkcji.');
+          console.warn("[WidgetWrapperApi] Brak zalogowanego użytkownika");
+
+          throw new Error(
+            "Użytkownik nie zalogowany. Zaloguj się, aby korzystać z tej funkcji."
+          );
         }
       }
-      
+
       const payload = payloadDataPath ? get(payloadDataPath) : undefined;
-      const url = apiEndpoint.startsWith('http') ? apiEndpoint : `${import.meta.env.VITE_API_URL}${apiEndpoint}`;
-      
+      const url = apiEndpoint.startsWith("http")
+        ? apiEndpoint
+        : `${import.meta.env.VITE_API_URL}${apiEndpoint}`;
+
       console.log(`[WidgetWrapperApi] Wysyłam zapytanie ${method} do ${url}`);
       console.log(`[WidgetWrapperApi] Payload:`, payload);
-      
+
       const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       };
-      
+
       // Dodaj token autoryzacji, jeśli skipAuth nie jest true
       if (!skipAuth) {
         const token = await getToken();
-        headers['Authorization'] = `Bearer ${token}`;
+        headers["Authorization"] = `Bearer ${token}`;
       }
-      
+
       const opts: RequestInit = {
         method,
         headers,
       };
-      
+
       // Dodaj body tylko dla odpowiednich metod HTTP
-      if (method !== 'GET' && method !== 'HEAD' && payload) {
+      if (method !== "GET" && payload) {
         opts.body = JSON.stringify(payload);
       }
-      
+
       const response = await fetch(url, opts);
-      
+
       if (!response.ok) {
-        console.error(`[WidgetWrapperApi] HTTP Error: ${response.status} ${response.statusText}`);
-        
+        console.error(
+          `[WidgetWrapperApi] HTTP Error: ${response.status} ${response.statusText}`
+        );
+
         // Próbujemy odczytać odpowiedź jako JSON, a jeśli się nie uda, używamy tekstu
         const errorBody = await response.json().catch(async () => {
           const text = await response.text();
           return { message: text || `Błąd HTTP ${response.status}` };
         });
-        
-        console.error('[WidgetWrapperApi] Error response:', errorBody);
-        throw new Error(errorBody.message || errorBody.error?.message || `Błąd HTTP ${response.status}`);
+
+        console.error("[WidgetWrapperApi] Error response:", errorBody);
+        throw new Error(
+          errorBody.message ||
+            errorBody.error?.message ||
+            `Błąd HTTP ${response.status}`
+        );
       }
-      
+
       let json;
       try {
         json = await response.json();
         console.log(`[WidgetWrapperApi] Otrzymano odpowiedź:`, json);
       } catch (jsonError) {
-        console.error('[WidgetWrapperApi] Error parsing JSON response:', jsonError);
-        throw new Error('Błąd parsowania odpowiedzi JSON');
+        console.error(
+          "[WidgetWrapperApi] Error parsing JSON response:",
+          jsonError
+        );
+        throw new Error("Błąd parsowania odpowiedzi JSON");
       }
-      
+
       // Transformacja danych
       let transformed;
       try {
         transformed = responseTransform(json);
         console.log(`[WidgetWrapperApi] Dane po transformacji:`, transformed);
-      } catch (transformError) {
-        console.error('[WidgetWrapperApi] Error in responseTransform:', transformError);
-        throw new Error(`Błąd transformacji danych: ${transformError.message}`);
+      } catch (transformError: unknown) {
+        if (transformError instanceof Error) {
+          console.error(
+            "[WidgetWrapperApi] Error in responseTransform:",
+            transformError
+          );
+          throw new Error(
+            `Błąd transformacji danych: ${transformError.message}`
+          );
+        } else {
+          console.error(
+            "[WidgetWrapperApi] Unknown error in responseTransform:",
+            transformError
+          );
+          throw new Error("Unknown error");
+        }
       }
-      
+
       setData(transformed);
-      
+
       // Zapisz dane w kontekście, jeśli podano ścieżkę
       if (responseDataPath) {
-        console.log(`[WidgetWrapperApi] Zapisuję dane w kontekście pod ścieżką: ${responseDataPath}`);
+        console.log(
+          `[WidgetWrapperApi] Zapisuję dane w kontekście pod ścieżką: ${responseDataPath}`
+        );
         set(responseDataPath, transformed);
       }
     } catch (err: any) {
       console.error(`[WidgetWrapperApi] Error:`, err);
-      
+
       // Bezpieczne wywołanie transformErrors
       try {
-        if (typeof transformErrors === 'function') {
+        if (typeof transformErrors === "function") {
           setError(transformErrors(err));
         } else {
-          setError(err.message || 'Wystąpił nieznany błąd');
+          setError(err.message || "Wystąpił nieznany błąd");
         }
       } catch (transformErr) {
-        console.error('[WidgetWrapperApi] Error in transformErrors:', transformErr);
-        setError(err.message || 'Wystąpił nieznany błąd');
+        console.error(
+          "[WidgetWrapperApi] Error in transformErrors:",
+          transformErr
+        );
+        setError(err.message || "Wystąpił nieznany błąd");
       }
     } finally {
       setIsLoading(false);
@@ -174,21 +185,15 @@ export default function WidgetWrapperApi<T>({
         setAuthChecked(true);
         return;
       }
-      
+
       try {
-        // Używamy isAuthenticated z useAuth() jeśli istnieje
-        const authStatus = typeof isAuthenticated === 'function' 
-          ? await isAuthenticated() 
-          : (!!user && !!(await getToken()));
-        
-        console.log(`[WidgetWrapperApi] Authentication status:`, authStatus);
         setAuthChecked(true);
       } catch (authErr) {
-        console.error('[WidgetWrapperApi] Auth check error:', authErr);
+        console.error("[WidgetWrapperApi] Auth check error:", authErr);
         setAuthChecked(true);
       }
     };
-    
+
     checkAuth();
   }, []);
 
@@ -207,7 +212,7 @@ export default function WidgetWrapperApi<T>({
       </div>
     );
   }
-  
+
   // Stan błędu
   if (error) {
     return (
@@ -222,13 +227,14 @@ export default function WidgetWrapperApi<T>({
             <RefreshCw className="w-3 h-3 mr-1" />
             Spróbuj ponownie
           </button>
-          
+
           {/* Jeśli błąd dotyczy autentykacji, dodajemy przycisk do logowania */}
-          {error.toLowerCase().includes('token') || error.toLowerCase().includes('zalog') ? (
+          {error.toLowerCase().includes("token") ||
+          error.toLowerCase().includes("zalog") ? (
             <button
               onClick={() => {
                 // Przekieruj do strony logowania lub wywołaj funkcję logowania
-                const loginUrl = '/login'; // Dostosuj do swojej aplikacji
+                const loginUrl = "/login"; // Dostosuj do swojej aplikacji
                 window.location.href = loginUrl;
               }}
               className="px-3 py-1.5 rounded text-sm bg-black text-white hover:bg-gray-800"
@@ -240,12 +246,12 @@ export default function WidgetWrapperApi<T>({
       </div>
     );
   }
-  
+
   // Jeśli mamy dane, renderujemy widget
   if (data !== null) {
     return <WrappedWidget data={data} {...widgetProps} />;
   }
-  
+
   // Stan, gdy nie ma danych ani błędu, ale nie ładujemy (może wystąpić na początku)
   return (
     <div className="p-4 bg-gray-50 text-gray-600 rounded border border-gray-200 text-sm">

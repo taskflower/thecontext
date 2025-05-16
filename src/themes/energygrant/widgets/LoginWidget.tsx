@@ -1,5 +1,4 @@
 // src/themes/energygrant/widgets/LoginWidget.tsx
-import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDarkMode, useAuth } from "../utils/ThemeUtils";
 
@@ -10,8 +9,6 @@ type LoginWidgetProps = {
 };
 
 export default function LoginWidget({ 
-  title = "e-operator", 
-  subtitle = "Program Dotacji Energetycznych",
   redirectUrl = "/dashboard"
 }: LoginWidgetProps) {
   const { darkMode } = useDarkMode();

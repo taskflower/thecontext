@@ -1,6 +1,5 @@
 // Zaktualizowany src/editor/ConfigEditor.tsx
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { FileCog, FileText, AlertTriangle } from "lucide-react";
 import { FirebaseAdapter } from "@/provideDB/firebase/FirebaseAdapter";
 import { AppConfig, WorkspaceConfig, ScenarioConfig } from "@/core/types";
@@ -15,16 +14,16 @@ type EditorSection = "app" | "workspace" | "scenario";
 
 // Interfejs dla obiektu edycji
 interface EditorState {
-  section: EditorSection;
-  configId: string;
-  selectedWorkspace?: string;
-  selectedScenario?: string;
-  config: AppConfig | null;
-  workspaces: WorkspaceConfig[];
-  scenarios: ScenarioConfig[];
-  isDirty: boolean;
-  error: string | null;
-}
+    section: "app" | "workspace" | "scenario";
+    configId: string;
+    selectedWorkspace?: string;
+    selectedScenario?: string;
+    config: AppConfig | null;
+    workspaces: WorkspaceConfig[];
+    scenarios: ScenarioConfig[];
+    isDirty: boolean;
+    error: string | null;
+  }
 
 // Propsy dla ConfigEditor
 interface ConfigEditorProps {
@@ -36,7 +35,7 @@ export const ConfigEditor: React.FC<ConfigEditorProps> = ({
   initialConfig,
   configId,
 }) => {
-  const navigate = useNavigate();
+  
 
   // Stan edytora, inicjalizowany z propsów
   const [state, setState] = useState<EditorState>({

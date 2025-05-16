@@ -66,6 +66,8 @@ export const ScenarioEditor: React.FC<ScenarioEditorProps> = ({
       description: "Opis nowego kroku",
       tplFile: "FormStep",
       order: maxOrder + 1,
+      contextSchemaPath: "",
+      contextDataPath: "",
       attrs: {
         title: `Nowy krok ${nodes.length + 1}`,
         description: "Opis nowego kroku",
@@ -214,7 +216,6 @@ export const ScenarioEditor: React.FC<ScenarioEditorProps> = ({
                 name: scenario.name,
                 description: scenario.description,
                 icon: scenario.icon,
-                tplDir: scenario.tplDir,
               }}
               onChange={handleFormChange}
             />

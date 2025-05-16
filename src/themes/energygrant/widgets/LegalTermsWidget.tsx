@@ -1,5 +1,4 @@
 // src/themes/energygrant/widgets/LegalTermsWidget.tsx
-import React from 'react';
 import { useFlow } from "@/core";
 import { I } from "@/components";
 

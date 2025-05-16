@@ -9,7 +9,6 @@ const TagsField: React.FC<FieldProps> = ({
   fieldValue,
   fieldError,
   handleChange,
-  nodeSlug,
 }) => {
   const { title, required, description, options } = fieldSchema;
   const [newTag, setNewTag] = useState("");

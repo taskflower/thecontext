@@ -15,23 +15,6 @@ const Public: React.FC<PublicProps> = ({
   subtitle = "Program Dotacji Energetycznych",
 }) => {
   const { darkMode, toggleDarkMode } = useDarkMode();
-  const [windowHeight, setWindowHeight] = useState(0);
-
-  // Update window height on mount and resize
-  useEffect(() => {
-    const updateHeight = () => {
-      setWindowHeight(window.innerHeight);
-    };
-    
-    // Set initial height
-    updateHeight();
-    
-    // Add event listener for window resize
-    window.addEventListener('resize', updateHeight);
-    
-    // Clean up event listener
-    return () => window.removeEventListener('resize', updateHeight);
-  }, []);
 
   return (
     <div
@@ -44,28 +27,23 @@ const Public: React.FC<PublicProps> = ({
       {/* Tło z elementami energetycznymi - zmodyfikowane do kształtu połówki trapezu */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="fixed top-0 right-0 w-1/2 h-full opacity-20">
-        <svg 
-            width="100%" 
-            height="100%" 
-            preserveAspectRatio="none" 
-            viewBox="0 0 100 100" 
+          <svg
+            width="100%"
+            height="100%"
+            preserveAspectRatio="none"
+            viewBox="0 0 100 100"
             xmlns="http://www.w3.org/2000/svg"
           >
-            {/* Pierwszy trapez - najdalej od krawędzi, najjaśniejszy */}
             <path
               d="M120,-20 L120,120 L30,120 L60,-20 Z"
               fill={darkMode ? "#059669" : "#10b981"}
               opacity="0.15"
             />
-            
-            {/* Drugi trapez - pośrodku */}
             <path
               d="M140,-20 L140,120 L50,120 L80,-20 Z"
               fill={darkMode ? "#047857" : "#34d399"}
               opacity="0.2"
             />
-            
-            {/* Trzeci trapez - najbliżej krawędzi, najciemniejszy */}
             <path
               d="M160,-20 L160,120 L70,120 L100,-20 Z"
               fill={darkMode ? "#065f46" : "#059669"}

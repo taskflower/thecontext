@@ -37,7 +37,7 @@ export default function ApiStep<T>({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorDetails, setErrorDetails] = useState<any>(null);
-  const [showErrorDetails, setShowErrorDetails] = useState(false);
+  const [, setShowErrorDetails] = useState(false);
   const [result, setResult] = useState<T | null>(null);
   const [started, setStarted] = useState(autoStart);
 

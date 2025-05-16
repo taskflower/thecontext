@@ -23,7 +23,7 @@ export default function LlmStep<T>({
 }: LlmStepProps<T>) {
   const { getToken, user } = useAuth();
 
-  const { isLoading, error, result, started, startLlmProcess, setStarted } =
+  const { isLoading, error, result, started, startLlmProcess } =
     useLlm<T>({
       schema,
       jsonSchema,

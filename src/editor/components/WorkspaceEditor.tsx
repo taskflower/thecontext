@@ -1,6 +1,6 @@
 // src/editor/components/WorkspaceEditor.tsx
 import React, { useState } from "react";
-import { WorkspaceConfig, ScenarioConfig } from "@/core/types";
+import { WorkspaceConfig, ScenarioConfig, TemplateSettings } from "@/core/types";
 import { JsonEditor } from "./common/JsonEditor";
 import { FormEditor } from "./common/FormEditor";
 import { Widget } from "./workspace/Widget";
@@ -64,7 +64,7 @@ export const WorkspaceEditor: React.FC<WorkspaceEditorProps> = ({
   
   // Dodaj widget do workspace
   const addWidget = () => {
-    const templateSettings = workspace.templateSettings || { widgets: [] };
+    const templateSettings = workspace.templateSettings || { widgets: [], layoutFile: '' };
     const widgets = templateSettings.widgets || [];
     
     const newWidget = {
@@ -76,16 +76,20 @@ export const WorkspaceEditor: React.FC<WorkspaceEditorProps> = ({
     };
     
     onUpdate({
-      templateSettings: {
-        ...templateSettings,
-        widgets: [...widgets, newWidget]
-      }
-    });
+        templateSettings: {
+          ...templateSettings,
+          layoutFile: templateSettings.layoutFile || '', 
+          widgets: [...widgets, newWidget]
+        }
+      });
   };
   
   // Aktualizuj widget
   const updateWidget = (index: number, updatedWidget: any) => {
-    const templateSettings = workspace.templateSettings || { widgets: [] };
+    const templateSettings = workspace.templateSettings || { 
+      widgets: [], 
+      layoutFile: 'Simple' // Dodać domyślną wartość layoutFile
+    };
     const widgets = templateSettings.widgets || [];
     
     const updatedWidgets = [...widgets];
@@ -94,6 +98,7 @@ export const WorkspaceEditor: React.FC<WorkspaceEditorProps> = ({
     onUpdate({
       templateSettings: {
         ...templateSettings,
+        layoutFile: templateSettings.layoutFile || 'Simple', 
         widgets: updatedWidgets
       }
     });
@@ -109,6 +114,7 @@ export const WorkspaceEditor: React.FC<WorkspaceEditorProps> = ({
     onUpdate({
       templateSettings: {
         ...templateSettings,
+        layoutFile: (templateSettings as TemplateSettings).layoutFile || 'Simple',
         widgets: updatedWidgets
       }
     });
@@ -185,7 +191,7 @@ export const WorkspaceEditor: React.FC<WorkspaceEditorProps> = ({
                 name: workspace.name,
                 description: workspace.description,
                 icon: workspace.icon,
-                tplDir: workspace.tplDir
+                tplDir: workspace.templateSettings?.tplDir || ''
               }}
               onChange={handleFormChange}
             />

@@ -1,9 +1,20 @@
 // src/editor/components/workspace/Widget.tsx
 import React, { useState } from "react";
-import { ChevronUp, ChevronDown, X, Edit, Save, Eye } from "lucide-react";
+import { ChevronUp, ChevronDown, X, Edit, Save } from "lucide-react";
 
 interface WidgetProps {
-  widget: any;
+  widget: {
+    title?: string;
+    tplFile: string;
+    colSpan?: number | string;
+    icon?: string;
+    data?: string;
+    contextDataPath?: string;
+    apiEndpoint?: string;
+    method?: string;
+    responseDataPath?: string;
+    widget?: string;
+  };
   index: number;
   onUpdate: (updatedWidget: any) => void;
   onDelete: () => void;
