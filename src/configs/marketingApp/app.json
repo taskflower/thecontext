@@ -2,6 +2,8 @@
   "name": "Analiza Marketingowa Strony",
   "description": "Analiza strony internetowej pod kątem przyszłych kampanii marketingowych",
   "tplDir": "default",
+  "defaultWorkspace": "workspace-website-analysis",
+  "defaultScenario": "scenario-website-analysis",
   "workspaces": [
     {
       "id": "workspace-website-analysis"

@@ -37,10 +37,13 @@ const ExporterTab: React.FC<ExporterTabProps> = ({ config }) => {
       addLog(`🚀 Rozpoczynam zapis konfiguracji "${config.name}"...`);
       const workspacesCount = config.workspaces.length;
       const scenariosCount = config.scenarios.length;
-      const nodesCount = config.scenarios.reduce((sum, s) => sum + s.nodes.length, 0);
+      const nodesCount = config.scenarios.reduce((sum, s) => sum + (s.nodes?.length || 0), 0);
       addLog(`📊 Statystyki: ${workspacesCount} workspace'ów, ${scenariosCount} scenariuszy, ${nodesCount} węzłów`);
       addLog(`📝 Zapis do Firestore pod ID "${configId}"…`);
 
+      // Clean the config object to remove undefined values
+      const cleanConfig = JSON.parse(JSON.stringify(config));
+      
       const options: SaveToDBOptions & { id: string } = {
         enabled: true,
         provider: 'firebase',
@@ -49,7 +52,8 @@ const ExporterTab: React.FC<ExporterTabProps> = ({ config }) => {
         id: configId!,  // Użycie slug jako ID dokumentu
         additionalInfo: { workspacesCount, scenariosCount, nodesCount }
       };
-      await dbProvider.saveData(options, config);
+      
+      await dbProvider.saveData(options, cleanConfig);
 
       addLog('✅ Zapis zakończony pomyślnie');
       setStatus('success');
