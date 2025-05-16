@@ -4,6 +4,8 @@ import { ScenarioConfig, NodeConfig } from "@/core/types";
 import { JsonEditor } from "./common/JsonEditor";
 import { FormEditor } from "./common/FormEditor";
 import { NodeEditor } from "./scenario/NodeEditor";
+import { EditorTabs } from "./common/EditorTabs";
+import { EditorCard } from "./common/EditorCard";
 import { PlusCircle, Trash2, MoveUp, MoveDown } from "lucide-react";
 
 interface ScenarioEditorProps {
@@ -154,54 +156,23 @@ export const ScenarioEditor: React.FC<ScenarioEditorProps> = ({
     (a, b) => (a.order || 0) - (b.order || 0)
   );
 
+  const tabOptions = [
+    { id: "form", label: "Podstawowe" },
+    { id: "nodes", label: "Kroki (Nodes)" },
+    { id: "json", label: "JSON" }
+  ];
+
   return (
     <div className="space-y-6">
-      {/* Informacje o scenariuszu */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="border-b border-gray-200 p-4">
-          <h2 className="text-lg font-medium text-gray-800">
-            Scenariusz: {scenario.name || scenario.slug}
-          </h2>
-          <p className="text-sm text-gray-500">
-            {scenario.description || "Brak opisu"}
-          </p>
-        </div>
-
-        {/* Przyciski zmiany trybu edycji */}
-        <div className="px-4 py-2 border-b border-gray-200 bg-gray-50">
-          <div className="flex space-x-2">
-            <button
-              className={`px-3 py-1 text-sm rounded-md ${
-                activeTab === "form"
-                  ? "bg-blue-100 text-blue-800"
-                  : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
-              onClick={() => setActiveTab("form")}
-            >
-              Podstawowe
-            </button>
-            <button
-              className={`px-3 py-1 text-sm rounded-md ${
-                activeTab === "nodes"
-                  ? "bg-blue-100 text-blue-800"
-                  : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
-              onClick={() => setActiveTab("nodes")}
-            >
-              Kroki (Nodes)
-            </button>
-            <button
-              className={`px-3 py-1 text-sm rounded-md ${
-                activeTab === "json"
-                  ? "bg-blue-100 text-blue-800"
-                  : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
-              onClick={() => setActiveTab("json")}
-            >
-              JSON
-            </button>
-          </div>
-        </div>
+      <EditorCard
+        title={`Scenariusz: ${scenario.name || scenario.slug}`}
+        description={scenario.description || "Brak opisu"}
+      >
+        <EditorTabs 
+          activeTab={activeTab}
+          options={tabOptions}
+          onChange={(tab) => setActiveTab(tab as "form" | "nodes" | "json")}
+        />
 
         <div className="p-4">
           {activeTab === "form" && (
@@ -312,7 +283,7 @@ export const ScenarioEditor: React.FC<ScenarioEditorProps> = ({
             <JsonEditor value={scenario} onChange={handleJsonChange} />
           )}
         </div>
-      </div>
+      </EditorCard>
     </div>
   );
 };

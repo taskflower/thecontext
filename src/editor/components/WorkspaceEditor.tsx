@@ -4,6 +4,8 @@ import { WorkspaceConfig, ScenarioConfig, TemplateSettings } from "@/core/types"
 import { JsonEditor } from "./common/JsonEditor";
 import { FormEditor } from "./common/FormEditor";
 import { Widget } from "./workspace/Widget";
+import { EditorTabs } from "./common/EditorTabs";
+import { EditorCard } from "./common/EditorCard";
 import { PlusCircle, Layers, Trash2 } from "lucide-react";
 
 interface WorkspaceEditorProps {
@@ -76,19 +78,19 @@ export const WorkspaceEditor: React.FC<WorkspaceEditorProps> = ({
     };
     
     onUpdate({
-        templateSettings: {
-          ...templateSettings,
-          layoutFile: templateSettings.layoutFile || '', 
-          widgets: [...widgets, newWidget]
-        }
-      });
+      templateSettings: {
+        ...templateSettings,
+        layoutFile: templateSettings.layoutFile || '', 
+        widgets: [...widgets, newWidget]
+      }
+    });
   };
   
   // Aktualizuj widget
   const updateWidget = (index: number, updatedWidget: any) => {
     const templateSettings = workspace.templateSettings || { 
       widgets: [], 
-      layoutFile: 'Simple' // Dodać domyślną wartość layoutFile
+      layoutFile: 'Simple' 
     };
     const widgets = templateSettings.widgets || [];
     
@@ -133,55 +135,24 @@ export const WorkspaceEditor: React.FC<WorkspaceEditorProps> = ({
   };
   
   const widgets = workspace.templateSettings?.widgets || [];
+
+  const tabOptions = [
+    { id: "form", label: "Podstawowe" },
+    { id: "widgets", label: "Widgety" },
+    { id: "json", label: "JSON" }
+  ];
   
   return (
     <div className="space-y-6">
-      {/* Informacje o przestrzeni */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="border-b border-gray-200 p-4">
-          <h2 className="text-lg font-medium text-gray-800">
-            Przestrzeń: {workspace.name || workspace.slug}
-          </h2>
-          <p className="text-sm text-gray-500">
-            {workspace.description || "Brak opisu"}
-          </p>
-        </div>
-        
-        {/* Przyciski zmiany trybu edycji */}
-        <div className="px-4 py-2 border-b border-gray-200 bg-gray-50">
-          <div className="flex space-x-2">
-            <button
-              className={`px-3 py-1 text-sm rounded-md ${
-                activeTab === "form"
-                  ? "bg-blue-100 text-blue-800"
-                  : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
-              onClick={() => setActiveTab("form")}
-            >
-              Podstawowe
-            </button>
-            <button
-              className={`px-3 py-1 text-sm rounded-md ${
-                activeTab === "widgets"
-                  ? "bg-blue-100 text-blue-800"
-                  : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
-              onClick={() => setActiveTab("widgets")}
-            >
-              Widgety
-            </button>
-            <button
-              className={`px-3 py-1 text-sm rounded-md ${
-                activeTab === "json"
-                  ? "bg-blue-100 text-blue-800"
-                  : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
-              onClick={() => setActiveTab("json")}
-            >
-              JSON
-            </button>
-          </div>
-        </div>
+      <EditorCard
+        title={`Przestrzeń: ${workspace.name || workspace.slug}`}
+        description={workspace.description || "Brak opisu"}
+      >
+        <EditorTabs 
+          activeTab={activeTab}
+          options={tabOptions}
+          onChange={(tab) => setActiveTab(tab as "form" | "widgets" | "json")}
+        />
         
         <div className="p-4">
           {activeTab === "form" && (
@@ -256,12 +227,12 @@ export const WorkspaceEditor: React.FC<WorkspaceEditorProps> = ({
             />
           )}
         </div>
-      </div>
+      </EditorCard>
       
       {/* Scenariusze */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+      <EditorCard title="Scenariusze">
         <div className="border-b border-gray-200 p-4 flex items-center justify-between">
-          <h2 className="text-lg font-medium text-gray-800">Scenariusze</h2>
+          <div />
           <button
             className="flex items-center text-sm text-blue-600 hover:text-blue-800"
             onClick={onAddScenario}
@@ -311,7 +282,7 @@ export const WorkspaceEditor: React.FC<WorkspaceEditorProps> = ({
             </div>
           )}
         </div>
-      </div>
+      </EditorCard>
     </div>
   );
 };
