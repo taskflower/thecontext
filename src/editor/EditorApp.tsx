@@ -82,6 +82,10 @@ export const EditorApp: React.FC = () => {
       </div>
     );
   }
+
+  if (!configId) {
+    return <div>Config ID is not available</div>;
+  }
   
   // Przekaż załadowaną konfigurację do ConfigEditor
   return <ConfigEditor initialConfig={config} configId={configId} />;

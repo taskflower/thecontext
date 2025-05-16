@@ -64,6 +64,7 @@ export const ConfigEditor: React.FC<ConfigEditorProps> = ({
       await dbAdapter.saveData(
         {
           enabled: true,
+          provider: 'firebase',
           itemType: "project",
           itemTitle: state.config.name || "Nowa konfiguracja",
           id: state.configId,
@@ -129,6 +130,10 @@ export const ConfigEditor: React.FC<ConfigEditorProps> = ({
       templateSettings: {
         layoutFile: "Simple",
         widgets: [],
+      },
+      contextSchema: {
+        type: "object",
+        properties: {},
       },
     };
 
