@@ -1,7 +1,7 @@
 {
   "id": "scenario-website-analysis",
   "slug": "scenario-website-analysis",
-  "workspaceSlug": "workspace-marketing",
+  "workspaceSlug": "workspace-website-analysis",
   "name": "Analiza Strony WWW",
   "description": "Analiza strony i przygotowanie opisu marketingowego",
   "icon": "search",

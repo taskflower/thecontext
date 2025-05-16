@@ -1,80 +1,145 @@
 {
-    "id": "workspace-user-auth",
-    "slug": "workspace-user-auth",
-    "name": "Panel Użytkownika",
-    "description": "Zarządzaj swoim kontem, profilem i ustawieniami",
-    "icon": "user",
-    "templateSettings": {
-      "layoutFile": "AuthLayout",
-      "widgets": [
-        {
-          "tplFile": "InfoWidget",
-          "title": "Witaj w Panelu Użytkownika",
-          "data": "Załóż konto, zarządzaj profilem i ustawieniami swojego konta.",
-          "icon": "info",
-          "colSpan": "full"
-        },
-        {
-          "tplFile": "ScenarioListWidget",
-          "title": "Dostępne funkcje",
-          "colSpan": "full"
+  "id": "workspace-user-auth",
+  "slug": "workspace-user-auth",
+  "name": "Panel Użytkownika",
+  "description": "Zarządzaj swoim kontem, profilem i ustawieniami",
+  "icon": "user",
+  "templateSettings": {
+    "layoutFile": "AuthLayout",
+    "widgets": []
+  },
+  "contextSchema": {
+    "type": "object",
+    "properties": {
+      "user-data": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "firstName": {
+            "type": "string",
+            "title": "Imię"
+          },
+          "lastName": {
+            "type": "string",
+            "title": "Nazwisko"
+          },
+          "points": {
+            "type": "number",
+            "title": "Punkty"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "beneficjent",
+              "wykonawca",
+              "audytor",
+              "operator"
+            ],
+            "title": "Rola"
+          },
+          "isLoggedIn": {
+            "type": "boolean",
+            "title": "Status logowania"
+          },
+          "lastLoginDate": {
+            "type": "string",
+            "title": "Data ostatniego logowania"
+          }
         }
-      ]
-    },
-    "contextSchema": {
-      "type": "object",
-      "properties": {
-        "user-data": {
-          "type": "object",
-          "properties": {
-            "email": { "type": "string", "title": "Email" },
-            "firstName": { "type": "string", "title": "Imię" },
-            "lastName": { "type": "string", "title": "Nazwisko" },
-            "points": { "type": "number", "title": "Punkty" },
-            "role": { 
-              "type": "string", 
-              "enum": ["beneficjent", "wykonawca", "audytor", "operator"],
-              "title": "Rola"
-            },
-            "isLoggedIn": { "type": "boolean", "title": "Status logowania" },
-            "lastLoginDate": { "type": "string", "title": "Data ostatniego logowania" }
+      },
+      "registration-data": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "firstName": {
+            "type": "string",
+            "title": "Imię"
+          },
+          "lastName": {
+            "type": "string",
+            "title": "Nazwisko"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "beneficjent",
+              "wykonawca",
+              "audytor",
+              "operator"
+            ],
+            "title": "Rola"
+          },
+          "termsConsent": {
+            "type": "boolean",
+            "title": "Zgoda na regulamin"
+          },
+          "privacyConsent": {
+            "type": "boolean",
+            "title": "Zgoda na politykę prywatności"
+          },
+          "marketingConsent": {
+            "type": "boolean",
+            "title": "Zgoda marketingowa"
           }
-        },
-        "registration-data": {
-          "type": "object",
-          "properties": {
-            "email": { "type": "string", "title": "Email" },
-            "firstName": { "type": "string", "title": "Imię" },
-            "lastName": { "type": "string", "title": "Nazwisko" },
-            "role": { 
-              "type": "string",
-              "enum": ["beneficjent", "wykonawca", "audytor", "operator"],
-              "title": "Rola" 
-            },
-            "termsConsent": { "type": "boolean", "title": "Zgoda na regulamin" },
-            "privacyConsent": { "type": "boolean", "title": "Zgoda na politykę prywatności" },
-            "marketingConsent": { "type": "boolean", "title": "Zgoda marketingowa" }
-          }
-        },
-        "profile-data": {
-          "type": "object",
-          "properties": {
-            "email": { "type": "string", "title": "Email" },
-            "firstName": { "type": "string", "title": "Imię" },
-            "lastName": { "type": "string", "title": "Nazwisko" },
-            "points": { "type": "number", "title": "Punkty" },
-            "role": { 
-              "type": "string",
-              "enum": ["beneficjent", "wykonawca", "audytor", "operator"],
-              "title": "Rola" 
-            },
-            "phone": { "type": "string", "title": "Telefon" },
-            "address": { "type": "string", "title": "Adres" },
-            "postalCode": { "type": "string", "title": "Kod pocztowy" },
-            "city": { "type": "string", "title": "Miasto" },
-            "notificationsEnabled": { "type": "boolean", "title": "Powiadomienia" }
+        }
+      },
+      "profile-data": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "firstName": {
+            "type": "string",
+            "title": "Imię"
+          },
+          "lastName": {
+            "type": "string",
+            "title": "Nazwisko"
+          },
+          "points": {
+            "type": "number",
+            "title": "Punkty"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "beneficjent",
+              "wykonawca",
+              "audytor",
+              "operator"
+            ],
+            "title": "Rola"
+          },
+          "phone": {
+            "type": "string",
+            "title": "Telefon"
+          },
+          "address": {
+            "type": "string",
+            "title": "Adres"
+          },
+          "postalCode": {
+            "type": "string",
+            "title": "Kod pocztowy"
+          },
+          "city": {
+            "type": "string",
+            "title": "Miasto"
+          },
+          "notificationsEnabled": {
+            "type": "boolean",
+            "title": "Powiadomienia"
           }
         }
       }
     }
   }
+}

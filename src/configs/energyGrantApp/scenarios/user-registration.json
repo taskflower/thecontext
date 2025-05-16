@@ -1,169 +1,141 @@
 {
-    "id": "user-registration",
-    "slug": "user-registration",
-    "workspaceSlug": "workspace-user-auth",
-    "name": "Rejestracja użytkownika",
-    "description": "Zarejestruj się za pomocą konta Google lub formularza",
-    "icon": "user-plus",
-    "nodes": [
-      {
-        "slug": "registration-options",
-        "label": "Opcje rejestracji",
-        "contextSchemaPath": "registration-data",
-        "contextDataPath": "registration-data",
-        "tplFile": "WidgetsStep",
-        "order": 0,
-        "attrs": {
-          "widgets": [
-            {
-              "tplFile": "TitleWidget",
-              "title": "Rejestracja użytkownika",
-              "subtitle": "Wybierz sposób rejestracji w systemie",
-              "colSpan": "full"
-            },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Rejestracja za pomocą Google",
-              "data": "Kliknij przycisk poniżej, aby zarejestrować się za pomocą konta Google.",
-              "icon": "info",
-              "actionUrl": "#google-login",
-              "actionText": "Zarejestruj się przez Google",
-              "colSpan": 1
-            },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Rejestracja za pomocą formularza",
-              "data": "Możesz również zarejestrować się wypełniając formularz z danymi.",
-              "icon": "info",
-              "colSpan": 1
-            }
-          ]
-        }
-      },
-      {
-        "slug": "google-auth-mock",
-        "label": "Rejestracja z Google",
-        "contextSchemaPath": "registration-data",
-        "contextDataPath": "registration-data",
-        "tplFile": "LlmStep",
-        "order": 1,
-        "attrs": {
-          "title": "Autoryzacja Google",
-          "autoStart": true,
-          "userMessage": "Symuluj dane użytkownika otrzymane z Google. Zwróć obiekt JSON z polami: email (losowy email), firstName, lastName (losowe imię i nazwisko), role (domyślnie 'beneficjent'). Uwaga: zwróć tylko obiekt JSON bez dodatkowego formatowania czy komentarzy."
-        }
-      },
-      {
-        "slug": "registration-consent",
-        "label": "Zgody rejestracyjne",
-        "contextSchemaPath": "registration-data",
-        "contextDataPath": "registration-data",
-        "tplFile": "FormStep",
-        "order": 2,
-        "attrs": {
-          "title": "Zgody i wybór roli",
-          "description": "Aby dokończyć rejestrację, zapoznaj się z regulaminem i wybierz swoją rolę w systemie",
-          "jsonSchema": {
-            "type": "object",
-            "properties": {
-              "role": {
-                "type": "string",
-                "title": "Wybierz swoją rolę w systemie",
-                "enum": ["beneficjent", "wykonawca", "audytor", "operator"],
-                "default": "beneficjent"
-              },
-              "termsConsent": {
-                "type": "boolean",
-                "title": "Zapoznałem się z regulaminem serwisu i akceptuję jego warunki",
-                "default": false
-              },
-              "privacyConsent": {
-                "type": "boolean",
-                "title": "Zapoznałem się z polityką prywatności i wyrażam zgodę na przetwarzanie moich danych osobowych",
-                "default": false
-              },
-              "marketingConsent": {
-                "type": "boolean",
-                "title": "Wyrażam zgodę na otrzymywanie informacji marketingowych (opcjonalnie)",
-                "default": false
-              }
-            },
-            "required": ["role", "termsConsent", "privacyConsent"]
+  "id": "user-registration",
+  "slug": "user-registration",
+  "workspaceSlug": "workspace-user-auth",
+  "name": "Rejestracja użytkownika",
+  "description": "Zarejestruj się za pomocą konta Google lub formularza",
+  "icon": "user-plus",
+  "nodes": [
+    {
+      "slug": "registration-options",
+      "label": "Opcje rejestracji",
+      "contextSchemaPath": "registration-data",
+      "contextDataPath": "registration-data",
+      "tplFile": "WidgetsStep",
+      "order": 0,
+      "attrs": {
+        "widgets": [
+          {
+            "tplFile": "TitleWidget",
+            "title": "Rejestracja użytkownika",
+            "subtitle": "Wybierz sposób rejestracji w systemie",
+            "colSpan": "full"
           },
-          "submitLabel": "Zakończ rejestrację"
-        }
-      },
-      {
-        "slug": "registration-complete",
-        "label": "Rejestracja zakończona",
-        "contextSchemaPath": "user-data",
-        "contextDataPath": "user-data",
-        "tplFile": "LlmStep",
-        "order": 3,
-        "attrs": {
-          "autoStart": true,
-          "userMessage": "Na podstawie danych rejestracyjnych utwórz obiekt użytkownika. Pobierz email, firstName, lastName i role z {{registration-data}}. Dodaj pola: points (wartość 100), isLoggedIn (true), lastLoginDate (aktualna data). Zwróć jako czysty obiekt JSON."
-        },
-        "saveToDB": {
-          "enabled": true,
-          "provider": "indexedDB",
-          "itemType": "user",
-          "itemTitle": "Dane użytkownika",
-          "contentPath": "user-data"
-        }
-      },
-      {
-        "slug": "registration-summary",
-        "label": "Podsumowanie rejestracji",
-        "contextSchemaPath": "user-data",
-        "contextDataPath": "user-data",
-        "tplFile": "WidgetsStep",
-        "order": 4,
-        "attrs": {
-          "widgets": [
-            {
-              "tplFile": "TitleWidget",
-              "title": "Rejestracja zakończona powodzeniem!",
-              "subtitle": "Dziękujemy za rejestrację. Twoje konto zostało utworzone.",
-              "colSpan": "full"
-            },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Twój adres e-mail",
-              "contextDataPath": "user-data.email",
-              "icon": "mail",
-              "colSpan": 1
-            },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Imię i nazwisko",
-              "data": "{{user-data.firstName}} {{user-data.lastName}}",
-              "icon": "user",
-              "colSpan": 1
-            },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Twoja rola",
-              "contextDataPath": "user-data.role",
-              "icon": "briefcase",
-              "colSpan": 1
-            },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Twoje punkty powitalne",
-              "contextDataPath": "user-data.points",
-              "icon": "tag",
-              "colSpan": 1
-            },
-            {
-              "tplFile": "InfoWidget",
-              "title": "Co dalej?",
-              "data": "Teraz możesz przejść do ekranu powitalnego lub uzupełnić swój profil.",
-              "icon": "info",
-              "colSpan": "full"
-            }
-          ]
-        }
+          {
+            "tplFile": "InfoWidget",
+            "title": "Rejestracja za pomocą Google",
+            "data": "Kliknij przycisk poniżej, aby zarejestrować się za pomocą konta Google.",
+            "icon": "info",
+            "actionUrl": "#google-login",
+            "actionText": "Zarejestruj się przez Google",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Rejestracja za pomocą formularza",
+            "data": "Możesz również zarejestrować się wypełniając formularz z danymi.",
+            "icon": "info",
+            "colSpan": 1
+          }
+        ]
       }
-    ]
-  }
+    },
+    {
+      "slug": "google-auth-mock",
+      "label": "Rejestracja z Google",
+      "contextSchemaPath": "registration-data",
+      "contextDataPath": "registration-data",
+      "tplFile": "LlmStep",
+      "order": 1,
+      "attrs": {
+        "title": "Autoryzacja Google",
+        "autoStart": true,
+        "userMessage": "Symuluj dane użytkownika otrzymane z Google. Zwróć obiekt JSON z polami: email (losowy email), firstName, lastName (losowe imię i nazwisko), role (domyślnie 'beneficjent'). Uwaga: zwróć tylko obiekt JSON bez dodatkowego formatowania czy komentarzy."
+      }
+    },
+    {
+      "slug": "registration-consent",
+      "label": "Zgody rejestracyjne",
+      "contextSchemaPath": "registration-data",
+      "contextDataPath": "registration-data",
+      "tplFile": "FormStep",
+      "order": 2,
+      "attrs": {
+        "title": "Zgody i wybór roli",
+        "description": "Aby dokończyć rejestrację, zapoznaj się z regulaminem i wybierz swoją rolę w systemie",
+        "jsonSchema": {
+          "type": "object",
+          "properties": {
+            "role": {
+              "type": "string",
+              "title": "Wybierz swoją rolę w systemie",
+              "enum": [
+                "beneficjent",
+                "wykonawca",
+                "audytor",
+                "operator"
+              ],
+              "default": "beneficjent"
+            },
+            "termsConsent": {
+              "type": "boolean",
+              "title": "Zapoznałem się z regulaminem serwisu i akceptuję jego warunki",
+              "default": false
+            },
+            "privacyConsent": {
+              "type": "boolean",
+              "title": "Zapoznałem się z polityką prywatności i wyrażam zgodę na przetwarzanie moich danych osobowych",
+              "default": false
+            },
+            "marketingConsent": {
+              "type": "boolean",
+              "title": "Wyrażam zgodę na otrzymywanie informacji marketingowych (opcjonalnie)",
+              "default": false
+            }
+          },
+          "required": [
+            "role",
+            "termsConsent",
+            "privacyConsent"
+          ]
+        },
+        "submitLabel": "Zakończ rejestrację"
+      }
+    },
+    {
+      "slug": "registration-complete",
+      "label": "Rejestracja zakończona",
+      "contextSchemaPath": "user-data",
+      "contextDataPath": "user-data",
+      "tplFile": "LlmStep",
+      "order": 3,
+      "attrs": {
+        "autoStart": true,
+        "userMessage": "Na podstawie danych rejestracyjnych utwórz obiekt użytkownika. Pobierz email, firstName, lastName i role z {{registration-data}}. Dodaj pola: points (wartość 100), isLoggedIn (true), lastLoginDate (aktualna data). Zwróć jako czysty obiekt JSON."
+      },
+      "saveToDB": {
+        "enabled": true,
+        "provider": "indexedDB",
+        "itemType": "user",
+        "itemTitle": "Dane użytkownika",
+        "contentPath": "user-data"
+      }
+    },
+    {
+      "slug": "registration-summary",
+      "label": "Podsumowanie rejestracji",
+      "contextSchemaPath": "user-data",
+      "contextDataPath": "user-data",
+      "tplFile": "WidgetsStep",
+      "order": 4,
+      "attrs": {
+        "widgets": [
+          {
+            "tplFile": "GoogleAuthWidget",
+            "colSpan": "full"
+          }
+        ]
+      }
+    }
+  ]
+}

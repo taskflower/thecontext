@@ -1,22 +1,24 @@
 {
-    "name": "Analiza Marketingowa Strony",
-    "description": "Analiza strony internetowej pod kątem przyszłych kampanii marketingowych",
-    "tplDir": "default",
-    "workspaces": [
-      {
-        "id": "workspace-marketing"
-      }
-    ],
-    "scenarios": [
-      {
-        "id": "scenario-googleads-campaign"
-      },
-      {
-        "id": "scenario-website-analysis"
-      },
-      {
-        "id": "scenario-campaign-budgets"
-      }
-    ]
-  }
-  
+  "name": "Analiza Marketingowa Strony",
+  "description": "Analiza strony internetowej pod kątem przyszłych kampanii marketingowych",
+  "tplDir": "default",
+  "workspaces": [
+    {
+      "id": "workspace-website-analysis"
+    },
+    {
+      "id": "workspace-googleads"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "scenario-website-analysis"
+    },
+    {
+      "id": "scenario-create-budget"
+    },
+    {
+      "id": "scenario-manage-budgets"
+    }
+  ]
+}

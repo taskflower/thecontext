@@ -12,17 +12,24 @@ import type { AppConfig, WorkspaceConfig, ScenarioConfig } from "@/core/types";
 
 // Fallback component for missing modules
 const NotFoundComponent = (props: any) => (
-  <div className="fallback">
-    Nie znaleziono: {props.componentType} {props.componentName} w szablonie {props.tplDir}
+  <div className="fallback text-xs p-4 text-gray-600">
+    <span className="font-semibold">Nie znaleziono:</span> {props.componentType}{" "}
+    {props.componentName} w szablonie {props.tplDir}
   </div>
 );
 
 // Component cache and module imports
 const componentCache = new Map<string, React.LazyExoticComponent<any>>();
 const moduleImports = {
-  component: import.meta.glob<{ default: React.ComponentType<any> }>("./themes/*/components/*.tsx"),
-  layout: import.meta.glob<{ default: React.ComponentType<any> }>("./themes/*/layouts/*.tsx"),
-  widget: import.meta.glob<{ default: React.ComponentType<any> }>("./themes/*/widgets/*.tsx"),
+  component: import.meta.glob<{ default: React.ComponentType<any> }>(
+    "./themes/*/components/*.tsx"
+  ),
+  layout: import.meta.glob<{ default: React.ComponentType<any> }>(
+    "./themes/*/layouts/*.tsx"
+  ),
+  widget: import.meta.glob<{ default: React.ComponentType<any> }>(
+    "./themes/*/widgets/*.tsx"
+  ),
 };
 
 // Load component module
@@ -43,19 +50,27 @@ const loadModule = (
   const path = paths.find((p) => moduleImports[type][p]);
   const component = path
     ? lazy(moduleImports[type][path])
-    : lazy(() => Promise.resolve({
-        default: (props: any) => (
-          <NotFoundComponent componentName={name} tplDir={tplDir} componentType={type} {...props} />
-        ),
-      }));
-      
+    : lazy(() =>
+        Promise.resolve({
+          default: (props: any) => (
+            <NotFoundComponent
+              componentName={name}
+              tplDir={tplDir}
+              componentType={type}
+              {...props}
+            />
+          ),
+        })
+      );
+
   componentCache.set(cacheKey, component);
   return component;
 };
 
 // Preload module exports
 export const preloadModules = {
-  component: (tplDir: string, name: string) => loadModule("component", tplDir, name),
+  component: (tplDir: string, name: string) =>
+    loadModule("component", tplDir, name),
   layout: (tplDir: string, name: string) => loadModule("layout", tplDir, name),
   widget: (tplDir: string, name: string) => loadModule("widget", tplDir, name),
 };
@@ -73,9 +88,15 @@ export const loadJsonConfigs = async (slug: string): Promise<AppConfig> => {
 
   // Import all config files
   const configs = {
-    app: import.meta.glob<Record<string, any>>("./configs/*/app.json", { as: "json" }),
-    ws: import.meta.glob<Record<string, any>>("./configs/*/workspaces/*.json", { as: "json" }),
-    sc: import.meta.glob<Record<string, any>>("./configs/*/scenarios/*.json", { as: "json" }),
+    app: import.meta.glob<Record<string, any>>("./configs/*/app.json", {
+      as: "json",
+    }),
+    ws: import.meta.glob<Record<string, any>>("./configs/*/workspaces/*.json", {
+      as: "json",
+    }),
+    sc: import.meta.glob<Record<string, any>>("./configs/*/scenarios/*.json", {
+      as: "json",
+    }),
   };
 
   const configPromise = (async () => {
@@ -122,7 +143,7 @@ export const loadJsonConfigs = async (slug: string): Promise<AppConfig> => {
       } as AppConfig;
     } catch (error) {
       console.error("Error loading config:", error);
-      throw error; 
+      throw error;
     }
   })();
 
@@ -162,10 +183,10 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Load configuration from JSON or Firebase
   const loadConfig = useCallback(async (slug: string) => {
-    setState(current => ({
+    setState((current) => ({
       ...current,
       loading: true,
-      error: null
+      error: null,
     }));
 
     try {
@@ -181,7 +202,9 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (err) {
       // If JSON fails, try Firebase
       try {
-        const { FirebaseAdapter } = await import("./provideDB/firebase/FirebaseAdapter");
+        const { FirebaseAdapter } = await import(
+          "./provideDB/firebase/FirebaseAdapter"
+        );
         const adapter = new FirebaseAdapter("application_configs");
         const saved = await adapter.retrieveData(slug);
 
@@ -198,11 +221,13 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
 
         throw new Error("Brak payload w dokumencie Firestore");
       } catch (fbErr: any) {
-        setState(current => ({
+        setState((current) => ({
           ...current,
           configId: slug,
           loading: false,
-          error: `Nie udało się załadować konfiguracji: ${fbErr?.message || "Nieznany błąd"}`,
+          error: `Nie udało się załadować konfiguracji: ${
+            fbErr?.message || "Nieznany błąd"
+          }`,
         }));
       }
     }
@@ -217,7 +242,9 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
   }, [location.pathname, state.configId, state.config, loadConfig]);
 
   return (
-    <ConfigContext.Provider value={{ ...state, preload: preloadModules, loadConfig }}>
+    <ConfigContext.Provider
+      value={{ ...state, preload: preloadModules, loadConfig }}
+    >
       {children}
     </ConfigContext.Provider>
   );

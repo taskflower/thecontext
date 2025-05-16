@@ -1,24 +1,25 @@
 {
-    "name": "Program Dotacji Energetycznych",
-    "description": "Platforma łącząca beneficjentów, wykonawców i audytorów w programie dotacji energetycznych",
-    "tplDir": "energygrant",
-    "workspaces": [
-      { "id": "workspace-energygrant" },
-      { "id": "workspace-auditor" },
-      { "id": "workspace-user-auth" }
-    ],
-    "scenarios": [
-      { "id": "contact-operator" },
-      { "id": "find-contractor" },
-      { "id": "contractor-market" },
-      { "id": "find-auditor" },
-      { "id": "auditor-market" },
-      { "id": "beneficiary-orders" },
-      { "id": "portfolio" },
-      { "id": "auditor-profile" },
-      { "id": "auditor-points-purchase" },
-      { "id": "user-registration" },
-      { "id": "user-welcome" },
-      { "id": "user-profile" }
-    ]
-  }
+  "name": "Program Dotacji Energetycznych",
+  "description": "Platforma łącząca beneficjentów, wykonawców i audytorów w programie dotacji energetycznych",
+  "tplDir": "energygrant",
+  "workspaces": [
+    { "id": "workspace-energygrant" },
+    { "id": "workspace-auditor" },
+    { "id": "workspace-beneficiary" },
+    { "id": "workspace-user-auth" }
+  ],
+  "scenarios": [
+    { "id": "beneficiary-contact-operator" },
+    { "id": "beneficiary-find-contractor" },
+    { "id": "beneficiary-find-auditor" },
+    { "id": "contractor-market" },
+    { "id": "auditor-market" },
+    { "id": "beneficiary-orders" },
+    { "id": "portfolio" },
+    { "id": "auditor-profile" },
+    { "id": "auditor-points-purchase" },
+    { "id": "user-registration" },
+    { "id": "user-welcome" },
+    { "id": "user-profile" }
+  ]
+}

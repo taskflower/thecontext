@@ -1,0 +1,63 @@
+{
+    "id": "beneficiary-find-auditor",
+    "slug": "beneficiary-find-auditor",
+    "workspaceSlug": "workspace-beneficiary",
+    "name": "Wyszukiwarka Audytorów",
+    "description": "Formularz zapotrzebowania na audyt energetyczny",
+    "icon": "user-search",
+    "nodes": [
+      {
+        "slug": "auditor-order-form",
+        "label": "Krok 1: Formularz zapotrzebowania",
+        "contextSchemaPath": "order-request-form-auditor",
+        "contextDataPath": "order-request-form-auditor",
+        "tplFile": "FormStep",
+        "order": 0,
+        "attrs": {
+          "title": "Formularz zapotrzebowania na audyt energetyczny",
+          "description": "Wypełnij formularz, aby znaleźć audytora",
+          "jsonSchema": {
+            "type": "object",
+            "properties": {
+              "address": { "type": "string", "title": "Adres" },
+              "postalCode": { "type": "string", "title": "Kod pocztowy", "pattern": "^[0-9]{2}-[0-9]{3}$" },
+              "city": { "type": "string", "title": "Miejscowość" },
+              "phone": { "type": "string", "title": "Telefon" },
+              "buildingType": { "type": "string", "title": "Typ budynku", "enum": ["Dom jednorodzinny","Dom bliźniak","Segment","Budynek wielorodzinny","Gospodarczy","Inny"] },
+              "buildingArea": { "type": "number", "title": "Powierzchnia (m²)", "minimum": 1 },
+              "constructionYear": { "type": "number", "title": "Rok budowy", "minimum": 1900, "maximum": 2025 },
+              "urgency": { "type": "string", "title": "Pilność", "enum": ["Natychmiast","W miesiąc","W 3 miesiące","Elastycznie"] },
+              "comments": { "type": "string", "title": "Uwagi" },
+              "authorized": { "type": "boolean", "title": "Zgoda na przetwarzanie danych", "default": false }
+            },
+            "required": ["address","postalCode","city","phone","buildingType","buildingArea","authorized"]
+          },
+          "submitLabel": "Opublikuj zapotrzebowanie"
+        }
+      },
+      {
+        "slug": "auditor-order-summary",
+        "label": "Krok 2: Podsumowanie",
+        "contextSchemaPath": "order-request-form-auditor",
+        "contextDataPath": "order-request-form-auditor",
+        "tplFile": "WidgetsStep",
+        "order": 1,
+        "saveToDB": {
+          "enabled": true,
+          "provider": "indexedDB",
+          "itemType": "order",
+          "itemTitle": "Zapotrzebowanie na audyt",
+          "contentPath": "order-request-form-auditor"
+        },
+        "attrs": {
+          "widgets": [
+            { "tplFile": "TitleWidget", "title": "Zapotrzebowanie opublikowane", "subtitle": "Audytorzy mogą się z Tobą skontaktować.", "colSpan": "full" },
+            { "tplFile": "InfoWidget", "title": "Miasto", "contextDataPath": "order-request-form-auditor.city", "icon": "map-pin", "colSpan": 1 },
+            { "tplFile": "InfoWidget", "title": "Typ budynku", "contextDataPath": "order-request-form-auditor.buildingType", "icon": "home", "colSpan": 1 },
+            { "tplFile": "OrderDetailsWidget", "contextDataPath": "order-request-form-auditor", "colSpan": "full" }
+          ]
+        }
+      }
+    ]
+  }
+  

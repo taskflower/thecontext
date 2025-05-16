@@ -13,7 +13,7 @@ export interface ApiStepProps<T> {
   description?: string;
   showResults?: boolean;
   nodeSlug?: string;
-  autoStart?: boolean; // Add this prop like in LlmStep
+  autoStart?: boolean;
 }
 
 export default function ApiStep<T>({
@@ -26,18 +26,22 @@ export default function ApiStep<T>({
   title,
   description,
   showResults = false,
-  autoStart = false, // Default to false like in LlmStep
+  autoStart = false,
 }: ApiStepProps<T>) {
   const { getToken, user } = useAuth();
   const { get } = useFlow();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorDetails, setErrorDetails] = useState<any>(null);
+  const [showErrorDetails, setShowErrorDetails] = useState(false);
   const [result, setResult] = useState<T | null>(null);
   const [started, setStarted] = useState(autoStart);
 
   const executeApiRequest = async () => {
     setIsLoading(true);
     setError(null);
+    setErrorDetails(null);
+    setShowErrorDetails(false);
 
     try {
       const token = await getToken();
@@ -64,19 +68,29 @@ export default function ApiStep<T>({
       const response = await fetch(apiUrl, fetchOptions);
 
       if (!response.ok) {
-        const errInfo = await response
-          .json()
-          .catch(() => ({
-            error: { message: `Błąd HTTP ${response.status}` },
-          }));
+        const errInfo = await response.json().catch(() => ({
+          error: { message: `Błąd HTTP ${response.status}` },
+        }));
+
+        // Zapisujemy szczegóły błędu
+        setErrorDetails({
+          status: response.status,
+          statusText: response.statusText,
+          details: errInfo,
+        });
+
         throw new Error(
           errInfo.error?.message || `Błąd serwera: ${response.status}`
         );
       }
       const responseData = await response.json();
       if (responseData.success === false) {
+        // Zapisujemy szczegóły błędu także dla błędów logicznych
+        setErrorDetails(responseData);
         throw new Error(
-          responseData.message || "Operacja zakończyła się niepowodzeniem"
+          responseData.error?.message ||
+            responseData.message ||
+            "Operacja zakończyła się niepowodzeniem"
         );
       }
 
@@ -84,10 +98,13 @@ export default function ApiStep<T>({
       setResult(transformedResponse as T);
       onSubmit(transformedResponse as T);
       setIsLoading(false);
-
     } catch (err: any) {
       const errorMessage = transformErrors(err);
       setError(errorMessage);
+      // Jeśli nie ustawiliśmy wcześniej szczegółów błędu, zapisujemy oryginalny obiekt błędu
+      if (!errorDetails) {
+        setErrorDetails(err);
+      }
       setIsLoading(false);
     }
   };
@@ -109,22 +126,64 @@ export default function ApiStep<T>({
     </div>
   );
 
-  // Renderowanie błędu
-  const renderError = () => (
-    <div className="p-4 bg-red-50 text-red-600 rounded border border-red-200 text-sm">
-      <h3 className="font-semibold mb-2">Wystąpił błąd</h3>
-      <p>{error}</p>
-      <button
-        onClick={() => {
-          setError(null);
-          executeApiRequest();
-        }}
-        className="mt-4 px-5 py-2.5 rounded transition-colors text-sm font-semibold bg-black text-white hover:bg-gray-800"
-      >
-        Spróbuj ponownie
-      </button>
-    </div>
-  );
+  // Renderowanie błędu z przyciskiem szczegółów
+  const renderError = () => {
+    // Wydobycie szczegółów błędu z różnych możliwych formatów odpowiedzi
+    const detailsToShow = errorDetails?.error?.details ||
+      errorDetails?.details ||
+      errorDetails || { message: error };
+
+    return (
+      <div className="p-4 bg-red-50 text-red-600 rounded border border-red-200 text-sm">
+        <h3 className="font-semibold mb-2">Wystąpił błąd</h3>
+        <p>{error}</p>
+
+        <div className="flex items-center justify-between mt-4">
+          <button
+            onClick={() => setShowErrorDetails(!showErrorDetails)}
+            className="text-red-700 underline text-xs flex items-center"
+          >
+            {showErrorDetails ? "Ukryj szczegóły" : "Pokaż szczegóły"}
+            <svg
+              className={`ml-1 w-3 h-3 transition-transform ${
+                showErrorDetails ? "rotate-180" : ""
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+
+          <button
+            onClick={() => {
+              setError(null);
+              executeApiRequest();
+            }}
+            className="px-5 py-2 rounded transition-colors text-sm font-semibold bg-black text-white hover:bg-gray-800"
+          >
+            Spróbuj ponownie
+          </button>
+        </div>
+
+        {/* Szczegóły błędu - widoczne po kliknięciu przycisku */}
+        {showErrorDetails && detailsToShow && (
+          <div className="mt-4">
+            <h4 className="font-semibold text-xs mb-2">Szczegóły błędu:</h4>
+            <pre className="bg-white p-3 rounded overflow-auto max-h-80 text-xs border border-red-100 font-mono">
+              {JSON.stringify(detailsToShow, null, 2)}
+            </pre>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   // Renderowanie loadera
   const renderLoader = () => (

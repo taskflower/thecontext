@@ -1,0 +1,175 @@
+{
+    "id": "workspace-beneficiary",
+    "slug": "workspace-beneficiary",
+    "name": "Panel Beneficjenta",
+    "description": "Zarządzaj swoim wnioskiem o dotację, zleceniami i ofertami",
+    "icon": "user",
+    "templateSettings": {
+      "layoutFile": "Dashboard",
+      "widgets": [
+        {
+          "tplFile": "InfoWidget",
+          "title": "Witaj w Panelu Beneficjenta",
+          "data": "Tutaj możesz obliczyć dotację, wysłać wniosek, przeglądać dostępne zlecenia i zarządzać swoimi zamówieniami.",
+          "icon": "info",
+          "colSpan": "full"
+        },
+        {
+          "tplFile": "GrantCalculatorWidget",
+          "title": "Kalkulator dotacji",
+          "contextDataPath": "grant-calculator",
+          "formDataPath": "grant-calculator-form",
+          "colSpan": 1
+        },
+        {
+          "tplFile": "ContactFormWidget",
+          "title": "Formularz kontaktowy",
+          "contextDataPath": "contact-form",
+          "colSpan": 1
+        },
+        {
+          "tplFile": "MarketListingWidget",
+          "title": "Dostępne zlecenia",
+          "contextDataPath": "market-listing",
+          "colSpan": "full"
+        },
+        {
+          "tplFile": "BeneficiaryOrdersWidget",
+          "title": "Twoje zlecenia",
+          "contextDataPath": "beneficiary-orders",
+          "colSpan": "full"
+        },
+        {
+          "tplFile": "ScenarioListWidget",
+          "title": "Dostępne scenariusze",
+          "colSpan": "full"
+        },
+        {
+          "tplFile": "WorkspacesListWidget",
+          "title": "Dostępne obszary robocze",
+          "colSpan": "full"
+        }
+      ]
+    },
+    "contextSchema": {
+      "type": "object",
+      "properties": {
+        "grant-calculator-form": {
+          "type": "object",
+          "properties": {
+            "householdSize": { "type": "number", "title": "Liczba osób w gospodarstwie" },
+            "income": { "type": "number", "title": "Dochód na osobę" },
+            "coOwners": { "type": "boolean", "title": "Czy są współwłaściciele" },
+            "dataProcessingConsent": { "type": "boolean", "title": "Zgoda na przetwarzanie danych" }
+          }
+        },
+        "grant-calculator": {
+          "type": "object",
+          "properties": {
+            "grantEligibility": { "type": "boolean", "title": "Kwalifikacja do dotacji" },
+            "grantAmount": { "type": "number", "title": "Potencjalna wysokość dotacji" }
+          }
+        },
+        "contact-form": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string", "title": "Imię i nazwisko" },
+            "email": { "type": "string", "title": "E-mail" },
+            "phone": { "type": "string", "title": "Telefon" },
+            "postalCode": { "type": "string", "title": "Kod pocztowy" },
+            "city": { "type": "string", "title": "Miejscowość" },
+            "message": { "type": "string", "title": "Wiadomość" },
+            "dataProcessingConsent": { "type": "boolean", "title": "Zgoda na przetwarzanie danych" },
+            "marketingConsent": { "type": "boolean", "title": "Zgoda marketingowa" }
+          }
+        },
+        "market-listing": {
+          "type": "object",
+          "properties": {
+            "listings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "postalCode": { "type": "string" },
+                  "city": { "type": "string" },
+                  "scope": { "type": "string" },
+                  "hasAudit": { "type": "boolean" },
+                  "isVerified": { "type": "boolean" },
+                  "views": { "type": "number" },
+                  "created": { "type": "string" },
+                  "type": { "type": "string", "enum": ["contractor","auditor"] }
+                }
+              }
+            },
+            "purchasedPoints": { "type": "number", "title": "Wykupione punkty" },
+            "unlockedListings": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "beneficiary-orders": {
+          "type": "object",
+          "properties": {
+            "orders": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "type": { "type": "string", "enum": ["contractor","auditor"] },
+                  "status": { "type": "string" },
+                  "created": { "type": "string" },
+                  "scope": { "type": "string" },
+                  "offers": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "providerId": { "type": "string" },
+                        "providerName": { "type": "string" },
+                        "price": { "type": "number" },
+                        "description": { "type": "string" },
+                        "isAccepted": { "type": "boolean" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "portfolio": {
+          "type": "object",
+          "properties": {
+            "companyName": { "type": "string", "title": "Nazwa firmy" },
+            "nip": { "type": "string", "title": "NIP" },
+            "address": { "type": "string", "title": "Adres" },
+            "postalCode": { "type": "string", "title": "Kod pocztowy" },
+            "city": { "type": "string", "title": "Miejscowość" },
+            "phone": { "type": "string", "title": "Telefon" },
+            "email": { "type": "string", "title": "E-mail" },
+            "website": { "type": "string", "title": "Strona www" },
+            "description": { "type": "string", "title": "Opis działalności" },
+            "services": { "type": "array", "items": { "type": "string" }, "title": "Oferowane usługi" },
+            "images": { "type": "array", "items": { "type": "string" }, "title": "Zdjęcia realizacji" },
+            "certificateNumber": { "type": "string", "title": "Numer certyfikatu" },
+            "certificateExpiry": { "type": "string", "title": "Data ważności certyfikatu" },
+            "profileConsent": { "type": "boolean", "title": "Zgoda profilowa" },
+            "certificateConsent": { "type": "boolean", "title": "Zgoda certyfikatowa" },
+            "termsConsent": { "type": "boolean", "title": "Zgoda na regulamin" },
+            "verificationConsent": { "type": "boolean", "title": "Zgoda na weryfikację" }
+          }
+        },
+        "order-rating": {
+          "type": "object",
+          "properties": {
+            "rating": { "type": "number", "title": "Ocena" },
+            "comment": { "type": "string", "title": "Komentarz" },
+            "recommendationLevel": { "type": "string", "title": "Poziom rekomendacji" },
+            "publicReview": { "type": "boolean", "title": "Zgoda na publikację" }
+          }
+        }
+      }
+    }
+  }
