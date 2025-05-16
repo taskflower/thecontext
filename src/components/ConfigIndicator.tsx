@@ -1,46 +1,30 @@
 // src/components/ConfigIndicator.tsx
-import { FCWithChildren } from "@/core";
-import { memo } from "react";
-import I from "./I";
+import React from "react";
 import { useConfig } from "@/ConfigProvider";
+import { EditConfigButton } from "./EditConfigButton";
 
-interface ConfigIndicatorProps {
-  configId?: string;
-  configType?: "firebase" | "local";
-  config?: {
-    workspaces: any[];
-    scenarios: any[];
-  };
-}
-
-const ConfigIndicator: FCWithChildren<ConfigIndicatorProps> = memo(({ configId, configType, config }) => {
-  const configContext = useConfig();
-  const id = configId || configContext.configId || "";
-  const type = configType || configContext.configType || "local";
-  const cfg = config || configContext.config || { workspaces: [], scenarios: [] };
+export const ConfigIndicator: React.FC = () => {
+  const { config, configId, configType } = useConfig();
   
-  const isFirebase = type === "firebase";
-  const iconName = "database";
-  const colors = isFirebase
-    ? ["bg-blue-100", "text-blue-800", "border-blue-200"]
-    : ["bg-green-100", "text-green-800", "border-green-200"];
-  const label = isFirebase ? "Firebase App" : "Local Config";
-
+  if (!config || !configId) return null;
+  
   return (
-    <div
-      className={`fixed left-4 bottom-4 z-50 px-3 py-2 text-xs rounded-md font-semibold flex items-center shadow-md border ${colors.join(
-        " "
-      )}`}
-    >
-      <I name={iconName} className={`w-3.5 h-3.5 mr-1.5 ${colors[1]}`} />
-      <span>
-        {label}: <span className="font-mono">{id.slice(0, 8)}…</span>
-        <span className="text-xs opacity-60 ml-2">
-          ({cfg.workspaces.length} ws, {cfg.scenarios.length} sc)
-        </span>
-      </span>
+    <div className="fixed bottom-2 right-2 z-50 flex items-center space-x-2">
+      {/* Przycisk edycji konfiguracji */}
+      <EditConfigButton />
+      
+      {/* Wskaźnik aktywnej konfiguracji */}
+      <div className="bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg flex items-center">
+        <span className="mr-1.5">Config:</span> 
+        <span className="font-mono">{configId}</span>
+        {configType && (
+          <span className="ml-1.5 bg-blue-600 px-1.5 py-0.5 rounded-sm">
+            {configType}
+          </span>
+        )}
+      </div>
     </div>
   );
-});
+};
 
 export default ConfigIndicator;
