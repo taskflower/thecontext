@@ -146,7 +146,10 @@ export const NodeEditor: React.FC<NodeEditorProps> = ({ node, onUpdate }) => {
   };
 
   return (
-    <EditorCard title={`Krok: ${node.label || node.slug}`}>
+    <EditorCard
+      title={`${node.label || node.slug}`}
+      description="Krok scenariusza"
+    >
       <EditorTabs
         activeTab={activeTab}
         options={[

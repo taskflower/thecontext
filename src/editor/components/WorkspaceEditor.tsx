@@ -1,4 +1,4 @@
-// src/editor/components/WorkspaceEditor.tsx
+// src/editor/components/WorkspaceEditor.tsx (bez większych zmian)
 import React, { useState } from "react";
 import { WorkspaceConfig, ScenarioConfig } from "@/core/types";
 import { JsonEditor } from "./common/JsonEditor";
@@ -64,38 +64,24 @@ export const WorkspaceEditor: React.FC<WorkspaceEditorProps> = ({
             onChange={onUpdate}
           />
         )}
-        {tab === "widgets" && (
-          <div className="text-gray-500 italic">Tu widgety…</div>
-        )}
+        {tab === "widgets" && <div className="text-gray-500 italic">Tu widgety…</div>}
         {tab === "json" && <JsonEditor value={workspace} onChange={onUpdate} />}
       </div>
 
       <EditorCard title="Scenariusze">
-        <div className="flex justify-end p-4">
-          <button
-            onClick={onAddScenario}
-            className="text-blue-600 hover:underline"
-          >
+        <div className="flex justify-end">
+          <button onClick={onAddScenario} className="text-sm text-blue-600 hover:underline">
             Dodaj scenariusz
           </button>
         </div>
-        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {scenarios.map((s) => (
-            <div
-              key={s.slug}
-              className="border p-3 rounded flex justify-between"
-            >
-              <div
-                onClick={() => onEditScenario(s.slug)}
-                className="cursor-pointer"
-              >
+            <div key={s.slug} className="border p-3 rounded flex justify-between shadow-sm">
+              <div onClick={() => onEditScenario(s.slug)} className="cursor-pointer">
                 <h4 className="font-medium">{s.name}</h4>
                 <p className="text-xs text-gray-500">{s.description}</p>
               </div>
-              <button
-                onClick={() => onDeleteScenario(s.slug)}
-                className="text-red-600"
-              >
+              <button onClick={() => onDeleteScenario(s.slug)} className="text-red-600">
                 Usuń
               </button>
             </div>

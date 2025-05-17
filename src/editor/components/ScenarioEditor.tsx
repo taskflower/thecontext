@@ -1,11 +1,11 @@
-// src/editor/components/ScenarioEditor.tsx
+// src/editor/components/ScenarioEditor.tsx (brak potrzeby zmian — logika update przekazywana z góry)
 import React, { useState } from "react";
 import { ScenarioConfig, NodeConfig } from "@/core/types";
 import { JsonEditor } from "./common/JsonEditor";
 import { FormEditor } from "./common/FormEditor";
 import { EditorTabs } from "./common/EditorTabs";
 import { EditorCard } from "./common/EditorCard";
-import { PlusCircle } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, PlusCircle, Trash } from "lucide-react";
 import { NodeEditor } from "./scenario/NodeEditor";
 
 interface ScenarioEditorProps {
@@ -97,16 +97,6 @@ export const ScenarioEditor: React.FC<ScenarioEditorProps> = ({
 
         {activeTab === "nodes" && (
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="font-medium">Kroki</h3>
-              <button
-                className="flex items-center text-sm text-blue-600 hover:text-blue-800"
-                onClick={addNode}
-              >
-                <PlusCircle className="w-4 h-4 mr-1" /> Dodaj krok
-              </button>
-            </div>
-
             {sorted.length === 0 ? (
               <div className="text-gray-500 italic p-4 bg-gray-50 rounded text-center">
                 Brak kroków
@@ -115,7 +105,7 @@ export const ScenarioEditor: React.FC<ScenarioEditorProps> = ({
               sorted.map((node, idx) => (
                 <div
                   key={node.slug}
-                  className="border rounded-md overflow-hidden"
+                  className=""
                 >
                   <NodeEditor
                     node={node}
@@ -127,24 +117,33 @@ export const ScenarioEditor: React.FC<ScenarioEditorProps> = ({
                   />
                   <div className="p-2 flex justify-end space-x-2 text-xs">
                     <button onClick={() => move(idx, -1)} disabled={idx === 0}>
-                      ▲
+                      <ChevronUp className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => move(idx, 1)}
                       disabled={idx === sorted.length - 1}
                     >
-                      ▼
+                      <ChevronDown className="w-4 h-4" />
                     </button>
                     <button
                       className="text-red-600"
                       onClick={() => remove(idx)}
                     >
-                      🗑
+                      <Trash className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
               ))
             )}
+
+            <div className="flex justify-end items-center">
+              <button
+                className="flex items-center text-sm text-blue-600 hover:text-blue-800"
+                onClick={addNode}
+              >
+                <PlusCircle className="w-4 h-4 mr-1" /> Dodaj krok
+              </button>
+            </div>
           </div>
         )}
 

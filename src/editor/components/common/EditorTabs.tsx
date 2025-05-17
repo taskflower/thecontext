@@ -18,12 +18,12 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
   onChange,
 }) => {
   return (
-    <div className="px-4 py-2 border-b border-gray-200 bg-gray-50">
-      <div className="flex space-x-2">
+    <div className="border p-px rounded-md border-white shadow mb-8">
+      <div className="flex space-x-px">
         {options.map((option) => (
           <button
             key={option.id}
-            className={`px-3 py-1 text-sm rounded-md ${
+            className={`px-3 py-2 text-sm rounded-md ${
               activeTab === option.id
                 ? "bg-blue-100 text-blue-800"
                 : "bg-white text-gray-700 hover:bg-gray-100"

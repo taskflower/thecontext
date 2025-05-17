@@ -1,42 +1,15 @@
-// Kompaktowa wersja pliku ConfigEditor.tsx zredukowana pod LLM/tokeny
-
-import React, { useReducer } from "react";
+// src/editor/ConfigEditor.tsx (po refaktoryzacji)
+import { useReducer } from "react";
 import { FileCog, AlertTriangle } from "lucide-react";
 import { FirebaseAdapter } from "@/provideDB/firebase/FirebaseAdapter";
-import { AppConfig, WorkspaceConfig, ScenarioConfig } from "@/core/types";
 import { AppConfigEditor } from "./components/AppConfigEditor";
 import { WorkspaceEditor } from "./components/WorkspaceEditor";
 import { ScenarioEditor } from "./components/ScenarioEditor";
 import { EditorHeader } from "./components/EditorHeader";
 import { EditorSidebar } from "./components/EditorSidebar";
+import { useCrudDispatcher } from "@/editor/useCrudDispatcher";
 
-type Sec = "app" | "workspace" | "scenario";
-type Lst = "workspaces" | "scenarios";
-
-type Act =
-  | { type: "setError"; error: string | null }
-  | { type: "markClean" }
-  | { type: "setSection"; section: Sec; workspace?: string; scenario?: string }
-  | {
-      type: "crud";
-      list: Lst;
-      op: "add" | "update" | "delete";
-      item?: any;
-      slug?: string;
-    };
-
-type State = {
-  section: Sec;
-  selectedWorkspace?: string;
-  selectedScenario?: string;
-  config: AppConfig;
-  workspaces: WorkspaceConfig[];
-  scenarios: ScenarioConfig[];
-  isDirty: boolean;
-  error: string | null;
-};
-
-const reducer = (s: State, a: Act): State => {
+const reducer = (s, a) => {
   if (a.type === "setError") return { ...s, error: a.error };
   if (a.type === "markClean") return { ...s, isDirty: false };
   if (a.type === "setSection")
@@ -62,9 +35,7 @@ const reducer = (s: State, a: Act): State => {
   return s;
 };
 
-type Props = { initialConfig: AppConfig; configId: string };
-
-export const ConfigEditor: React.FC<Props> = ({ initialConfig, configId }) => {
+export const ConfigEditor = ({ initialConfig, configId }) => {
   const [state, dispatch] = useReducer(reducer, {
     section: "app",
     config: initialConfig,
@@ -73,11 +44,12 @@ export const ConfigEditor: React.FC<Props> = ({ initialConfig, configId }) => {
     isDirty: false,
     error: null,
   });
-
   const db = new FirebaseAdapter("application_configs");
+  const crud = useCrudDispatcher(dispatch);
+
   const save = async () => {
     try {
-      dispatch({ type: "setError", error: null });
+      crud.setError(null);
       await db.saveData(
         {
           enabled: true,
@@ -88,74 +60,46 @@ export const ConfigEditor: React.FC<Props> = ({ initialConfig, configId }) => {
         },
         state.config
       );
-      dispatch({ type: "markClean" });
-    } catch (e: any) {
-      dispatch({ type: "setError", error: e.message || "Błąd zapisu" });
+      crud.markClean();
+    } catch (e) {
+      crud.setError(e.message || "Błąd zapisu");
     }
   };
 
   const addWs = () => {
-    const newWs: WorkspaceConfig = {
+    const newWs = {
       slug: `ws-${Date.now()}`,
       name: "Nowa",
       description: "",
       templateSettings: { layoutFile: "Simple", widgets: [] },
       contextSchema: { type: "object", properties: {} },
     };
-    dispatch({ type: "crud", list: "workspaces", op: "add", item: newWs });
-    dispatch({
-      type: "setSection",
-      section: "workspace",
-      workspace: newWs.slug,
-    });
+    crud.add("workspaces", newWs);
+    crud.setSection("workspace", newWs.slug);
   };
 
-  const updWs = (slug: string, updates: Partial<WorkspaceConfig>) =>
-    dispatch({
-      type: "crud",
-      list: "workspaces",
-      op: "update",
-      slug,
-      item: updates,
-    });
-  const delWs = (slug: string) =>
+  const updWs = (slug, updates) => crud.update("workspaces", slug, updates);
+  const delWs = (slug) =>
     confirm(`Usunąć ${slug}?`) &&
-    (dispatch({ type: "crud", list: "workspaces", op: "delete", slug }),
-    dispatch({ type: "setSection", section: "app" }));
+    (crud.remove("workspaces", slug), crud.setSection("app"));
 
-  const addSc = (ws: string) => {
-    const newSc: ScenarioConfig = {
+  const addSc = (ws) => {
+    const newSc = {
       slug: `sc-${Date.now()}`,
       name: "Nowy",
       description: "",
       workspaceSlug: ws,
       nodes: [],
     };
-    dispatch({ type: "crud", list: "scenarios", op: "add", item: newSc });
-    dispatch({
-      type: "setSection",
-      section: "scenario",
-      workspace: ws,
-      scenario: newSc.slug,
-    });
+    crud.add("scenarios", newSc);
+    crud.setSection("scenario", ws, newSc.slug);
   };
 
-  const updSc = (slug: string, updates: Partial<ScenarioConfig>) =>
-    dispatch({
-      type: "crud",
-      list: "scenarios",
-      op: "update",
-      slug,
-      item: updates,
-    });
-  const delSc = (slug: string) =>
-    confirm(`Usunąć?`) &&
-    (dispatch({ type: "crud", list: "scenarios", op: "delete", slug }),
-    dispatch({
-      type: "setSection",
-      section: "workspace",
-      workspace: state.selectedWorkspace,
-    }));
+  const updSc = (slug, updates) => crud.update("scenarios", slug, updates);
+  const delSc = (slug) =>
+    confirm("Usunąć?") &&
+    (crud.remove("scenarios", slug),
+    crud.setSection("workspace", state.selectedWorkspace));
 
   const view = () => {
     const {
@@ -172,15 +116,7 @@ export const ConfigEditor: React.FC<Props> = ({ initialConfig, configId }) => {
           config={config}
           workspaces={workspaces}
           scenarios={scenarios}
-          onUpdate={(u) =>
-            dispatch({
-              type: "crud",
-              list: "workspaces",
-              op: "update",
-              slug: "",
-              item: u,
-            })
-          }
+          onUpdate={(u) => crud.update("workspaces", "", u)}
         />
       );
     if (section === "workspace") {
@@ -191,14 +127,7 @@ export const ConfigEditor: React.FC<Props> = ({ initialConfig, configId }) => {
           scenarios={scenarios.filter((s) => s.workspaceSlug === ws.slug)}
           onUpdate={(u) => updWs(ws.slug, u)}
           onAddScenario={() => addSc(ws.slug)}
-          onEditScenario={(s) =>
-            dispatch({
-              type: "setSection",
-              section: "scenario",
-              workspace: ws.slug,
-              scenario: s,
-            })
-          }
+          onEditScenario={(s) => crud.setSection("scenario", ws.slug, s)}
           onDeleteScenario={delSc}
         />
       ) : (
@@ -235,14 +164,7 @@ export const ConfigEditor: React.FC<Props> = ({ initialConfig, configId }) => {
             activeSection={state.section}
             selectedWorkspace={state.selectedWorkspace}
             selectedScenario={state.selectedScenario}
-            onChangeSection={(s, ws, sc) =>
-              dispatch({
-                type: "setSection",
-                section: s,
-                workspace: ws,
-                scenario: sc,
-              })
-            }
+            onChangeSection={(s, ws, sc) => crud.setSection(s, ws, sc)}
             onAddWorkspace={addWs}
             onDeleteWorkspace={delWs}
           />

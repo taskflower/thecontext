@@ -1,3 +1,4 @@
+// src/editor/components/AppConfigEditor.tsx (bez zmian funkcjonalnych, ale dopasowanie do hooka jeśli potrzeba)
 import React, { useState } from "react";
 import { AppConfig, WorkspaceConfig, ScenarioConfig } from "@/core/types";
 import { JsonEditor } from "./common/JsonEditor";
@@ -20,15 +21,15 @@ export const AppConfigEditor: React.FC<{
       tplDir: { type: "string", title: "Katalog" },
       defaultWorkspace: {
         type: "string",
-        title: "Domyślna przestrzeń",
-        enum: workspaces.map(w => w.slug),
-        enumNames: workspaces.map(w => w.name || w.slug),
+        title: "Domyślna przestrzeń robocza",
+        enum: workspaces.map((w) => w.slug),
+        enumNames: workspaces.map((w) => w.name || w.slug),
       },
       defaultScenario: {
         type: "string",
         title: "Domyślny scenariusz",
-        enum: scenarios.map(s => s.slug),
-        enumNames: scenarios.map(s => s.name || s.slug),
+        enum: scenarios.map((s) => s.slug),
+        enumNames: scenarios.map((s) => s.name || s.slug),
       },
     },
     required: ["name", "tplDir"],
@@ -36,7 +37,14 @@ export const AppConfigEditor: React.FC<{
 
   return (
     <EditorCard title="Konfiguracja aplikacji">
-      <EditorTabs activeTab={tab} options={[{ id: "form", label: "Form" }, { id: "json", label: "JSON" }]} onChange={t => setTab(t as any)} />
+      <EditorTabs
+        activeTab={tab}
+        options={[
+          { id: "form", label: "Form" },
+          { id: "json", label: "JSON" },
+        ]}
+        onChange={(t) => setTab(t as any)}
+      />
       <div className="p-4">
         {tab === "form" ? (
           <FormEditor schema={schema} formData={config} onChange={onUpdate} />
