@@ -3,24 +3,5 @@
   "description": "Analiza strony internetowej pod kątem przyszłych kampanii marketingowych",
   "tplDir": "default",
   "defaultWorkspace": "workspace-website-analysis",
-  "defaultScenario": "scenario-website-analysis",
-  "workspaces": [
-    {
-      "id": "workspace-website-analysis"
-    },
-    {
-      "id": "workspace-googleads"
-    }
-  ],
-  "scenarios": [
-    {
-      "id": "scenario-website-analysis"
-    },
-    {
-      "id": "scenario-create-budget"
-    },
-    {
-      "id": "scenario-manage-budgets"
-    }
-  ]
+  "defaultScenario": "scenario-website-analysis"
 }
