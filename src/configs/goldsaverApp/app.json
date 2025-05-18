@@ -1,25 +1,5 @@
 {
   "name": "GoldSaver",
   "description": "Platforma do zakupu i zarządzania oszczędnościami w złocie",
-  "tplDir": "goldsaver",
-  "workspaces": [
-    { "id": "workspace-goldsaver" },
-    { "id": "workspace-pages" }
-  ],
-  "scenarios": [
-    { "id": "user-panel" },
-    { "id": "purchase-gold" },
-    { "id": "transaction-history" },
-    { "id": "analytics-dashboard" },
-    { "id": "bars-management" },
-    { "id": "coins-exchange" },
-    { "id": "sell-gold" },
-    { "id": "invoices" },
-    { "id": "support-center" },
-
-
-    { "id": "regulamin" },
-    { "id": "polityka-prywatnosci" },
-    { "id": "kontakt" }
-  ]
+  "tplDir": "goldsaver"
 }
