@@ -1,20 +1,18 @@
 // src/themes/default/components/FormStep.tsx
-import React, { useMemo } from "react";
-import {
-  TemplateComponentProps,
-  useFormSchema,
-  useFlow,
-  getPath,
-} from "@/core";
-import FieldRenderer from "../commons/form/FieldRenderer";
-import TagsField from "../commons/form/TagsField";
-import CheckboxField from "../commons/form/CheckboxField";
-import TextField from "../commons/form/TextField";
-import NumberField from "../commons/form/NumberField";
-import TextareaField from "../commons/form/TextareaField";
-import SelectField from "../commons/form/SelectField";
+import React, { useMemo, useState } from "react";
+import { TemplateComponentProps, useFormSchema } from "@/core";
+
 import { useParams } from "react-router-dom";
 import { useConfig } from "@/ConfigProvider";
+import {
+  CheckboxField,
+  FieldRenderer,
+  NumberField,
+  SelectField,
+  TagsField,
+  TextareaField,
+  TextField,
+} from "../commons/form";
 
 const fieldComponents = {
   TagsField,
@@ -84,11 +82,23 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
   contextSchemaPath,
 }) => {
   const contextSchema = useSchemaFromContext(contextSchemaPath);
+  const [showValidationSummary, setShowValidationSummary] = useState(false);
+
+  // Debug log schema sources
+  console.log(`[FormStep:${nodeSlug}] Schema Sources:`, {
+    propSchema: schema,
+    propJsonSchema: jsonSchema,
+    contextSchemaPath,
+    contextSchema,
+  });
 
   const effectiveSchema = useMemo(() => {
     if (jsonSchema) return jsonSchema;
     return contextSchema || {};
   }, [jsonSchema, contextSchema]);
+
+  // Debug log effective schema
+  console.log(`[FormStep:${nodeSlug}] Effective Schema:`, effectiveSchema);
 
   const {
     formData,
@@ -99,20 +109,70 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
     hasRequiredFields,
     isSimpleType,
     unwrapSimpleValue,
+    setErrors,
   } = useFormSchema({
     schema,
     jsonSchema: effectiveSchema,
     initialData: data,
   });
 
+  // Debug current form state
+  console.log(`[FormStep:${nodeSlug}] Current Form State:`, {
+    formData,
+    errors,
+    fieldSchemas,
+    hasRequiredFields,
+    isSimpleType,
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
-      console.log(`[FormStep:${nodeSlug}] Submitting form data:`, formData);
+    console.log(`[FormStep:${nodeSlug}] Attempting to submit form...`);
 
+    // Manual validation for required fields if standard validation doesn't catch them
+    const manualValidationErrors: Record<string, string> = {};
+
+    // Check required fields explicitly from jsonSchema
+    if (effectiveSchema.required) {
+      effectiveSchema.required.forEach((fieldName: string) => {
+        if (
+          formData[fieldName] === undefined ||
+          formData[fieldName] === null ||
+          formData[fieldName] === ""
+        ) {
+          manualValidationErrors[fieldName] = "To pole jest wymagane";
+        }
+      });
+    }
+
+    // Apply manual validation errors if found
+    if (Object.keys(manualValidationErrors).length > 0) {
+      console.log(
+        `[FormStep:${nodeSlug}] Manual validation failed with errors:`,
+        manualValidationErrors
+      );
+      setErrors(manualValidationErrors);
+      setShowValidationSummary(true);
+      return;
+    }
+
+    // Run standard validation
+    const isValid = validateForm();
+    console.log(
+      `[FormStep:${nodeSlug}] Form validation result:`,
+      isValid,
+      "Errors:",
+      errors
+    );
+
+    if (isValid) {
       // Jeśli mamy prosty typ, odwijamy wartość przed przekazaniem
       const submitData = isSimpleType ? unwrapSimpleValue(formData) : formData;
+      console.log(`[FormStep:${nodeSlug}] Submitting form data:`, submitData);
       onSubmit(submitData);
+    } else {
+      // Show validation summary when validation fails
+      setShowValidationSummary(true);
     }
   };
 
@@ -121,6 +181,20 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
       <h2 className="text-xl text-gray-900 mb-3">{title}</h2>
       {description && (
         <p className="text-gray-600 mb-6 text-sm">{description}</p>
+      )}
+
+      {/* Validation summary - show when there are errors and validation has been attempted */}
+      {showValidationSummary && Object.keys(errors).length > 0 && (
+        <div className="p-4 bg-orange-50 border border-orange-200 rounded mb-4">
+          <p className="font-medium mb-2">Formularz zawiera błędy:</p>
+          <ul className="text-sm list-disc pl-5">
+            {Object.entries(errors).map(([field, error]) => (
+              <li key={field}>
+                {fieldSchemas[field]?.title || field}: {error}
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       <form onSubmit={handleSubmit}>
@@ -132,7 +206,15 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
               fieldSchema={schema}
               value={formData[name]}
               error={errors[name]}
-              handleChange={handleChange}
+              handleChange={(field, value) => {
+                handleChange(field, value);
+                // Clear error for this field when it changes
+                if (errors[field]) {
+                  const newErrors = { ...errors };
+                  delete newErrors[field];
+                  setErrors(newErrors);
+                }
+              }}
               nodeSlug={nodeSlug}
               components={fieldComponents}
             />
@@ -143,8 +225,25 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
               Nie znaleziono pól formularza dla podanej ścieżki.
             </p>
             <p className="text-red-500 text-sm">
-              Sprawdź konfigurację ścieżki i strukturę schematu.
+              Sprawdź konfigurację ścieżki: <strong>{contextSchemaPath}</strong>
             </p>
+            <details className="mt-3">
+              <summary className="text-red-600 cursor-pointer">
+                Szczegóły debugowania
+              </summary>
+              <pre className="text-xs bg-red-100 p-2 mt-2 rounded overflow-auto max-h-40">
+                {JSON.stringify(
+                  {
+                    contextSchemaPath,
+                    effectiveSchema,
+                    formData,
+                    errors,
+                  },
+                  null,
+                  2
+                )}
+              </pre>
+            </details>
           </div>
         )}
 
