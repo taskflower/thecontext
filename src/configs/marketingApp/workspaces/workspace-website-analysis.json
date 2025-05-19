@@ -38,83 +38,129 @@
     "properties": {
       "website-data": {
         "type": "object",
-        "properties": { 
-          "url": { 
-            "type": "string", 
+        "properties": {
+          "url": {
+            "type": "string",
             "title": "Adres URL strony",
-            "description": "Podaj pełny adres URL strony, którą chcesz przeanalizować"
+            "description": "Podaj pełny adres URL strony, którą chcesz przeanalizować",
+            "minLength": 5,
+            "ui:widget": "url",
+            "ui:placeholder": "https://example.com",
+            "ui:help": "Podaj kompletny adres łącznie z https:// lub http://",
+            "pattern": "^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$",
+            "patternMessage": "Wprowadź prawidłowy adres URL"
           },
           "authorized": {
             "type": "boolean",
             "title": "Potwierdzam, że jestem uprawniony do analizy tej strony",
-            "default": false
+            "default": false,
+            "ui:widget": "checkbox"
           }
         },
-        "required": ["url", "authorized"]
+        "required": [
+          "url",
+          "authorized"
+        ]
       },
       "website-summary": {
         "type": "object",
         "properties": {
-          "summary": { 
-            "type": "string", 
-            "title": "Streszczenie strony" 
+          "summary": {
+            "type": "string",
+            "title": "Streszczenie strony",
+            "ui:widget": "textarea",
+            "minLength": 20,
+            "maxLength": 5000
           },
-          "keywords": { 
-            "type": "array", 
-            "items": { 
-              "type": "string" 
-            }, 
-            "title": "Słowa kluczowe" 
+          "industry": {
+            "type": "string",
+            "title": "Branża",
+            "description": "Określenie branży, której dotyczy analizowana strona",
+            "required": true,
+            "minLength": 3
           },
-          "mainTopics": { 
-            "type": "array", 
-            "items": { 
-              "type": "string" 
-            }, 
-            "title": "Główne tematy" 
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Słowa kluczowe",
+            "ui:widget": "tags"
+          },
+          "mainTopics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Główne tematy",
+            "ui:widget": "tags"
           }
         }
       },
       "marketing-description": {
         "type": "object",
         "properties": {
-          "marketingDescription": { 
-            "type": "string", 
-            "title": "Opis marketingowy" 
+          "marketingDescription": {
+            "type": "string",
+            "title": "Opis marketingowy",
+            "ui:widget": "textarea",
+            "minLength": 50
           },
-          "industry": { 
-            "type": "string", 
+          "industry": {
+            "type": "string",
             "title": "Branża",
-            "description": "Określenie branży, której dotyczy analizowana strona"
+            "description": "Określenie branży, której dotyczy analizowana strona",
+            "minLength": 3,
+            "maxLength": 100,
+            "ui:help": "Podaj główną branżę, np. 'Finanse', 'E-commerce', 'Edukacja'"
           },
-          "targetAudience": { 
-            "type": "string", 
-            "title": "Grupa docelowa" 
+          "targetAudience": {
+            "type": "string",
+            "title": "Grupa docelowa",
+            "ui:widget": "textarea"
           },
           "suggestedChannels": {
             "type": "array",
-            "items": { 
-              "type": "object", 
-              "properties": { 
-                "id": { "type": "string" }, 
-                "name": { "type": "string" }, 
-                "description": { "type": "string" }, 
-                "icon": { "type": "string" } 
-              } 
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "icon": {
+                  "type": "string"
+                }
+              }
             },
             "title": "Sugerowane kanały"
           },
           "metrics": {
             "type": "array",
-            "items": { 
-              "type": "object", 
-              "properties": { 
-                "label": { "type": "string" }, 
-                "value": { "type": "number" }, 
-                "prefix": { "type": "string" }, 
-                "suffix": { "type": "string" }, 
-                "change": { "type": "number" } 
-              } 
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "number"
+                },
+                "prefix": {
+                  "type": "string"
+                },
+                "suffix": {
+                  "type": "string"
+                },
+                "change": {
+                  "type": "number"
+                }
+              }
             },
             "title": "Metryki marketingowe"
           }

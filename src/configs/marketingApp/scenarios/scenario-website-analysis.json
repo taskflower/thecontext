@@ -15,6 +15,7 @@
       "order": 0,
       "attrs": {
         "title": "Podaj adres URL strony do analizy",
+        "description": "Wprowadź kompletny adres strony, którą chcesz przeanalizować",
         "submitLabel": "Dalej"
       }
     },
@@ -53,14 +54,27 @@
     {
       "slug": "edit-industry",
       "label": "Krok 4: Edytuj branżę",
-      "contextSchemaPath": "marketing-description",
-      "contextDataPath": "marketing-description",
+      "contextSchemaPath": "website-summary.industry",
+      "contextDataPath": "website-summary.industry",
       "tplFile": "FormStep",
       "order": 6,
       "attrs": {
         "title": "Edycja branży",
-        "submitLabel": "Zapisz",
-        "schemaPath": "marketing-description.industry" 
+        "description": "Określ branżę, której dotyczy analizowana strona",
+        "submitLabel": "Zapisz"
+      }
+    },
+    {
+      "slug": "edit-description",
+      "label": "Krok 4: Edytuj branżę",
+      "contextSchemaPath": "website-summary.summary",
+      "contextDataPath": "website-summary.summary",
+      "tplFile": "FormStep",
+      "order": 6,
+      "attrs": {
+        "title": "Edycja branży",
+        "description": "Określ branżę, której dotyczy analizowana strona",
+        "submitLabel": "Zapisz"
       }
     }
   ]

@@ -1,4 +1,4 @@
-// src/core/engine.tsx (Zmodyfikowany)
+// src/core/engine.tsx (Z dodatkowym debugowaniem)
 import { memo, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import {
@@ -8,6 +8,7 @@ import {
   TemplateComponentProps,
   useComponent,
   jsonToZod,
+  getPath,
 } from ".";
 
 import { useAppNavigation } from "./navigation";
@@ -36,11 +37,76 @@ const NodeRenderer = memo(({
     [config.workspaces, workspaceSlug]
   );
   
-  // Get schema from workspace configuration
+  // Dodajemy debugowanie
+  console.log("NodeRenderer Config:", {
+    node: node.slug,
+    contextSchemaPath: node.contextSchemaPath,
+    contextDataPath: node.contextDataPath,
+    workspaceSlug,
+    currentWorkspace: currentWorkspace ? currentWorkspace.slug : null
+  });
+  
+  if (currentWorkspace) {
+    console.log("Workspace contextSchema:", currentWorkspace.contextSchema);
+  }
+  
+  // Get schema from workspace configuration - pozwala na głęboki dostęp do schematu
   const jsonSchema = useMemo(() => {
-    if (!currentWorkspace || !node.contextSchemaPath) return {};
-    return currentWorkspace.contextSchema.properties[node.contextSchemaPath] || {};
+    if (!currentWorkspace || !node.contextSchemaPath) {
+      console.warn("Missing workspace or contextSchemaPath");
+      return {};
+    }
+    
+    // Podziel ścieżkę na segmenty, pierwszy segment jest głównym obiektem w properties
+    const pathSegments = node.contextSchemaPath.split('.');
+    const rootProperty = pathSegments[0];
+    
+    console.log("Path segments:", pathSegments);
+    console.log("Root property:", rootProperty);
+    
+    // Pobierz główny obiekt ze schematu
+    const rootSchema = currentWorkspace.contextSchema.properties[rootProperty];
+    if (!rootSchema) {
+      console.warn(`Root schema not found for property: ${rootProperty}`);
+      console.log("Available properties:", Object.keys(currentWorkspace.contextSchema.properties));
+      return {};
+    }
+    
+    console.log("Root schema:", rootSchema);
+    
+    // Jeśli nie ma dalszych segmentów, zwróć cały obiekt
+    if (pathSegments.length === 1) {
+      console.log("Returning root schema (no segments)");
+      return rootSchema;
+    }
+    
+    // W przeciwnym razie nawiguj głębiej w schemat
+    // Dodajemy bardziej szczegółowe śledzenie
+    let currentLevel = rootSchema;
+    let path = '';
+    
+    for (let i = 1; i < pathSegments.length; i++) {
+      const segment = pathSegments[i];
+      path = path ? `${path}.${segment}` : segment;
+      
+      console.log(`Looking for segment "${segment}" at path "${path}"`);
+      
+      if (currentLevel.type === 'object' && currentLevel.properties && currentLevel.properties[segment]) {
+        currentLevel = currentLevel.properties[segment];
+        console.log(`Found segment "${segment}":`, currentLevel);
+      } else {
+        console.warn(`Segment "${segment}" not found in schema at path "${path}"`);
+        console.log("Current level:", currentLevel);
+        return {};
+      }
+    }
+    
+    console.log("Final schema:", currentLevel);
+    return currentLevel;
+    
   }, [currentWorkspace, node.contextSchemaPath]);
+  
+  console.log("Final jsonSchema:", jsonSchema);
   
   const zodSchema = useMemo(() => jsonToZod(jsonSchema), [jsonSchema]);
   const data = get(node.contextDataPath);
@@ -64,7 +130,7 @@ const NodeRenderer = memo(({
       jsonSchema={jsonSchema}
       data={data}
       onSubmit={handleSubmit}
-      contextSchemaPath={node.contextSchemaPath} // Przekazujemy ścieżkę do schematu
+      contextSchemaPath={node.contextSchemaPath}
       {...(node.attrs || {})}
       saveToDB={node.saveToDB}
       scenarioName={currentScenario?.name}

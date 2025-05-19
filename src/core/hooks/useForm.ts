@@ -1,4 +1,4 @@
-// src/core/hooks/useForm.ts (Refactored)
+// src/core/hooks/useForm.ts (z dodatkowym eksportowaniem setErrors)
 import { useState, useEffect, useCallback } from "react";
 import { ZodType } from 'zod';
 
@@ -14,6 +14,7 @@ interface UseFormResult {
   handleChange: (field: string, value: any) => void;
   validateForm: () => boolean;
   resetForm: () => void;
+  setErrors: (errors: Record<string, string>) => void; // Dodajemy eksport tej funkcji
 }
 
 export const useForm = <T>({ 
@@ -23,6 +24,7 @@ export const useForm = <T>({
 }: UseFormOptions<T>): UseFormResult => {
   const [formData, setFormData] = useState<Record<string, any>>(initialData || {});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  
   useEffect(() => {
     if (initialData) {
       setFormData(initialData);
@@ -74,5 +76,12 @@ export const useForm = <T>({
     setErrors({});
   }, [initialData]);
 
-  return { formData, errors, handleChange, validateForm, resetForm };
+  return { 
+    formData, 
+    errors, 
+    handleChange, 
+    validateForm, 
+    resetForm,
+    setErrors // Eksportujemy tę funkcję, aby można było ręcznie ustawić błędy
+  };
 };
