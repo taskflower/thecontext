@@ -1,5 +1,5 @@
 // src/themes/default/components/FormStep.tsx
-import React from "react";
+import React, { useMemo } from "react";
 import { TemplateComponentProps, useFormSchema } from "@/core";
 import FieldRenderer from "../commons/form/FieldRenderer";
 import TagsField from "../commons/form/TagsField";
@@ -8,6 +8,8 @@ import TextField from "../commons/form/TextField";
 import NumberField from "../commons/form/NumberField";
 import TextareaField from "../commons/form/TextareaField";
 import SelectField from "../commons/form/SelectField";
+import { useParams } from "react-router-dom";
+import { useConfig } from "@/ConfigProvider";
 
 const fieldComponents = {
   TagsField,
@@ -19,11 +21,12 @@ const fieldComponents = {
 };
 
 interface EnhancedFormStepProps extends TemplateComponentProps {
-  jsonSchema?: any;
   title?: string;
   description?: string;
   submitLabel?: string;
   showRequiredHint?: boolean;
+  // Dodajemy tylko ścieżkę do konkretnego fragmentu schematu
+  schemaPath?: string;
 }
 
 const FormStep: React.FC<EnhancedFormStepProps> = ({
@@ -35,7 +38,28 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
   description,
   submitLabel = "Dalej",
   nodeSlug,
+  schemaPath,
+  contextSchemaPath,
 }) => {
+  const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
+  const { config } = useConfig();
+  
+  // Pobieranie schematu z konfiguracji workspace na podstawie ścieżki
+  const derivedJsonSchema = useMemo(() => {
+    if (jsonSchema) return jsonSchema; // Jeśli jsonSchema jest już zdefiniowane, użyj go
+    
+    // Znalezienie aktualnego workspace
+    const workspace = config.workspaces.find(ws => ws.slug === workspaceSlug);
+    if (!workspace) return {};
+    
+    // Użyj contextSchemaPath (z definicji węzła) lub schemaPath (z atrybutów)
+    const path = contextSchemaPath || schemaPath;
+    if (!path) return {};
+    
+    // Pobierz schemat z workspace.contextSchema.properties
+    return workspace.contextSchema.properties[path] || {};
+  }, [config.workspaces, workspaceSlug, jsonSchema, contextSchemaPath, schemaPath]);
+  
   const {
     formData,
     errors,
@@ -43,7 +67,11 @@ const FormStep: React.FC<EnhancedFormStepProps> = ({
     validateForm,
     fieldSchemas,
     hasRequiredFields,
-  } = useFormSchema({ schema, jsonSchema, initialData: data });
+  } = useFormSchema({ 
+    schema, 
+    jsonSchema: derivedJsonSchema, 
+    initialData: data 
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

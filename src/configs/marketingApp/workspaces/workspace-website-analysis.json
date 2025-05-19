@@ -38,30 +38,84 @@
     "properties": {
       "website-data": {
         "type": "object",
-        "properties": { "url": { "type": "string", "title": "Adres URL strony" } }
+        "properties": { 
+          "url": { 
+            "type": "string", 
+            "title": "Adres URL strony",
+            "description": "Podaj pełny adres URL strony, którą chcesz przeanalizować"
+          },
+          "authorized": {
+            "type": "boolean",
+            "title": "Potwierdzam, że jestem uprawniony do analizy tej strony",
+            "default": false
+          }
+        },
+        "required": ["url", "authorized"]
       },
       "website-summary": {
         "type": "object",
         "properties": {
-          "summary": { "type": "string", "title": "Streszczenie strony" },
-          "keywords": { "type": "array", "items": { "type": "string" }, "title": "Słowa kluczowe" },
-          "mainTopics": { "type": "array", "items": { "type": "string" }, "title": "Główne tematy" }
+          "summary": { 
+            "type": "string", 
+            "title": "Streszczenie strony" 
+          },
+          "keywords": { 
+            "type": "array", 
+            "items": { 
+              "type": "string" 
+            }, 
+            "title": "Słowa kluczowe" 
+          },
+          "mainTopics": { 
+            "type": "array", 
+            "items": { 
+              "type": "string" 
+            }, 
+            "title": "Główne tematy" 
+          }
         }
       },
       "marketing-description": {
         "type": "object",
         "properties": {
-          "marketingDescription": { "type": "string", "title": "Opis marketingowy" },
-          "industry": { "type": "string", "title": "Branża" },
-          "targetAudience": { "type": "string", "title": "Grupa docelowa" },
+          "marketingDescription": { 
+            "type": "string", 
+            "title": "Opis marketingowy" 
+          },
+          "industry": { 
+            "type": "string", 
+            "title": "Branża",
+            "description": "Określenie branży, której dotyczy analizowana strona"
+          },
+          "targetAudience": { 
+            "type": "string", 
+            "title": "Grupa docelowa" 
+          },
           "suggestedChannels": {
             "type": "array",
-            "items": { "type": "object", "properties": { "id": { "type": "string" }, "name": { "type": "string" }, "description": { "type": "string" }, "icon": { "type": "string" } } },
+            "items": { 
+              "type": "object", 
+              "properties": { 
+                "id": { "type": "string" }, 
+                "name": { "type": "string" }, 
+                "description": { "type": "string" }, 
+                "icon": { "type": "string" } 
+              } 
+            },
             "title": "Sugerowane kanały"
           },
           "metrics": {
             "type": "array",
-            "items": { "type": "object", "properties": { "label": { "type": "string" }, "value": { "type": "number" }, "prefix": { "type": "string" }, "suffix": { "type": "string" }, "change": { "type": "number" } } },
+            "items": { 
+              "type": "object", 
+              "properties": { 
+                "label": { "type": "string" }, 
+                "value": { "type": "number" }, 
+                "prefix": { "type": "string" }, 
+                "suffix": { "type": "string" }, 
+                "change": { "type": "number" } 
+              } 
+            },
             "title": "Metryki marketingowe"
           }
         }

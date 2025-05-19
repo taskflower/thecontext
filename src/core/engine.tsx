@@ -1,4 +1,4 @@
-// src/core/engine.tsx (Refactored)
+// src/core/engine.tsx (Zmodyfikowany)
 import { memo, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import {
@@ -28,12 +28,19 @@ const NodeRenderer = memo(({
   totalSteps,
 }: NodeRendererProps) => {
   const { get, set } = useFlowStore();
+  const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
+  
+  // Znajdź aktualny workspace
+  const currentWorkspace = useMemo(
+    () => config.workspaces.find(ws => ws.slug === workspaceSlug),
+    [config.workspaces, workspaceSlug]
+  );
   
   // Get schema from workspace configuration
-  const jsonSchema = useMemo(
-    () => config.workspaces[0]?.contextSchema.properties?.[node.contextSchemaPath] ?? {},
-    [config.workspaces, node.contextSchemaPath]
-  );
+  const jsonSchema = useMemo(() => {
+    if (!currentWorkspace || !node.contextSchemaPath) return {};
+    return currentWorkspace.contextSchema.properties[node.contextSchemaPath] || {};
+  }, [currentWorkspace, node.contextSchemaPath]);
   
   const zodSchema = useMemo(() => jsonToZod(jsonSchema), [jsonSchema]);
   const data = get(node.contextDataPath);
@@ -57,11 +64,17 @@ const NodeRenderer = memo(({
       jsonSchema={jsonSchema}
       data={data}
       onSubmit={handleSubmit}
+      contextSchemaPath={node.contextSchemaPath} // Przekazujemy ścieżkę do schematu
       {...(node.attrs || {})}
       saveToDB={node.saveToDB}
       scenarioName={currentScenario?.name}
       nodeSlug={node.slug}
-      context={{ stepIdx, totalSteps, workspace: null, scenario: null }}
+      context={{ 
+        stepIdx, 
+        totalSteps, 
+        workspace: currentWorkspace || null, 
+        scenario: currentScenario || null 
+      }}
     />
   );
 });
