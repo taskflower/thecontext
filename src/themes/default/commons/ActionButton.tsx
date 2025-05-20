@@ -30,7 +30,11 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   return (
     <button
       onClick={onClick}
-      className={`flex items-center justify-center rounded transition-colors text-sm font-semibold ${buttonClasses[variant]} ${additionalClasses} ${disabled ? 'bg-gray-400 cursor-not-allowed' : ''}`} // Dodane klasy do zablokowanego przycisku
+      className={`flex items-center justify-center rounded transition-colors text-sm font-semibold ${
+        buttonClasses[variant]
+      } ${additionalClasses} ${
+        disabled ? "bg-gray-100 cursor-not-allowed" : ""
+      }`} // Dodane klasy do zablokowanego przycisku
       disabled={disabled} // Zablokowanie przycisku
     >
       {icon && <span className="mr-2">{icon}</span>}

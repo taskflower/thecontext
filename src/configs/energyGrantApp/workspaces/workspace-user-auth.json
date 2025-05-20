@@ -44,7 +44,7 @@
               "auditor",
               "operator"
             ],
-            "title": "Rola",
+            "title": "Wybierz obszar dla Twojej roli w systemie",
             "fieldType": "role"
           },
           "isLoggedIn": {
