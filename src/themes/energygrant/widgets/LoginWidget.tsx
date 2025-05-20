@@ -1,5 +1,3 @@
-// src/themes/energygrant/widgets/LoginWidget.tsx
-
 import { useAuthContext } from "@/auth/AuthContext";
 
 type LoginWidgetProps = {
@@ -120,6 +118,7 @@ export default function LoginWidget({ onSubmit }: LoginWidgetProps) {
       {/* Przycisk rejestracji */}
       <button
         onClick={onSubmit}
+        disabled={loading || !user} // Blokowanie przycisku, jeśli użytkownik nie jest zalogowany
         className={`w-full flex items-center justify-center py-3 px-4 rounded-md text-sm font-medium ${
           user
             ? "bg-emerald-600 hover:bg-emerald-700 text-white"

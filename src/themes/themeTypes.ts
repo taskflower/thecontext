@@ -12,6 +12,7 @@ export interface WidgetsStepProps {
   onSubmit: (data: any) => void;
   title?: string;
   subtitle?: string;
+  disableNextButton?: boolean;
   saveToDB?: {
     enabled: boolean;
     provider: "indexedDB";

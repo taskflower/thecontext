@@ -7,6 +7,7 @@ interface ActionButtonProps {
   icon?: React.ReactNode;
   additionalClasses?: string;
   variant?: "narrow" | "full" | "outline" | "full-outline"; // Dodano "full-outline"
+  disabled?: boolean; // Dodano możliwość zablokowania przycisku
 }
 
 const ActionButton: React.FC<ActionButtonProps> = ({
@@ -15,6 +16,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   icon,
   additionalClasses = "",
   variant = "full", // Domyślny wariant to "full"
+  disabled = false, // Domyślnie przycisk nie jest zablokowany
 }) => {
   const buttonClasses = {
     narrow: "px-4 py-2", // Wąski przycisk
@@ -28,7 +30,8 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   return (
     <button
       onClick={onClick}
-      className={`flex items-center justify-center rounded transition-colors text-sm font-semibold ${buttonClasses[variant]} ${additionalClasses}`}
+      className={`flex items-center justify-center rounded transition-colors text-sm font-semibold ${buttonClasses[variant]} ${additionalClasses} ${disabled ? 'bg-gray-400 cursor-not-allowed' : ''}`} // Dodane klasy do zablokowanego przycisku
+      disabled={disabled} // Zablokowanie przycisku
     >
       {icon && <span className="mr-2">{icon}</span>}
       <span>{label}</span>

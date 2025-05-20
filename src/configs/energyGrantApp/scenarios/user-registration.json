@@ -7,7 +7,7 @@
   "icon": "user-plus",
   "nodes": [
     {
-      "slug": "registration-options",
+      "slug": "role-selection",
       "label": "",
       "contextSchemaPath": "user-data.role",
       "contextDataPath": "user-data.role",
@@ -20,8 +20,8 @@
       }
     },
     {
-      "slug": "role-selection",
-      "label": "Wybór roli",
+      "slug": "registration-component",
+      "label": "",
       "contextSchemaPath": "user-data",
       "contextDataPath": "user-data",
       "tplFile": "WidgetsStep",
@@ -29,6 +29,7 @@
       "attrs": {
         "title": "",
         "subtitle": "",
+        "disableNextButton": true,
         "widgets": [
           {
             "tplFile": "LoginWidget",
