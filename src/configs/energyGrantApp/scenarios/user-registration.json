@@ -14,8 +14,8 @@
       "tplFile": "WidgetsStep",
       "order": 0,
       "attrs": {
-        "title": "Wybierz swoją rolę w systemie",
-        "subtitle": "Określ, w jaki sposób będziesz korzystać z platformy",
+        "title": "",
+        "subtitle": "",
         "widgets": [
           {
             "tplFile": "TitleWidget",
