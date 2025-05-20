@@ -16,6 +16,7 @@
       "attrs": {
         "title": "",
         "subtitle": "",
+        "disableNextButton": true,
         "widgets": [
           {
             "tplFile": "TitleWidget",
@@ -160,7 +161,7 @@
               },
               {
                 "icon": "user",
-                "label": "Uzupełnij swój profil", 
+                "label": "Uzupełnij swój profil",
                 "description": "Dodaj więcej informacji do swojego profilu",
                 "url": "/profile"
               },

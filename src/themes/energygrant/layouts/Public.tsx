@@ -20,129 +20,176 @@ const Public: React.FC<PublicProps> = ({
     <div
       className={`min-h-screen flex flex-col ${
         darkMode
-          ? "bg-zinc-950 text-zinc-50"
-          : "bg-gradient-to-b from-emerald-50 to-zinc-100 text-zinc-900"
+          ? "bg-zinc-900 text-zinc-100"
+          : "bg-gradient-to-br from-emerald-50 via-zinc-50 to-blue-50 text-zinc-900"
       }`}
     >
-      {/* Tło z elementami energetycznymi - zmodyfikowane do kształtu połówki trapezu */}
+      {/* Modern background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="fixed top-0 right-0 w-1/2 h-full opacity-20">
-          <svg
-            width="100%"
-            height="100%"
-            preserveAspectRatio="none"
-            viewBox="0 0 100 100"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+        <svg
+          width="100%"
+          height="100%"
+          preserveAspectRatio="none"
+          viewBox="0 0 100 100"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <filter
+              id="ny-shadow"
+              x="-100%"
+              y="-100%"
+              width="300%"
+              height="300%"
+            >
+              <feGaussianBlur
+                in="SourceAlpha"
+                stdDeviation="17"
+                result="base-blur"
+              />
+
+              <feOffset in="base-blur" dx="15" dy="20" result="offset-main" />
+              <feComponentTransfer in="offset-main" result="shadow-main">
+                <feFuncA type="linear" slope="1.75" />
+              </feComponentTransfer>
+
+              <feOffset
+                in="base-blur"
+                dx="-3"
+                dy="17"
+                result="offset-secondary"
+              />
+              <feGaussianBlur
+                in="offset-secondary"
+                stdDeviation="5"
+                result="blur-secondary"
+              />
+              <feComponentTransfer
+                in="blur-secondary"
+                result="shadow-secondary"
+              >
+                <feFuncA type="linear" slope="0.4" />
+              </feComponentTransfer>
+
+              <feSpecularLighting
+                in="base-blur"
+                surfaceScale="5"
+                specularConstant="1"
+                specularExponent="20"
+                lighting-color="#007a60"
+                result="specular"
+              >
+                <fePointLight x="50" y="-50" z="200" />
+              </feSpecularLighting>
+              <feComposite
+                in="specular"
+                in2="SourceAlpha"
+                operator="in"
+                result="specular-comp"
+              />
+
+              <feMerge>
+                <feMergeNode in="shadow-main" />
+                <feMergeNode in="shadow-secondary" />
+                <feMergeNode in="SourceGraphic" />
+                <feMergeNode in="specular-comp" />
+              </feMerge>
+            </filter>
+          </defs>
+          <g filter="url(#ny-shadow)">
             <path
               d="M120,-20 L120,120 L30,120 L60,-20 Z"
-              fill={darkMode ? "#059669" : "#10b981"}
-              opacity="0.15"
+              fill="#90b981"
+              opacity="0.1"
             />
             <path
               d="M140,-20 L140,120 L50,120 L80,-20 Z"
-              fill={darkMode ? "#047857" : "#34d399"}
-              opacity="0.2"
+              fill="#34d399"
+              opacity="0.05"
             />
             <path
               d="M160,-20 L160,120 L70,120 L100,-20 Z"
-              fill={darkMode ? "#065f46" : "#059669"}
-              opacity="0.25"
+              fill="#059679"
+              opacity="0.05"
             />
-          </svg>
-        </div>
-
-        {/* Elementy tematyczne - zielona energia */}
-        <div className="fixed inset-0 flex items-center justify-center opacity-5">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="100%"
-            height="100%"
-            viewBox="0 0 1000 1000"
-            preserveAspectRatio="xMidYMid meet"
-          >
-            <g
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="text-emerald-600"
-            >
-              <circle cx="500" cy="500" r="300" />
-              <circle cx="500" cy="500" r="350" opacity="0.6" />
-              <circle cx="500" cy="500" r="400" opacity="0.3" />
-            </g>
-          </svg>
-        </div>
+          </g>
+        </svg>
       </div>
 
-      {/* Główna zawartość */}
+      {/* Main content */}
       <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8 relative z-10">
         <div
           className={`w-full max-w-xl ${
             darkMode
-              ? "bg-zinc-900 border-zinc-800"
-              : "bg-white border-zinc-200"
-          } border rounded-xl shadow-xl overflow-hidden transform transition-all`}
+              ? "bg-zinc-800/80 border-zinc-700"
+              : "bg-white/80 border-zinc-100"
+          } border rounded-2xl shadow-2xl backdrop-blur-sm overflow-hidden transition-all`}
         >
-          {/* Logo i nagłówek - zawsze widoczne */}
-          <div
-            className={`p-1 ${
-              darkMode ? "bg-zinc-900" : "bg-white"
-            } relative border-b`}
-          >
-            <div className="flex justify-center p-10">
-              {/* Logo programu dotacji energetycznych */}
-              <div className="relative flex items-center justify-center">
-                <div className="w-20 h-20 rounded-full bg-emerald-500 opacity-10 animate-pulse absolute"></div>
-                <HousePlug className="w-10 h-10 z-10 relative text-green-800" />
-              </div>
-            </div>
+          {/* Modern header area */}
+          <div className="relative">
+            {/* Decorative header accent */}
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-green-400 to-teal-500"></div>
 
-            <div className="text-center mb-6">
-              <h1
-                className={`text-3xl font-bold tracking-tight ${
-                  darkMode ? "text-white" : "text-zinc-900"
-                }`}
-              >
-                {title}
-              </h1>
-              <p
-                className={`mt-2 ${
-                  darkMode ? "text-zinc-400" : "text-zinc-600"
-                }`}
-              >
-                {subtitle}
-              </p>
+            <div className="pt-8 px-8">
+              {/* Logo with modern styling */}
+              <div className="flex justify-center mb-6 relative">
+                <div className="relative">
+                  <div
+                    className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full blur-md transform scale-110 opacity-30 animate-pulse"
+                    style={{ animationDuration: "3s" }}
+                  ></div>
+                  <div className="relative w-16 h-16 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+                    <HousePlug className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Modern typography */}
+              <div className="text-center mb-8">
+                <h1
+                  className={`text-3xl font-bold tracking-tight ${
+                    darkMode ? "text-white" : "text-zinc-900"
+                  }`}
+                >
+                  {title}
+                </h1>
+                <p
+                  className={`mt-2 ${
+                    darkMode ? "text-zinc-300" : "text-zinc-600"
+                  } font-medium`}
+                >
+                  {subtitle}
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Zawartość strony - dynamiczna część */}
-          <div className="px-8 pb-8">{children}</div>
+          {/* Content area with subtle separator */}
+          <div className="px-8 pb-8 pt-2">{children}</div>
 
-          {/* Stopka z informacją prawną */}
+          {/* Modern footer */}
           <div
-            className={`px-8 py-4 border-t ${
+            className={`px-8 py-4 ${
               darkMode
-                ? "bg-zinc-900 border-zinc-800"
-                : "bg-zinc-50 border-zinc-200"
-            }`}
+                ? "bg-zinc-800/50 border-zinc-700"
+                : "bg-zinc-50/50 border-zinc-200"
+            } border-t backdrop-blur-sm`}
           >
             <p
               className={`text-xs text-center ${
-                darkMode ? "text-zinc-500" : "text-zinc-600"
+                darkMode ? "text-zinc-400" : "text-zinc-500"
               }`}
             >
               Logując się, akceptujesz nasze{" "}
               <a
                 href="/workspace-user-legal-info/user-legal-info/terms-of-service"
-                className="text-emerald-600 hover:text-emerald-500 transition-colors"
+                className="text-emerald-500 hover:text-emerald-400 transition-colors font-medium"
               >
                 Warunki korzystania
               </a>{" "}
               i{" "}
               <a
                 href="/workspace-user-legal-info/user-legal-info/privacy-policy"
-                className="text-emerald-600 hover:text-emerald-500 transition-colors"
+                className="text-emerald-500 hover:text-emerald-400 transition-colors font-medium"
               >
                 Politykę prywatności
               </a>
@@ -151,7 +198,7 @@ const Public: React.FC<PublicProps> = ({
         </div>
       </div>
 
-      {/* Footer */}
+      {/* Footer with improved styling */}
       <Footer
         darkMode={darkMode}
         toggleDarkMode={toggleDarkMode}
