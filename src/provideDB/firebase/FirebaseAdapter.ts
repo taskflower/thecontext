@@ -25,13 +25,13 @@ export class FirebaseAdapter implements DatabaseOperations {
    * - dzięki temu ConfigProvider.retrieveData(slug) zadziała poprawnie 
    */
   async saveData(options: SaveToDBOptions & { id?: string }, data: any): Promise<void> {
-    if (!options.enabled) return;
+
     const id = options.id ?? undefined;
     const ref = id ? doc(this.collRef, id) : doc(this.collRef);
     const now = new Date().toISOString();
     const payload = {
       payload:        data,
-      type:           options.itemType,
+
       title:          options.itemTitle,
       additionalInfo: options.additionalInfo,
       createdAt:      now,

@@ -1,5 +1,5 @@
 // src/themes/default/widgets/RoleDetailsWidget.tsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   User, 
   Wrench, 
@@ -10,10 +10,6 @@ import {
   ChevronRight
 } from 'lucide-react';
 
-type RoleFeature = {
-  title: string;
-  description: string;
-};
 
 type RoleDetailsWidgetProps = {
   role?: string;

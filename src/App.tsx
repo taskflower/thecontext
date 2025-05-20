@@ -1,4 +1,4 @@
-// Zaktualizowany App.tsx (minimalna zmiana)
+// App.tsx
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ConfigProvider, useConfig } from "./ConfigProvider";
 import AppRouter from "./AppRouter";
@@ -12,24 +12,23 @@ function App() {
     <ErrorBoundary>
       <BrowserRouter>
         <Routes>
-          {/* Ścieżka edytora - poza ConfigProvider */}
           <Route path="/editor/:configId/*" element={<EditorApp />} />
-          
-          {/* Standardowa aplikacja wewnątrz ConfigProvider */}
-          <Route path="/*" element={
-            <ConfigProvider>
-              <NormalApp />
-            </ConfigProvider>
-          } />
+          <Route
+            path="/*"
+            element={
+              <ConfigProvider>
+                <NormalApp />
+              </ConfigProvider>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </ErrorBoundary>
   );
 }
 
-// Komponent dla normalnej aplikacji
 const NormalApp = () => {
-  const { config,  loading, error } = useConfig();
+  const { config, loading, error } = useConfig();
 
   if (loading) {
     return <Loading message="Ładowanie aplikacji..." />;
@@ -46,10 +45,10 @@ const NormalApp = () => {
 
   return (
     <>
-    <AuthProvider> <AppRouter /></AuthProvider>
-     
+      <AuthProvider>
+        <AppRouter />
+      </AuthProvider>
       <ContextDebugger config={config} />
-     
     </>
   );
 };

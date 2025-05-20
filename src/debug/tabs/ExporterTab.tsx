@@ -45,9 +45,7 @@ const ExporterTab: React.FC<ExporterTabProps> = ({ config }) => {
       const cleanConfig = JSON.parse(JSON.stringify(config));
       
       const options: SaveToDBOptions & { id: string } = {
-        enabled: true,
         provider: 'firebase',
-        itemType: 'project',
         itemTitle: config.name,
         id: configId!,  // Użycie slug jako ID dokumentu
         additionalInfo: { workspacesCount, scenariosCount, nodesCount }

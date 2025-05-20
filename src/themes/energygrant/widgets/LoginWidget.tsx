@@ -1,10 +1,8 @@
 import { useAuthContext } from "@/auth/AuthContext";
 import { ArrowRight, LogOut } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useFlow } from "@/core";
 import { useAppNavigation } from "@/core/navigation";
-import Loading from "@/components/Loading";
 
 type LoginWidgetProps = {
   onSubmit: () => void;
@@ -30,9 +28,8 @@ export default function LoginWidget({
   profilePath = "user-profile", // Domyślna ścieżka dla danych profilu
 }: LoginWidgetProps) {
   const { loading, signInWithGoogle, signOut, user } = useAuthContext();
-  const navigate = useNavigate();
   const params = useParams();
-  const { get, set } = useFlow();
+  const { set } = useFlow();
   const { navigateTo } = useAppNavigation();
 
   // Pobierz currentStep z parametrów URL lub ustaw na 0

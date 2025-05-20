@@ -132,7 +132,7 @@
             "colSpan": "full"
           },
           {
-            "tplFile": "EnhancedProfileWidget",
+            "tplFile": "UserEnhancedProfileWidget",
             "fullName": "{{user-profile.firstName}} {{user-profile.lastName}}",
             "email": "{{user-data.email}}",
             "joinDate": "{{user-data.lastLoginDate}}",
@@ -146,6 +146,7 @@
             "tplFile": "UserRoleSummaryWidget",
             "role": "{{user-data.role}}",
             "points": "{{user-data.points}}",
+            "successPath": "workspace-auditor/auditor-points-purchase",
             "colSpan": "full"
           },
           {
@@ -174,7 +175,7 @@
             ]
           },
           {
-            "tplFile": "WelcomeBubbleWidget",
+            "tplFile": "UserWelcomeBubbleWidget",
             "userName": "{{user-profile.firstName}}",
             "message": "Dziękujemy za dołączenie do naszego systemu! Twoje konto zostało pomyślnie utworzone. Możesz teraz korzystać ze wszystkich funkcji dostępnych dla wybranej roli.",
             "delay": 2000,

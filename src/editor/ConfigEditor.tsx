@@ -8,8 +8,9 @@ import { ScenarioEditor } from "./components/ScenarioEditor";
 import { EditorHeader } from "./components/EditorHeader";
 import { EditorSidebar } from "./components/EditorSidebar";
 import { useCrudDispatcher } from "@/editor/useCrudDispatcher";
+import { ScenarioConfig, WorkspaceConfig } from "@/core";
 
-const reducer = (s, a) => {
+const reducer = (s: any, a: any) => {
   if (a.type === "setError") return { ...s, error: a.error };
   if (a.type === "markClean") return { ...s, isDirty: false };
   if (a.type === "setSection")
@@ -35,7 +36,7 @@ const reducer = (s, a) => {
   return s;
 };
 
-export const ConfigEditor = ({ initialConfig, configId }) => {
+export const ConfigEditor = ({ initialConfig, configId }: any) => {
   const [state, dispatch] = useReducer(reducer, {
     section: "app",
     config: initialConfig,
@@ -52,16 +53,15 @@ export const ConfigEditor = ({ initialConfig, configId }) => {
       crud.setError(null);
       await db.saveData(
         {
-          enabled: true,
           provider: "firebase",
-          itemType: "project",
+
           itemTitle: state.config.name || "Konfiguracja",
           id: configId,
         },
         state.config
       );
       crud.markClean();
-    } catch (e) {
+    } catch (e: any) {
       crud.setError(e.message || "Błąd zapisu");
     }
   };
@@ -78,12 +78,12 @@ export const ConfigEditor = ({ initialConfig, configId }) => {
     crud.setSection("workspace", newWs.slug);
   };
 
-  const updWs = (slug, updates) => crud.update("workspaces", slug, updates);
-  const delWs = (slug) =>
+  const updWs = (slug: string, updates: any) => crud.update("workspaces", slug, updates);
+  const delWs = (slug: string) =>
     confirm(`Usunąć ${slug}?`) &&
     (crud.remove("workspaces", slug), crud.setSection("app"));
 
-  const addSc = (ws) => {
+  const addSc = (ws: string) => {
     const newSc = {
       slug: `sc-${Date.now()}`,
       name: "Nowy",
@@ -95,8 +95,8 @@ export const ConfigEditor = ({ initialConfig, configId }) => {
     crud.setSection("scenario", ws, newSc.slug);
   };
 
-  const updSc = (slug, updates) => crud.update("scenarios", slug, updates);
-  const delSc = (slug) =>
+  const updSc = (slug: string, updates: any) => crud.update("scenarios", slug, updates);
+  const delSc = (slug: string) =>
     confirm("Usunąć?") &&
     (crud.remove("scenarios", slug),
     crud.setSection("workspace", state.selectedWorkspace));
@@ -120,11 +120,11 @@ export const ConfigEditor = ({ initialConfig, configId }) => {
         />
       );
     if (section === "workspace") {
-      const ws = workspaces.find((w) => w.slug === selectedWorkspace);
+      const ws = workspaces.find((w: WorkspaceConfig) => w.slug === selectedWorkspace);
       return ws ? (
         <WorkspaceEditor
           workspace={ws}
-          scenarios={scenarios.filter((s) => s.workspaceSlug === ws.slug)}
+          scenarios={scenarios.filter((s:ScenarioConfig) => s.workspaceSlug === ws.slug)}
           onUpdate={(u) => updWs(ws.slug, u)}
           onAddScenario={() => addSc(ws.slug)}
           onEditScenario={(s) => crud.setSection("scenario", ws.slug, s)}
@@ -137,7 +137,7 @@ export const ConfigEditor = ({ initialConfig, configId }) => {
         </div>
       );
     }
-    const sc = scenarios.find((s) => s.slug === selectedScenario);
+    const sc = scenarios.find((s:ScenarioConfig) => s.slug === selectedScenario);
     return sc ? (
       <ScenarioEditor scenario={sc} onUpdate={(u) => updSc(sc.slug, u)} />
     ) : (

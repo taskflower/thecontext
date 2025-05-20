@@ -7,7 +7,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAppNavigation } from "@/core/navigation";
 import { ChevronRight } from "lucide-react";
 import { useDarkMode } from "../utils/ThemeUtils";
-import { Footer } from "../common/Footer";
+import { Footer } from "../commons/Footer";
 
 
 interface LayoutContext {

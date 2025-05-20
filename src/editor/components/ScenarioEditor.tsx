@@ -5,7 +5,7 @@ import { JsonEditor } from "./common/JsonEditor";
 import { FormEditor } from "./common/FormEditor";
 import { EditorTabs } from "./common/EditorTabs";
 import { EditorCard } from "./common/EditorCard";
-import { Check, ChevronDown, ChevronUp, PlusCircle, Trash } from "lucide-react";
+import { ChevronDown, ChevronUp, PlusCircle, Trash } from "lucide-react";
 import { NodeEditor } from "./scenario/NodeEditor";
 
 interface ScenarioEditorProps {

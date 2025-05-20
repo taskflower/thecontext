@@ -29,7 +29,7 @@ const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) => {
   const { user, loading } = useAuth();
   const { data: contextData } = useFlowStore();
   // Dodajemy useConfig hook
-  const { configId, configType } = useConfig();
+  const { configId } = useConfig();
 
   const tabs = useMemo(
     () => [
@@ -147,11 +147,7 @@ const ContextDebugger: React.FC<{ config?: AppConfig }> = ({ config }) => {
             <div className="text-gray-700 flex items-center">
               <span className="mr-1.5">Config:</span>
               <span className="border px-2 py-0.5 rounded bg-white">{configId}</span>
-              {configType && (
-                <span className="ml-1.5 bg-blue-600 text-white px-1.5 py-0.5 rounded-sm">
-                  {configType}
-                </span>
-              )}
+              
             </div>
           </>
         )}

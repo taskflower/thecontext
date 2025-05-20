@@ -47,7 +47,7 @@ const WidgetsStep: React.FC<WidgetsStepProps> = React.memo(
     const tplDir = useTheme();
 
     const handleNext = async () => {
-      if (saveToDB?.enabled && saveToDB.provider) {
+      if (saveToDB && saveToDB.provider) {
         try {
           const dbProvider = getDatabaseProvider(saveToDB.provider, saveToDB.contentPath);
           const dataToSave = saveToDB.contentPath ? get(saveToDB.contentPath) : {};

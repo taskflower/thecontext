@@ -1,15 +1,15 @@
 // src/hooks/useCrudDispatcher.ts
 import { Dispatch } from "react";
-import { Act, Lst } from "@/core/types";
 
-export const useCrudDispatcher = (dispatch: Dispatch<Act>) => {
-  const add = (list: Lst, item: any) =>
+
+export const useCrudDispatcher = (dispatch: Dispatch<any>) => {
+  const add = (list: any, item: any) =>
     dispatch({ type: "crud", list, op: "add", item });
 
-  const update = (list: Lst, slug: string, updates: any) =>
+  const update = (list: any, slug: string, updates: any) =>
     dispatch({ type: "crud", list, op: "update", slug, item: updates });
 
-  const remove = (list: Lst, slug: string) =>
+  const remove = (list: any, slug: string) =>
     dispatch({ type: "crud", list, op: "delete", slug });
 
   const setSection = (

@@ -1,6 +1,6 @@
 // src/themes/default/widgets/EnhancedProfileWidget.tsx
 import { useState, useEffect } from 'react';
-import { User, Mail, Phone, MapPin, Calendar, Shield, Edit } from 'lucide-react';
+import {  Mail, Phone, MapPin, Calendar, Shield, Edit } from 'lucide-react';
 
 type EnhancedProfileWidgetProps = {
   fullName?: string;
