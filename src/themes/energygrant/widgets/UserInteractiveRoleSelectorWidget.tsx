@@ -10,6 +10,7 @@ import {
 import { useFlow } from "@/core"; // Import useFlow from your core module
 import { useAppNavigation } from "@/core/navigation";
 import { useParams } from "react-router-dom";
+import { useConfig } from "@/ConfigProvider"; // Dodajemy import dla useConfig
 
 type Role = {
   id: string;
@@ -40,14 +41,19 @@ export default function InteractiveRoleSelectorWidget({
   successLabel = "Przejdź dalej",
 }: InteractiveRoleSelectorWidgetProps) {
   const { get, set } = useFlow();
-  const { navigateTo } = useAppNavigation();
+  const { navigateTo, toScenarioStep } = useAppNavigation(); // Dodajemy toScenarioStep
   const params = useParams();
+  const { configId } = useConfig(); // Pobieramy configId bezpośrednio z useConfig
   const [selectedRole, setSelectedRole] = useState("");
   const [hasAnimated, setHasAnimated] = useState(false);
 
   // Get currentStep from URL params or set to 0
   const currentStep = params.stepIndex ? parseInt(params.stepIndex, 10) : 0;
-  const configId = params.configId || "default";
+  const urlConfigId = params.configId || configId || "default";
+
+  // Użyj workspaceSlug z parametrów URL jeśli nie jest przekazany jako prop
+  const urlWorkspaceSlug = params.workspaceSlug || workspaceSlug;
+  const urlScenarioSlug = params.scenarioSlug || scenarioSlug;
 
   // Initialize from flow context
   useEffect(() => {
@@ -218,10 +224,33 @@ export default function InteractiveRoleSelectorWidget({
     setSelectedRole(roleId);
   };
 
-  // Handle navigation to next step
+  // Handle navigation to next step - ZMODYFIKOWANA FUNKCJA
   const handleContinue = () => {
-    const stepUrl = `/${configId}/${workspaceSlug}/${scenarioSlug}/${currentStep + 1}`;
-    navigateTo(successPath || stepUrl);
+    // Sprawdź czy mamy wszystkie potrzebne dane
+    if (!urlWorkspaceSlug || !urlScenarioSlug) {
+      console.error("Brak wymaganych parametrów workspaceSlug lub scenarioSlug");
+      return; // Przerwij jeśli brakuje kluczowych danych
+    }
+
+    try {
+      if (successPath) {
+        // Jeśli mamy zdefiniowaną własną ścieżkę, użyj jej
+        navigateTo(successPath);
+      } else {
+        // W przeciwnym razie użyj toScenarioStep
+        const nextStep = currentStep + 1;
+        console.log(`Przechodzę do kroku ${nextStep} scenariusza ${urlScenarioSlug} w workspace ${urlWorkspaceSlug}`);
+        
+        // Możesz użyć toScenarioStep lub navigateTo - wybierz to, co działa lepiej
+        toScenarioStep(urlWorkspaceSlug, urlScenarioSlug, nextStep);
+        
+        // Alternatywnie:
+        // const fullPath = `/${urlConfigId}/${urlWorkspaceSlug}/${urlScenarioSlug}/${nextStep}`;
+        // navigateTo(fullPath);
+      }
+    } catch (error) {
+      console.error("Błąd podczas nawigacji:", error);
+    }
   };
 
   return (
