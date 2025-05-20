@@ -23,8 +23,6 @@
       "slug": "login-step",
       "label": "Logowanie",
       "description": "Zaloguj się, aby kontynuować proces",
-      "contextSchemaPath": "user-data",
-      "contextDataPath": "user-data",
       "tplFile": "WidgetsStep",
       "order": 1,
       "attrs": {
@@ -35,7 +33,9 @@
           {
             "tplFile": "LoginWidget",
             "colSpan": "full",
-            "successPath": "workspace-user-auth/user-registration/2"
+            "successPath": "workspace-user-auth/user-registration/2",
+            "dataPath": "user-data",
+            "profilePath": "user-profile"
           }
         ]
       }

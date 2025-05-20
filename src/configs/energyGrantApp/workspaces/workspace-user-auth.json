@@ -17,12 +17,12 @@
     "contextSchema": {
       "type": "object",
       "properties": {
-        "user-profile":{
+        "user-profile": {
           "type": "object",
           "properties": {
             "id": {
               "type": "string",
-              "title": "ID"
+              "fieldType": "hidden"
             },
             "firstName": {
               "type": "string",
@@ -31,7 +31,8 @@
             "lastName": {
               "type": "string",
               "title": "Nazwisko"
-            }
+            },
+            "required": ["firstName", "lastName"]
           }
         },
         "user-data": {

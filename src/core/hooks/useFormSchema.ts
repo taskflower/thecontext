@@ -77,14 +77,19 @@ export function generateFieldSchemas(jsonSchema: any, isSimpleType: boolean) {
   }
 
   if (jsonSchema.properties) {
+    // Pobierz tablicę wymaganych pól z poziomu obiektu (standardowa specyfikacja JSON Schema)
     const requiredFields = jsonSchema.required || [];
 
     Object.entries(jsonSchema.properties).forEach(
       ([field, propSchema]: [string, any]) => {
+        // Sprawdź czy pole ma własny atrybut required (niestandardowa implementacja)
+        const isFieldRequired = 
+          requiredFields.includes(field) || propSchema.required === true;
+
         schemas[field] = {
           ...propSchema,
           type: propSchema.type || "text",
-          required: requiredFields.includes(field),
+          required: isFieldRequired,
           title: propSchema.title || field,
         };
       }

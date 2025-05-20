@@ -1,4 +1,4 @@
-// src/themes/default/commons/form/FormikField.tsx
+// src/themes/default/commons/form/FormikField.tsx - z poprawioną ścieżką do motywu
 import React, { useState, useEffect } from "react";
 import { FormikProps } from "formik";
 import { FieldSchema } from "./types";
@@ -33,6 +33,9 @@ const FormikField: React.FC<FormikFieldProps> = ({
 
   // Priorytet: fieldType > type
   const componentType = fieldType || type;
+  
+  // Sprawdzamy, czy pole jest ukryte
+  const isHidden = componentType === "hidden";
 
   const [FieldComponent, setFieldComponent] =
     useState<React.ComponentType<any> | null>(null);
@@ -57,17 +60,29 @@ const FormikField: React.FC<FormikFieldProps> = ({
           // Jeśli to nie motyw default, próbuj najpierw załadować z motywu potomnego
           if (themeName !== "default") {
             try {
-              // Używamy względnych ścieżek zamiast aliasów
+              // Poprawiona ścieżka: zamieniamy "common" na "commons"
               componentModule = await import(
-                `../../../${themeName}/common/form/${componentType}`
+                `../../../${themeName}/commons/form/${componentType}`
               );
               if (isMounted) setFieldComponent(() => componentModule.default);
               return;
             } catch (error) {
-              // Kontynuuj do default
               console.log(
-                `Komponent ${componentType} nie znaleziony w ${themeName}, próbuję default`
+                `Komponent ${componentType} nie znaleziony w ${themeName}/commons/form, próbuję ${themeName}/common/form`
               );
+              
+              // Próba alternatywnej ścieżki (dla kompatybilności wstecznej)
+              try {
+                componentModule = await import(
+                  `../../../${themeName}/common/form/${componentType}`
+                );
+                if (isMounted) setFieldComponent(() => componentModule.default);
+                return;
+              } catch (innerError) {
+                console.log(
+                  `Komponent ${componentType} nie znaleziony w ${themeName}/common/form, próbuję default`
+                );
+              }
             }
           }
 
@@ -92,6 +107,11 @@ const FormikField: React.FC<FormikFieldProps> = ({
 
   // Domyślny komponent wyświetlany podczas ładowania
   if (isLoading) {
+    // Dla ukrytych pól nie pokazujemy placeholdera ładowania
+    if (isHidden) {
+      return null;
+    }
+    
     return (
       <div className="my-4 space-y-2">
         <label
@@ -126,6 +146,19 @@ const FormikField: React.FC<FormikFieldProps> = ({
       </div>
     ));
 
+  // Specjalna obsługa dla pola ukrytego - renderujemy tylko sam komponent bez opakowania
+  if (isHidden) {
+    return (
+      <Component
+        name={name}
+        formik={formik}
+        fieldSchema={fieldSchema}
+        fieldId={fieldId}
+      />
+    );
+  }
+
+  // Standardowe renderowanie dla widocznych pól
   return (
     <div className="my-4 space-y-2">
       <label htmlFor={fieldId} className="text-sm font-semibold text-gray-900">
