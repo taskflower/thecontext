@@ -46,7 +46,6 @@ const FormStep: React.FC<FormStepProps> = ({
     contextDataPath
   });
 
-  // Inicjalizacja Formika z bezpośrednią walidacją
   const formik = useFormik({
     initialValues: processedData || {},
     validate: (values) => validateWithJsonSchema(values, jsonSchema, isSimpleType),
