@@ -1,5 +1,7 @@
 // src/themes/default/widgets/InfoWidget.tsx
 import { Info, AlertTriangle, CheckCircle, XCircle, ArrowRight } from 'lucide-react';
+import { useFlow } from "@/core"; // Import useFlow from your core module
+import { useMemo } from 'react';
 
 type InfoProps = {
   title?: string;
@@ -16,6 +18,19 @@ export default function InfoWidget({
   actionUrl,
   actionText = 'Więcej'
 }: InfoProps) {
+  const { get } = useFlow(); // Get the flow context
+
+  // Przetwarzanie szablonów w danych
+  const processedData = useMemo(() => {
+    if (typeof data === 'string') {
+      return data.replace(/{{([^}]+)}}/g, (_, path) => {
+        const value = get(path.trim());
+        return value !== undefined ? String(value) : "";
+      });
+    }
+    return data;
+  }, [data, get]);
+
   const renderIcon = () => {
     switch (icon) {
       case 'info':
@@ -41,10 +56,10 @@ export default function InfoWidget({
       )}
       
       <div className="p-4">
-        {data !== undefined ? (
+        {processedData !== undefined ? (
           <div className="flex flex-col">
             <p className="m-0 break-words text-base text-gray-700">
-              {String(data)}
+              {String(processedData)}
             </p>
             
             {actionUrl && (
