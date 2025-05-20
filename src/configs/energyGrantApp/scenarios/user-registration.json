@@ -124,7 +124,7 @@
         },
         "widgets": [
           {
-            "tplFile": "RegistrationSuccessWidget",
+            "tplFile": "UserRegistrationSuccessWidget",
             "userName": "{{user-profile.firstName}}",
             "redirectUrl": "/dashboard",
             "redirectLabel": "Przejdź do panelu głównego",
