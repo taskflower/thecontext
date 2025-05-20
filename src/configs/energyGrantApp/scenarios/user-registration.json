@@ -88,33 +88,21 @@
       }
     },
     {
-      "slug": "registration-complete",
-      "label": "Rejestracja zakończona",
-      "contextSchemaPath": "user-data",
-      "contextDataPath": "user-data",
-      "tplFile": "WidgetsStep",
-      "order": 5,
-      "attrs": {
-        "autoStart": true,
-        "userMessage": "Na podstawie danych rejestracyjnych utwórz obiekt użytkownika. Pobierz email, firstName, lastName i role z {{user-data}}. Dodaj pola: points (wartość 100), isLoggedIn (true), lastLoginDate (aktualna data). Zwróć jako czysty obiekt JSON."
-      },
-      "saveToDB": {
-        "collection": "user-data",
-        "itemId": "{{user-data.id}}",
-        "provider": "indexedDB",
-        "contentPath": "user-data"
-      }
-    },
-    {
       "slug": "registration-summary",
       "label": "Podsumowanie rejestracji",
       "contextSchemaPath": "user-data",
       "contextDataPath": "user-data",
       "tplFile": "WidgetsStep",
-      "order": 6,
+      "order": 4,
       "attrs": {
         "title": "Rejestracja zakończona pomyślnie",
         "subtitle": "Twoje konto zostało utworzone",
+        "saveToDB": {
+          "collection": "user-data",
+          "itemId": "{{user-data.id}}",
+          "provider": "indexedDB",
+          "contentPath": "user-data"
+        },
         "widgets": [
           {
             "tplFile": "TitleWidget",
@@ -122,7 +110,6 @@
             "subtitle": "Twoje konto zostało utworzone pomyślnie. Oto podsumowanie:",
             "colSpan": "full"
           },
-        
           {
             "tplFile": "InfoWidget",
             "title": "Imię i nazwisko",

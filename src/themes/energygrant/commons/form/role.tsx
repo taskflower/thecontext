@@ -16,7 +16,7 @@ const roles: RoleOption[] = [
     id: 'beneficiary',
     name: 'Beneficjent',
     description: 'Właściciel domu, który ubiega się o dotację energetyczną',
-    icon: 'home',
+    icon: 'house', // Zmieniono z 'home' na 'house'
     features: [
       'Kontakt z operatorem',
       'Kalkulator zdolności do dotacji',
@@ -29,7 +29,7 @@ const roles: RoleOption[] = [
     id: 'contractor',
     name: 'Wykonawca',
     description: 'Firma wykonująca prace termomodernizacyjne i energetyczne',
-    icon: 'tool',
+    icon: 'wrench', // Zmieniono z 'tool' na 'wrench'
     features: [
       'Dostęp do giełdy zleceń',
       'Składanie ofert na zlecenia',
@@ -41,7 +41,7 @@ const roles: RoleOption[] = [
     id: 'auditor',
     name: 'Audytor',
     description: 'Specjalista wykonujący audyty energetyczne',
-    icon: 'clipboard-check',
+    icon: 'square-check-big',
     features: [
       'Dostęp do zleceń audytów',
       'Składanie ofert na audyty',
@@ -62,6 +62,7 @@ const roles: RoleOption[] = [
     ],
   },
 ]
+
 
 const RoleSelectField: React.FC<BaseFieldProps> = ({ name, formik, fieldId }) => {
   const selected: string = formik.values[name] || ''
@@ -84,7 +85,7 @@ const RoleSelectField: React.FC<BaseFieldProps> = ({ name, formik, fieldId }) =>
   }
 
   return (
-    <div id={fieldId} className="grid grid-cols-1 gap-2">
+    <div id={fieldId} className="grid grid-cols-1 gap-4">
       {roles.map(role => {
         const isSel = selected === role.id
         const isExp = expanded === role.id
@@ -92,34 +93,46 @@ const RoleSelectField: React.FC<BaseFieldProps> = ({ name, formik, fieldId }) =>
         const bgHead = isExp ? 'bg-green-50 rounded-t-lg' : 'bg-white'
 
         return (
-          <div key={role.id} className={`border ${border} rounded-lg transition-shadow ${isExp ? 'shadow-md' : 'shadow-sm'}`}>
+          <div 
+            key={role.id} 
+            className={`border ${border} rounded-lg transition-shadow ${isExp ? 'shadow-md' : 'shadow-sm'}`}
+          >
             <div
-              className={`flex items-center p-2 cursor-pointer ${bgHead}`}
+              className={`flex items-center p-4 cursor-pointer ${bgHead}`}
               onClick={() => onHeaderClick(role.id, isExp)}
             >
-              <I name={isExp ? 'chevron-up' : 'chevron-down'} className="w-4 h-4 mr-2" />
+              <I 
+                name={role.icon} 
+                className="w-5 h-5 text-green-600 mr-3"
+              />
               <div className="flex-1">
-                <div className="font-medium text-sm">{role.name}</div>
-                <div className="text-xs text-gray-500">{role.description}</div>
+                <div className="font-medium text-sm text-gray-800">{role.name}</div>
+                <div className="text-xs text-gray-500 mt-1">{role.description}</div>
               </div>
-              <button
-                type="button"
-                onClick={e => { e.stopPropagation(); onSelect(role.id) }}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                  isSel ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {isSel ? 'Wybrano' : 'Wybierz'}
-              </button>
+              <div className="flex items-center">
+                <I 
+                  name={isExp ? 'chevron-up' : 'chevron-down'} 
+                  className="w-4 h-4 mr-3 text-gray-400" 
+                />
+                <button
+                  type="button"
+                  onClick={e => { e.stopPropagation(); onSelect(role.id) }}
+                  className={`px-4 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                    isSel ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {isSel ? 'Wybrano' : 'Wybierz'}
+                </button>
+              </div>
             </div>
             {isExp && (
-              <div className="px-4 py-2 bg-green-50 rounded-b-lg border-t border-green-100 text-xs text-gray-600">
-                <strong>Funkcje:</strong>
-                <ul className="grid grid-cols-2 gap-x-3 gap-y-1 mt-1">
+              <div className="px-6 py-3 bg-green-50 rounded-b-lg border-t border-green-100 text-xs text-gray-600">
+                <strong className="block mb-2 text-sm text-gray-700">Funkcje:</strong>
+                <ul className="grid grid-cols-2 gap-x-4 gap-y-2">
                   {role.features.map((f, i) => (
                     <li key={i} className="flex items-center">
-                      <I name="check" className="w-3 h-3 text-green-600 mr-1" />
-                      {f}
+                      <I name="check" className="w-3.5 h-3.5 text-green-600 mr-2" />
+                      <span className="text-gray-700">{f}</span>
                     </li>
                   ))}
                 </ul>
