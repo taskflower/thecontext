@@ -42,19 +42,12 @@
           "url": {
             "type": "string",
             "title": "Adres URL strony",
-            "description": "Podaj pełny adres URL strony, którą chcesz przeanalizować",
-            "minLength": 5,
-            "ui:widget": "url",
-            "ui:placeholder": "https://example.com",
-            "ui:help": "Podaj kompletny adres łącznie z https:// lub http://",
-            "pattern": "^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$",
-            "patternMessage": "Wprowadź prawidłowy adres URL"
+            "description": "Podaj pełny adres URL strony, którą chcesz przeanalizować"
           },
           "authorized": {
             "type": "boolean",
             "title": "Potwierdzam, że jestem uprawniony do analizy tej strony",
-            "default": false,
-            "ui:widget": "checkbox"
+            "default": false
           }
         },
         "required": [
@@ -68,7 +61,6 @@
           "summary": {
             "type": "string",
             "title": "Streszczenie strony",
-            "ui:widget": "textarea",
             "minLength": 20,
             "maxLength": 5000
           },
@@ -84,16 +76,14 @@
             "items": {
               "type": "string"
             },
-            "title": "Słowa kluczowe",
-            "ui:widget": "tags"
+            "title": "Słowa kluczowe"
           },
           "mainTopics": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "title": "Główne tematy",
-            "ui:widget": "tags"
+            "title": "Główne tematy"
           }
         }
       },
@@ -103,7 +93,7 @@
           "marketingDescription": {
             "type": "string",
             "title": "Opis marketingowy",
-            "ui:widget": "textarea",
+            "fieldType": "textarea",
             "minLength": 50
           },
           "industry": {
@@ -111,13 +101,11 @@
             "title": "Branża",
             "description": "Określenie branży, której dotyczy analizowana strona",
             "minLength": 3,
-            "maxLength": 100,
-            "ui:help": "Podaj główną branżę, np. 'Finanse', 'E-commerce', 'Edukacja'"
+            "maxLength": 100
           },
           "targetAudience": {
             "type": "string",
-            "title": "Grupa docelowa",
-            "ui:widget": "textarea"
+            "title": "Grupa docelowa"
           },
           "suggestedChannels": {
             "type": "array",
