@@ -1,9 +1,9 @@
 // src/core/hooks/useFormSchema.ts
-import { useState, useMemo, useCallback } from 'react';
-import { ZodType } from 'zod';
-import { useFlow } from '../context';
+import { useState, useMemo, useCallback } from "react";
+import { ZodType } from "zod";
+import { useFlow } from "../context";
 
-const SIMPLE_VALUE_FIELD = 'value';
+const SIMPLE_VALUE_FIELD = "value";
 
 // Interface dla opcji hooka
 interface FormSchemaOptions<T> {
@@ -35,7 +35,7 @@ export function wrapSimpleValue(value: any): Record<string, any> {
 }
 
 export function unwrapSimpleValue(data: Record<string, any>): any {
-  if (data && typeof data === 'object' && SIMPLE_VALUE_FIELD in data) {
+  if (data && typeof data === "object" && SIMPLE_VALUE_FIELD in data) {
     return data[SIMPLE_VALUE_FIELD];
   }
   return data;
@@ -47,170 +47,184 @@ export function mapJsonTypeToFieldType(schema: any): string {
 }
 
 export function isSimpleTypeSchema(schema: any): boolean {
-  return schema && 
-    typeof schema === 'object' && 
-    (schema.type === 'string' || schema.type === 'number' || 
-     schema.type === 'integer' || schema.type === 'boolean');
+  return (
+    schema &&
+    typeof schema === "object" &&
+    (schema.type === "string" ||
+      schema.type === "number" ||
+      schema.type === "integer" ||
+      schema.type === "boolean")
+  );
 }
 
 export function extractUiMetadata(propSchema: any): Record<string, any> {
   return propSchema;
 }
 
-// Generuje schematy pól z JSON schema
 export function generateFieldSchemas(jsonSchema: any, isSimpleType: boolean) {
   if (!jsonSchema) return {};
-  
+
   const schemas: Record<string, any> = {};
-  
-  // Obsługa prostych typów
   if (isSimpleType) {
     schemas[SIMPLE_VALUE_FIELD] = {
       ...jsonSchema,
-      type: jsonSchema.type || 'text',
+      type: jsonSchema.type || "text",
       ...(jsonSchema.fieldType ? { fieldType: jsonSchema.fieldType } : {}),
-      title: jsonSchema.title || 'Wartość'
+      title: jsonSchema.title || "Wartość",
     };
-    
+
     return schemas;
   }
-  
-  // Obsługa obiektów
+
   if (jsonSchema.properties) {
     const requiredFields = jsonSchema.required || [];
-    
+
     Object.entries(jsonSchema.properties).forEach(
       ([field, propSchema]: [string, any]) => {
         schemas[field] = {
           ...propSchema,
-          type: propSchema.type || 'text',
+          type: propSchema.type || "text",
           required: requiredFields.includes(field),
-          title: propSchema.title || field
+          title: propSchema.title || field,
         };
       }
     );
   }
-  
+
   return schemas;
 }
 
-// Funkcja walidująca dane na podstawie JSON Schema
-export function validateWithJsonSchema(values: any, jsonSchema: any, isSimpleType: boolean): Record<string, string> {
+export function validateWithJsonSchema(
+  values: any,
+  jsonSchema: any,
+  isSimpleType: boolean
+): Record<string, string> {
   const errors: Record<string, string> = {};
-  
+
   if (!values || !jsonSchema) return errors;
-  
+
   if (isSimpleType) {
     const value = values[SIMPLE_VALUE_FIELD];
-    if (jsonSchema.required && (value === undefined || value === null || value === '')) {
+    if (
+      jsonSchema.required &&
+      (value === undefined || value === null || value === "")
+    ) {
       errors[SIMPLE_VALUE_FIELD] = "To pole jest wymagane";
     }
     return errors;
   }
-  
-  // Obsługa obiektów
+
   if (jsonSchema.properties && jsonSchema.required) {
     jsonSchema.required.forEach((field: string) => {
       const propSchema = jsonSchema.properties[field];
       if (!propSchema) return;
-      
+
       const value = values[field];
-      
-      // Specjalna obsługa pól typu boolean
-      if (propSchema.type === 'boolean') {
+
+      if (propSchema.type === "boolean") {
         // Boolean jest wymagany tylko wtedy, gdy ma być true
         if (value !== true) {
           errors[field] = "To pole jest wymagane";
         }
-      } 
-      // Standardowa obsługa innych typów
-      else if (value === undefined || value === null || value === '') {
+      } else if (value === undefined || value === null || value === "") {
         errors[field] = "To pole jest wymagane";
       }
     });
   }
-  
+
   return errors;
 }
 
 // Eksportujmy createValidator dla zachowania kompatybilności wstecznej
 export function createValidator(jsonSchema: any, isSimpleType: boolean) {
-  return (values: any) => validateWithJsonSchema(values, jsonSchema, isSimpleType);
+  return (values: any) =>
+    validateWithJsonSchema(values, jsonSchema, isSimpleType);
 }
 
 // Główny hook
 export function useFormSchema<T>({
-  schema,
   jsonSchema,
   initialData,
   autoValidate = false,
-  contextSchemaPath,
-  contextDataPath
+  contextDataPath,
 }: FormSchemaOptions<T>): FormSchemaResult<T> {
   const { get } = useFlow();
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [localData, setLocalData] = useState<T | null>(null);
-  
-  const isSimpleType = useMemo(() => isSimpleTypeSchema(jsonSchema), [jsonSchema]);
-  
+
+  const isSimpleType = useMemo(
+    () => isSimpleTypeSchema(jsonSchema),
+    [jsonSchema]
+  );
+
   const contextData = useMemo(() => {
     if (contextDataPath) {
       return get(contextDataPath);
     }
     return initialData || null;
   }, [initialData, contextDataPath, get]);
-  
+
   // Używamy danych z kontekstu jeśli są dostępne, w przeciwnym razie używamy lokalnych
   const data = contextData || localData;
-  
+
   // Przygotuj dane w formacie odpowiednim dla formularza (opakowanie prostych typów)
   const processedData = useMemo(() => {
-    if (isSimpleType && data !== undefined && 
-        (typeof data !== 'object' || data === null)) {
+    if (
+      isSimpleType &&
+      data !== undefined &&
+      (typeof data !== "object" || data === null)
+    ) {
       return wrapSimpleValue(data);
     }
     return data;
   }, [isSimpleType, data]);
-  
+
   // Generuj schematy pól
-  const fieldSchemas = useMemo(() => 
-    generateFieldSchemas(jsonSchema, isSimpleType),
+  const fieldSchemas = useMemo(
+    () => generateFieldSchemas(jsonSchema, isSimpleType),
     [jsonSchema, isSimpleType]
   );
-  
+
   // Sprawdź czy są wymagane pola
   const hasRequiredFields = useMemo(
     () => jsonSchema && jsonSchema.required && jsonSchema.required.length > 0,
     [jsonSchema]
   );
-  
+
   // Funkcja walidacji - zwraca true jeśli nie ma błędów, false jeśli są błędy
   const validate = useCallback(() => {
     if (!jsonSchema || !processedData) return true;
-    
+
     setIsLoading(true);
-    const validationErrors = validateWithJsonSchema(processedData, jsonSchema, isSimpleType);
+    const validationErrors = validateWithJsonSchema(
+      processedData,
+      jsonSchema,
+      isSimpleType
+    );
     setErrors(validationErrors);
     setIsLoading(false);
-    
+
     return Object.keys(validationErrors).length === 0;
   }, [processedData, jsonSchema, isSimpleType]);
-  
+
   // Funkcja aktualizująca dane
-  const setData = useCallback((newData: T) => {
-    setLocalData(newData);
-    if (autoValidate) {
-      // Automatyczna walidacja przy zmianie danych
-      const validationErrors = validateWithJsonSchema(
-        isSimpleType ? wrapSimpleValue(newData) : newData, 
-        jsonSchema, 
-        isSimpleType
-      );
-      setErrors(validationErrors);
-    }
-  }, [jsonSchema, isSimpleType, autoValidate]);
-  
+  const setData = useCallback(
+    (newData: T) => {
+      setLocalData(newData);
+      if (autoValidate) {
+        // Automatyczna walidacja przy zmianie danych
+        const validationErrors = validateWithJsonSchema(
+          isSimpleType ? wrapSimpleValue(newData) : newData,
+          jsonSchema,
+          isSimpleType
+        );
+        setErrors(validationErrors);
+      }
+    },
+    [jsonSchema, isSimpleType, autoValidate]
+  );
+
   return {
     data,
     isValid: Object.keys(errors).length === 0,
@@ -221,6 +235,6 @@ export function useFormSchema<T>({
     setData,
     validate,
     hasRequiredFields,
-    processedData
+    processedData,
   };
 }
