@@ -9,11 +9,15 @@
     {
       "slug": "registration-options",
       "label": "Opcje rejestracji",
-      "contextSchemaPath": "user-data",
-      "contextDataPath": "user-data",
+      "contextSchemaPath": "user-data.role",
+      "contextDataPath": "user-data.role",
       "tplFile": "FormStep",
       "order": 0,
-      "attrs": {}
+      "attrs": {
+        "title": "Edycja branży",
+        "description": "Określ branżę, której dotyczy analizowana strona",
+        "submitLabel": "Zapisz"
+      }
     },
     {
       "slug": "google-auth-mock",
@@ -43,12 +47,6 @@
             "tplFile": "TitleWidget",
             "title": "{{user-data.firstName}}, wybierz swoją rolę w systemie",
             "subtitle": "Od wybranej roli zależą funkcje dostępne w Twoim panelu użytkownika",
-            "colSpan": "full"
-          },
-          {
-            "tplFile": "RoleSelectionWidget",
-            "onChange": "role",
-            "selectedRole": "{{user-data.role}}",
             "colSpan": "full"
           },
           {

@@ -1,48 +1,24 @@
-// src/themes/default/components/FormStep.tsx (zmodyfikowany)
-import React, { useMemo } from "react";
-import { useParams } from "react-router-dom";
-import { useFormik } from "formik";
-import { TemplateComponentProps } from "@/core";
-import { useConfig } from "@/ConfigProvider";
-import {
-  isSimpleTypeSchema,
-  unwrapSimpleValue,
-  generateFieldSchemas,
-  createValidator,
-} from "@/core/hooks/useFormSchema";
+// src/themes/default/components/FormStep.tsx (zmodyfikowany - bez mapowania)
+import React, { useEffect, useMemo } from "react";
+import { TemplateComponentProps, useFormSchema, unwrapSimpleValue } from "@/core";
 import FormikField from "../commons/form/FormikField";
-import { FieldSchema } from "../commons/form";
-
-// Przykładowy niestandardowy komponent pola (można wynieść do osobnego pliku)
-const ColorPickerField: React.FC<any> = ({ name, formik, fieldId }) => {
-  const value = formik.values[name] || "#000000";
-
-  return (
-    <div className="flex items-center gap-3">
-      <input
-        type="color"
-        id={fieldId}
-        name={name}
-        value={value}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
-        className="w-12 h-8 cursor-pointer"
-      />
-      <span className="text-sm">{value}</span>
-    </div>
-  );
-};
+import Loader from "../commons/Loader";
+import ErrorDisplay from "../commons/ErrorDisplay";
+import { useFormik } from "formik";
 
 interface FormStepProps extends TemplateComponentProps {
   title?: string;
   description?: string;
   submitLabel?: string;
   contextSchemaPath?: string;
+  contextDataPath?: string;
   nodeSlug?: string;
   customFields?: Record<string, React.ComponentType<any>>;
+  autoValidate?: boolean;
 }
 
 const FormStep: React.FC<FormStepProps> = ({
+  schema,
   jsonSchema,
   data,
   onSubmit,
@@ -50,93 +26,55 @@ const FormStep: React.FC<FormStepProps> = ({
   description,
   submitLabel = "Dalej",
   contextSchemaPath,
+  contextDataPath,
   nodeSlug,
   customFields,
+  autoValidate = false,
 }) => {
-  const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
-  const { config } = useConfig();
+  // Ujednolicone użycie hooka useFormSchema
+  const {
+    fieldSchemas,
+    hasRequiredFields,
+    isSimpleType,
+    isLoading,
+    errors: schemaErrors,
+    processedData,
+    validate
+  } = useFormSchema({
+    schema,
+    jsonSchema,
+    initialData: data,
+    autoValidate,
+    contextSchemaPath,
+    contextDataPath
+  });
 
-  // Standardowe niestandardowe pola, które zawsze dostępne w FormStep
-  const defaultCustomFields = useMemo(
-    () => ({
-      color: ColorPickerField,
-      // Tutaj można dodać więcej niestandardowych pól
-    }),
-    []
-  );
-
-  // Połączenie domyślnych i przekazanych niestandardowych pól
-  const allCustomFields = useMemo(
-    () => ({
-      ...defaultCustomFields,
-      ...customFields,
-    }),
-    [defaultCustomFields, customFields]
-  );
-
-  // Pobierz schemat z kontekstu workspace'a
-  const contextSchema = useMemo(() => {
-    if (!contextSchemaPath || !workspaceSlug || !config) return null;
-
-    const workspace = config.workspaces.find((ws) => ws.slug === workspaceSlug);
-    if (!workspace) return null;
-
-    // Nawiguj do właściwego podschematu
-    const pathSegments = contextSchemaPath.split(".");
-    let currentSchema = workspace.contextSchema.properties[pathSegments[0]];
-
-    for (let i = 1; i < pathSegments.length; i++) {
-      if (!currentSchema?.properties?.[pathSegments[i]]) return null;
-      currentSchema = currentSchema.properties[pathSegments[i]];
-    }
-
-    return currentSchema;
-  }, [config, workspaceSlug, contextSchemaPath]);
-
-  // Wybierz odpowiedni schemat
-  const effectiveSchema = jsonSchema || contextSchema || {};
-
-  // Sprawdź czy to prosty typ
-  const isSimpleType = isSimpleTypeSchema(effectiveSchema);
-
-  // Przygotuj początkowe dane
-  const initialValues = useMemo(() => {
-    if (
-      isSimpleType &&
-      data !== undefined &&
-      (typeof data !== "object" || data === null)
-    ) {
-      return { value: data };
-    }
-    return data || {};
-  }, [data, isSimpleType]);
-
-  // Generuj schematy pól
-  const fieldSchemas = useMemo(
-    () => generateFieldSchemas(effectiveSchema, isSimpleType),
-    [effectiveSchema, isSimpleType]
-  );
-
-  // Czy są wymagane pola
-  const hasRequiredFields = Object.values(fieldSchemas).some(
-    (schema: any) => schema.required
-  );
-
-  // Utwórz validator
-  const validate = createValidator(effectiveSchema, isSimpleType);
-
-  // Inicjalizacja Formika
+  // Inicjalizacja Formika z danymi z useFormSchema
   const formik = useFormik({
-    initialValues,
-    validate,
+    initialValues: processedData || {},
+    validate: (_) => schemaErrors, // Używamy walidacji z useFormSchema
     onSubmit: (values) => {
-      const submitData = isSimpleType ? unwrapSimpleValue(values) : values;
-      onSubmit(submitData);
+      const isValid = validate();
+      if (isValid) {
+        const submitData = isSimpleType ? unwrapSimpleValue(values) : values;
+        onSubmit(submitData);
+      }
     },
-    validateOnChange: false,
-    validateOnBlur: false,
+    validateOnChange: autoValidate,
+    validateOnBlur: autoValidate,
     enableReinitialize: true,
   });
+
+  // Aktualizacja walidacji gdy zmienią się errory z useFormSchema
+  useEffect(() => {
+    if (Object.keys(schemaErrors).length > 0) {
+      formik.setErrors(schemaErrors);
+    }
+  }, [schemaErrors]);
+
+  if (isLoading) {
+    return <Loader />;
+  }
 
   return (
     <div className="pt-6">
@@ -167,9 +105,9 @@ const FormStep: React.FC<FormStepProps> = ({
               key={name}
               name={name}
               formik={formik}
-              fieldSchema={schema as FieldSchema}
+              fieldSchema={schema as any}
               nodeSlug={nodeSlug}
-              customFields={allCustomFields}
+              customFields={customFields}
             />
           ))
         ) : (
