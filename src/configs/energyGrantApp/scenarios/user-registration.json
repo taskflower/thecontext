@@ -43,8 +43,6 @@
     {
       "slug": "legal-info",
       "label": "Informacje prawne",
-      "contextSchemaPath": "user-data",
-      "contextDataPath": "user-data",
       "tplFile": "WidgetsStep",
       "order": 2,
       "attrs": {
@@ -60,10 +58,6 @@
           {
             "tplFile": "LegalTermsWidget",
             "colSpan": "full"
-          },
-          {
-            "tplFile": "PrivacyPolicyWidget",
-            "colSpan": "full"
           }
         ]
       }
@@ -71,8 +65,8 @@
     {
       "slug": "registration-consent",
       "label": "Zgody rejestracyjne",
-      "contextSchemaPath": "user-data",
-      "contextDataPath": "user-data",
+      "contextSchemaPath": "user-profile",
+      "contextDataPath": "user-profile",
       "tplFile": "FormStep",
       "order": 3,
       "attrs": {
@@ -105,8 +99,8 @@
         "userMessage": "Na podstawie danych rejestracyjnych utwórz obiekt użytkownika. Pobierz email, firstName, lastName i role z {{user-data}}. Dodaj pola: points (wartość 100), isLoggedIn (true), lastLoginDate (aktualna data). Zwróć jako czysty obiekt JSON."
       },
       "saveToDB": {
-        "collection":"user-data",
-        "itemId":"{{user-data.id}}",  
+        "collection": "user-data",
+        "itemId": "{{user-data.id}}",
         "provider": "indexedDB",
         "contentPath": "user-data"
       }
@@ -124,22 +118,30 @@
         "widgets": [
           {
             "tplFile": "TitleWidget",
-            "title": "Witaj, {{user-data.firstName}}!",
+            "title": "Witaj, {{user-profile.firstName}}!",
             "subtitle": "Twoje konto zostało utworzone pomyślnie. Oto podsumowanie:",
             "colSpan": "full"
+          },
+        
+          {
+            "tplFile": "InfoWidget",
+            "title": "Imię i nazwisko",
+            "contextDataPath": "user-data",
+            "icon": "user",
+            "colSpan": 1
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "Imię i nazwisko",
+            "contextDataPath": "user-data.email",
+            "icon": "user",
+            "colSpan": 1
           },
           {
             "tplFile": "InfoWidget",
             "title": "Adres email",
             "contextDataPath": "user-data.email",
             "icon": "mail",
-            "colSpan": 1
-          },
-          {
-            "tplFile": "InfoWidget",
-            "title": "Imię i nazwisko",
-            "data": "{{user-data.firstName}} {{user-data.lastName}}",
-            "icon": "user",
             "colSpan": 1
           },
           {

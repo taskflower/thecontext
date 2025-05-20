@@ -78,7 +78,7 @@ const Public: React.FC<PublicProps> = ({
       {/* Główna zawartość */}
       <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8 relative z-10">
         <div
-          className={`w-full max-w-lg ${
+          className={`w-full max-w-xl ${
             darkMode
               ? "bg-zinc-900 border-zinc-800"
               : "bg-white border-zinc-200"

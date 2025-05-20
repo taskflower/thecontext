@@ -57,29 +57,6 @@
       }
     },
     {
-      "slug": "privacy-policy",
-      "label": "Polityka prywatności",
-      "contextSchemaPath": "legal-info",
-      "contextDataPath": "legal-info",
-      "tplFile": "WidgetsStep",
-      "order": 2,
-      "attrs": {
-        "title": "Polityka prywatności",
-        "widgets": [
-          {
-            "tplFile": "TitleWidget",
-            "title": "Polityka prywatności",
-            "subtitle": "Informacje o przetwarzaniu danych osobowych",
-            "colSpan": "full"
-          },
-          {
-            "tplFile": "PrivacyPolicyWidget",
-            "colSpan": "full"
-          }
-        ]
-      }
-    },
-    {
       "slug": "cookies-policy",
       "label": "Polityka cookies",
       "contextSchemaPath": "legal-info",
