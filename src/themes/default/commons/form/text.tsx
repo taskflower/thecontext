@@ -1,8 +1,8 @@
-// src/themes/default/commons/form/string.tsx
+// src/themes/default/commons/form/text.tsx
 import React from "react";
 import { BaseFieldProps } from "./types";
 
-const string: React.FC<BaseFieldProps> = ({
+const text: React.FC<BaseFieldProps> = ({
   name,
   formik,
   fieldSchema,
@@ -18,6 +18,7 @@ const string: React.FC<BaseFieldProps> = ({
     min,
     max,
     step,
+    // Możemy używać dowolnych właściwości przekazanych w schemacie
     ...otherProps
   } = fieldSchema;
   
@@ -42,10 +43,11 @@ const string: React.FC<BaseFieldProps> = ({
         min={min}
         max={max}
         step={step}
+        // Przekazujemy dodatkowe właściwości komponentu input
         {...otherProps.inputProps}
       />
     </div>
   );
 };
 
-export default string;
+export default text;

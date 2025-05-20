@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
 import { useDarkMode } from "../utils/ThemeUtils";
-import { Footer } from "../common/Footer";
+import { Footer } from "../commons/Footer";
 import { HousePlug } from "lucide-react";
 
 interface PublicProps {
