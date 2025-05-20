@@ -8,15 +8,28 @@
   "nodes": [
     {
       "slug": "role-selection",
-      "label": "",
+      "label": "Wybór roli",
       "contextSchemaPath": "user-data.role",
       "contextDataPath": "user-data.role",
-      "tplFile": "FormStep",
+      "tplFile": "WidgetsStep",
       "order": 0,
       "attrs": {
-        "title": "",
-        "description": "",
-        "submitLabel": "Wybierz"
+        "title": "Wybierz swoją rolę w systemie",
+        "subtitle": "Określ, w jaki sposób będziesz korzystać z platformy",
+        "widgets": [
+          {
+            "tplFile": "TitleWidget",
+            "title": "Wybierz rolę, która najlepiej odpowiada Twoim potrzebom",
+            "subtitle": "Każda rola ma dostęp do innych funkcji w systemie",
+            "colSpan": "full"
+          },
+          {
+            "tplFile": "UserInteractiveRoleSelectorWidget",
+            "selectedRoleId": "user-data.role",
+            "contextDataPath": "user-data.role",
+            "colSpan": "full"
+          }
+        ]
       }
     },
     {
@@ -27,22 +40,27 @@
       "order": 1,
       "attrs": {
         "title": "Logowanie do systemu",
-        "subtitle": "Zaloguj się, aby kontynuować proces składania wniosku",
+        "subtitle": "Zaloguj się, aby kontynuować proces rejestracji",
         "disableNextButton": true,
         "widgets": [
           {
-            "tplFile": "LoginWidget",
+            "tplFile": "UserModernLoginWidget",
             "colSpan": "full",
             "successPath": "workspace-user-auth/user-registration/2",
             "dataPath": "user-data",
-            "profilePath": "user-profile"
+            "profilePath": "user-profile",
+            "enableGoogleLogin": true,
+            "enableEmailLogin": false,
+            "showRegistration": false,
+            "title": "Logowanie do systemu",
+            "subtitle": "Zaloguj się, aby kontynuować proces rejestracji"
           }
         ]
       }
     },
     {
       "slug": "legal-info",
-      "label": "Informacje prawne",
+      "label": "Regulamin",
       "tplFile": "WidgetsStep",
       "order": 2,
       "attrs": {
@@ -64,7 +82,7 @@
     },
     {
       "slug": "registration-consent",
-      "label": "Zgody rejestracyjne",
+      "label": "Dane osobowe",
       "contextSchemaPath": "user-profile",
       "contextDataPath": "user-profile",
       "tplFile": "FormStep",
@@ -89,7 +107,7 @@
     },
     {
       "slug": "registration-summary",
-      "label": "Podsumowanie rejestracji",
+      "label": "Podsumowanie",
       "contextSchemaPath": "user-data",
       "contextDataPath": "user-data",
       "tplFile": "WidgetsStep",
@@ -105,45 +123,66 @@
         },
         "widgets": [
           {
-            "tplFile": "TitleWidget",
-            "title": "Witaj, {{user-profile.firstName}}!",
-            "subtitle": "Twoje konto zostało utworzone pomyślnie. Oto podsumowanie:",
+            "tplFile": "RegistrationSuccessWidget",
+            "userName": "{{user-profile.firstName}}",
+            "redirectUrl": "/dashboard",
+            "redirectLabel": "Przejdź do panelu głównego",
+            "delay": 60,
             "colSpan": "full"
           },
           {
-            "tplFile": "InfoWidget",
-            "title": "Imię i nazwisko",
-            "contextDataPath": "user-data",
-            "icon": "user",
-            "colSpan": 1
+            "tplFile": "EnhancedProfileWidget",
+            "fullName": "{{user-profile.firstName}} {{user-profile.lastName}}",
+            "email": "{{user-data.email}}",
+            "joinDate": "{{user-data.lastLoginDate}}",
+            "role": "{{user-data.role}}",
+            "verified": true,
+            "editProfileUrl": "/profile/edit",
+            "profileCompleteness": 40,
+            "colSpan": "full"
           },
           {
-            "tplFile": "InfoWidget",
-            "title": "Imię i nazwisko",
-            "contextDataPath": "user-data.email",
-            "icon": "user",
-            "colSpan": 1
+            "tplFile": "UserRoleSummaryWidget",
+            "role": "{{user-data.role}}",
+            "points": "{{user-data.points}}",
+            "colSpan": "full"
           },
           {
-            "tplFile": "InfoWidget",
-            "title": "Adres email",
-            "contextDataPath": "user-data.email",
-            "icon": "mail",
-            "colSpan": 1
+            "tplFile": "RegistrationActionsWidget",
+            "colSpan": "full",
+            "actions": [
+              {
+                "icon": "home",
+                "label": "Przejdź do strony głównej",
+                "description": "Zacznij korzystać z wszystkich funkcji platformy",
+                "url": "/dashboard",
+                "primary": true
+              },
+              {
+                "icon": "user",
+                "label": "Uzupełnij swój profil", 
+                "description": "Dodaj więcej informacji do swojego profilu",
+                "url": "/profile"
+              },
+              {
+                "icon": "book",
+                "label": "Zapoznaj się z poradnikiem",
+                "description": "Dowiedz się więcej o funkcjach dostępnych w systemie",
+                "url": "/guide"
+              }
+            ]
           },
           {
-            "tplFile": "InfoWidget",
-            "title": "Rola w systemie",
-            "contextDataPath": "user-data.role",
-            "icon": "briefcase",
-            "colSpan": 1
-          },
-          {
-            "tplFile": "InfoWidget",
-            "title": "Punkty startowe",
-            "contextDataPath": "user-data.points",
-            "icon": "award",
-            "colSpan": 1
+            "tplFile": "WelcomeBubbleWidget",
+            "userName": "{{user-profile.firstName}}",
+            "message": "Dziękujemy za dołączenie do naszego systemu! Twoje konto zostało pomyślnie utworzone. Możesz teraz korzystać ze wszystkich funkcji dostępnych dla wybranej roli.",
+            "delay": 2000,
+            "autoDismiss": true,
+            "dismissDelay": 15000,
+            "showCloseButton": true,
+            "ctaLink": "/dashboard",
+            "ctaLabel": "Rozpocznij korzystanie z systemu",
+            "colSpan": "full"
           }
         ]
       }
