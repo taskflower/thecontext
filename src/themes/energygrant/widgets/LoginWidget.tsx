@@ -141,7 +141,7 @@ export default function LoginWidget({
 
       {/* Informacja o logowaniu lub powitanie */}
       <div
-        className={`mx-auto max-w-lg rounded-lg p-3 mb-4 ${
+        className={`mx-auto max-w-lg rounded-lg px-3 py-8 mb-4 ${
           user ? "bg-emerald-50" : "bg-emerald-50"
         }`}
       >
