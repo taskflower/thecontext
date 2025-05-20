@@ -11,30 +11,16 @@
       "label": "Opcje rejestracji",
       "contextSchemaPath": "user-data",
       "contextDataPath": "user-data",
-      "tplFile": "WidgetsStep",
+      "tplFile": "FormStep",
       "order": 0,
-      "attrs": {
-        "widgets": [
-          {
-            "tplFile": "TitleWidget",
-            "title": "Rejestracja użytkownika",
-            "subtitle": "Wybierz sposób rejestracji w systemie",
-            "colSpan": "full"
-          },
-          {
-            "tplFile": "RegisterWidget",
-            "redirectUrl": "#role-selection",
-            "colSpan": "full"
-          }
-        ]
-      }
+      "attrs": {}
     },
     {
       "slug": "google-auth-mock",
       "label": "Rejestracja z Google",
       "contextSchemaPath": "user-data",
       "contextDataPath": "user-data",
-      "tplFile": "LlmStep",
+      "tplFile": "FormStep",
       "order": 1,
       "attrs": {
         "title": "Autoryzacja Google",
