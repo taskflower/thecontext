@@ -12,6 +12,7 @@ type LoginWidgetProps = {
   scenarioSlug: string; // Slug aktualnego scenariusza
   successPath?: string; // Ścieżka nawigacji po zalogowaniu
   successLabel?: string; // Tekst na przycisku (domyślnie "Przejdź dalej")
+  dataPath?: string; // Ścieżka do zapisania danych użytkownika w kontekście
 };
 
 /**
@@ -56,19 +57,54 @@ export default function LoginWidget({
   scenarioSlug,
   successPath,
   successLabel = "Przejdź dalej",
+  dataPath = "user-data", // Domyślna ścieżka kontekstu
 }: LoginWidgetProps) {
   const { loading, signInWithGoogle, signOut, user } = useAuthContext();
   const navigate = useNavigate();
   const params = useParams();
-  const { get } = useFlow();
+  const { get, set } = useFlow(); // Dodano dostęp do funkcji set
 
   // Pobierz currentStep z parametrów URL lub ustaw na 0
   const currentStep = params.stepIndex ? parseInt(params.stepIndex, 10) : 0;
   const configId = params.configId || config.name;
 
+  // Funkcja zapisująca dane użytkownika Google do kontekstu aplikacji
+  const saveUserDataToContext = () => {
+    if (user) {
+      // Zapisz email użytkownika
+      if (dataPath) {
+        set(`${dataPath}.email`, user.email);
+        set(`${dataPath}.id`, user.uid);
+        set(`${dataPath}.isLoggedIn`, true);
+        set(`${dataPath}.lastLoginDate`, new Date().toISOString());
+
+        // Jeśli dostępne, zapisz również imię i nazwisko
+        if (user.displayName) {
+          const nameParts = user.displayName.split(" ");
+          if (nameParts.length > 0) {
+            set(`${dataPath}.firstName`, nameParts[0]);
+            if (nameParts.length > 1) {
+              set(`${dataPath}.lastName`, nameParts.slice(1).join(" "));
+            }
+          }
+        }
+      }
+
+      console.log("Zapisano dane użytkownika do kontekstu:", {
+        path: dataPath,
+        email: user.email,
+        id: user.uid,
+        isLoggedIn: true,
+        lastLoginDate: new Date().toISOString(),
+      });
+    }
+  };
+
   const handleGoogleAuth = async () => {
     try {
       await signInWithGoogle();
+      // Po udanym logowaniu, zapisz dane użytkownika do kontekstu
+      saveUserDataToContext();
     } catch (error) {
       console.error("Google login failed", error);
     }
@@ -79,6 +115,12 @@ export default function LoginWidget({
     try {
       await signOut();
       console.log("Wylogowano pomyślnie");
+
+      // Po wylogowaniu aktualizujemy status w kontekście
+      if (dataPath) {
+        set(`${dataPath}.isLoggedIn`, false);
+      }
+
       // Opcjonalnie: możesz dodać nawigację po wylogowaniu, np. do strony głównej
       // navigate("/");
     } catch (error) {
@@ -88,7 +130,10 @@ export default function LoginWidget({
 
   // Funkcja do przejścia do następnego kroku
   const handleContinue = () => {
-    // Najpierw wywołujemy standardowy onSubmit dla zachowania kompatybilności
+    // Upewnij się, że dane użytkownika są zapisane w kontekście
+    saveUserDataToContext();
+
+    // Następnie wywołujemy standardowy onSubmit dla zachowania kompatybilności
     if (typeof onSubmit === "function") {
       console.log("Calling onSubmit function");
       onSubmit();
@@ -263,7 +308,7 @@ export default function LoginWidget({
             {successLabel}
             <ArrowRight className="w-4 h-4 ml-2" />
           </button>
-          
+
           {/* Przycisk wylogowania - widoczny tylko gdy użytkownik jest zalogowany */}
           <button
             onClick={handleLogout}

@@ -54,7 +54,8 @@ const WidgetsStep: React.FC<WidgetsStepProps> = React.memo(
     const tplDir = useTheme();
 
     const handleNext = async () => {
-      if (saveToDB?.enabled && saveToDB.provider) {
+      if (saveToDB?.provider) {
+        
         try {
           const dbProvider = getDatabaseProvider(
             saveToDB.provider,
@@ -63,11 +64,16 @@ const WidgetsStep: React.FC<WidgetsStepProps> = React.memo(
           const dataToSave = saveToDB.contentPath
             ? get(saveToDB.contentPath)
             : {};
+         
+          
           const options: SaveToDBOptions = {
             ...saveToDB,
             additionalInfo: { scenarioName, nodeSlug },
           };
-          await dbProvider.saveData(options, dataToSave);
+          const res = await dbProvider.saveData(options, dataToSave);
+          console.log(options,res);
+          
+          console.log(options, dataToSave)
         } catch (error) {
           console.error(
             "[WidgetsStep] Błąd podczas zapisywania do bazy:",

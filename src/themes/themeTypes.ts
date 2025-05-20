@@ -14,11 +14,8 @@ export interface WidgetsStepProps {
   subtitle?: string;
   disableNextButton?: boolean;
   saveToDB?: {
-    enabled: boolean;
     provider: "indexedDB";
     itemId?: string;
-    itemType: "lesson" | "quiz" | "project";
-    itemTitle?: string;
     contentPath?: string;
   } | null;
   scenarioName?: string | null;

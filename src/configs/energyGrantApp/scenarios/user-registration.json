@@ -74,8 +74,24 @@
       "contextSchemaPath": "user-data",
       "contextDataPath": "user-data",
       "tplFile": "FormStep",
-      "order": 4,
-      "attrs": {}
+      "order": 3,
+      "attrs": {
+        "title": "Dane osobowe",
+        "description": "Wprowadź swoje imię i nazwisko, aby dokończyć rejestrację",
+        "submitLabel": "Zapisz dane",
+        "customFields": {
+          "firstName": {
+            "type": "string",
+            "title": "Imię",
+            "required": true
+          },
+          "lastName": {
+            "type": "string",
+            "title": "Nazwisko",
+            "required": true
+          }
+        }
+      }
     },
     {
       "slug": "registration-complete",
@@ -89,10 +105,9 @@
         "userMessage": "Na podstawie danych rejestracyjnych utwórz obiekt użytkownika. Pobierz email, firstName, lastName i role z {{user-data}}. Dodaj pola: points (wartość 100), isLoggedIn (true), lastLoginDate (aktualna data). Zwróć jako czysty obiekt JSON."
       },
       "saveToDB": {
-        "enabled": true,
+        "collection":"user-data",
+        "itemId":"{{user-data.id}}",  
         "provider": "indexedDB",
-        "itemType": "user",
-        "itemTitle": "Dane użytkownika",
         "contentPath": "user-data"
       }
     },

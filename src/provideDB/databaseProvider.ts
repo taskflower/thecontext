@@ -4,10 +4,8 @@ import { IndexedDBAdapter } from './indexedDB/IndexedDBAdapter';
 import { FirebaseAdapter } from './firebase/FirebaseAdapter';
 
 export interface SaveToDBOptions {
-  enabled: boolean;
   provider: 'indexedDB' | 'firebase';
   itemId?: string;
-  itemType: 'lesson' | 'quiz' | 'project';
   itemTitle?: string;
   contentPath?: string;
   additionalInfo?: Record<string, any>;
