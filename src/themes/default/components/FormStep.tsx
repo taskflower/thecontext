@@ -1,9 +1,8 @@
-// src/themes/default/components/FormStep.tsx (zmodyfikowany - bez mapowania)
-import React, { useEffect, useMemo } from "react";
-import { TemplateComponentProps, useFormSchema, unwrapSimpleValue } from "@/core";
+// src/themes/default/components/FormStep.tsx
+import React from "react";
+import { TemplateComponentProps, useFormSchema, unwrapSimpleValue, validateWithJsonSchema } from "@/core";
 import FormikField from "../commons/form/FormikField";
 import Loader from "../commons/Loader";
-import ErrorDisplay from "../commons/ErrorDisplay";
 import { useFormik } from "formik";
 
 interface FormStepProps extends TemplateComponentProps {
@@ -37,9 +36,7 @@ const FormStep: React.FC<FormStepProps> = ({
     hasRequiredFields,
     isSimpleType,
     isLoading,
-    errors: schemaErrors,
-    processedData,
-    validate
+    processedData
   } = useFormSchema({
     schema,
     jsonSchema,
@@ -49,13 +46,14 @@ const FormStep: React.FC<FormStepProps> = ({
     contextDataPath
   });
 
-  // Inicjalizacja Formika z danymi z useFormSchema
+  // Inicjalizacja Formika z bezpośrednią walidacją
   const formik = useFormik({
     initialValues: processedData || {},
-    validate: (_) => schemaErrors, // Używamy walidacji z useFormSchema
+    validate: (values) => validateWithJsonSchema(values, jsonSchema, isSimpleType),
     onSubmit: (values) => {
-      const isValid = validate();
-      if (isValid) {
+      const errors = validateWithJsonSchema(values, jsonSchema, isSimpleType);
+      
+      if (Object.keys(errors).length === 0) {
         const submitData = isSimpleType ? unwrapSimpleValue(values) : values;
         onSubmit(submitData);
       }
@@ -64,13 +62,6 @@ const FormStep: React.FC<FormStepProps> = ({
     validateOnBlur: autoValidate,
     enableReinitialize: true,
   });
-
-  // Aktualizacja walidacji gdy zmienią się errory z useFormSchema
-  useEffect(() => {
-    if (Object.keys(schemaErrors).length > 0) {
-      formik.setErrors(schemaErrors);
-    }
-  }, [schemaErrors]);
 
   if (isLoading) {
     return <Loader />;
@@ -91,7 +82,7 @@ const FormStep: React.FC<FormStepProps> = ({
             {Object.entries(formik.errors).map(([field, error]) => (
               <li key={field}>
                 {fieldSchemas[field]?.title || field}:{" "}
-                <span className="text-gray-500">{String(error)}</span>
+                <span className="text-red-500">{String(error)}</span>
               </li>
             ))}
           </ul>

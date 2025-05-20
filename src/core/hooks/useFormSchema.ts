@@ -1,4 +1,4 @@
-// src/core/hooks/useFormSchema.ts - kompletnie bez mapowania
+// src/core/hooks/useFormSchema.ts
 import { useState, useMemo, useCallback } from 'react';
 import { ZodType } from 'zod';
 import { useFlow } from '../context';
@@ -43,8 +43,6 @@ export function unwrapSimpleValue(data: Record<string, any>): any {
 
 // Helpers które były dostępne w starej wersji
 export function mapJsonTypeToFieldType(schema: any): string {
-  // Ta funkcja jest dostępna dla wstecznej kompatybilności
-  // W nowym podejściu używamy bezpośrednio widget lub type
   return schema.widget || schema.type || "text";
 }
 
@@ -56,11 +54,10 @@ export function isSimpleTypeSchema(schema: any): boolean {
 }
 
 export function extractUiMetadata(propSchema: any): Record<string, any> {
-  // Funkcja zachowana dla kompatybilności wstecznej
   return propSchema;
 }
 
-// Generuje schematy pól z JSON schema - bez jakiegokolwiek mapowania
+// Generuje schematy pól z JSON schema
 export function generateFieldSchemas(jsonSchema: any, isSimpleType: boolean) {
   if (!jsonSchema) return {};
   
@@ -70,8 +67,8 @@ export function generateFieldSchemas(jsonSchema: any, isSimpleType: boolean) {
   if (isSimpleType) {
     schemas[SIMPLE_VALUE_FIELD] = {
       ...jsonSchema,
-      // Używamy nazwy komponentu bezpośrednio z pola widget lub type
-      fieldType: jsonSchema.widget || jsonSchema.type || 'text',
+      type: jsonSchema.type || 'text',
+      ...(jsonSchema.fieldType ? { fieldType: jsonSchema.fieldType } : {}),
       title: jsonSchema.title || 'Wartość'
     };
     
@@ -84,14 +81,10 @@ export function generateFieldSchemas(jsonSchema: any, isSimpleType: boolean) {
     
     Object.entries(jsonSchema.properties).forEach(
       ([field, propSchema]: [string, any]) => {
-        // Wszystkie właściwości ze schematu są przekazywane bezpośrednio
         schemas[field] = {
           ...propSchema,
-          // Tylko dodajemy pole fieldType jeśli nie istnieje
-          fieldType: propSchema.widget || propSchema.type || 'text',
-          // Oraz flagę required na podstawie listy required
+          type: propSchema.type || 'text',
           required: requiredFields.includes(field),
-          // Upewniamy się, że title istnieje
           title: propSchema.title || field
         };
       }
@@ -105,6 +98,8 @@ export function generateFieldSchemas(jsonSchema: any, isSimpleType: boolean) {
 export function validateWithJsonSchema(values: any, jsonSchema: any, isSimpleType: boolean): Record<string, string> {
   const errors: Record<string, string> = {};
   
+  if (!values || !jsonSchema) return errors;
+  
   if (isSimpleType) {
     const value = values[SIMPLE_VALUE_FIELD];
     if (jsonSchema.required && (value === undefined || value === null || value === '')) {
@@ -115,15 +110,21 @@ export function validateWithJsonSchema(values: any, jsonSchema: any, isSimpleTyp
   
   // Obsługa obiektów
   if (jsonSchema.properties && jsonSchema.required) {
-    const requiredFields = jsonSchema.required || [];
-    
-    requiredFields.forEach((field: string) => {
-      const value = values[field];
+    jsonSchema.required.forEach((field: string) => {
       const propSchema = jsonSchema.properties[field];
+      if (!propSchema) return;
       
+      const value = values[field];
+      
+      // Specjalna obsługa pól typu boolean
       if (propSchema.type === 'boolean') {
-        if (value !== true) errors[field] = "To pole jest wymagane";
-      } else if (value === undefined || value === null || value === '') {
+        // Boolean jest wymagany tylko wtedy, gdy ma być true
+        if (value !== true) {
+          errors[field] = "To pole jest wymagane";
+        }
+      } 
+      // Standardowa obsługa innych typów
+      else if (value === undefined || value === null || value === '') {
         errors[field] = "To pole jest wymagane";
       }
     });
@@ -180,13 +181,13 @@ export function useFormSchema<T>({
   
   // Sprawdź czy są wymagane pola
   const hasRequiredFields = useMemo(
-    () => Object.values(fieldSchemas).some((schema: any) => schema.required),
-    [fieldSchemas]
+    () => jsonSchema && jsonSchema.required && jsonSchema.required.length > 0,
+    [jsonSchema]
   );
   
-  // Funkcja walidacji
+  // Funkcja walidacji - zwraca true jeśli nie ma błędów, false jeśli są błędy
   const validate = useCallback(() => {
-    if (!jsonSchema) return true;
+    if (!jsonSchema || !processedData) return true;
     
     setIsLoading(true);
     const validationErrors = validateWithJsonSchema(processedData, jsonSchema, isSimpleType);

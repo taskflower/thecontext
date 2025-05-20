@@ -1,8 +1,8 @@
-// src/themes/default/commons/form/FormikField.tsx - bez map, w pełni dynamiczne
-import React, { lazy, Suspense } from 'react';
-import { FormikProps } from 'formik';
-import { FieldSchema } from './types';
-import Loader from '../Loader';
+
+// src/themes/default/commons/form/FormikField.tsx - najprostsze rozwiązanie
+import React, { useState, useEffect } from "react";
+import { FormikProps } from "formik";
+import { FieldSchema } from "./types";
 
 interface FormikFieldProps {
   name: string;
@@ -12,6 +12,7 @@ interface FormikFieldProps {
   customFields?: Record<string, React.ComponentType<any>>;
 }
 
+// Każdy komponent powinien mieć dokładnie taką samą nazwę jak typ pola w schemacie
 const FormikField: React.FC<FormikFieldProps> = ({
   name,
   formik,
@@ -19,97 +20,97 @@ const FormikField: React.FC<FormikFieldProps> = ({
   nodeSlug,
   customFields = {},
 }) => {
-  const { 
-    title, 
-    required, 
-    description, 
-    fieldType,
-    help
-  } = fieldSchema;
-  
+  const { title, required, description, type = "text", fieldType, help } = fieldSchema;
   const error = formik.touched[name] && formik.errors[name];
   const fieldId = `field-${nodeSlug}-${name}`;
   
-  // Komponent pola z customFields lub dynamicznie ładowany
-  let FieldComponent;
+  // Priorytet: fieldType > type
+  const componentType = fieldType || type;
   
-  // Najpierw sprawdź czy istnieje w przekazanych customFields
-  if (customFields[fieldType]) {
-    FieldComponent = customFields[fieldType];
-  } else {
-    // Próba dynamicznego załadowania komponentu na podstawie nazwy
-    try {
-      // Konwencja: nazwa typu pola + "Field", np. "text" -> "TextField"
-      const componentName = fieldType.charAt(0).toUpperCase() + fieldType.slice(1) + 'Field';
-      
-      // Dynamiczny import komponentu - próbujemy różne ścieżki
-      FieldComponent = lazy(() => 
-        import(`./fields/${componentName}`)
-          .catch(() => import(`./fields/${fieldType}`))
-          .catch(() => import(`../fields/${componentName}`))
-          .catch(() => import(`../fields/${fieldType}`))
-          .catch(() => import(`@/themes/default/commons/form/fields/${componentName}`))
-          .catch(() => import(`@/themes/default/commons/form/fields/${fieldType}`))
-          .catch(() => {
-            console.warn(`Nie znaleziono komponentu pola dla typu: ${fieldType}`);
-            // Fallback do prostego komponentu input jako ostateczność
-            return {
-              default: (props: any) => (
-                <div className="relative w-full border rounded border-gray-200 px-3 py-2">
-                  <input
-                    type="text"
-                    id={props.fieldId}
-                    name={props.name}
-                    value={props.formik.values[props.name] || ""}
-                    onChange={props.formik.handleChange}
-                    onBlur={props.formik.handleBlur}
-                    className="w-full bg-transparent text-sm focus:outline-none"
-                    placeholder={props.fieldSchema.placeholder}
-                  />
-                </div>
-              )
-            };
-          })
-      );
-    } catch (e) {
-      // Fallback do komponentu tekstowego w przypadku błędu
-      console.error(`Błąd ładowania komponentu dla typu: ${fieldType}`, e);
-      FieldComponent = (props: any) => (
-        <div className="relative w-full border rounded border-gray-200 px-3 py-2">
-          <input
-            type="text"
-            id={props.fieldId}
-            name={props.name}
-            value={props.formik.values[props.name] || ""}
-            onChange={props.formik.handleChange}
-            onBlur={props.formik.handleBlur}
-            className="w-full bg-transparent text-sm focus:outline-none"
-            placeholder={props.fieldSchema.placeholder}
-          />
-        </div>
-      );
-    }
+  const [FieldComponent, setFieldComponent] = useState<React.ComponentType<any> | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Ładuj komponent raz, podczas montowania
+  useEffect(() => {
+    let isMounted = true;
+    
+    const loadComponent = async () => {
+      try {
+        // 1. Najpierw sprawdź w customFields (przekazane przez props)
+        if (customFields[componentType]) {
+          if (isMounted) setFieldComponent(customFields[componentType]);
+          return;
+        }
+        
+        // 2. Próbuj bezpośrednio zaimportować komponent o takiej samej nazwie jak typ pola
+        try {
+          // UWAGA: ścieżka powinna być dostosowana do struktury projektu
+          const module = await import(`./${componentType}`);
+          if (isMounted) setFieldComponent(() => module.default);
+        } catch (e) {
+          console.warn(`Nie znaleziono komponentu dla typu: ${componentType}`, e);
+          if (isMounted) setFieldComponent(null);
+        }
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+    
+    loadComponent();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [componentType, customFields]);
+  
+  // Domyślny komponent wyświetlany podczas ładowania
+  if (isLoading) {
+    return (
+      <div className="my-4 space-y-2">
+        <label htmlFor={fieldId} className="text-sm font-semibold text-gray-900">
+          {title} {required && <span className="text-red-500">*</span>}
+        </label>
+        {description && <p className="text-sm text-gray-500">{description}</p>}
+        <div className="w-full h-10 bg-gray-100 animate-pulse rounded"></div>
+      </div>
+    );
   }
   
+  // Fallback do domyślnego komponentu tekstowego jeśli nie znaleziono komponentu
+  const Component = FieldComponent || ((props: any) => (
+    <div className="relative w-full border rounded border-orange-200 px-3 py-2 bg-orange-50">
+      <input
+        type="text"
+        id={props.fieldId}
+        name={props.name}
+        value={props.formik.values[props.name] || ""}
+        onChange={props.formik.handleChange}
+        onBlur={props.formik.handleBlur}
+        className="w-full bg-transparent text-sm focus:outline-none"
+      />
+      <div className="text-xs text-orange-600 mt-1">
+        Brak komponentu dla typu: {componentType}
+      </div>
+    </div>
+  ));
+
   return (
     <div className="my-4 space-y-2">
       <label htmlFor={fieldId} className="text-sm font-semibold text-gray-900">
         {title} {required && <span className="text-red-500">*</span>}
       </label>
-      
+
       {description && <p className="text-sm text-gray-500">{description}</p>}
-      
-      <Suspense fallback={<Loader />}>
-        <FieldComponent
-          name={name}
-          formik={formik}
-          fieldSchema={fieldSchema}
-          fieldId={fieldId}
-        />
-      </Suspense>
-      
+
+      <Component
+        name={name}
+        formik={formik}
+        fieldSchema={fieldSchema}
+        fieldId={fieldId}
+      />
+
       {help && <p className="text-xs text-gray-400 mt-1">{help}</p>}
-      
+
       {error && <p className="text-red-500 text-xs mt-1">{String(error)}</p>}
     </div>
   );

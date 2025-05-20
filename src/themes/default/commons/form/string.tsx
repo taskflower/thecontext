@@ -1,18 +1,16 @@
-// src/themes/default/commons/form/fields/TextField.tsx (przykład)
+// src/themes/default/commons/form/fields/text.tsx
 import React from "react";
 import { BaseFieldProps } from "./types";
 
 
-const TextField: React.FC<BaseFieldProps> = ({
+const text: React.FC<BaseFieldProps> = ({
   name,
   formik,
   fieldSchema,
   fieldId,
 }) => {
-  // Możemy teraz bezpośrednio korzystać z właściwości schemy bez żadnego mapowania
   const { 
     placeholder, 
-    type = "text", 
     disabled, 
     readonly, 
     pattern, 
@@ -27,13 +25,10 @@ const TextField: React.FC<BaseFieldProps> = ({
   
   const value = formik.values[name];
 
-  // Określ typ pola na podstawie typu w schemacie lub podstawowy text
-  const inputType = type === "string" ? "text" : type;
-
   return (
     <div className="relative w-full border rounded border-gray-200 px-3 py-2 hover:border-gray-300 focus-within:border-gray-400">
       <input
-        type={inputType}
+        type="text"
         id={fieldId}
         name={name}
         value={value || ""}
@@ -49,11 +44,11 @@ const TextField: React.FC<BaseFieldProps> = ({
         min={min}
         max={max}
         step={step}
-        // Możemy również przekazać dodatkowe właściwości
+        // Przekazujemy dodatkowe właściwości komponentu input
         {...otherProps.inputProps}
       />
     </div>
   );
 };
 
-export default TextField;
+export default text;
