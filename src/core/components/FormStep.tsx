@@ -55,19 +55,30 @@ const FormStep: React.FC<FormStepProps> = ({
   const formik = useFormik({
     initialValues: processedData || {},
     validate: (values) => {
-          const errors: Record<string, string> = validateWithJsonSchema(values, jsonSchema, isSimpleType);
-          // walidacja wymaganych pól w customFields
-          if (customFields) {
-            Object.entries(customFields).forEach(([key, schema]: [string, any]) => {
-              if (schema.required && (values[key] === undefined || values[key] === null || values[key] === "")) {
-                errors[key] = "To pole jest wymagane";
-              }
-            });
+      const errors: Record<string, string> = validateWithJsonSchema(
+        values,
+        jsonSchema,
+        isSimpleType
+      );
+      // walidacja wymaganych pól w customFields
+      if (customFields) {
+        Object.entries(customFields).forEach(
+          ([key, schema]: [string, any]) => {
+            if (
+              schema.required &&
+              (values[key] === undefined || values[key] === null || values[key] === '')
+            ) {
+              errors[key] = 'To pole jest wymagane';
+            }
           }
-          return errors;
-        },
+        );
+      }
+      return errors;
+    },
     onSubmit: (values) => {
-      const submitData = isSimpleType ? unwrapSimpleValue(values) : values;
+      const submitData = isSimpleType
+        ? unwrapSimpleValue(values)
+        : values;
       onSubmit(submitData);
     },
     validateOnChange: autoValidate,
@@ -105,9 +116,10 @@ const FormStep: React.FC<FormStepProps> = ({
             key={name}
             name={name}
             formik={formik}
-            fieldSchema={fieldSchemas[name] || (customFields ?? {})[name]}
+            fieldSchema={
+              fieldSchemas[name] || (customFields ?? {})[name]
+            }
             nodeSlug={nodeSlug}
-            customFields={customFields}
           />
         ))}
 
