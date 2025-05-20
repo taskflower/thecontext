@@ -1,62 +1,75 @@
-{
-  "id": "workspace-user-auth",
-  "slug": "workspace-user-auth",
-  "name": "Panel Użytkownika",
-  "description": "Zarządzaj swoim kontem, profilem i ustawieniami",
-  "icon": "user",
-  "templateSettings": {
-    "layoutFile": "Public",
-    "widgets": [
-      {
-        "tplFile": "LoginWidget",
-        "redirectUrl": "/dashboard",
-        "colSpan": "full"
-      }
-    ]
-  },
-  "contextSchema": {
-    "type": "object",
-    "properties": {
-      "user-data": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "title": "Email"
-          },
-          "firstName": {
-            "type": "string",
-            "title": "Imię"
-          },
-          "lastName": {
-            "type": "string",
-            "title": "Nazwisko"
-          },
-          "points": {
-            "type": "number",
-            "title": "Punkty"
-          },
-          "role": {
-            "type": "string",
-            "enum": [
-              "beneficiary",
-              "contractor",
-              "auditor",
-              "operator"
-            ],
-            "title": "Wybierz obszar dla Twojej roli w systemie",
-            "fieldType": "role"
-          },
-          "isLoggedIn": {
-            "type": "boolean",
-            "title": "Status logowania"
-          },
-          "lastLoginDate": {
-            "type": "string",
-            "title": "Data ostatniego logowania"
+  {
+    "id": "workspace-user-auth",
+    "slug": "workspace-user-auth",
+    "name": "Panel Użytkownika",
+    "description": "Zarządzaj swoim kontem, profilem i ustawieniami",
+    "icon": "user",
+    "templateSettings": {
+      "layoutFile": "Public",
+      "widgets": [
+        {
+          "tplFile": "LoginWidget",
+          "redirectUrl": "/dashboard",
+          "colSpan": "full"
+        }
+      ]
+    },
+    "contextSchema": {
+      "type": "object",
+      "properties": {
+        "user-profile":{
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "title": "ID"
+            },
+            "firstName": {
+              "type": "string",
+              "title": "Imię"
+            },
+            "lastName": {
+              "type": "string",
+              "title": "Nazwisko"
+            }
+          }
+        },
+        "user-data": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "title": "Imię"
+            },
+            "email": {
+              "type": "string",
+              "title": "Email"
+            },
+            "points": {
+              "type": "number",
+              "title": "Punkty"
+            },
+            "role": {
+              "type": "string",
+              "enum": [
+                "beneficiary",
+                "contractor",
+                "auditor",
+                "operator"
+              ],
+              "title": "Wybierz obszar dla Twojej roli w systemie",
+              "fieldType": "role"
+            },
+            "isLoggedIn": {
+              "type": "boolean",
+              "title": "Status logowania"
+            },
+            "lastLoginDate": {
+              "type": "string",
+              "title": "Data ostatniego logowania"
+            }
           }
         }
       }
     }
   }
-}
