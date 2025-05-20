@@ -1,6 +1,7 @@
 // src/themes/default/layouts/Simple.tsx
 import { X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useConfig } from "@/ConfigProvider";
 
 interface LayoutContext {
   workspace: any;
@@ -17,13 +18,30 @@ interface LayoutProps {
 
 const SimpleLayout: React.FC<LayoutProps> = ({ children, context }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { config } = useConfig();
   const { workspace, scenario, stepIdx = 0, totalSteps = 0 } = context || {};
-  const showScenarioUI = !!scenario;
+  
+  // Sprawdź, czy jesteśmy w widoku scenariusza na podstawie ścieżki URL
+  const urlParts = location.pathname.split('/');
+  const isScenarioView = urlParts.length > 3; // /appName/workspaceSlug/scenarioSlug/...
   
   // Handle returning to workspace overview when X button is clicked
   const handleClose = () => {
-    if (workspace?.slug) {
-      navigate(`/${workspace.slug}`);
+    // Pobierz części ścieżki URL
+    const parts = location.pathname.split('/');
+    const appName = parts[1];
+    const workspaceSlug = parts[2];
+    
+    // Jeśli mamy ścieżkę workspace, wróć do widoku workspace
+    if (workspaceSlug) {
+      navigate(`/${appName}/${workspaceSlug}`);
+    } else if (config?.defaultWorkspace) {
+      // Jeśli bieżący workspace nie jest dostępny, użyj domyślnego z konfiguracji
+      navigate(`/${config.name || ''}/${config.defaultWorkspace}`);
+    } else {
+      // Jeśli nie ma żadnego workspace'a, przejdź do strony głównej
+      navigate('/');
     }
   };
   
@@ -33,20 +51,22 @@ const SimpleLayout: React.FC<LayoutProps> = ({ children, context }) => {
         <div className="px-5 py-5 bg-white border-b border-gray-100">
           <div className="w-full flex items-center justify-between">
             <div className="font-bold text-lg tracking-tight text-gray-900">
-              {workspace?.name || 'FlowApp'}
+              {workspace?.name || config?.name || 'FlowApp'}
             </div>
-            {/* Only show close button when in a scenario */}
-            {showScenarioUI && (
+            
+            {/* Przycisk X - widoczny tylko w widoku scenariusza */}
+            {isScenarioView && (
               <button 
                 onClick={handleClose}
                 className="inline-flex items-center justify-center text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-400 h-8 w-8 rounded-md text-gray-600 hover:bg-gray-100"
+                title="Wróć do obszaru roboczego"
               >
                 <X className="h-4 w-4" />
               </button>
             )}
           </div>
           
-          {showScenarioUI && (
+          {isScenarioView && (
             <>
               <div className="mt-8 mb-6">
                 <h2 className="text-2xl font-normal text-gray-900">
@@ -56,7 +76,7 @@ const SimpleLayout: React.FC<LayoutProps> = ({ children, context }) => {
               </div>
               <div className="mb-3">
                 <h3 className="font-semibold text-sm text-gray-900">
-                  Krok {stepIdx + 1}: {scenario?.steps?.[stepIdx]?.title || ''}
+                  Krok {stepIdx + 1}: {scenario?.nodes?.[stepIdx]?.label || ''}
                 </h3>
               </div>
               
