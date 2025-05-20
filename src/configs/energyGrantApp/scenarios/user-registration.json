@@ -8,28 +8,15 @@
   "nodes": [
     {
       "slug": "registration-options",
-      "label": "Opcje rejestracji",
+      "label": "",
       "contextSchemaPath": "user-data.role",
       "contextDataPath": "user-data.role",
       "tplFile": "FormStep",
       "order": 0,
       "attrs": {
-        "title": "Edycja branży",
-        "description": "Określ branżę, której dotyczy analizowana strona",
+        "title": "Obszar serwisu",
+        "description": "Określ rolę w systemie dotacji energetycznych",
         "submitLabel": "Zapisz"
-      }
-    },
-    {
-      "slug": "google-auth-mock",
-      "label": "Rejestracja z Google",
-      "contextSchemaPath": "user-data",
-      "contextDataPath": "user-data",
-      "tplFile": "FormStep",
-      "order": 1,
-      "attrs": {
-        "title": "Autoryzacja Google",
-        "autoStart": true,
-        "userMessage": "Symuluj dane użytkownika otrzymane z Google. Zwróć obiekt JSON z polami: email (losowy email), firstName, lastName (losowe imię i nazwisko). Uwaga: zwróć tylko obiekt JSON bez dodatkowego formatowania czy komentarzy."
       }
     },
     {
@@ -40,23 +27,12 @@
       "tplFile": "WidgetsStep",
       "order": 2,
       "attrs": {
-        "title": "Wybierz swoją rolę w systemie",
-        "subtitle": "Określ, w jaki sposób chcesz korzystać z programu dotacji energetycznych",
+        "title": "",
+        "subtitle": "",
         "widgets": [
           {
-            "tplFile": "TitleWidget",
-            "title": "{{user-data.firstName}}, wybierz swoją rolę w systemie",
-            "subtitle": "Od wybranej roli zależą funkcje dostępne w Twoim panelu użytkownika",
+            "tplFile": "LoginWidget",
             "colSpan": "full"
-          },
-          {
-            "tplFile": "InfoWidget",
-            "title": "Informacja",
-            "data": "Wybór roli możesz zmienić później w ustawieniach konta. Potwierdź wybór, aby przejść dalej.",
-            "icon": "info",
-            "colSpan": "full",
-            "actionText": "Potwierdzam wybór roli",
-            "actionUrl": "#legal-info"
           }
         ]
       }

@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react'
 import { I } from '@/components'
 import { BaseFieldProps } from '@/themes/default/commons/form/types'
 
-
 interface RoleOption {
   id: string
   name: string
@@ -14,7 +13,7 @@ interface RoleOption {
 
 const roles: RoleOption[] = [
   {
-    id: 'beneficjent',
+    id: 'beneficiary',
     name: 'Beneficjent',
     description: 'Właściciel domu, który ubiega się o dotację energetyczną',
     icon: 'home',
@@ -27,7 +26,7 @@ const roles: RoleOption[] = [
     ],
   },
   {
-    id: 'wykonawca',
+    id: 'contractor',
     name: 'Wykonawca',
     description: 'Firma wykonująca prace termomodernizacyjne i energetyczne',
     icon: 'tool',
@@ -39,7 +38,7 @@ const roles: RoleOption[] = [
     ],
   },
   {
-    id: 'audytor',
+    id: 'auditor',
     name: 'Audytor',
     description: 'Specjalista wykonujący audyty energetyczne',
     icon: 'clipboard-check',
@@ -75,6 +74,13 @@ const RoleSelectField: React.FC<BaseFieldProps> = ({ name, formik, fieldId }) =>
   const onSelect = (id: string) => {
     formik.setFieldValue(name, id)
     formik.setFieldTouched(name, true)
+    setExpanded(id)
+  }
+
+  const onHeaderClick = (id: string, isExp: boolean) => {
+    const next = isExp ? null : id
+    setExpanded(next)
+    if (next) onSelect(id)
   }
 
   return (
@@ -89,7 +95,7 @@ const RoleSelectField: React.FC<BaseFieldProps> = ({ name, formik, fieldId }) =>
           <div key={role.id} className={`border ${border} rounded-lg transition-shadow ${isExp ? 'shadow-md' : 'shadow-sm'}`}>
             <div
               className={`flex items-center p-2 cursor-pointer ${bgHead}`}
-              onClick={() => setExpanded(isExp ? null : role.id)}
+              onClick={() => onHeaderClick(role.id, isExp)}
             >
               <I name={isExp ? 'chevron-up' : 'chevron-down'} className="w-4 h-4 mr-2" />
               <div className="flex-1">

@@ -39,9 +39,9 @@
           "role": {
             "type": "string",
             "enum": [
-              "beneficjent",
-              "wykonawca",
-              "audytor",
+              "beneficiary",
+              "contractor",
+              "auditor",
               "operator"
             ],
             "title": "Rola",

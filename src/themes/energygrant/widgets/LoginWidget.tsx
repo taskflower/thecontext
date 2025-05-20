@@ -1,41 +1,44 @@
 // src/themes/energygrant/widgets/LoginWidget.tsx
-import { useNavigate } from "react-router-dom";
-import { useDarkMode, useAuth } from "../utils/ThemeUtils";
+
+import { useAuthContext } from "@/auth/AuthContext";
 
 type LoginWidgetProps = {
-  title?: string;
-  subtitle?: string;
-  redirectUrl?: string;
+  onSubmit: () => void; // Funkcja, którą wywołasz po udanym logowaniu
 };
 
-export default function LoginWidget({ 
-  redirectUrl = "/dashboard"
-}: LoginWidgetProps) {
-  const { darkMode } = useDarkMode();
-  const { loading, loginWithGoogle } = useAuth();
-  const navigate = useNavigate();
+export default function LoginWidget({ onSubmit }: LoginWidgetProps) {
+  const { loading, signInWithGoogle, user } = useAuthContext();
 
-  const handleGoogleAuth = () => {
-    loginWithGoogle(() => {
-      navigate(redirectUrl);
-    });
+  const handleGoogleAuth = async () => {
+    try {
+      await signInWithGoogle(); // Próbujemy zalogować użytkownika za pomocą Google
+      if (typeof onSubmit === "function") {
+        onSubmit(); // Po udanym logowaniu wywołujemy onSubmit
+      }
+    } catch (error) {
+      console.error("Google login failed", error);
+    }
   };
 
-  const handleRegister = () => {
-    navigate("/register");
-  };
+  // Jeśli użytkownik jest już zalogowany, wywołujemy onSubmit
+  if (user) {
+    if (typeof onSubmit === "function") {
+      onSubmit(); // Wywołanie onSubmit po zalogowaniu
+    }
+    return null; // Nie renderujemy nic, gdy użytkownik jest zalogowany
+  }
 
   return (
     <div className="space-y-4">
       {/* Informacja o logowaniu */}
       <div
         className={`mx-auto max-w-xs rounded-lg p-2 mb-4 ${
-          darkMode ? "bg-zinc-800" : "bg-emerald-50"
+          user ? "bg-zinc-800" : "bg-emerald-50"
         }`}
       >
         <p
           className={`text-center text-sm ${
-            darkMode ? "text-zinc-300" : "text-emerald-800"
+            user ? "text-zinc-300" : "text-emerald-800"
           }`}
         >
           Zaloguj się, aby zarządzać swoimi wnioskami i monitorować status
@@ -47,8 +50,8 @@ export default function LoginWidget({
       <button
         onClick={handleGoogleAuth}
         disabled={loading}
-        className={`w-full flex items-center justify-center py-3 px-4 rounded-md border text-sm font-medium transition-all duration-200 transform hover:scale-105 ${
-          darkMode
+        className={`w-full flex items-center justify-center py-3 px-4 rounded-md border text-sm font-medium ${
+          user
             ? "bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white"
             : "bg-white border-zinc-300 hover:bg-zinc-50 text-zinc-700 shadow-md"
         } focus:outline-none focus:ring-2 focus:ring-emerald-500`}
@@ -105,20 +108,10 @@ export default function LoginWidget({
       {/* Separator */}
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
-          <div
-            className={`w-full border-t ${
-              darkMode ? "border-zinc-800" : "border-zinc-200"
-            }`}
-          ></div>
+          <div className="w-full border-t border-zinc-200"></div>
         </div>
         <div className="relative flex justify-center">
-          <span
-            className={`px-2 text-xs uppercase ${
-              darkMode
-                ? "bg-zinc-900 text-zinc-500"
-                : "bg-white text-zinc-500"
-            }`}
-          >
+          <span className="px-2 text-xs uppercase bg-white text-zinc-500">
             lub
           </span>
         </div>
@@ -126,16 +119,12 @@ export default function LoginWidget({
 
       {/* Przycisk rejestracji */}
       <button
-        onClick={handleRegister}
-        className={`w-full flex items-center justify-center py-3 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
-          darkMode
-            ? "bg-emerald-600 hover:bg-emerald-700 text-white transform hover:scale-105"
-            : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transform hover:scale-105"
-        } focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-          darkMode
-            ? "focus:ring-offset-zinc-900"
-            : "focus:ring-offset-white"
-        } focus:ring-emerald-500`}
+        onClick={onSubmit}
+        className={`w-full flex items-center justify-center py-3 px-4 rounded-md text-sm font-medium ${
+          user
+            ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+            : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-md"
+        } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500`}
       >
         <svg
           className="w-5 h-5 mr-2"
@@ -152,75 +141,6 @@ export default function LoginWidget({
         </svg>
         Zarejestruj się
       </button>
-      
-      {/* Informacja o korzyściach */}
-      <div
-        className={`mt-8 p-4 rounded-lg ${
-          darkMode ? "bg-zinc-800" : "bg-emerald-50"
-        }`}
-      >
-        <h3
-          className={`text-sm font-medium mb-2 ${
-            darkMode ? "text-zinc-200" : "text-emerald-800"
-          }`}
-        >
-          Korzyści z uczestnictwa w programie
-        </h3>
-        <ul
-          className={`text-xs space-y-1 ${
-            darkMode ? "text-zinc-400" : "text-emerald-700"
-          }`}
-        >
-          <li className="flex items-center">
-            <svg
-              className="w-4 h-4 mr-1 text-emerald-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-            Dofinansowanie do 100% na modernizację energetyczną
-          </li>
-          <li className="flex items-center">
-            <svg
-              className="w-4 h-4 mr-1 text-emerald-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-            Profesjonalne audyty energetyczne
-          </li>
-          <li className="flex items-center">
-            <svg
-              className="w-4 h-4 mr-1 text-emerald-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-            Zniżki na ekologiczne źródła energii
-          </li>
-        </ul>
-      </div>
     </div>
   );
 }

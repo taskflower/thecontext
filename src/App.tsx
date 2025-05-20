@@ -5,6 +5,7 @@ import AppRouter from "./AppRouter";
 import EditorApp from "./editor/EditorApp"; // Import nowego komponentu
 import { ErrorBoundary, Loading } from "./components";
 import { ContextDebugger } from "./debug";
+import { AuthProvider } from "./auth/AuthContext";
 
 function App() {
   return (
@@ -45,7 +46,8 @@ const NormalApp = () => {
 
   return (
     <>
-      <AppRouter />
+    <AuthProvider> <AppRouter /></AuthProvider>
+     
       <ContextDebugger config={config} />
      
     </>
