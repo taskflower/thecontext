@@ -1,7 +1,7 @@
 // src/themes/energygrant/commons/form/AuthField.tsx
 import React from 'react';
-import { BaseFieldProps } from '@/themes/default/commons/form';
 import { useAuthContext } from '@/auth/AuthContext';
+import { BaseFieldProps } from '@/themes/default/commons/form/types';
 
 const AuthField: React.FC<BaseFieldProps> = ({ name, formik, fieldId }) => {
   const { loading, signInWithGoogle, user } = useAuthContext();

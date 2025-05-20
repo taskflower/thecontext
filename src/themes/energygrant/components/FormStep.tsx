@@ -1,9 +1,8 @@
 // src/themes/energygrant/components/FormStep.tsx
 import React from "react";
 import { TemplateComponentProps, useFormSchema, unwrapSimpleValue, validateWithJsonSchema } from "@/core";
-
 import { useFormik } from "formik";
-import { Loader } from "lucide-react";
+import Loader from "@/themes/default/commons/Loader";
 import FormikField from "@/themes/default/commons/form/FormikField";
 
 interface FormStepProps extends TemplateComponentProps {
@@ -99,6 +98,7 @@ const FormStep: React.FC<FormStepProps> = ({
               fieldSchema={schema as any}
               nodeSlug={nodeSlug}
               customFields={customFields}
+              themeName="energygrant" // Tu przekazujemy nazwę motywu
             />
           ))
         ) : (

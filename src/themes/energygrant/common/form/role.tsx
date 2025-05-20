@@ -1,7 +1,8 @@
 // src/themes/energygrant/commons/form/RoleSelectField.tsx
 import React, { useState, useEffect } from 'react'
 import { I } from '@/components'
-import { BaseFieldProps } from '@/themes/default/commons/form'
+import { BaseFieldProps } from '@/themes/default/commons/form/types'
+
 
 interface RoleOption {
   id: string
