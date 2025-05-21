@@ -11,7 +11,7 @@ interface PublicProps {
 
 const Public: React.FC<PublicProps> = ({
   children,
-  title = "e-operator",
+  title = "mOperator",
   subtitle = "Program Dotacji Energetycznych",
 }) => {
   const { darkMode, toggleDarkMode } = useDarkMode();
