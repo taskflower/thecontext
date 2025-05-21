@@ -1,0 +1,168 @@
+{
+    "id": "operator-applications",
+    "slug": "operator-applications",
+    "workspaceSlug": "workspace-operator",
+    "name": "Zarządzanie wnioskami",
+    "description": "Przeglądaj i weryfikuj wnioski o dotacje energetyczne",
+    "icon": "file-text",
+    "nodes": [
+      {
+        "slug": "applications-list",
+        "label": "Lista wniosków",
+        "contextSchemaPath": "applications",
+        "contextDataPath": "applications",
+        "tplFile": "FormStep",
+        "order": 0,
+        "attrs": {
+          "title": "Lista wniosków o dotacje",
+          "description": "Przeglądaj i filtruj wnioski beneficjentów",
+          "jsonSchema": {
+            "type": "object",
+            "properties": {
+              "status": { 
+                "type": "string", 
+                "title": "Status wniosków", 
+                "enum": ["all", "pending", "verification", "approved", "rejected"],
+                "default": "all"
+              },
+              "dateFrom": { "type": "string", "title": "Data od", "format": "date" },
+              "dateTo": { "type": "string", "title": "Data do", "format": "date" }
+            }
+          },
+          "submitLabel": "Filtruj wnioski"
+        }
+      },
+      {
+        "slug": "filtered-applications",
+        "label": "Przefiltrowane wnioski",
+        "contextSchemaPath": "applications",
+        "contextDataPath": "applications",
+        "tplFile": "WidgetsStep",
+        "order": 1,
+        "attrs": {
+          "widgets": [
+            { 
+              "tplFile": "TitleWidget", 
+              "title": "Wnioski o dotacje energetyczne", 
+              "subtitle": "Wybierz wniosek, aby przejść do szczegółów", 
+              "colSpan": "full" 
+            },
+            { 
+              "tplFile": "ApplicationsTableWidget", 
+              "contextDataPath": "applications", 
+              "colSpan": "full" 
+            }
+          ]
+        }
+      },
+      {
+        "slug": "application-details",
+        "label": "Szczegóły wniosku",
+        "contextSchemaPath": "applications",
+        "contextDataPath": "applications",
+        "tplFile": "FormStep",
+        "order": 2,
+        "attrs": {
+          "title": "Szczegóły wniosku",
+          "description": "Wybierz wniosek do weryfikacji",
+          "jsonSchema": {
+            "type": "object",
+            "properties": {
+              "applicationId": { 
+                "type": "string", 
+                "title": "Wybierz wniosek", 
+                "enum": ["app-001", "app-002", "app-003", "app-004", "app-005"],
+                "enumNames": ["Jan Kowalski (2025/001)", "Anna Nowak (2025/002)", "Piotr Wiśniewski (2025/003)", "Maria Dąbrowska (2025/004)", "Adam Lewandowski (2025/005)"]
+              }
+            },
+            "required": ["applicationId"]
+          },
+          "submitLabel": "Przejdź do weryfikacji"
+        }
+      },
+      {
+        "slug": "verification-process",
+        "label": "Weryfikacja wniosku",
+        "contextSchemaPath": "verification-form",
+        "contextDataPath": "verification-form",
+        "tplFile": "FormStep",
+        "order": 3,
+        "attrs": {
+          "title": "Weryfikacja wniosku",
+          "description": "Uzupełnij formularz weryfikacji wniosku",
+          "jsonSchema": {
+            "type": "object",
+            "properties": {
+              "entityId": { "type": "string", "title": "ID wniosku", "default": "{{applications.applicationId}}" },
+              "verificationResult": { 
+                "type": "string", 
+                "title": "Wynik weryfikacji", 
+                "enum": ["approved", "rejected", "additional_info"],
+                "enumNames": ["Zatwierdzony", "Odrzucony", "Wymaga dodatkowych informacji"]
+              },
+              "docsVerified": { "type": "boolean", "title": "Dokumenty zweryfikowane", "default": false },
+              "identityVerified": { "type": "boolean", "title": "Tożsamość zweryfikowana", "default": false },
+              "requiresFollowUp": { "type": "boolean", "title": "Wymaga dodatkowej weryfikacji", "default": false },
+              "comments": { "type": "string", "title": "Komentarze", "description": "Dodaj komentarze lub uwagi do weryfikacji" }
+            },
+            "required": ["entityId", "verificationResult", "docsVerified", "identityVerified"]
+          },
+          "submitLabel": "Zapisz wynik weryfikacji"
+        }
+      },
+      {
+        "slug": "verification-summary",
+        "label": "Podsumowanie weryfikacji",
+        "contextSchemaPath": "verification-form",
+        "contextDataPath": "verification-form",
+        "tplFile": "WidgetsStep",
+        "order": 4,
+        "attrs": {
+          "widgets": [
+            { 
+              "tplFile": "TitleWidget", 
+              "title": "Weryfikacja zakończona", 
+              "subtitle": "Poniżej znajduje się podsumowanie weryfikacji", 
+              "colSpan": "full" 
+            },
+            { 
+              "tplFile": "InfoWidget", 
+              "title": "ID wniosku", 
+              "contextDataPath": "verification-form.entityId", 
+              "icon": "file", 
+              "colSpan": 1 
+            },
+            { 
+              "tplFile": "InfoWidget", 
+              "title": "Wynik weryfikacji", 
+              "contextDataPath": "verification-form.verificationResult", 
+              "icon": "check-circle", 
+              "colSpan": 1 
+            },
+            { 
+              "tplFile": "InfoWidget", 
+              "title": "Dokumenty zweryfikowane", 
+              "data": "{{verification-form.docsVerified ? 'Tak' : 'Nie'}}", 
+              "icon": "file-text", 
+              "colSpan": 1 
+            },
+            { 
+              "tplFile": "InfoWidget", 
+              "title": "Komentarze", 
+              "contextDataPath": "verification-form.comments", 
+              "icon": "message-square", 
+              "colSpan": "full" 
+            },
+            { 
+              "tplFile": "ActionButtonsWidget", 
+              "buttons": [
+                { "label": "Powrót do listy wniosków", "icon": "arrow-left", "path": "workspace-operator/operator-applications/1" },
+                { "label": "Nowa weryfikacja", "icon": "repeat", "path": "workspace-operator/operator-applications/2" }
+              ],
+              "colSpan": "full" 
+            }
+          ]
+        }
+      }
+    ]
+  }

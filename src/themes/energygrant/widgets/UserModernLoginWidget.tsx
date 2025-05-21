@@ -53,7 +53,7 @@ export default function ModernLoginWidget({
     if (role) setUserRole(role);
     
     // Animacja wejściowa
-    const timer = setTimeout(() => setHasAnimated(true), 300);
+    const timer = setTimeout(() => setHasAnimated(true), 50);
     return () => clearTimeout(timer);
   }, [get]);
 
