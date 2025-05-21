@@ -126,27 +126,23 @@
           {
             "tplFile": "UserRegistrationSuccessWidget",
             "userName": "{{user-profile.firstName}}",
-            "redirectUrl": "/dashboard",
+            "successPath": "workspace-{{user-data.role}}",
             "redirectLabel": "Przejdź do panelu głównego",
             "delay": 60,
             "colSpan": "full"
           },
           {
             "tplFile": "UserEnhancedProfileWidget",
-            "fullName": "{{user-profile.firstName}} {{user-profile.lastName}}",
-            "email": "{{user-data.email}}",
-            "joinDate": "{{user-data.lastLoginDate}}",
-            "role": "{{user-data.role}}",
-            "verified": true,
-            "editProfileUrl": "/profile/edit",
-            "profileCompleteness": 40,
+            "userProfile": "user-profile",
+            "userData": "user-data",
+            "successPath": "workspace-{{user-data.role}}",
             "colSpan": "full"
           },
           {
             "tplFile": "UserRoleSummaryWidget",
             "role": "{{user-data.role}}",
             "points": "{{user-data.points}}",
-            "successPath": "workspace-auditor/auditor-points-purchase",
+            "successPath": "workspace-{{user-data.role}}",
             "colSpan": "full"
           },
           {

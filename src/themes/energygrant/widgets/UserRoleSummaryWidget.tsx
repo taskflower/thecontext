@@ -1,7 +1,8 @@
 // src/themes/default/widgets/UserRoleSummaryWidget.tsx
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { useParams } from "react-router-dom";
 import { useAppNavigation } from "@/core/navigation";
+import { useFlow } from "@/core";
 import { I } from "@/components";
 import { getColorClasses } from "@/themes/energygrant/utils/ColorUtils";
 import { roles } from "../utils/Definitions";
@@ -14,6 +15,7 @@ type UserRoleSummaryWidgetProps = {
   redirectDelay?: number;
   successLabel?: string;
   onSubmit?: () => void;
+  contextDataPath?: string;
 };
 
 export default function UserRoleSummaryWidget({ 
@@ -23,15 +25,40 @@ export default function UserRoleSummaryWidget({
   autoRedirect = false,
   redirectDelay = 3000,
   successLabel = "Przejdź dalej",
-  onSubmit
+  onSubmit,
+  contextDataPath = "user-data.role"
 }: UserRoleSummaryWidgetProps) {
   const params = useParams();
   const { navigateTo } = useAppNavigation();
+  const { get, set } = useFlow();
+  
+  const [userRole, setUserRole] = useState(role);
+  const [hasAnimated, setHasAnimated] = useState(false);
 
   const currentStep = params.stepIndex ? parseInt(params.stepIndex, 10) : 0;
   const configId = params.configId;
   const workspaceSlug = params.workspaceSlug || '';
   const scenarioSlug = params.scenarioSlug || '';
+
+  // Inicjalizacja z kontekstu flow
+  useEffect(() => {
+    const contextRole = get(contextDataPath);
+    if (contextRole) {
+      setUserRole(contextRole);
+    } else if (role) {
+      setUserRole(role);
+      // Zapisz rolę do kontekstu jeśli została przekazana jako prop
+      set(contextDataPath, role);
+    }
+  }, [get, set, contextDataPath, role]);
+
+  // Efekt animacji
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setHasAnimated(true);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Konwersja punktów na liczbę
   const pointsNumber = useMemo(() => {
@@ -69,7 +96,7 @@ export default function UserRoleSummaryWidget({
 
   // Pobierz konfigurację dla bieżącej roli
   const roleConfig = useMemo(() => {
-    return roles.find(r => r.id === role) || {
+    return roles.find(r => r.id === userRole) || {
       id: 'undefined',
       name: 'Niezdefiniowana rola',
       description: 'Rola użytkownika nie została jeszcze określona',
@@ -77,13 +104,17 @@ export default function UserRoleSummaryWidget({
       features: ['Dostęp do podstawowych funkcji'],
       color: 'gray'
     };
-  }, [role]);
+  }, [userRole]);
 
-  // Pobierz klasy kolorów dla wybranej roli
-  const colorClasses = useMemo(() => getColorClasses(roleConfig.color, true), [roleConfig.color]);
+  // Pobierz klasy kolorów dla wybranej roli - z uwzględnieniem animacji
+  const colorClasses = useMemo(() => 
+    getColorClasses(roleConfig.color, true, hasAnimated), 
+    [roleConfig.color, hasAnimated]
+  );
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6">
+    <div className={`bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6 ${hasAnimated ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'}`} 
+         style={{ transition: 'all 0.3s ease-in-out' }}>
       <div className="p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Twoja rola i uprawnienia</h3>
@@ -97,7 +128,7 @@ export default function UserRoleSummaryWidget({
         
         <div className={`rounded-lg ${colorClasses.bgClasses} border ${colorClasses.borderClasses} p-4`}>
           <div className="flex items-center mb-3">
-            <div className="mr-3">
+            <div className={`w-12 h-12 rounded-full flex-shrink-0 ${colorClasses.iconContainerClasses} flex items-center justify-center mr-3`}>
               <I name={roleConfig.icon} className="w-6 h-6 stroke-2" />
             </div>
             <div>
@@ -110,10 +141,10 @@ export default function UserRoleSummaryWidget({
             {roleConfig.features.map((feature, index) => (
               <div 
                 key={index} 
-                className="flex items-center bg-white rounded px-3 py-2 border border-gray-100"
+                className={colorClasses.featureClasses || "flex items-center bg-white rounded px-3 py-2 border border-gray-100"}
               >
-                <div className={`w-4 h-4 rounded-full ${colorClasses.iconContainerClasses} flex items-center justify-center mr-3`}>
-                  <div className={`w-2 h-2 rounded-full`}></div>
+                <div className={`w-5 h-5 rounded-full ${colorClasses.iconContainerClasses} flex items-center justify-center mr-3`}>
+                  <I name="check" className="w-3 h-3 stroke-2" />
                 </div>
                 <span className="text-sm text-gray-700">{feature}</span>
               </div>
@@ -126,8 +157,8 @@ export default function UserRoleSummaryWidget({
           <div className="mt-6">
             <button
               onClick={handleContinue}
-              className={`w-full flex items-center justify-center py-3 px-4 rounded-md text-sm font-medium 
-                ${colorClasses.buttonClasses} text-white shadow-md transition-colors duration-200
+              className={`w-full flex items-center justify-center py-3.5 px-4 rounded-xl text-sm font-medium 
+                ${colorClasses.buttonClasses} text-white shadow-md transition-all transform hover:scale-[1.01] duration-200
                 focus:outline-none focus:ring-2 focus:ring-offset-2 ${colorClasses.ring}`}
             >
               {successLabel}

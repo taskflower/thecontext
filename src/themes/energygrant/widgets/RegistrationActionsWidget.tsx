@@ -1,4 +1,3 @@
-// src/themes/default/widgets/RegistrationActionsWidget.tsx
 import { Home, User, BookOpen, ArrowRight } from 'lucide-react';
 
 type ActionItem = {
@@ -60,12 +59,12 @@ export default function RegistrationActionsWidget({
               href={action.url}
               className={`flex items-center p-4 rounded-lg border transition-colors ${
                 action.primary 
-                  ? 'border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-800' 
+                  ? 'border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-800' 
                   : 'border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-800'
               }`}
             >
               <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                action.primary ? 'bg-blue-200' : 'bg-gray-200'
+                action.primary ? 'bg-emerald-200' : 'bg-gray-200'
               }`}>
                 {renderIcon(action.icon)}
               </div>
@@ -77,7 +76,7 @@ export default function RegistrationActionsWidget({
                 )}
               </div>
               
-              <ArrowRight className={`w-4 h-4 ${action.primary ? 'text-blue-600' : 'text-gray-500'}`} />
+              <ArrowRight className={`w-4 h-4 ${action.primary ? 'text-emerald-600' : 'text-gray-500'}`} />
             </a>
           ))}
         </div>
