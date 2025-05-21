@@ -19,7 +19,7 @@ export const EditConfigButton: React.FC<EditConfigButtonProps> = ({ className = 
   return (
     <button
       onClick={goToEditor}
-      className={`flex items-center px-3 py-1.5 bg-gray-100 rounded-md text-gray-600 text-sm hover:bg-gray-200 ${className}`}
+      className={`flex items-center px-3 py-1.5 bg-gray-200 border border-gray-300 rounded-sm text-gray-600 text-sm hover:bg-gray-300 ${className}`}
       title="Edytuj konfigurację"
     >
       <Settings className="h-4 w-4 mr-1.5" />
