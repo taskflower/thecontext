@@ -1,6 +1,6 @@
 {
-    "id": "add-beneficiary-listing",
-    "slug": "add-beneficiary-listing",
+    "id": "beneficiary-listing-add",
+    "slug": "beneficiary-listing-add",
     "workspaceSlug": "workspace-beneficiary",
     "name": "Dodaj nowe zlecenie",
     "description": "Utwórz nowe zlecenie dla wykonawców",

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle, ChevronRight } from 'lucide-react';
-import { useAppNavigation } from "@/core/navigation";
-import { useParams } from "react-router-dom";
+import { useWidgetNavigation } from "../utils/NavigationUtils";
 
 type RegistrationSuccessWidgetProps = {
   userName?: string;
@@ -16,7 +15,6 @@ type RegistrationSuccessWidgetProps = {
 
 export default function RegistrationSuccessWidget({ 
   userName = 'Użytkowniku',
-  redirectUrl = '/dashboard',
   redirectLabel = 'Przejdź do strony głównej',
   delay = 60,
   successPath,
@@ -26,35 +24,27 @@ export default function RegistrationSuccessWidget({
 }: RegistrationSuccessWidgetProps) {
   const [countdown, setCountdown] = useState(delay);
   const [isAnimating, setIsAnimating] = useState(true);
-  const { navigateTo } = useAppNavigation();
-  const params = useParams();
+  
+  const { handleContinue, routeParams } = useWidgetNavigation({
+    successPath,
+    autoRedirect: false, // We'll handle the redirection ourselves
+    redirectDelay: delay * 1000,
+    onSubmit: undefined
+  });
 
-  // Pobierz parametry z URL jeśli nie podano jako propsy
-  const urlConfigId = configId || params.configId;
-  const urlWorkspaceSlug = workspaceSlug || params.workspaceSlug || '';
-  const urlScenarioSlug = scenarioSlug || params.scenarioSlug || '';
-  const currentStep = params.stepIndex ? parseInt(params.stepIndex, 10) : 0;
+  // Override config props with values from URL if not provided
+  const urlConfigId = configId || routeParams.configId;
+  const urlWorkspaceSlug = workspaceSlug || routeParams.workspaceSlug;
+  const urlScenarioSlug = scenarioSlug || routeParams.scenarioSlug;
 
-  // Funkcja obsługi przekierowania
-  const handleRedirect = () => {
-    if (successPath) {
-      navigateTo(successPath);
-    } else if (urlConfigId && urlWorkspaceSlug && urlScenarioSlug) {
-      const defaultPath = `/${urlConfigId}/${urlWorkspaceSlug}/${urlScenarioSlug}/${currentStep + 1}`;
-      navigateTo(defaultPath);
-    } else {
-      window.location.href = redirectUrl;
-    }
-  };
-
-  // Efekt animacji i odliczania
+  // Animation and countdown effect
   useEffect(() => {
-    // Animacja przez 2 sekundy
+    // Animation for 2 seconds
     const animationTimer = setTimeout(() => {
       setIsAnimating(false);
     }, 2000);
 
-    // Odliczanie - aktualizacja co 1 sekundę
+    // Countdown - update every 1 second
     if (countdown > 0) {
       const timer = setTimeout(() => {
         setCountdown(prev => prev - 1);
@@ -65,12 +55,12 @@ export default function RegistrationSuccessWidget({
         clearTimeout(animationTimer);
       };
     } else {
-      // Przekierowanie po zakończeniu odliczania
-      handleRedirect();
+      // Redirect after countdown
+      handleContinue();
     }
     
     return () => clearTimeout(animationTimer);
-  }, [countdown, redirectUrl]);
+  }, [countdown, handleContinue]);
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 transition-all duration-300 transform opacity-100 translate-y-0" 
@@ -104,7 +94,7 @@ export default function RegistrationSuccessWidget({
           </div>
           
           <button
-            onClick={handleRedirect}
+            onClick={handleContinue}
             className="inline-flex items-center justify-center w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
           >
             {redirectLabel}

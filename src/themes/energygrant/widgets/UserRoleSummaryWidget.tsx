@@ -1,11 +1,10 @@
 // src/themes/default/widgets/UserRoleSummaryWidget.tsx
 import { useMemo, useEffect, useState } from 'react';
-import { useParams } from "react-router-dom";
-import { useAppNavigation } from "@/core/navigation";
 import { useFlow } from "@/core";
 import { I } from "@/components";
 import { getColorClasses } from "@/themes/energygrant/utils/ColorUtils";
 import { roles } from "../utils/Definitions";
+import { useWidgetNavigation } from "../utils/NavigationUtils";
 
 type UserRoleSummaryWidgetProps = {
   role?: string;
@@ -28,31 +27,30 @@ export default function UserRoleSummaryWidget({
   onSubmit,
   contextDataPath = "user-data.role"
 }: UserRoleSummaryWidgetProps) {
-  const params = useParams();
-  const { navigateTo } = useAppNavigation();
   const { get, set } = useFlow();
+  const { handleContinue } = useWidgetNavigation({
+    successPath,
+    autoRedirect,
+    redirectDelay,
+    onSubmit
+  });
   
   const [userRole, setUserRole] = useState(role);
   const [hasAnimated, setHasAnimated] = useState(false);
 
-  const currentStep = params.stepIndex ? parseInt(params.stepIndex, 10) : 0;
-  const configId = params.configId;
-  const workspaceSlug = params.workspaceSlug || '';
-  const scenarioSlug = params.scenarioSlug || '';
-
-  // Inicjalizacja z kontekstu flow
+  // Initialize from flow context
   useEffect(() => {
     const contextRole = get(contextDataPath);
     if (contextRole) {
       setUserRole(contextRole);
     } else if (role) {
       setUserRole(role);
-      // Zapisz rolę do kontekstu jeśli została przekazana jako prop
+      // Save role to context if provided as prop
       set(contextDataPath, role);
     }
   }, [get, set, contextDataPath, role]);
 
-  // Efekt animacji
+  // Animation effect
   useEffect(() => {
     const timer = setTimeout(() => {
       setHasAnimated(true);
@@ -60,7 +58,7 @@ export default function UserRoleSummaryWidget({
     return () => clearTimeout(timer);
   }, []);
 
-  // Konwersja punktów na liczbę
+  // Convert points to number
   const pointsNumber = useMemo(() => {
     if (typeof points === 'string') {
       const parsed = parseInt(points, 10);
@@ -69,32 +67,7 @@ export default function UserRoleSummaryWidget({
     return points || 0;
   }, [points]);
 
-  // Funkcja do obsługi przekierowania
-  const handleContinue = () => {
-    if (typeof onSubmit === "function") {
-      onSubmit();
-    }
-
-    const defaultPath = `/${configId}/${workspaceSlug}/${scenarioSlug}/${currentStep + 1}`;
-    navigateTo(successPath, defaultPath);
-  };
-
-  // Efekt do automatycznego przekierowania
-  useEffect(() => {
-    let redirectTimer: number | undefined;
-    
-    if (autoRedirect && (successPath || (configId && workspaceSlug && scenarioSlug))) {
-      redirectTimer = window.setTimeout(handleContinue, redirectDelay);
-    }
-
-    return () => {
-      if (redirectTimer) {
-        clearTimeout(redirectTimer);
-      }
-    };
-  }, [autoRedirect, successPath, redirectDelay, configId, workspaceSlug, scenarioSlug]);
-
-  // Pobierz konfigurację dla bieżącej roli
+  // Get configuration for current role
   const roleConfig = useMemo(() => {
     return roles.find(r => r.id === userRole) || {
       id: 'undefined',
@@ -106,7 +79,7 @@ export default function UserRoleSummaryWidget({
     };
   }, [userRole]);
 
-  // Pobierz klasy kolorów dla wybranej roli - z uwzględnieniem animacji
+  // Get color classes for selected role - with animation
   const colorClasses = useMemo(() => 
     getColorClasses(roleConfig.color, true, hasAnimated), 
     [roleConfig.color, hasAnimated]
@@ -152,8 +125,8 @@ export default function UserRoleSummaryWidget({
           </div>
         </div>
         
-        {/* Przycisk przekierowania */}
-        {(successPath || (configId && workspaceSlug && scenarioSlug)) && (
+        {/* Redirection button */}
+        {successPath && (
           <div className="mt-6">
             <button
               onClick={handleContinue}
@@ -165,7 +138,7 @@ export default function UserRoleSummaryWidget({
               <I name="arrow-right" className="w-4 h-4 ml-2 stroke-2" />
             </button>
             
-            {/* Informacja o automatycznym przekierowaniu */}
+            {/* Auto-redirect information */}
             {autoRedirect && (
               <p className="text-center text-xs text-gray-500 mt-2">
                 Automatyczne przekierowanie za {Math.round(redirectDelay / 1000)} sekund...
