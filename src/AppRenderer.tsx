@@ -3,19 +3,19 @@ import { Navigate } from "react-router-dom";
 import { useAppNavigation, useConfig, useDynamicComponent } from "./engine";
 import { AppConfig, ScenarioConfig, WorkspaceConfig } from "./engine/types";
 import { WidgetContainer } from "./engine/components/WidgetContainer";
+
 export const P = "/src/configs";
 export const Lc = "text-8xl font-black text-gray-50/30";
 
 export const AppRenderer = () => {
   const { config, workspace, scenario, step } = useAppNavigation();
-
-  // Jeden centralny log
+  
   console.log("🎯 ROUTE:", {
     url: window.location.pathname,
     params: { config, workspace, scenario, step },
     renderType: step ? "STEP" : scenario ? "SCENARIO" : "WORKSPACE",
   });
-
+  
   if (step) return <StepRenderer />;
   if (scenario) return <ScenarioRenderer />;
   return <WorkspaceRenderer />;
@@ -27,7 +27,6 @@ const WorkspaceRenderer = () => {
   const { config: workspaceConfig, loading } = useConfig<WorkspaceConfig>(
     `${P}/${config}/workspaces/${workspace}.json`
   );
-
   const LayoutComponent = useDynamicComponent(
     appConfig?.tplDir ? `themes/${appConfig.tplDir}/layouts` : undefined,
     workspaceConfig?.templateSettings?.layoutFile
@@ -67,11 +66,20 @@ const ScenarioRenderer = () => {
 const StepRenderer = () => {
   const { config, workspace, scenario, step } = useAppNavigation();
   const { config: appConfig } = useConfig<AppConfig>(`${P}/${config}/app.json`);
+  const { config: workspaceConfig } = useConfig<WorkspaceConfig>(
+    `${P}/${config}/workspaces/${workspace}.json`
+  );
   const { config: scenarioConfig, loading } = useConfig<ScenarioConfig>(
     `${P}/${config}/scenarios/${workspace}/${scenario}.json`
   );
 
   const stepConfig = scenarioConfig?.nodes.find((node) => node.slug === step);
+  
+  const LayoutComponent = useDynamicComponent(
+    appConfig?.tplDir ? `themes/${appConfig.tplDir}/layouts` : undefined,
+    workspaceConfig?.templateSettings?.layoutFile
+  );
+  
   const StepComponent = useDynamicComponent(
     appConfig?.tplDir ? `themes/${appConfig.tplDir}/steps` : undefined,
     stepConfig?.tplFile
@@ -79,6 +87,11 @@ const StepRenderer = () => {
 
   if (loading) return <div>Loading step...</div>;
   if (!stepConfig || !StepComponent) return <div>Step not found: {step}</div>;
+  if (!LayoutComponent) return <div>Layout not found</div>;
 
-  return <StepComponent {...stepConfig} />;
+  return (
+    <LayoutComponent>
+      <StepComponent {...stepConfig} />
+    </LayoutComponent>
+  );
 };
