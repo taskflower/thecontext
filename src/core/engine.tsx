@@ -84,6 +84,16 @@ const NodeRenderer = memo(
 
     const zodSchema = useMemo(() => jsonToZod(jsonSchema), [jsonSchema]);
     const data = get(node.contextDataPath);
+
+    // Dodane logi do debugowania formularza
+    console.log("======= Budowanie formularza =======");
+    console.log("Node:", node.slug);
+    console.log("contextSchemaPath:", node.contextSchemaPath);
+    console.log("contextDataPath:", node.contextDataPath);
+    console.log("JSON Schema:", jsonSchema);
+    console.log("Zod Schema:", zodSchema);
+    console.log("Current data:", data);
+    
     const Component = useComponent<TemplateComponentProps>(
       config.tplDir,
       node.tplFile

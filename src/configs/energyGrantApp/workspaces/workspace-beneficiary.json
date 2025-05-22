@@ -57,142 +57,63 @@
         "tplFile": "ScenarioListWidget",
         "title": "Dostępne scenariusze",
         "colSpan": "full"
+      },
+      {
+        "tplFile": "UserEnhancedProfileWidget",
+        "title": "Edytuj dane beneficjenta",
+        "contextDataPath": "user-profile",
+        "colSpan": "full"
       }
     ]
   },
   "contextSchema": {
     "type": "object",
     "properties": {
-      "beneficiary-data": {
+      "listing-order-item": {
         "type": "object",
         "properties": {
-          "id": { "type": "string" },
-          "role": { "type": "string", "enum": ["beneficiary"] },
-          "points": { "type": "number", "title": "Punkty dostępu" }
-        }
-      },
-      "beneficiary-listings": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "id": { "type": "string" },
-            "title": { "type": "string", "title": "Tytuł zlecenia" },
-            "description": { "type": "string", "title": "Opis zlecenia" },
-            "scope": { "type": "string", "title": "Zakres prac" },
-            "location": { "type": "string", "title": "Lokalizacja" },
-            "postalCode": { "type": "string", "title": "Kod pocztowy" },
-            "hasAudit": { "type": "boolean", "title": "Posiada audyt" },
-            "createdAt": { "type": "string", "title": "Data utworzenia" },
-            "status": { "type": "string", "enum": ["new", "pending", "in_progress", "completed"], "title": "Status" },
-            "offers": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "id": { "type": "string" },
-                  "providerId": { "type": "string" },
-                  "providerName": { "type": "string" },
-                  "price": { "type": "number" },
-                  "description": { "type": "string" },
-                  "isAccepted": { "type": "boolean" }
-                }
-              }
-            }
-          }
-        }
-      },
-      "grant-calculator-form": {
-        "type": "object",
-        "properties": {
-          "householdSize": { "type": "number", "title": "Liczba osób w gospodarstwie" },
-          "income": { "type": "number", "title": "Dochód na osobę" },
-          "coOwners": { "type": "boolean", "title": "Czy są współwłaściciele" },
-          "dataProcessingConsent": { "type": "boolean", "title": "Zgoda na przetwarzanie danych" }
-        }
-      },
-      "grant-calculator": {
-        "type": "object",
-        "properties": {
-          "grantEligibility": { "type": "boolean", "title": "Kwalifikacja do dotacji" },
-          "grantAmount": { "type": "number", "title": "Potencjalna wysokość dotacji" }
-        }
-      },
-      "beneficiary-grant": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "string" },
-          "status": { "type": "string", "enum": ["draft", "submitted", "verified", "approved", "rejected"] },
-          "submissionDate": { "type": "string" },
-          "amount": { "type": "number" }
-        }
-      },
-      "contact-form": {
-        "type": "object",
-        "properties": {
-          "name": { "type": "string", "title": "Imię i nazwisko" },
-          "email": { "type": "string", "title": "E-mail" },
-          "phone": { "type": "string", "title": "Telefon" },
-          "postalCode": { "type": "string", "title": "Kod pocztowy" },
-          "city": { "type": "string", "title": "Miejscowość" },
-          "message": { "type": "string", "title": "Wiadomość" },
-          "dataProcessingConsent": { "type": "boolean", "title": "Zgoda na przetwarzanie danych" },
-          "marketingConsent": { "type": "boolean", "title": "Zgoda marketingowa" }
-        }
-      },
-      "market-listing": {
-        "type": "object",
-        "properties": {
-          "listings": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": { "type": "string" },
-                "postalCode": { "type": "string" },
-                "city": { "type": "string" },
-                "scope": { "type": "string" },
-                "hasAudit": { "type": "boolean" },
-                "isVerified": { "type": "boolean" },
-                "views": { "type": "number" },
-                "created": { "type": "string" },
-                "type": { "type": "string", "enum": ["contractor","auditor"] }
-              }
-            }
+          "title": {
+            "type": "string",
+            "title": "Tytuł zlecenia"
           },
-          "purchasedPoints": { "type": "number", "title": "Wykupione punkty" },
-          "unlockedListings": { "type": "array", "items": { "type": "string" } }
-        }
-      },
-      "portfolio": {
-        "type": "object",
-        "properties": {
-          "companyName": { "type": "string", "title": "Nazwa firmy" },
-          "nip": { "type": "string", "title": "NIP" },
-          "address": { "type": "string", "title": "Adres" },
-          "postalCode": { "type": "string", "title": "Kod pocztowy" },
-          "city": { "type": "string", "title": "Miejscowość" },
-          "phone": { "type": "string", "title": "Telefon" },
-          "email": { "type": "string", "title": "E-mail" },
-          "website": { "type": "string", "title": "Strona www" },
-          "description": { "type": "string", "title": "Opis działalności" },
-          "services": { "type": "array", "items": { "type": "string" }, "title": "Oferowane usługi" },
-          "images": { "type": "array", "items": { "type": "string" }, "title": "Zdjęcia realizacji" },
-          "certificateNumber": { "type": "string", "title": "Numer certyfikatu" },
-          "certificateExpiry": { "type": "string", "title": "Data ważności certyfikatu" },
-          "profileConsent": { "type": "boolean", "title": "Zgoda profilowa" },
-          "certificateConsent": { "type": "boolean", "title": "Zgoda certyfikatowa" },
-          "termsConsent": { "type": "boolean", "title": "Zgoda na regulamin" },
-          "verificationConsent": { "type": "boolean", "title": "Zgoda na weryfikację" }
-        }
-      },
-      "order-rating": {
-        "type": "object",
-        "properties": {
-          "rating": { "type": "number", "title": "Ocena" },
-          "comment": { "type": "string", "title": "Komentarz" },
-          "recommendationLevel": { "type": "string", "title": "Poziom rekomendacji" },
-          "publicReview": { "type": "boolean", "title": "Zgoda na publikację" }
+          "description": {
+            "type": "string",
+            "title": "Opis zlecenia",
+            "fieldType": "textarea"
+          },
+          "scope": {
+            "type": "string",
+            "title": "Zakres prac",
+            "enum": [
+              "Termomodernizacja ścian",
+              "Termomodernizacja dachu",
+              "Wymiana okien",
+              "Wymiana źródła ciepła",
+              "Instalacja fotowoltaiki",
+              "Kompleksowa termomodernizacja",
+              "Inne"
+            ]
+          },
+          "hasAudit": {
+            "type": "boolean",
+            "title": "Posiadam audyt energetyczny",
+            "default": false
+          },
+          "budget": {
+            "type": "number",
+            "title": "Szacowany budżet (PLN)"
+          },
+          "timeline": {
+            "type": "string",
+            "title": "Preferowany termin realizacji",
+            "enum": [
+              "Jak najszybciej",
+              "W ciągu miesiąca",
+              "W ciągu 3 miesięcy",
+              "W ciągu 6 miesięcy",
+              "W ciągu roku"
+            ]
+          }
         }
       }
     }

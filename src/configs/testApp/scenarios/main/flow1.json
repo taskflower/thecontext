@@ -1,0 +1,91 @@
+
+{
+  "id": "flow1",
+  "name": "Flow 1",
+  "nodes": [
+    {
+      "slug": "step1",
+      "tplFile": "WidgetsStep",
+      "order": 0,
+      "attrs": {
+        "title": "Main > Flow 1 > Step 1",
+        "widgets": [
+          {
+            "tplFile": "InfoWidget",
+            "title": "This is the first step of Flow 1",
+            "colSpan": "full"
+          },
+          {
+            "tplFile": "ButtonWidget",
+            "label": "Back to Main",
+            "variant": "secondary",
+            "colSpan": 1,
+            "attrs": {
+              "navPath": "workspace"
+            }
+          },
+          {
+            "tplFile": "ButtonWidget",
+            "label": "Next Step",
+            "variant": "primary",
+            "colSpan": 1,
+            "attrs": {
+              "navPath": "@next"
+            }
+          },
+          {
+            "tplFile": "ButtonWidget",
+            "label": "Switch to Flow 2",
+            "variant": "secondary",
+            "colSpan": 1,
+            "attrs": {
+              "navPath": "flow2"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "slug": "step2",
+      "tplFile": "WidgetsStep",
+      "order": 1,
+      "attrs": {
+        "title": "Main > Flow 1 > Step 2",
+        "widgets": [
+          {
+            "tplFile": "InfoWidget",
+            "title": "This is the final step of Flow 1",
+            "colSpan": "full"
+          },
+          {
+            "tplFile": "ButtonWidget",
+            "label": "Previous Step",
+            "variant": "secondary",
+            "colSpan": 1,
+            "attrs": {
+              "navPath": "@prev"
+            }
+          },
+          {
+            "tplFile": "ButtonWidget",
+            "label": "Complete Flow 1",
+            "variant": "success",
+            "colSpan": 1,
+            "attrs": {
+              "navPath": "workspace"
+            }
+          },
+          {
+            "tplFile": "ButtonWidget",
+            "label": "Start Flow 2",
+            "variant": "primary",
+            "colSpan": 1,
+            "attrs": {
+              "navPath": "flow2"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

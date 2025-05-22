@@ -1,5 +1,8 @@
 import { useFlow } from "@/core";
 
+/**
+ * Komponenty pomocnicze dla uproszczenia struktury
+ */
 const InfoRow = ({ label, value }) => (
   <div className="flex justify-between border-b pb-2">
     <span className="text-gray-600">{label}:</span>
@@ -11,7 +14,10 @@ const SectionTitle = ({ title }) => (
   <h4 className="font-medium text-gray-700 mb-2">{title}</h4>
 );
 
-const ListingSummaryWidget = ({
+    /**
+     * Widget wyświetlający podsumowanie zlecenia przed finalną publikacją
+     */
+const BeneficiaryListingSummaryWidget = ({
   listing: listingProp,
   colSpan = "full",
 }) => {
@@ -99,4 +105,4 @@ const ListingSummaryWidget = ({
   );
 };
 
-export default ListingSummaryWidget;
+export default BeneficiaryListingSummaryWidget;

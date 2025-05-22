@@ -1,4 +1,3 @@
-// src/themes/default/widgets/ModernLoginWidget.tsx
 import { useState, useEffect } from 'react';
 import { useAuthContext } from "@/auth/AuthContext";
 import { useFlow } from "@/core";
@@ -42,20 +41,37 @@ export default function ModernLoginWidget({
   
   const [error, setError] = useState<string | null>(null);
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [, setIsSuccess] = useState(false);
 
   const urlWorkspaceSlug = params.workspaceSlug || workspaceSlug;
   const urlScenarioSlug = params.scenarioSlug || scenarioSlug;
   
   // Pobranie roli z kontekstu przepływu
   const [userRole, setUserRole] = useState<string>(colorTheme);
+  
+  // Inicjalizacja stanu z danymi z kontekstu
   useEffect(() => {
-    const role = get('user-data.role');
+    const role = get(`${dataPath}.role`);
     if (role) setUserRole(role);
+    
+    // Sprawdź, czy użytkownik jest już zalogowany
+    const isLoggedIn = get(`${dataPath}.isLoggedIn`);
+    if (isLoggedIn && user) {
+      setIsSuccess(true);
+      saveUserDataToContext(); // Aktualizuj dane kontekstu przy ponownym załadowaniu
+    }
     
     // Animacja wejściowa
     const timer = setTimeout(() => setHasAnimated(true), 50);
     return () => clearTimeout(timer);
-  }, [get]);
+  }, [get, dataPath, user]);
+  
+  // Aktualizuj kontekst, gdy zmienia się stan logowania
+  useEffect(() => {
+    if (user && !loading) {
+      saveUserDataToContext();
+    }
+  }, [user, loading]);
 
   // Znalezienie obiektu roli na podstawie ID
   const roleObject = roles.find(r => r.id === userRole) || roles.find(r => r.color === colorTheme) || { color: 'blue' };
@@ -66,21 +82,33 @@ export default function ModernLoginWidget({
     
     // Zapisz dane logowania
     if (dataPath) {
-      set(`${dataPath}.email`, user.email);
+      
       set(`${dataPath}.id`, user.uid);
       set(`${dataPath}.isLoggedIn`, true);
       set(`${dataPath}.lastLoginDate`, new Date().toISOString());
+      
+      // Zachowaj rolę, jeśli była wcześniej wybrana
+      const existingRole = get(`${dataPath}.role`);
+      if (existingRole) {
+        set(`${dataPath}.role`, existingRole);
+      }
     }
 
     // Zapisz imię i nazwisko
     if (profilePath && user.displayName) {
+      set(`${profilePath}.email`, user.email);
       const nameParts = user.displayName.split(" ");
       set(`${profilePath}.firstName`, nameParts[0]);
       if (nameParts.length > 1) {
         set(`${profilePath}.lastName`, nameParts.slice(1).join(" "));
       }
       set(`${profilePath}.id`, user.uid);
+      set(`${profilePath}.email`, user.email);
+      set(`${profilePath}.displayName`, user.displayName);
     }
+    
+    console.log("Zapisano dane użytkownika do kontekstu:", 
+      { email: user.email, id: user.uid, isLoggedIn: true });
   };
 
   // Pobranie klas kolorów na podstawie roli
@@ -91,8 +119,8 @@ export default function ModernLoginWidget({
     try {
       setError(null);
       await signInWithGoogle();
-      saveUserDataToContext();
-      // Nie ustawiamy isSuccess - pozostajemy w widoku zalogowanego użytkownika
+      setIsSuccess(true);
+      // saveUserDataToContext() - nie trzeba wywoływać tutaj, bo useEffect zrobi to po zmianie stanu user
     } catch (err) {
       setError('Wystąpił błąd podczas logowania przez Google. Spróbuj ponownie.');
       console.error('Google login failed', err);
@@ -106,6 +134,7 @@ export default function ModernLoginWidget({
       if (dataPath) {
         set(`${dataPath}.isLoggedIn`, false);
       }
+      setIsSuccess(false);
       
       // Przekierowanie do zerowego kroku po wylogowaniu
       if (urlWorkspaceSlug && urlScenarioSlug) {
@@ -120,6 +149,9 @@ export default function ModernLoginWidget({
   const handleContinue = () => {
     if (successPath) {
       navigateTo(successPath);
+    } else if (urlWorkspaceSlug && urlScenarioSlug) {
+      const currentStep = params.stepIndex ? parseInt(params.stepIndex, 10) : 0;
+      toScenarioStep(urlWorkspaceSlug, urlScenarioSlug, currentStep + 1);
     }
   };
 
@@ -137,7 +169,7 @@ export default function ModernLoginWidget({
   const renderLoggedIn = () => (
     <div className="flex flex-col items-center py-6">
       <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-all duration-300 ${colorClasses.bgClasses}`}>
-        <div className="w-full h-full rounded-full flex items-center justify-center text-xl font-bold text-black">
+        <div className="w-full h-full rounded-full flex items-center justify-center text-xl font-bold text-white">
           {user?.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
         </div>
       </div>
@@ -158,7 +190,7 @@ export default function ModernLoginWidget({
       </div>
       
       <div className="flex space-x-4 w-full">
-      <button
+        <button
           onClick={handleLogout}
           className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 font-medium py-3 px-4 rounded-lg flex items-center justify-center border border-red-200 transition-all duration-300"
         >
@@ -170,8 +202,6 @@ export default function ModernLoginWidget({
         >
           Kontynuuj <ArrowRight className="ml-2 w-4 h-4" />
         </button>
-        
-      
       </div>
     </div>
   );

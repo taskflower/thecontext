@@ -1,0 +1,6 @@
+{
+    "name": "Test App",
+    "tplDir": "test",
+    "defaultWorkspace": "main",
+    "defaultScenario": "flow1"
+  }

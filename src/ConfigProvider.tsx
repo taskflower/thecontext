@@ -1,219 +1,192 @@
 // src/ConfigProvider.tsx
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  lazy,
-  useCallback,
-} from "react";
-import { useLocation } from "react-router-dom";
-import type { AppConfig, WorkspaceConfig, ScenarioConfig } from "@/core/types";
+import React, { createContext, useContext, useEffect, useState, lazy } from 'react';
+import { useParams } from 'react-router-dom';
+import type { AppConfig, WorkspaceConfig, ScenarioConfig } from '@/core/types';
 
-// Fallback component dla brakujących modułów
-const NotFoundComponent = ({ componentType, componentName, tplDir }: any) => (
+// Glob wszystkich modułów tematów
+const moduleMap: Record<string, () => Promise<any>> = {};
+const modules = import.meta.glob(
+  './themes/*/{components,layouts,widgets}/*.tsx',
+  { as: 'module' }
+);
+for (const path in modules) {
+  const importer = modules[path];
+  // Ścieżka: ./themes/{tplDir}/{type}/{name}.tsx
+  const match = path.match(/\.\/themes\/(.*?)\/(components|layouts|widgets)\/(.*?)\.tsx$/);
+  if (!match) continue;
+  const [, tplDir, type, name] = match;
+  moduleMap[`${type}:${tplDir}/${name}`] = importer;
+}
+
+// Cache dla Lazy komponentów
+const componentCache = new Map<string, React.LazyExoticComponent<any>>();
+
+const NotFound = ({ type, name, tplDir }: any) => (
   <div className="fallback text-xs p-4 text-gray-600">
-    <span className="font-semibold">Nie znaleziono:</span> {componentType}{" "}
-    {componentName} w szablonie {tplDir}
+    <span className="font-semibold">Nie znaleziono:</span> {type} {name} w {tplDir}
   </div>
 );
 
-// Cache komponentów i importy dynamiczne
-const moduleImports = {
-  component: import.meta.glob<{ default: React.ComponentType<any> }>(
-    "./themes/*/components/*.tsx",
-    { as: "module" }
-  ),
-  layout: import.meta.glob<{ default: React.ComponentType<any> }>(
-    "./themes/*/layouts/*.tsx",
-    { as: "module" }
-  ),
-  widget: import.meta.glob<{ default: React.ComponentType<any> }>(
-    "./themes/*/widgets/*.tsx",
-    { as: "module" }
-  ),
-};
-
-const componentCache = new Map<string, React.LazyExoticComponent<any>>();
-
-// Ładowanie modułu w cache lub fallback
 const loadModule = (
-  type: "component" | "layout" | "widget",
+  type: 'components' | 'layouts' | 'widgets',
   tplDir: string,
   name: string
 ) => {
-  const cacheKey = `${type}:${tplDir}/${name}`;
-  if (componentCache.has(cacheKey)) return componentCache.get(cacheKey)!;
+  const key = `${type}:${tplDir}/${name}`;
+  if (componentCache.has(key)) return componentCache.get(key)!;
 
-  const path = [
-    `./themes/${tplDir}/${type}s/${name}.tsx`,
-    `./themes/default/${type}s/${name}.tsx`,
-  ].find((p) => moduleImports[type][p]);
+  const importer = moduleMap[key] || moduleMap[`${type}:default/${name}`];
+  const fallback = () =>
+    Promise.resolve({ default: (props: any) => <NotFound type={type} name={name} tplDir={tplDir} {...props} /> });
 
-  const component = path
-    ? lazy(moduleImports[type][path])
-    : lazy(() =>
-        Promise.resolve({
-          default: (props: any) => (
-            <NotFoundComponent
-              {...props}
-              componentName={name}
-              tplDir={tplDir}
-              componentType={type}
-            />
-          ),
-        })
-      );
-
-  componentCache.set(cacheKey, component);
-  return component;
+  const Comp = lazy(importer ?? fallback);
+  componentCache.set(key, Comp);
+  return Comp;
 };
 
-// Eksport preloaderów
-export const preloadModules = {
-  component: (tplDir: string, name: string) =>
-    loadModule("component", tplDir, name),
-  layout: (tplDir: string, name: string) => loadModule("layout", tplDir, name),
-  widget: (tplDir: string, name: string) => loadModule("widget", tplDir, name),
+export const preload = {
+  component: (tplDir: string, name: string) => loadModule('components', tplDir, name),
+  layout: (tplDir: string, name: string) => loadModule('layouts', tplDir, name),
+  widget: (tplDir: string, name: string) => loadModule('widgets', tplDir, name),
 };
 
-// Pobieranie configId z URL
-export const getConfigIdFromURL = (path: string) =>
-  path.split("/")[1] || "energyGrantApp";
-
-// Cache konfiguracji
-const configCache = new Map<string, Promise<AppConfig>>();
-
-// Połączona metoda ładowania workspace'ów i scenariuszy
-const loadConfigs = async (
-  configType: "workspaces" | "scenarios",
-  configs: any,
-  slug: string
-) => {
-  const paths = Object.keys(configs).filter((path) =>
-    path.startsWith(`./configs/${slug}/${configType}/`)
-  );
-  return Promise.all(
-    paths.map(async (path) => {
-      try {
-        const data = await configs[path]();
-        const id =
-          path.match(new RegExp(`${configType}/(.+)\\.json$`))?.[1] || "";
-        return { ...(data as WorkspaceConfig | ScenarioConfig), slug: id };
-      } catch (err) {
-        console.error(
-          `Błąd ładowania ${configType.slice(0, -1)} z ${path}:`,
-          err
-        );
-        return { slug: path.split("/").pop()?.replace(".json", "") || "" } as
-          | WorkspaceConfig
-          | ScenarioConfig;
-      }
-    })
-  );
-};
-
-// Auto-discovery loadJsonConfigs
-const loadJsonConfigs = async (slug: string): Promise<AppConfig> => {
-  if (configCache.has(slug)) return configCache.get(slug)!;
-
-  const configs = {
-    app: import.meta.glob<Record<string, any>>("./configs/*/app.json", {
-      as: "json",
-    }),
-    ws: import.meta.glob<Record<string, any>>("./configs/*/workspaces/*.json", {
-      as: "json",
-    }),
-    sc: import.meta.glob<Record<string, any>>("./configs/*/scenarios/*.json", {
-      as: "json",
-    }),
-  };
-
-  const configPromise = (async () => {
-    try {
-      const app = await configs.app[`./configs/${slug}/app.json`]();
-      const workspaces = await loadConfigs("workspaces", configs.ws, slug);
-      const scenarios = await loadConfigs("scenarios", configs.sc, slug);
-
-      return {
-        name: app.name || "Aplikacja",
-        description: app.description || "",
-        tplDir: app.tplDir || "default",
-        workspaces,
-        scenarios,
-        defaultWorkspace: app.defaultWorkspace,
-        defaultScenario: app.defaultScenario,
-      } as AppConfig;
-    } catch (error) {
-      console.error("Error loading config:", error);
-      throw error;
-    }
-  })();
-
-  configCache.set(slug, configPromise);
-  return configPromise;
-};
-
-// Kontekst ConfigProvider
+// Kontekst konfiguracji
 const ConfigContext = createContext<{
   config: AppConfig | null;
+  workspace: WorkspaceConfig | null;
+  scenario: ScenarioConfig | null;
   configId: string | null;
   loading: boolean;
   error: string | null;
-  preload: typeof preloadModules;
-  loadConfig: (configId: string) => Promise<void>;
-}>({
-  config: null,
-  configId: null,
-  loading: false,
-  error: null,
-  preload: preloadModules,
-  loadConfig: async () => {},
+  preload: typeof preload;
+}>({ 
+  config: null, 
+  workspace: null, 
+  scenario: null, 
+  configId: null, 
+  loading: false, 
+  error: null, 
+  preload 
 });
 
-// Provider komponentu
 export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
-  const location = useLocation();
-  const [state, setState] = useState({
-    config: null as AppConfig | null,
-    configId: null as string | null,
-    loading: true,
-    error: null as string | null,
+  const { configId, workspaceSlug, scenarioSlug } = useParams<{ 
+    configId: string; 
+    workspaceSlug: string; 
+    scenarioSlug: string; 
+  }>();
+
+  // Debug: sprawdź aktualne location
+  const location = window.location;
+  console.log('🌐 Current location:', {
+    href: location.href,
+    pathname: location.pathname,
+    hash: location.hash,
+    search: location.search
   });
 
-  const loadConfig = useCallback(
-    async (slug: string) => {
-      setState((s) => ({ ...s, loading: true, error: null }));
-      try {
-        const cfg = await loadJsonConfigs(slug);
-        setState({ config: cfg, configId: slug, loading: false, error: null });
-      } catch (fbErr: any) {
-        console.error("Błąd ładowania configu JSON, próba Firebase…", fbErr);
-        setState({
-          ...state,
-          configId: slug,
-          loading: false,
-          error: fbErr.message || "Nieznany błąd",
-        });
-      }
-    },
-    [state]
-  );
+  const [state, setState] = useState<{
+    config: AppConfig | null;
+    workspace: WorkspaceConfig | null;
+    scenario: ScenarioConfig | null;
+    configId: string | null;
+    loading: boolean;
+    error: string | null;
+  }>({
+    config: null,
+    workspace: null,
+    scenario: null,
+    configId: null,
+    loading: false,
+    error: null,
+  });
 
   useEffect(() => {
-    const slug = getConfigIdFromURL(location.pathname);
-    if (slug !== state.configId || state.config === null) {
-      loadConfig(slug);
-    }
-  }, [location.pathname, state.configId, state.config, loadConfig]);
+    const loadConfig = async () => {
+      console.log('🔄 ConfigProvider: Loading config...', { configId, workspaceSlug, scenarioSlug });
+      
+      if (!configId) {
+        console.log('❌ ConfigProvider: No configId provided');
+        return;
+      }
 
-  return (
-    <ConfigContext.Provider
-      value={{ ...state, preload: preloadModules, loadConfig }}
-    >
-      {children}
-    </ConfigContext.Provider>
-  );
+      setState(prev => ({ ...prev, loading: true, error: null }));
+      
+      try {
+        // Zawsze ładuj app config
+        console.log(`📁 Loading app config: ../src/configs/${configId}/app.json`);
+        const app: AppConfig = (await import(`../src/configs/${configId}/app.json`)).default;
+        console.log('✅ App config loaded:', app);
+        
+        let workspace: WorkspaceConfig | null = null;
+        let scenario: ScenarioConfig | null = null;
+        let scenarios: any[] = [];
+
+        // Jeśli mamy workspaceSlug, ładuj workspace
+        if (workspaceSlug) {
+          console.log(`📁 Loading workspace: ../src/configs/${configId}/workspaces/${workspaceSlug}.json`);
+          workspace = {
+            ...(await import(`../src/configs/${configId}/workspaces/${workspaceSlug}.json`)).default,
+            slug: workspaceSlug,
+          };
+          console.log('✅ Workspace loaded:', workspace);
+
+          // Jeśli mamy scenarioSlug, ładuj scenariusz
+          if (scenarioSlug) {
+            console.log(`📁 Loading scenario: ../src/configs/${configId}/scenarios/${workspaceSlug}/${scenarioSlug}.json`);
+            scenario = {
+              ...(await import(`../src/configs/${configId}/scenarios/${workspaceSlug}/${scenarioSlug}.json`)).default,
+              slug: scenarioSlug,
+            };
+            console.log('✅ Scenario loaded:', scenario);
+          }
+        }
+
+        console.log('✅ ConfigProvider: All configs loaded successfully');
+        const finalConfig = { 
+          ...app, 
+          workspaces: workspace ? [workspace] : [],
+          scenarios: scenarios || []
+        };
+        console.log('📦 Final config structure:', {
+          app,
+          workspace,
+          finalConfig,
+          workspacesArray: finalConfig.workspaces
+        });
+        
+        setState({
+          config: finalConfig,
+          workspace,
+          scenario,
+          configId: configId,
+          loading: false,
+          error: null,
+        });
+      } catch (err: any) {
+        console.error('❌ ConfigProvider: Error loading config:', err);
+        console.error('❌ Error details:', { 
+          message: err.message, 
+          stack: err.stack,
+          configId, 
+          workspaceSlug, 
+          scenarioSlug 
+        });
+        setState({ 
+          config: null, 
+          workspace: null, 
+          scenario: null, 
+          configId: configId, 
+          loading: false, 
+          error: err.message 
+        });
+      }
+    };
+
+    loadConfig();
+  }, [configId, workspaceSlug, scenarioSlug]);
+
+  return <ConfigContext.Provider value={{ ...state, preload }}>{children}</ConfigContext.Provider>;
 };
 
 export const useConfig = () => useContext(ConfigContext);

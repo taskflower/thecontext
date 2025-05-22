@@ -1,85 +1,76 @@
 // src/AppRouter.tsx
-import React, { useMemo } from "react";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { useConfig } from "./ConfigProvider";
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { ConfigProvider, useConfig } from "./ConfigProvider";
 import {
   WorkspaceLayout,
   WorkspaceOverview,
   ScenarioLayout,
 } from "./components";
+import { Loading } from "./components";
+
+// Wrapper komponent który obsługuje loading/error dla workspace
+const WorkspaceWrapper: React.FC = () => {
+  const { config, workspace, loading, error } = useConfig();
+
+  console.log('🏢 WorkspaceWrapper render:', { config: !!config, workspace: !!workspace, loading, error });
+
+  if (loading) {
+    return <Loading message="Ładowanie workspace..." />;
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 text-red-600">
+        <h1 className="text-xl font-bold">Błąd ładowania workspace</h1>
+        <p>{error}</p>
+      </div>
+    );
+  }
+
+  if (!config || !workspace) {
+    return (
+      <div className="p-4 text-yellow-600">
+        <h1 className="text-xl font-bold">Ładowanie danych...</h1>
+        <p>Config: {config ? '✅' : '❌'}, Workspace: {workspace ? '✅' : '❌'}</p>
+      </div>
+    );
+  }
+
+  return <WorkspaceLayout />;
+};
 
 const AppRouter: React.FC = () => {
-  const { config, configId } = useConfig();
-  const location = useLocation();
-
-  if (!config || !configId) return null;
-
-  // Wybierz domyślny workspace (użyj defaultWorkspace z konfiguracji lub pierwszy workspace z listy)
-  const defaultWorkspace =
-    config.defaultWorkspace || config.workspaces[0]?.slug;
-
-  // Funkcja do ustalania domyślnej ścieżki bazowej na podstawie configId
-  const getDefaultPath = useMemo(() => {
-    // Podstawowa ścieżka do workspace
-    let basePath = `/${configId}/${defaultWorkspace}`;
-
-    // Jeśli podano domyślny scenariusz, sprawdź czy istnieje i należy do domyślnego workspace
-    if (config.defaultScenario) {
-      const defaultScenario = config.scenarios.find(
-        (s) =>
-          s.slug === config.defaultScenario &&
-          s.workspaceSlug === defaultWorkspace
-      );
-
-      if (defaultScenario) {
-        // Dodaj domyślny scenariusz do ścieżki
-        basePath = `${basePath}/${defaultScenario.slug}/0`;
-      }
-    }
-
-    return basePath;
-  }, [configId, config, defaultWorkspace]);
-
-  // Sprawdź, czy jesteśmy dokładnie na ścieżce /:configId
-  // Jeśli tak, to musimy przekierować do domyślnej ścieżki
-  const shouldRedirectToDefault = location.pathname === `/${configId}`;
-
   return (
     <Routes>
-      <Route path="/" element={<Navigate to={`/${configId}`} replace />} />
-
-      {/* Przekieruj z "/:configId" na domyślną ścieżkę */}
-      <Route
-        path="/:configId"
+      {/* Redirect z głównej strony */}
+      <Route path="/" element={<Navigate to="/energyGrantApp" replace />} />
+      
+      {/* Workspace routes - tutaj ConfigProvider ma dostęp do parametrów */}
+      <Route 
+        path="/:configId/:workspaceSlug" 
         element={
-          shouldRedirectToDefault ? (
-            <Navigate to={getDefaultPath} replace />
-          ) : null
+          <ConfigProvider>
+            <WorkspaceWrapper />
+          </ConfigProvider>
         }
-      />
-
-      <Route path="/:configId/:workspaceSlug" element={<WorkspaceLayout />}>
+      >
         <Route index element={<WorkspaceOverview />} />
-        <Route path=":scenarioSlug">
+        
+        {/* Scenario routes */}
+        <Route path=":scenarioSlug" element={<ScenarioLayout />}>
           <Route index element={<Navigate to="0" replace />} />
           <Route path=":stepIndex" element={<ScenarioLayout />} />
         </Route>
       </Route>
 
+      {/* 404 */}
       <Route
         path="*"
         element={
           <div className="p-8 text-center">
             <h1 className="text-2xl font-bold mb-4">Strona nie znaleziona</h1>
             <p className="mb-4">Nie znaleziono podanej strony.</p>
-            <button
-              onClick={() =>
-                (window.location.href = `/${configId}/${defaultWorkspace}`)
-              }
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Wróć do strony głównej
-            </button>
           </div>
         }
       />

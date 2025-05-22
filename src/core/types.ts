@@ -34,6 +34,7 @@ export interface WorkspaceConfig {
   description?: string;
   icon?: string;
   templateSettings?: TemplateSettings;
+  scenarios: ScenarioConfig[];
   contextSchema: {
     type: string;
     properties: Record<string, any>;
@@ -55,7 +56,6 @@ export interface AppConfig {
   tplDir: string;
   workspaces: WorkspaceConfig[];
   scenarios: ScenarioConfig[];
-  // Nowe pola dla domyślnego workspace i scenariusza
   defaultWorkspace?: string;
   defaultScenario?: string;
 }

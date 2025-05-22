@@ -9,11 +9,18 @@ const WorkspaceLayout = memo(() => {
   const { config, preload } = useConfig();
   const { workspaceSlug = "" } = useParams<{ workspaceSlug?: string }>();
 
+  console.log("🏢 WorkspaceLayout render:", {
+    config: !!config,
+    workspaces: config?.workspaces?.length || 0,
+    workspaceSlug,
+  });
+
   if (!config) return <Loading message="Ładowanie konfiguracji..." />;
   if (!workspaceSlug) return <>Brak workspace</>;
 
-  const workspace = config.workspaces.find((w) => w.slug === workspaceSlug);
+  const workspace = config.workspaces?.find((w) => w.slug === workspaceSlug);
   if (!workspace) return <>Workspace nie znaleziony</>;
+
   const tpl = workspace.templateSettings?.tplDir || config.tplDir;
   const layoutFile = workspace.templateSettings?.layoutFile || "Simple";
   const AppLayout = preload.layout(tpl, layoutFile) as React.ComponentType<any>;
@@ -34,5 +41,7 @@ const WorkspaceLayout = memo(() => {
     </Suspense>
   );
 });
+
+WorkspaceLayout.displayName = "WorkspaceLayout";
 
 export default WorkspaceLayout;

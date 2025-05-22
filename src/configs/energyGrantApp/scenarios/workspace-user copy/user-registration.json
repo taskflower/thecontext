@@ -1,7 +1,7 @@
 {
   "id": "user-registration",
   "slug": "user-registration",
-  "workspaceSlug": "workspace-user-auth",
+  "workspaceSlug": "workspace-user",
   "name": "Rejestracja użytkownika",
   "description": "Zarejestruj się za pomocą konta Google lub formularza",
   "icon": "user-plus",
@@ -47,12 +47,9 @@
           {
             "tplFile": "UserModernLoginWidget",
             "colSpan": "full",
-            "successPath": "workspace-user-auth/user-registration/2",
+            "successPath": "workspace-user/user-registration/2",
             "dataPath": "user-data",
             "profilePath": "user-profile",
-            "enableGoogleLogin": true,
-            "enableEmailLogin": false,
-            "showRegistration": false,
             "title": "Logowanie do systemu",
             "subtitle": "Zaloguj się, aby kontynuować proces rejestracji"
           }

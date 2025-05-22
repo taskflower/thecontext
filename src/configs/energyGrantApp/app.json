@@ -2,6 +2,6 @@
   "name": "Program Dotacji Energetycznych",
   "description": "Platforma łącząca beneficjentów, wykonawców i audytorów w programie dotacji energetycznych",
   "tplDir": "energygrant",
-  "defaultWorkspace": "workspace-user-auth",
+  "defaultWorkspace": "workspace-user",
   "defaultScenario":"user-registration"
 }

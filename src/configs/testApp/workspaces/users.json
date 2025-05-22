@@ -1,0 +1,33 @@
+
+{
+    "name": "User Management",
+    "tplDir": "test",
+    "templateSettings": {
+      "layoutFile": "Simple",
+      "widgets": [
+        {
+          "tplFile": "InfoWidget",
+          "title": "User Management Page",
+          "colSpan": "full"
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "label": "Add User",
+          "variant": "primary",
+          "colSpan": 1,
+          "attrs": {
+            "navPath": "add-user"
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "label": "Back to Admin",
+          "variant": "secondary",
+          "colSpan": 1,
+          "attrs": {
+            "navPath": "/admin"
+          }
+        }
+      ]
+    }
+  }

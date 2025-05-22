@@ -1,0 +1,105 @@
+{
+  "name": "Main Workspace",
+  "tplDir": "test",
+  "scenarios": [
+    {
+      "name": "User Onboarding",
+      "steps": [
+        {
+          "slug": "welcome",
+          "order": 0,
+          "tplFile": "WidgetsStep",
+          "attrs": {
+            "title": "Welcome to Main",
+            "widgets": [
+              {
+                "tplFile": "InfoWidget",
+                "title": "This is the welcome step",
+                "colSpan": "full"
+              },
+              {
+                "tplFile": "ButtonWidget",
+                "label": "Next Step",
+                "variant": "primary",
+                "colSpan": 1,
+                "attrs": {
+                  "navPath": "@next"
+                }
+              },
+              {
+                "tplFile": "ButtonWidget",
+                "label": "Go to Admin",
+                "variant": "secondary",
+                "colSpan": 1,
+                "attrs": {
+                  "navPath": "/admin"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "slug": "preferences",
+          "order": 1,
+          "tplFile": "WidgetsStep",
+          "attrs": {
+            "title": "Set Your Preferences",
+            "widgets": [
+              {
+                "tplFile": "InfoWidget",
+                "title": "Configure your settings",
+                "colSpan": "full"
+              },
+              {
+                "tplFile": "ButtonWidget",
+                "label": "Previous Step",
+                "variant": "secondary",
+                "colSpan": 1,
+                "attrs": {
+                  "navPath": "@prev"
+                }
+              },
+              {
+                "tplFile": "ButtonWidget",
+                "label": "Finish",
+                "variant": "success",
+                "colSpan": 1,
+                "attrs": {
+                  "navPath": "@workspace"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "templateSettings": {
+    "layoutFile": "Simple",
+    "widgets": [
+      {
+        "tplFile": "InfoWidget",
+        "title": "Main Workspace Home",
+        "colSpan": "full"
+      },
+      {
+        "tplFile": "ButtonWidget",
+        "label": "Start Onboarding",
+        "variant": "primary",
+        "colSpan": 1,
+        "attrs": {
+          "navPath": "welcome"
+        }
+      },
+      {
+        "tplFile": "ButtonWidget",
+        "label": "Go to Admin",
+        "variant": "secondary",
+        "colSpan": 1,
+        "attrs": {
+          "navPath": "/admin"
+        }
+      }
+    ]
+  }
+}
