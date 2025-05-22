@@ -11,38 +11,11 @@
       },
       {
         "tplFile": "ButtonWidget",
-        "label": "Start Onboarding",
+        "label": "Manage Orders",
         "variant": "primary",
         "colSpan": 1,
         "attrs": {
-          "navPath": "main/onboarding"
-        }
-      },
-      {
-        "tplFile": "ButtonWidget",
-        "label": "Go to Admin",
-        "variant": "secondary",
-        "colSpan": 1,
-        "attrs": {
-          "navPath": "admin"
-        }
-      },
-      {
-        "tplFile": "ButtonWidget",
-        "label": "Start Flow 1",
-        "variant": "primary",
-        "colSpan": 1,
-        "attrs": {
-          "navPath": "main/flow1"
-        }
-      },
-      {
-        "tplFile": "ButtonWidget",
-        "label": "Start Flow 2",
-        "variant": "primary",
-        "colSpan": 1,
-        "attrs": {
-          "navPath": "main/flow2"
+          "navPath": "orders"
         }
       }
     ]

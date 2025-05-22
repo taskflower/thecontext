@@ -1,0 +1,102 @@
+{
+    "name": "Orders Management",
+    "tplDir": "test",
+    "contextSchema": {
+        "order": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "readOnly": true
+                },
+                "title": {
+                    "type": "string",
+                    "required": true,
+                    "label": "Order Title"
+                },
+                "description": {
+                    "type": "string",
+                    "label": "Description",
+                    "widget": "textarea"
+                },
+                "priority": {
+                    "type": "string",
+                    "enum": [
+                        "low",
+                        "medium",
+                        "high"
+                    ],
+                    "default": "medium",
+                    "label": "Priority"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "new",
+                        "in-progress",
+                        "completed",
+                        "cancelled"
+                    ],
+                    "default": "new",
+                    "label": "Status"
+                },
+                "assignee": {
+                    "type": "string",
+                    "label": "Assigned To"
+                },
+                "dueDate": {
+                    "type": "string",
+                    "format": "date",
+                    "label": "Due Date"
+                },
+                "amount": {
+                    "type": "number",
+                    "label": "Amount (PLN)",
+                    "minimum": 0
+                },
+                "createdAt": {
+                    "type": "string",
+                    "format": "datetime",
+                    "readOnly": true
+                }
+            }
+        }
+    },
+    "templateSettings": {
+        "layoutFile": "Simple",
+        "widgets": [
+            {
+                "tplFile": "InfoWidget",
+                "title": "Orders Management",
+                "colSpan": "full"
+            },
+            {
+                "tplFile": "OrderListWidget",
+                "title": "All Orders",
+                "colSpan": "full",
+                "attrs": {
+                    "schemaPath": "order",
+                    "dataSource": "localStorage:orders"
+                }
+            },
+            {
+                "tplFile": "ButtonWidget",
+                "label": "Add New Order",
+                "variant": "primary",
+                "colSpan": 1,
+                "attrs": {
+                    "navPath": "orders/add-order"
+                }
+            },
+            {
+                "tplFile": "ButtonWidget",
+                "label": "Back to Main",
+                "variant": "secondary",
+                "colSpan": 1,
+                "attrs": {
+                    "navPath": "main"
+                }
+            }
+        ]
+    }
+}

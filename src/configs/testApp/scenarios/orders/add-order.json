@@ -1,0 +1,53 @@
+{
+    "id": "add-order",
+    "name": "Add Order",
+    "nodes": [
+      {
+        "slug": "form",
+        "tplFile": "WidgetsStep",
+        "order": 0,
+        "attrs": {
+          "title": "Add New Order",
+          "widgets": [
+            {
+              "tplFile": "InfoWidget",
+              "title": "Create a new order",
+              "colSpan": "full"
+            },
+            {
+              "tplFile": "FormWidget",
+              "title": "Order Details",
+              "colSpan": "full",
+              "attrs": {
+                "schemaPath": "order",
+                "excludeFields": ["id", "createdAt"],
+                "formId": "newOrder"
+              }
+            },
+            {
+              "tplFile": "ButtonWidget",
+              "label": "Cancel",
+              "variant": "secondary",
+              "colSpan": 1,
+              "attrs": {
+                "navPath": "orders"
+              }
+            },
+            {
+              "tplFile": "SaveButtonWidget",
+              "label": "Save Order",
+              "variant": "success",
+              "colSpan": 1,
+              "attrs": {
+                "formId": "newOrder",
+                "dataSource": "localStorage:orders",
+                "onSuccess": {
+                  "navPath": "orders"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
