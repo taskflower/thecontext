@@ -1,0 +1,21 @@
+{
+    "slug": "create",
+    "nodes": [
+      {
+        "slug": "form",
+        "label": "Nowe zgłoszenie",
+        "order": 1,
+        "tplFile": "FormStep.tsx",
+        "attrs": {
+          "title": "Dodaj nowe zgłoszenie",
+          "schemaPath": "ticket",
+          "excludeFields": ["status"],
+          "onSubmit": {
+            "collection": "tickets",
+            "navPath": "tickets/list",
+            "action": "create"
+          }
+        }
+      }
+    ]
+  }

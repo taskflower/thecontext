@@ -1,13 +1,14 @@
 {
   "name": "Test App",
   "tplDir": "test",
-  "defaultWorkspace": "main",
-  "defaultScenario": "flow1",
+  "defaultWorkspace": "tickets",
+  "defaultScenario": "list",
   "database": {
     "provider": "indexedDB",
     "collections": {
       "orders": "orders",
-      "users": "users"
+      "users": "users",
+      "tickets": "tickets"
     }
   }
 }

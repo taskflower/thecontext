@@ -1,0 +1,60 @@
+
+{
+    "slug": "tickets",
+    "templateSettings": {
+      "layoutFile": "Simple",
+      "widgets": []
+    },
+    "contextSchema": {
+      "ticket": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "label": "Tytuł zgłoszenia",
+            "required": true
+          },
+          "description": {
+            "type": "string",
+            "label": "Opis",
+            "widget": "textarea",
+            "required": true
+          },
+          "priority": {
+            "type": "string",
+            "label": "Priorytet",
+            "enum": ["low", "medium", "high", "urgent"],
+            "default": "medium",
+            "required": true
+          },
+          "status": {
+            "type": "string",
+            "label": "Status",
+            "enum": ["new", "in_progress", "resolved", "closed"],
+            "default": "new",
+            "required": true
+          },
+          "category": {
+            "type": "string",
+            "label": "Kategoria",
+            "enum": ["bug", "feature", "support", "question"],
+            "required": true
+          },
+          "assignee": {
+            "type": "string",
+            "label": "Przypisany do"
+          },
+          "reporter": {
+            "type": "string",
+            "label": "Zgłaszający",
+            "required": true
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date",
+            "label": "Termin wykonania"
+          }
+        }
+      }
+    }
+  }

@@ -1,8 +1,8 @@
-// engine/navigation.ts
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
+// engine/hooks/useAppNavigation.ts
 export const useAppNavigation = () => {
-  const { config, workspace, scenario, step } = useParams();
+  const { config, workspace, scenario, step, id } = useParams();
   const navigate = useNavigate();
 
   const navigateTo = (navPath: string) => {
@@ -14,6 +14,7 @@ export const useAppNavigation = () => {
     workspace,
     scenario,
     step,
+    id,  // Dodane
     navigateTo,
   };
 };

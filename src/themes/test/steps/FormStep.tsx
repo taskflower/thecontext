@@ -4,7 +4,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useAppNavigation } from "@/engine";
 import { useWorkspaceContext } from "@/engine/hooks/useWorkspaceContext";
 import { useDBData } from "@/engine/hooks/useDBData";
-import { Lc } from "@/AppRenderer";
+import { useParams } from "react-router-dom";
 
 interface FormStepProps {
   attrs?: {
@@ -29,19 +29,24 @@ const getFieldType = (property: any) => {
 };
 
 export default function FormStep({ attrs }: FormStepProps) {
-  // All hooks must be called before any early returns
-  const { navigateTo, step } = useAppNavigation();
+  const { navigateTo } = useAppNavigation();
+  const { id } = useParams(); // Get ID from URL params
   const { getSchema } = useWorkspaceContext();
   const { addItem, updateItem, getItem } = useDBData(
     attrs?.onSubmit?.collection || ""
   );
   const [existingData, setExistingData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (attrs?.loadFromParams && step && getItem) {
-      getItem(step).then(setExistingData).catch(console.error);
+    if (attrs?.loadFromParams && id) {
+      setLoading(true);
+      getItem(id)
+        .then(setExistingData)
+        .catch(console.error)
+        .finally(() => setLoading(false));
     }
-  }, [attrs?.loadFromParams, step, getItem]);
+  }, [attrs?.loadFromParams, id]);
 
   if (!attrs?.schemaPath) {
     return <div className="text-red-500">Schema path required</div>;
@@ -49,7 +54,13 @@ export default function FormStep({ attrs }: FormStepProps) {
 
   const schema = getSchema(attrs.schemaPath);
   if (!schema) {
-    return <div className={Lc}>Schema not found: {attrs.schemaPath}</div>;
+    return (
+      <div className="text-red-500">Schema not found: {attrs.schemaPath}</div>
+    );
+  }
+
+  if (loading) {
+    return <div className="text-center py-8">Ładowanie...</div>;
   }
 
   const { properties } = schema;
@@ -65,8 +76,8 @@ export default function FormStep({ attrs }: FormStepProps) {
 
   const handleSubmit = async (values: any, { setSubmitting }: any) => {
     try {
-      if (attrs.onSubmit?.action === "update" && step) {
-        await updateItem(step, values);
+      if (attrs.onSubmit?.action === "update" && id) {
+        await updateItem(id, values);
       } else {
         await addItem(values);
       }

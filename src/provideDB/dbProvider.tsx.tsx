@@ -1,57 +1,35 @@
-// src/provideDB/simpleDBProvider.ts
-export interface DBConfig {
-  provider: 'indexedDB';
-  collections: Record<string, string>; 
-}
+// src/provideDB/dbProvider.tsx
+import React, { createContext, useContext } from 'react';
+import { useAppNavigation, useConfig } from '@/engine';
+import { AppConfig } from '@/engine/types';
 
 class SimpleIndexedDB {
   private dbName = 'appDB';
   private dbPromise: Promise<IDBDatabase> | null = null;
+  private collections: string[] = [];
+
+  setCollections(collections: string[]) {
+    this.collections = collections;
+    this.dbPromise = null; // Reset connection
+  }
 
   private async openDB(): Promise<IDBDatabase> {
     if (this.dbPromise) return this.dbPromise;
 
     this.dbPromise = new Promise((resolve, reject) => {
-      // Get current version first
-      const versionRequest = indexedDB.open(this.dbName);
+      const req = indexedDB.open(this.dbName, 1);
       
-      versionRequest.onsuccess = () => {
-        const currentVersion = versionRequest.result.version;
-        versionRequest.result.close();
-        
-        // Open with current or next version
-        const req = indexedDB.open(this.dbName, currentVersion || 1);
-        
-        req.onupgradeneeded = () => {
-          const db = req.result;
-          // Create all standard stores
-          const stores = ['tickets', 'orders', 'users'];
-          stores.forEach(storeName => {
-            if (!db.objectStoreNames.contains(storeName)) {
-              db.createObjectStore(storeName, { keyPath: "id" });
-            }
-          });
-        };
-        
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-      };
-      
-      versionRequest.onerror = () => {
-        // Database doesn't exist, create new
-        const req = indexedDB.open(this.dbName, 1);
-        
-        req.onupgradeneeded = () => {
-          const db = req.result;
-          const stores = ['tickets', 'orders', 'users'];
-          stores.forEach(storeName => {
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        this.collections.forEach(storeName => {
+          if (!db.objectStoreNames.contains(storeName)) {
             db.createObjectStore(storeName, { keyPath: "id" });
-          });
-        };
-        
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
+          }
+        });
       };
+      
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
     });
 
     return this.dbPromise;
@@ -111,10 +89,32 @@ class SimpleIndexedDB {
 }
 
 const dbInstance = new SimpleIndexedDB();
+const DBContext = createContext(dbInstance);
 
-export const useDB = () => ({
-  save: dbInstance.save.bind(dbInstance),
-  getById: dbInstance.getById.bind(dbInstance),
-  getAll: dbInstance.getAll.bind(dbInstance),
-  delete: dbInstance.delete.bind(dbInstance),
-});
+export const DBProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { config } = useAppNavigation();
+  const { config: appConfig } = useConfig<AppConfig>(`/src/configs/${config}/app.json`);
+
+  React.useEffect(() => {
+    if (appConfig?.database?.collections) {
+      const collections = Object.values(appConfig.database.collections);
+      dbInstance.setCollections(collections);
+    }
+  }, [appConfig]);
+
+  return (
+    <DBContext.Provider value={dbInstance}>
+      {children}
+    </DBContext.Provider>
+  );
+};
+
+export const useDB = () => {
+  const db = useContext(DBContext);
+  return {
+    save: db.save.bind(db),
+    getById: db.getById.bind(db),
+    getAll: db.getAll.bind(db),
+    delete: db.delete.bind(db),
+  };
+};

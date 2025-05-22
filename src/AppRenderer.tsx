@@ -52,8 +52,9 @@ const StepRenderer = () => {
     stepConfig?.tplFile
   );
 
-  if (loading || !FinalLayout) return <div>Loading...</div>;
-  if (!stepConfig || !StepComponent) return <div>Step not found: {step}</div>;
+  if (loading || !FinalLayout) return <div className={Lc}>Loading...</div>;
+  if (!stepConfig || !StepComponent)
+    return <div className={Lc}>Step not found: {step}</div>;
 
   return (
     <FinalLayout>
