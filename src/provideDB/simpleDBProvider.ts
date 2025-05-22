@@ -1,7 +1,7 @@
 // src/provideDB/simpleDBProvider.ts
 export interface DBConfig {
     provider: 'indexedDB';
-    collections: Record<string, string>; // collection -> storeName mapping
+    collections: Record<string, string>; 
   }
   
   class SimpleIndexedDB {

@@ -13,11 +13,17 @@ export interface Widget extends TemplateConfig {
   attrs?: Record<string, any>;
 }
 
+export interface DBConfig {
+  provider: "indexedDB";
+  collections: Record<string, string>;
+}
+
 export interface AppConfig {
   name: string;
   tplDir: string;
   defaultWorkspace: string;
   defaultScenario: string;
+  database?: DBConfig;
 }
 
 export interface WorkspaceConfig extends BaseConfig {
