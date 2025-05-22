@@ -20,7 +20,7 @@
             "variant": "secondary",
             "colSpan": 1,
             "attrs": {
-              "navPath": "workspace"
+              "navPath": "main"
             }
           },
           {
@@ -29,7 +29,7 @@
             "variant": "primary",
             "colSpan": 1,
             "attrs": {
-              "navPath": "step2"
+              "navPath": "main/flow2/step2"
             }
           },
           {
@@ -38,7 +38,7 @@
             "variant": "secondary",
             "colSpan": 1,
             "attrs": {
-              "navPath": "flow1"
+              "navPath": "main/flow1"
             }
           }
         ]
@@ -62,7 +62,7 @@
             "variant": "secondary",
             "colSpan": 1,
             "attrs": {
-              "navPath": "step1"
+              "navPath": "main/flow2/step1"
             }
           },
           {
@@ -71,7 +71,7 @@
             "variant": "success",
             "colSpan": 1,
             "attrs": {
-              "navPath": "workspace"
+              "navPath": "main"
             }
           },
           {
@@ -80,7 +80,7 @@
             "variant": "primary",
             "colSpan": 1,
             "attrs": {
-              "navPath": "flow1"
+              "navPath": "main/flow1"
             }
           }
         ]

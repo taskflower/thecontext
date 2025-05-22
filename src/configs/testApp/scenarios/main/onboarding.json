@@ -1,0 +1,72 @@
+{
+    "id": "onboarding",
+    "name": "User Onboarding",
+    "nodes": [
+      {
+        "slug": "welcome",
+        "tplFile": "WidgetsStep",
+        "order": 0,
+        "attrs": {
+          "title": "Welcome to Main",
+          "widgets": [
+            {
+              "tplFile": "InfoWidget",
+              "title": "This is the welcome step",
+              "colSpan": "full"
+            },
+            {
+              "tplFile": "ButtonWidget",
+              "label": "Next Step",
+              "variant": "primary",
+              "colSpan": 1,
+              "attrs": {
+                "navPath": "main/onboarding/preferences"
+              }
+            },
+            {
+              "tplFile": "ButtonWidget",
+              "label": "Go to Admin",
+              "variant": "secondary",
+              "colSpan": 1,
+              "attrs": {
+                "navPath": "admin"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "slug": "preferences",
+        "tplFile": "WidgetsStep",
+        "order": 1,
+        "attrs": {
+          "title": "Set Your Preferences",
+          "widgets": [
+            {
+              "tplFile": "InfoWidget",
+              "title": "Configure your settings",
+              "colSpan": "full"
+            },
+            {
+              "tplFile": "ButtonWidget",
+              "label": "Previous Step",
+              "variant": "secondary",
+              "colSpan": 1,
+              "attrs": {
+                "navPath": "main/onboarding/welcome"
+              }
+            },
+            {
+              "tplFile": "ButtonWidget",
+              "label": "Finish",
+              "variant": "success",
+              "colSpan": 1,
+              "attrs": {
+                "navPath": "main"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }

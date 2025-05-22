@@ -1,0 +1,39 @@
+{
+    "id": "add-user",
+    "name": "Add User",
+    "nodes": [
+      {
+        "slug": "form",
+        "tplFile": "WidgetsStep",
+        "order": 0,
+        "attrs": {
+          "title": "Add New User",
+          "widgets": [
+            {
+              "tplFile": "InfoWidget",
+              "title": "Fill in user details",
+              "colSpan": "full"
+            },
+            {
+              "tplFile": "ButtonWidget",
+              "label": "Cancel",
+              "variant": "secondary",
+              "colSpan": 1,
+              "attrs": {
+                "navPath": "users"
+              }
+            },
+            {
+              "tplFile": "ButtonWidget",
+              "label": "Save User",
+              "variant": "success",
+              "colSpan": 1,
+              "attrs": {
+                "navPath": "users"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }

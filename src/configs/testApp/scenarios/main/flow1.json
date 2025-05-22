@@ -1,4 +1,3 @@
-
 {
   "id": "flow1",
   "name": "Flow 1",
@@ -21,7 +20,7 @@
             "variant": "secondary",
             "colSpan": 1,
             "attrs": {
-              "navPath": "workspace"
+              "navPath": "main"
             }
           },
           {
@@ -30,7 +29,7 @@
             "variant": "primary",
             "colSpan": 1,
             "attrs": {
-              "navPath": "@next"
+              "navPath": "main/flow1/step2"
             }
           },
           {
@@ -39,7 +38,7 @@
             "variant": "secondary",
             "colSpan": 1,
             "attrs": {
-              "navPath": "flow2"
+              "navPath": "main/flow2/step1"
             }
           }
         ]
@@ -63,7 +62,7 @@
             "variant": "secondary",
             "colSpan": 1,
             "attrs": {
-              "navPath": "@prev"
+              "navPath": "main/flow1/step1"
             }
           },
           {
@@ -72,7 +71,7 @@
             "variant": "success",
             "colSpan": 1,
             "attrs": {
-              "navPath": "workspace"
+              "navPath": "main"
             }
           },
           {
@@ -81,7 +80,7 @@
             "variant": "primary",
             "colSpan": 1,
             "attrs": {
-              "navPath": "flow2"
+              "navPath": "main/flow2"
             }
           }
         ]
