@@ -1,13 +1,10 @@
 // AppRenderer.tsx
 import { Navigate } from "react-router-dom";
-import {
-  useAppNavigation,
-  useConfig,
-  useDynamicComponent,
-  useAppWidgets,
-} from "./engine";
+import { useAppNavigation, useConfig, useDynamicComponent } from "./engine";
 import { AppConfig, ScenarioConfig, WorkspaceConfig } from "./engine/types";
+import { WidgetContainer } from "./engine/components/WidgetContainer";
 export const P = "/src/configs";
+export const Lc = "text-8xl font-black text-gray-50/30";
 
 export const AppRenderer = () => {
   const { config, workspace, scenario, step } = useAppNavigation();
@@ -36,30 +33,15 @@ const WorkspaceRenderer = () => {
     workspaceConfig?.templateSettings?.layoutFile
   );
 
-  const widgets = useAppWidgets(
-    workspaceConfig?.templateSettings?.widgets,
-    appConfig?.tplDir
-  );
-
-  if (loading)
-    return (
-      <div className="text-8xl font-black text-gray-50/30">
-        Loading workspace...
-      </div>
-    );
-  if (!LayoutComponent)
-    return (
-      <div className="text-8xl font-black text-gray-50/30">
-        Layout not found
-      </div>
-    );
+  if (loading) return <div className={Lc}>Loading workspace...</div>;
+  if (!LayoutComponent) return <div className={Lc}>Layout not found</div>;
 
   return (
     <LayoutComponent>
-      {widgets.map((widget, i) => {
-        const { Component, ...props } = widget;
-        return <Component key={i} {...props} />;
-      })}
+      <WidgetContainer
+        widgets={workspaceConfig?.templateSettings?.widgets || []}
+        templateDir={appConfig?.tplDir}
+      />
     </LayoutComponent>
   );
 };
@@ -70,8 +52,9 @@ const ScenarioRenderer = () => {
     `${P}/${config}/scenarios/${workspace}/${scenario}.json`
   );
 
-  if (loading) return <div>Loading scenario...</div>;
-  if (!scenarioConfig?.nodes?.length) return <div>Scenario not found</div>;
+  if (loading) return <div className={Lc}>Loading scenario...</div>;
+  if (!scenarioConfig?.nodes?.length)
+    return <div className={Lc}>Scenario not found</div>;
 
   return (
     <Navigate
