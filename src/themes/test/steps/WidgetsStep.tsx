@@ -1,5 +1,5 @@
 // themes/test/steps/WidgetsStep.tsx - Przekazywanie attrs do widgetów
-import { useWidgets, useConfig, useAppNavigation } from "@/engine";
+import { useAppWidgets, useConfig, useAppNavigation } from "@/engine";
 import { AppConfig } from "@/engine/types";
 
 export default function WidgetsStep({ attrs }: any) {
@@ -7,11 +7,11 @@ export default function WidgetsStep({ attrs }: any) {
   const { config: appConfig } = useConfig<AppConfig>(
     `/src/configs/${config}/app.json`
   );
-  const widgets = useWidgets(attrs?.widgets || [], appConfig?.tplDir);
+  const widgets = useAppWidgets(attrs?.widgets || [], appConfig?.tplDir);
 
   if (!attrs?.widgets?.length) {
     return (
-      <div className="max-w-7xl mx-auto py-6 px-4">
+      <div className="max-w-7xl mx-auto py-6 px-3">
         {attrs?.title && (
           <h1 className="text-3xl font-bold mb-6">{attrs.title}</h1>
         )}

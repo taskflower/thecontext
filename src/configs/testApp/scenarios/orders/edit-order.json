@@ -1,67 +1,22 @@
 {
-    "id": "edit-order",
-    "name": "Edit Order",
-    "nodes": [
-      {
-        "slug": "form",
-        "tplFile": "WidgetsStep",
-        "order": 0,
-        "attrs": {
-          "title": "Edit Order",
-          "widgets": [
-            {
-              "tplFile": "InfoWidget",
-              "title": "Modify order details",
-              "colSpan": "full"
-            },
-            {
-              "tplFile": "FormWidget",
-              "title": "Order Details",
-              "colSpan": "full",
-              "attrs": {
-                "schemaPath": "order",
-                "excludeFields": ["createdAt"],
-                "formId": "editOrder",
-                "loadFromParams": true
-              }
-            },
-            {
-              "tplFile": "ButtonWidget",
-              "label": "Cancel",
-              "variant": "secondary",
-              "colSpan": 1,
-              "attrs": {
-                "navPath": "orders"
-              }
-            },
-            {
-              "tplFile": "UpdateButtonWidget",
-              "label": "Update Order",
-              "variant": "success",
-              "colSpan": 1,
-              "attrs": {
-                "formId": "editOrder",
-                "dataSource": "localStorage:orders",
-                "onSuccess": {
-                  "navPath": "orders"
-                }
-              }
-            },
-            {
-              "tplFile": "DeleteButtonWidget",
-              "label": "Delete Order",
-              "variant": "danger",
-              "colSpan": 1,
-              "attrs": {
-                "dataSource": "localStorage:orders",
-                "confirmMessage": "Are you sure you want to delete this order?",
-                "onSuccess": {
-                  "navPath": "orders"
-                }
-              }
-            }
-          ]
+  "id": "edit-order",
+  "name": "Edit Order",
+  "nodes": [
+    {
+      "slug": "form",
+      "tplFile": "FormStep",
+      "order": 0,
+      "attrs": {
+        "title": "Edit Order",
+        "schemaPath": "order",
+        "excludeFields": ["createdAt"],
+        "loadFromParams": true,
+        "onSubmit": {
+          "collection": "orders",
+          "navPath": "orders",
+          "action": "update"
         }
       }
-    ]
-  }
+    }
+  ]
+}

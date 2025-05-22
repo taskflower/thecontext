@@ -4,7 +4,7 @@ import {
   useAppNavigation,
   useConfig,
   useDynamicComponent,
-  useWidgets,
+  useAppWidgets,
 } from "./engine";
 import { AppConfig, ScenarioConfig, WorkspaceConfig } from "./engine/types";
 export const P = "/src/configs";
@@ -36,13 +36,23 @@ const WorkspaceRenderer = () => {
     workspaceConfig?.templateSettings?.layoutFile
   );
 
-  const widgets = useWidgets(
+  const widgets = useAppWidgets(
     workspaceConfig?.templateSettings?.widgets,
     appConfig?.tplDir
   );
 
-  if (loading) return <div>Loading workspace...</div>;
-  if (!LayoutComponent) return <div>Layout not found</div>;
+  if (loading)
+    return (
+      <div className="text-8xl font-black text-gray-50/30">
+        Loading workspace...
+      </div>
+    );
+  if (!LayoutComponent)
+    return (
+      <div className="text-8xl font-black text-gray-50/30">
+        Layout not found
+      </div>
+    );
 
   return (
     <LayoutComponent>

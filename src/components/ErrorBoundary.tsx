@@ -1,7 +1,8 @@
 // src/components/ErrorBoundary.tsx
 import { FCWithChildren } from "@/core";
 import { useState, useEffect } from "react";
-import { I } from ".";
+import I from "./I";
+
 
 export const ErrorBoundary: FCWithChildren<{ fallback?: React.ReactNode }> = ({
   children,

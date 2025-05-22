@@ -33,7 +33,7 @@ export const useConfig = <T>(configPath: string) => {
   return { config, loading };
 };
 
-export const useWidgets = (widgets: Widget[] = [], templateDir?: string) => {
+export const useAppWidgets = (widgets: Widget[] = [], templateDir?: string) => {
   const [loadedWidgets, setLoadedWidgets] = useState<
     Array<{ Component: ComponentType<any> } & Widget>
   >([]);
