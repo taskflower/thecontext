@@ -7,16 +7,18 @@ import { AuthProvider } from "./themes/test/useMockAuth";
 export default function App() {
   return (
     <BrowserRouter>
+    <DBProvider>
       <AuthProvider>
-      <DBProvider>
+      
         <Routes>
           <Route path="/:config/:workspace" element={<AppRenderer />} />
           <Route path="/:config/:workspace/:scenario" element={<AppRenderer />} />
           <Route path="/:config/:workspace/:scenario/:step" element={<AppRenderer />} />
           <Route path="/:config/:workspace/:scenario/:step/:id" element={<AppRenderer />} />
         </Routes>
-      </DBProvider>
+      
       </AuthProvider>
+      </DBProvider>
     </BrowserRouter>
   );
 }

@@ -6,9 +6,10 @@
   "database": {
     "provider": "indexedDB",
     "collections": {
-      "orders": "orders",
+
       "users": "users",
-      "tickets": "tickets"
+      "tickets": "tickets",
+        "profiles": "profiles"
     }
   }
 }
