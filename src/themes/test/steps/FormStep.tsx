@@ -5,6 +5,7 @@ import { useAppNavigation } from "@/engine";
 import { useWorkspaceContext } from "@/engine/hooks/useWorkspaceContext";
 import { useDBData } from "@/engine/hooks/useDBData";
 import { useParams } from "react-router-dom";
+import { Lc } from "@/AppRenderer";
 
 interface FormStepProps {
   attrs?: {
@@ -30,7 +31,7 @@ const getFieldType = (property: any) => {
 
 export default function FormStep({ attrs }: FormStepProps) {
   const { navigateTo } = useAppNavigation();
-  const { id } = useParams(); // Get ID from URL params
+  const { id } = useParams();
   const { getSchema } = useWorkspaceContext();
   const { addItem, updateItem, getItem } = useDBData(
     attrs?.onSubmit?.collection || ""
@@ -49,18 +50,18 @@ export default function FormStep({ attrs }: FormStepProps) {
   }, [attrs?.loadFromParams, id]);
 
   if (!attrs?.schemaPath) {
-    return <div className="text-red-500">Schema path required</div>;
+    return <div className={Lc}>Schema path required</div>;
   }
 
   const schema = getSchema(attrs.schemaPath);
   if (!schema) {
     return (
-      <div className="text-red-500">Schema not found: {attrs.schemaPath}</div>
+      <div className={Lc}>Schema not found: {attrs.schemaPath}</div>
     );
   }
 
   if (loading) {
-    return <div className="text-center py-8">Ładowanie...</div>;
+    return <div className={Lc}>Ładowanie...</div>;
   }
 
   const { properties } = schema;
@@ -73,6 +74,20 @@ export default function FormStep({ attrs }: FormStepProps) {
     acc[key] = existingData?.[key] || property.default || "";
     return acc;
   }, {} as Record<string, any>);
+
+  const validate = (values: any) => {
+    const errors: any = {};
+    
+    fields.forEach(([key, property]) => {
+      const value = values[key];
+      
+      if (property.required && (!value || value.toString().trim() === "")) {
+        errors[key] = `${property.label || key} jest wymagane`;
+      }
+    });
+    
+    return errors;
+  };
 
   const handleSubmit = async (values: any, { setSubmitting }: any) => {
     try {
@@ -148,6 +163,7 @@ export default function FormStep({ attrs }: FormStepProps) {
 
       <Formik
         initialValues={initialValues}
+        validate={validate}
         onSubmit={handleSubmit}
         enableReinitialize
       >

@@ -15,7 +15,7 @@
         "variant": "primary",
         "colSpan": 1,
         "attrs": {
-          "navPath": "orders"
+          "navPath": "tickets/list"
         }
       }
     ]

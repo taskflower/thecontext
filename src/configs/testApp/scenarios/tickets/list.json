@@ -1,9 +1,8 @@
-
 {
     "slug": "list",
     "nodes": [
       {
-        "slug": "list",
+        "slug": "view",
         "label": "Lista zgłoszeń",
         "order": 1,
         "tplFile": "TicketListStep.tsx",
