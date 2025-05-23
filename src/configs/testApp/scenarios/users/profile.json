@@ -1,0 +1,14 @@
+{
+    "slug": "profile",
+    "nodes": [
+      {
+        "slug": "view",
+        "label": "Profil użytkownika",
+        "order": 1,
+        "tplFile": "UserProfileStep.tsx",
+        "attrs": {
+          "title": "Twój profil"
+        }
+      }
+    ]
+  }

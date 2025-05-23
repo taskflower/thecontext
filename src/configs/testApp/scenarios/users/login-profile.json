@@ -1,0 +1,15 @@
+{
+    "slug": "login-profile",
+    "nodes": [
+      {
+        "slug": "profile-form",
+        "label": "Logowanie - Profil",
+        "order": 1,
+        "tplFile": "LoginProfileStep.tsx",
+        "attrs": {
+          "title": "Uzupełnij dane",
+          "onSuccess": "tickets/list"
+        }
+      }
+    ]
+  }

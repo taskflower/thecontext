@@ -1,11 +1,13 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppRenderer } from "./AppRenderer";
 import { DBProvider } from "./provideDB/dbProvider.tsx";
+import { AuthProvider } from "./themes/test/useMockAuth";
 
 // App.tsx
 export default function App() {
   return (
     <BrowserRouter>
+      <AuthProvider>
       <DBProvider>
         <Routes>
           <Route path="/:config/:workspace" element={<AppRenderer />} />
@@ -14,6 +16,7 @@ export default function App() {
           <Route path="/:config/:workspace/:scenario/:step/:id" element={<AppRenderer />} />
         </Routes>
       </DBProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

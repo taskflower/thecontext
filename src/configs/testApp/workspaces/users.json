@@ -1,0 +1,72 @@
+{
+    "slug": "users",
+    "templateSettings": {
+      "layoutFile": "Simple",
+      "widgets": []
+    },
+    "contextSchema": {
+      "user-system": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "label": "ID użytkownika"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "label": "Email",
+            "required": true
+          },
+          "role": {
+            "type": "string",
+            "label": "Rola",
+            "enum": ["admin", "user", "moderator"],
+            "default": "user",
+            "required": true
+          }
+        }
+      },
+      "user-contact": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "label": "Imię",
+            "required": true
+          },
+          "lastName": {
+            "type": "string",
+            "label": "Nazwisko",
+            "required": true
+          },
+          "phone": {
+            "type": "string",
+            "label": "Telefon"
+          }
+        }
+      },
+      "user-address": {
+        "type": "object",
+        "properties": {
+          "street": {
+            "type": "string",
+            "label": "Ulica"
+          },
+          "city": {
+            "type": "string",
+            "label": "Miasto"
+          },
+          "postalCode": {
+            "type": "string",
+            "label": "Kod pocztowy"
+          },
+          "country": {
+            "type": "string",
+            "label": "Kraj",
+            "default": "Polska"
+          }
+        }
+      }
+    }
+  }
