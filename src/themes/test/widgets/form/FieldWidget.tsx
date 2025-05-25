@@ -1,5 +1,12 @@
 // src/themes/test/widgets/form/FieldWidget.tsx
 import React from "react";
+import TextFieldWidget from "./text";
+import TextareaFieldWidget from "./textarea";
+import NumberFieldWidget from "./number";
+import EmailFieldWidget from "./email";
+import DateFieldWidget from "./date";
+import SelectFieldWidget from "./select";
+import CheckboxFieldWidget from "./checkbox";
 
 // Typ dla props FieldWidget
 export interface FieldWidgetProps {
@@ -24,50 +31,74 @@ export interface FieldWidgetProps {
   onChange: (key: string, value: any) => void;
 }
 
+// Mapowanie widgetów
+const widgetMap: { [key: string]: React.ComponentType<any> } = {
+  text: TextFieldWidget,
+  textarea: TextareaFieldWidget,
+  number: NumberFieldWidget,
+  email: EmailFieldWidget,
+  date: DateFieldWidget,
+  select: SelectFieldWidget,
+  checkbox: CheckboxFieldWidget,
+};
+
 // Główny komponent FieldWidget
 export const FieldWidget: React.FC<FieldWidgetProps> = ({
   field,
   value,
   onChange,
 }) => {
-  // Określenie nazwy widgetu - z fieldType lub widget (backward compatibility) lub domyślny text
-  const widgetName = field.fieldType || field.widget || "text";
+  // Określenie nazwy widgetu
+  let widgetName = field.fieldType || field.widget;
+  
+  // Jeśli nie ma explicit widget, określ na podstawie typu i właściwości
+  if (!widgetName) {
+    if (field.enum) {
+      widgetName = "select";
+    } else if (field.type === "boolean") {
+      widgetName = "checkbox";
+    } else if (field.type === "number" || field.type === "integer") {
+      widgetName = "number";
+    } else if (field.format === "email") {
+      widgetName = "email";
+    } else if (field.format === "date") {
+      widgetName = "date";
+    } else if (field.widget === "textarea") {
+      widgetName = "textarea";
+    } else {
+      widgetName = "text";
+    }
+  }
 
-  // Dynamiczne importowanie komponentu
-  const WidgetComponent = React.lazy(() =>
-    import(`./${widgetName}`).catch(() =>
-      import(`./text`) // fallback do text
-    )
-  );
+  // Pobierz komponent widgetu
+  const WidgetComponent = widgetMap[widgetName] || widgetMap.text;
 
   return (
-    <React.Suspense fallback={<div className="animate-pulse h-16 bg-gray-100 rounded"></div>}>
-      <WidgetComponent
-        title={field.label}
-        attrs={{
-          fieldKey: field.key,
-          field: field,
-          value: value,
-          onChange: onChange,
-          placeholder: field.placeholder,
-          required: field.required,
-          // Przekazanie wszystkich dodatkowych props
-          ...Object.fromEntries(
-            Object.entries(field).filter(
-              ([key]) =>
-                ![
-                  "type",
-                  "label",
-                  "key",
-                  "required",
-                  "placeholder",
-                  "description",
-                  "default",
-                ].includes(key)
-            )
-          ),
-        }}
-      />
-    </React.Suspense>
+    <WidgetComponent
+      title={field.label}
+      attrs={{
+        fieldKey: field.key,
+        field: field,
+        value: value,
+        onChange: onChange,
+        placeholder: field.placeholder,
+        required: field.required,
+        // Przekazanie wszystkich dodatkowych props
+        ...Object.fromEntries(
+          Object.entries(field).filter(
+            ([key]) =>
+              ![
+                "type",
+                "label",
+                "key",
+                "required",
+                "placeholder",
+                "description",
+                "default",
+              ].includes(key)
+          )
+        ),
+      }}
+    />
   );
 };

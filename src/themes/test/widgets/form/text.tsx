@@ -1,5 +1,4 @@
-// src/themes/test/widgets/TextFieldWidget.tsx
-
+// src/themes/test/widgets/form/text.tsx
 
 interface TextFieldWidgetProps {
   title?: string;
