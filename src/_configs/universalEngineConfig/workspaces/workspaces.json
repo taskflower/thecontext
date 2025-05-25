@@ -2,7 +2,7 @@
     "slug": "workspaces",
     "name": "Workspace Manager",
     "templateSettings": {
-        "layoutFile": "Simple",
+        "layoutFile": "UniversalLayout",
         "widgets": [
             {
                 "tplFile": "InfoWidget",
