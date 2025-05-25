@@ -1,17 +1,23 @@
-// src/App.tsx
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { Router } from "./ngn2/cre";
+/// src/App.tsx
+import { BrowserRouter, useRoutes } from "react-router-dom";
+import ConfigPage from "./pages/ConfigPage";
+import Layout from "./layout/Layout";
+
+function AppRoutes() {
+  const routes = [
+    { path: ":config/:workspace/:scenario/:step?", element: <ConfigPage /> },
+    { path: ":config/:workspace", element: <ConfigPage /> },
+    { path: "*", element: <div>Not found</div> }
+  ];
+  return useRoutes(routes);
+}
 
 export function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route
-          path="/:config?/:workspace?/:scenario?/:step?/:id?"
-          element={<Router />}
-        />
-        <Route path="/" element={<Navigate to="/testApp/main" replace />} />
-      </Routes>
+      <Layout>
+        <AppRoutes />
+      </Layout>
     </BrowserRouter>
   );
 }
