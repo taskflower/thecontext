@@ -1,64 +1,55 @@
+// ----------------------------------------
 // src/core/hooks/useComponent.tsx
-import { ComponentType, useEffect, useState } from "react";
-const modules = import.meta.glob("../themes/**/!(*.d).{tsx,jsx}", {
-  eager: false,
-});
+import { useEffect, useState } from "react";
+import type { ComponentHookResult, ThemeType } from "../types";
 
-const componentCache = new Map<string, ComponentType<any>>();
+const modules = import.meta.glob("../themes/**/!(*.d).{tsx,jsx}", { eager: false });
+const cache = new Map<string, any>();
+
 export function useComponent(
   theme: string,
-  type: "steps" | "widgets" | "layouts",
+  type: ThemeType,
   filename: string
-) {
-  const [Component, setComponent] = useState<ComponentType<any> | null>(null);
+): ComponentHookResult {
+  const [Component, setComponent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadComponent = async () => {
+    const load = async () => {
       setLoading(true);
       setError(null);
 
-      const componentPath = `../themes/${theme}/${type}/${filename}`;
-      const cacheKey = componentPath;
-
-      if (componentCache.has(cacheKey)) {
-        setComponent(() => componentCache.get(cacheKey)!);
+      const path = `../themes/${theme}/${type}/${filename}`;
+      
+      if (cache.has(path)) {
+        setComponent(() => cache.get(path));
         setLoading(false);
         return;
       }
 
-      const moduleKey = Object.keys(modules).find(
-        (key) => key === componentPath
-      );
-
-      if (!moduleKey) {
-        setError(`Component not found: ${componentPath}`);
+      const key = Object.keys(modules).find(k => k === path);
+      if (!key) {
+        setError(`Component not found: ${path}`);
         setLoading(false);
         return;
       }
 
       try {
-        const module = await modules[moduleKey]();
-        const component = (module as any).default;
-
-        if (!component) {
-          setError(`No default export in: ${componentPath}`);
-          setLoading(false);
-          return;
-        }
-
-        componentCache.set(cacheKey, component);
-        setComponent(() => component);
+        const mod = await modules[key]();
+        const comp = (mod as any).default;
+        if (!comp) throw new Error(`No default export: ${path}`);
+        
+        cache.set(path, comp);
+        setComponent(() => comp);
       } catch (err) {
-        setError(`Failed to load: ${componentPath}`);
-        console.error(err);
+        setError(`Failed to load: ${path}`);
       } finally {
         setLoading(false);
       }
     };
 
-    loadComponent();
+    load();
   }, [theme, type, filename]);
 
   return { Component, loading, error };

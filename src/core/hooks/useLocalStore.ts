@@ -1,8 +1,10 @@
+// ----------------------------------------
 // src/core/hooks/useLocalStore.ts
 import { useState, useEffect } from "react";
 import { useEngineStore } from "./useEngineStore";
+import type { LocalStoreHook } from "../types";
 
-export function useLocalStore<T>(prefix: string) {
+export function useLocalStore<T>(prefix: string): LocalStoreHook<T> {
   const [items, setItems] = useState<T[]>([]);
 
   useEffect(() => {
@@ -13,7 +15,7 @@ export function useLocalStore<T>(prefix: string) {
       .catch(console.error);
   }, [prefix]);
 
-  const add = (data: T) => {
+  const add = (data: T): void => {
     const id = Date.now().toString();
     useEngineStore.getState().addRecord(`${prefix}${id}`, data);
   };

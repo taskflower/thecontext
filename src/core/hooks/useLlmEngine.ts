@@ -1,27 +1,18 @@
+// ----------------------------------------
 // src/core/hooks/useLlmEngine.ts
-import { ZodType } from 'zod';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useEngineStore } from './useEngineStore';
-import { useAuthContext } from '@/auth/AuthContext';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEngineStore } from "./useEngineStore";
+import { useAuthContext } from "@/auth/AuthContext";
+import type { LlmOptions, LlmHookResult, LlmMessage } from "../types";
 
-
-interface LlmOptions<T> {
-  schema?: ZodType<T>;
-  jsonSchema?: any;
-  userMessage: string;
-  systemMessage?: string;
-  autoStart?: boolean;
-  apiEndpoint?: string;
-}
-
-export function useLlmEngine<T>({
+export function useLlmEngine<T = any>({
   schema,
   jsonSchema,
   userMessage,
   systemMessage,
   autoStart = false,
   apiEndpoint,
-}: LlmOptions<T>) {
+}: LlmOptions<T>): LlmHookResult<T> {
   const { get } = useEngineStore();
   const { user, getToken } = useAuthContext();
   const [isLoading, setIsLoading] = useState(false);
@@ -29,40 +20,41 @@ export function useLlmEngine<T>({
   const [result, setResult] = useState<T | null>(null);
   const [started, setStarted] = useState(autoStart);
 
-  const processTemplate = (str: string) =>
-    str.replace(/{{([^}]+)}}/g, (_, p) => String(get(p.trim()) ?? ''));
+  const processTemplate = (str: string): string =>
+    str.replace(/{{([^}]+)}}/g, (_, p) => String(get(p.trim()) ?? ""));
 
-  const processedUser = useMemo(
-    () => processTemplate(userMessage),
-    [userMessage]
-  );
+  const processedUser = useMemo(() => processTemplate(userMessage), [userMessage]);
 
   const start = useCallback(async () => {
     if (isLoading) return;
     setStarted(true);
     setIsLoading(true);
     setError(null);
+    
     try {
-      const msgs: { role: string; content: string }[] = [];
-      if (jsonSchema)
+      const msgs: LlmMessage[] = [];
+      if (jsonSchema) {
         msgs.push({
-          role: 'system',
+          role: "system",
           content: `Zwróć JSON zgodny ze schemą: ${JSON.stringify(jsonSchema)}`,
         });
-      if (systemMessage)
-        msgs.push({ role: 'system', content: processTemplate(systemMessage) });
-      msgs.push({ role: 'user', content: processedUser });
+      }
+      if (systemMessage) {
+        msgs.push({ role: "system", content: processTemplate(systemMessage) });
+      }
+      msgs.push({ role: "user", content: processedUser });
 
       const token = await getToken();
-      if (!token || !user)
-        throw new Error(token ? 'Użytkownik nie zalogowany' : 'Brak tokenu');
+      if (!token || !user) {
+        throw new Error(token ? "Użytkownik nie zalogowany" : "Brak tokenu");
+      }
 
       const res = await fetch(
         apiEndpoint || `${import.meta.env.VITE_API_URL}/api/v1/services/gemini/chat/completion`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
@@ -74,15 +66,21 @@ export function useLlmEngine<T>({
           }),
         }
       );
-      if (!res.ok)
-        throw new Error((await res.json()).error?.message || 'Błąd LLM');
+      
+      if (!res.ok) {
+        throw new Error((await res.json()).error?.message || "Błąd LLM");
+      }
+      
       const { result: llmRes } = await res.json();
       if (schema) {
         const v = schema.safeParse(llmRes);
-        if (!v.success)
-          throw new Error('Nieprawidłowy format: ' + v.error.message);
+        if (!v.success) {
+          throw new Error("Nieprawidłowy format: " + v.error.message);
+        }
         setResult(v.data);
-      } else setResult(llmRes as any);
+      } else {
+        setResult(llmRes as T);
+      }
     } catch (e: any) {
       setError(e.message);
     } finally {

@@ -1,9 +1,11 @@
+// ----------------------------------------
 // src/core/hooks/useWorkspaceSchema.ts
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useConfig, WorkspaceConfig } from "./useConfig";
+import { useConfig } from "./useConfig";
+import type { WorkspaceConfig, SchemaHookResult } from "../types";
 
-export function useWorkspaceSchema(schemaPath: string) {
+export function useWorkspaceSchema(schemaPath: string): SchemaHookResult {
   const { config = "exampleTicketApp", workspace = "" } = useParams<{
     config: string;
     workspace: string;

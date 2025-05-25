@@ -1,70 +1,70 @@
 // src/core/ComponentLoader.ts
-import React from "react";
+import { ComponentType, useEffect, useState } from "react";
+
+type ThemeType = "steps" | "widgets" | "layouts";
+
+interface ComponentHookResult<T = any> {
+  Component: ComponentType<T> | null;
+  loading: boolean;
+  error: string | null;
+}
 
 const modules = import.meta.glob("../themes/**/!(*.d).{tsx,jsx}", {
   eager: false,
 });
 
-const componentCache = new Map<string, React.ComponentType<any>>();
+const cache = new Map<string, ComponentType<any>>();
 
 export function useComponent(
   theme: string,
-  type: "steps" | "widgets" | "layouts",
+  type: ThemeType,
   filename: string
-) {
-  const [Component, setComponent] =
-    React.useState<React.ComponentType<any> | null>(null);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
+): ComponentHookResult {
+  const [Component, setComponent] = useState<ComponentType<any> | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  React.useEffect(() => {
-    const loadComponent = async () => {
+  useEffect(() => {
+    const load = async (): Promise<void> => {
       setLoading(true);
       setError(null);
 
-      // Buduj ścieżkę do komponentu
-      const componentPath = `../themes/${theme}/${type}/${filename}`;
-      const cacheKey = componentPath;
-
-      // Sprawdź cache
-      if (componentCache.has(cacheKey)) {
-        setComponent(() => componentCache.get(cacheKey)!);
+      const path = `../themes/${theme}/${type}/${filename}`;
+      
+      if (cache.has(path)) {
+        setComponent(() => cache.get(path)!);
         setLoading(false);
         return;
       }
 
-      // Znajdź matching moduł w glob imports
-      const moduleKey = Object.keys(modules).find(
-        (key) => key === componentPath
-      );
-
-      if (!moduleKey) {
-        setError(`Component not found: ${componentPath}`);
+      const key = Object.keys(modules).find(k => k === path);
+      if (!key) {
+        setError(`Component not found: ${path}`);
         setLoading(false);
         return;
       }
 
       try {
-        const module = await modules[moduleKey]();
-        const component = (module as any).default;
+        const mod = await modules[key]();
+        const comp = (mod as { default: ComponentType<any> }).default;
 
-        if (!component) {
-          setError(`No default export in: ${componentPath}`);
+        if (!comp) {
+          setError(`No default export in: ${path}`);
           setLoading(false);
           return;
         }
 
-        componentCache.set(cacheKey, component);
-        setComponent(() => component);
+        cache.set(path, comp);
+        setComponent(() => comp);
       } catch (err) {
-        setError(`Failed to load: ${componentPath}`);
+        setError(`Failed to load: ${path}`);
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
-    loadComponent();
+    load();
   }, [theme, type, filename]);
 
   return { Component, loading, error };
@@ -73,11 +73,9 @@ export function useComponent(
 export function getAvailableThemes(): string[] {
   const themes = new Set<string>();
 
-  Object.keys(modules).forEach((path) => {
+  Object.keys(modules).forEach((path: string) => {
     const match = path.match(/\.\.\/themes\/([^\/]+)\//);
-    if (match) {
-      themes.add(match[1]);
-    }
+    if (match?.[1]) themes.add(match[1]);
   });
 
   return Array.from(themes);
