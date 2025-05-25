@@ -1,11 +1,13 @@
 // src/themes/test/widgets/InfoWidget.tsx
+import TitleWidget from "./TitleWidget";
 
 type InfoVariant = "default" | "info" | "success" | "warning" | "error";
 
 interface InfoWidgetProps {
   title: string;
   attrs?: {
-    content: string;
+    content?: string;
+    description?: string;
     variant?: InfoVariant;
     colSpan?: string | number;
   };
@@ -17,6 +19,7 @@ export default function InfoWidget({
 }: InfoWidgetProps) {
   const content = attrs.content || "Default content";  
   const variant = attrs.variant || "default";
+  const description = attrs.description;
 
   const variants: Record<InfoVariant, string> = {
     default: "bg-white border-zinc-200/80",
@@ -28,7 +31,15 @@ export default function InfoWidget({
 
   return (
     <div className={`p-6 rounded-lg border ${variants[variant]}`}>
-      <h3 className="text-base font-medium mb-3 text-zinc-900">{title}</h3>
+      <div className="mb-4">
+        <TitleWidget 
+          title={title}
+          attrs={{
+            description: description,
+            size: "small"
+          }}
+        />
+      </div>
       <p className="text-sm text-zinc-600 leading-relaxed">{content}</p>
     </div>
   );
