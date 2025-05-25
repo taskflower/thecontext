@@ -1,10 +1,9 @@
 // src/themes/test/steps/FormStep.tsx
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { configDB } from "../../../db";
 import { useWorkspaceSchema } from "@/core/engine";
-import { CheckboxFieldWidget, DateFieldWidget, EmailFieldWidget, NumberFieldWidget, SelectFieldWidget, TextareaFieldWidget, TextFieldWidget } from "../widgets/form";
-
+import { FieldWidget } from "../widgets/form/FieldWidget";
 
 type FormStepAttrs = {
   schemaPath: string;
@@ -15,87 +14,12 @@ type FormStepAttrs = {
   };
   excludeFields?: string[];
   title?: string;
-  // Możliwość nadpisania widgetów dla konkretnych pól
-  fieldWidgets?: {
-    [fieldKey: string]: {
-      widget: string;
-      title?: string;
-      attrs?: any;
-    };
-  };
 };
 
 interface FormStepProps {
   attrs: FormStepAttrs;
   ticketId?: string;
 }
-
-// Mapa dostępnych widgetów
-const FIELD_WIDGETS = {
-  text: TextFieldWidget,
-  textarea: TextareaFieldWidget,
-  select: SelectFieldWidget,
-  date: DateFieldWidget,
-  number: NumberFieldWidget,
-  email: EmailFieldWidget,
-  checkbox: CheckboxFieldWidget,
-};
-
-// Funkcja wybierająca odpowiedni widget
-const renderFieldWidget = (
-  fieldKey: string, 
-  field: any, 
-  value: any, 
-  onChange: any, 
-  customWidget?: { widget: string; title?: string; attrs?: any }
-) => {
-  let widgetType = "text"; // domyślny
-  let title = field.label || fieldKey;
-  let extraAttrs = {};
-
-  // Sprawdzenie czy jest custom widget dla tego pola
-  if (customWidget) {
-    widgetType = customWidget.widget;
-    title = customWidget.title || title;
-    extraAttrs = customWidget.attrs || {};
-  } else {
-    // Automatyczne wykrywanie typu widgetu
-    if (field.widget === "textarea") {
-      widgetType = "textarea";
-    } else if (field.widget === "checkbox" || field.type === "boolean") {
-      widgetType = "checkbox";
-    } else if (field.enum) {
-      widgetType = "select";
-    } else if (field.format === "date") {
-      widgetType = "date";
-    } else if (field.format === "email") {
-      widgetType = "email";
-    } else if (field.type === "number" || field.type === "integer") {
-      widgetType = "number";
-    }
-  }
-
-  const WidgetComponent = FIELD_WIDGETS[widgetType as keyof typeof FIELD_WIDGETS];
-  
-  if (!WidgetComponent) {
-    console.warn(`Widget type "${widgetType}" not found for field "${fieldKey}"`);
-    return null;
-  }
-
-  return (
-    <WidgetComponent
-      key={fieldKey}
-      title={title}
-      attrs={{
-        fieldKey,
-        field,
-        value: value ?? "",
-        onChange,
-        ...extraAttrs,
-      }}
-    />
-  );
-};
 
 export default function FormStep({ attrs, ticketId }: FormStepProps) {
   const navigate = useNavigate();
@@ -106,7 +30,6 @@ export default function FormStep({ attrs, ticketId }: FormStepProps) {
   const [data, setData] = useState<Record<string, any>>({});
   const [saving, setSaving] = useState(false);
 
-  // Domyślne wartości
   useEffect(() => {
     if (!schema?.properties) return;
     const defaults: any = {};
@@ -116,7 +39,6 @@ export default function FormStep({ attrs, ticketId }: FormStepProps) {
     setData(defaults);
   }, [schema]);
 
-  // Ładowanie rekordu do edycji
   useEffect(() => {
     if (!schema || !attrs.loadFromParams || !editId) return;
     (async () => {
@@ -141,7 +63,9 @@ export default function FormStep({ attrs, ticketId }: FormStepProps) {
       <div className="flex items-center justify-center py-24">
         <div className="flex items-center gap-3">
           <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900" />
-          <span className="text-sm font-medium text-zinc-600">Ładowanie formularza</span>
+          <span className="text-sm font-medium text-zinc-600">
+            Ładowanie formularza
+          </span>
         </div>
       </div>
     );
@@ -150,7 +74,9 @@ export default function FormStep({ attrs, ticketId }: FormStepProps) {
   if (error || !schema) {
     return (
       <div className="py-24 text-center">
-        <div className="text-red-600 text-sm font-medium mb-2">Błąd konfiguracji</div>
+        <div className="text-red-600 text-sm font-medium mb-2">
+          Błąd konfiguracji
+        </div>
         <div className="text-xs text-zinc-500">
           {error || `Nie znaleziono schemy: ${attrs.schemaPath}`}
         </div>
@@ -199,11 +125,15 @@ export default function FormStep({ attrs, ticketId }: FormStepProps) {
           <div className="space-y-5">
             {Object.entries(schema.properties).map(([key, field]: any) => {
               if (attrs.excludeFields?.includes(key)) return null;
-              
-              const value = data[key];
-              const customWidget = attrs.fieldWidgets?.[key];
-              
-              return renderFieldWidget(key, field, value, handleChange, customWidget);
+
+              return (
+                <FieldWidget
+                  key={key}
+                  field={{ ...field, key }}
+                  value={data[key] ?? ""}
+                  onChange={handleChange}
+                />
+              );
             })}
           </div>
 

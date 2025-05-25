@@ -1,6 +1,4 @@
 // src/themes/test/widgets/TextareaFieldWidget.tsx
-
-
 interface TextareaFieldWidgetProps {
   title?: string;
   attrs: {
@@ -16,14 +14,29 @@ interface TextareaFieldWidgetProps {
   };
 }
 
-export default function TextareaFieldWidget({ title, attrs }: TextareaFieldWidgetProps) {
-  const { fieldKey, field, value, onChange, placeholder, required, disabled, rows, className } = attrs;
-  
+export default function TextareaFieldWidget({
+  title,
+  attrs,
+}: TextareaFieldWidgetProps) {
+  const {
+    fieldKey,
+    field,
+    value,
+    onChange,
+    placeholder,
+    required,
+    disabled,
+    rows,
+    className,
+  } = attrs;
+
   return (
     <div className="space-y-2">
       <label className="block text-sm font-medium text-zinc-700">
         {title || field.label || fieldKey}
-        {(required ?? field.required) && <span className="text-red-500 ml-1">*</span>}
+        {(required ?? field.required) && (
+          <span className="text-red-500 ml-1">*</span>
+        )}
       </label>
       <textarea
         value={value ?? ""}
@@ -31,7 +44,10 @@ export default function TextareaFieldWidget({ title, attrs }: TextareaFieldWidge
         placeholder={placeholder || field.placeholder}
         disabled={disabled}
         rows={rows || 4}
-        className={className || "w-full px-3 py-2 text-sm border border-zinc-300/80 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-900/20 focus:border-zinc-400 resize-none"}
+        className={
+          className ||
+          "w-full px-3 py-2 text-sm border border-zinc-300/80 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-900/20 focus:border-zinc-400 resize-none"
+        }
         required={required ?? field.required}
       />
       {field.description && (
