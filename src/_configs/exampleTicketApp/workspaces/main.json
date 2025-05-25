@@ -5,7 +5,7 @@
     "layoutFile": "Simple",
     "widgets": [
       {
-        "tplFile": "InfoWidget.tsx",
+        "tplFile": "InfoWidget",
         "title": "🎫 HELLO Ticket Management",
         "attrs": {
           "content": "Manage support tickets, track issues and handle customer requests efficiently.",

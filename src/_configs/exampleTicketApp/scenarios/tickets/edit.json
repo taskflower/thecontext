@@ -5,7 +5,7 @@
         "slug": "form",
         "label": "Edytuj zgłoszenie",
         "order": 1,
-        "tplFile": "FormStep.tsx",
+        "tplFile": "FormStep",
         "attrs": {
           "title": "Edytuj zgłoszenie",
           "schemaPath": "ticket",

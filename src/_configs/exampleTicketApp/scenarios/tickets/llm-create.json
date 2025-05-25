@@ -5,7 +5,7 @@
       "slug": "form",
       "label": "Generuj zgłoszenie z AI",
       "order": 1,
-      "tplFile": "LLMGenerationStep.tsx",
+      "tplFile": "LLMGenerationStep",
       "attrs": {
         "title": "Wygeneruj zgłoszenie przy pomocy AI",
         "schemaPath": "ticket"

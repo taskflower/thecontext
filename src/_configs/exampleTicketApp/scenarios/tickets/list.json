@@ -5,13 +5,13 @@
       "slug": "view",
       "label": "Lista zgłoszeń",
       "order": 1,
-      "tplFile": "TicketListStep.tsx",
+      "tplFile": "TicketListStep",
       "attrs": {
         "title": "Lista zgłoszeń",
         "collection": "tickets",
         "widgets": [
           {
-            "tplFile": "ButtonWidget.tsx", 
+            "tplFile": "ButtonWidget", 
             "title": "Dodaj nowe zgłoszenie", 
             "attrs": {
               "variant": "primary",

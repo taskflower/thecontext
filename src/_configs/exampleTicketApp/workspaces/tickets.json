@@ -5,7 +5,7 @@
     "layoutFile": "Simple",
     "widgets": [
       {
-        "tplFile": "InfoWidget.tsx",
+        "tplFile": "InfoWidget",
         "title": "🎫 Ticket Management",
         "attrs": {
           "content": "Manage support tickets, track issues and handle customer requests efficiently.",
@@ -14,7 +14,7 @@
         }
       },
       {
-        "tplFile": "ButtonWidget.tsx",
+        "tplFile": "ButtonWidget",
         "title": "📝 Create New Ticket", 
         "attrs": {
           "navPath": "tickets/create",
@@ -23,7 +23,7 @@
         }
       },
       {
-        "tplFile": "ButtonWidget.tsx",
+        "tplFile": "ButtonWidget",
         "title": "📋 View All Tickets", 
         "attrs": {
           "navPath": "tickets/list",
@@ -32,7 +32,7 @@
         }
       },
       {
-        "tplFile": "ButtonWidget.tsx",
+        "tplFile": "ButtonWidget",
         "title": "🤖 Wygeneruj z AI",
         "attrs": {
           "navPath": "tickets/llm-create",

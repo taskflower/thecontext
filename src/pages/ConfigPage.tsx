@@ -1,7 +1,7 @@
 // src/pages/ConfigPage.tsx - Zaktualizowana wersja
-import { useConfig } from "@/core/engine";
+import { useComponent, useConfig } from "@/core/engine";
 import { useParams } from "react-router-dom";
-import { useComponent } from "@/core/ComponentLoader";
+
 
 const renderError = (message: string, details: string) => (
   <div className="text-center py-12">

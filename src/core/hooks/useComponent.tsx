@@ -1,9 +1,10 @@
-// ----------------------------------------
 // src/core/hooks/useComponent.tsx
 import { useEffect, useState } from "react";
 import type { ComponentHookResult, ThemeType } from "../types";
 
-const modules = import.meta.glob("../themes/**/!(*.d).{tsx,jsx}", { eager: false });
+const modules = import.meta.glob("../../themes/**/!(*.d).{tsx,jsx}", {
+  eager: false,
+});
 const cache = new Map<string, any>();
 
 export function useComponent(
@@ -20,15 +21,19 @@ export function useComponent(
       setLoading(true);
       setError(null);
 
-      const path = `../themes/${theme}/${type}/${filename}`;
+      const path = `../../themes/${theme}/${type}/${filename}`;
+      const pathWithExt = `${path}.tsx`;
+      const cacheKey = path;
       
-      if (cache.has(path)) {
-        setComponent(() => cache.get(path));
+      if (cache.has(cacheKey)) {
+        setComponent(() => cache.get(cacheKey));
         setLoading(false);
         return;
       }
 
-      const key = Object.keys(modules).find(k => k === path);
+      // Sprawdź oba warianty - z rozszerzeniem i bez
+      const key = Object.keys(modules).find(k => k === path || k === pathWithExt);
+      
       if (!key) {
         setError(`Component not found: ${path}`);
         setLoading(false);
@@ -40,7 +45,7 @@ export function useComponent(
         const comp = (mod as any).default;
         if (!comp) throw new Error(`No default export: ${path}`);
         
-        cache.set(path, comp);
+        cache.set(cacheKey, comp);
         setComponent(() => comp);
       } catch (err) {
         setError(`Failed to load: ${path}`);

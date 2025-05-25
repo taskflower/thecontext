@@ -3,8 +3,8 @@ import { BrowserRouter, useParams, useRoutes } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthContext";
 import ConfigPage from "./pages/ConfigPage";
 import AuthPage from "./pages/AuthPage";
-import { useConfig } from "./core/engine";
-import { useComponent } from "./core/ComponentLoader";
+import { useComponent, useConfig } from "./core/engine";
+
 
 function AppRoutes() {
   const routes = [
