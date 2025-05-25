@@ -8,7 +8,6 @@ export default function TicketListStep({ attrs }: any) {
   const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Load tickets from IndexedDB
   useEffect(() => {
     loadTickets();
   }, []);
@@ -16,7 +15,6 @@ export default function TicketListStep({ attrs }: any) {
   const loadTickets = async () => {
     try {
       setLoading(true);
-      // Load all records that start with "tickets:"
       const records = await configDB.records
         .where("id")
         .startsWith("tickets:")
@@ -37,7 +35,7 @@ export default function TicketListStep({ attrs }: any) {
     if (confirm("Czy na pewno chcesz usunąć to zgłoszenie?")) {
       try {
         await configDB.records.delete(`tickets:${ticketId}`);
-        await loadTickets(); // Refresh list
+        await loadTickets();
       } catch (error) {
         console.error("Failed to delete ticket:", error);
         alert("Błąd podczas usuwania zgłoszenia");
@@ -47,28 +45,29 @@ export default function TicketListStep({ attrs }: any) {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2"></div>
-        <span className="text-gray-600">Ładowanie zgłoszeń...</span>
+      <div className="flex items-center justify-center py-24">
+        <div className="flex items-center gap-3">
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900" />
+          <span className="text-sm font-medium text-zinc-600">Ładowanie zgłoszeń</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">{attrs.title}</h1>
-
-        {/* Render widgets from config */}
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-semibold text-zinc-900">{attrs.title}</h1>
+        
         <div className="flex gap-2">
           {attrs.widgets?.map((widget: any, i: number) => (
             <button
               key={i}
               onClick={() => navigate(`/exampleTicketApp/${widget.attrs.navPath}`)}
-              className={`px-4 py-2 rounded font-medium ${
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 widget.attrs.variant === "primary"
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
-                  : "bg-gray-600 text-white hover:bg-gray-700"
+                  ? "bg-zinc-900 text-white hover:bg-zinc-800"
+                  : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
               }`}
             >
               {widget.title}
@@ -78,127 +77,129 @@ export default function TicketListStep({ attrs }: any) {
       </div>
 
       {tickets.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <div className="text-gray-400 text-lg mb-4">📝 Brak zgłoszeń</div>
-          <p className="text-gray-600 mb-6">
-            Nie masz jeszcze żadnych zgłoszeń. Stwórz pierwsze!
+        <div className="text-center py-20 bg-zinc-50/50 rounded-lg border border-zinc-200/60">
+          <div className="text-zinc-400 text-lg mb-3">📝</div>
+          <h3 className="text-lg font-medium text-zinc-900 mb-2">Brak zgłoszeń</h3>
+          <p className="text-zinc-600 text-sm mb-6 max-w-sm mx-auto">
+            Nie masz jeszcze żadnych zgłoszeń. Stwórz pierwsze zgłoszenie, aby rozpocząć.
           </p>
           <button
             onClick={() => navigate("/exampleTicketApp/tickets/create")}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium"
+            className="bg-zinc-900 text-white px-5 py-2.5 text-sm font-medium rounded-md hover:bg-zinc-800 transition-colors"
           >
-            Stwórz pierwsze zgłoszenie
+            Stwórz zgłoszenie
           </button>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
-                  Tytuł
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
-                  Priorytet
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
-                  Status
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
-                  Kategoria
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
-                  Zgłaszający
-                </th>
-                <th className="px-4 py-3 text-right text-sm font-medium text-gray-700">
-                  Akcje
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {tickets.map((ticket) => (
-                <tr key={ticket.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <div className="font-medium text-gray-900">
-                      {ticket.title}
-                    </div>
-                    {ticket.description && (
-                      <div className="text-sm text-gray-600 truncate max-w-xs">
-                        {ticket.description}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                        ticket.priority === "urgent"
-                          ? "bg-red-100 text-red-800"
-                          : ticket.priority === "high"
-                          ? "bg-orange-100 text-orange-800"
-                          : ticket.priority === "medium"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-green-100 text-green-800"
-                      }`}
-                    >
-                      {ticket.priority}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                        ticket.status === "closed"
-                          ? "bg-gray-100 text-gray-800"
-                          : ticket.status === "resolved"
-                          ? "bg-green-100 text-green-800"
-                          : ticket.status === "in_progress"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {ticket.status === "in_progress"
-                        ? "w trakcie"
-                        : ticket.status === "resolved"
-                        ? "rozwiązane"
-                        : ticket.status === "closed"
-                        ? "zamknięte"
-                        : "nowe"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-900">
-                    {ticket.category === "bug"
-                      ? "błąd"
-                      : ticket.category === "feature"
-                      ? "funkcja"
-                      : ticket.category === "support"
-                      ? "wsparcie"
-                      : "pytanie"}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-900">
-                    {ticket.reporter}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex justify-end gap-2">
-                      {/* POPRAWKA: Zmieniona ścieżka nawigacji do edycji */}
-                      <button
-                        onClick={() =>
-                          navigate(`/exampleTicketApp/tickets/edit/${ticket.id}`)
-                        }
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                      >
-                        Edytuj
-                      </button>
-                      <button
-                        onClick={() => deleteTicket(ticket.id)}
-                        className="text-red-600 hover:text-red-800 text-sm font-medium"
-                      >
-                        Usuń
-                      </button>
-                    </div>
-                  </td>
+        <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-zinc-50/80 border-b border-zinc-200/60">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-600 uppercase tracking-wider">
+                    Zgłoszenie
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-600 uppercase tracking-wider">
+                    Priorytet
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-600 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-600 uppercase tracking-wider">
+                    Kategoria
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-600 uppercase tracking-wider">
+                    Zgłaszający
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-zinc-600 uppercase tracking-wider">
+                    Akcje
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-zinc-200/60">
+                {tickets.map((ticket) => (
+                  <tr key={ticket.id} className="hover:bg-zinc-50/50 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="font-medium text-zinc-900 text-sm">
+                        {ticket.title}
+                      </div>
+                      {ticket.description && (
+                        <div className="text-xs text-zinc-500 truncate max-w-xs mt-1">
+                          {ticket.description}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                          ticket.priority === "urgent"
+                            ? "bg-red-100 text-red-700"
+                            : ticket.priority === "high"
+                            ? "bg-orange-100 text-orange-700"
+                            : ticket.priority === "medium"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-green-100 text-green-700"
+                        }`}
+                      >
+                        {ticket.priority}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                          ticket.status === "closed"
+                            ? "bg-zinc-100 text-zinc-700"
+                            : ticket.status === "resolved"
+                            ? "bg-green-100 text-green-700"
+                            : ticket.status === "in_progress"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-yellow-100 text-yellow-700"
+                        }`}
+                      >
+                        {ticket.status === "in_progress"
+                          ? "w trakcie"
+                          : ticket.status === "resolved"
+                          ? "rozwiązane"
+                          : ticket.status === "closed"
+                          ? "zamknięte"
+                          : "nowe"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-zinc-600">
+                      {ticket.category === "bug"
+                        ? "błąd"
+                        : ticket.category === "feature"
+                        ? "funkcja"
+                        : ticket.category === "support"
+                        ? "wsparcie"
+                        : "pytanie"}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-zinc-600">
+                      {ticket.reporter}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex justify-end gap-3">
+                        <button
+                          onClick={() =>
+                            navigate(`/exampleTicketApp/tickets/edit/${ticket.id}`)
+                          }
+                          className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors"
+                        >
+                          Edytuj
+                        </button>
+                        <button
+                          onClick={() => deleteTicket(ticket.id)}
+                          className="text-red-600 hover:text-red-700 text-sm font-medium transition-colors"
+                        >
+                          Usuń
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

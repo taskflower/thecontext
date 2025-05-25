@@ -7,20 +7,22 @@ export default function Simple({ children }: any) {
   const cfg = config || "exampleTicketApp";
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col ">
-      <header className="bg-white shadow-sm border-b">
-        <div className=" contailer mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+    <div className="min-h-screen bg-zinc-50 flex flex-col w-full">
+      <header className="border-b border-zinc-200/80 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-6">
+          <div className="flex justify-between items-center h-14">
             <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900">{cfg}</h1>
+              <h1 className="text-lg font-medium tracking-tight text-zinc-900">
+                {cfg}
+              </h1>
             </div>
-            <div className="flex items-center space-x-4">
-              <nav className="flex space-x-4">
+            <div className="flex items-center gap-8">
+              <nav className="flex items-center gap-1">
                 {["main", "tickets"].map((p) => (
                   <Link
                     key={p}
                     to={`/${cfg}/${p}`}
-                    className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                    className="px-3 py-1.5 text-sm font-medium text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100/80 rounded-md transition-colors"
                   >
                     {p.charAt(0).toUpperCase() + p.slice(1)}
                   </Link>
@@ -31,14 +33,15 @@ export default function Simple({ children }: any) {
           </div>
         </div>
       </header>
-      <main className="flex-1 container mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">{children}</div>
+      
+      <main className="flex-1 container mx-auto px-12 py-8">
+        <div className="container mx-auto">{children}</div>
       </main>
-      <footer className="bg-white border-t mt-12">
-        <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-sm text-gray-500">
-            © {new Date().getFullYear()} {cfg}. Built with Universal Engine +
-            LLM.
+      
+      <footer className="border-t border-zinc-200/50 bg-white/50 mt-16">
+        <div className="container mx-auto px-6 py-6">
+          <p className="text-center text-xs text-zinc-500 font-medium">
+            © {new Date().getFullYear()} {cfg} — Built with Universal Engine + LLM
           </p>
         </div>
       </footer>

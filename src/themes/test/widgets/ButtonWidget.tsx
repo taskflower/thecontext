@@ -1,3 +1,4 @@
+// src/themes/test/widgets/ButtonWidget.tsx
 import { useNavigate, useParams } from "react-router-dom";
 
 interface ButtonWidgetProps {
@@ -17,10 +18,10 @@ export default function ButtonWidget({
   const cfg = config || "exampleTicketApp"; 
   const fullPath = attrs?.navPath ? `/${cfg}/${attrs.navPath}` : null;
 
-  const colors: Record<string, string> = {
-    primary: "bg-blue-600 hover:bg-blue-700 text-white",
-    secondary: "bg-gray-600 hover:bg-gray-700 text-white",
-    default: "bg-gray-100 hover:bg-gray-200 text-gray-900",
+  const variants: Record<string, string> = {
+    primary: "bg-zinc-900 text-white hover:bg-zinc-800 border-zinc-900",
+    secondary: "bg-white text-zinc-700 hover:bg-zinc-50 border-zinc-300",
+    default: "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 border-zinc-200",
   };
 
   const handleClick = () => {
@@ -34,10 +35,10 @@ export default function ButtonWidget({
   return (
     <button
       onClick={handleClick}
-      className={`${colors[attrs?.variant || "default"]} px-4 py-2 rounded font-medium transition-colors duration-200 ${
+      className={`${variants[attrs?.variant || "default"]} w-full px-4 py-2 text-sm font-medium border rounded-md transition-colors duration-200 ${
         !attrs?.navPath ? "opacity-50 cursor-not-allowed" : ""
       }`}
-      disabled={!attrs?.navPath}  // Disabled jeśli brak 'navPath'
+      disabled={!attrs?.navPath}
     >
       {title}
     </button>

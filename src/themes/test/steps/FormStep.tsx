@@ -17,8 +17,9 @@ type FormStepAttrs = {
 
 interface FormStepProps {
   attrs: FormStepAttrs;
-  ticketId?: string; // Można użyć 'string' lub 'number' w zależności od typu
+  ticketId?: string;
 }
+
 export default function FormStep({ attrs, ticketId }: FormStepProps) {
   const navigate = useNavigate();
   const params = useParams<{ id: string; config: string; workspace: string }>();
@@ -60,18 +61,20 @@ export default function FormStep({ attrs, ticketId }: FormStepProps) {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2" />
-        <span className="text-gray-600">Ładowanie formularza...</span>
+      <div className="flex items-center justify-center py-24">
+        <div className="flex items-center gap-3">
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900" />
+          <span className="text-sm font-medium text-zinc-600">Ładowanie formularza</span>
+        </div>
       </div>
     );
   }
 
   if (error || !schema) {
     return (
-      <div className="text-center py-12">
-        <div className="text-red-600 mb-4">Błąd konfiguracji</div>
-        <div className="text-sm text-gray-500">
+      <div className="py-24 text-center">
+        <div className="text-red-600 text-sm font-medium mb-2">Błąd konfiguracji</div>
+        <div className="text-xs text-zinc-500">
           {error || `Nie znaleziono schemy: ${attrs.schemaPath}`}
         </div>
       </div>
@@ -104,96 +107,99 @@ export default function FormStep({ attrs, ticketId }: FormStepProps) {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-lg shadow-lg"
-      >
-        <h2 className="text-2xl font-bold mb-6 text-gray-900">
-          {attrs.title || (editId ? "Edytuj rekord" : "Nowy rekord")}
-        </h2>
-
-        {process.env.NODE_ENV === "development" && (
-          <div className="mb-4 p-2 bg-gray-100 rounded text-xs">
-            Debug: editId={editId}, loadFromParams={attrs.loadFromParams},
-            schemaPath={attrs.schemaPath}
-          </div>
-        )}
-
-        {Object.entries(schema.properties).map(([key, field]: any) => {
-          if (attrs.excludeFields?.includes(key)) return null;
-          const value = data[key] ?? "";
-          return (
-            <div key={key} className="mb-6">
-              <label className="block mb-2 text-sm font-medium text-gray-700">
-                {getFieldLabel(key, field)}
-                {field.required && <span className="text-red-500 ml-1">*</span>}
-              </label>
-
-              {field.enum ? (
-                <select
-                  value={value}
-                  onChange={(e) => handleChange(key, e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  required={field.required}
-                >
-                  <option value="">Wybierz...</option>
-                  {getSelectOptions(field.enum, field).map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              ) : field.widget === "textarea" ? (
-                <textarea
-                  value={value}
-                  onChange={(e) => handleChange(key, e.target.value)}
-                  placeholder={field.placeholder}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  rows={4}
-                  required={field.required}
-                />
-              ) : field.format === "date" ? (
-                <input
-                  type="date"
-                  value={value}
-                  onChange={(e) => handleChange(key, e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  required={field.required}
-                />
-              ) : (
-                <input
-                  type="text"
-                  value={value}
-                  onChange={(e) => handleChange(key, e.target.value)}
-                  placeholder={field.placeholder}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  required={field.required}
-                />
-              )}
-            </div>
-          );
-        })}
-
-        <div className="flex gap-3 mt-8">
-          <button
-            type="submit"
-            className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-            disabled={saving}
-          >
-            {saving ? "Zapisywanie..." : editId ? "Zaktualizuj" : "Zapisz"}
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              navigate(`/${params.config}/${attrs.onSubmit.navPath}`)
-            }
-            className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50"
-          >
-            Anuluj
-          </button>
+    <div className="max-w-xl mx-auto">
+      <div className="bg-white border border-zinc-200/60 rounded-lg">
+        <div className="p-6 border-b border-zinc-200/60">
+          <h2 className="text-xl font-semibold text-zinc-900">
+            {attrs.title || (editId ? "Edycja rekordu" : "Nowy rekord")}
+          </h2>
         </div>
-      </form>
+
+        <form onSubmit={handleSubmit} className="p-6">
+          {process.env.NODE_ENV === "development" && (
+            <div className="mb-6 p-3 bg-zinc-50 rounded text-xs font-mono text-zinc-600">
+              Debug: editId={editId}, loadFromParams={attrs.loadFromParams},
+              schemaPath={attrs.schemaPath}
+            </div>
+          )}
+
+          <div className="space-y-5">
+            {Object.entries(schema.properties).map(([key, field]: any) => {
+              if (attrs.excludeFields?.includes(key)) return null;
+              const value = data[key] ?? "";
+              return (
+                <div key={key} className="space-y-2">
+                  <label className="block text-sm font-medium text-zinc-700">
+                    {getFieldLabel(key, field)}
+                    {field.required && <span className="text-red-500 ml-1">*</span>}
+                  </label>
+
+                  {field.enum ? (
+                    <select
+                      value={value}
+                      onChange={(e) => handleChange(key, e.target.value)}
+                      className="w-full px-3 py-2 text-sm border border-zinc-300/80 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-900/20 focus:border-zinc-400 bg-white"
+                      required={field.required}
+                    >
+                      <option value="">Wybierz opcję</option>
+                      {getSelectOptions(field.enum, field).map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  ) : field.widget === "textarea" ? (
+                    <textarea
+                      value={value}
+                      onChange={(e) => handleChange(key, e.target.value)}
+                      placeholder={field.placeholder}
+                      className="w-full px-3 py-2 text-sm border border-zinc-300/80 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-900/20 focus:border-zinc-400 resize-none"
+                      rows={4}
+                      required={field.required}
+                    />
+                  ) : field.format === "date" ? (
+                    <input
+                      type="date"
+                      value={value}
+                      onChange={(e) => handleChange(key, e.target.value)}
+                      className="w-full px-3 py-2 text-sm border border-zinc-300/80 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-900/20 focus:border-zinc-400"
+                      required={field.required}
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      value={value}
+                      onChange={(e) => handleChange(key, e.target.value)}
+                      placeholder={field.placeholder}
+                      className="w-full px-3 py-2 text-sm border border-zinc-300/80 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-900/20 focus:border-zinc-400"
+                      required={field.required}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex gap-3 mt-8 pt-6 border-t border-zinc-200/60">
+            <button
+              type="submit"
+              className="flex-1 bg-zinc-900 text-white text-sm font-medium px-4 py-2.5 rounded-md hover:bg-zinc-800 disabled:opacity-50 transition-colors"
+              disabled={saving}
+            >
+              {saving ? "Zapisywanie..." : editId ? "Zaktualizuj" : "Zapisz"}
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                navigate(`/${params.config}/${attrs.onSubmit.navPath}`)
+              }
+              className="px-4 py-2.5 text-sm font-medium text-zinc-700 border border-zinc-300/80 rounded-md hover:bg-zinc-50 transition-colors"
+            >
+              Anuluj
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
