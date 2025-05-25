@@ -1,10 +1,10 @@
-// src/App.tsx
-import React, { Suspense } from "react";
+// src/App.tsx - Zaktualizowana wersja
 import { BrowserRouter, useParams, useRoutes } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthContext";
 import ConfigPage from "./pages/ConfigPage";
 import AuthPage from "./pages/AuthPage";
 import { useConfig } from "./core/engine";
+import { useComponent } from "./core/ComponentLoader";
 
 function AppRoutes() {
   const routes = [
@@ -32,13 +32,16 @@ function AppContent() {
   const cfgName = config || "testApp";
   const app = useConfig<any>(cfgName, `/src/!CONFIGS/${cfgName}/app.json`);
   const theme = app?.tplDir || "test";
-  const Layout = React.lazy(() => import(`./themes/${theme}/layouts/Simple`));
-
+  
+  const { Component: Layout, loading, error } = useComponent(theme, 'layouts', 'Simple.tsx');
+  
+  if (loading) return <div>Loading layout...</div>;
+  if (error) return <div>Layout error: {error}</div>;
+  if (!Layout) return <div>Layout not found: {theme}/layouts/Simple.tsx</div>;
+  
   return (
-    <Suspense fallback={<div>Loading layout...</div>}>
-      <Layout>
-        <AppRoutes />
-      </Layout>
-    </Suspense>
+    <Layout>
+      <AppRoutes />
+    </Layout>
   );
 }
