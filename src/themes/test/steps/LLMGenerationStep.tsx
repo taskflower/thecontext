@@ -60,7 +60,6 @@ export default function LLMGenerationStep({ attrs }: any) {
     };
   }, [schema]);
 
-  // Łączymy instrukcję z promptem i wkładamy to do userMessage
   const userMessage = useMemo(() => {
     const baseInstr =
       attrs.systemMessage ||
@@ -68,7 +67,6 @@ export default function LLMGenerationStep({ attrs }: any) {
     return `${baseInstr}${enumInstr}\n\n${prompt}`;
   }, [attrs.systemMessage, enumInstr, prompt]);
 
-  // Użycie hooka: tylko jeden system message (JSON schema), reszta w userMessage
   const {
     isLoading,
     error: llmError,
@@ -78,7 +76,6 @@ export default function LLMGenerationStep({ attrs }: any) {
     schema: zodSchema,
     jsonSchema,
     userMessage,
-    // nie przekazujemy systemMessage
   });
 
   const { add: addRecord } = useLocalStore(`${attrs.collection || "records"}:`);
