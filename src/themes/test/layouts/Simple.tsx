@@ -4,7 +4,7 @@ import { Link, useParams } from "react-router-dom";
 
 export default function Simple({ children }: any) {
   const { config } = useParams();
-  const cfg = config || "testApp";
+  const cfg = config || "exampleTicketApp";
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col ">

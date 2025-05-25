@@ -14,7 +14,7 @@ export default function ButtonWidget({
 }: ButtonWidgetProps) {
   const navigate = useNavigate();
   const { config } = useParams<{ config: string }>();
-  const cfg = config || "testApp"; // Domyślnie 'testApp' jeśli brak 'config'
+  const cfg = config || "exampleTicketApp"; // Domyślnie 'testApp' jeśli brak 'config'
 
   // POPRAWKA: Budowanie pełnej ścieżki - navPath już zawiera pełną ścieżkę
   const fullPath = attrs?.navPath ? `/${cfg}/${attrs.navPath}` : null;

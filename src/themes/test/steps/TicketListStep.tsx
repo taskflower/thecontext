@@ -64,7 +64,7 @@ export default function TicketListStep({ attrs }: any) {
           {attrs.widgets?.map((widget: any, i: number) => (
             <button
               key={i}
-              onClick={() => navigate(`/testApp/${widget.attrs.navPath}`)}
+              onClick={() => navigate(`/exampleTicketApp/${widget.attrs.navPath}`)}
               className={`px-4 py-2 rounded font-medium ${
                 widget.attrs.variant === "primary"
                   ? "bg-blue-600 text-white hover:bg-blue-700"
@@ -84,7 +84,7 @@ export default function TicketListStep({ attrs }: any) {
             Nie masz jeszcze żadnych zgłoszeń. Stwórz pierwsze!
           </p>
           <button
-            onClick={() => navigate("/testApp/tickets/create")}
+            onClick={() => navigate("/exampleTicketApp/tickets/create")}
             className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium"
           >
             Stwórz pierwsze zgłoszenie
@@ -181,7 +181,7 @@ export default function TicketListStep({ attrs }: any) {
                       {/* POPRAWKA: Zmieniona ścieżka nawigacji do edycji */}
                       <button
                         onClick={() =>
-                          navigate(`/testApp/tickets/edit/${ticket.id}`)
+                          navigate(`/exampleTicketApp/tickets/edit/${ticket.id}`)
                         }
                         className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                       >

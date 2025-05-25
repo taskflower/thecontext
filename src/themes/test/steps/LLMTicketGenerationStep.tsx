@@ -77,7 +77,7 @@ Zwróć czysty JSON zgodny ze schematem.`,
       // Uzupełniamy dane
       const dataWithMeta = { ...result, status: 'new', assignee: '', dueDate: '' };
       await addTicket(dataWithMeta);
-      navigate('/testApp/tickets/list');
+      navigate('/exampleTicketApp/tickets/list');
     } catch (e) {
       console.error(e);
       alert('Błąd podczas zapisu zgłoszenia');
@@ -141,7 +141,7 @@ Zwróć czysty JSON zgodny ze schematem.`,
 
           <footer className="flex justify-between items-center">
             <button
-              onClick={() => navigate('/testApp/tickets/list')}
+              onClick={() => navigate('/exampleTicketApp/tickets/list')}
               className="text-gray-600 hover:underline"
             >← Powrót</button>
             <div className="space-x-2">

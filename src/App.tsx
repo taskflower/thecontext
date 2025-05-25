@@ -29,7 +29,7 @@ export function App() {
 
 function AppContent() {
   const { config } = useParams<{ config: string }>();
-  const cfgName = config || "testApp";
+  const cfgName = config || "exampleTicketApp";
   const app = useConfig<any>(cfgName, `/src/_configs/${cfgName}/app.json`);
   const theme = app?.tplDir || "test";
   

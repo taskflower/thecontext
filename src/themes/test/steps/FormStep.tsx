@@ -96,7 +96,7 @@ export default function FormStep({ attrs, ticketId }: any) {
       } else {
         console.error('Ticket not found:', ticketId);
         alert('Zgłoszenie nie zostało znalezione');
-        navigate('/testApp/tickets/list');
+        navigate('/exampleTicketApp/tickets/list');
       }
     } catch (error) {
       console.error('Failed to load ticket:', error);
@@ -122,7 +122,7 @@ export default function FormStep({ attrs, ticketId }: any) {
       });
       
       console.log('Ticket saved successfully');
-      navigate(`/testApp/${attrs.onSubmit.navPath}`);
+      navigate(`/exampleTicketApp/${attrs.onSubmit.navPath}`);
     } catch (error) {
       console.error('Failed to save ticket:', error);
       alert('Błąd podczas zapisywania zgłoszenia');
@@ -227,7 +227,7 @@ export default function FormStep({ attrs, ticketId }: any) {
           </button>
           <button 
             type="button"
-            onClick={() => navigate(`/testApp/${attrs.onSubmit.navPath}`)}
+            onClick={() => navigate(`/exampleTicketApp/${attrs.onSubmit.navPath}`)}
             className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
           >
             Anuluj
