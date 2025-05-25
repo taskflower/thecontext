@@ -14,9 +14,15 @@ export default function ButtonWidget({
 }: ButtonWidgetProps) {
   const navigate = useNavigate();
   const { config } = useParams<{ config: string }>();
-  const cfg = config || "testApp";
+  const cfg = config || "testApp"; // Domyślnie 'testApp' jeśli brak 'config'
 
+  // Budowanie pełnej ścieżki na podstawie 'cfg' i 'navPath'
   const fullPath = attrs?.navPath ? `/${cfg}${attrs.navPath}` : null;
+
+  // Logowanie wartości dla debugowania
+  console.log('Button navPath:', attrs?.navPath);
+  console.log('Full path:', fullPath);
+  console.log('Config:', cfg);
 
   const colors: Record<string, string> = {
     primary: "bg-blue-600 hover:bg-blue-700 text-white",
@@ -38,9 +44,10 @@ export default function ButtonWidget({
       className={`${colors[attrs?.variant || "default"]} px-4 py-2 rounded font-medium transition-colors duration-200 ${
         !attrs?.navPath ? "opacity-50 cursor-not-allowed" : ""
       }`}
-      disabled={!attrs?.navPath}
+      disabled={!attrs?.navPath}  // Disabled jeśli brak 'navPath'
     >
       {title}
     </button>
   );
 }
+  
