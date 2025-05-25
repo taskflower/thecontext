@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { configDB } from "../../../db";
 import { useWorkspaceSchema } from "@/core/engine";
+import { CheckboxFieldWidget, DateFieldWidget, EmailFieldWidget, NumberFieldWidget, SelectFieldWidget, TextareaFieldWidget, TextFieldWidget } from "../widgets/form";
+
 
 type FormStepAttrs = {
   schemaPath: string;
@@ -13,12 +15,87 @@ type FormStepAttrs = {
   };
   excludeFields?: string[];
   title?: string;
+  // Możliwość nadpisania widgetów dla konkretnych pól
+  fieldWidgets?: {
+    [fieldKey: string]: {
+      widget: string;
+      title?: string;
+      attrs?: any;
+    };
+  };
 };
 
 interface FormStepProps {
   attrs: FormStepAttrs;
   ticketId?: string;
 }
+
+// Mapa dostępnych widgetów
+const FIELD_WIDGETS = {
+  text: TextFieldWidget,
+  textarea: TextareaFieldWidget,
+  select: SelectFieldWidget,
+  date: DateFieldWidget,
+  number: NumberFieldWidget,
+  email: EmailFieldWidget,
+  checkbox: CheckboxFieldWidget,
+};
+
+// Funkcja wybierająca odpowiedni widget
+const renderFieldWidget = (
+  fieldKey: string, 
+  field: any, 
+  value: any, 
+  onChange: any, 
+  customWidget?: { widget: string; title?: string; attrs?: any }
+) => {
+  let widgetType = "text"; // domyślny
+  let title = field.label || fieldKey;
+  let extraAttrs = {};
+
+  // Sprawdzenie czy jest custom widget dla tego pola
+  if (customWidget) {
+    widgetType = customWidget.widget;
+    title = customWidget.title || title;
+    extraAttrs = customWidget.attrs || {};
+  } else {
+    // Automatyczne wykrywanie typu widgetu
+    if (field.widget === "textarea") {
+      widgetType = "textarea";
+    } else if (field.widget === "checkbox" || field.type === "boolean") {
+      widgetType = "checkbox";
+    } else if (field.enum) {
+      widgetType = "select";
+    } else if (field.format === "date") {
+      widgetType = "date";
+    } else if (field.format === "email") {
+      widgetType = "email";
+    } else if (field.type === "number" || field.type === "integer") {
+      widgetType = "number";
+    }
+  }
+
+  const WidgetComponent = FIELD_WIDGETS[widgetType as keyof typeof FIELD_WIDGETS];
+  
+  if (!WidgetComponent) {
+    console.warn(`Widget type "${widgetType}" not found for field "${fieldKey}"`);
+    return null;
+  }
+
+  return (
+    <WidgetComponent
+      key={fieldKey}
+      title={title}
+      attrs={{
+        fieldKey,
+        field,
+        value: value ?? "",
+        onChange,
+        ...extraAttrs,
+      }}
+    />
+  );
+};
 
 export default function FormStep({ attrs, ticketId }: FormStepProps) {
   const navigate = useNavigate();
@@ -81,10 +158,6 @@ export default function FormStep({ attrs, ticketId }: FormStepProps) {
     );
   }
 
-  const getFieldLabel = (key: string, field: any) => field.label || key;
-  const getSelectOptions = (enumVals: string[], field: any) =>
-    enumVals.map((v) => ({ value: v, label: field.enumLabels?.[v] || v }));
-
   const handleChange = (key: string, value: any) =>
     setData((d) => ({ ...d, [key]: value }));
 
@@ -126,57 +199,11 @@ export default function FormStep({ attrs, ticketId }: FormStepProps) {
           <div className="space-y-5">
             {Object.entries(schema.properties).map(([key, field]: any) => {
               if (attrs.excludeFields?.includes(key)) return null;
-              const value = data[key] ?? "";
-              return (
-                <div key={key} className="space-y-2">
-                  <label className="block text-sm font-medium text-zinc-700">
-                    {getFieldLabel(key, field)}
-                    {field.required && <span className="text-red-500 ml-1">*</span>}
-                  </label>
-
-                  {field.enum ? (
-                    <select
-                      value={value}
-                      onChange={(e) => handleChange(key, e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-zinc-300/80 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-900/20 focus:border-zinc-400 bg-white"
-                      required={field.required}
-                    >
-                      <option value="">Wybierz opcję</option>
-                      {getSelectOptions(field.enum, field).map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
-                  ) : field.widget === "textarea" ? (
-                    <textarea
-                      value={value}
-                      onChange={(e) => handleChange(key, e.target.value)}
-                      placeholder={field.placeholder}
-                      className="w-full px-3 py-2 text-sm border border-zinc-300/80 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-900/20 focus:border-zinc-400 resize-none"
-                      rows={4}
-                      required={field.required}
-                    />
-                  ) : field.format === "date" ? (
-                    <input
-                      type="date"
-                      value={value}
-                      onChange={(e) => handleChange(key, e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-zinc-300/80 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-900/20 focus:border-zinc-400"
-                      required={field.required}
-                    />
-                  ) : (
-                    <input
-                      type="text"
-                      value={value}
-                      onChange={(e) => handleChange(key, e.target.value)}
-                      placeholder={field.placeholder}
-                      className="w-full px-3 py-2 text-sm border border-zinc-300/80 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-900/20 focus:border-zinc-400"
-                      required={field.required}
-                    />
-                  )}
-                </div>
-              );
+              
+              const value = data[key];
+              const customWidget = attrs.fieldWidgets?.[key];
+              
+              return renderFieldWidget(key, field, value, handleChange, customWidget);
             })}
           </div>
 
