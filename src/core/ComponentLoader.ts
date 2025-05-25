@@ -1,15 +1,19 @@
 // src/core/ComponentLoader.ts
-import React from 'react';
+import React from "react";
 
-// Vite glob import - automatycznie znajdzie wszystkie komponenty
-const modules = import.meta.glob('../themes/**/!(*.d).{tsx,jsx}', { eager: false });
+const modules = import.meta.glob("../themes/**/!(*.d).{tsx,jsx}", {
+  eager: false,
+});
 
-// Cache dla załadowanych komponentów
 const componentCache = new Map<string, React.ComponentType<any>>();
 
-// Hook do ładowania komponentów
-export function useComponent(theme: string, type: 'steps' | 'widgets' | 'layouts', filename: string) {
-  const [Component, setComponent] = React.useState<React.ComponentType<any> | null>(null);
+export function useComponent(
+  theme: string,
+  type: "steps" | "widgets" | "layouts",
+  filename: string
+) {
+  const [Component, setComponent] =
+    React.useState<React.ComponentType<any> | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -30,8 +34,10 @@ export function useComponent(theme: string, type: 'steps' | 'widgets' | 'layouts
       }
 
       // Znajdź matching moduł w glob imports
-      const moduleKey = Object.keys(modules).find(key => key === componentPath);
-      
+      const moduleKey = Object.keys(modules).find(
+        (key) => key === componentPath
+      );
+
       if (!moduleKey) {
         setError(`Component not found: ${componentPath}`);
         setLoading(false);
@@ -41,14 +47,13 @@ export function useComponent(theme: string, type: 'steps' | 'widgets' | 'layouts
       try {
         const module = await modules[moduleKey]();
         const component = (module as any).default;
-        
+
         if (!component) {
           setError(`No default export in: ${componentPath}`);
           setLoading(false);
           return;
         }
 
-        // Cache component
         componentCache.set(cacheKey, component);
         setComponent(() => component);
       } catch (err) {
@@ -65,16 +70,15 @@ export function useComponent(theme: string, type: 'steps' | 'widgets' | 'layouts
   return { Component, loading, error };
 }
 
-// Funkcja do sprawdzenia dostępnych theme'ów (opcjonalna)
 export function getAvailableThemes(): string[] {
   const themes = new Set<string>();
-  
-  Object.keys(modules).forEach(path => {
+
+  Object.keys(modules).forEach((path) => {
     const match = path.match(/\.\.\/themes\/([^\/]+)\//);
     if (match) {
       themes.add(match[1]);
     }
   });
-  
+
   return Array.from(themes);
 }
