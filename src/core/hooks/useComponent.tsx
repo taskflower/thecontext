@@ -1,0 +1,70 @@
+// src/core/hooks/useComponent.tsx
+import React from 'react';
+
+// Vite glob import - automatycznie znajdzie wszystkie komponenty
+const modules = import.meta.glob('../themes/**/!(*.d).{tsx,jsx}', { eager: false });
+
+// Cache dla załadowanych komponentów
+const componentCache = new Map<string, React.ComponentType<any>>();
+
+// Hook do ładowania komponentów
+export function useComponent(
+  theme: string,
+  type: 'steps' | 'widgets' | 'layouts',
+  filename: string
+) {
+  const [Component, setComponent] = React.useState<React.ComponentType<any> | null>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const loadComponent = async () => {
+      setLoading(true);
+      setError(null);
+
+      // Buduj ścieżkę do komponentu
+      const componentPath = `../themes/${theme}/${type}/${filename}`;
+      const cacheKey = componentPath;
+
+      // Sprawdź cache
+      if (componentCache.has(cacheKey)) {
+        setComponent(() => componentCache.get(cacheKey)!);
+        setLoading(false);
+        return;
+      }
+
+      // Znajdź matching moduł w glob imports
+      const moduleKey = Object.keys(modules).find(key => key === componentPath);
+
+      if (!moduleKey) {
+        setError(`Component not found: ${componentPath}`);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const module = await modules[moduleKey]();
+        const component = (module as any).default;
+
+        if (!component) {
+          setError(`No default export in: ${componentPath}`);
+          setLoading(false);
+          return;
+        }
+
+        // Cache component
+        componentCache.set(cacheKey, component);
+        setComponent(() => component);
+      } catch (err) {
+        setError(`Failed to load: ${componentPath}`);
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadComponent();
+  }, [theme, type, filename]);
+
+  return { Component, loading, error };
+}
