@@ -49,17 +49,19 @@
         "title": {
           "type": "string",
           "label": "Tytuł zgłoszenia",
+          "fieldType": "text",
           "required": true
         },
         "description": {
           "type": "string",
           "label": "Opis",
-          "widget": "textarea",
+          "fieldType": "textarea",
           "required": true
         },
         "priority": {
           "type": "string",
           "label": "Priorytet",
+          "fieldType": "select",
           "enum": ["low", "medium", "high", "urgent"],
           "enumLabels": {
             "low": "niski",
@@ -73,6 +75,7 @@
         "status": {
           "type": "string",
           "label": "Status",
+          "fieldType": "select",
           "enum": ["new", "in_progress", "resolved", "closed"],
           "enumLabels": {
             "new": "nowe",
@@ -86,6 +89,7 @@
         "category": {
           "type": "string",
           "label": "Kategoria",
+          "fieldType": "select",
           "enum": ["bug", "feature", "support", "question"],
           "enumLabels": {
             "bug": "błąd",
@@ -98,17 +102,40 @@
         "assignee": {
           "type": "string",
           "label": "Przypisany do",
+          "fieldType": "text",
           "required": false
         },
         "reporter": {
           "type": "string",
           "label": "Zgłaszający",
+          "fieldType": "text",
+          "required": true
+        },
+        "reporterEmail": {
+          "type": "string",
+          "label": "Email zgłaszającego",
+          "fieldType": "email",
           "required": true
         },
         "dueDate": {
           "type": "string",
-          "format": "date",
           "label": "Termin wykonania",
+          "fieldType": "date",
+          "required": false
+        },
+        "isUrgent": {
+          "type": "boolean",
+          "label": "Pilne zgłoszenie",
+          "fieldType": "checkbox",
+          "default": false,
+          "required": false
+        },
+        "estimatedHours": {
+          "type": "number",
+          "label": "Szacowane godziny",
+          "fieldType": "number",
+          "minimum": 0,
+          "maximum": 100,
           "required": false
         }
       }
