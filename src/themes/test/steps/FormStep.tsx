@@ -1,106 +1,82 @@
 // src/themes/test/steps/FormStep.tsx
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { configDB } from '../../../db';
-
-// Hardcoded ticket schema (z konfiguracji workspace)
-const ticketSchema = {
-  type: "object",
-  properties: {
-    title: {
-      type: "string",
-      label: "Tytuł zgłoszenia",
-      required: true
-    },
-    description: {
-      type: "string",
-      label: "Opis",
-      widget: "textarea",
-      required: true
-    },
-    priority: {
-      type: "string",
-      label: "Priorytet",
-      enum: ["low", "medium", "high", "urgent"],
-      default: "medium",
-      required: true
-    },
-    status: {
-      type: "string",
-      label: "Status",
-      enum: ["new", "in_progress", "resolved", "closed"],
-      default: "new",
-      required: true
-    },
-    category: {
-      type: "string",
-      label: "Kategoria",
-      enum: ["bug", "feature", "support", "question"],
-      required: true
-    },
-    assignee: {
-      type: "string",
-      label: "Przypisany do"
-    },
-    reporter: {
-      type: "string",
-      label: "Zgłaszający",
-      required: true
-    },
-    dueDate: {
-      type: "string",
-      format: "date",
-      label: "Termin wykonania"
-    }
-  }
-};
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { configDB } from "../../../db";
+import { useConfig } from "../../../core/engine";
 
 export default function FormStep({ attrs, ticketId }: any) {
   const navigate = useNavigate();
-  const params = useParams(); // Dodajemy useParams aby mieć dostęp do wszystkich parametrów
-  
-  // POPRAWKA: Używamy ticketId z props lub próbujemy wyciągnąć z params
+  const params = useParams();
+  const { config, workspace } = params;
+
+  // Pobierz konfigurację workspace dla schemy
+  const workspaceConfig = useConfig(
+    config || "exampleTicketApp",
+    `/src/_configs/${config || "exampleTicketApp"}/workspaces/${workspace}.json`
+  );
+
   const editId = ticketId || params.id;
-  
   const [data, setData] = useState<any>({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    console.log('FormStep mounted with:', { editId, ticketId, params });
-    
-    if (editId) {
-      loadTicket(editId);
-    } else {
-      // Set defaults for new ticket
-      const defaults: any = {};
-      Object.entries(ticketSchema.properties).forEach(([key, field]: [string, any]) => {
-        if (field.default) {
-          defaults[key] = field.default;
-        }
-      });
-      setData(defaults);
+  // Pobierz schemat z konfiguracji workspace
+  const getSchemaFromConfig = () => {
+    if (!workspaceConfig?.contextSchema || !attrs?.schemaPath) {
+      console.error("Missing schema configuration");
+      return null;
     }
-  }, [editId]);
 
-  const loadTicket = async (ticketId: string) => {
+    const schemaPath = attrs.schemaPath;
+    return workspaceConfig.contextSchema[schemaPath];
+  };
+
+  const schema = getSchemaFromConfig();
+
+  useEffect(() => {
+    console.log("FormStep mounted with:", { editId, ticketId, params, schema });
+
+    if (editId && attrs?.loadFromParams) {
+      loadRecord(editId);
+    } else {
+      // Set defaults for new record
+      setDefaultValues();
+    }
+  }, [editId, schema]);
+
+  const setDefaultValues = () => {
+    if (!schema?.properties) return;
+
+    const defaults: any = {};
+    Object.entries(schema.properties).forEach(([key, field]: [string, any]) => {
+      if (field.default) {
+        defaults[key] = field.default;
+      }
+    });
+    setData(defaults);
+  };
+
+  const loadRecord = async (recordId: string) => {
     try {
       setLoading(true);
-      console.log('Loading ticket with ID:', ticketId);
-      
-      const record = await configDB.records.get(`tickets:${ticketId}`);
-      console.log('Loaded record:', record);
-      
+      console.log("Loading record with ID:", recordId);
+
+      const collection = attrs?.onSubmit?.collection || "records";
+      const record = await configDB.records.get(`${collection}:${recordId}`);
+      console.log("Loaded record:", record);
+
       if (record) {
         setData(record.data);
       } else {
-        console.error('Ticket not found:', ticketId);
-        alert('Zgłoszenie nie zostało znalezione');
-        navigate('/exampleTicketApp/tickets/list');
+        console.error("Record not found:", recordId);
+        alert("Rekord nie został znaleziony");
+        if (attrs?.onSubmit?.navPath) {
+          navigate(`/${config}/${attrs.onSubmit.navPath}`);
+        }
       }
     } catch (error) {
-      console.error('Failed to load ticket:', error);
-      alert('Błąd podczas ładowania zgłoszenia');
+      console.error("Failed to load record:", error);
+      alert("Błąd podczas ładowania rekordu");
     } finally {
       setLoading(false);
     }
@@ -108,28 +84,58 @@ export default function FormStep({ attrs, ticketId }: any) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    if (!attrs?.onSubmit) {
+      console.error("No onSubmit configuration");
+      return;
+    }
+
     try {
       setSaving(true);
-      const ticketId = editId || Date.now().toString();
-      
-      console.log('Saving ticket:', { ticketId, data });
-      
+      const collection = attrs.onSubmit.collection;
+      const recordId = editId || Date.now().toString();
+
       await configDB.records.put({
-        id: `tickets:${ticketId}`,
-        data: { ...data, id: ticketId },
-        updatedAt: new Date()
+        id: `${collection}:${recordId}`,
+        data: { ...data, id: recordId },
+        updatedAt: new Date(),
       });
-      
-      console.log('Ticket saved successfully');
-      navigate(`/exampleTicketApp/${attrs.onSubmit.navPath}`);
+
+      navigate(`/${config}/${attrs.onSubmit.navPath}`);
     } catch (error) {
-      console.error('Failed to save ticket:', error);
-      alert('Błąd podczas zapisywania zgłoszenia');
+      console.error("Failed to save record:", error);
+      alert("Błąd podczas zapisywania rekordu");
     } finally {
       setSaving(false);
     }
   };
+
+  const getFieldLabel = (key: string, field: any) => {
+    return field.label || key;
+  };
+
+  const getSelectOptions = (key: string, enumValues: string[], field: any) => {
+    return enumValues.map((value) => ({
+      value,
+      label: field.enumLabels?.[value] || value,
+    }));
+  };
+
+  if (!schema) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-red-600 mb-4">Błąd konfiguracji</div>
+        <div className="text-sm text-gray-500">
+          Nie znaleziono schemy: {attrs?.schemaPath || "brak schemaPath"} w
+          workspace: {workspace}
+        </div>
+        <div className="text-xs text-gray-400 mt-2">
+          Debug: config={config}, workspaceConfig=
+          {workspaceConfig ? "loaded" : "null"}, attrs={JSON.stringify(attrs)}
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -142,92 +148,104 @@ export default function FormStep({ attrs, ticketId }: any) {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-lg">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-8 rounded-lg shadow-lg"
+      >
         <h2 className="text-2xl font-bold mb-6 text-gray-900">
-          {/* POPRAWKA: Dynamiczny tytuł w zależności od trybu */}
-          {editId ? 'Edytuj zgłoszenie' : attrs.title}
+          {attrs?.title || (editId ? "Edytuj rekord" : "Nowy rekord")}
         </h2>
-        
+
         {/* DEBUG INFO */}
-        {process.env.NODE_ENV === 'development' && (
+        {process.env.NODE_ENV === "development" && (
           <div className="mb-4 p-2 bg-gray-100 rounded text-xs">
-            Debug: editId={editId}, mode={editId ? 'edit' : 'create'}
+            Debug: editId={editId}, mode={editId ? "edit" : "create"}, schema=
+            {attrs?.schemaPath}
           </div>
         )}
-        
-        {Object.entries(ticketSchema.properties).map(([key, field]: [string, any]) => {
-          // Skip excluded fields
-          if (attrs.excludeFields?.includes(key)) return null;
-          
-          return (
-            <div key={key} className="mb-6">
-              <label className="block mb-2 text-sm font-medium text-gray-700">
-                {field.label || key}
-                {field.required && <span className="text-red-500 ml-1">*</span>}
-              </label>
-              
-              {field.enum ? (
-                <select 
-                  value={data[key] || ''} 
-                  onChange={e => setData({...data, [key]: e.target.value})}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  required={field.required}
-                >
-                  <option value="">Wybierz...</option>
-                  {field.enum.map((opt: string) => (
-                    <option key={opt} value={opt}>
-                      {key === 'priority' ? 
-                        (opt === 'low' ? 'niski' : opt === 'medium' ? 'średni' : opt === 'high' ? 'wysoki' : 'pilny') :
-                       key === 'status' ?
-                        (opt === 'new' ? 'nowe' : opt === 'in_progress' ? 'w trakcie' : opt === 'resolved' ? 'rozwiązane' : 'zamknięte') :
-                       key === 'category' ?
-                        (opt === 'bug' ? 'błąd' : opt === 'feature' ? 'funkcja' : opt === 'support' ? 'wsparcie' : 'pytanie') :
-                       opt}
-                    </option>
-                  ))}
-                </select>
-              ) : field.widget === 'textarea' ? (
-                <textarea 
-                  value={data[key] || ''} 
-                  onChange={e => setData({...data, [key]: e.target.value})}
-                  placeholder={field.placeholder}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  rows={4}
-                  required={field.required}
-                />
-              ) : field.format === 'date' ? (
-                <input 
-                  type="date"
-                  value={data[key] || ''} 
-                  onChange={e => setData({...data, [key]: e.target.value})}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  required={field.required}
-                />
-              ) : (
-                <input 
-                  type="text"
-                  value={data[key] || ''} 
-                  onChange={e => setData({...data, [key]: e.target.value})}
-                  placeholder={field.placeholder}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  required={field.required}
-                />
-              )}
-            </div>
-          );
-        })}
-        
+
+        {Object.entries(schema.properties || {}).map(
+          ([key, field]: [string, any]) => {
+            // Skip excluded fields
+            if (attrs?.excludeFields?.includes(key)) return null;
+
+            return (
+              <div key={key} className="mb-6">
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  {getFieldLabel(key, field)}
+                  {field.required && (
+                    <span className="text-red-500 ml-1">*</span>
+                  )}
+                </label>
+
+                {field.enum ? (
+                  <select
+                    value={data[key] || ""}
+                    onChange={(e) =>
+                      setData({ ...data, [key]: e.target.value })
+                    }
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required={field.required}
+                  >
+                    <option value="">Wybierz...</option>
+                    {getSelectOptions(key, field.enum, field).map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : field.widget === "textarea" ? (
+                  <textarea
+                    value={data[key] || ""}
+                    onChange={(e) =>
+                      setData({ ...data, [key]: e.target.value })
+                    }
+                    placeholder={field.placeholder}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    rows={4}
+                    required={field.required}
+                  />
+                ) : field.format === "date" ? (
+                  <input
+                    type="date"
+                    value={data[key] || ""}
+                    onChange={(e) =>
+                      setData({ ...data, [key]: e.target.value })
+                    }
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required={field.required}
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    value={data[key] || ""}
+                    onChange={(e) =>
+                      setData({ ...data, [key]: e.target.value })
+                    }
+                    placeholder={field.placeholder}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required={field.required}
+                  />
+                )}
+              </div>
+            );
+          }
+        )}
+
         <div className="flex gap-3 mt-8">
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50"
             disabled={saving}
           >
-            {saving ? 'Zapisywanie...' : (editId ? 'Zaktualizuj' : 'Zapisz')}
+            {saving ? "Zapisywanie..." : editId ? "Zaktualizuj" : "Zapisz"}
           </button>
-          <button 
+          <button
             type="button"
-            onClick={() => navigate(`/exampleTicketApp/${attrs.onSubmit.navPath}`)}
+            onClick={() =>
+              attrs?.onSubmit?.navPath &&
+              navigate(`/${config}/${attrs.onSubmit.navPath}`)
+            }
             className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
           >
             Anuluj
