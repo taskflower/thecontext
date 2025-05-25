@@ -32,6 +32,15 @@
         }
       },
       {
+        "tplFile": "ButtonWidget.tsx",
+        "title": "🤖 Wygeneruj z AI",
+        "attrs": {
+          "navPath": "tickets/llm-create",
+          "variant": "secondary",
+          "colSpan": 1
+        }
+      },
+      {
         "tplFile": "InfoWidget.tsx",
         "title": "📊 Quick Stats",
         "attrs": {

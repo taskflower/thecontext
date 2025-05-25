@@ -1,0 +1,14 @@
+{
+    "slug": "llm-create",
+    "nodes": [
+      {
+        "slug": "form",
+        "label": "Generuj zgłoszenie z AI",
+        "order": 1,
+        "tplFile": "LLMTicketGenerationStep.tsx",
+        "attrs": {
+          "title": "Wygeneruj zgłoszenie przy pomocy AI"
+        }
+      }
+    ]
+  }
