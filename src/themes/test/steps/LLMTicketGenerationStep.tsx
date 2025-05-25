@@ -1,5 +1,5 @@
 // src/themes/test/steps/LLMTicketGenerationStep.tsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { z } from 'zod';
 import { useLlmEngine, useLocalStore } from '../../../core/engine';
 import { useNavigate } from 'react-router-dom';
