@@ -30,7 +30,7 @@ export function App() {
 function AppContent() {
   const { config } = useParams<{ config: string }>();
   const cfgName = config || "testApp";
-  const app = useConfig<any>(cfgName, `/src/!CONFIGS/${cfgName}/app.json`);
+  const app = useConfig<any>(cfgName, `/src/_configs/${cfgName}/app.json`);
   const theme = app?.tplDir || "test";
   
   const { Component: Layout, loading, error } = useComponent(theme, 'layouts', 'Simple.tsx');

@@ -157,6 +157,8 @@ export async function loadConfig(configName: string, path: string): Promise<any>
   }
 
   // 2) fetch
+  console.log(path);
+  
   const res = await fetch(path);
   if (!res.ok) throw new Error(`Failed to load config: ${res.statusText}`);
   const cfg = await res.json();

@@ -15,7 +15,7 @@ export default function ConfigPage() {
   
   if (!config || !workspace) return renderError("Invalid path", "");
   
-  const base = `/src/!CONFIGS/${config}`;
+  const base = `/src/_configs/${config}`;
   const app = useConfig<any>(config, `${base}/app.json`);
   const cfg = useConfig<any>(
     config,
