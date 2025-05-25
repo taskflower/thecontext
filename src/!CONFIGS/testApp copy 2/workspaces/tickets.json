@@ -1,0 +1,93 @@
+{
+  "slug": "tickets",
+  "name": "Ticket Management",
+  "templateSettings": {
+    "layoutFile": "Simple",
+    "widgets": [
+      {
+        "tplFile": "InfoWidget.tsx",
+        "title": "🎫 Ticket Management",
+        "content": "Manage support tickets, track issues and handle customer requests efficiently.",
+        "variant": "info",
+        "colSpan": "full"
+      },
+      {
+        "tplFile": "ButtonWidget.tsx",
+        "label": "📝 Create New Ticket",
+        "variant": "primary",
+        "colSpan": 1,
+        "attrs": {
+          "navPath": "tickets/create"
+        }
+      },
+      {
+        "tplFile": "ButtonWidget.tsx",
+        "label": "📋 View All Tickets",
+        "variant": "secondary",
+        "colSpan": 1,
+        "attrs": {
+          "navPath": "tickets/list"
+        }
+      },
+      {
+        "tplFile": "InfoWidget.tsx",
+        "title": "📊 Quick Stats",
+        "content": "Track your ticket metrics: open issues, resolved cases, and response times.",
+        "variant": "default",
+        "colSpan": "full"
+      }
+    ]
+  },
+  "contextSchema": {
+    "ticket": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "label": "Tytuł zgłoszenia",
+          "required": true
+        },
+        "description": {
+          "type": "string",
+          "label": "Opis",
+          "widget": "textarea",
+          "required": true
+        },
+        "priority": {
+          "type": "string",
+          "label": "Priorytet",
+          "enum": ["low", "medium", "high", "urgent"],
+          "default": "medium",
+          "required": true
+        },
+        "status": {
+          "type": "string",
+          "label": "Status",
+          "enum": ["new", "in_progress", "resolved", "closed"],
+          "default": "new",
+          "required": true
+        },
+        "category": {
+          "type": "string",
+          "label": "Kategoria",
+          "enum": ["bug", "feature", "support", "question"],
+          "required": true
+        },
+        "assignee": {
+          "type": "string",
+          "label": "Przypisany do"
+        },
+        "reporter": {
+          "type": "string",
+          "label": "Zgłaszający",
+          "required": true
+        },
+        "dueDate": {
+          "type": "string",
+          "format": "date",
+          "label": "Termin wykonania"
+        }
+      }
+    }
+  }
+}

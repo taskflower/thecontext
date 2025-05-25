@@ -1,0 +1,21 @@
+{
+    "slug": "edit",
+    "nodes": [
+      {
+        "slug": "form",
+        "label": "Edytuj zgłoszenie",
+        "order": 1,
+        "tplFile": "FormStep.tsx",
+        "attrs": {
+          "title": "Edytuj zgłoszenie",
+          "schemaPath": "ticket",
+          "loadFromParams": true,
+          "onSubmit": {
+            "collection": "tickets",
+            "navPath": "tickets/list",
+            "action": "update"
+          }
+        }
+      }
+    ]
+  }

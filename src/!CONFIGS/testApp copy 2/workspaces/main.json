@@ -22,6 +22,15 @@
         }
       },
       {
+        "tplFile": "ButtonWidget",
+        "label": "🧪 LLM Experiments", 
+        "variant": "secondary",
+        "colSpan": 3,
+        "attrs": {
+          "navPath": "experiments"
+        }
+      },
+      {
         "tplFile": "InfoWidget",
         "title": "Quick Actions",
         "content": "Create new tickets, run AI experiments, or explore generated configurations",
