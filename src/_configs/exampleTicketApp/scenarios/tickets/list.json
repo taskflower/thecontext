@@ -5,18 +5,110 @@
       "slug": "view",
       "label": "Lista zgłoszeń",
       "order": 1,
-      "tplFile": "TicketListStep",
+      "tplFile": "ListStep",
       "attrs": {
-        "title": "Lista zgłoszeń",
+        "schemaPath": "ticket",
         "collection": "tickets",
+        "title": "Lista zgłoszeń",
+        "description": "Zarządzaj wszystkimi zgłoszeniami support",
+        "emptyState": {
+          "icon": "🎫",
+          "title": "Brak zgłoszeń",
+          "description": "Nie masz jeszcze żadnych zgłoszeń. Stwórz pierwsze zgłoszenie, aby rozpocząć.",
+          "actionButton": {
+            "title": "Stwórz zgłoszenie",
+            "navPath": "tickets/create"
+          }
+        },
+        "search": {
+          "enabled": true,
+          "placeholder": "Szukaj zgłoszeń...",
+          "fields": [
+            "title",
+            "description",
+            "reporter"
+          ]
+        },
+        "sorting": {
+          "enabled": true,
+          "defaultField": "title",
+          "defaultDirection": "asc"
+        },
+        "pagination": {
+          "pageSize": 10,
+          "showTotal": true
+        },
+        "columns": [
+          {
+            "key": "title",
+            "label": "Zgłoszenie",
+            "type": "text",
+            "sortable": true
+          },
+          {
+            "key": "priority",
+            "label": "Priorytet",
+            "type": "badge",
+            "sortable": true
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "badge",
+            "sortable": true
+          },
+          {
+            "key": "category",
+            "label": "Kategoria",
+            "type": "enum",
+            "sortable": true
+          },
+          {
+            "key": "reporter",
+            "label": "Zgłaszający",
+            "type": "text",
+            "sortable": true
+          },
+          {
+            "key": "dueDate",
+            "label": "Termin",
+            "type": "date",
+            "sortable": true
+          }
+        ],
+        "actions": [
+          {
+            "type": "edit",
+            "label": "Edytuj",
+            "navPath": "tickets/edit"
+          },
+          {
+            "type": "delete",
+            "label": "Usuń",
+            "variant": "danger",
+            "confirm": "Czy na pewno chcesz usunąć to zgłoszenie?"
+          },
+          {
+            "type": "custom",
+            "label": "Szczegóły",
+            "navPath": "tickets/view"
+          }
+        ],
         "widgets": [
           {
-            "tplFile": "ButtonWidget", 
-            "title": "Dodaj nowe zgłoszenie", 
+            "tplFile": "ButtonWidget",
+            "title": "Dodaj nowe zgłoszenie",
             "attrs": {
               "variant": "primary",
-              "colSpan": 1,
               "navPath": "tickets/create"
+            }
+          },
+          {
+            "tplFile": "ButtonWidget",
+            "title": "🤖 Wygeneruj z AI",
+            "attrs": {
+              "variant": "secondary",
+              "navPath": "tickets/llm-create"
             }
           }
         ]
