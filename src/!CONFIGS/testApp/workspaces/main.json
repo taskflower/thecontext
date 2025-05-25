@@ -6,23 +6,14 @@
     "widgets": [
       {
         "tplFile": "InfoWidget.tsx",
-        "title": "🎫 Ticket Management",
+        "title": "🎫 HELLO Ticket Management",
         "attrs": {
           "content": "Manage support tickets, track issues and handle customer requests efficiently.",
           "variant": "info",
           "colSpan": "full"
         }
-      },
-      {
-        "tplFile": "ButtonWidget.tsx",
-        "title": "📝 Create New Ticket",
-        "attrs": {
-          "navPath": "tickets/list",
-          "variant": "primary",
-          "colSpan": 1
-        }
       }
-     
+      
     ]
   }
 }

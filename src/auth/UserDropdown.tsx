@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../auth/AuthContext";
-import '../_firebase/config'; // Import to ensure Firebase is initialized
+
 
 const UserDropdown: React.FC = () => {
   const navigate = useNavigate();

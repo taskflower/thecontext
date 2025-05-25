@@ -1,7 +1,8 @@
 // src/pages/ConfigPage.tsx
+import { useConfig } from "@/core/engine";
 import React from "react";
 import { useParams } from "react-router-dom";
-import { useConfig } from "../hooks";
+
 
 export default function ConfigPage() {
   const { config, workspace, scenario, step, id } = useParams();
@@ -60,7 +61,7 @@ export default function ConfigPage() {
     };
 
     return (
-      <React.Suspense fallback={<div>Loading step...</div>}>
+      <React.Suspense fallback={<></>}>
         <Step {...stepProps} />
       </React.Suspense>
     );
@@ -87,7 +88,7 @@ export default function ConfigPage() {
               widget.attrs?.colSpan === "full" ? "md:col-span-2" : ""
             }`}
           >
-            <React.Suspense fallback={<div>Loading widget...</div>}>
+            <React.Suspense fallback={<></>}>
               <Widget {...widgetProps} />
             </React.Suspense>
           </div>
