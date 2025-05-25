@@ -1,4 +1,4 @@
-// src/ngn2/router/Router.tsx
+// src/ngn2/router/Router.tsx - Z VITE GLOB IMPORTS
 import {
   lazy,
   Suspense,
@@ -10,41 +10,67 @@ import {
 import { useParams } from "react-router-dom";
 import { configManager } from "../config/ConfigManager";
 
+// Vite glob imports - automatycznie ładuje wszystkie komponenty
+const widgetModules = import.meta.glob('/src/themes/*/widgets/*.{tsx,jsx}');
+const stepModules = import.meta.glob('/src/themes/*/steps/*.{tsx,jsx}');
+const layoutModules = import.meta.glob('/src/themes/*/layouts/*.{tsx,jsx}');
+
 // Component cache
 const componentCache = new Map<string, any>();
-const layoutCache = new Map<string, any>();
 
 function getComponent(theme: string, type: string, name: string) {
-  const key = `${theme}/${type}/${name}`;
+  // Usuń rozszerzenie jeśli jest podane
+  const cleanName = name.replace(/\.(tsx|jsx)$/, "");
+  const key = `${theme}/${type}/${cleanName}`;
+  
   if (!componentCache.has(key)) {
-    componentCache.set(
-      key,
-      lazy(() =>
-        import(`/src/themes/${theme}/${type}/${name}.tsx`)
-          .catch(() => import(`/src/themes/${theme}/${type}/${name}.jsx`))
-          .catch(() => ({
-            default: () =>
-              h(
-                "div",
-                { className: "p-4 text-red-600" },
-                `Missing component: ${name}`
-              ),
-          }))
-      )
-    );
+    // Wybierz odpowiedni moduł na podstawie typu
+    const modules = type === 'widgets' ? widgetModules : 
+                   type === 'steps' ? stepModules : 
+                   type === 'layouts' ? layoutModules : {};
+    
+    // Szukaj modułu pasującego do ścieżki
+    const modulePath = `/src/themes/${theme}/${type}/${cleanName}.tsx`;
+    const modulePathJsx = `/src/themes/${theme}/${type}/${cleanName}.jsx`;
+    
+    const moduleLoader = modules[modulePath] || modules[modulePathJsx];
+    
+    if (moduleLoader) {
+      // Utwórz lazy component
+      const LazyComponent = lazy(() => moduleLoader().then((module: any) => ({
+        default: module.default || module
+      })));
+      
+      componentCache.set(key, LazyComponent);
+    } else {
+      // Fallback component
+      const ErrorComponent = () =>
+        h(
+          "div",
+          { className: "p-4 text-red-600 border border-red-300 rounded" },
+          h("h3", { className: "font-bold" }, "Missing Component"),
+          h("p", null, `Component "${cleanName}" not found`),
+          h("p", { className: "text-sm text-gray-600 mt-2" }, 
+            `Expected: ${modulePath}`),
+          h("div", { className: "text-xs mt-2" },
+            h("details", null,
+              h("summary", null, "Available modules:"),
+              h("pre", { className: "mt-1 text-xs" }, 
+                JSON.stringify(Object.keys(modules), null, 2))
+            )
+          )
+        );
+      
+      componentCache.set(key, ErrorComponent);
+    }
   }
+  
   return componentCache.get(key);
 }
 
 function Layout({ theme, layout, children }: any) {
-  const Comp = useMemo(() => {
-    const key = `${theme}/${layout}`;
-    if (!layoutCache.has(key)) {
-      layoutCache.set(key, getComponent(theme, "layouts", layout));
-    }
-    return layoutCache.get(key);
-  }, [theme, layout]);
-
+  const LayoutComponent = getComponent(theme, "layouts", layout);
+  
   return h(
     Suspense,
     {
@@ -54,7 +80,7 @@ function Layout({ theme, layout, children }: any) {
         "Loading layout..."
       ),
     },
-    h(Comp, null, children)
+    h(LayoutComponent, null, children)
   );
 }
 
@@ -86,13 +112,11 @@ export function Router() {
         setLoading(true);
         setError(null);
 
-        // Load app config
         const appConfig = await configManager.loadConfig(
           `/src/!CONFIGS/${config}/app.json`
         );
         if (mounted) setApp(appConfig);
 
-        // Load workspace config if needed
         if (workspace) {
           const workspaceConfig = await configManager.loadConfig(
             `/src/!CONFIGS/${config}/workspaces/${workspace}.json`
@@ -100,7 +124,6 @@ export function Router() {
           if (mounted) setWs(workspaceConfig);
         }
 
-        // Load scenario config if needed
         if (scenario && workspace) {
           const scenarioConfig = await configManager.loadConfig(
             `/src/!CONFIGS/${config}/scenarios/${workspace}/${scenario}.json`
@@ -122,10 +145,7 @@ export function Router() {
     }
 
     loadConfigs();
-
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, [config, workspace, scenario]);
 
   const content = useMemo(() => {
@@ -138,98 +158,71 @@ export function Router() {
         "div",
         { className: "p-8 text-center" },
         h("div", { className: "text-red-600 mb-4" }, `Error: ${error}`),
-        h(
-          "button",
-          {
-            className:
-              "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700",
-            onClick: () => window.location.reload(),
-          },
-          "Reload"
-        )
+        h("button", {
+          className: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700",
+          onClick: () => window.location.reload(),
+        }, "Reload")
       );
     }
 
     if (!app) {
-      return h(
-        "div",
-        { className: "p-8 text-center text-gray-600" },
-        "Application not found"
-      );
+      return h("div", { className: "p-8 text-center text-gray-600" }, "Application not found");
     }
 
     // Scenario/Step mode
     if (scenario && sc) {
-      const node =
-        (step && sc.nodes.find((n: any) => n.slug === step)) || sc.nodes[0];
+      const node = (step && sc.nodes.find((n: any) => n.slug === step)) || sc.nodes[0];
       if (node) {
-        const Comp = getComponent(
-          app.tplDir,
-          "steps",
-          node.tplFile.replace(/\.(tsx|jsx)$/, "")
-        );
+        const StepComponent = getComponent(app.tplDir, "steps", node.tplFile);
         return h(
           Suspense,
           { fallback: h(LoadingFallback, { message: "Loading step..." }) },
-          h(Comp, { attrs: { ...node.attrs, id } })
-        );
-      } else {
-        return h(
-          "div",
-          { className: "p-8 text-center text-gray-600" },
-          "Step not found"
+          h(StepComponent, { attrs: { ...node.attrs, id } })
         );
       }
+      return h("div", { className: "p-8 text-center text-gray-600" }, "Step not found");
     }
 
     // Workspace mode
     if (workspace && ws) {
       const widgets = ws.templateSettings?.widgets || [];
+      
       if (widgets.length === 0) {
-        return h(
-          "div",
-          { className: "p-8 text-center text-gray-600" },
-          "No widgets configured"
-        );
+        if (workspace === 'tickets') {
+          window.location.href = `/testApp/tickets/list`;
+          return h(LoadingFallback, { message: "Redirecting..." });
+        }
+        return h("div", { className: "p-8 text-center text-gray-600" }, "No widgets configured");
       }
 
       return h(
         "div",
         { className: "space-y-4" },
-        ...widgets.map((w: any, i: number) =>
-          h(
+        ...widgets.map((w: any, i: number) => {
+          const WidgetComponent = getComponent(app.tplDir, "widgets", w.tplFile);
+          
+          return h(
             "div",
             { key: i },
             h(
               Suspense,
-              {
-                fallback: h(LoadingFallback, { message: "Loading widget..." }),
-              },
-              h(getComponent(app.tplDir, "widgets", w.tplFile), w)
+              { fallback: h(LoadingFallback, { message: `Loading ${w.tplFile}...` }) },
+              h(WidgetComponent, w)
             )
-          )
-        )
+          );
+        })
       );
     }
 
-    return h(
-      "div",
-      { className: "p-8 text-center text-gray-600" },
-      "No route matched"
-    );
+    return h("div", { className: "p-8 text-center text-gray-600" }, "No route matched");
   }, [app, ws, sc, scenario, step, workspace, id, loading, error]);
 
-  // Don't render layout while loading or on error
   if (loading || error || !app) {
     return content;
   }
 
-  return h(
-    Layout,
-    {
-      theme: app.tplDir,
-      layout: ws?.templateSettings?.layoutFile || "Simple",
-    },
-    content
-  );
+  return h(Layout, {
+    theme: app.tplDir,
+    layout: ws?.templateSettings?.layoutFile || "Simple",
+  }, content);
 }
