@@ -55,16 +55,22 @@ const ticketSchema = {
   }
 };
 
-export default function FormStep({ attrs }: any) {
+export default function FormStep({ attrs, ticketId }: any) {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const params = useParams(); // Dodajemy useParams aby mieć dostęp do wszystkich parametrów
+  
+  // POPRAWKA: Używamy ticketId z props lub próbujemy wyciągnąć z params
+  const editId = ticketId || params.id;
+  
   const [data, setData] = useState<any>({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (id) {
-      loadTicket(id);
+    console.log('FormStep mounted with:', { editId, ticketId, params });
+    
+    if (editId) {
+      loadTicket(editId);
     } else {
       // Set defaults for new ticket
       const defaults: any = {};
@@ -75,17 +81,26 @@ export default function FormStep({ attrs }: any) {
       });
       setData(defaults);
     }
-  }, [id]);
+  }, [editId]);
 
   const loadTicket = async (ticketId: string) => {
     try {
       setLoading(true);
+      console.log('Loading ticket with ID:', ticketId);
+      
       const record = await configDB.records.get(`tickets:${ticketId}`);
+      console.log('Loaded record:', record);
+      
       if (record) {
         setData(record.data);
+      } else {
+        console.error('Ticket not found:', ticketId);
+        alert('Zgłoszenie nie zostało znalezione');
+        navigate('/testApp/tickets/list');
       }
     } catch (error) {
       console.error('Failed to load ticket:', error);
+      alert('Błąd podczas ładowania zgłoszenia');
     } finally {
       setLoading(false);
     }
@@ -96,7 +111,9 @@ export default function FormStep({ attrs }: any) {
     
     try {
       setSaving(true);
-      const ticketId = id || Date.now().toString();
+      const ticketId = editId || Date.now().toString();
+      
+      console.log('Saving ticket:', { ticketId, data });
       
       await configDB.records.put({
         id: `tickets:${ticketId}`,
@@ -104,6 +121,7 @@ export default function FormStep({ attrs }: any) {
         updatedAt: new Date()
       });
       
+      console.log('Ticket saved successfully');
       navigate(`/testApp/${attrs.onSubmit.navPath}`);
     } catch (error) {
       console.error('Failed to save ticket:', error);
@@ -125,7 +143,17 @@ export default function FormStep({ attrs }: any) {
   return (
     <div className="max-w-2xl mx-auto">
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-6 text-gray-900">{attrs.title}</h2>
+        <h2 className="text-2xl font-bold mb-6 text-gray-900">
+          {/* POPRAWKA: Dynamiczny tytuł w zależności od trybu */}
+          {editId ? 'Edytuj zgłoszenie' : attrs.title}
+        </h2>
+        
+        {/* DEBUG INFO */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mb-4 p-2 bg-gray-100 rounded text-xs">
+            Debug: editId={editId}, mode={editId ? 'edit' : 'create'}
+          </div>
+        )}
         
         {Object.entries(ticketSchema.properties).map(([key, field]: [string, any]) => {
           // Skip excluded fields
@@ -195,7 +223,7 @@ export default function FormStep({ attrs }: any) {
             className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50"
             disabled={saving}
           >
-            {saving ? 'Zapisywanie...' : (id ? 'Zaktualizuj' : 'Zapisz')}
+            {saving ? 'Zapisywanie...' : (editId ? 'Zaktualizuj' : 'Zapisz')}
           </button>
           <button 
             type="button"

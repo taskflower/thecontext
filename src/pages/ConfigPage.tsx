@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { useConfig } from "../hooks";
 
 export default function ConfigPage() {
-  const { config, workspace, scenario, step } = useParams();
+  const { config, workspace, scenario, step, id } = useParams();
 
   if (!config || !workspace) return <div>Invalid path</div>;
 
@@ -28,19 +28,23 @@ export default function ConfigPage() {
         <div className="text-center py-12">
           <div className="text-red-600 mb-4">Błąd konfiguracji scenariusza</div>
           <div className="text-sm text-gray-500">
-            Scenario: {scenario}, Step: {step}
+            Scenario: {scenario}, Step: {step}, ID: {id}
           </div>
           <div className="text-sm text-gray-500">Config path: {cfgPath}</div>
         </div>
       );
     }
 
-    const node = cfg.nodes.find((n: any) => n.slug === step) || cfg.nodes[0];
+    // POPRAWKA: Jeśli mamy ID w URL, to traktujemy go jako step=form (domyślny step edycji)
+    // a ID przekazujemy jako parametr
+    const currentStep = id ? 'form' : step;
+    const node = cfg.nodes.find((n: any) => n.slug === currentStep) || cfg.nodes[0];
+    
     if (!node) {
       return (
         <div className="text-center py-12">
           <div className="text-red-600 mb-4">Krok nie został znaleziony</div>
-          <div className="text-sm text-gray-500">Step: {step}</div>
+          <div className="text-sm text-gray-500">Step: {currentStep}, ID: {id}</div>
         </div>
       );
     }
@@ -49,9 +53,15 @@ export default function ConfigPage() {
       () => import(`../themes/${theme}/steps/${node.tplFile}`)
     );
 
+    // POPRAWKA: Przekazujemy ID jako props jeśli istnieje
+    const stepProps = {
+      attrs: node.attrs,
+      ...(id && { ticketId: id }) // Dodajemy ticketId jeśli mamy ID w URL
+    };
+
     return (
       <React.Suspense fallback={<div>Loading step...</div>}>
-        <Step attrs={node.attrs} />
+        <Step {...stepProps} />
       </React.Suspense>
     );
   }

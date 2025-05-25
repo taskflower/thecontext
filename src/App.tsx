@@ -6,7 +6,11 @@ import ConfigPage from "./pages/ConfigPage";
 
 function AppRoutes() {
   const routes = [
+    // NOWY: Route z ID dla edycji ticketów
+    { path: ":config/:workspace/:scenario/:id", element: <ConfigPage /> },
+    // ISTNIEJĄCE: Route z opcjonalnym step
     { path: ":config/:workspace/:scenario/:step?", element: <ConfigPage /> },
+    // ISTNIEJĄCE: Route tylko z workspace
     { path: ":config/:workspace", element: <ConfigPage /> },
     { path: "*", element: <div>Not found</div> }
   ];

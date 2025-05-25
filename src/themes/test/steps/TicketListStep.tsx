@@ -22,7 +22,7 @@ export default function TicketListStep({ attrs }: any) {
         .startsWith("tickets:")
         .toArray();
       const ticketList = records.map((record) => ({
-        id: record.id.replace("tickets:", ""),
+        id: record.id?.replace("tickets:", "") ?? "",
         ...record.data,
       }));
       setTickets(ticketList);
@@ -66,12 +66,12 @@ export default function TicketListStep({ attrs }: any) {
               key={i}
               onClick={() => navigate(`/testApp/${widget.attrs.navPath}`)}
               className={`px-4 py-2 rounded font-medium ${
-                widget.variant === "primary"
+                widget.attrs.variant === "primary"
                   ? "bg-blue-600 text-white hover:bg-blue-700"
                   : "bg-gray-600 text-white hover:bg-gray-700"
               }`}
             >
-              {widget.label}
+              {widget.title}
             </button>
           ))}
         </div>
@@ -178,9 +178,10 @@ export default function TicketListStep({ attrs }: any) {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex justify-end gap-2">
+                      {/* POPRAWKA: Zmieniona ścieżka nawigacji do edycji */}
                       <button
                         onClick={() =>
-                          navigate(`/testApp/tickets/edit/form/${ticket.id}`)
+                          navigate(`/testApp/tickets/edit/${ticket.id}`)
                         }
                         className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                       >
