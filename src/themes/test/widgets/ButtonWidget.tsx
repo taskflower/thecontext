@@ -1,43 +1,21 @@
-// themes/test/widgets/ButtonWidget.tsx
-import { useAppNavigation } from "@/engine";
+// Updated ButtonWidget.tsx
+import { useNavigate } from 'react-router-dom';
 
-interface ButtonWidgetProps {
-  label: string;
-  variant?: "primary" | "secondary" | "success" | "danger";
-  disabled?: boolean;
-  attrs?: {
-    navPath?: string; // Ścieżka zgodna z hookiem nawigacyjnym
-    [key: string]: any;
+export default function ButtonWidget({ label = "Click", variant = 'primary', attrs = {} }: any) {
+  const navigate = useNavigate();
+  
+  const colors = {
+    primary: 'bg-blue-600 hover:bg-blue-700',
+    secondary: 'bg-gray-600 hover:bg-gray-700'
   };
-}
-
-const buttonStyles = {
-  primary: "bg-blue-500 hover:bg-blue-600 text-white",
-  secondary: "bg-gray-500 hover:bg-gray-600 text-white",
-  success: "bg-green-500 hover:bg-green-600 text-white",
-  danger: "bg-red-500 hover:bg-red-600 text-white",
-};
-
-export default function ButtonWidget({
-  label,
-  variant = "primary",
-  disabled = false,
-  attrs,
-}: ButtonWidgetProps) {
-  const { navigateTo } = useAppNavigation();
-
-  const handleClick = () => {
-    if (disabled || !attrs?.navPath) return;
-    navigateTo(attrs.navPath);
-  };
-
+  
   return (
     <button
-      className={`px-4 py-2 rounded font-medium transition-colors disabled:opacity-50 ${buttonStyles[variant]}`}
-      onClick={handleClick}
-      disabled={disabled}
+      onClick={() => attrs.navPath && navigate(`/testApp/${attrs.navPath}`)}
+      className={`${colors[variant] || colors.primary} text-white px-4 py-2 rounded`}
     >
       {label}
     </button>
   );
 }
+

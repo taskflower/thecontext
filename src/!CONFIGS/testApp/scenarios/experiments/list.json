@@ -1,0 +1,36 @@
+{
+    "slug": "list",
+    "name": "Experiments List",
+    "nodes": [
+      {
+        "slug": "view",
+        "label": "All Experiments",
+        "order": 1,
+        "tplFile": "ExperimentListStep.tsx",
+        "attrs": {
+          "title": "LLM Experiments",
+          "collection": "experiments",
+          "widgets": [
+            {
+              "tplFile": "ButtonWidget.tsx",
+              "label": "New Experiment",
+              "variant": "primary",
+              "colSpan": 1,
+              "attrs": {
+                "navPath": "experiments/create"
+              }
+            },
+            {
+              "tplFile": "ButtonWidget.tsx",
+              "label": "Import Templates",
+              "variant": "secondary",
+              "colSpan": 1,
+              "attrs": {
+                "action": "import_templates"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }

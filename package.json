@@ -12,6 +12,7 @@
     "lint": "eslint src --ext ts,tsx"
   },
   "dependencies": {
+    "dexie": "^4.0.11",
     "firebase": "^11.6.0",
     "localforage": "^1.10.0",
     "lucide-react": "^0.487.0",

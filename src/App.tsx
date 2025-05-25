@@ -1,24 +1,15 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AppRenderer } from "./AppRenderer";
-import { DBProvider } from "./provideDB/dbProvider.tsx";
-import { AuthProvider } from "./themes/test/useMockAuth";
+// src/App.tsx 
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Router } from "./ngn2/cre";
 
-// App.tsx
-export default function App() {
+
+export function App() {
   return (
     <BrowserRouter>
-    <DBProvider>
-      <AuthProvider>
-      
-        <Routes>
-          <Route path="/:config/:workspace" element={<AppRenderer />} />
-          <Route path="/:config/:workspace/:scenario" element={<AppRenderer />} />
-          <Route path="/:config/:workspace/:scenario/:step" element={<AppRenderer />} />
-          <Route path="/:config/:workspace/:scenario/:step/:id" element={<AppRenderer />} />
-        </Routes>
-      
-      </AuthProvider>
-      </DBProvider>
+      <Routes>
+        <Route path="/:config?/:workspace?/:scenario?/:step?/:id?" element={<Router />} />
+        <Route path="/" element={<Navigate to="/testApp/main" replace />} />
+      </Routes>
     </BrowserRouter>
   );
 }

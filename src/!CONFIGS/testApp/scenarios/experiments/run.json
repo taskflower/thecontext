@@ -1,0 +1,17 @@
+{
+    "slug": "run",
+    "name": "Run Experiment",
+    "nodes": [
+    {
+        "slug": "execution",
+        "label": "Execute LLM Experiment",
+        "order": 1,
+        "tplFile": "ExperimentRunStep.tsx",
+        "attrs": {
+        "title": "Run LLM Experiment",
+        "loadFromParams": true,
+        "collection": "experiments"
+        }
+    }
+    ]
+}
