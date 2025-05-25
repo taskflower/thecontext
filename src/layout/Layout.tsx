@@ -7,7 +7,6 @@ export default function Layout({ children }: { children: ReactNode }) {
   const { config } = useParams();
   const cfgName = config || 'testApp';
 
-  // Load app config for title and theme
   const app = useConfig<any>(cfgName, `/src/!CONFIGS/${cfgName}/app.json`);
   const title = app?.name || cfgName;
   const theme = app?.tplDir;

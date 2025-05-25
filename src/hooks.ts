@@ -15,7 +15,7 @@ export function useConfig<T>(configName: string, path: string) {
 
 export function useLocalStore<T>() {
   const [items, setItems] = useState<T[]>([]);
-  const table = configDB.table as Dexie.Table<Record<T>, string>;
+  const table = configDB.records as Dexie.Table<Record<T>, string>;
   useEffect(() => {
     table.toArray().then(arr => setItems(arr.map(r => r.data)));
   }, []);
