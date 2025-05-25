@@ -19,7 +19,7 @@ export default function LLMGenerationStep({ attrs }: any) {
   // Budowa Zod i JSON Schema oraz instrukcji enum
   const { zodSchema, jsonSchema, enumInstr } = useMemo(() => {
     if (!schema?.properties) {
-      return { zodSchema: null, jsonSchema: null, enumInstr: "" };
+      return { zodSchema: undefined, jsonSchema: null, enumInstr: "" };
     }
 
     const zFields: Record<string, any> = {};
