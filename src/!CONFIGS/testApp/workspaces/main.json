@@ -1,4 +1,3 @@
-
 {
   "name": "Main Workspace",
   "tplDir": "test",
@@ -6,28 +5,24 @@
     "layoutFile": "Simple",
     "widgets": [
       {
-        "tplFile": "InfoWidget",
-        "title": "Welcome to Test App",
-        "content": "Universal configurable app engine with LLM experiments",
-        "variant": "info",
-        "colSpan": "1"
-      },
-      {
-        "tplFile": "ButtonWidget",
-        "label": "🎫 Manage Tickets",
-        "variant": "primary",
-        "colSpan": 1,
+        "tplFile": "InfoWidget.tsx",
+        "title": "🎫 Ticket Management",
         "attrs": {
-          "navPath": "tickets/list"
+          "content": "Manage support tickets, track issues and handle customer requests efficiently.",
+          "variant": "info",
+          "colSpan": "full"
         }
       },
       {
-        "tplFile": "InfoWidget",
-        "title": "Quick Actions",
-        "content": "Create new tickets, run AI experiments, or explore generated configurations",
-        "variant": "default",
-        "colSpan": "full"
+        "tplFile": "ButtonWidget.tsx",
+        "title": "📝 Create New Ticket",
+        "attrs": {
+          "navPath": "tickets/list",
+          "variant": "primary",
+          "colSpan": 1
+        }
       }
+     
     ]
   }
 }

@@ -1,4 +1,3 @@
-
 {
   "name": "Main Workspace",
   "tplDir": "test",
@@ -6,36 +5,40 @@
     "layoutFile": "Simple",
     "widgets": [
       {
-        "tplFile": "InfoWidget",
-        "title": "Welcome to Test App",
-        "content": "Universal configurable app engine with LLM experiments",
-        "variant": "info",
-        "colSpan": "1"
+        "tplFile": "InfoWidget", 
+        "attrs": {
+          "title": "Welcome to Test App",
+          "content": "Universal configurable app engine with LLM experiments",
+          "variant": "info",
+          "colSpan": "1"
+        }
       },
       {
-        "tplFile": "ButtonWidget",
-        "label": "🎫 Manage Tickets",
-        "variant": "primary",
-        "colSpan": 1,
+        "tplFile": "ButtonWidget", 
         "attrs": {
+          "label": "🎫 Manage Tickets",
+          "variant": "primary",
+          "colSpan": 1,
           "navPath": "tickets/list"
         }
       },
       {
-        "tplFile": "ButtonWidget",
-        "label": "🧪 LLM Experiments", 
-        "variant": "secondary",
-        "colSpan": 3,
+        "tplFile": "ButtonWidget", 
         "attrs": {
+          "label": "🧪 LLM Experiments", 
+          "variant": "secondary",
+          "colSpan": 3,
           "navPath": "experiments"
         }
       },
       {
-        "tplFile": "InfoWidget",
-        "title": "Quick Actions",
-        "content": "Create new tickets, run AI experiments, or explore generated configurations",
-        "variant": "default",
-        "colSpan": "full"
+        "tplFile": "InfoWidget", 
+        "attrs": {
+          "title": "Quick Actions",
+          "content": "Create new tickets, run AI experiments, or explore generated configurations",
+          "variant": "default",
+          "colSpan": "full"
+        }
       }
     ]
   }
