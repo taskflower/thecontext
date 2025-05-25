@@ -16,8 +16,8 @@ export default function ButtonWidget({
   const { config } = useParams<{ config: string }>();
   const cfg = config || "testApp"; // Domyślnie 'testApp' jeśli brak 'config'
 
-  // Budowanie pełnej ścieżki na podstawie 'cfg' i 'navPath'
-  const fullPath = attrs?.navPath ? `/${cfg}${attrs.navPath}` : null;
+  // POPRAWKA: Budowanie pełnej ścieżki - navPath już zawiera pełną ścieżkę
+  const fullPath = attrs?.navPath ? `/${cfg}/${attrs.navPath}` : null;
 
   // Logowanie wartości dla debugowania
   console.log('Button navPath:', attrs?.navPath);
@@ -50,4 +50,3 @@ export default function ButtonWidget({
     </button>
   );
 }
-  

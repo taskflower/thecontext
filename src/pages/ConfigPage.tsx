@@ -36,7 +36,6 @@ export default function ConfigPage() {
     }
 
     const node = cfg.nodes.find((n: any) => n.slug === step) || cfg.nodes[0];
-
     if (!node) {
       return (
         <div className="text-center py-12">
@@ -58,6 +57,7 @@ export default function ConfigPage() {
   }
 
   const widgets = cfg.templateSettings?.widgets || [];
+
   return (
     <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
       {widgets.map((widget: any, index: number) => {
@@ -66,20 +66,18 @@ export default function ConfigPage() {
         );
 
         const widgetProps = {
-          ...widget.attrs,
-          label: widget.label,
           title: widget.title,
-          content: widget.content,
-          variant: widget.variant,
-          colSpan: widget.colSpan,
+          attrs: widget.attrs,
         };
 
         return (
           <div
             key={index}
-            className={`${widget.colSpan === "full" ? "md:col-span-2" : ""}`}
+            className={`${
+              widget.attrs?.colSpan === "full" ? "md:col-span-2" : ""
+            }`}
           >
-            <React.Suspense>
+            <React.Suspense fallback={<div>Loading widget...</div>}>
               <Widget {...widgetProps} />
             </React.Suspense>
           </div>
