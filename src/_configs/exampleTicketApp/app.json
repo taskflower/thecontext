@@ -1,0 +1,15 @@
+{
+  "name": "Test App",
+  "tplDir": "test",
+  "defaultWorkspace": "tickets",
+  "defaultScenario": "list",
+  "database": {
+    "provider": "indexedDB",
+    "collections": {
+
+      "users": "users",
+      "tickets": "tickets",
+        "profiles": "profiles"
+    }
+  }
+}

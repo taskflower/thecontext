@@ -1,0 +1,62 @@
+{
+    "id": "beneficiary-find-contractor",
+    "slug": "beneficiary-find-contractor",
+    "workspaceSlug": "workspace-beneficiary",
+    "name": "Wyszukiwarka Wykonawców",
+    "description": "Formularz zlecenia do publikacji na giełdzie wykonawców",
+    "icon": "wrench",
+    "nodes": [
+      {
+        "slug": "contractor-order-form",
+        "label": "Krok 1: Formularz zlecenia",
+        "contextSchemaPath": "order-request-form-contractor",
+        "contextDataPath": "order-request-form-contractor",
+        "tplFile": "FormStep",
+        "order": 0,
+        "attrs": {
+          "title": "Formularz zlecenia dla wykonawców",
+          "description": "Opublikuj zlecenie na giełdzie wykonawców",
+          "jsonSchema": {
+            "type": "object",
+            "properties": {
+              "address": { "type": "string", "title": "Adres" },
+              "postalCode": { "type": "string", "title": "Kod pocztowy", "pattern": "^[0-9]{2}-[0-9]{3}$" },
+              "city": { "type": "string", "title": "Miejscowość" },
+              "phone": { "type": "string", "title": "Telefon" },
+              "scope": { "type": "string", "title": "Zakres prac", "enum": ["Termomodernizacja","Wymiana okien","Instalacja PV","Wymiana źródła ciepła","Kompleksowo","Inne"] },
+              "scopeDescription": { "type": "string", "title": "Opis prac" },
+              "hasAudit": { "type": "boolean", "title": "Czy jest audyt?" },
+              "auditFile": { "type": "string", "title": "Plik audytu" },
+              "authorized": { "type": "boolean", "title": "Zgoda na przetwarzanie danych", "default": false }
+            },
+            "required": ["address","postalCode","city","phone","scope","hasAudit","authorized"]
+          },
+          "submitLabel": "Opublikuj zlecenie"
+        }
+      },
+      {
+        "slug": "contractor-order-summary",
+        "label": "Krok 2: Podsumowanie zlecenia",
+        "contextSchemaPath": "order-request-form-contractor",
+        "contextDataPath": "order-request-form-contractor",
+        "tplFile": "WidgetsStep",
+        "order": 1,
+        "saveToDB": {
+          "enabled": true,
+          "provider": "indexedDB",
+          "itemType": "order",
+          "itemTitle": "Zlecenie wykonawcy",
+          "contentPath": "order-request-form-contractor"
+        },
+        "attrs": {
+          "widgets": [
+            { "tplFile": "TitleWidget", "title": "Zlecenie opublikowane", "subtitle": "Wykonawcy mogą się z Tobą skontaktować.", "colSpan": "full" },
+            { "tplFile": "InfoWidget", "title": "Miasto", "contextDataPath": "order-request-form-contractor.city", "icon": "map-pin", "colSpan": 1 },
+            { "tplFile": "InfoWidget", "title": "Zakres prac", "contextDataPath": "order-request-form-contractor.scope", "icon": "tool", "colSpan": 1 },
+            { "tplFile": "OrderDetailsWidget", "contextDataPath": "order-request-form-contractor", "colSpan": "full" }
+          ]
+        }
+      }
+    ]
+  }
+  

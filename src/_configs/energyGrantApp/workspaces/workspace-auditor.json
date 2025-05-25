@@ -1,0 +1,51 @@
+{
+  "id": "workspace-auditor",
+  "slug": "workspace-auditor",
+  "name": "Panel Audytora",
+  "description": "Zarządzanie profilem audytora energetycznego",
+  "icon": "clipboard-check",
+  "templateSettings": {
+    "layoutFile": "Dashboard",
+    "widgets": [
+      {
+        "tplFile": "InfoWidget",
+        "title": "Witaj w Panelu Audytora",
+        "data": "Kompletny profil pozwoli Ci na skuteczne pozyskiwanie zleceń na audyty energetyczne.",
+        "icon": "info",
+        "colSpan": "full"
+      },
+      {
+        "tplFile": "InfoWidget",
+        "title": "Twoje punkty dostępu",
+        "data": "0",
+        "icon": "tag",
+        "colSpan": 1
+      },
+      {
+        "tplFile": "InfoWidget",
+        "title": "Status profilu",
+        "data": "Uzupełnij profil, aby zwiększyć swoje szanse na zdobycie zlecenia",
+        "icon": "user-check",
+        "colSpan": 1
+      },
+      {
+        "tplFile": "ListObjectWidget",
+        "title": "Twój profil audytora",
+        "contextDataPath": "portfolio",
+        "layout": "table",
+        "colSpan": 1
+      },
+      {
+        "tplFile": "ScenarioListWidget",
+        "title": "Dostępne scenariusze",
+        "colSpan": "full"
+      },
+      {
+        "tplFile": "WorkspacesListWidget",
+        "title": "Dostępne obszary robocze",
+        "colSpan": "full"
+      }
+    ]
+  }
+  
+}

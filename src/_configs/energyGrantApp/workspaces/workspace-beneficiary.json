@@ -1,0 +1,121 @@
+{
+  "id": "workspace-beneficiary",
+  "slug": "workspace-beneficiary",
+  "name": "Panel Beneficjenta",
+  "description": "Zarządzaj swoim wnioskiem o dotację, zleceniami i ofertami",
+  "icon": "user",
+  "templateSettings": {
+    "layoutFile": "Dashboard",
+    "widgets": [
+      {
+        "tplFile": "TitleWidget",
+        "title": "Panel Beneficjenta",
+        "subtitle": "Zarządzaj swoimi zleceniami i dotacjami",
+        "colSpan": "full"
+      },
+      {
+        "tplFile": "InfoWidget",
+        "title": "Twoje punkty dostępu",
+        "data": "{{beneficiary-data.points || 0}}",
+        "icon": "tag",
+        "colSpan": 1
+      },
+      {
+        "tplFile": "InfoWidget",
+        "title": "Status wniosku",
+        "data": "{{beneficiary-grant.status || 'Nie złożono'}}",
+        "icon": "file-text",
+        "colSpan": 1
+      },
+      {
+        "tplFile": "BeneficiaryListingsWidget",
+        "title": "Twoje zlecenia",
+        "contextDataPath": "beneficiary-listings",
+        "databaseProvider": "indexedDB",
+        "colSpan": "full"
+      },
+      {
+        "tplFile": "GrantCalculatorWidget",
+        "title": "Kalkulator dotacji",
+        "contextDataPath": "grant-calculator",
+        "formDataPath": "grant-calculator-form",
+        "colSpan": 1
+      },
+      {
+        "tplFile": "ContactFormWidget",
+        "title": "Formularz kontaktowy",
+        "contextDataPath": "contact-form",
+        "colSpan": 1
+      },
+      {
+        "tplFile": "MarketListingWidget",
+        "title": "Rynek wykonawców",
+        "contextDataPath": "market-listing",
+        "colSpan": "full"
+      },
+      {
+        "tplFile": "ScenarioListWidget",
+        "title": "Dostępne scenariusze",
+        "colSpan": "full"
+      },
+      {
+        "tplFile": "UserEnhancedProfileWidget",
+        "title": "Edytuj dane beneficjenta",
+        "contextDataPath": "user-profile",
+        "colSpan": "full"
+      }
+    ]
+  },
+  "contextSchema": {
+    "type": "object",
+    "properties": {
+      "listing-order-item": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Tytuł zlecenia"
+          },
+          "description": {
+            "type": "string",
+            "title": "Opis zlecenia",
+            "fieldType": "textarea"
+          },
+          "scope": {
+            "type": "string",
+            "title": "Zakres prac",
+            "enum": [
+              "Termomodernizacja ścian",
+              "Termomodernizacja dachu",
+              "Wymiana okien",
+              "Wymiana źródła ciepła",
+              "Instalacja fotowoltaiki",
+              "Kompleksowa termomodernizacja",
+              "Inne"
+            ]
+          },
+          "hasAudit": {
+            "type": "boolean",
+            "title": "Posiadam audyt energetyczny",
+            "default": false
+          },
+          "budget": {
+            "type": "number",
+            "title": "Szacowany budżet (PLN)"
+          },
+          "timeline": {
+            "type": "string",
+            "title": "Preferowany termin realizacji",
+            "enum": [
+              "Jak najszybciej",
+              "W ciągu miesiąca",
+              "W ciągu 3 miesięcy",
+              "W ciągu 6 miesięcy",
+              "W ciągu roku"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

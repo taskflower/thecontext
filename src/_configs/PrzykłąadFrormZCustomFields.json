@@ -1,0 +1,226 @@
+{
+    "id": "beneficiary-listing-add",
+    "slug": "beneficiary-listing-add",
+    "workspaceSlug": "workspace-beneficiary",
+    "name": "Dodaj nowe zlecenie",
+    "description": "Utwórz nowe zlecenie dla wykonawców",
+    "icon": "plus-circle",
+    "nodes": [
+      {
+        "slug": "listing-details",
+        "label": "Szczegóły zlecenia",
+        "contextSchemaPath": "new-listing",
+        "contextDataPath": "new-listing",
+        "tplFile": "FormStep",
+        "order": 0,
+        "attrs": {
+          "title": "Szczegóły zlecenia",
+          "subtitle": "Wprowadź informacje o zleceniu",
+          "submitLabel": "Dalej",
+          "customFields": {
+            "title": {
+              "type": "string",
+              "title": "Tytuł zlecenia",
+              "required": true
+            },
+            "description": {
+              "type": "string",
+              "title": "Opis zlecenia",
+              "fieldType": "textarea",
+              "required": true
+            },
+            "scope": {
+              "type": "string",
+              "title": "Zakres prac",
+              "enum": [
+                "Termomodernizacja ścian",
+                "Termomodernizacja dachu",
+                "Wymiana okien",
+                "Wymiana źródła ciepła",
+                "Instalacja fotowoltaiki",
+                "Kompleksowa termomodernizacja",
+                "Inne"
+              ],
+              "required": true
+            },
+            "scopeOther": {
+              "type": "string",
+              "title": "Inny zakres prac",
+              "condition": "scope === 'Inne'"
+            }
+          }
+        }
+      },
+      {
+        "slug": "location-details",
+        "label": "Lokalizacja",
+        "contextSchemaPath": "new-listing",
+        "contextDataPath": "new-listing",
+        "tplFile": "FormStep",
+        "order": 1,
+        "attrs": {
+          "title": "Lokalizacja inwestycji",
+          "subtitle": "Podaj informacje o lokalizacji",
+          "submitLabel": "Dalej",
+          "customFields": {
+            "postalCode": {
+              "type": "string",
+              "title": "Kod pocztowy",
+              "required": true,
+              "pattern": "\\d{2}-\\d{3}"
+            },
+            "city": {
+              "type": "string",
+              "title": "Miejscowość",
+              "required": true
+            },
+            "address": {
+              "type": "string",
+              "title": "Adres",
+              "required": true
+            }
+          }
+        }
+      },
+      {
+        "slug": "additional-details",
+        "label": "Dodatkowe informacje",
+        "contextSchemaPath": "new-listing",
+        "contextDataPath": "new-listing",
+        "tplFile": "FormStep",
+        "order": 2,
+        "attrs": {
+          "title": "Dodatkowe informacje",
+          "subtitle": "Podaj dodatkowe informacje o zleceniu",
+          "submitLabel": "Dalej",
+          "customFields": {
+            "hasAudit": {
+              "type": "boolean",
+              "title": "Posiadam audyt energetyczny",
+              "default": false
+            },
+            "budget": {
+              "type": "number",
+              "title": "Szacowany budżet (PLN)",
+              "required": true
+            },
+            "timeline": {
+              "type": "string",
+              "title": "Preferowany termin realizacji",
+              "enum": [
+                "Jak najszybciej",
+                "W ciągu miesiąca",
+                "W ciągu 3 miesięcy",
+                "W ciągu 6 miesięcy",
+                "W ciągu roku"
+              ],
+              "required": true
+            }
+          }
+        }
+      },
+      {
+        "slug": "contact-details",
+        "label": "Dane kontaktowe",
+        "contextSchemaPath": "new-listing",
+        "contextDataPath": "new-listing",
+        "tplFile": "FormStep",
+        "order": 3,
+        "attrs": {
+          "title": "Dane kontaktowe",
+          "subtitle": "Podaj dane do kontaktu dla wykonawców",
+          "submitLabel": "Dalej",
+          "customFields": {
+            "contactName": {
+              "type": "string",
+              "title": "Imię i nazwisko",
+              "required": true
+            },
+            "contactPhone": {
+              "type": "string",
+              "title": "Telefon kontaktowy",
+              "required": true
+            },
+            "contactEmail": {
+              "type": "string",
+              "title": "E-mail",
+              "required": true,
+              "format": "email"
+            },
+            "preferredContact": {
+              "type": "string",
+              "title": "Preferowany sposób kontaktu",
+              "enum": ["Telefon", "E-mail", "Dowolny"],
+              "required": true
+            }
+          }
+        }
+      },
+      {
+        "slug": "consent-step",
+        "label": "Zgody",
+        "contextSchemaPath": "new-listing",
+        "contextDataPath": "new-listing",
+        "tplFile": "FormStep",
+        "order": 4,
+        "attrs": {
+          "title": "Wymagane zgody",
+          "subtitle": "Zaakceptuj wymagane zgody",
+          "submitLabel": "Dalej",
+          "customFields": {
+            "termsConsent": {
+              "type": "boolean",
+              "title": "Akceptuję regulamin platformy",
+              "required": true
+            },
+            "dataProcessingConsent": {
+              "type": "boolean",
+              "title": "Wyrażam zgodę na przetwarzanie moich danych osobowych",
+              "required": true
+            },
+            "marketingConsent": {
+              "type": "boolean",
+              "title": "Wyrażam zgodę na otrzymywanie informacji marketingowych (opcjonalnie)"
+            }
+          }
+        }
+      },
+      {
+        "slug": "submission-summary",
+        "label": "Podsumowanie",
+        "tplFile": "WidgetsStep",
+        "order": 5,
+        "attrs": {
+          "title": "Podsumowanie zlecenia",
+          "subtitle": "Potwierdź i opublikuj zlecenie",
+          "disableNextButton": false,
+          "saveToDB": {
+            "collection": "beneficiary-listings",
+            "generateId": true,
+            "provider": "indexedDB",
+            "contentPath": "new-listing",
+            "additionalData": {
+              "status": "new",
+              "createdAt": "{{currentDate}}",
+              "offers": []
+            }
+          },
+          "widgets": [
+            {
+              "tplFile": "ListingSummaryWidget",
+              "listing": "new-listing",
+              "colSpan": "full"
+            },
+            {
+              "tplFile": "ActionButtonWidget",
+              "label": "Opublikuj zlecenie",
+              "icon": "check",
+              "redirectPath": "/workspace-beneficiary",
+              "saveAction": true,
+              "colSpan": "full"
+            }
+          ]
+        }
+      }
+    ]
+  }

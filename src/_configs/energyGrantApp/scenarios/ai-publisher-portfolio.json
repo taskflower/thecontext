@@ -1,0 +1,263 @@
+{
+  "id":"portfolio",
+  "slug":"portfolio",
+  "workspaceSlug":"workspace-ai-publisher",
+  "name":"Portfolio",
+  "description":"Zarządzaj swoim profilem wykonawcy lub audytora energetycznego",
+  "icon":"user",
+  "nodes":[
+    {
+      "slug":"portfolio-type-detector",
+      "label":"Wykrywanie typu portfolio",
+      "contextSchemaPath":"portfolio",
+      "contextDataPath":"portfolio",
+      "tplFile":"LlmStep",
+      "order":0,
+      "attrs":{
+        "autoStart":true,
+        "userMessage":"Na podstawie roli użytkownika ({{user-data.role}}) określ typ portfolio i przygotuj podstawowy obiekt danych. Jeśli rola to 'wykonawca', ustaw portfolioType na 'contractor'. Jeśli rola to 'audytor', ustaw portfolioType na 'auditor'. W przeciwnym wypadku domyślnie ustaw 'contractor'. Zwróć czysty JSON bez żadnych znaczników, komentarzy czy dodatkowego tekstu - tylko obiekt JSON z następującymi polami:\n\n{\n  \"portfolioType\": \"contractor\",\n  \"companyName\": \"\",\n  \"nip\": \"\",\n  \"address\": \"\",\n  \"postalCode\": \"\",\n  \"city\": \"\",\n  \"phone\": \"\",\n  \"email\": \"\",\n  \"website\": \"\",\n  \"description\": \"\",\n  \"certificateNumber\": \"\",\n  \"certificateExpiry\": \"\",\n  \"images\": [],\n  \"services\": [],\n  \"profileConsent\": false,\n  \"certificateConsent\": false,\n  \"termsConsent\": false,\n  \"verificationConsent\": false\n}"
+      }
+    },
+    {
+      "slug":"portfolio-data-entry",
+      "label":"Krok 1: Dane profilowe",
+      "tplFile":"FormStep",
+      "order":1,
+      "contextSchemaPath":"portfolio",
+      "contextDataPath":"portfolio",
+      "attrs":{
+        "title":"Dane profilowe",
+        "description":"Wprowadź dane swojej firmy, które będą widoczne dla beneficjentów",
+        "jsonSchema":{
+          "type":"object",
+          "properties":{
+            "companyName":{"type":"string","title":"Nazwa firmy"},
+            "nip":{"type":"string","title":"NIP","pattern":"^[0-9]{10}$"},
+            "address":{"type":"string","title":"Adres siedziby"},
+            "postalCode":{"type":"string","title":"Kod pocztowy","pattern":"^[0-9]{2}-[0-9]{3}$"},
+            "city":{"type":"string","title":"Miejscowość"},
+            "phone":{"type":"string","title":"Telefon kontaktowy"},
+            "email":{"type":"string","title":"E-mail kontaktowy","format":"email"},
+            "website":{"type":"string","title":"Strona internetowa"},
+            "description":{"type":"string","title":"Opis działalności","description":"Krótki opis działalności, doświadczenia, specjalizacji"},
+            "profileConsent":{"type":"boolean","title":"Potwierdzam, że jestem uprawniony do publikacji tych danych w serwisie oraz wyrażam zgodę na ich przetwarzanie w celu prezentacji profilu firmy","default":false}
+          },
+          "required":["companyName","nip","address","postalCode","city","phone","email","profileConsent"]
+        },
+        "submitLabel":"Dalej"
+      }
+    },
+    {
+      "slug":"portfolio-services-prep",
+      "label":"Przygotowanie do usług",
+      "tplFile":"LlmStep",
+      "order":1.9,
+      "contextSchemaPath":"portfolio",
+      "contextDataPath":"portfolio",
+      "attrs":{
+        "autoStart":true,
+        "userMessage":"Przygotuj obiekt portfolio do następnego kroku. Upewnij się, że pole 'services' jest pustą tablicą [], a nie stringiem. Zwróć cały obiekt portfolio bez zmian, zastępując jedynie pole 'services' pustą tablicą, jeśli nie jest już tablicą. Zwróć jedynie czysty obiekt JSON bez dodatkowych komentarzy czy formatowania."
+      }
+    },
+    {
+      "slug":"portfolio-services",
+      "label":"Krok 2: Usługi",
+      "tplFile":"FormStep",
+      "order":2,
+      "contextSchemaPath":"portfolio",
+      "contextDataPath":"portfolio",
+      "attrs":{
+        "title":"Oferowane usługi",
+        "description":"Wybierz usługi, które oferuje Twoja firma",
+        "jsonSchema":{
+          "type":"object",
+          "properties":{
+            "service":{
+              "type":"string",
+              "title":"Wybierz usługę",
+              "enum":[
+                "Termomodernizacja ścian",
+                "Termomodernizacja dachu",
+                "Wymiana okien",
+                "Instalacja fotowoltaiki",
+                "Wymiana źródła ciepła",
+                "Pompy ciepła",
+                "Rekuperacja",
+                "Audyt energetyczny",
+                "Audyt remontowy",
+                "Doradztwo energetyczne",
+                "Projekty termomodernizacji",
+                "Dokumentacja techniczna"
+              ]
+            }
+          }
+        },
+        "submitLabel":"Dodaj usługę"
+      }
+    },
+    {
+      "slug":"portfolio-service-add",
+      "label":"Dodawanie usługi",
+      "tplFile":"LlmStep",
+      "order":2.1,
+      "contextSchemaPath":"portfolio",
+      "contextDataPath":"portfolio",
+      "attrs":{
+        "autoStart":true,
+        "userMessage":"Dodaj wybraną usługę '{{portfolio.service}}' do tablicy 'services' w obiekcie portfolio, jeśli nie jest już w tej tablicy. Upewnij się, że 'services' jest tablicą. Zwróć cały zaktualizowany obiekt portfolio jako czysty JSON, zachowując wszystkie istniejące pola. Usuń pole 'service' z obiektu portfolio, jest to pole tymczasowe."
+      }
+    },
+    {
+      "slug":"portfolio-services-display",
+      "label":"Wyświetlenie wybranych usług",
+      "tplFile":"WidgetsStep",
+      "order":2.2,
+      "contextSchemaPath":"portfolio",
+      "contextDataPath":"portfolio",
+      "attrs":{
+        "widgets":[
+          {
+            "tplFile":"TitleWidget",
+            "title":"Wybrane usługi",
+            "subtitle":"Możesz dodać więcej usług lub przejść dalej",
+            "colSpan":"full"
+          },
+          {
+            "tplFile":"InfoWidget",
+            "title":"Liczba wybranych usług",
+            "data":"{{portfolio.services.length}}",
+            "icon":"list",
+            "colSpan":1
+          },
+          {
+            "tplFile":"InfoWidget",
+            "title":"Przejdź dalej",
+            "data":"Kliknij przycisk poniżej, aby przejść do następnego kroku",
+            "icon":"arrow-right",
+            "colSpan":"full"
+          }
+        ]
+      }
+    },
+    {
+      "slug":"portfolio-certificates",
+      "label":"Krok 3: Certyfikaty",
+      "tplFile":"FormStep",
+      "order":3,
+      "contextSchemaPath":"portfolio",
+      "contextDataPath":"portfolio",
+      "attrs":{
+        "title":"Certyfikaty i uprawnienia",
+        "description":"Wprowadź informacje o posiadanych certyfikatach i uprawnieniach",
+        "jsonSchema":{
+          "type":"object",
+          "properties":{
+            "certificateNumber":{"type":"string","title":"Numer certyfikatu/uprawnień"},
+            "certificateExpiry":{"type":"string","title":"Data ważności","format":"date"},
+            "certificateConsent":{"type":"boolean","title":"Oświadczam, że posiadam wszystkie wymagane prawem certyfikaty i uprawnienia do wykonywania deklarowanych usług","default":false}
+          },
+          "required":["certificateConsent"]
+        },
+        "submitLabel":"Dalej"
+      }
+    },
+    {
+      "slug":"portfolio-images",
+      "label":"Krok 4: Galeria realizacji",
+      "tplFile":"FormStep",
+      "order":4,
+      "contextSchemaPath":"portfolio",
+      "contextDataPath":"portfolio",
+      "attrs":{
+        "title":"Galeria realizacji",
+        "description":"Opisz swoje realizacje, które pokazują jakość Twojej pracy",
+        "jsonSchema":{
+          "type":"object",
+          "properties":{
+            "imageDescription":{"type":"string","title":"Opis realizacji","description":"Opisz przykładowe realizacje, które wykonałeś. Te informacje będą widoczne w Twoim profilu."}
+          }
+        },
+        "submitLabel":"Dalej"
+      }
+    },
+    {
+      "slug":"portfolio-images-processor",
+      "label":"Przetwarzanie opisu realizacji",
+      "tplFile":"LlmStep",
+      "order":4.5,
+      "contextSchemaPath":"portfolio",
+      "contextDataPath":"portfolio",
+      "attrs":{
+        "autoStart":true,
+        "userMessage":"Dodaj opis realizacji do obiektu portfolio. Zwróć cały obiekt portfolio bez zmian, dodając jedynie pole 'imageDescription' z wartością {{portfolio.imageDescription}}. Upewnij się, że pole 'images' pozostaje pustą tablicą, a nie stringiem. Zwróć jedynie czysty obiekt JSON bez dodatkowych komentarzy czy formatowania."
+      }
+    },
+    {
+      "slug":"portfolio-terms-consent",
+      "label":"Krok 5: Akceptacja regulaminu",
+      "tplFile":"FormStep",
+      "order":5,
+      "contextSchemaPath":"portfolio",
+      "contextDataPath":"portfolio",
+      "attrs":{
+        "title":"Akceptacja regulaminu",
+        "description":"Przed publikacją profilu zapoznaj się z regulaminem serwisu",
+        "jsonSchema":{
+          "type":"object",
+          "properties":{
+            "termsConsent":{"type":"boolean","title":"Oświadczam, że zapoznałem się z regulaminem serwisu i akceptuję jego warunki","default":false},
+            "verificationConsent":{"type":"boolean","title":"Wyrażam zgodę na weryfikację podanych danych przez operatora programu","default":false}
+          },
+          "required":["termsConsent","verificationConsent"]
+        },
+        "submitLabel":"Opublikuj profil"
+      }
+    },
+    {
+      "slug":"portfolio-summary",
+      "label":"Krok 6: Podsumowanie",
+      "tplFile":"WidgetsStep",
+      "order":6,
+      "saveToDB":{
+        "enabled":true,
+        "provider":"indexedDB",
+        "itemType":"portfolio",
+        "itemTitle":"Profil firmy",
+        "contentPath":"portfolio"
+      },
+      "contextSchemaPath":"portfolio",
+      "contextDataPath":"portfolio",
+      "attrs":{
+        "widgets":[
+          {
+            "tplFile":"TitleWidget",
+            "title":"Podsumowanie profilu",
+            "subtitle":"Twój profil jest już widoczny dla beneficjentów po wykupieniu punktów",
+            "colSpan":"full"
+          },
+          {
+            "tplFile":"InfoWidget",
+            "title":"Nazwa firmy",
+            "contextDataPath":"portfolio.companyName",
+            "icon":"building",
+            "colSpan":1
+          },
+          {
+            "tplFile":"InfoWidget",
+            "title":"Liczba oferowanych usług",
+            "data":"{{portfolio.services.length}}",
+            "icon":"list",
+            "colSpan":1
+          },
+          {
+            "tplFile":"InfoWidget",
+            "title":"Status",
+            "data":"Twój profil został zapisany i będzie widoczny dla beneficjentów po weryfikacji przez operatora.",
+            "icon":"info",
+            "colSpan":"full"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,146 @@
+{
+    "id": "operator-program-settings",
+    "slug": "operator-program-settings",
+    "workspaceSlug": "workspace-operator",
+    "name": "Ustawienia programu",
+    "description": "Zarządzaj parametrami programu dotacji energetycznych",
+    "icon": "settings",
+    "nodes": [
+      {
+        "slug": "program-settings-form",
+        "label": "Parametry programu",
+        "contextSchemaPath": "program-settings",
+        "contextDataPath": "program-settings",
+        "tplFile": "FormStep",
+        "order": 0,
+        "attrs": {
+          "title": "Ustawienia programu dotacji",
+          "description": "Dostosuj parametry programu dotacji energetycznych",
+          "jsonSchema": {
+            "type": "object",
+            "properties": {
+              "grantMaxValue": { 
+                "type": "number", 
+                "title": "Maksymalna wartość dotacji (PLN)", 
+                "minimum": 0,
+                "default": 30000 
+              },
+              "incomeCriteriaSingle": { 
+                "type": "number", 
+                "title": "Kryterium dochodowe dla 1 osoby (PLN)",
+                "minimum": 0,
+                "default": 2100
+              },
+              "incomeCriteriaMultiple": { 
+                "type": "number", 
+                "title": "Kryterium dochodowe dla ≥2 osób (PLN)",
+                "minimum": 0,
+                "default": 1500
+              },
+              "contractorPointCost": { 
+                "type": "number", 
+                "title": "Koszt punktu dla wykonawcy (PLN)",
+                "minimum": 0,
+                "default": 10
+              },
+              "auditorPointCost": { 
+                "type": "number", 
+                "title": "Koszt punktu dla audytora (PLN)",
+                "minimum": 0,
+                "default": 15
+              },
+              "programActive": { 
+                "type": "boolean", 
+                "title": "Program aktywny",
+                "default": true
+              },
+              "registrationOpen": { 
+                "type": "boolean", 
+                "title": "Rejestracja otwarta",
+                "default": true
+              },
+              "applicationDeadline": { 
+                "type": "string", 
+                "title": "Termin składania wniosków",
+                "format": "date",
+                "default": "2025-12-31"
+              }
+            },
+            "required": ["grantMaxValue", "incomeCriteriaSingle", "incomeCriteriaMultiple", "contractorPointCost", "auditorPointCost", "programActive", "applicationDeadline"]
+          },
+          "submitLabel": "Zapisz ustawienia"
+        }
+      },
+      {
+        "slug": "program-settings-summary",
+        "label": "Podsumowanie ustawień",
+        "contextSchemaPath": "program-settings",
+        "contextDataPath": "program-settings",
+        "tplFile": "WidgetsStep",
+        "order": 1,
+        "saveToDB": {
+          "enabled": true,
+          "provider": "indexedDB",
+          "itemType": "programSettings",
+          "itemTitle": "Ustawienia programu",
+          "contentPath": "program-settings"
+        },
+        "attrs": {
+          "widgets": [
+            { 
+              "tplFile": "TitleWidget", 
+              "title": "Ustawienia zostały zapisane", 
+              "subtitle": "Parametry programu dotacji zostały zaktualizowane", 
+              "colSpan": "full" 
+            },
+            { 
+              "tplFile": "InfoWidget", 
+              "title": "Maksymalna wartość dotacji", 
+              "data": "{{program-settings.grantMaxValue}} PLN", 
+              "icon": "dollar-sign", 
+              "colSpan": 1 
+            },
+            { 
+              "tplFile": "InfoWidget", 
+              "title": "Termin składania wniosków", 
+              "contextDataPath": "program-settings.applicationDeadline", 
+              "icon": "calendar", 
+              "colSpan": 1 
+            },
+            { 
+              "tplFile": "InfoWidget", 
+              "title": "Status programu", 
+              "data": "{{program-settings.programActive ? 'Aktywny' : 'Nieaktywny'}}", 
+              "icon": "activity", 
+              "colSpan": 1 
+            },
+            { 
+              "tplFile": "InfoWidget", 
+              "title": "Status rejestracji", 
+              "data": "{{program-settings.registrationOpen ? 'Otwarta' : 'Zamknięta'}}", 
+              "icon": "users", 
+              "colSpan": 1 
+            },
+            { 
+              "tplFile": "TableWidget", 
+              "title": "Kryteria kwalifikacji",
+              "data": [
+                { "name": "Kryterium dochodowe (1 osoba)", "value": "{{program-settings.incomeCriteriaSingle}} PLN" },
+                { "name": "Kryterium dochodowe (≥2 osoby)", "value": "{{program-settings.incomeCriteriaMultiple}} PLN" },
+                { "name": "Koszt punktu dla wykonawcy", "value": "{{program-settings.contractorPointCost}} PLN" },
+                { "name": "Koszt punktu dla audytora", "value": "{{program-settings.auditorPointCost}} PLN" }
+              ],
+              "colSpan": "full" 
+            },
+            { 
+              "tplFile": "ActionButtonWidget", 
+              "label": "Powrót do panelu głównego", 
+              "icon": "home", 
+              "path": "workspace-operator", 
+              "colSpan": "full" 
+            }
+          ]
+        }
+      }
+    ]
+  }

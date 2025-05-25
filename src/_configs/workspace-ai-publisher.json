@@ -1,0 +1,581 @@
+{
+  "id": "workspace-ai-publisher",
+  "slug": "workspace-ai-publisher",
+  "name": "Program Dotacji Energetycznych",
+  "description": "Platforma łącząca beneficjentów, wykonawców i audytorów w programie dotacji energetycznych",
+  "icon": "home",
+  "templateSettings": {
+    "layoutFile": "Dashboard",
+    "widgets": [
+      {
+        "tplFile": "InfoWidget",
+        "title": "Witaj w Programie Dotacji Energetycznych",
+        "data": "Aplikacja pomaga łączyć beneficjentów, wykonawców i audytorów w programie dotacji energetycznych. Wybierz odpowiednią funkcję z menu, aby rozpocząć.",
+        "icon": "info",
+        "colSpan": "full"
+      },
+     
+      {
+        "tplFile": "RoleInfoWidget",
+        "title": "Role w systemie",
+        "colSpan": "full"
+      },
+      {
+        "tplFile": "WorkspacesListWidget",
+        "title": "Dostępne obszary robocze",
+        "colSpan": "full"
+      },
+      {
+        "tplFile": "ScenarioListWidget",
+        "title": "Dostępne funkcje",
+        "colSpan": "full"
+      }
+    ]
+  },
+  "contextSchema": {
+    "type": "object",
+    "properties": {
+      "user-data": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "beneficjent",
+              "wykonawca",
+              "audytor",
+              "operator"
+            ]
+          },
+          "verified": {
+            "type": "boolean"
+          }
+        }
+      },
+      "grant-calculator-form": {
+        "type": "object",
+        "properties": {
+          "householdSize": {
+            "type": "number",
+            "title": "Liczba osób w gospodarstwie"
+          },
+          "income": {
+            "type": "number",
+            "title": "Dochód na osobę"
+          },
+          "coOwners": {
+            "type": "boolean",
+            "title": "Czy są współwłaściciele"
+          },
+          "dataProcessingConsent": {
+            "type": "boolean",
+            "title": "Zgoda na przetwarzanie danych"
+          }
+        }
+      },
+      "grant-calculator": {
+        "type": "object",
+        "properties": {
+          "grantEligibility": {
+            "type": "boolean",
+            "title": "Kwalifikacja do dotacji"
+          },
+          "grantAmount": {
+            "type": "number",
+            "title": "Potencjalna wysokość dotacji"
+          }
+        }
+      },
+      "contact-form": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Imię i nazwisko"
+          },
+          "email": {
+            "type": "string",
+            "title": "Adres e-mail"
+          },
+          "phone": {
+            "type": "string",
+            "title": "Numer telefonu"
+          },
+          "postalCode": {
+            "type": "string",
+            "title": "Kod pocztowy"
+          },
+          "city": {
+            "type": "string",
+            "title": "Miejscowość"
+          },
+          "message": {
+            "type": "string",
+            "title": "Wiadomość"
+          },
+          "dataProcessingConsent": {
+            "type": "boolean",
+            "title": "Zgoda na przetwarzanie danych"
+          },
+          "marketingConsent": {
+            "type": "boolean",
+            "title": "Zgoda marketingowa"
+          }
+        }
+      },
+      "order-request-form-contractor": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "title": "Adres"
+          },
+          "phone": {
+            "type": "string",
+            "title": "Telefon"
+          },
+          "scope": {
+            "type": "string",
+            "title": "Zakres prac"
+          },
+          "hasAudit": {
+            "type": "boolean",
+            "title": "Czy jest audyt"
+          },
+          "auditFile": {
+            "type": "string",
+            "title": "Plik audytu"
+          },
+          "postalCode": {
+            "type": "string",
+            "title": "Kod pocztowy"
+          },
+          "city": {
+            "type": "string",
+            "title": "Miejscowość"
+          },
+          "scopeDescription": {
+            "type": "string",
+            "title": "Opis zakresu prac"
+          },
+          "comments": {
+            "type": "string",
+            "title": "Uwagi"
+          },
+          "authorized": {
+            "type": "boolean",
+            "title": "Zgoda na przetwarzanie danych"
+          }
+        }
+      },
+      "order-request-form-auditor": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "title": "Adres"
+          },
+          "phone": {
+            "type": "string",
+            "title": "Telefon"
+          },
+          "postalCode": {
+            "type": "string",
+            "title": "Kod pocztowy"
+          },
+          "city": {
+            "type": "string",
+            "title": "Miejscowość"
+          },
+          "buildingType": {
+            "type": "string",
+            "title": "Typ budynku"
+          },
+          "buildingArea": {
+            "type": "number",
+            "title": "Powierzchnia budynku"
+          },
+          "constructionYear": {
+            "type": "number",
+            "title": "Rok budowy"
+          },
+          "urgency": {
+            "type": "string",
+            "title": "Pilność wykonania"
+          },
+          "comments": {
+            "type": "string",
+            "title": "Uwagi"
+          },
+          "authorized": {
+            "type": "boolean",
+            "title": "Zgoda na przetwarzanie danych"
+          }
+        }
+      },
+      "order-request-contractor": {
+        "type": "object",
+        "properties": {
+          "orderType": {
+            "type": "string",
+            "title": "Typ zlecenia"
+          },
+          "address": {
+            "type": "string",
+            "title": "Adres",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "title": "Telefon",
+            "nullable": true
+          },
+          "scope": {
+            "type": "string",
+            "title": "Zakres prac",
+            "nullable": true
+          },
+          "hasAudit": {
+            "type": "boolean",
+            "title": "Czy jest audyt",
+            "nullable": true
+          },
+          "auditFile": {
+            "type": "string",
+            "title": "Plik audytu",
+            "nullable": true
+          },
+          "postalCode": {
+            "type": "string",
+            "title": "Kod pocztowy",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "title": "Miejscowość",
+            "nullable": true
+          },
+          "scopeDescription": {
+            "type": "string",
+            "title": "Opis zakresu prac",
+            "nullable": true
+          },
+          "comments": {
+            "type": "string",
+            "title": "Uwagi",
+            "nullable": true
+          }
+        },
+        "required": [
+          "orderType"
+        ]
+      },
+      "order-request-auditor": {
+        "type": "object",
+        "properties": {
+          "orderType": {
+            "type": "string",
+            "title": "Typ zlecenia"
+          },
+          "address": {
+            "type": "string",
+            "title": "Adres",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "title": "Telefon",
+            "nullable": true
+          },
+          "postalCode": {
+            "type": "string",
+            "title": "Kod pocztowy",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "title": "Miejscowość",
+            "nullable": true
+          },
+          "buildingType": {
+            "type": "string",
+            "title": "Typ budynku",
+            "nullable": true
+          },
+          "buildingArea": {
+            "type": "number",
+            "title": "Powierzchnia budynku",
+            "nullable": true
+          },
+          "constructionYear": {
+            "type": "number",
+            "title": "Rok budowy",
+            "nullable": true
+          },
+          "urgency": {
+            "type": "string",
+            "title": "Pilność wykonania",
+            "nullable": true
+          },
+          "comments": {
+            "type": "string",
+            "title": "Uwagi",
+            "nullable": true
+          }
+        },
+        "required": [
+          "orderType"
+        ]
+      },
+      "market-listing": {
+        "type": "object",
+        "properties": {
+          "listings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "postalCode": {
+                  "type": "string"
+                },
+                "city": {
+                  "type": "string"
+                },
+                "scope": {
+                  "type": "string"
+                },
+                "hasAudit": {
+                  "type": "boolean"
+                },
+                "isVerified": {
+                  "type": "boolean"
+                },
+                "views": {
+                  "type": "number"
+                },
+                "created": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "contractor",
+                    "auditor"
+                  ]
+                }
+              }
+            }
+          },
+          "purchasedPoints": {
+            "type": "number",
+            "title": "Wykupione punkty"
+          },
+          "unlockedListings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "points-purchase-form": {
+        "type": "object",
+        "properties": {
+          "pointsAmount": {
+            "type": "number",
+            "title": "Liczba punktów"
+          },
+          "termsConsent": {
+            "type": "boolean",
+            "title": "Zgoda na regulamin"
+          },
+          "paymentConsent": {
+            "type": "boolean",
+            "title": "Zgoda na płatność"
+          }
+        }
+      },
+      "points-purchase": {
+        "type": "object",
+        "properties": {
+          "pointsAmount": {
+            "type": "number",
+            "title": "Liczba punktów"
+          },
+          "price": {
+            "type": "number",
+            "title": "Cena"
+          }
+        }
+      },
+      "beneficiary-orders": {
+        "type": "object",
+        "properties": {
+          "orders": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "contractor",
+                    "auditor"
+                  ]
+                },
+                "status": {
+                  "type": "string"
+                },
+                "created": {
+                  "type": "string"
+                },
+                "scope": {
+                  "type": "string"
+                },
+                "offers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "providerId": {
+                        "type": "string"
+                      },
+                      "providerName": {
+                        "type": "string"
+                      },
+                      "price": {
+                        "type": "number"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "isAccepted": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "portfolio": {
+        "type": "object",
+        "properties": {
+          "companyName": {
+            "type": "string",
+            "title": "Nazwa firmy"
+          },
+          "nip": {
+            "type": "string",
+            "title": "NIP"
+          },
+          "address": {
+            "type": "string",
+            "title": "Adres"
+          },
+          "postalCode": {
+            "type": "string",
+            "title": "Kod pocztowy"
+          },
+          "city": {
+            "type": "string",
+            "title": "Miejscowość"
+          },
+          "phone": {
+            "type": "string",
+            "title": "Telefon"
+          },
+          "email": {
+            "type": "string",
+            "title": "E-mail"
+          },
+          "website": {
+            "type": "string",
+            "title": "Strona www"
+          },
+          "description": {
+            "type": "string",
+            "title": "Opis działalności"
+          },
+          "certificateNumber": {
+            "type": "string",
+            "title": "Numer certyfikatu"
+          },
+          "certificateExpiry": {
+            "type": "string",
+            "title": "Data ważności certyfikatu"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Zdjęcia realizacji"
+          },
+          "services": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Oferowane usługi"
+          },
+          "portfolioType": {
+            "type": "string",
+            "enum": [
+              "contractor",
+              "auditor"
+            ]
+          },
+          "profileConsent": {
+            "type": "boolean",
+            "title": "Zgoda profilowa"
+          },
+          "certificateConsent": {
+            "type": "boolean",
+            "title": "Zgoda certyfikatowa"
+          },
+          "termsConsent": {
+            "type": "boolean",
+            "title": "Zgoda na regulamin"
+          },
+          "verificationConsent": {
+            "type": "boolean",
+            "title": "Zgoda na weryfikację"
+          }
+        }
+      },
+      "order-rating": {
+        "type": "object",
+        "properties": {
+          "rating": {
+            "type": "number",
+            "title": "Ocena"
+          },
+          "comment": {
+            "type": "string",
+            "title": "Komentarz"
+          },
+          "recommendationLevel": {
+            "type": "string",
+            "title": "Poziom rekomendacji"
+          },
+          "publicReview": {
+            "type": "boolean",
+            "title": "Zgoda na publikację"
+          }
+        }
+      }
+    }
+  }
+}
