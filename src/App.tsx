@@ -32,9 +32,7 @@ function AppContent() {
   const cfgName = config || "testApp";
   const app = useConfig<any>(cfgName, `/src/!CONFIGS/${cfgName}/app.json`);
   const theme = app?.tplDir || "test";
-  const Layout = React.lazy(
-    () => import(`./themes/${theme}/layouts/Simple`)
-  );
+  const Layout = React.lazy(() => import(`./themes/${theme}/layouts/Simple`));
 
   return (
     <Suspense fallback={<div>Loading layout...</div>}>
