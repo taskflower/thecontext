@@ -234,7 +234,7 @@ export default function ListStep({ attrs }: ListStepProps) {
       <div className="flex items-center justify-center py-24">
         <div className="flex items-center gap-3">
           <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900" />
-          <span className="text-sm font-medium text-zinc-600">
+          <span className="text-sm font-medium text-zinc-100">
             Ładowanie konfiguracji
           </span>
         </div>
