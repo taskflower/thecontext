@@ -1,0 +1,16 @@
+{
+    "name": "Config Editor",
+    "tplDir": "test",
+    "defaultWorkspace": "workspaces",
+    "defaultScenario": "list",
+    "database": {
+      "provider": "indexedDB",
+      "collections": {
+        "workspaces": "workspaces",
+        "widgets": "widgets", 
+        "schemas": "schemas",
+        "scenarios": "scenarios",
+        "configs": "configs"
+      }
+    }
+  }

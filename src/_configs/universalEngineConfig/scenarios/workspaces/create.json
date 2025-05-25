@@ -1,0 +1,20 @@
+{
+    "slug": "create",
+    "nodes": [
+      {
+        "slug": "form",
+        "label": "Nowy workspace",
+        "order": 1,
+        "tplFile": "FormStep",
+        "attrs": {
+          "title": "Dodaj nowy workspace",
+          "schemaPath": "workspace",
+          "onSubmit": {
+            "collection": "workspaces",
+            "navPath": "workspaces/list",
+            "action": "create"
+          }
+        }
+      }
+    ]
+  }

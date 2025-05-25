@@ -1,0 +1,20 @@
+{
+    "slug": "create",
+    "nodes": [
+      {
+        "slug": "form",
+        "label": "Nowy widget",
+        "order": 1,
+        "tplFile": "FormStep",
+        "attrs": {
+          "title": "Dodaj nowy widget",
+          "schemaPath": "widget",
+          "onSubmit": {
+            "collection": "widgets",
+            "navPath": "workspaces/widgets/list",
+            "action": "create"
+          }
+        }
+      }
+    ]
+  }

@@ -1,0 +1,21 @@
+{
+    "slug": "edit",
+    "nodes": [
+      {
+        "slug": "form",
+        "label": "Edytuj workspace",
+        "order": 1,
+        "tplFile": "FormStep",
+        "attrs": {
+          "title": "Edytuj workspace",
+          "schemaPath": "workspace",
+          "loadFromParams": true,
+          "onSubmit": {
+            "collection": "workspaces",
+            "navPath": "workspaces/list",
+            "action": "update"
+          }
+        }
+      }
+    ]
+  }
