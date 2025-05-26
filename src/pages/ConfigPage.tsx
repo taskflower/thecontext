@@ -12,22 +12,26 @@ const renderError = (message: string, details: string) => (
 
 // LayoutWrapper przeniesiony z App.tsx
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
-  const { config, workspace } = useParams<{ config: string; workspace: string }>();
-  
+  const { config, workspace } = useParams<{
+    config: string;
+    workspace: string;
+  }>();
+
   // Memoize config name to prevent re-renders
   const cfgName = useMemo(() => config || "exampleTicketApp", [config]);
   const workspaceName = useMemo(() => workspace || "main", [workspace]);
-  
+
   const app = useConfig<any>(cfgName, `/src/_configs/${cfgName}/app.json`);
   const workspaceConfig = useConfig<any>(
-    cfgName, 
+    cfgName,
     `/src/_configs/${cfgName}/workspaces/${workspaceName}.json`
   );
-  
+
   // Memoize layout configuration - tylko te wartości mają wpływ na layout
   const layoutConfig = useMemo(() => {
     const theme = app?.tplDir || "test";
-    const layoutFile = workspaceConfig?.templateSettings?.layoutFile || "Simple";
+    const layoutFile =
+      workspaceConfig?.templateSettings?.layoutFile || "Simple";
     return { theme, layoutFile };
   }, [app?.tplDir, workspaceConfig?.templateSettings?.layoutFile]);
 
@@ -39,13 +43,14 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
   if (loading) return <div>Loading layout...</div>;
   if (error) return <div>Layout error: {error}</div>;
-  if (!Layout) return <div>Layout not found: {layoutConfig.theme}/layouts/{layoutConfig.layoutFile}</div>;
+  if (!Layout)
+    return (
+      <div>
+        Layout not found: {layoutConfig.theme}/layouts/{layoutConfig.layoutFile}
+      </div>
+    );
 
-  return (
-    <Layout>
-      {children}
-    </Layout>
-  );
+  return <Layout>{children}</Layout>;
 }
 
 export default function ConfigPage() {
@@ -62,11 +67,12 @@ export default function ConfigPage() {
       : `${base}/workspaces/${workspace}.json`
   );
 
-  if (!app || !cfg) return (
-    <LayoutWrapper>
-      <div>Loading config...</div>
-    </LayoutWrapper>
-  );
+  if (!app || !cfg)
+    return (
+      <LayoutWrapper>
+        <div>Loading config...</div>
+      </LayoutWrapper>
+    );
 
   const theme = app.tplDir;
 
@@ -124,7 +130,7 @@ export default function ConfigPage() {
 function StepRenderer({ theme, filename, attrs, ticketId }: any) {
   const { Component, loading, error } = useComponent(theme, "steps", filename);
 
-  if (loading) return <div>Loading step...</div>;
+  if (loading) return <div className="text-gray-100">Loading step...</div>;
   if (error) return renderError("Step not found", error);
   if (!Component)
     return renderError("Step component missing", `${theme}/steps/${filename}`);
@@ -139,7 +145,7 @@ function WidgetRenderer({ theme, widget }: { theme: string; widget: any }) {
     widget.tplFile
   );
 
-  if (loading) return <div>Loading widget...</div>;
+  if (loading) return <div className="text-gray-100">Loading widget...</div>;
   if (error) return renderError("Widget not found", error);
   if (!Component)
     return renderError(
