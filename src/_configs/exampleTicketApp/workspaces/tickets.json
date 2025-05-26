@@ -50,13 +50,15 @@
           "type": "string",
           "label": "Tytuł zgłoszenia",
           "fieldType": "text",
-          "required": true
+          "required": true,
+          "aiHint": "Krótki, opisowy tytuł problemu lub prośby"
         },
         "description": {
           "type": "string",
           "label": "Opis",
           "fieldType": "textarea",
-          "required": true
+          "required": true,
+          "aiHint": "Szczegółowy opis problemu, kroków do reprodukcji lub wymagań"
         },
         "priority": {
           "type": "string",
@@ -69,8 +71,15 @@
             "high": "wysoki",
             "urgent": "pilny"
           },
+          "enumHints": {
+            "low": "Drobne problemy, pytania, usprawnienia - może poczekać",
+            "medium": "Standardowe zgłoszenia biznesowe - normalna kolejność",
+            "high": "Ważne problemy wpływające na pracę - priorytet",
+            "urgent": "Awarie, bezpieczeństwo, blokady - natychmiastowa akcja"
+          },
           "default": "medium",
-          "required": true
+          "required": true,
+          "aiHint": "Oceń wpływ na biznes: low=może poczekać, medium=standard, high=ważne, urgent=awarie"
         },
         "status": {
           "type": "string",
@@ -83,8 +92,15 @@
             "resolved": "rozwiązane",
             "closed": "zamknięte"
           },
+          "enumHints": {
+            "new": "Nowe zgłoszenie oczekujące na przydzielenie",
+            "in_progress": "Zgłoszenie jest obecnie realizowane",
+            "resolved": "Problem został rozwiązany, oczekuje na potwierdzenie",
+            "closed": "Zgłoszenie zakończone i zamknięte"
+          },
           "default": "new",
-          "required": true
+          "required": true,
+          "aiHint": "Nowe zgłoszenia zawsze status=new"
         },
         "category": {
           "type": "string",
@@ -97,38 +113,50 @@
             "support": "wsparcie",
             "question": "pytanie"
           },
-          "required": true
+          "enumHints": {
+            "bug": "Błędy w systemie, awarie, coś nie działa",
+            "feature": "Nowe funkcje, usprawnienia, zmiany w systemie", 
+            "support": "Pomoc techniczna, instalacje, konfiguracje",
+            "question": "Pytania, wyjaśnienia, porady"
+          },
+          "required": true,
+          "aiHint": "bug=błędy/awarie, feature=nowe funkcje, support=pomoc/instalacje, question=pytania"
         },
         "assignee": {
           "type": "string",
           "label": "Przypisany do",
           "fieldType": "text",
-          "required": false
+          "required": false,
+          "aiHint": "Zostaw puste - zostanie przydzielone automatycznie"
         },
         "reporter": {
           "type": "string",
           "label": "Zgłaszający",
           "fieldType": "text",
-          "required": true
+          "required": true,
+          "aiHint": "Imię i nazwisko osoby zgłaszającej, jeśli nieznane użyj 'Użytkownik'"
         },
         "reporterEmail": {
           "type": "string",
           "label": "Email zgłaszającego",
           "fieldType": "email",
-          "required": true
+          "required": true,
+          "aiHint": "Email kontaktowy, jeśli nieznany użyj format: uzytkownik@example.com"
         },
         "dueDate": {
           "type": "string",
           "label": "Termin wykonania",
           "fieldType": "date",
-          "required": false
+          "required": false,
+          "aiHint": "Format YYYY-MM-DD, zostaw puste jeśli brak konkretnego terminu"
         },
         "isUrgent": {
           "type": "boolean",
           "label": "Pilne zgłoszenie",
           "fieldType": "checkbox",
           "default": false,
-          "required": false
+          "required": false,
+          "aiHint": "true tylko dla awarii, problemów bezpieczeństwa lub blokujących pracę"
         },
         "estimatedHours": {
           "type": "number",
@@ -136,7 +164,8 @@
           "fieldType": "number",
           "minimum": 0,
           "maximum": 100,
-          "required": false
+          "required": false,
+          "aiHint": "Realistyczna ocena czasu potrzebnego (1-40h), zostaw puste jeśli trudno oszacować"
         }
       }
     }

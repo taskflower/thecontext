@@ -8,7 +8,21 @@
       "tplFile": "LLMGenerationStep",
       "attrs": {
         "title": "Wygeneruj zgłoszenie przy pomocy AI",
+        "description": "Opisz problem, a AI automatycznie wypełni wszystkie pola zgłoszenia",
         "schemaPath": "ticket",
+        "collection": "tickets",
+        "placeholder": "Opisz swój problem szczegółowo, np. 'Nie mogę się zalogować do systemu CRM', 'Komputer w sali konferencyjnej nie uruchamia się', 'Potrzebuję dostęp do nowej aplikacji'...",
+        "contextInstructions": "Im więcej szczegółów podasz, tym lepiej AI dopasuje priorytet, kategorię i inne parametry zgłoszenia",
+        "examplePrompts": [
+          "Nie mogę się zalogować do systemu",
+          "Aplikacja się zawiesza po kliknięciu zapisz",
+          "Potrzebuję dostęp do nowego modułu CRM",
+          "Drukarka w biurze nie działa",
+          "Prośba o instalację oprogramowania",
+          "Błąd w kalkulacji raportów sprzedażowych"
+        ],
+        "navPath": "tickets/list",
+        "cancelNavPath": "tickets/list",
         "nextStep": "form-review"
       }
     },
@@ -19,6 +33,7 @@
       "tplFile": "FormStep",
       "attrs": {
         "title": "Przejrzyj i edytuj wygenerowane zgłoszenie",
+        "description": "Sprawdź czy wszystkie dane zostały poprawnie wypełnione przez AI",
         "schemaPath": "ticket",
         "loadFromPreviousStep": true,
         "showGeneratedBadge": true,

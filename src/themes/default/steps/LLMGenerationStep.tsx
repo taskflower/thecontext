@@ -16,22 +16,31 @@ export default function LLMGenerationStep({ attrs }: any) {
   const [prompt, setPrompt] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Budowa Zod i JSON Schema oraz instrukcji enum
-  const { zodSchema, jsonSchema, enumInstr } = useMemo(() => {
+  // Budowa Zod i JSON Schema 
+  const { zodSchema, jsonSchema } = useMemo(() => {
     if (!schema?.properties) {
-      return { zodSchema: undefined, jsonSchema: null, enumInstr: "" };
+      return { zodSchema: undefined, jsonSchema: null };
     }
 
     const zFields: Record<string, any> = {};
     const jsProps: Record<string, any> = {};
     const required: string[] = [];
-    const enums: string[] = [];
 
     Object.entries(schema.properties).forEach(([key, field]: any) => {
-      // Zod
-      let zf = field.enum
-        ? (z as any).enum(field.enum).describe(field.label || key)
-        : z.string().describe(field.label || key);
+      // Poprawiona logika Zod - uwzględniamy rzeczywiste typy
+      let zf;
+      if (field.type === 'boolean') {
+        zf = z.boolean().describe(field.label || key);
+      } else if (field.type === 'number') {
+        zf = z.number().describe(field.label || key);
+        if (field.minimum !== undefined) zf = zf.min(field.minimum);
+        if (field.maximum !== undefined) zf = zf.max(field.maximum);
+      } else if (field.enum) {
+        zf = (z as any).enum(field.enum).describe(field.label || key);
+      } else {
+        zf = z.string().describe(field.label || key);
+      }
+      
       if (!field.required) zf = zf.optional();
       zFields[key] = zf;
 
@@ -40,32 +49,22 @@ export default function LLMGenerationStep({ attrs }: any) {
         type: field.type,
         description: field.label || key,
         ...(field.enum ? { enum: field.enum } : {}),
+        ...(field.minimum !== undefined ? { minimum: field.minimum } : {}),
+        ...(field.maximum !== undefined ? { maximum: field.maximum } : {}),
       };
+      
       if (field.required) required.push(key);
-      if (field.enum) {
-        enums.push(
-          `- ${key}: ${field.enum.map((v: string) => `"${v}"`).join(", ")}`
-        );
-      }
     });
 
     return {
       zodSchema: z.object(zFields),
       jsonSchema: { type: "object", properties: jsProps, required },
-      enumInstr: enums.length
-        ? `\nWAŻNE: Używaj tylko dozwolonych wartości enum:\n${enums.join(
-            "\n"
-          )}`
-        : "",
     };
   }, [schema]);
 
   const userMessage = useMemo(() => {
-    const baseInstr =
-      attrs.systemMessage ||
-      `Jesteś asystentem generującym strukturalne dane. Na podstawie opisu użytkownika wygeneruj dane zgodne ze schematem.`;
-    return `${baseInstr}${enumInstr}\n\n${prompt}`;
-  }, [attrs.systemMessage, enumInstr, prompt]);
+    return prompt; // Tylko czysty prompt użytkownika
+  }, [prompt]);
 
   const {
     isLoading,
@@ -76,6 +75,7 @@ export default function LLMGenerationStep({ attrs }: any) {
     schema: zodSchema,
     jsonSchema,
     userMessage,
+    systemMessage: attrs.systemMessage, // Używamy z konfiguracji
   });
 
   const { add: addRecord } = useLocalStore(`${attrs.collection || "records"}:`);
@@ -92,12 +92,18 @@ export default function LLMGenerationStep({ attrs }: any) {
     if (!result) return;
     setSaving(true);
     try {
-      const dataWithDefaults = { ...result };
+      let dataWithDefaults = { ...result };
+      
+      // Apply enum translations from workspace config
+      // TODO: This should be moved to workspace hook when enumTranslationMaps is added to WorkspaceConfig type
+      
+      // Apply defaults
       Object.entries(schema.properties).forEach(([key, field]: any) => {
         if (field.default != null && dataWithDefaults[key] == null) {
           dataWithDefaults[key] = field.default;
         }
       });
+      
       await addRecord(dataWithDefaults);
       const navPath = attrs.navPath || `${workspace}/list`;
       navigate(`/${config}/${navPath}`);
@@ -110,6 +116,9 @@ export default function LLMGenerationStep({ attrs }: any) {
 
   const getFieldDisplayValue = (key: string, value: any) => {
     const field = schema.properties?.[key];
+    if (field?.type === 'boolean') {
+      return value ? 'Tak' : 'Nie';
+    }
     return field?.enumLabels?.[value] || value;
   };
 
@@ -143,12 +152,17 @@ export default function LLMGenerationStep({ attrs }: any) {
           {attrs.description && (
             <p className="text-gray-600 mt-2">{attrs.description}</p>
           )}
+          {attrs.contextInstructions && (
+            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
+              <p className="text-sm text-blue-800">💡 {attrs.contextInstructions}</p>
+            </div>
+          )}
         </header>
         <section className="p-6 space-y-6">
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder={attrs.placeholder || "Wprowadź opis..."}
+            placeholder={attrs.placeholder || "Opisz swoje zgłoszenie, np. 'Brak prądu w biurze', 'Aplikacja się zawiesza', itp."}
             className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             disabled={isLoading}
           />
@@ -158,7 +172,10 @@ export default function LLMGenerationStep({ attrs }: any) {
             className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
           >
             {isLoading ? (
-              <span className="inline-flex animate-spin h-4 w-4 border-b-2 border-white rounded-full" />
+              <>
+                <span className="inline-flex animate-spin h-4 w-4 border-b-2 border-white rounded-full" />
+                Generuję...
+              </>
             ) : (
               "🎯 Wygeneruj"
             )}
@@ -174,7 +191,7 @@ export default function LLMGenerationStep({ attrs }: any) {
                   <div
                     key={key}
                     className={
-                      field.widget === "textarea" ? "md:col-span-2" : ""
+                      field.fieldType === "textarea" ? "md:col-span-2" : ""
                     }
                   >
                     <label className="block text-sm font-medium capitalize mb-1">
@@ -205,9 +222,9 @@ export default function LLMGenerationStep({ attrs }: any) {
             >
               ← Powrót
             </button>
-            {attrs.examples && (
+            {attrs.examplePrompts && (
               <div className="space-x-2">
-                {attrs.examples.map((ex: string, i: number) => (
+                {attrs.examplePrompts.map((ex: string, i: number) => (
                   <button
                     key={i}
                     onClick={() => setPrompt(ex)}
