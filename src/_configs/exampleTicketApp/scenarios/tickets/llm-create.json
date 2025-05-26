@@ -2,13 +2,45 @@
   "slug": "llm-create",
   "nodes": [
     {
-      "slug": "form",
+      "slug": "llm-generation",
       "label": "Generuj zgłoszenie z AI",
       "order": 1,
       "tplFile": "LLMGenerationStep",
       "attrs": {
         "title": "Wygeneruj zgłoszenie przy pomocy AI",
-        "schemaPath": "ticket"
+        "schemaPath": "ticket",
+        "nextStep": "form-review"
+      }
+    },
+    {
+      "slug": "form-review",
+      "label": "Przejrzyj wygenerowane zgłoszenie",
+      "order": 2,
+      "tplFile": "FormStep",
+      "attrs": {
+        "title": "Przejrzyj i edytuj wygenerowane zgłoszenie",
+        "schemaPath": "ticket",
+        "loadFromPreviousStep": true,
+        "showGeneratedBadge": true,
+        "onSubmit": {
+          "collection": "tickets",
+          "navPath": "tickets/list",
+          "action": "create"
+        },
+        "additionalActions": [
+          {
+            "type": "regenerate",
+            "label": "🔄 Wygeneruj ponownie",
+            "navPath": "tickets/llm-create",
+            "variant": "secondary"
+          },
+          {
+            "type": "cancel",
+            "label": "Anuluj",
+            "navPath": "tickets/list",
+            "variant": "outline"
+          }
+        ]
       }
     }
   ]

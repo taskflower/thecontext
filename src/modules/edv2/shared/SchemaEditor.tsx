@@ -1,9 +1,10 @@
 // ========================================
-// src/modules/edv2/shared/SchemaEditor.tsx - Z DEBUGOWANIEM
+// src/modules/edv2/shared/SchemaEditor.tsx - Z WIDOKIEM TABELI
 // ========================================
 import { useState, useEffect } from "react";
 import { AIGeneratorSection } from "./AIGeneratorSection";
 import { createDefaultSchema } from "./editorUtils";
+import { Star } from "lucide-react";
 
 interface SchemaEditorProps {
   schema: any;
@@ -181,32 +182,36 @@ export function SchemaEditor({ schema, onChange }: SchemaEditorProps) {
                     Remove
                   </button>
                 </div>
-
-                <div className="text-xs text-zinc-500 mt-1">
-                  Fields: {propertyKeys.join(", ") || "None"}
-                </div>
               </div>
 
-              {isExpanded && (
-                <div className="p-3 border-t border-zinc-200 bg-white">
-                  <div className="text-sm font-medium mb-2">Properties:</div>
-                  <div className="space-y-2">
+              {isExpanded && propertyKeys.length > 0 && (
+                <div className="border-t border-zinc-200 bg-white">
+                  <div className="space-y-1 p-1">
                     {propertyKeys.map((propKey) => {
                       const prop = properties[propKey];
                       return (
                         <div
                           key={propKey}
-                          className="text-xs bg-zinc-50 p-2 rounded"
+                          className="text-xs bg-zinc-100 p-2 rounded"
                         >
-                          <div className="font-mono font-medium">{propKey}</div>
-                          <div className="text-zinc-600 mt-1">
-                            Type: {prop?.type || "undefined"} | Field:{" "}
-                            {prop?.fieldType || "undefined"} | Label:{" "}
-                            {prop?.label || "undefined"} | Required:{" "}
-                            {prop?.required ? "Yes" : "No"}
+                          <div className="flex gap-2 items-center">
+                            <div className="font-mono font-semibold text-sm ">
+                              {propKey}
+                            </div>
+                            {prop?.required && (
+                              <Star className="block-inline w-3.5 h-3.5" />
+                            )}
+                            <div className="bg-purple-100 px-1 rounded">
+                              {prop?.type} : {prop?.fieldType}
+                            </div>
+                            
+                          </div>
+
+                          <div className="text-zinc-600 mt-1 flex items-center gap-1">
+                            <span>{prop?.label || "undefined"}</span>
                           </div>
                           {prop?.enum && (
-                            <div className="text-zinc-600 mt-1">
+                            <div className="text-blue-600 mt-1">
                               Options: {prop.enum.join(", ")}
                             </div>
                           )}
