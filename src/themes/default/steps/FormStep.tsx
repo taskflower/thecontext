@@ -1,4 +1,4 @@
-// src/themes/test/steps/FormStep.tsx
+// src/themes/default/steps/FormStep.tsx
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { configDB } from "../../../db";

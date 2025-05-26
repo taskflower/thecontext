@@ -1,4 +1,4 @@
-// src/themes/test/steps/LLMGenerationStep.tsx
+// src/themes/default/steps/LLMGenerationStep.tsx
 import { useState, useMemo } from "react";
 import { z } from "zod";
 import { useNavigate, useParams } from "react-router-dom";

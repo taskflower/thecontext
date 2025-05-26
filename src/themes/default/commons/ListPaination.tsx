@@ -1,4 +1,4 @@
-// src/themes/test/components/Pagination.tsx
+// src/themes/default/components/Pagination.tsx
 
 interface PaginationProps {
     currentPage: number;

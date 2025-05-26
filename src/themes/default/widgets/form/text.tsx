@@ -1,7 +1,6 @@
-// src/themes/test/widgets/NumberFieldWidget.tsx
+// src/themes/default/widgets/form/text.tsx
 
-
-interface NumberFieldWidgetProps {
+interface TextFieldWidgetProps {
   title?: string;
   attrs: {
     fieldKey: string;
@@ -11,15 +10,12 @@ interface NumberFieldWidgetProps {
     placeholder?: string;
     required?: boolean;
     disabled?: boolean;
-    min?: number;
-    max?: number;
-    step?: number | string;
     className?: string;
   };
 }
 
-export default function NumberFieldWidget({ title, attrs }: NumberFieldWidgetProps) {
-  const { fieldKey, field, value, onChange, placeholder, required, disabled, min, max, step, className } = attrs;
+export default function TextFieldWidget({ title, attrs }: TextFieldWidgetProps) {
+  const { fieldKey, field, value, onChange, placeholder, required, disabled, className } = attrs;
   
   return (
     <div className="space-y-2">
@@ -28,14 +24,11 @@ export default function NumberFieldWidget({ title, attrs }: NumberFieldWidgetPro
         {(required ?? field.required) && <span className="text-red-500 ml-1">*</span>}
       </label>
       <input
-        type="number"
+        type="text"
         value={value ?? ""}
         onChange={(e) => onChange(fieldKey, e.target.value)}
         placeholder={placeholder || field.placeholder}
         disabled={disabled}
-        min={min ?? field.minimum}
-        max={max ?? field.maximum}
-        step={step ?? field.multipleOf ?? "any"}
         className={className || "w-full px-3 py-2 text-sm border border-zinc-300/80 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-900/20 focus:border-zinc-400"}
         required={required ?? field.required}
       />

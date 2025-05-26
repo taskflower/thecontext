@@ -1,6 +1,7 @@
-// src/themes/test/widgets/form/text.tsx
+// src/themes/default/widgets/EmailFieldWidget.tsx
 
-interface TextFieldWidgetProps {
+
+interface EmailFieldWidgetProps {
   title?: string;
   attrs: {
     fieldKey: string;
@@ -14,7 +15,7 @@ interface TextFieldWidgetProps {
   };
 }
 
-export default function TextFieldWidget({ title, attrs }: TextFieldWidgetProps) {
+export default function EmailFieldWidget({ title, attrs }: EmailFieldWidgetProps) {
   const { fieldKey, field, value, onChange, placeholder, required, disabled, className } = attrs;
   
   return (
@@ -24,7 +25,7 @@ export default function TextFieldWidget({ title, attrs }: TextFieldWidgetProps) 
         {(required ?? field.required) && <span className="text-red-500 ml-1">*</span>}
       </label>
       <input
-        type="text"
+        type="email"
         value={value ?? ""}
         onChange={(e) => onChange(fieldKey, e.target.value)}
         placeholder={placeholder || field.placeholder}

@@ -1,4 +1,4 @@
-// src/themes/test/widgets/SelectFieldWidget.tsx
+// src/themes/default/widgets/SelectFieldWidget.tsx
 
 
 interface SelectFieldWidgetProps {

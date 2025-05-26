@@ -1,7 +1,5 @@
-// src/themes/test/widgets/EmailFieldWidget.tsx
-
-
-interface EmailFieldWidgetProps {
+// src/themes/default/widgets/TextareaFieldWidget.tsx
+interface TextareaFieldWidgetProps {
   title?: string;
   attrs: {
     fieldKey: string;
@@ -11,26 +9,45 @@ interface EmailFieldWidgetProps {
     placeholder?: string;
     required?: boolean;
     disabled?: boolean;
+    rows?: number;
     className?: string;
   };
 }
 
-export default function EmailFieldWidget({ title, attrs }: EmailFieldWidgetProps) {
-  const { fieldKey, field, value, onChange, placeholder, required, disabled, className } = attrs;
-  
+export default function TextareaFieldWidget({
+  title,
+  attrs,
+}: TextareaFieldWidgetProps) {
+  const {
+    fieldKey,
+    field,
+    value,
+    onChange,
+    placeholder,
+    required,
+    disabled,
+    rows,
+    className,
+  } = attrs;
+
   return (
     <div className="space-y-2">
       <label className="block text-sm font-medium text-zinc-700">
         {title || field.label || fieldKey}
-        {(required ?? field.required) && <span className="text-red-500 ml-1">*</span>}
+        {(required ?? field.required) && (
+          <span className="text-red-500 ml-1">*</span>
+        )}
       </label>
-      <input
-        type="email"
+      <textarea
         value={value ?? ""}
         onChange={(e) => onChange(fieldKey, e.target.value)}
         placeholder={placeholder || field.placeholder}
         disabled={disabled}
-        className={className || "w-full px-3 py-2 text-sm border border-zinc-300/80 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-900/20 focus:border-zinc-400"}
+        rows={rows || 4}
+        className={
+          className ||
+          "w-full px-3 py-2 text-sm border border-zinc-300/80 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-900/20 focus:border-zinc-400 resize-none"
+        }
         required={required ?? field.required}
       />
       {field.description && (

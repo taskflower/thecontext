@@ -1,4 +1,4 @@
-// src/themes/test/layouts/UniversalLayout.tsx
+// src/themes/default/layouts/UniversalLayout.tsx
 import UserDropdown from "@/auth/UserDropdown";
 import { Link, useParams, useNavigate } from "react-router-dom";
 

@@ -1,4 +1,4 @@
-// src/themes/test/steps/ListStep.tsx (refactored)
+// src/themes/default/steps/ListStep.tsx (refactored)
 import { useState, useEffect } from "react";
 import { configDB } from "../../../db";
 import { useWorkspaceSchema } from "@/core/engine";

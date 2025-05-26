@@ -1,4 +1,4 @@
-// src/themes/test/widgets/CheckboxFieldWidget.tsx
+// src/themes/default/widgets/CheckboxFieldWidget.tsx
 
 
 interface CheckboxFieldWidgetProps {

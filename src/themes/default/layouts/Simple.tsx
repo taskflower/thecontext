@@ -1,4 +1,4 @@
-// src/themes/test/layouts/Simple.tsx
+// src/themes/default/layouts/Simple.tsx
 import UserDropdown from "@/auth/UserDropdown";
 import { Link, useParams } from "react-router-dom";
 

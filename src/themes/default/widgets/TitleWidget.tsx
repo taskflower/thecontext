@@ -1,4 +1,4 @@
-// src/themes/test/widgets/TitleWidget.tsx
+// src/themes/default/widgets/TitleWidget.tsx
 interface TitleWidgetProps {
     title: string;
     attrs?: {

@@ -1,6 +1,6 @@
 {
   "name": "Test App",
-  "tplDir": "test",
+  "tplDir": "default",
   "defaultWorkspace": "tickets",
   "defaultScenario": "list",
   "database": {

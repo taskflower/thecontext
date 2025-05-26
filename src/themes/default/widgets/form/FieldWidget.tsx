@@ -1,4 +1,4 @@
-// src/themes/test/widgets/form/FieldWidget.tsx
+// src/themes/default/widgets/form/FieldWidget.tsx
 import React from "react";
 import TextFieldWidget from "./text";
 import TextareaFieldWidget from "./textarea";

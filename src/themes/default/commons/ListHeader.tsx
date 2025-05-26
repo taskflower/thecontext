@@ -1,4 +1,4 @@
-// src/themes/test/components/ListHeader.tsx
+// src/themes/default/components/ListHeader.tsx
 import { useNavigate, useParams } from "react-router-dom";
 
 interface Widget {

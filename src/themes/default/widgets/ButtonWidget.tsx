@@ -1,4 +1,4 @@
-// src/themes/test/widgets/ButtonWidget.tsx
+// src/themes/default/widgets/ButtonWidget.tsx
 import { useNavigate, useParams } from "react-router-dom";
 
 interface ButtonWidgetProps {

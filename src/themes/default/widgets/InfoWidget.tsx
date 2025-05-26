@@ -1,4 +1,4 @@
-// src/themes/test/widgets/InfoWidget.tsx
+// src/themes/default/widgets/InfoWidget.tsx
 import TitleWidget from "./TitleWidget";
 
 type InfoVariant = "default" | "info" | "success" | "warning" | "error";
