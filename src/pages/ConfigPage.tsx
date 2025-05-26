@@ -1,6 +1,7 @@
-// src/pages/ConfigPage.tsx - Zaktualizowana wersja z poprawnym gridem
+// src/pages/ConfigPage.tsx - Zaktualizowana wersja z LayoutWrapper
 import { useComponent, useConfig } from "@/core/engine";
 import { useParams } from "react-router-dom";
+import { useMemo } from "react";
 
 const renderError = (message: string, details: string) => (
   <div className="text-center py-12">
@@ -8,6 +9,44 @@ const renderError = (message: string, details: string) => (
     <div className="text-sm text-gray-500">{details}</div>
   </div>
 );
+
+// LayoutWrapper przeniesiony z App.tsx
+function LayoutWrapper({ children }: { children: React.ReactNode }) {
+  const { config, workspace } = useParams<{ config: string; workspace: string }>();
+  
+  // Memoize config name to prevent re-renders
+  const cfgName = useMemo(() => config || "exampleTicketApp", [config]);
+  const workspaceName = useMemo(() => workspace || "main", [workspace]);
+  
+  const app = useConfig<any>(cfgName, `/src/_configs/${cfgName}/app.json`);
+  const workspaceConfig = useConfig<any>(
+    cfgName, 
+    `/src/_configs/${cfgName}/workspaces/${workspaceName}.json`
+  );
+  
+  // Memoize layout configuration - tylko te wartości mają wpływ na layout
+  const layoutConfig = useMemo(() => {
+    const theme = app?.tplDir || "test";
+    const layoutFile = workspaceConfig?.templateSettings?.layoutFile || "Simple";
+    return { theme, layoutFile };
+  }, [app?.tplDir, workspaceConfig?.templateSettings?.layoutFile]);
+
+  const {
+    Component: Layout,
+    loading,
+    error,
+  } = useComponent(layoutConfig.theme, "layouts", layoutConfig.layoutFile);
+
+  if (loading) return <div>Loading layout...</div>;
+  if (error) return <div>Layout error: {error}</div>;
+  if (!Layout) return <div>Layout not found: {layoutConfig.theme}/layouts/{layoutConfig.layoutFile}</div>;
+
+  return (
+    <Layout>
+      {children}
+    </Layout>
+  );
+}
 
 export default function ConfigPage() {
   const { config, workspace, scenario, step, id } = useParams();
@@ -23,15 +62,23 @@ export default function ConfigPage() {
       : `${base}/workspaces/${workspace}.json`
   );
 
-  if (!app || !cfg) return <div>Loading config...</div>;
+  if (!app || !cfg) return (
+    <LayoutWrapper>
+      <div>Loading config...</div>
+    </LayoutWrapper>
+  );
 
   const theme = app.tplDir;
 
   if (scenario) {
     if (!cfg.nodes || !cfg.nodes.length) {
-      return renderError(
-        "Błąd konfiguracji scenariusza",
-        `Scenario: ${scenario}, Step: ${step}, ID: ${id}`
+      return (
+        <LayoutWrapper>
+          {renderError(
+            "Błąd konfiguracji scenariusza",
+            `Scenario: ${scenario}, Step: ${step}, ID: ${id}`
+          )}
+        </LayoutWrapper>
       );
     }
 
@@ -40,43 +87,38 @@ export default function ConfigPage() {
       cfg.nodes.find((n: any) => n.slug === currentStep) || cfg.nodes[0];
 
     if (!node) {
-      return renderError(
-        "Krok nie został znaleziony",
-        `Step: ${currentStep}, ID: ${id}`
+      return (
+        <LayoutWrapper>
+          {renderError(
+            "Krok nie został znaleziony",
+            `Step: ${currentStep}, ID: ${id}`
+          )}
+        </LayoutWrapper>
       );
     }
 
     return (
-      <StepRenderer
-        theme={theme}
-        filename={node.tplFile}
-        attrs={node.attrs}
-        ticketId={id}
-      />
+      <LayoutWrapper>
+        <StepRenderer
+          theme={theme}
+          filename={node.tplFile}
+          attrs={node.attrs}
+          ticketId={id}
+        />
+      </LayoutWrapper>
     );
   }
 
-  // Opcja 1: Grid 6-kolumnowy z elastycznym układem
+  // Grid 6-kolumnowy z elastycznym układem
   return (
-    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-      {cfg.templateSettings?.widgets?.map((widget: any, index: number) => (
-        <WidgetRenderer key={index} theme={theme} widget={widget} />
-      ))}
-    </div>
+    <LayoutWrapper>
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+        {cfg.templateSettings?.widgets?.map((widget: any, index: number) => (
+          <WidgetRenderer key={index} theme={theme} widget={widget} />
+        ))}
+      </div>
+    </LayoutWrapper>
   );
-
-  // Opcja 2: Jeśli wolisz flexbox z fraction classes
-  // return (
-  //   <div className="flex flex-wrap gap-4">
-  //     {cfg.templateSettings?.widgets?.map((widget: any, index: number) => (
-  //       <WidgetRenderer
-  //         key={index}
-  //         theme={theme}
-  //         widget={widget}
-  //       />
-  //     ))}
-  //   </div>
-  // );
 }
 
 function StepRenderer({ theme, filename, attrs, ticketId }: any) {
@@ -124,36 +166,9 @@ function WidgetRenderer({ theme, widget }: { theme: string; widget: any }) {
     }
   };
 
-  // Opcja z fraction classes (alternatywa)
-  const getFractionClass = (colSpan: string | number) => {
-    switch (colSpan) {
-      case "full":
-      case 6:
-        return "w-full";
-      case 5:
-        return "w-5/6";
-      case 4:
-        return "w-2/3";
-      case 3:
-        return "w-1/2";
-      case 2:
-        return "w-1/3";
-      case 1:
-      default:
-        return "w-1/6 min-w-48"; // minimum width dla małych elementów
-    }
-  };
-
   return (
     <div className={getColSpanClass(widget.attrs?.colSpan || 1)}>
       <Component {...widget} />
     </div>
   );
-
-  // Alternatywnie z fraction classes:
-  // return (
-  //   <div className={getFractionClass(widget.attrs?.colSpan || 1)}>
-  //     <Component {...widget} />
-  //   </div>
-  // );
 }

@@ -1,10 +1,10 @@
-// src/App.tsx - Zaktualizowana wersja
-import { BrowserRouter, useParams, useRoutes } from "react-router-dom";
+// src/App.tsx - Poprawiona wersja
+import { BrowserRouter, useParams, useRoutes, useLocation } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthContext";
 import ConfigPage from "./pages/ConfigPage";
 import AuthPage from "./pages/AuthPage";
 import { useComponent, useConfig } from "./core/engine";
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 
 function AppRoutes() {
   const routes = useMemo(() => [
@@ -29,7 +29,15 @@ export function App() {
 }
 
 function AppContent() {
+  return (
+    <AppRoutes />
+  );
+}
+
+// Nowy komponent LayoutWrapper, który będzie owijał ConfigPage
+function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const { config, workspace } = useParams<{ config: string; workspace: string }>();
+  const location = useLocation();
   
   // Memoize config name to prevent re-renders
   const cfgName = useMemo(() => config || "exampleTicketApp", [config]);
@@ -41,26 +49,39 @@ function AppContent() {
     `/src/_configs/${cfgName}/workspaces/${workspaceName}.json`
   );
   
-  // Memoize layout configuration
+  // Memoize layout configuration - tylko te wartości mają wpływ na layout
   const layoutConfig = useMemo(() => {
     const theme = app?.tplDir || "test";
     const layoutFile = workspaceConfig?.templateSettings?.layoutFile || "Simple";
     return { theme, layoutFile };
   }, [app?.tplDir, workspaceConfig?.templateSettings?.layoutFile]);
 
+  // State dla aktualnego layoutu - zmieni się tylko gdy layoutConfig się zmieni
+  const [currentLayoutConfig, setCurrentLayoutConfig] = useState(layoutConfig);
+  
+  // Aktualizuj layout config tylko gdy rzeczywiście się zmienił
+  useEffect(() => {
+    if (
+      layoutConfig.theme !== currentLayoutConfig.theme ||
+      layoutConfig.layoutFile !== currentLayoutConfig.layoutFile
+    ) {
+      setCurrentLayoutConfig(layoutConfig);
+    }
+  }, [layoutConfig, currentLayoutConfig]);
+
   const {
     Component: Layout,
     loading,
     error,
-  } = useComponent(layoutConfig.theme, "layouts", layoutConfig.layoutFile);
+  } = useComponent(currentLayoutConfig.theme, "layouts", currentLayoutConfig.layoutFile);
 
   if (loading) return <div>Loading layout...</div>;
   if (error) return <div>Layout error: {error}</div>;
-  if (!Layout) return <div>Layout not found: {layoutConfig.theme}/layouts/{layoutConfig.layoutFile}</div>;
+  if (!Layout) return <div>Layout not found: {currentLayoutConfig.theme}/layouts/{currentLayoutConfig.layoutFile}</div>;
 
   return (
     <Layout>
-      <AppRoutes />
+      {children}
     </Layout>
   );
 }
