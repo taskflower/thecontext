@@ -13,7 +13,7 @@ interface EditorV2Props {
 }
 
 export default function EditorV2({ isOpen, onClose }: EditorV2Props) {
-  const { config, workspace, scenario } = useParams();
+  const { config, workspace, scenario, step, id } = useParams();
   const location = useLocation();
   
   // Parse pathname as fallback
@@ -35,19 +35,20 @@ export default function EditorV2({ isOpen, onClose }: EditorV2Props) {
   
   const editMode = currentScenario ? 'scenario' : 'workspace';
   
-  // Config paths
+  // Config paths - ALWAYS define both to maintain hook order
   const workspaceConfigPath = `/src/_configs/${cfgName}/workspaces/${wsName}.json`;
   const scenarioConfigPath = `/src/_configs/${cfgName}/scenarios/${wsName}/${currentScenario || 'default'}.json`;
   
-  // Load configs
+  // Load configs - ALWAYS call both hooks to maintain hook order
   const workspaceConfig = useConfig<any>(cfgName, workspaceConfigPath);
-  const scenarioConfig = currentScenario ? useConfig<any>(cfgName, scenarioConfigPath) : null;
+  const scenarioConfig = useConfig<any>(cfgName, scenarioConfigPath);
   
   const [editConfig, setEditConfig] = useState<any>(null);
   const [saving, setSaving] = useState(false);
 
   // Set config based on mode
   useEffect(() => {
+    // Only use scenario config if we're actually in scenario mode and have scenario name
     if (editMode === 'scenario' && currentScenario && scenarioConfig) {
       setEditConfig({ ...scenarioConfig });
     } else if (editMode === 'workspace' && workspaceConfig) {
@@ -137,4 +138,4 @@ export default function EditorV2({ isOpen, onClose }: EditorV2Props) {
       )}
     </div>
   );
-}
+} 

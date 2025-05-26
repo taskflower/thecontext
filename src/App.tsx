@@ -4,7 +4,7 @@ import { AuthProvider } from "./auth/AuthContext";
 import ConfigPage from "./pages/ConfigPage";
 import AuthPage from "./pages/AuthPage";
 import { useMemo } from "react";
-import { EditorControlV2 } from "./modules/edv2";
+
 
 function AppRoutes() {
   const routes = useMemo(() => [
@@ -21,7 +21,7 @@ function AppRoutes() {
   return (
     <>
       {useRoutes(routes)}
-      <EditorControlV2 />
+      {/* <EditorControlV2 /> */}
     </>
   );
 }
