@@ -1,4 +1,6 @@
+// ========================================
 // src/modules/edv2/workspace/WorkspaceEditor.tsx
+// ========================================
 import { useState } from 'react';
 import { WidgetEditor } from './WidgetEditor';
 import { SchemaEditor } from '../shared/SchemaEditor';

@@ -1,73 +1,59 @@
-// src/modules/edv2/shared/SchemaEditor.tsx
-import { useState } from 'react';
-import { useLlmEngine } from '@/core/engine';
-import { z } from 'zod';
+// ========================================
+// src/modules/edv2/shared/SchemaEditor.tsx - Z DEBUGOWANIEM
+// ========================================
+import { useState, useEffect } from "react";
+import { AIGeneratorSection } from "./AIGeneratorSection";
+import { createDefaultSchema } from "./editorUtils";
 
 interface SchemaEditorProps {
   schema: any;
   onChange: (schema: any) => void;
 }
 
-const schemaGenerationSchema = z.object({
-  schemas: z.record(z.object({
-    type: z.literal('object'),
-    properties: z.record(z.object({
-      type: z.string(),
-      label: z.string(),
-      fieldType: z.string().optional(),
-      required: z.boolean().optional()
-    }))
-  }))
-});
-
 export function SchemaEditor({ schema, onChange }: SchemaEditorProps) {
-  const [prompt, setPrompt] = useState('');
-  const [newSchemaKey, setNewSchemaKey] = useState('');
+  const [newSchemaKey, setNewSchemaKey] = useState("");
+  const [expandedSchemas, setExpandedSchemas] = useState<
+    Record<string, boolean>
+  >({});
+  const [debugInfo, setDebugInfo] = useState<string>("");
 
-  const { isLoading, result, start } = useLlmEngine({
-    schema: schemaGenerationSchema,
-    jsonSchema: {
-      type: 'object',
-      properties: {
-        schemas: {
-          type: 'object',
-          additionalProperties: {
-            type: 'object',
-            properties: {
-              type: { type: 'string' },
-              properties: {
-                type: 'object',
-                additionalProperties: {
-                  type: 'object',
-                  properties: {
-                    type: { type: 'string' },
-                    label: { type: 'string' },
-                    fieldType: { type: 'string' },
-                    required: { type: 'boolean' }
-                  }
-                }
-              }
-            }
-          }
+  // Debug logging
+  useEffect(() => {
+    if (schema) {
+      const info = [];
+      info.push(`Schema keys: ${Object.keys(schema).length}`);
+
+      Object.entries(schema).forEach(([key, schemaObj]: [string, any]) => {
+        info.push(`\n📄 ${key}:`);
+        info.push(`  - type: ${schemaObj?.type || "undefined"}`);
+        info.push(
+          `  - properties: ${
+            schemaObj?.properties ? Object.keys(schemaObj.properties).length : 0
+          } fields`
+        );
+
+        if (schemaObj?.properties) {
+          Object.keys(schemaObj.properties).forEach((propKey) => {
+            const prop = schemaObj.properties[propKey];
+            info.push(
+              `    • ${propKey}: ${prop?.type || "no-type"} (${
+                prop?.fieldType || "no-fieldType"
+              })`
+            );
+          });
         }
-      }
-    },
-    userMessage: prompt,
-    systemMessage: 'Generate JSON schemas for data models. Use appropriate field types and fieldTypes.'
-  });
+      });
+
+      setDebugInfo(info.join("\n"));
+    } else {
+      setDebugInfo("Schema is null/undefined");
+    }
+  }, [schema]);
 
   const addSchema = () => {
     if (!newSchemaKey.trim()) return;
-    onChange({
-      ...schema,
-      [newSchemaKey]: {
-        type: 'object',
-        properties: {
-          name: { type: 'string', label: 'Name', fieldType: 'text', required: true }
-        }
-      }
-    });
-    setNewSchemaKey('');
+    onChange({ ...schema, ...createDefaultSchema(newSchemaKey) });
+    setNewSchemaKey("");
   };
 
   const removeSchema = (key: string) => {
@@ -76,37 +62,73 @@ export function SchemaEditor({ schema, onChange }: SchemaEditorProps) {
     onChange(newSchema);
   };
 
-  return (
-    <div className="space-y-4">
-      {/* AI Generation */}
-      <div className="bg-green-50 p-3 rounded">
-        <textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Describe data model to generate..."
-          className="w-full text-sm border rounded p-2 mb-2"
-          rows={2}
+  const toggleExpanded = (schemaKey: string) => {
+    setExpandedSchemas((prev) => ({
+      ...prev,
+      [schemaKey]: !prev[schemaKey],
+    }));
+  };
+
+  // Show debug info if no schema or empty schema
+  if (!schema || Object.keys(schema).length === 0) {
+    return (
+      <div className="space-y-4">
+        <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
+          <h4 className="font-medium text-yellow-800">⚠️ Debug Info</h4>
+          <pre className="text-xs text-yellow-700 mt-2 whitespace-pre-wrap">
+            {debugInfo}
+          </pre>
+        </div>
+
+        <AIGeneratorSection
+          type="schema"
+          onApply={(result) => onChange(result.schemas)}
+          bgColor="bg-green-50"
         />
+
         <div className="flex gap-2">
+          <input
+            value={newSchemaKey}
+            onChange={(e) => setNewSchemaKey(e.target.value)}
+            placeholder="Schema name"
+            className="flex-1 text-sm border rounded px-2 py-1"
+          />
           <button
-            onClick={() => start()}
-            disabled={isLoading || !prompt.trim()}
-            className="text-xs bg-green-600 text-white px-3 py-1 rounded disabled:opacity-50"
+            onClick={addSchema}
+            disabled={!newSchemaKey.trim()}
+            className="text-xs bg-zinc-900 text-white px-3 py-1 rounded disabled:opacity-50"
           >
-            {isLoading ? 'Generating...' : 'Generate'}
+            Add
           </button>
-          {result && (
-            <button
-              onClick={() => onChange({ ...schema, ...result.schemas })}
-              className="text-xs bg-blue-600 text-white px-3 py-1 rounded"
-            >
-              Apply Schemas
-            </button>
-          )}
+        </div>
+
+        <div className="text-center py-8 text-zinc-500">
+          <div className="text-2xl mb-2">📄</div>
+          <div className="text-sm">No schemas found</div>
+          <div className="text-xs">Check debug info above</div>
         </div>
       </div>
+    );
+  }
 
-      {/* Manual Add */}
+  return (
+    <div className="space-y-4">
+      {/* Debug panel - removable in production */}
+      <details className="bg-gray-50 border rounded p-2">
+        <summary className="text-xs font-medium cursor-pointer">
+          🔍 Debug Schema Data
+        </summary>
+        <pre className="text-xs text-gray-600 mt-2 whitespace-pre-wrap overflow-auto max-h-32">
+          {debugInfo}
+        </pre>
+      </details>
+
+      <AIGeneratorSection
+        type="schema"
+        onApply={(result) => onChange({ ...schema, ...result.schemas })}
+        bgColor="bg-green-50"
+      />
+
       <div className="flex gap-2">
         <input
           value={newSchemaKey}
@@ -123,24 +145,80 @@ export function SchemaEditor({ schema, onChange }: SchemaEditorProps) {
         </button>
       </div>
 
-      {/* Schema List */}
       <div className="space-y-2">
-        {Object.entries(schema).map(([key, schemaObj]: [string, any]) => (
-          <div key={key} className="border rounded p-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">{key}</span>
-              <button
-                onClick={() => removeSchema(key)}
-                className="text-red-600 text-xs"
+        {Object.entries(schema).map(([key, schemaObj]: [string, any]) => {
+          const isExpanded = expandedSchemas[key];
+          const properties = schemaObj?.properties || {};
+          const propertyKeys = Object.keys(properties);
+
+          return (
+            <div key={key} className="border rounded">
+              <div
+                className="p-3 bg-zinc-50 cursor-pointer"
+                onClick={() => toggleExpanded(key)}
               >
-                Remove
-              </button>
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`transform transition-transform text-xs ${
+                        isExpanded ? "rotate-90" : ""
+                      }`}
+                    >
+                      ▶
+                    </span>
+                    <span className="text-sm font-medium">📄 {key}</span>
+                    <span className="text-xs bg-zinc-200 px-2 py-1 rounded">
+                      {propertyKeys.length} fields
+                    </span>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeSchema(key);
+                    }}
+                    className="text-red-600 text-xs"
+                  >
+                    Remove
+                  </button>
+                </div>
+
+                <div className="text-xs text-zinc-500 mt-1">
+                  Fields: {propertyKeys.join(", ") || "None"}
+                </div>
+              </div>
+
+              {isExpanded && (
+                <div className="p-3 border-t border-zinc-200 bg-white">
+                  <div className="text-sm font-medium mb-2">Properties:</div>
+                  <div className="space-y-2">
+                    {propertyKeys.map((propKey) => {
+                      const prop = properties[propKey];
+                      return (
+                        <div
+                          key={propKey}
+                          className="text-xs bg-zinc-50 p-2 rounded"
+                        >
+                          <div className="font-mono font-medium">{propKey}</div>
+                          <div className="text-zinc-600 mt-1">
+                            Type: {prop?.type || "undefined"} | Field:{" "}
+                            {prop?.fieldType || "undefined"} | Label:{" "}
+                            {prop?.label || "undefined"} | Required:{" "}
+                            {prop?.required ? "Yes" : "No"}
+                          </div>
+                          {prop?.enum && (
+                            <div className="text-zinc-600 mt-1">
+                              Options: {prop.enum.join(", ")}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="text-xs text-zinc-500 mt-1">
-              Fields: {Object.keys(schemaObj.properties || {}).join(', ') || 'None'}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

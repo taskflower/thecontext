@@ -1,6 +1,9 @@
-// src/modules/edv2/EditorControl.tsx - Zoptymalizowany
+// ========================================
+// src/modules/edv2/EditorControl.tsx
+// ========================================
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { parsePath } from './shared/editorUtils';
 import EditorV2 from './EditorV2';
 
 export default function EditorControlV2() {
@@ -12,19 +15,7 @@ export default function EditorControlV2() {
     return null;
   }
 
-  // Parse current path
-  const parsePath = () => {
-    const parts = location.pathname.split('/').filter(Boolean);
-    return {
-      config: parts[0] || 'exampleTicketApp',
-      workspace: parts[1] || 'main',
-      scenario: parts[2],
-      step: parts[3],
-      id: parts[4]
-    };
-  };
-
-  const path = parsePath();
+  const path = parsePath(location.pathname);
   const isScenario = !!path.scenario;
   
   const editContext = isScenario 

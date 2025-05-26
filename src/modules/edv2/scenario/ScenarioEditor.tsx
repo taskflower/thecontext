@@ -1,4 +1,6 @@
+// ========================================
 // src/modules/edv2/scenario/ScenarioEditor.tsx
+// ========================================
 import { useState } from 'react';
 import { NodesEditor } from './NodesEditor';
 import { FlowEditor } from './FlowEditor';

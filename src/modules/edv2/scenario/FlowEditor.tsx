@@ -1,7 +1,7 @@
+// ========================================
 // src/modules/edv2/scenario/FlowEditor.tsx
-import { useState } from 'react';
-import { useLlmEngine } from '@/core/engine';
-import { z } from 'zod';
+// ========================================
+import { AIGeneratorSection } from '../shared/AIGeneratorSection';
 
 interface FlowEditorProps {
   flow: any;
@@ -9,50 +9,7 @@ interface FlowEditorProps {
   onChange: (flow: any) => void;
 }
 
-const flowSchema = z.object({
-  flow: z.object({
-    entryPoint: z.string(),
-    transitions: z.record(z.object({
-      onSuccess: z.string().optional(),
-      onError: z.string().optional(),
-      onCancel: z.string().optional(),
-      conditions: z.record(z.string()).optional()
-    }))
-  })
-});
-
 export function FlowEditor({ flow, nodes, onChange }: FlowEditorProps) {
-  const [prompt, setPrompt] = useState('');
-
-  const { isLoading, result, start } = useLlmEngine({
-    schema: flowSchema,
-    jsonSchema: {
-      type: 'object',
-      properties: {
-        flow: {
-          type: 'object',
-          properties: {
-            entryPoint: { type: 'string' },
-            transitions: {
-              type: 'object',
-              additionalProperties: {
-                type: 'object',
-                properties: {
-                  onSuccess: { type: 'string' },
-                  onError: { type: 'string' },
-                  onCancel: { type: 'string' },
-                  conditions: { type: 'object' }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    userMessage: `Generate flow logic for nodes: ${nodes.map(n => n.slug).join(', ')}. ${prompt}`,
-    systemMessage: 'Generate flow transitions between steps. Define entry point and transitions (onSuccess, onError, onCancel).'
-  });
-
   const updateFlow = (updates: any) => {
     onChange({ ...flow, ...updates });
   };
@@ -100,33 +57,11 @@ export function FlowEditor({ flow, nodes, onChange }: FlowEditorProps) {
 
   return (
     <div className="space-y-4">
-      {/* AI Generation */}
-      <div className="bg-indigo-50 p-3 rounded">
-        <textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Describe flow logic (e.g., 'After create success go to view, on error stay, cancel returns to list')"
-          className="w-full text-sm border rounded p-2 mb-2"
-          rows={2}
-        />
-        <div className="flex gap-2">
-          <button
-            onClick={() => start()}
-            disabled={isLoading || !prompt.trim()}
-            className="text-xs bg-indigo-600 text-white px-3 py-1 rounded disabled:opacity-50"
-          >
-            {isLoading ? 'Generating...' : 'Generate Flow'}
-          </button>
-          {result && (
-            <button
-              onClick={() => onChange({ ...flow, ...result.flow })}
-              className="text-xs bg-green-600 text-white px-3 py-1 rounded"
-            >
-              Apply Flow
-            </button>
-          )}
-        </div>
-      </div>
+      <AIGeneratorSection
+        type="flow"
+        onApply={(result) => onChange({ ...flow, ...result.flow })}
+        bgColor="bg-indigo-50"
+      />
 
       {/* Entry Point */}
       <div className="space-y-2">
@@ -209,7 +144,7 @@ export function FlowEditor({ flow, nodes, onChange }: FlowEditorProps) {
         )}
       </div>
 
-      {/* Flow Visualization */}
+      {/* Flow Visualization - pozostaje bez zmian */}
       {nodes.length > 0 && (
         <div className="bg-zinc-50 p-3 rounded">
           <h4 className="text-sm font-medium text-zinc-700 mb-2">Flow Preview</h4>

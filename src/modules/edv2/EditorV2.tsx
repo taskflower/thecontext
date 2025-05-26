@@ -1,8 +1,11 @@
-// src/modules/edv2/EditorV2.tsx - Główny komponent edytora
+// ========================================
+// src/modules/edv2/EditorV2.tsx
+// ========================================
 import { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { useConfig } from '@/core/engine';
 import { configDB } from '@/db';
+import { parsePath } from './shared/editorUtils';
 import WorkspaceEditor from './workspace/WorkspaceEditor';
 import ScenarioEditor from './scenario/ScenarioEditor';
 import { Breadcrumbs } from './shared/Breadcrumbs';
@@ -15,18 +18,6 @@ interface EditorV2Props {
 export default function EditorV2({ isOpen, onClose }: EditorV2Props) {
   const { config, workspace, scenario, step, id } = useParams();
   const location = useLocation();
-  
-  // Parse pathname as fallback
-  const parsePath = (pathname: string) => {
-    const parts = pathname.split('/').filter(Boolean);
-    return {
-      config: parts[0] || 'exampleTicketApp',
-      workspace: parts[1] || 'main',
-      scenario: parts[2],
-      step: parts[3],
-      id: parts[4]
-    };
-  };
   
   const pathParams = parsePath(location.pathname);
   const cfgName = config || pathParams.config;
