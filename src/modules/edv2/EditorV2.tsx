@@ -1,6 +1,6 @@
-// src/modules/edv2/EditorV2.tsx - Main sidebar editor
+// src/modules/edv2/EditorV2.tsx - Main sidebar editor with breadcrumbs
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { useConfig, useLlmEngine } from '@/core/engine';
 import { configDB } from '@/db';
 import { z } from 'zod';
@@ -11,20 +11,64 @@ interface EditorV2Props {
 }
 
 export default function EditorV2({ isOpen, onClose }: EditorV2Props) {
-  const { config, workspace } = useParams<{ config: string; workspace: string }>();
-  const cfgName = config || 'exampleTicketApp';
-  const wsName = workspace || 'main';
+  const { config, workspace, scenario, step, id } = useParams<{ 
+    config: string; 
+    workspace: string; 
+    scenario?: string; 
+    step?: string; 
+    id?: string; 
+  }>();
+  const location = useLocation();
   
-  const workspaceConfig = useConfig<any>(cfgName, `/src/_configs/${cfgName}/workspaces/${wsName}.json`);
+  // Fallback parsing from pathname if useParams fails
+  const parsePathname = (pathname: string) => {
+    const parts = pathname.split('/').filter(Boolean);
+    return {
+      config: parts[0] || 'exampleTicketApp',
+      workspace: parts[1] || 'main',
+      scenario: parts[2],
+      step: parts[3],
+      id: parts[4]
+    };
+  };
+  
+  const pathParams = parsePathname(location.pathname);
+  const cfgName = config || pathParams.config;
+  const wsName = workspace || pathParams.workspace;
+  const currentScenario = scenario || pathParams.scenario;
+  const currentStep = step || pathParams.step;
+  const currentId = id || pathParams.id;
+  
+  // Create unique key for this workspace combination
+  const workspaceKey = `${cfgName}:${wsName}`;
+  
+  // Debug logging
+  console.log('EditorV2 params:', { 
+    fromUseParams: { config, workspace, scenario, step, id },
+    fromPathname: pathParams,
+    final: { cfgName, wsName, currentScenario, currentStep, currentId },
+    workspaceKey,
+    pathname: location.pathname 
+  });
+  
+  // Build the config path dynamically
+  const configPath = `/src/_configs/${cfgName}/workspaces/${wsName}.json`;
+  const workspaceConfig = useConfig<any>(cfgName, configPath);
+  
   const [editConfig, setEditConfig] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'widgets' | 'schema'>('widgets');
   const [saving, setSaving] = useState(false);
 
+  // Simple effect - just load the config when it's available
   useEffect(() => {
     if (workspaceConfig) {
+      console.log('Setting editConfig for workspace:', workspaceKey, workspaceConfig);
       setEditConfig({ ...workspaceConfig });
+    } else {
+      console.log('No workspaceConfig yet for:', workspaceKey);
+      setEditConfig(null);
     }
-  }, [workspaceConfig]);
+  }, [workspaceConfig, workspaceKey]);
 
   const saveConfig = async () => {
     if (!editConfig) return;
@@ -38,9 +82,52 @@ export default function EditorV2({ isOpen, onClose }: EditorV2Props) {
       window.location.reload(); // Refresh to see changes
     } catch (error) {
       alert('Save failed');
+      console.error('Save error:', error);
     } finally {
       setSaving(false);
     }
+  };
+
+  // Generate breadcrumbs based on current route
+  const getBreadcrumbs = () => {
+    const breadcrumbs = [];
+    
+    // Always start with config
+    breadcrumbs.push({ label: cfgName, path: `/${cfgName}` });
+    
+    // Add workspace
+    if (wsName) {
+      breadcrumbs.push({ 
+        label: wsName, 
+        path: `/${cfgName}/${wsName}` 
+      });
+    }
+    
+    // Add scenario if present
+    if (currentScenario) {
+      breadcrumbs.push({ 
+        label: `📋 ${currentScenario}`, 
+        path: `/${cfgName}/${wsName}/${currentScenario}` 
+      });
+    }
+    
+    // Add step if present
+    if (currentStep) {
+      breadcrumbs.push({ 
+        label: `📝 ${currentStep}`, 
+        path: `/${cfgName}/${wsName}/${currentScenario}/${currentStep}` 
+      });
+    }
+    
+    // Add ID if present (form view)
+    if (currentId) {
+      breadcrumbs.push({ 
+        label: `🎫 #${currentId}`, 
+        path: location.pathname 
+      });
+    }
+    
+    return breadcrumbs;
   };
 
   if (!isOpen) return null;
@@ -52,7 +139,44 @@ export default function EditorV2({ isOpen, onClose }: EditorV2Props) {
         <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600">✕</button>
       </div>
 
-      {editConfig && (
+      {/* Breadcrumbs */}
+      <div className="px-4 py-2 bg-zinc-50 border-b border-zinc-200">
+        <div className="flex items-center space-x-1 text-sm">
+          {getBreadcrumbs().map((crumb, index) => (
+            <div key={index} className="flex items-center">
+              {index > 0 && (
+                <svg className="w-3 h-3 text-zinc-400 mx-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                </svg>
+              )}
+              <span 
+                className={`${
+                  index === getBreadcrumbs().length - 1 
+                    ? 'text-zinc-900 font-medium' 
+                    : 'text-zinc-600 hover:text-zinc-900 cursor-pointer'
+                }`}
+                onClick={() => {
+                  if (index < getBreadcrumbs().length - 1) {
+                    window.open(crumb.path, '_blank');
+                  }
+                }}
+              >
+                {crumb.label}
+              </span>
+            </div>
+          ))}
+        </div>
+        
+        {/* Current path info and workspace indicator */}
+        <div className="flex justify-between items-center text-xs text-zinc-500 mt-1">
+          <span>{location.pathname}</span>
+          <span className="bg-zinc-200 px-2 py-1 rounded" key={`${cfgName}-${wsName}`}>
+            Editing: {cfgName}/{wsName}
+          </span>
+        </div>
+      </div>
+
+      {editConfig ? (
         <>
           <div className="p-4">
             <div className="flex border-b border-zinc-200 mb-4">
@@ -105,6 +229,10 @@ export default function EditorV2({ isOpen, onClose }: EditorV2Props) {
             </button>
           </div>
         </>
+      ) : (
+        <div className="p-4 text-center text-zinc-500">
+          {workspaceConfig ? 'Loading workspace...' : 'Loading configuration...'}
+        </div>
       )}
     </div>
   );
