@@ -22,7 +22,7 @@
           "Błąd w kalkulacji raportów sprzedażowych"
         ],
         "navPath": "tickets/list",
-        "cancelNavPath": "tickets/list",
+        "cancelNavPath": "tickets/list/view",
         "nextStep": "form-review"
       }
     },
@@ -39,20 +39,20 @@
         "showGeneratedBadge": true,
         "onSubmit": {
           "collection": "tickets",
-          "navPath": "tickets/list",
+          "navPath": "tickets/list/view",
           "action": "create"
         },
         "additionalActions": [
           {
             "type": "regenerate",
             "label": "🔄 Wygeneruj ponownie",
-            "navPath": "tickets/llm-create",
+            "navPath": "tickets/llm-create/new",
             "variant": "secondary"
           },
           {
             "type": "cancel",
             "label": "Anuluj",
-            "navPath": "tickets/list",
+            "navPath": "tickets/list/view",
             "variant": "outline"
           }
         ]

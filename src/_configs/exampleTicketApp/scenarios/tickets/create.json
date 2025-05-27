@@ -12,7 +12,7 @@
           "excludeFields": ["status"],
           "onSubmit": {
             "collection": "tickets",
-            "navPath": "tickets/list",
+            "navPath": "tickets/list/view",
             "action": "create"
           }
         }

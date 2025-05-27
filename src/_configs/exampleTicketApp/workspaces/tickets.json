@@ -17,7 +17,7 @@
         "tplFile": "ButtonWidget",
         "title": "📝 Create New Ticket", 
         "attrs": {
-          "navPath": "tickets/create",
+          "navPath": "tickets/create/new",
           "variant": "primary",
           "colSpan": 1
         }
@@ -26,7 +26,7 @@
         "tplFile": "ButtonWidget",
         "title": "📋 View All Tickets", 
         "attrs": {
-          "navPath": "tickets/list",
+          "navPath": "tickets/list/view",
           "variant": "secondary",
           "colSpan": 1
         }
@@ -35,7 +35,7 @@
         "tplFile": "ButtonWidget",
         "title": "🤖 Wygeneruj z AI",
         "attrs": {
-          "navPath": "tickets/llm-create",
+          "navPath": "tickets/llm-create/new",
           "variant": "secondary",
           "colSpan": 1
         }

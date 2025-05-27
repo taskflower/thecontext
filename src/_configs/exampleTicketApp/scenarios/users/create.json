@@ -12,7 +12,7 @@
           "schemaPath": "user",
           "onSubmit": {
             "collection": "users",
-            "navPath": "users/list",
+            "navPath": "users/list/view",
             "action": "create"
           }
         }

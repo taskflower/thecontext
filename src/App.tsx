@@ -12,8 +12,8 @@ function AppRoutes() {
     { path: "login", element: <AuthPage /> },
     
     // Regular config routes
-    { path: ":config/:workspace/:scenario/:id", element: <ConfigPage /> },
-    { path: ":config/:workspace/:scenario/:step?", element: <ConfigPage /> },
+    { path: ":config/:workspace/:scenario/:action/:id", element: <ConfigPage /> },
+    { path: ":config/:workspace/:scenario/:action/:step?", element: <ConfigPage /> },
     { path: ":config/:workspace", element: <ConfigPage /> },
     { path: "/", element: <ConfigPage /> },
     { path: "*", element: <div className="flex items-center justify-center min-h-screen text-zinc-600">Page not found</div> },

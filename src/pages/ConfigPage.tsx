@@ -1,4 +1,4 @@
-// src/pages/ConfigPage.tsx - Fixed hooks and component safety
+// src/pages/ConfigPage.tsx - Fixed naming conflict
 import { useComponent, useConfig } from "@/core";
 import { useParams } from "react-router-dom";
 import { useMemo } from "react";
@@ -51,10 +51,11 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
 }
 
 export default function ConfigPage() {
-  const { config, workspace, scenario, step, id } = useParams<{
+  const { config, workspace, scenario, action, step, id } = useParams<{
     config: string;
     workspace: string;
     scenario: string;
+    action: string; 
     step: string;
     id: string;
   }>();
@@ -62,6 +63,10 @@ export default function ConfigPage() {
   // Use defaults from app config if not provided
   const configName = config || "exampleTicketApp";
   const workspaceName = workspace || "tickets"; // Use tickets as default
+
+  // ✅ Extract action parameter but ignore it for now
+  // TODO: Implement action handling in future versions
+  // const actionType = action; // Available for future use
 
   const base = `/src/_configs/${configName}`;
   const app = useConfig<AppConfig>(configName, `${base}/app.json`);
@@ -118,13 +123,13 @@ export default function ConfigPage() {
         <LayoutWrapper>
           {renderError(
             "Invalid scenario configuration",
-            `Scenario: ${scenario}, Step: ${step}, ID: ${id}`
+            `Scenario: ${scenario}, Step: ${step}, Action: ${action}, ID: ${id}`
           )}
         </LayoutWrapper>
       );
     }
 
-    // Determine current step
+    // Determine current step (action parameter is ignored for now)
     const currentStep = id ? "form" : step || scenarioConfig.nodes[0].slug;
     const node = scenarioConfig.nodes.find((n) => n.slug === currentStep) || scenarioConfig.nodes[0];
 
@@ -146,7 +151,7 @@ export default function ConfigPage() {
           filename={node.tplFile}
           attrs={node.attrs}
           ticketId={id}
-          key={`${currentStep}-${id || 'new'}`} // ✅ Add key to force remount on navigation
+          key={`${currentStep}-${id || 'new'}`} // ✅ Key remains the same, action ignored
         />
       </LayoutWrapper>
     );
@@ -177,12 +182,12 @@ function StepRenderer({ theme, filename, attrs, ticketId }: {
   if (!Component)
     return renderError("Step component missing", `${theme}/steps/${filename}`);
 
-  // ✅ Safety check: ensure Component exists and attrs is valid before rendering
+  // ✅ Fixed: Renamed caught error variable to avoid shadowing
   try {
     return <Component attrs={attrs || {}} ticketId={ticketId} />;
-  } catch (renderError) {
-    console.error("Component render error:", renderError);
-    return renderError("Component render failed", String(renderError));
+  } catch (err) {
+    console.error("Component render error:", err);
+    return renderError("Component render failed", String(err));
   }
 }
 
@@ -220,15 +225,15 @@ function WidgetRenderer({ theme, widget }: { theme: string; widget: any }) {
     }
   };
 
-  // ✅ Safety check: ensure widget and attrs exist
+  // ✅ Fixed: Renamed caught error variable to avoid shadowing
   try {
     return (
       <div className={getColSpanClass(widget?.attrs?.colSpan || 1)}>
         <Component {...(widget || {})} />
       </div>
     );
-  } catch (renderError) {
-    console.error("Widget render error:", renderError);
-    return renderError("Widget render failed", String(renderError));
+  } catch (err) {
+    console.error("Widget render error:", err);
+    return renderError("Widget render failed", String(err));
   }
 }
