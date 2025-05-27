@@ -1,9 +1,10 @@
-// src/themes/default/steps/ListStep.tsx - Fixed hooks order
+// src/themes/default/steps/ListTableStep.tsx
 import { useState, useEffect, useMemo } from "react";
 import { useWorkspaceSchema, useCollections } from "@/core";
 import ListHeader from "../commons/ListHeader";
 import DataTable, { Column } from "../commons/ListDataTable";
 import Pagination from "../commons/ListPaination";
+import { LoadingSpinner, ErrorMessage } from "../commons/StepWrapper";
 
 interface ListStepProps {
   attrs: {
@@ -11,152 +12,97 @@ interface ListStepProps {
     collection: string;
     title?: string;
     description?: string;
-    emptyState?: {
-      icon?: string;
-      title?: string;
-      description?: string;
-      actionButton?: { title: string; navPath: string };
-    };
-    columns?: Array<{
-      key: string;
-      label?: string;
-      type?: "text" | "badge" | "date" | "enum";
-      width?: string;
-      sortable?: boolean;
-    }>;
-    actions?: Array<{
-      type: "edit" | "delete" | "custom";
-      label?: string;
-      navPath?: string;
-      confirm?: string;
-      variant?: "default" | "danger";
-    }>;
-    widgets?: Array<{
-      tplFile: string;
-      title: string;
-      attrs: { navPath: string; variant?: "primary" | "secondary" };
-    }>;
+    emptyState?: any;
+    columns?: any[];
+    actions?: any[];
+    widgets?: any[];
     pagination?: { pageSize?: number; showTotal?: boolean };
     search?: { enabled?: boolean; placeholder?: string; fields?: string[] };
-    sorting?: {
-      enabled?: boolean;
-      defaultField?: string;
-      defaultDirection?: "asc" | "desc";
-    };
+    sorting?: { enabled?: boolean; defaultField?: string; defaultDirection?: "asc" | "desc" };
   };
 }
 
 export default function ListStep({ attrs }: ListStepProps) {
-  // ✅ ALL HOOKS MUST BE CALLED FIRST - BEFORE ANY CONDITIONAL LOGIC
+  // ✅ ALL HOOKS AT TOP LEVEL
   const { schema, loading, error } = useWorkspaceSchema(attrs?.schemaPath || "");
-  const {
-    items: records,
-    loading: loadingRecords,
-    deleteItem,
-  } = useCollections(attrs?.collection || "");
-  
+  const { items: records, loading: loadingRecords, deleteItem } = useCollections(attrs?.collection || "");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState(attrs?.sorting?.defaultField || "");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">(
-    attrs?.sorting?.defaultDirection || "asc"
-  );
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">(attrs?.sorting?.defaultDirection || "asc");
   const [currentPage, setCurrentPage] = useState(1);
 
   const pageSize = attrs?.pagination?.pageSize || 10;
 
+  // ✅ MEMOIZED CALCULATIONS
   const filteredRecords = useMemo(() => {
+    if (!records.length) return [];
+    
     let filtered = [...records];
 
-    // Search
     if (searchTerm && attrs?.search?.enabled) {
-      const searchFields =
-        attrs.search.fields || Object.keys(schema?.properties || {});
+      const searchFields = attrs.search.fields || Object.keys(schema?.properties || {});
       filtered = filtered.filter((record) =>
         searchFields.some((field) =>
-          String((record as any)[field] || "")
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase())
+          String((record as any)[field] || "").toLowerCase().includes(searchTerm.toLowerCase())
         )
       );
     }
 
-    // Sort
     if (sortField && attrs?.sorting?.enabled) {
       filtered.sort((a, b) => {
-        const comparison = String((a as any)[sortField] || "").localeCompare(
-          String((b as any)[sortField] || "")
-        );
+        const comparison = String((a as any)[sortField] || "").localeCompare(String((b as any)[sortField] || ""));
         return sortDirection === "asc" ? comparison : -comparison;
       });
     }
 
     return filtered;
-  }, [
-    records,
-    searchTerm,
-    sortField,
-    sortDirection,
-    attrs?.search,
-    attrs?.sorting,
-    schema,
-  ]);
+  }, [records, searchTerm, sortField, sortDirection, attrs?.search, attrs?.sorting, schema?.properties]);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, sortField, sortDirection]);
-
-  // ✅ Now conditional logic can happen after all hooks
-
-  const handleDelete = async (recordId: string) => {
-    try {
-      await deleteItem(recordId);
-    } catch (error) {
-      console.error("Failed to delete record:", error);
-      alert("Błąd podczas usuwania rekordu");
-    }
-  };
-
-  const columns =
-    attrs?.columns ||
-    Object.entries(schema?.properties || {}).map(([key, field]: any) => ({
+  const columns = useMemo(() => {
+    if (!schema?.properties) return [];
+    
+    return attrs?.columns || Object.entries(schema.properties).map(([key, field]: any) => ({
       key,
       label: field.label || key,
       type: field.enum ? "badge" : field.format === "date" ? "date" : "text",
     }));
+  }, [attrs?.columns, schema?.properties]);
 
-  const paginatedRecords = filteredRecords.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
+  const paginatedRecords = useMemo(() => 
+    filteredRecords.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [filteredRecords, currentPage, pageSize]
   );
+
   const totalPages = Math.ceil(filteredRecords.length / pageSize);
 
-  if (loading)
-    return (
-      <div className="flex items-center justify-center py-24">
-        <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900" />
-        <span className="ml-3 text-sm font-medium text-zinc-600">
-          Ładowanie konfiguracji
-        </span>
-      </div>
-    );
+  // ✅ EFFECTS
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, sortField, sortDirection]);
 
-  if (error || !schema)
-    return (
-      <div className="py-24 text-center">
-        <div className="text-red-600 text-sm font-medium mb-2">
-          Błąd konfiguracji
-        </div>
-        <div className="text-xs text-zinc-500">
-          {error || `Nie znaleziono schemy: ${attrs?.schemaPath}`}
-        </div>
-      </div>
-    );
+  // ✅ HANDLERS
+  const handleDelete = async (recordId: string) => {
+    try {
+      await deleteItem(recordId);
+    } catch (error) {
+      alert("Błąd podczas usuwania rekordu");
+    }
+  };
+
+  // ✅ CONDITIONAL RENDERING AFTER ALL HOOKS
+  if (loading) return <LoadingSpinner text="Loading configuration..." />;
+  if (error || !schema) return <ErrorMessage error={error || `Schema not found: ${attrs?.schemaPath}`} />;
 
   return (
     <div className="space-y-6">
+      {(attrs?.title || attrs?.description) && (
+        <div className="mb-6">
+          {attrs?.title && <h2 className="text-xl font-semibold text-zinc-900">{attrs.title}</h2>}
+          {attrs?.description && <p className="text-zinc-600 mt-1 text-sm">{attrs.description}</p>}
+        </div>
+      )}
+
       <ListHeader
-        title={attrs?.title}
-        description={attrs?.description}
         widgets={attrs?.widgets}
         search={attrs?.search}
         searchTerm={searchTerm}
