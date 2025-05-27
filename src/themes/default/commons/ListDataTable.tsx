@@ -54,7 +54,6 @@ export default function DataTable({
   sortingEnabled,
   onSort,
   onDelete,
-  collection,
 }: DataTableProps) {
   const navigate = useNavigate();
   const params = useParams<{ config: string; workspace: string }>();

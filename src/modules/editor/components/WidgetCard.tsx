@@ -1,5 +1,5 @@
 // src/modules/editor/components/WidgetCard.tsx
-import { FieldWidget } from '@/themes/test/widgets/form/FieldWidget';
+import { FieldWidget } from '@/themes/default/widgets/form/FieldWidget';
 import { WIDGET_SCHEMAS } from '../schemas/widgetSchemas';
 
 interface WidgetCardProps {
@@ -13,7 +13,7 @@ interface WidgetCardProps {
 
 export default function WidgetCard({ 
   widget, 
-  index, 
+
   isSelected, 
   onSelect, 
   onUpdate, 

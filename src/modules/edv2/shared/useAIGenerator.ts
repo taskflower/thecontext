@@ -2,8 +2,9 @@
 // src/modules/edv2/shared/useAIGenerator.ts
 // ========================================
 import { useState } from 'react';
-import { useLlmEngine } from '@/core/engine';
+
 import { AI_CONFIGS } from './editorConfigs';
+import { useLlmEngine } from '@/core';
 
 export function useAIGenerator(type: keyof typeof AI_CONFIGS) {
   const [prompt, setPrompt] = useState('');

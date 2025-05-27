@@ -1,6 +1,7 @@
 // src/modules/editor/components/ContextSchemaEditor.tsx
+import { useLlmEngine } from '@/core';
 import { useState } from 'react';
-import { useLlmEngine } from '@/core/engine';
+
 import { z } from 'zod';
 
 interface ContextSchemaEditorProps {

@@ -1,9 +1,9 @@
 // src/modules/editor/EditorPage.tsx - Updated with sidebar
 import { useParams } from 'react-router-dom';
-import { useConfig } from '@/core/engine';
 import WorkspaceEditor from './components/WorkspaceEditor';
 import EditorSidebar from './components/EditorSidebar';
 import EditorBreadcrumbs from './components/EditorBreadcrumbs';
+import { useConfig } from '@/core';
 
 export default function EditorPage() {
   const { config, workspace, scenario, type } = useParams<{
