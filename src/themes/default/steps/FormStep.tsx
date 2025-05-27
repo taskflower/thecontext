@@ -1,7 +1,7 @@
-// src/themes/default/steps/FormStep.tsx - Safer typing
+// src/themes/default/steps/FormStep.tsx - Fixed hooks order
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useWorkspaceSchema, useCollections } from "@/core/engine";
+import { useWorkspaceSchema, useCollections } from "@/core";
 import { FieldWidget } from "../widgets/form/FieldWidget";
 import type { ScenarioNode } from "@/core/types";
 
@@ -21,7 +21,13 @@ export default function FormStep({ attrs, ticketId }: FormStepProps) {
   const params = useParams<{ id: string; config: string; workspace: string }>();
   const editId = ticketId || params.id;
 
-  // Validation of required props
+  // ✅ ALL HOOKS MUST BE CALLED FIRST - BEFORE ANY CONDITIONAL RETURNS
+  const { schema, loading, error } = useWorkspaceSchema(attrs?.schemaPath || "");
+  const { items, saveItem, loading: itemsLoading } = useCollections(attrs?.onSubmit?.collection || "");
+  const [data, setData] = useState<Record<string, any>>({});
+  const [saving, setSaving] = useState(false);
+
+  // ✅ Now we can do conditional returns AFTER all hooks are called
   if (!attrs) {
     return (
       <div className="py-24 text-center">
@@ -60,11 +66,6 @@ export default function FormStep({ attrs, ticketId }: FormStepProps) {
     );
   }
 
-  const { schema, loading, error } = useWorkspaceSchema(attrs.schemaPath);
-  const { items, saveItem, loading: itemsLoading } = useCollections(attrs.onSubmit.collection);
-  const [data, setData] = useState<Record<string, any>>({});
-  const [saving, setSaving] = useState(false);
-
   // Initialize defaults and load record
   useEffect(() => {
     if (!schema?.properties) return;
@@ -85,7 +86,7 @@ export default function FormStep({ attrs, ticketId }: FormStepProps) {
         navigate(`/${params.config}/${attrs.onSubmit.navPath}`);
       }
     }
-  }, [schema, editId, items, itemsLoading, attrs.loadFromParams, attrs.onSubmit.navPath]);
+  }, [schema, editId, items, itemsLoading, attrs.loadFromParams, attrs.onSubmit.navPath, navigate, params.config]);
 
   if (loading) return (
     <div className="flex items-center justify-center py-24">

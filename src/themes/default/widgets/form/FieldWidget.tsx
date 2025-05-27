@@ -1,4 +1,4 @@
-// src/themes/default/widgets/form/FieldWidget.tsx
+// src/themes/default/widgets/form/FieldWidget.tsx - ZAKTUALIZOWANA WERSJA
 import React from "react";
 import TextFieldWidget from "./text";
 import TextareaFieldWidget from "./textarea";
@@ -7,6 +7,7 @@ import EmailFieldWidget from "./email";
 import DateFieldWidget from "./date";
 import SelectFieldWidget from "./select";
 import CheckboxFieldWidget from "./checkbox";
+import UserSelectFieldWidget from "./userSelect";
 
 // Typ dla props FieldWidget
 export interface FieldWidgetProps {
@@ -31,7 +32,7 @@ export interface FieldWidgetProps {
   onChange: (key: string, value: any) => void;
 }
 
-// Mapowanie widgetów
+// Mapowanie widgetów - DODANO userSelect
 const widgetMap: { [key: string]: React.ComponentType<any> } = {
   text: TextFieldWidget,
   textarea: TextareaFieldWidget,
@@ -40,6 +41,7 @@ const widgetMap: { [key: string]: React.ComponentType<any> } = {
   date: DateFieldWidget,
   select: SelectFieldWidget,
   checkbox: CheckboxFieldWidget,
+  userSelect: UserSelectFieldWidget, // NOWY WIDGET
 };
 
 // Główny komponent FieldWidget
@@ -53,7 +55,9 @@ export const FieldWidget: React.FC<FieldWidgetProps> = ({
   
   // Jeśli nie ma explicit widget, określ na podstawie typu i właściwości
   if (!widgetName) {
-    if (field.enum) {
+    if (field.fieldType === "userSelect") {
+      widgetName = "userSelect";
+    } else if (field.enum) {
       widgetName = "select";
     } else if (field.type === "boolean") {
       widgetName = "checkbox";

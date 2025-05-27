@@ -18,7 +18,7 @@ export default function Simple({ children }: any) {
             </div>
             <div className="flex items-center gap-8">
               <nav className="flex items-center gap-1">
-                {["main", "tickets"].map((p) => (
+                {["main", "tickets","users"].map((p) => (
                   <Link
                     key={p}
                     to={`/${cfg}/${p}`}

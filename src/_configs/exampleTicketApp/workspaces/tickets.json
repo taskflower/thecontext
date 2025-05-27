@@ -122,12 +122,19 @@
           "required": true,
           "aiHint": "bug=błędy/awarie, feature=nowe funkcje, support=pomoc/instalacje, question=pytania"
         },
-        "assignee": {
-          "type": "string",
+        "assigneeId": {
+          "type": "string", 
           "label": "Przypisany do",
-          "fieldType": "text",
+          "fieldType": "userSelect",
           "required": false,
-          "aiHint": "Zostaw puste - zostanie przydzielone automatycznie"
+          "aiHint": "User ID who should handle this ticket"
+        },
+        "reporterId": {
+          "type": "string",
+          "label": "Zgłaszający (wybierz)",
+          "fieldType": "userSelect", 
+          "required": false,
+          "aiHint": "User ID who reported this issue"
         },
         "reporter": {
           "type": "string",

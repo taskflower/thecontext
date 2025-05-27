@@ -1,0 +1,101 @@
+{
+    "slug": "list",
+    "nodes": [
+      {
+        "slug": "view",
+        "label": "Lista użytkowników",
+        "order": 1,
+        "tplFile": "ListStep",
+        "attrs": {
+          "schemaPath": "user",
+          "collection": "users",
+          "title": "Lista użytkowników",
+          "description": "Zarządzaj użytkownikami systemu",
+          "emptyState": {
+            "icon": "👥",
+            "title": "Brak użytkowników",
+            "description": "Nie masz jeszcze żadnych użytkowników. Dodaj pierwszego użytkownika.",
+            "actionButton": {
+              "title": "Dodaj użytkownika",
+              "navPath": "users/create"
+            }
+          },
+          "search": {
+            "enabled": true,
+            "placeholder": "Szukaj użytkowników...",
+            "fields": ["firstName", "lastName", "email", "department"]
+          },
+          "sorting": {
+            "enabled": true,
+            "defaultField": "lastName",
+            "defaultDirection": "asc"
+          },
+          "pagination": {
+            "pageSize": 15,
+            "showTotal": true
+          },
+          "columns": [
+            {
+              "key": "firstName",
+              "label": "Imię",
+              "type": "text",
+              "sortable": true
+            },
+            {
+              "key": "lastName",
+              "label": "Nazwisko",
+              "type": "text",
+              "sortable": true
+            },
+            {
+              "key": "email",
+              "label": "Email",
+              "type": "text",
+              "sortable": true
+            },
+            {
+              "key": "role",
+              "label": "Rola",
+              "type": "badge",
+              "sortable": true
+            },
+            {
+              "key": "department",
+              "label": "Dział",
+              "type": "badge",
+              "sortable": true
+            },
+            {
+              "key": "isActive",
+              "label": "Status",
+              "type": "badge",
+              "sortable": true
+            }
+          ],
+          "actions": [
+            {
+              "type": "edit",
+              "label": "Edytuj",
+              "navPath": "users/edit"
+            },
+            {
+              "type": "delete",
+              "label": "Usuń",
+              "variant": "danger",
+              "confirm": "Czy na pewno chcesz usunąć tego użytkownika?"
+            }
+          ],
+          "widgets": [
+            {
+              "tplFile": "ButtonWidget",
+              "title": "Dodaj użytkownika",
+              "attrs": {
+                "variant": "primary",
+                "navPath": "users/create"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }

@@ -1,0 +1,123 @@
+{
+    "slug": "users",
+    "name": "User Management",
+    "templateSettings": {
+      "layoutFile": "Simple",
+      "widgets": [
+        {
+          "tplFile": "InfoWidget",
+          "title": "👥 Zarządzanie użytkownikami",
+          "attrs": {
+            "content": "Manage system users, assign roles and permissions.",
+            "variant": "info",
+            "colSpan": "full"
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "➕ Add New User",
+          "attrs": {
+            "navPath": "users/create",
+            "variant": "primary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "👥 View All Users",
+          "attrs": {
+            "navPath": "users/list",
+            "variant": "secondary",
+            "colSpan": 1
+          }
+        }
+      ]
+    },
+    "contextSchema": {
+      "user": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "label": "Imię",
+            "fieldType": "text",
+            "required": true,
+            "aiHint": "First name of the user"
+          },
+          "lastName": {
+            "type": "string",
+            "label": "Nazwisko",
+            "fieldType": "text",
+            "required": true,
+            "aiHint": "Last name of the user"
+          },
+          "email": {
+            "type": "string",
+            "label": "Email",
+            "fieldType": "email",
+            "required": true,
+            "aiHint": "Email address for login and notifications"
+          },
+          "role": {
+            "type": "string",
+            "label": "Rola",
+            "fieldType": "select",
+            "enum": ["admin", "support", "user", "manager"],
+            "enumLabels": {
+              "admin": "Administrator",
+              "support": "Support",
+              "user": "Użytkownik",
+              "manager": "Menedżer"
+            },
+            "enumHints": {
+              "admin": "Full system access",
+              "support": "Can handle tickets and user support",
+              "user": "Basic user access",
+              "manager": "Team management and reporting"
+            },
+            "default": "user",
+            "required": true,
+            "aiHint": "User role determines access permissions"
+          },
+          "department": {
+            "type": "string",
+            "label": "Dział",
+            "fieldType": "select",
+            "enum": ["it", "hr", "finance", "sales", "marketing", "operations"],
+            "enumLabels": {
+              "it": "IT",
+              "hr": "HR",
+              "finance": "Finanse",
+              "sales": "Sprzedaż",
+              "marketing": "Marketing",
+              "operations": "Operacje"
+            },
+            "required": true,
+            "aiHint": "Department the user belongs to"
+          },
+          "isActive": {
+            "type": "boolean",
+            "label": "Aktywny",
+            "fieldType": "checkbox",
+            "default": true,
+            "required": false,
+            "aiHint": "Whether the user account is active"
+          },
+          "phone": {
+            "type": "string",
+            "label": "Telefon",
+            "fieldType": "text",
+            "required": false,
+            "aiHint": "Contact phone number"
+          },
+          "startDate": {
+            "type": "string",
+            "label": "Data rozpoczęcia",
+            "fieldType": "date",
+            "required": false,
+            "aiHint": "When the user started working"
+          }
+        }
+      }
+    }
+  }

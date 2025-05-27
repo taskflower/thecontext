@@ -1,9 +1,9 @@
-// src/themes/default/steps/LLMGenerationStep.tsx - używa useCollections zamiast useLocalStore
+// src/themes/default/steps/LLMGenerationStep.tsx - Fixed hooks order
 import { useState, useMemo } from "react";
 import { z } from "zod";
 import { useNavigate, useParams } from "react-router-dom";
-import { useLlmEngine, useCollections } from "../../../core/engine";
 import { useWorkspaceSchema } from "../../../core/hooks/useWorkspaceSchema";
+import { useCollections, useLlmEngine } from "@/core";
 
 export default function LLMGenerationStep({ attrs }: any) {
   const navigate = useNavigate();
@@ -11,12 +11,14 @@ export default function LLMGenerationStep({ attrs }: any) {
     config: string;
     workspace: string;
   }>();
-  const { schema, loading, error } = useWorkspaceSchema(attrs.schemaPath);
-  const { saveItem } = useCollections(attrs.collection || "records");
+  
+  // ✅ ALL HOOKS MUST BE CALLED FIRST - BEFORE ANY CONDITIONAL LOGIC
+  const { schema, loading, error } = useWorkspaceSchema(attrs?.schemaPath || "");
+  const { saveItem } = useCollections(attrs?.collection || "records");
   const [prompt, setPrompt] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Build Zod and JSON Schema
+  // Build Zod and JSON Schema - this uses useMemo which is a hook
   const { zodSchema, jsonSchema } = useMemo(() => {
     if (!schema?.properties) return { zodSchema: undefined, jsonSchema: null };
 
@@ -48,17 +50,20 @@ export default function LLMGenerationStep({ attrs }: any) {
     };
   }, [schema]);
 
+  // This hook depends on the memoized values above
   const { isLoading, error: llmError, result, start } = useLlmEngine({
     schema: zodSchema,
     jsonSchema,
     userMessage: prompt,
-    systemMessage: attrs.systemMessage,
+    systemMessage: attrs?.systemMessage,
   });
+
+  // ✅ Now all conditional logic and early returns can happen after all hooks
 
   const handleGenerate = () => prompt.trim() ? start() : alert("Proszę wprowadzić opis");
 
   const handleSave = async () => {
-    if (!result) return;
+    if (!result || !schema?.properties) return;
     setSaving(true);
     try {
       // Apply defaults
@@ -69,8 +74,8 @@ export default function LLMGenerationStep({ attrs }: any) {
         }
       });
       
-      await saveItem(dataWithDefaults); // ✅ Używa kolekcji, nie store
-      navigate(`/${config}/${attrs.navPath || `${workspace}/list`}`);
+      await saveItem(dataWithDefaults);
+      navigate(`/${config}/${attrs?.navPath || `${workspace}/list`}`);
     } catch {
       alert("Błąd podczas zapisu");
     } finally {
@@ -79,7 +84,7 @@ export default function LLMGenerationStep({ attrs }: any) {
   };
 
   const getFieldDisplayValue = (key: string, value: any) => {
-    const field = schema.properties?.[key];
+    const field = schema?.properties?.[key];
     return field?.type === 'boolean' ? (value ? 'Tak' : 'Nie') :
            field?.enumLabels?.[value] || value;
   };
@@ -94,7 +99,7 @@ export default function LLMGenerationStep({ attrs }: any) {
   if (error || !schema) return (
     <div className="text-center py-12">
       <div className="text-red-600 mb-4">Błąd konfiguracji</div>
-      <div className="text-sm text-gray-500">{error || `Nie znaleziono schemy: ${attrs.schemaPath}`}</div>
+      <div className="text-sm text-gray-500">{error || `Nie znaleziono schemy: ${attrs?.schemaPath}`}</div>
     </div>
   );
 
@@ -102,9 +107,9 @@ export default function LLMGenerationStep({ attrs }: any) {
     <div className="max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-lg">
         <header className="p-6 border-b">
-          <h2 className="text-2xl font-bold">{attrs.title || "🤖 Generowanie z AI"}</h2>
-          {attrs.description && <p className="text-gray-600 mt-2">{attrs.description}</p>}
-          {attrs.contextInstructions && (
+          <h2 className="text-2xl font-bold">{attrs?.title || "🤖 Generowanie z AI"}</h2>
+          {attrs?.description && <p className="text-gray-600 mt-2">{attrs.description}</p>}
+          {attrs?.contextInstructions && (
             <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
               <p className="text-sm text-blue-800">💡 {attrs.contextInstructions}</p>
             </div>
@@ -114,7 +119,7 @@ export default function LLMGenerationStep({ attrs }: any) {
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder={attrs.placeholder || "Opisz swoje zgłoszenie..."}
+            placeholder={attrs?.placeholder || "Opisz swoje zgłoszenie..."}
             className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             disabled={isLoading}
           />
@@ -131,7 +136,7 @@ export default function LLMGenerationStep({ attrs }: any) {
             ) : "🎯 Wygeneruj"}
           </button>
           {llmError && <div className="text-red-600">Błąd: {llmError}</div>}
-          {result && (
+          {result && schema?.properties && (
             <div className="p-6 bg-green-50 border border-green-200 rounded space-y-4">
               <h3 className="text-lg font-semibold text-green-800">✅ Wygenerowane dane</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

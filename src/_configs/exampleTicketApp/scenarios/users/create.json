@@ -1,0 +1,21 @@
+
+{
+    "slug": "create",
+    "nodes": [
+      {
+        "slug": "form",
+        "label": "Nowy użytkownik",
+        "order": 1,
+        "tplFile": "FormStep",
+        "attrs": {
+          "title": "Dodaj nowego użytkownika",
+          "schemaPath": "user",
+          "onSubmit": {
+            "collection": "users",
+            "navPath": "users/list",
+            "action": "create"
+          }
+        }
+      }
+    ]
+  }

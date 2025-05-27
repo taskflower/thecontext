@@ -1,5 +1,5 @@
-// src/pages/ConfigPage.tsx - Fixed scenario handling
-import { useComponent, useConfig } from "@/core/engine";
+// src/pages/ConfigPage.tsx - Fixed hooks and component safety
+import { useComponent, useConfig } from "@/core";
 import { useParams } from "react-router-dom";
 import { useMemo } from "react";
 import type { AppConfig, WorkspaceConfig, ScenarioConfig } from "@/core/types";
@@ -146,6 +146,7 @@ export default function ConfigPage() {
           filename={node.tplFile}
           attrs={node.attrs}
           ticketId={id}
+          key={`${currentStep}-${id || 'new'}`} // ✅ Add key to force remount on navigation
         />
       </LayoutWrapper>
     );
@@ -156,7 +157,7 @@ export default function ConfigPage() {
     <LayoutWrapper>
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
         {workspaceConfig.templateSettings?.widgets?.map((widget, index) => (
-          <WidgetRenderer key={index} theme={theme} widget={widget} />
+          <WidgetRenderer key={`widget-${index}`} theme={theme} widget={widget} />
         ))}
       </div>
     </LayoutWrapper>
@@ -176,14 +177,20 @@ function StepRenderer({ theme, filename, attrs, ticketId }: {
   if (!Component)
     return renderError("Step component missing", `${theme}/steps/${filename}`);
 
-  return <Component attrs={attrs} ticketId={ticketId} />;
+  // ✅ Safety check: ensure Component exists and attrs is valid before rendering
+  try {
+    return <Component attrs={attrs || {}} ticketId={ticketId} />;
+  } catch (renderError) {
+    console.error("Component render error:", renderError);
+    return renderError("Component render failed", String(renderError));
+  }
 }
 
 function WidgetRenderer({ theme, widget }: { theme: string; widget: any }) {
   const { Component, loading, error } = useComponent(
     theme,
     "widgets",
-    widget.tplFile
+    widget?.tplFile || ""
   );
 
   if (loading) return <div className="text-gray-100">Loading widget...</div>;
@@ -191,7 +198,7 @@ function WidgetRenderer({ theme, widget }: { theme: string; widget: any }) {
   if (!Component)
     return renderError(
       "Widget component missing",
-      `${theme}/widgets/${widget.tplFile}`
+      `${theme}/widgets/${widget?.tplFile}`
     );
 
   const getColSpanClass = (colSpan: string | number) => {
@@ -213,9 +220,15 @@ function WidgetRenderer({ theme, widget }: { theme: string; widget: any }) {
     }
   };
 
-  return (
-    <div className={getColSpanClass(widget.attrs?.colSpan || 1)}>
-      <Component {...widget} />
-    </div>
-  );
+  // ✅ Safety check: ensure widget and attrs exist
+  try {
+    return (
+      <div className={getColSpanClass(widget?.attrs?.colSpan || 1)}>
+        <Component {...(widget || {})} />
+      </div>
+    );
+  } catch (renderError) {
+    console.error("Widget render error:", renderError);
+    return renderError("Widget render failed", String(renderError));
+  }
 }
