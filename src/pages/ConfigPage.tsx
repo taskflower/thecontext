@@ -1,239 +1,128 @@
-// src/pages/ConfigPage.tsx - Fixed naming conflict
+// src/pages/ConfigPage.tsx - 50% lighter with fixed step logic + DEBUG LOGS
 import { useComponent, useConfig } from "@/core";
 import { useParams } from "react-router-dom";
 import { useMemo } from "react";
 import type { AppConfig, WorkspaceConfig, ScenarioConfig } from "@/core/types";
 
-const renderError = (message: string, details: string) => (
-  <div className="text-center py-12">
-    <div className="text-red-600 mb-4">{message}</div>
-    <div className="text-sm text-gray-500">{details}</div>
-  </div>
-);
-
-function LayoutWrapper({ children }: { children: React.ReactNode }) {
-  const { config, workspace } = useParams<{
-    config: string;
-    workspace: string;
-  }>();
-
-  const cfgName = useMemo(() => config || "exampleTicketApp", [config]);
-  const workspaceName = useMemo(() => workspace || "main", [workspace]);
-
-  const app = useConfig<AppConfig>(cfgName, `/src/_configs/${cfgName}/app.json`);
-  const workspaceConfig = useConfig<WorkspaceConfig>(
-    cfgName,
-    `/src/_configs/${cfgName}/workspaces/${workspaceName}.json`
+function Error({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="text-center py-12">
+      <div className="text-red-600 text-sm">{children}</div>
+    </div>
   );
-
-  const layoutConfig = useMemo(() => {
-    const theme = app?.tplDir || "test";
-    const layoutFile = workspaceConfig?.templateSettings?.layoutFile || "Simple";
-    return { theme, layoutFile };
-  }, [app?.tplDir, workspaceConfig?.templateSettings?.layoutFile]);
-
-  const {
-    Component: Layout,
-    loading,
-    error,
-  } = useComponent(layoutConfig.theme, "layouts", layoutConfig.layoutFile);
-
-  if (loading) return <div>Loading layout...</div>;
-  if (error) return <div>Layout error: {error}</div>;
-  if (!Layout)
-    return (
-      <div>
-        Layout not found: {layoutConfig.theme}/layouts/{layoutConfig.layoutFile}
-      </div>
-    );
-
-  return <Layout>{children}</Layout>;
 }
 
 export default function ConfigPage() {
   const { config, workspace, scenario, action, step, id } = useParams<{
-    config: string;
-    workspace: string;
-    scenario: string;
-    action: string; 
-    step: string;
-    id: string;
+    config: string; workspace: string; scenario: string; 
+    action: string; step: string; id: string;
   }>();
 
-  // Use defaults from app config if not provided
   const configName = config || "exampleTicketApp";
-  const workspaceName = workspace || "tickets"; // Use tickets as default
-
-  // ✅ Extract action parameter but ignore it for now
-  // TODO: Implement action handling in future versions
-  // const actionType = action; // Available for future use
-
+  const workspaceName = workspace || "tickets";
   const base = `/src/_configs/${configName}`;
+
   const app = useConfig<AppConfig>(configName, `${base}/app.json`);
-  
-  // Load workspace config first
-  const workspaceConfig = useConfig<WorkspaceConfig>(
-    configName,
-    `${base}/workspaces/${workspaceName}.json`
-  );
+  const workspaceConfig = useConfig<WorkspaceConfig>(configName, `${base}/workspaces/${workspaceName}.json`);
+  const scenarioConfig = useConfig<ScenarioConfig>(configName, scenario ? `${base}/scenarios/${workspaceName}/${scenario}.json` : "");
 
-  // Load scenario config only if scenario is specified
-  const scenarioConfig = useConfig<ScenarioConfig>(
-    configName,
-    scenario ? `${base}/scenarios/${workspaceName}/${scenario}.json` : ""
-  );
+  // Memoized layout config
+  const { theme, layoutFile } = useMemo(() => ({
+    theme: app?.tplDir || "default",
+    layoutFile: workspaceConfig?.templateSettings?.layoutFile || "Simple"
+  }), [app?.tplDir, workspaceConfig?.templateSettings?.layoutFile]);
 
-  if (!app) {
-    return (
-      <LayoutWrapper>
-        <div>Loading app config...</div>
-      </LayoutWrapper>
-    );
-  }
+  const { Component: Layout, loading: layoutLoading } = useComponent(theme, "layouts", layoutFile);
 
-  // If no workspace config and using defaults, redirect to default workspace
-  if (!workspaceConfig && !workspace) {
-    const defaultPath = `/${configName}/${app.defaultWorkspace}`;
-    window.location.href = defaultPath;
-    return null;
-  }
-
-  if (!workspaceConfig) {
-    return (
-      <LayoutWrapper>
-        {renderError("Workspace not found", `Workspace: ${workspaceName}`)}
-      </LayoutWrapper>
-    );
-  }
-
-  const theme = app.tplDir;
+  // Loading states
+  if (!app || layoutLoading) return <div>Loading...</div>;
+  if (!workspaceConfig) return <Error>Workspace not found: {workspaceName}</Error>;
+  if (!Layout) return <Error>Layout not found: {layoutFile}</Error>;
 
   // Handle scenario rendering
   if (scenario) {
-    if (!scenarioConfig) {
-      return (
-        <LayoutWrapper>
-          <div>Loading scenario...</div>
-        </LayoutWrapper>
-      );
-    }
+    if (!scenarioConfig) return <Layout><div>Loading scenario...</div></Layout>;
+    if (!scenarioConfig.nodes?.length) return <Layout><Error>Invalid scenario: {scenario}</Error></Layout>;
 
-    if (!scenarioConfig.nodes || !scenarioConfig.nodes.length) {
-      return (
-        <LayoutWrapper>
-          {renderError(
-            "Invalid scenario configuration",
-            `Scenario: ${scenario}, Step: ${step}, Action: ${action}, ID: ${id}`
-          )}
-        </LayoutWrapper>
-      );
+    // 🔥 DEBUG LOGS - sprawdzamy co się dzieje
+    console.log("=== DEBUGGING STEP SELECTION ===");
+    console.log("URL params:", { config, workspace, scenario, action, step, id });
+    console.log("Available nodes:", scenarioConfig.nodes.map(n => n.slug));
+    console.log("step param:", step);
+    console.log("id param:", id);
+    
+    // 🔥 FIXED: Handle routing bug - if action="step", use id as step name
+    let actualStep;
+    if (action === "step" && id) {
+      actualStep = id; // URL bug: /step/db-summary puts "db-summary" in id param
+    } else {
+      actualStep = step || (id && "form") || scenarioConfig.nodes[0].slug;
     }
-
-    // Determine current step (action parameter is ignored for now)
-    const currentStep = id ? "form" : step || scenarioConfig.nodes[0].slug;
-    const node = scenarioConfig.nodes.find((n) => n.slug === currentStep) || scenarioConfig.nodes[0];
-
-    if (!node) {
-      return (
-        <LayoutWrapper>
-          {renderError(
-            "Step not found in scenario",
-            `Step: ${currentStep}, Available: ${scenarioConfig.nodes.map(n => n.slug).join(', ')}`
-          )}
-        </LayoutWrapper>
-      );
-    }
+    
+    console.log("Action:", action);
+    console.log("Routing fix - actualStep:", actualStep);
+    
+    const node = scenarioConfig.nodes.find(n => n.slug === actualStep) || scenarioConfig.nodes[0];
+    console.log("Found node:", node?.slug, "with tplFile:", node?.tplFile);
+    console.log("=== END DEBUG ===");
 
     return (
-      <LayoutWrapper>
-        <StepRenderer
-          theme={theme}
-          filename={node.tplFile}
-          attrs={node.attrs}
-          ticketId={id}
-          key={`${currentStep}-${id || 'new'}`} // ✅ Key remains the same, action ignored
+      <Layout>
+        <StepRenderer 
+          theme={theme} 
+          filename={node.tplFile} 
+          attrs={node.attrs} 
+          ticketId={action === "step" ? undefined : id}
+          key={`${actualStep}-${id || 'new'}`}
         />
-      </LayoutWrapper>
+      </Layout>
     );
   }
 
-  // Handle workspace rendering (grid layout)
+  // Handle workspace grid
   return (
-    <LayoutWrapper>
+    <Layout>
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-        {workspaceConfig.templateSettings?.widgets?.map((widget, index) => (
-          <WidgetRenderer key={`widget-${index}`} theme={theme} widget={widget} />
+        {workspaceConfig.templateSettings?.widgets?.map((widget, i) => (
+          <WidgetRenderer key={i} theme={theme} widget={widget} />
         ))}
       </div>
-    </LayoutWrapper>
+    </Layout>
   );
 }
 
+// Compact components
 function StepRenderer({ theme, filename, attrs, ticketId }: {
-  theme: string;
-  filename: string;
-  attrs: any;
-  ticketId?: string;
+  theme: string; filename: string; attrs: any; ticketId?: string;
 }) {
   const { Component, loading, error } = useComponent(theme, "steps", filename);
-
-  if (loading) return <div className="text-gray-100">Loading step...</div>;
-  if (error) return renderError("Step not found", error);
-  if (!Component)
-    return renderError("Step component missing", `${theme}/steps/${filename}`);
-
-  // ✅ Fixed: Renamed caught error variable to avoid shadowing
+  if (loading) return <div>Loading step...</div>;
+  if (error || !Component) return <Error>Step not found: {filename}</Error>;
+  
   try {
     return <Component attrs={attrs || {}} ticketId={ticketId} />;
   } catch (err) {
-    console.error("Component render error:", err);
-    return renderError("Component render failed", String(err));
+    return <Error>Render failed: {String(err)}</Error>;
   }
 }
 
 function WidgetRenderer({ theme, widget }: { theme: string; widget: any }) {
-  const { Component, loading, error } = useComponent(
-    theme,
-    "widgets",
-    widget?.tplFile || ""
-  );
+  const { Component, loading, error } = useComponent(theme, "widgets", widget?.tplFile || "");
+  if (loading) return <div>Loading widget...</div>;
+  if (error || !Component) return <Error>Widget not found: {widget?.tplFile}</Error>;
 
-  if (loading) return <div className="text-gray-100">Loading widget...</div>;
-  if (error) return renderError("Widget not found", error);
-  if (!Component)
-    return renderError(
-      "Widget component missing",
-      `${theme}/widgets/${widget?.tplFile}`
-    );
-
-  const getColSpanClass = (colSpan: string | number) => {
-    switch (colSpan) {
-      case "full":
-      case 6:
-        return "col-span-full";
-      case 5:
-        return "col-span-5";
-      case 4:
-        return "col-span-4";
-      case 3:
-        return "col-span-3";
-      case 2:
-        return "col-span-2";
-      case 1:
-      default:
-        return "col-span-1";
-    }
+  const colSpanMap: Record<string | number, string> = {
+    "full": "col-span-full", 6: "col-span-full", 5: "col-span-5", 
+    4: "col-span-4", 3: "col-span-3", 2: "col-span-2", 1: "col-span-1"
   };
 
-  // ✅ Fixed: Renamed caught error variable to avoid shadowing
   try {
     return (
-      <div className={getColSpanClass(widget?.attrs?.colSpan || 1)}>
+      <div className={colSpanMap[widget?.attrs?.colSpan || 1] || "col-span-1"}>
         <Component {...(widget || {})} />
       </div>
     );
   } catch (err) {
-    console.error("Widget render error:", err);
-    return renderError("Widget render failed", String(err));
+    return <Error>Widget render failed: {String(err)}</Error>;
   }
 }

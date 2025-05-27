@@ -7,10 +7,9 @@
       "order": 1,
       "tplFile": "LLMGenerationStep",
       "attrs": {
-        "title": "Wygeneruj zgłoszenie przy pomocy AI",
+        "title": "🤖 Wygeneruj zgłoszenie przy pomocy AI",
         "description": "Opisz problem, a AI automatycznie wypełni wszystkie pola zgłoszenia",
         "schemaPath": "ticket",
-        "collection": "tickets",
         "placeholder": "Opisz swój problem szczegółowo, np. 'Nie mogę się zalogować do systemu CRM', 'Komputer w sali konferencyjnej nie uruchamia się', 'Potrzebuję dostęp do nowej aplikacji'...",
         "contextInstructions": "Im więcej szczegółów podasz, tym lepiej AI dopasuje priorytet, kategorię i inne parametry zgłoszenia",
         "examplePrompts": [
@@ -21,38 +20,38 @@
           "Prośba o instalację oprogramowania",
           "Błąd w kalkulacji raportów sprzedażowych"
         ],
-        "navPath": "tickets/list",
         "cancelNavPath": "tickets/list/view",
-        "nextStep": "form-review"
+        "navPath": "tickets/llm-create/db-summary",
+        "saveToContext": true,
+        "contextKey": "generatedTicket"
       }
     },
     {
-      "slug": "form-review",
-      "label": "Przejrzyj wygenerowane zgłoszenie",
+      "slug": "db-summary",
+      "label": "Przejrzyj i zapisz zgłoszenie",
       "order": 2,
-      "tplFile": "FormStep",
+      "tplFile": "DbSummaryStep",
       "attrs": {
-        "title": "Przejrzyj i edytuj wygenerowane zgłoszenie",
-        "description": "Sprawdź czy wszystkie dane zostały poprawnie wypełnione przez AI",
+        "title": "📋 Przejrzyj wygenerowane zgłoszenie",
+        "description": "Sprawdź dane wygenerowane przez AI i zapisz zgłoszenie do bazy danych",
         "schemaPath": "ticket",
-        "loadFromPreviousStep": true,
+        "collection": "tickets",
+        "contextKey": "generatedTicket",
+        "navPath": "tickets/list/view",
+        "cancelNavPath": "tickets/list/view",
+        "allowEdit": true,
         "showGeneratedBadge": true,
-        "onSubmit": {
-          "collection": "tickets",
-          "navPath": "tickets/list/view",
-          "action": "create"
-        },
         "additionalActions": [
           {
             "type": "regenerate",
             "label": "🔄 Wygeneruj ponownie",
-            "navPath": "tickets/llm-create/new",
+            "navPath": "tickets/llm-create/llm-generation",
             "variant": "secondary"
           },
           {
-            "type": "cancel",
-            "label": "Anuluj",
-            "navPath": "tickets/list/view",
+            "type": "custom",
+            "label": "✏️ Edytuj ręcznie",
+            "navPath": "tickets/create/form",
             "variant": "outline"
           }
         ]

@@ -1,7 +1,7 @@
-// src/themes/default/steps/FormStep.tsx - Fixed hooks order
+// src/themes/default/steps/FormStep.tsx - Updated with context storage
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useWorkspaceSchema, useCollections } from "@/core";
+import { useWorkspaceSchema, useCollections, useEngineStore } from "@/core";
 import { FieldWidget } from "../widgets/form/FieldWidget";
 import type { ScenarioNode } from "@/core/types";
 
@@ -11,6 +11,8 @@ interface FormStepProps {
       collection: string;
       navPath: string;
       action?: "create" | "update";
+      saveToContext?: boolean; // NEW: flag to save to context instead of DB
+      contextKey?: string; // NEW: key for context storage
     };
   };
   ticketId?: string;
@@ -21,13 +23,14 @@ export default function FormStep({ attrs, ticketId }: FormStepProps) {
   const params = useParams<{ id: string; config: string; workspace: string }>();
   const editId = ticketId || params.id;
 
-  // ✅ ALL HOOKS MUST BE CALLED FIRST - BEFORE ANY CONDITIONAL RETURNS
+  // ✅ ALL HOOKS MUST BE CALLED FIRST
   const { schema, loading, error } = useWorkspaceSchema(attrs?.schemaPath || "");
   const { items, saveItem, loading: itemsLoading } = useCollections(attrs?.onSubmit?.collection || "");
+  const { get, set } = useEngineStore(); // NEW: for context storage
   const [data, setData] = useState<Record<string, any>>({});
   const [saving, setSaving] = useState(false);
 
-  // ✅ Now we can do conditional returns AFTER all hooks are called
+  // ✅ Configuration validation
   if (!attrs) {
     return (
       <div className="py-24 text-center">
@@ -54,14 +57,11 @@ export default function FormStep({ attrs, ticketId }: FormStepProps) {
     );
   }
 
-  if (!attrs.onSubmit?.collection) {
+  if (!attrs.onSubmit?.collection && !attrs.onSubmit?.saveToContext) {
     return (
       <div className="py-24 text-center">
         <div className="text-red-600 text-sm font-medium mb-2">Configuration Error</div>
-        <div className="text-xs text-zinc-500">Missing onSubmit.collection in form configuration</div>
-        <div className="mt-2 text-xs text-gray-400">
-          Expected: attrs.onSubmit.collection
-        </div>
+        <div className="text-xs text-zinc-500">Missing onSubmit.collection or saveToContext in form configuration</div>
       </div>
     );
   }
@@ -74,19 +74,28 @@ export default function FormStep({ attrs, ticketId }: FormStepProps) {
     Object.entries(schema.properties).forEach(([key, field]) => {
       if (field.default != null) defaults[key] = field.default;
     });
-    setData(defaults);
 
-    // Load existing record if editing
-    if (attrs.loadFromParams && editId && !itemsLoading) {
+    // NEW: Check if we should load from context first
+    const contextKey = attrs.onSubmit?.contextKey || attrs.schemaPath;
+    const contextData = get(contextKey);
+    
+    if (contextData) {
+      // Load from context (highest priority)
+      setData(prev => ({ ...defaults, ...contextData }));
+    } else if (attrs.loadFromParams && editId && !itemsLoading) {
+      // Load existing record from DB if editing
       const existingRecord = items.find(item => (item as any).id === editId);
       if (existingRecord) {
-        setData(prev => ({ ...prev, ...existingRecord }));
-      } else if (items.length > 0) { // Only show error if items are loaded
+        setData(prev => ({ ...defaults, ...existingRecord }));
+      } else if (items.length > 0) {
         alert("Record not found");
         navigate(`/${params.config}/${attrs.onSubmit.navPath}`);
       }
+    } else {
+      // Just set defaults
+      setData(defaults);
     }
-  }, [schema, editId, items, itemsLoading, attrs.loadFromParams, attrs.onSubmit.navPath, navigate, params.config]);
+  }, [schema, editId, items, itemsLoading, attrs.loadFromParams, attrs.onSubmit.navPath, attrs.onSubmit.contextKey, attrs.schemaPath, navigate, params.config, get]);
 
   if (loading) return (
     <div className="flex items-center justify-center py-24">
@@ -113,8 +122,18 @@ export default function FormStep({ attrs, ticketId }: FormStepProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    
     try {
-      await saveItem({ ...data, id: editId || Date.now().toString() });
+      if (attrs.onSubmit.saveToContext) {
+        // NEW: Save to context instead of database
+        const contextKey = attrs.onSubmit.contextKey || attrs.schemaPath;
+        set(contextKey, { ...data, id: editId || Date.now().toString() });
+        console.log(`Saved to context: ${contextKey}`, data);
+      } else {
+        // Original behavior: save to database
+        await saveItem({ ...data, id: editId || Date.now().toString() });
+      }
+      
       navigate(`/${params.config}/${attrs.onSubmit.navPath}`);
     } catch (err: any) {
       console.error("Save error:", err);
@@ -131,11 +150,16 @@ export default function FormStep({ attrs, ticketId }: FormStepProps) {
           <h2 className="text-xl font-semibold text-zinc-900">
             {attrs.title || (editId ? "Edit Record" : "New Record")}
           </h2>
+          {attrs.description && (
+            <p className="text-zinc-600 mt-2 text-sm">{attrs.description}</p>
+          )}
         </div>
         <form onSubmit={handleSubmit} className="p-6">
           {process.env.NODE_ENV === "development" && (
             <div className="mb-6 p-3 bg-zinc-50 rounded text-xs font-mono text-zinc-600">
-              Debug: editId={editId}, schemaPath={attrs.schemaPath}, collection={attrs.onSubmit.collection}
+              Debug: editId={editId}, schemaPath={attrs.schemaPath}, 
+              saveToContext={attrs.onSubmit.saveToContext}, 
+              contextKey={attrs.onSubmit.contextKey || attrs.schemaPath}
             </div>
           )}
           <div className="space-y-5">
@@ -156,7 +180,9 @@ export default function FormStep({ attrs, ticketId }: FormStepProps) {
               className="flex-1 bg-zinc-900 text-white text-sm font-medium px-4 py-2.5 rounded-md hover:bg-zinc-800 disabled:opacity-50"
               disabled={saving}
             >
-              {saving ? "Saving..." : editId ? "Update" : "Save"}
+              {saving ? "Saving..." : 
+                attrs.onSubmit.saveToContext ? "Continue" : 
+                editId ? "Update" : "Save"}
             </button>
             <button
               type="button"

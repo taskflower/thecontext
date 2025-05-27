@@ -5,7 +5,7 @@
       "slug": "view",
       "label": "Lista zgłoszeń",
       "order": 1,
-      "tplFile": "ListStep",
+      "tplFile": "ListTableStep",
       "attrs": {
         "schemaPath": "ticket",
         "collection": "tickets",

@@ -5,7 +5,7 @@
         "slug": "view",
         "label": "Lista użytkowników",
         "order": 1,
-        "tplFile": "ListStep",
+        "tplFile": "ListTableStep",
         "attrs": {
           "schemaPath": "user",
           "collection": "users",
