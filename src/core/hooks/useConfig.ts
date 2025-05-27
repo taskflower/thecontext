@@ -1,4 +1,4 @@
-// src/core/hooks/useConfig.ts - TYLKO konfiguracja
+// src/core/hooks/useConfig.ts
 import { useState, useEffect } from "react";
 import { configDB } from '@/db';
 

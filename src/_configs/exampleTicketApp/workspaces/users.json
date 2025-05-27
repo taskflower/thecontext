@@ -17,7 +17,7 @@
           "tplFile": "ButtonWidget",
           "title": "➕ Add New User",
           "attrs": {
-            "navPath": "users/create",
+            "navPath": "users/create/new",
             "variant": "primary",
             "colSpan": 1
           }
@@ -26,7 +26,7 @@
           "tplFile": "ButtonWidget",
           "title": "👥 View All Users",
           "attrs": {
-            "navPath": "users/list",
+            "navPath": "users/list/view",
             "variant": "secondary",
             "colSpan": 1
           }
