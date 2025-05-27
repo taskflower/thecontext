@@ -20,6 +20,7 @@ interface LLMGenerationStepProps {
 }
 
 export default function LLMGenerationStep({ attrs }: LLMGenerationStepProps) {
+  // ✅ ALL HOOKS AT TOP LEVEL
   const navigate = useNavigate();
   const { config = "exampleTicketApp", workspace = "" } = useParams();
   const { schema, loading, error } = useWorkspaceSchema(attrs?.schemaPath || "");
@@ -28,46 +29,46 @@ export default function LLMGenerationStep({ attrs }: LLMGenerationStepProps) {
 
   const contextKey = attrs?.contextKey || attrs.schemaPath;
 
-  // Build Zod and JSON Schema
+  // Build Zod and JSON Schema from existing schema
   const { zodSchema, jsonSchema } = useMemo(() => {
     if (!schema?.properties) return { zodSchema: undefined, jsonSchema: null };
 
+    // Convert schema to Zod - much simpler!
     const zFields: Record<string, any> = {};
-    const jsProps: Record<string, any> = {};
-    const required: string[] = [];
-
     Object.entries(schema.properties).forEach(([key, field]: any) => {
-      // Build base Zod field
-      let zf = field.type === 'boolean' ? z.boolean() :
-              field.type === 'number' ? z.number() :
-              field.enum ? z.enum(field.enum) : z.string();
-      
-      // Add description
-      zf = zf.describe(field.label || key);
-      
-      // Store the field (don't make optional here for useLlmEngine)
-      zFields[key] = zf;
-
-      // Build JSON Schema property
-      jsProps[key] = {
-        type: field.type,
-        description: field.label || key,
-        ...(field.enum && { enum: field.enum }),
-      };
-      
-      // Track required fields
-      if (field.required) {
-        required.push(key);
+      let zf;
+      switch (field.type) {
+        case 'boolean': zf = z.boolean(); break;
+        case 'number': zf = z.number(); break;
+        default: zf = field.enum ? z.enum(field.enum) : z.string();
       }
+      
+      // Make optional if not required
+      if (!field.required) zf = zf.optional();
+      
+      zFields[key] = zf.describe(field.label || key);
     });
+
+    // JSON Schema is just our existing schema with some tweaks
+    const jsonSchema = {
+      type: "object",
+      properties: Object.fromEntries(
+        Object.entries(schema.properties).map(([key, field]: any) => [
+          key, {
+            type: field.type,
+            description: field.label || key,
+            ...(field.enum && { enum: field.enum })
+          }
+        ])
+      ),
+      required: Object.entries(schema.properties)
+        .filter(([_, field]: any) => field.required)
+        .map(([key]) => key)
+    };
 
     return {
       zodSchema: z.object(zFields),
-      jsonSchema: { 
-        type: "object", 
-        properties: jsProps, 
-        required 
-      }
+      jsonSchema
     };
   }, [schema]);
 

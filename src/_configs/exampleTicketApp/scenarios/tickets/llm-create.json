@@ -21,7 +21,7 @@
           "Błąd w kalkulacji raportów sprzedażowych"
         ],
         "cancelNavPath": "tickets/list/view",
-        "navPath": "tickets/llm-create/db-summary",
+        "navPath": "tickets/db-summary/view",
         "saveToContext": true,
         "contextKey": "generatedTicket"
       }
