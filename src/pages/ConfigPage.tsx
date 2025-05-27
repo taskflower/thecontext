@@ -1,7 +1,8 @@
-// src/pages/ConfigPage.tsx - Zaktualizowana wersja z LayoutWrapper
+// src/pages/ConfigPage.tsx - Fixed scenario handling
 import { useComponent, useConfig } from "@/core/engine";
 import { useParams } from "react-router-dom";
 import { useMemo } from "react";
+import type { AppConfig, WorkspaceConfig, ScenarioConfig } from "@/core/types";
 
 const renderError = (message: string, details: string) => (
   <div className="text-center py-12">
@@ -10,28 +11,24 @@ const renderError = (message: string, details: string) => (
   </div>
 );
 
-// LayoutWrapper przeniesiony z App.tsx
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const { config, workspace } = useParams<{
     config: string;
     workspace: string;
   }>();
 
-  // Memoize config name to prevent re-renders
   const cfgName = useMemo(() => config || "exampleTicketApp", [config]);
   const workspaceName = useMemo(() => workspace || "main", [workspace]);
 
-  const app = useConfig<any>(cfgName, `/src/_configs/${cfgName}/app.json`);
-  const workspaceConfig = useConfig<any>(
+  const app = useConfig<AppConfig>(cfgName, `/src/_configs/${cfgName}/app.json`);
+  const workspaceConfig = useConfig<WorkspaceConfig>(
     cfgName,
     `/src/_configs/${cfgName}/workspaces/${workspaceName}.json`
   );
 
-  // Memoize layout configuration - tylko te wartości mają wpływ na layout
   const layoutConfig = useMemo(() => {
     const theme = app?.tplDir || "test";
-    const layoutFile =
-      workspaceConfig?.templateSettings?.layoutFile || "Simple";
+    const layoutFile = workspaceConfig?.templateSettings?.layoutFile || "Simple";
     return { theme, layoutFile };
   }, [app?.tplDir, workspaceConfig?.templateSettings?.layoutFile]);
 
@@ -54,50 +51,89 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
 }
 
 export default function ConfigPage() {
-  const { config, workspace, scenario, step, id } = useParams();
+  const { config, workspace, scenario, step, id } = useParams<{
+    config: string;
+    workspace: string;
+    scenario: string;
+    step: string;
+    id: string;
+  }>();
 
-  if (!config || !workspace) return renderError("Invalid path", "");
+  // Use defaults from app config if not provided
+  const configName = config || "exampleTicketApp";
+  const workspaceName = workspace || "tickets"; // Use tickets as default
 
-  const base = `/src/_configs/${config}`;
-  const app = useConfig<any>(config, `${base}/app.json`);
-  const cfg = useConfig<any>(
-    config,
-    scenario
-      ? `${base}/scenarios/${workspace}/${scenario}.json`
-      : `${base}/workspaces/${workspace}.json`
+  const base = `/src/_configs/${configName}`;
+  const app = useConfig<AppConfig>(configName, `${base}/app.json`);
+  
+  // Load workspace config first
+  const workspaceConfig = useConfig<WorkspaceConfig>(
+    configName,
+    `${base}/workspaces/${workspaceName}.json`
   );
 
-  if (!app || !cfg)
+  // Load scenario config only if scenario is specified
+  const scenarioConfig = useConfig<ScenarioConfig>(
+    configName,
+    scenario ? `${base}/scenarios/${workspaceName}/${scenario}.json` : ""
+  );
+
+  if (!app) {
     return (
       <LayoutWrapper>
-        <div>Loading config...</div>
+        <div>Loading app config...</div>
       </LayoutWrapper>
     );
+  }
+
+  // If no workspace config and using defaults, redirect to default workspace
+  if (!workspaceConfig && !workspace) {
+    const defaultPath = `/${configName}/${app.defaultWorkspace}`;
+    window.location.href = defaultPath;
+    return null;
+  }
+
+  if (!workspaceConfig) {
+    return (
+      <LayoutWrapper>
+        {renderError("Workspace not found", `Workspace: ${workspaceName}`)}
+      </LayoutWrapper>
+    );
+  }
 
   const theme = app.tplDir;
 
+  // Handle scenario rendering
   if (scenario) {
-    if (!cfg.nodes || !cfg.nodes.length) {
+    if (!scenarioConfig) {
+      return (
+        <LayoutWrapper>
+          <div>Loading scenario...</div>
+        </LayoutWrapper>
+      );
+    }
+
+    if (!scenarioConfig.nodes || !scenarioConfig.nodes.length) {
       return (
         <LayoutWrapper>
           {renderError(
-            "Błąd konfiguracji scenariusza",
+            "Invalid scenario configuration",
             `Scenario: ${scenario}, Step: ${step}, ID: ${id}`
           )}
         </LayoutWrapper>
       );
     }
 
-    const currentStep = id ? "form" : step;
-    const node =
-      cfg.nodes.find((n: any) => n.slug === currentStep) || cfg.nodes[0];
+    // Determine current step
+    const currentStep = id ? "form" : step || scenarioConfig.nodes[0].slug;
+    const node = scenarioConfig.nodes.find((n) => n.slug === currentStep) || scenarioConfig.nodes[0];
 
     if (!node) {
       return (
         <LayoutWrapper>
           {renderError(
-            "Krok nie został znaleziony",
-            `Step: ${currentStep}, ID: ${id}`
+            "Step not found in scenario",
+            `Step: ${currentStep}, Available: ${scenarioConfig.nodes.map(n => n.slug).join(', ')}`
           )}
         </LayoutWrapper>
       );
@@ -115,11 +151,11 @@ export default function ConfigPage() {
     );
   }
 
-  // Grid 6-kolumnowy z elastycznym układem
+  // Handle workspace rendering (grid layout)
   return (
     <LayoutWrapper>
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-        {cfg.templateSettings?.widgets?.map((widget: any, index: number) => (
+        {workspaceConfig.templateSettings?.widgets?.map((widget, index) => (
           <WidgetRenderer key={index} theme={theme} widget={widget} />
         ))}
       </div>
@@ -127,7 +163,12 @@ export default function ConfigPage() {
   );
 }
 
-function StepRenderer({ theme, filename, attrs, ticketId }: any) {
+function StepRenderer({ theme, filename, attrs, ticketId }: {
+  theme: string;
+  filename: string;
+  attrs: any;
+  ticketId?: string;
+}) {
   const { Component, loading, error } = useComponent(theme, "steps", filename);
 
   if (loading) return <div className="text-gray-100">Loading step...</div>;
@@ -157,7 +198,7 @@ function WidgetRenderer({ theme, widget }: { theme: string; widget: any }) {
     switch (colSpan) {
       case "full":
       case 6:
-        return "col-span-full"; // pełna szerokość
+        return "col-span-full";
       case 5:
         return "col-span-5";
       case 4:

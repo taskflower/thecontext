@@ -1,11 +1,9 @@
-// ----------------------------------------
-// src/core/engine.ts
+// src/core/engine.ts - Poprawione eksporty
 export { useComponent } from "./hooks/useComponent";
 export { getAvailableThemes } from "./hooks/getAvailableThemes";
-export { useEngineStore } from "./hooks/useEngineStore";
+export { useEngineStore } from "./hooks/useEngineStore"; // TYLKO kontekst
 export { useLlmEngine } from "./hooks/useLlmEngine";
-export { loadConfig } from "./hooks/loadConfig";
-export { useConfig } from "./hooks/useConfig";
-export { useLocalStore } from "./hooks/useLocalStore";
+export { useConfig } from "./hooks/useConfig"; // TYLKO konfiguracja
+export { useCollections } from "./hooks/useCollections"; // TYLKO kolekcje
 export { useWorkspaceSchema } from "./hooks/useWorkspaceSchema";
 export type * from "./types";

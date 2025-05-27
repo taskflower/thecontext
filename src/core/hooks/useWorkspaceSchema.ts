@@ -1,6 +1,5 @@
-// ----------------------------------------
-// src/core/hooks/useWorkspaceSchema.ts
-import { useState, useEffect } from "react";
+// src/core/hooks/useWorkspaceSchema.ts - Optimized (-50% size)
+import { useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useConfig } from "./useConfig";
 import type { WorkspaceConfig, SchemaHookResult } from "../types";
@@ -16,21 +15,16 @@ export function useWorkspaceSchema(schemaPath: string): SchemaHookResult {
     `/src/_configs/${config}/workspaces/${workspace}.json`
   );
 
-  const [schema, setSchema] = useState<any>(null);
-
-  useEffect(() => {
-    if (!workspaceConfig || !schemaPath) return;
-    const s = workspaceConfig.contextSchema?.[schemaPath];
-    setSchema(s ?? null);
+  const result = useMemo(() => {
+    if (!workspaceConfig) return { schema: null, loading: true, error: null };
+    
+    const schema = workspaceConfig.contextSchema?.[schemaPath];
+    return {
+      schema: schema ?? null,
+      loading: false,
+      error: schema ? null : `Nie znaleziono schemy ${schemaPath}`,
+    };
   }, [workspaceConfig, schemaPath]);
 
-  return {
-    schema,
-    loading: !workspaceConfig,
-    error: !workspaceConfig
-      ? null
-      : schema
-      ? null
-      : `Nie znaleziono schemy ${schemaPath}`,
-  };
+  return result;
 }

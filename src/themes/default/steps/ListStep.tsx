@@ -1,198 +1,112 @@
-// src/themes/default/steps/ListStep.tsx (refactored)
-import { useState, useEffect } from "react";
-import { configDB } from "../../../db";
-import { useWorkspaceSchema } from "@/core/engine";
+// src/themes/default/steps/ListStep.tsx - używa useCollections dla danych
+import { useState, useEffect, useMemo } from "react";
+import { useWorkspaceSchema, useCollections } from "@/core/engine";
 import ListHeader from "../commons/ListHeader";
 import DataTable, { Column } from "../commons/ListDataTable";
 import Pagination from "../commons/ListPaination";
 
-
-type ListStepAttrs = {
-  schemaPath: string;
-  collection: string;
-  title?: string;
-  description?: string;
-  emptyState?: {
-    icon?: string;
+interface ListStepProps {
+  attrs: {
+    schemaPath: string;
+    collection: string;
     title?: string;
     description?: string;
-    actionButton?: {
+    emptyState?: {
+      icon?: string;
+      title?: string;
+      description?: string;
+      actionButton?: { title: string; navPath: string };
+    };
+    columns?: Array<{
+      key: string;
+      label?: string;
+      type?: "text" | "badge" | "date" | "enum";
+      width?: string;
+      sortable?: boolean;
+    }>;
+    actions?: Array<{
+      type: "edit" | "delete" | "custom";
+      label?: string;
+      navPath?: string;
+      confirm?: string;
+      variant?: "default" | "danger";
+    }>;
+    widgets?: Array<{
+      tplFile: string;
       title: string;
-      navPath: string;
-    };
+      attrs: { navPath: string; variant?: "primary" | "secondary" };
+    }>;
+    pagination?: { pageSize?: number; showTotal?: boolean };
+    search?: { enabled?: boolean; placeholder?: string; fields?: string[] };
+    sorting?: { enabled?: boolean; defaultField?: string; defaultDirection?: "asc" | "desc" };
   };
-  columns?: Array<{
-    key: string;
-    label?: string;
-    type?: "text" | "badge" | "date" | "enum";
-    width?: string;
-    sortable?: boolean;
-  }>;
-  actions?: Array<{
-    type: "edit" | "delete" | "custom";
-    label?: string;
-    navPath?: string;
-    confirm?: string;
-    variant?: "default" | "danger";
-  }>;
-  widgets?: Array<{
-    tplFile: string;
-    title: string;
-    attrs: {
-      navPath: string;
-      variant?: "primary" | "secondary";
-    };
-  }>;
-  pagination?: {
-    pageSize?: number;
-    showTotal?: boolean;
-  };
-  search?: {
-    enabled?: boolean;
-    placeholder?: string;
-    fields?: string[];
-  };
-  sorting?: {
-    enabled?: boolean;
-    defaultField?: string;
-    defaultDirection?: "asc" | "desc";
-  };
-};
-
-interface ListStepProps {
-  attrs: ListStepAttrs;
 }
 
 export default function ListStep({ attrs }: ListStepProps) {
   const { schema, loading, error } = useWorkspaceSchema(attrs.schemaPath);
-
-  const [records, setRecords] = useState<any[]>([]);
-  const [filteredRecords, setFilteredRecords] = useState<any[]>([]);
-  const [loadingRecords, setLoadingRecords] = useState(true);
+  const { items: records, loading: loadingRecords, deleteItem } = useCollections(attrs.collection);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState(attrs.sorting?.defaultField || "");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">(
-    attrs.sorting?.defaultDirection || "asc"
-  );
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">(attrs.sorting?.defaultDirection || "asc");
   const [currentPage, setCurrentPage] = useState(1);
 
   const pageSize = attrs.pagination?.pageSize || 10;
 
-  useEffect(() => {
-    loadRecords();
-  }, []);
-
-  useEffect(() => {
-    filterAndSortRecords();
-  }, [records, searchTerm, sortField, sortDirection]);
-
-  const loadRecords = async () => {
-    try {
-      setLoadingRecords(true);
-      const data = await configDB.records
-        .where("id")
-        .startsWith(`${attrs.collection}:`)
-        .toArray();
-
-      const recordList = data.map((record) => ({
-        id: record.id?.replace(`${attrs.collection}:`, "") ?? "",
-        ...record.data,
-      }));
-
-      setRecords(recordList);
-    } catch (error) {
-      console.error("Failed to load records:", error);
-    } finally {
-      setLoadingRecords(false);
-    }
-  };
-
-  const filterAndSortRecords = () => {
+  const filteredRecords = useMemo(() => {
     let filtered = [...records];
 
-    // Filtrowanie
+    // Search
     if (searchTerm && attrs.search?.enabled) {
-      const searchFields =
-        attrs.search.fields || Object.keys(schema?.properties || {});
-      filtered = filtered.filter((record) =>
-        searchFields.some((field) =>
-          String(record[field] || "")
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase())
-        )
+      const searchFields = attrs.search.fields || Object.keys(schema?.properties || {});
+      filtered = filtered.filter(record =>
+        searchFields.some(field => String((record as any)[field] || "").toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
-    // Sortowanie
+    // Sort
     if (sortField && attrs.sorting?.enabled) {
       filtered.sort((a, b) => {
-        const aVal = a[sortField] || "";
-        const bVal = b[sortField] || "";
-        const comparison = String(aVal).localeCompare(String(bVal));
+        const comparison = String((a as any)[sortField] || "").localeCompare(String((b as any)[sortField] || ""));
         return sortDirection === "asc" ? comparison : -comparison;
       });
     }
 
-    setFilteredRecords(filtered);
-    setCurrentPage(1);
-  };
+    return filtered;
+  }, [records, searchTerm, sortField, sortDirection, attrs.search, attrs.sorting, schema]);
+
+  useEffect(() => { setCurrentPage(1); }, [searchTerm, sortField, sortDirection]);
 
   const handleDelete = async (recordId: string) => {
     try {
-      await configDB.records.delete(`${attrs.collection}:${recordId}`);
-      await loadRecords();
+      await deleteItem(recordId);
     } catch (error) {
       console.error("Failed to delete record:", error);
       alert("Błąd podczas usuwania rekordu");
     }
   };
 
-  const handleSort = (field: string, direction: "asc" | "desc") => {
-    setSortField(field);
-    setSortDirection(direction);
-  };
+  const columns = attrs.columns || Object.entries(schema?.properties || {}).map(([key, field]: any) => ({
+    key,
+    label: field.label || key,
+    type: field.enum ? "badge" : field.format === "date" ? "date" : "text",
+  }));
 
-  const getDefaultColumns = () => {
-    if (!schema?.properties) return [];
-    return Object.entries(schema.properties).map(([key, field]: any) => ({
-      key,
-      label: field.label || key,
-      type: field.enum ? "badge" : field.format === "date" ? "date" : "text",
-    }));
-  };
-
-  const columns = attrs.columns || getDefaultColumns();
-  const paginatedRecords = filteredRecords.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  const paginatedRecords = filteredRecords.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const totalPages = Math.ceil(filteredRecords.length / pageSize);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <div className="flex items-center gap-3">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900" />
-          <span className="text-sm font-medium text-zinc-600">
-            Ładowanie konfiguracji
-          </span>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="flex items-center justify-center py-24">
+      <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900" />
+      <span className="ml-3 text-sm font-medium text-zinc-600">Ładowanie konfiguracji</span>
+    </div>
+  );
 
-  if (error || !schema) {
-    return (
-      <div className="py-24 text-center">
-        <div className="text-red-600 text-sm font-medium mb-2">
-          Błąd konfiguracji
-        </div>
-        <div className="text-xs text-zinc-500">
-          {error || `Nie znaleziono schemy: ${attrs.schemaPath}`}
-        </div>
-      </div>
-    );
-  }
+  if (error || !schema) return (
+    <div className="py-24 text-center">
+      <div className="text-red-600 text-sm font-medium mb-2">Błąd konfiguracji</div>
+      <div className="text-xs text-zinc-500">{error || `Nie znaleziono schemy: ${attrs.schemaPath}`}</div>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -217,7 +131,7 @@ export default function ListStep({ attrs }: ListStepProps) {
         sortField={sortField}
         sortDirection={sortDirection}
         sortingEnabled={attrs.sorting?.enabled}
-        onSort={handleSort}
+        onSort={(field, direction) => { setSortField(field); setSortDirection(direction); }}
         onDelete={handleDelete}
         collection={attrs.collection}
       />

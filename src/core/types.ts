@@ -1,4 +1,4 @@
-// src/core/types.ts
+// src/core/types.ts - Stronger typing
 import { ComponentType } from "react";
 import { ZodType } from "zod";
 
@@ -16,17 +16,119 @@ export interface ConfigRecord {
   updatedAt: Date;
 }
 
-export interface WorkspaceConfig {
-  contextSchema?: Record<string, any>;
+// Stronger typing for schema properties
+export interface SchemaProperty {
+  type: "string" | "number" | "boolean";
+  label: string;
+  fieldType: "text" | "textarea" | "select" | "email" | "date" | "checkbox" | "number";
+  required: boolean;
+  enum?: string[];
+  enumLabels?: Record<string, string>;
+  enumHints?: Record<string, string>;
+  default?: any;
+  minimum?: number;
+  maximum?: number;
+  aiHint?: string;
 }
 
+export interface ContextSchema {
+  type: "object";
+  properties: Record<string, SchemaProperty>;
+}
+
+export interface WorkspaceConfig {
+  slug?: string;
+  name: string;
+  templateSettings: {
+    layoutFile: string;
+    widgets: Array<{
+      tplFile: string;
+      title: string;
+      attrs: Record<string, any>;
+    }>;
+  };
+  contextSchema: Record<string, ContextSchema>;
+}
+
+// Scenario configuration types
+export interface ScenarioNode {
+  slug: string;
+  label: string;
+  order: number;
+  tplFile: string;
+  attrs: {
+    title?: string;
+    schemaPath: string;
+    collection?: string;
+    loadFromParams?: boolean;
+    excludeFields?: string[];
+    onSubmit?: {
+      collection: string;
+      navPath: string;
+      action?: "create" | "update";
+    };
+    // LLM specific
+    description?: string;
+    placeholder?: string;
+    contextInstructions?: string;
+    examplePrompts?: string[];
+    navPath?: string;
+    cancelNavPath?: string;
+    systemMessage?: string;
+    // List specific
+    emptyState?: {
+      icon?: string;
+      title?: string;
+      description?: string;
+      actionButton?: { title: string; navPath: string };
+    };
+    columns?: Array<{
+      key: string;
+      label?: string;
+      type?: "text" | "badge" | "date" | "enum";
+      width?: string;
+      sortable?: boolean;
+    }>;
+    actions?: Array<{
+      type: "edit" | "delete" | "custom";
+      label?: string;
+      navPath?: string;
+      confirm?: string;
+      variant?: "default" | "danger";
+    }>;
+    widgets?: Array<{
+      tplFile: string;
+      title: string;
+      attrs: { navPath: string; variant?: "primary" | "secondary" };
+    }>;
+    pagination?: { pageSize?: number; showTotal?: boolean };
+    search?: { enabled?: boolean; placeholder?: string; fields?: string[] };
+    sorting?: { enabled?: boolean; defaultField?: string; defaultDirection?: "asc" | "desc" };
+  };
+}
+
+export interface ScenarioConfig {
+  slug: string;
+  nodes: ScenarioNode[];
+}
+
+export interface AppConfig {
+  name: string;
+  tplDir: string;
+  defaultWorkspace: string;
+  defaultScenario: string;
+  database: {
+    provider: string;
+    collections: Record<string, string>;
+  };
+}
+
+// Updated FlowState - ONLY for context data
 export interface FlowState {
   data: Record<string, any>;
   get: (path: string) => any;
   set: (path: string, value: any) => void;
   reset: () => void;
-  getAll: (prefix: string) => Promise<any[]>;
-  addRecord: (id: string, data: any) => Promise<void>;
 }
 
 export interface LlmMessage {
@@ -52,13 +154,8 @@ export interface LlmHookResult<T> {
   setStarted: (value: boolean) => void;
 }
 
-export interface LocalStoreHook<T> {
-  items: T[];
-  add: (data: T) => void;
-}
-
 export interface SchemaHookResult {
-  schema: any;
+  schema: ContextSchema | null;
   loading: boolean;
   error: string | null;
 }
