@@ -9,8 +9,6 @@
       "attrs": {
         "schemaPath": "ticket",
         "collection": "tickets",
-        "title": "Lista zgłoszeń",
-        "description": "Zarządzaj wszystkimi zgłoszeniami support",
         "emptyState": {
           "icon": "🎫",
           "title": "Brak zgłoszeń",
@@ -20,6 +18,41 @@
             "navPath": "tickets/create/new"
           }
         },
+        "headerWidgets": [
+          {
+            "tplFile": "TitleWidget",
+            "title": "Lista zgłoszeń",
+            "attrs": {
+              "description": "Zarządzaj wszystkimi zgłoszeniami support",
+              "size": "large",
+              "align": "left"
+            }
+          },
+          {
+            "tplFile": "ButtonWidget",
+            "title": "➕ Dodaj nowe zgłoszenie",
+            "attrs": {
+              "variant": "primary",
+              "navPath": "tickets/create/new"
+            }
+          },
+          {
+            "tplFile": "ButtonWidget",
+            "title": "🤖 Wygeneruj z AI",
+            "attrs": {
+              "variant": "secondary",
+              "navPath": "tickets/llm-create/new"
+            }
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "📊 Statystyki",
+            "attrs": {
+              "content": "Wyświetl szybki przegląd aktywnych zgłoszeń i ich statusów.",
+              "variant": "info"
+            }
+          }
+        ],
         "search": {
           "enabled": true,
           "placeholder": "Szukaj zgłoszeń...",
@@ -92,24 +125,6 @@
             "type": "custom",
             "label": "Szczegóły",
             "navPath": "tickets/view/details"
-          }
-        ],
-        "widgets": [
-          {
-            "tplFile": "ButtonWidget",
-            "title": "Dodaj nowe zgłoszenie",
-            "attrs": {
-              "variant": "primary",
-              "navPath": "tickets/create/new"
-            }
-          },
-          {
-            "tplFile": "ButtonWidget",
-            "title": "🤖 Wygeneruj z AI",
-            "attrs": {
-              "variant": "secondary",
-              "navPath": "tickets/llm-create/new"
-            }
           }
         ]
       }

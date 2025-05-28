@@ -1,10 +1,19 @@
 // src/themes/default/steps/ListTableStep.tsx
 import { useState, useEffect, useMemo } from "react";
 import { useWorkspaceSchema, useCollections } from "@/core";
-import ListHeader from "../commons/ListHeader";
 import DataTable, { Column } from "../commons/ListDataTable";
 import Pagination from "../commons/ListPaination";
 import { LoadingSpinner, ErrorMessage } from "../commons/StepWrapper";
+// Import widgetów
+import TitleWidget from "../widgets/TitleWidget";
+import ButtonWidget from "../widgets/ButtonWidget";
+import InfoWidget from "../widgets/InfoWidget";
+
+interface Widget {
+  tplFile: string;
+  title: string;
+  attrs: any;
+}
 
 interface ListStepProps {
   attrs: {
@@ -15,7 +24,7 @@ interface ListStepProps {
     emptyState?: any;
     columns?: any[];
     actions?: any[];
-    widgets?: any[];
+    headerWidgets?: Widget[]; // NOWA WŁAŚCIWOŚĆ - widgety w headerze
     pagination?: { pageSize?: number; showTotal?: boolean };
     search?: { enabled?: boolean; placeholder?: string; fields?: string[] };
     sorting?: {
@@ -25,6 +34,13 @@ interface ListStepProps {
     };
   };
 }
+
+// Mapowanie dostępnych widgetów
+const widgetMap = {
+  TitleWidget,
+  ButtonWidget,
+  InfoWidget,
+};
 
 export default function ListStep({ attrs }: ListStepProps) {
   // ✅ ALL HOOKS AT TOP LEVEL
@@ -123,6 +139,22 @@ export default function ListStep({ attrs }: ListStepProps) {
     }
   };
 
+  // Funkcja renderująca widget
+  const renderWidget = (widget: Widget, index: number) => {
+    const WidgetComponent = widgetMap[widget.tplFile as keyof typeof widgetMap];
+    
+    if (!WidgetComponent) {
+      console.warn(`Widget ${widget.tplFile} not found`);
+      return null;
+    }
+
+    return (
+      <div key={index} className="widget-container">
+        <WidgetComponent title={widget.title} attrs={widget.attrs} />
+      </div>
+    );
+  };
+
   // ✅ CONDITIONAL RENDERING AFTER ALL HOOKS
   if (loading) return <LoadingSpinner text="Loading configuration..." />;
   if (error || !schema)
@@ -132,28 +164,32 @@ export default function ListStep({ attrs }: ListStepProps) {
 
   return (
     <div className="space-y-6">
-      {(attrs?.title || attrs?.description) && (
-        <div className="mb-6">
-          {attrs?.title && (
-            <h2 className="text-xl font-semibold text-zinc-900">
-              {attrs.title}
-            </h2>
-          )}
-          {attrs?.description && (
-            <p className="text-zinc-600 mt-1 text-sm">{attrs.description}</p>
-          )}
+      {/* NOWA SEKCJA: Header Widgets */}
+      {attrs?.headerWidgets && attrs.headerWidgets.length > 0 && (
+        <div className="header-widgets-container">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            {attrs.headerWidgets.map((widget, index) => renderWidget(widget, index))}
+          </div>
         </div>
       )}
 
-      <ListHeader
-        widgets={attrs?.widgets}
-        search={attrs?.search}
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        totalCount={filteredRecords.length}
-        showTotal={attrs?.pagination?.showTotal}
-        slugs={[]}
-      />
+      {/* Search Bar - jeśli włączone */}
+      {attrs?.search?.enabled && (
+        <div className="flex justify-between items-center">
+          <input
+            type="text"
+            placeholder={attrs.search.placeholder || "Szukaj..."}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="px-4 py-2 border border-zinc-300 rounded-md focus:ring-2 focus:ring-zinc-900/20 max-w-sm"
+          />
+          {attrs?.pagination?.showTotal && (
+            <div className="text-sm text-zinc-600">
+              Znaleziono: {filteredRecords.length}
+            </div>
+          )}
+        </div>
+      )}
 
       <DataTable
         records={paginatedRecords}

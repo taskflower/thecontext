@@ -1,101 +1,119 @@
 {
-    "slug": "list",
-    "nodes": [
-      {
-        "slug": "view",
-        "label": "Lista użytkowników",
-        "order": 1,
-        "tplFile": "ListTableStep",
-        "attrs": {
-          "schemaPath": "user",
-          "collection": "users",
-          "title": "Lista użytkowników",
-          "description": "Zarządzaj użytkownikami systemu",
-          "emptyState": {
-            "icon": "👥",
-            "title": "Brak użytkowników",
-            "description": "Nie masz jeszcze żadnych użytkowników. Dodaj pierwszego użytkownika.",
-            "actionButton": {
-              "title": "Dodaj użytkownika",
+  "slug": "list",
+  "nodes": [
+    {
+      "slug": "view",
+      "label": "Lista użytkowników",
+      "order": 1,
+      "tplFile": "ListTableStep",
+      "attrs": {
+        "schemaPath": "user",
+        "collection": "users",
+        "emptyState": {
+          "icon": "👥",
+          "title": "Brak użytkowników",
+          "description": "Nie masz jeszcze żadnych użytkowników. Dodaj pierwszego użytkownika.",
+          "actionButton": {
+            "title": "Dodaj użytkownika",
+            "navPath": "users/create/new"
+          }
+        },
+        "headerWidgets": [
+          {
+            "tplFile": "TitleWidget",
+            "title": "👥 Lista użytkowników",
+            "attrs": {
+              "description": "Zarządzaj użytkownikami systemu, ich rolami i uprawnieniami",
+              "size": "large",
+              "align": "left",
+              "colSpan":5
+            }
+          },
+          {
+            "tplFile": "ButtonWidget",
+            "title": "➕ Dodaj użytkownika",
+            "attrs": {
+              "variant": "primary",
               "navPath": "users/create/new"
             }
           },
-          "search": {
-            "enabled": true,
-            "placeholder": "Szukaj użytkowników...",
-            "fields": ["firstName", "lastName", "email", "department"]
-          },
-          "sorting": {
-            "enabled": true,
-            "defaultField": "lastName",
-            "defaultDirection": "asc"
-          },
-          "pagination": {
-            "pageSize": 15,
-            "showTotal": true
-          },
-          "columns": [
-            {
-              "key": "firstName",
-              "label": "Imię",
-              "type": "text",
-              "sortable": true
-            },
-            {
-              "key": "lastName",
-              "label": "Nazwisko",
-              "type": "text",
-              "sortable": true
-            },
-            {
-              "key": "email",
-              "label": "Email",
-              "type": "text",
-              "sortable": true
-            },
-            {
-              "key": "role",
-              "label": "Rola",
-              "type": "badge",
-              "sortable": true
-            },
-            {
-              "key": "department",
-              "label": "Dział",
-              "type": "badge",
-              "sortable": true
-            },
-            {
-              "key": "isActive",
-              "label": "Status",
-              "type": "badge",
-              "sortable": true
+          {
+            "tplFile": "InfoWidget",
+            "title": "ℹ️ Informacje",
+            "attrs": {
+              "content": "Zarządzaj kontami użytkowników, przypisuj role i monitoruj aktywność w systemie.",
+              "variant": "info",
+              "colSpan": "full"
+
             }
-          ],
-          "actions": [
-            {
-              "type": "edit",
-              "label": "Edytuj",
-              "navPath": "users/edit/id"
-            },
-            {
-              "type": "delete",
-              "label": "Usuń",
-              "variant": "danger",
-              "confirm": "Czy na pewno chcesz usunąć tego użytkownika?"
-            }
-          ],
-          "widgets": [
-            {
-              "tplFile": "ButtonWidget",
-              "title": "Dodaj użytkownika",
-              "attrs": {
-                "variant": "primary",
-                "navPath": "users/create/new"
-              }
-            }
-          ]
-        }
+          }
+        ],
+        "search": {
+          "enabled": true,
+          "placeholder": "Szukaj użytkowników...",
+          "fields": ["firstName", "lastName", "email", "department"]
+        },
+        "sorting": {
+          "enabled": true,
+          "defaultField": "lastName",
+          "defaultDirection": "asc"
+        },
+        "pagination": {
+          "pageSize": 15,
+          "showTotal": true
+        },
+        "columns": [
+          {
+            "key": "firstName",
+            "label": "Imię",
+            "type": "text",
+            "sortable": true
+          },
+          {
+            "key": "lastName",
+            "label": "Nazwisko",
+            "type": "text",
+            "sortable": true
+          },
+          {
+            "key": "email",
+            "label": "Email",
+            "type": "text",
+            "sortable": true
+          },
+          {
+            "key": "role",
+            "label": "Rola",
+            "type": "badge",
+            "sortable": true
+          },
+          {
+            "key": "department",
+            "label": "Dział",
+            "type": "badge",
+            "sortable": true
+          },
+          {
+            "key": "isActive",
+            "label": "Status",
+            "type": "badge",
+            "sortable": true
+          }
+        ],
+        "actions": [
+          {
+            "type": "edit",
+            "label": "Edytuj",
+            "navPath": "users/edit/id"
+          },
+          {
+            "type": "delete",
+            "label": "Usuń",
+            "variant": "danger",
+            "confirm": "Czy na pewno chcesz usunąć tego użytkownika?"
+          }
+        ]
       }
-    ]
-  }
+    }
+  ]
+}
