@@ -1,21 +1,22 @@
 {
-    "slug": "create",
-    "nodes": [
-      {
-        "slug": "form",
-        "label": "Nowe zgłoszenie",
-        "order": 1,
-        "tplFile": "FormStep",
-        "attrs": {
-          "title": "Dodaj nowe zgłoszenie",
-          "schemaPath": "ticket",
-          "excludeFields": ["status"],
-          "onSubmit": {
-            "collection": "tickets",
-            "navPath": "tickets/list/view",
-            "action": "create"
-          }
+  "slug": "create",
+  "nodes": [
+    {
+      "slug": "form",
+      "label": "Nowe zgłoszenie",
+      "order": 1,
+      "tplFile": "FormStep",
+      "attrs": {
+        "title": "📝 Dodaj nowe zgłoszenie",
+        "description": "Wypełnij formularz, aby utworzyć nowe zgłoszenie. Twoje dane zostaną automatycznie wypełnione.",
+        "schemaPath": "ticket",
+        "autoPopulateFromCurrentUser": true,
+        "excludeFields": ["status"],
+        "onSubmit": {
+          "collection": "tickets",
+          "navPath": "tickets/list/view"
         }
       }
-    ]
-  }
+    }
+  ]
+}

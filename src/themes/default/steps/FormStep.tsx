@@ -1,4 +1,4 @@
-// src/themes/default/steps/FormStep.tsx
+// src/themes/default/steps/FormStep.tsx - ENHANCED VERSION
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useWorkspaceSchema, useCollections, useEngineStore, useAppNavigation } from "@/core";
@@ -17,14 +17,16 @@ interface FormStepProps {
       contextKey?: string;
     };
     loadFromParams?: boolean;
+    loadFromContext?: string; // NOWE: ścieżka kontekstu do załadowania danych
     excludeFields?: string[];
+    autoPopulateFromCurrentUser?: boolean; // NOWE: auto-wypełnianie z currentUser
   };
 }
 
 export default function FormStep({ attrs }: FormStepProps) {
   // ✅ ALL HOOKS AT TOP LEVEL
   const params = useParams<{ id: string; config: string; workspace: string }>();
-  const { go } = useAppNavigation(); // ✅ UŻYWAMY useAppNavigation
+  const { go } = useAppNavigation();
   const editId = params.id;
 
   const { schema, loading, error } = useWorkspaceSchema(attrs?.schemaPath || "");
@@ -43,16 +45,72 @@ export default function FormStep({ attrs }: FormStepProps) {
       Object.entries(schema.properties).map(([key, field]: any) => [key, field.default])
     );
 
-    const contextData = get(contextKey);
-    if (contextData) {
-      setData({ ...defaults, ...contextData });
-    } else if (attrs.loadFromParams && editId) {
-      const existing = items.find((item: any) => item.id === editId);
-      setData(existing ? { ...defaults, ...existing } : defaults);
-    } else {
-      setData(defaults);
+    let initialData = defaults;
+
+    // NOWE: Ładowanie z określonego kontekstu
+    if (attrs.loadFromContext) {
+      const contextData = get(attrs.loadFromContext);
+      if (contextData) {
+        initialData = { ...initialData, ...contextData };
+      }
     }
-  }, [schema, contextKey, attrs.loadFromParams, editId, items, get]);
+    // Ładowanie z kontekstu domyślnego
+    else {
+      const contextData = get(contextKey);
+      if (contextData) {
+        initialData = { ...initialData, ...contextData };
+      }
+    }
+
+    // Ładowanie z parametrów (edycja)
+    if (attrs.loadFromParams && editId) {
+      const existing = items.find((item: any) => item.id === editId);
+      if (existing) {
+        initialData = { ...initialData, ...existing };
+      }
+    }
+
+    // NOWE: Auto-wypełnianie z currentUser
+    if (attrs.autoPopulateFromCurrentUser) {
+      const currentUser = get("currentUser");
+      if (currentUser) {
+        // Mapowanie pól currentUser na pola formularza
+        const userMapping: Record<string, string> = {
+          firstName: "firstName",
+          lastName: "lastName", 
+          email: "email",
+          phone: "phone",
+          role: "role",
+          department: "department",
+          // Dodaj więcej mapowań według potrzeb
+        };
+
+        Object.entries(userMapping).forEach(([userField, formField]) => {
+          if (currentUser[userField] && schema.properties[formField]) {
+            initialData[formField] = currentUser[userField];
+          }
+        });
+
+        // Specjalne pole dla ID użytkownika
+        if (schema.properties.reporterId || schema.properties.userId) {
+          const userIdField = schema.properties.reporterId ? "reporterId" : "userId";
+          initialData[userIdField] = currentUser.id;
+        }
+
+        // Specjalne pole dla nazwy użytkownika
+        if (schema.properties.reporter) {
+          initialData.reporter = `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim();
+        }
+
+        // Auto-wypełnij email reportera
+        if (schema.properties.reporterEmail) {
+          initialData.reporterEmail = currentUser.email;
+        }
+      }
+    }
+
+    setData(initialData);
+  }, [schema, contextKey, attrs.loadFromParams, attrs.loadFromContext, attrs.autoPopulateFromCurrentUser, editId, items, get]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +125,7 @@ export default function FormStep({ attrs }: FormStepProps) {
         await saveItem(payload);
       }
       
-      go(`/:config/${attrs.onSubmit.navPath}`); // ✅ UŻYWAMY go() zamiast navigate()
+      go(`/:config/${attrs.onSubmit.navPath}`);
     } catch (err: any) {
       alert(`Save failed: ${err.message}`);
     } finally {
@@ -76,7 +134,7 @@ export default function FormStep({ attrs }: FormStepProps) {
   };
 
   const handleCancel = () => {
-    go(`/:config/${attrs.onSubmit.navPath}`); // ✅ UŻYWAMY go() zamiast navigate()
+    go(`/:config/${attrs.onSubmit.navPath}`);
   };
 
   // ✅ CONDITIONAL RENDERING AFTER ALL HOOKS

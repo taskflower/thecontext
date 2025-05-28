@@ -5,6 +5,15 @@
     "layoutFile": "Simple",
     "widgets": [
       {
+        "tplFile": "CurrentUserWidget",
+        "title": "Zalogowany użytkownik",
+        "attrs": {
+          "variant": "compact",
+          "showActions": true,
+          "colSpan": "full"
+        }
+      },
+      {
         "tplFile": "InfoWidget",
         "title": "🎫 Ticket Management",
         "attrs": {
@@ -17,7 +26,7 @@
         "tplFile": "ButtonWidget",
         "title": "📝 Create New Ticket", 
         "attrs": {
-          "navPath": "tickets/create/new",
+          "navPath": "create/new",
           "variant": "primary",
           "colSpan": 1
         }
@@ -26,7 +35,7 @@
         "tplFile": "ButtonWidget",
         "title": "📋 View All Tickets", 
         "attrs": {
-          "navPath": "tickets/list/view",
+          "navPath": "list/view",
           "variant": "secondary",
           "colSpan": 1
         }
@@ -35,7 +44,7 @@
         "tplFile": "ButtonWidget",
         "title": "🤖 Wygeneruj z AI",
         "attrs": {
-          "navPath": "tickets/llm-create/new",
+          "navPath": "llm-create/new",
           "variant": "secondary",
           "colSpan": 1
         }
@@ -131,7 +140,7 @@
         },
         "reporterId": {
           "type": "string",
-          "label": "Zgłaszający (wybierz)",
+          "label": "Zgłaszający (ID)",
           "fieldType": "userSelect", 
           "required": false,
           "aiHint": "User ID who reported this issue"

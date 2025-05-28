@@ -1,19 +1,54 @@
 {
   "name": "Main Workspace",
-  "tplDir": "test",
+  "tplDir": "default",
   "templateSettings": {
     "layoutFile": "UniversalLayout",
     "widgets": [
       {
-        "tplFile": "InfoWidget",
-        "title": "🎫 HELLO Ticket Management",
+        "tplFile": "CurrentUserWidget",
+        "title": "Panel użytkownika",
         "attrs": {
-          "content": "Manage support tickets, track issues and handle customer requests efficiently.",
+          "variant": "detailed",
+          "showActions": true,
+          "colSpan": 2
+        }
+      },
+      {
+        "tplFile": "UserSystemSummaryWidget",
+        "title": "System użytkowników",
+        "attrs": {
+          "showStats": true,
+          "showRecentActivity": true,
+          "colSpan": 2
+        }
+      },
+      {
+        "tplFile": "InfoWidget",
+        "title": "🎫 Ticket Management System",
+        "attrs": {
+          "content": "Manage support tickets, track issues and handle customer requests efficiently. Complete user authentication system integrated.",
           "variant": "info",
-          "colSpan": "full"
+          "colSpan": 2
+        }
+      },
+      {
+        "tplFile": "ButtonWidget",
+        "title": "👤 Logowanie",
+        "attrs": {
+          "navPath": "users/login/form",
+          "variant": "primary",
+          "colSpan": 1
+        }
+      },
+      {
+        "tplFile": "ButtonWidget",
+        "title": "📝 Nowe zgłoszenie",
+        "attrs": {
+          "navPath": "tickets/create/form",
+          "variant": "primary",
+          "colSpan": 1
         }
       }
-      
     ]
   }
 }
