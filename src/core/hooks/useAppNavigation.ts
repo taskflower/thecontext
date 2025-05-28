@@ -46,24 +46,46 @@ export function useAppNavigation(slugs: string[] = []) {
       .replace(/@next/g, next ?? "")
       .replace(/@prev/g, prev ?? "");
 
-    // Usuń duplikaty ścieżki workspace (np. /tickets/tickets/...)
-    const dupSegment = `/${workspace}/${workspace}/`;
-    if (workspace && path.includes(dupSegment)) {
-      path = path.replace(new RegExp(dupSegment, "g"), `/${workspace}/`);
+    // KLUCZOWA POPRAWKA: Jeśli ścieżka nie zaczyna się od config, dodaj go
+    if (config && !path.startsWith(`/${config}`)) {
+      // Usuń początkowy slash jeśli istnieje
+      const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+      path = `/${config}/${cleanPath}`;
+    }
+
+    // Usuń duplikaty segmentów workspace (np. /tickets/tickets/...)
+    if (workspace) {
+      const dupSegment = `/${workspace}/${workspace}/`;
+      if (path.includes(dupSegment)) {
+        path = path.replace(new RegExp(dupSegment, "g"), `/${workspace}/`);
+      }
     }
     
     // Usuń ewentualne podwójne slashe
-    return path.replace(/\/\//g, "/");
+    path = path.replace(/\/+/g, "/");
+    
+    // Usuń trailing slash (oprócz root)
+    if (path.length > 1 && path.endsWith('/')) {
+      path = path.slice(0, -1);
+    }
+
+    console.log(`[useAppNavigation] Built path: "${template}" → "${path}"`);
+    return path;
   }
 
   return {
     slugs,
     prev,
     next,
-  
+    
     /** Buduje ścieżkę, nie nawigując */
     to: (template: string) => buildPath(template),
-    /** Nawiązuje do wygenerowanej ścieżki */
-    go: (template: string) => navigate(buildPath(template)),
+    
+    /** Nawiguje do wygenerowanej ścieżki */
+    go: (template: string) => {
+      const fullPath = buildPath(template);
+      console.log(`[useAppNavigation] Navigating to: ${fullPath}`);
+      navigate(fullPath);
+    },
   };
 }

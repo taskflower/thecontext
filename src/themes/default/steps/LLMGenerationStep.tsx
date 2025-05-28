@@ -1,8 +1,8 @@
 // src/themes/default/steps/LLMGenerationStep.tsx
 import { useState, useMemo } from "react";
 import { z } from "zod";
-import { useNavigate, useParams } from "react-router-dom";
-import { useWorkspaceSchema, useEngineStore, useLlmEngine } from "@/core";
+import { useParams } from "react-router-dom";
+import { useWorkspaceSchema, useEngineStore, useLlmEngine, useAppNavigation } from "@/core";
 
 interface LLMGenerationStepProps {
   attrs: {
@@ -21,8 +21,8 @@ interface LLMGenerationStepProps {
 
 export default function LLMGenerationStep({ attrs }: LLMGenerationStepProps) {
   // ✅ ALL HOOKS AT TOP LEVEL
-  const navigate = useNavigate();
-  const { config = "exampleTicketApp", workspace = "" } = useParams();
+  const { workspace = "" } = useParams();
+  const { go } = useAppNavigation(); // ✅ UŻYWAMY useAppNavigation
   const { schema, loading, error } = useWorkspaceSchema(attrs?.schemaPath || "");
   const { set } = useEngineStore();
   const [prompt, setPrompt] = useState("");
@@ -89,22 +89,22 @@ export default function LLMGenerationStep({ attrs }: LLMGenerationStepProps) {
     // Determine next path with debugging
     let nextPath;
     if (attrs?.nextStep) {
-      nextPath = `/${config}/${workspace}/${attrs.nextStep}`;
+      nextPath = `/:config/${workspace}/${attrs.nextStep}`;
       console.log(`LLM: Using nextStep: ${attrs.nextStep} → ${nextPath}`);
     } else if (attrs?.navPath) {
-      nextPath = `/${config}/${attrs.navPath}`;
+      nextPath = `/:config/${attrs.navPath}`;
       console.log(`LLM: Using navPath: ${attrs.navPath} → ${nextPath}`);
     } else {
-      nextPath = `/${config}/${workspace}/list`;
+      nextPath = `/:config/${workspace}/list`;
       console.log(`LLM: Using fallback → ${nextPath}`);
     }
     
-    navigate(nextPath);
+    go(nextPath); // ✅ UŻYWAMY go() zamiast navigate()
   };
 
   const handleCancel = () => {
-    const cancelPath = attrs?.cancelNavPath ? `/${config}/${attrs.cancelNavPath}` : `/${config}/${workspace}/list`;
-    navigate(cancelPath);
+    const cancelPath = attrs?.cancelNavPath || `${workspace}/list`;
+    go(`/:config/${cancelPath}`); // ✅ UŻYWAMY go() zamiast navigate()
   };
 
   // ✅ CONDITIONAL RENDERING AFTER ALL HOOKS

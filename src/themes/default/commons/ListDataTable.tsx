@@ -1,5 +1,5 @@
-// src/themes/test/components/DataTable.tsx
-import { useNavigate, useParams } from "react-router-dom";
+// src/themes/default/commons/ListDataTable.tsx
+import { useAppNavigation } from "@/core/hooks/useAppNavigation";
 
 export interface Column {
   key: string;
@@ -55,8 +55,7 @@ export default function DataTable({
   onSort,
   onDelete,
 }: DataTableProps) {
-  const navigate = useNavigate();
-  const params = useParams<{ config: string; workspace: string }>();
+  const { go } = useAppNavigation(); // ✅ UŻYWAMY useAppNavigation
 
   const getFieldDisplayValue = (key: string, value: any) => {
     const field = schema?.properties?.[key];
@@ -167,11 +166,7 @@ export default function DataTable({
         </p>
         {emptyState?.actionButton && (
           <button
-            onClick={() =>
-              navigate(
-                `/${params.config}/${emptyState?.actionButton?.navPath}`
-              )
-            }
+            onClick={() => go(`/:config/${emptyState?.actionButton?.navPath}`)} // ✅ UŻYWAMY go()
             className="bg-zinc-900 text-white px-5 py-2.5 text-sm font-medium rounded-md hover:bg-zinc-800 transition-colors"
           >
             {emptyState.actionButton.title}
@@ -237,11 +232,7 @@ export default function DataTable({
                           return (
                             <button
                               key={index}
-                              onClick={() =>
-                                navigate(
-                                  `/${params.config}/${action.navPath}/${record.id}`
-                                )
-                              }
+                              onClick={() => go(`/:config/${action.navPath}/${record.id}`)} // ✅ UŻYWAMY go()
                               className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors"
                             >
                               {action.label || "Edytuj"}
@@ -267,11 +258,7 @@ export default function DataTable({
                           return (
                             <button
                               key={index}
-                              onClick={() =>
-                                navigate(
-                                  `/${params.config}/${action.navPath}/${record.id}`
-                                )
-                              }
+                              onClick={() => go(`/:config/${action.navPath}/${record.id}`)} // ✅ UŻYWAMY go()
                               className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors"
                             >
                               {action.label || "Akcja"}

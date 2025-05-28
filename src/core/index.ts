@@ -6,4 +6,5 @@ export { useLlmEngine } from "./hooks/useLlmEngine";
 export { useConfig } from "./hooks/useConfig"; // TYLKO konfiguracja
 export { useCollections } from "./hooks/useCollections"; // TYLKO kolekcje
 export { useWorkspaceSchema } from "./hooks/useWorkspaceSchema";
+export { useAppNavigation } from "./hooks/useAppNavigation";
 export type * from "./types";

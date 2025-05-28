@@ -18,17 +18,31 @@ interface ListStepProps {
     widgets?: any[];
     pagination?: { pageSize?: number; showTotal?: boolean };
     search?: { enabled?: boolean; placeholder?: string; fields?: string[] };
-    sorting?: { enabled?: boolean; defaultField?: string; defaultDirection?: "asc" | "desc" };
+    sorting?: {
+      enabled?: boolean;
+      defaultField?: string;
+      defaultDirection?: "asc" | "desc";
+    };
   };
 }
 
 export default function ListStep({ attrs }: ListStepProps) {
   // ✅ ALL HOOKS AT TOP LEVEL
-  const { schema, loading, error } = useWorkspaceSchema(attrs?.schemaPath || "");
-  const { items: records, loading: loadingRecords, deleteItem } = useCollections(attrs?.collection || "");
+  const { schema, loading, error } = useWorkspaceSchema(
+    attrs?.schemaPath || ""
+  );
+  const {
+    items: records,
+    loading: loadingRecords,
+    deleteItem,
+  } = useCollections(attrs?.collection || "");
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortField, setSortField] = useState(attrs?.sorting?.defaultField || "");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">(attrs?.sorting?.defaultDirection || "asc");
+  const [sortField, setSortField] = useState(
+    attrs?.sorting?.defaultField || ""
+  );
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">(
+    attrs?.sorting?.defaultDirection || "asc"
+  );
   const [currentPage, setCurrentPage] = useState(1);
 
   const pageSize = attrs?.pagination?.pageSize || 10;
@@ -36,40 +50,60 @@ export default function ListStep({ attrs }: ListStepProps) {
   // ✅ MEMOIZED CALCULATIONS
   const filteredRecords = useMemo(() => {
     if (!records.length) return [];
-    
+
     let filtered = [...records];
 
     if (searchTerm && attrs?.search?.enabled) {
-      const searchFields = attrs.search.fields || Object.keys(schema?.properties || {});
+      const searchFields =
+        attrs.search.fields || Object.keys(schema?.properties || {});
       filtered = filtered.filter((record) =>
         searchFields.some((field) =>
-          String((record as any)[field] || "").toLowerCase().includes(searchTerm.toLowerCase())
+          String((record as any)[field] || "")
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
         )
       );
     }
 
     if (sortField && attrs?.sorting?.enabled) {
       filtered.sort((a, b) => {
-        const comparison = String((a as any)[sortField] || "").localeCompare(String((b as any)[sortField] || ""));
+        const comparison = String((a as any)[sortField] || "").localeCompare(
+          String((b as any)[sortField] || "")
+        );
         return sortDirection === "asc" ? comparison : -comparison;
       });
     }
 
     return filtered;
-  }, [records, searchTerm, sortField, sortDirection, attrs?.search, attrs?.sorting, schema?.properties]);
+  }, [
+    records,
+    searchTerm,
+    sortField,
+    sortDirection,
+    attrs?.search,
+    attrs?.sorting,
+    schema?.properties,
+  ]);
 
   const columns = useMemo(() => {
     if (!schema?.properties) return [];
-    
-    return attrs?.columns || Object.entries(schema.properties).map(([key, field]: any) => ({
-      key,
-      label: field.label || key,
-      type: field.enum ? "badge" : field.format === "date" ? "date" : "text",
-    }));
+
+    return (
+      attrs?.columns ||
+      Object.entries(schema.properties).map(([key, field]: any) => ({
+        key,
+        label: field.label || key,
+        type: field.enum ? "badge" : field.format === "date" ? "date" : "text",
+      }))
+    );
   }, [attrs?.columns, schema?.properties]);
 
-  const paginatedRecords = useMemo(() => 
-    filteredRecords.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+  const paginatedRecords = useMemo(
+    () =>
+      filteredRecords.slice(
+        (currentPage - 1) * pageSize,
+        currentPage * pageSize
+      ),
     [filteredRecords, currentPage, pageSize]
   );
 
@@ -91,14 +125,23 @@ export default function ListStep({ attrs }: ListStepProps) {
 
   // ✅ CONDITIONAL RENDERING AFTER ALL HOOKS
   if (loading) return <LoadingSpinner text="Loading configuration..." />;
-  if (error || !schema) return <ErrorMessage error={error || `Schema not found: ${attrs?.schemaPath}`} />;
+  if (error || !schema)
+    return (
+      <ErrorMessage error={error || `Schema not found: ${attrs?.schemaPath}`} />
+    );
 
   return (
     <div className="space-y-6">
       {(attrs?.title || attrs?.description) && (
         <div className="mb-6">
-          {attrs?.title && <h2 className="text-xl font-semibold text-zinc-900">{attrs.title}</h2>}
-          {attrs?.description && <p className="text-zinc-600 mt-1 text-sm">{attrs.description}</p>}
+          {attrs?.title && (
+            <h2 className="text-xl font-semibold text-zinc-900">
+              {attrs.title}
+            </h2>
+          )}
+          {attrs?.description && (
+            <p className="text-zinc-600 mt-1 text-sm">{attrs.description}</p>
+          )}
         </div>
       )}
 
@@ -109,6 +152,7 @@ export default function ListStep({ attrs }: ListStepProps) {
         onSearchChange={setSearchTerm}
         totalCount={filteredRecords.length}
         showTotal={attrs?.pagination?.showTotal}
+        slugs={[]}
       />
 
       <DataTable

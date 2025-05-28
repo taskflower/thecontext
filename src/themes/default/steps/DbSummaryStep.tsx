@@ -1,7 +1,7 @@
 // src/themes/default/steps/DbSummaryStep.tsx
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { useWorkspaceSchema, useCollections, useEngineStore } from "@/core";
+import { useParams } from "react-router-dom";
+import { useWorkspaceSchema, useCollections, useEngineStore, useAppNavigation } from "@/core";
 import { FieldWidget } from "../widgets/form/FieldWidget";
 import { LoadingSpinner, ErrorMessage } from "../commons/StepWrapper";
 
@@ -28,8 +28,8 @@ interface DbSummaryStepProps {
 
 export default function DbSummaryStep({ attrs }: DbSummaryStepProps) {
   // ✅ ALL HOOKS AT TOP LEVEL
-  const navigate = useNavigate();
-  const { config = "exampleTicketApp", workspace = "", id } = useParams();
+  const { workspace = "", id } = useParams();
+  const { go } = useAppNavigation(); // ✅ UŻYWAMY useAppNavigation
   
   const { schema, loading, error } = useWorkspaceSchema(attrs?.schemaPath || "");
   const { saveItem, loading: savingToDb } = useCollections(attrs?.collection || "");
@@ -52,7 +52,7 @@ export default function DbSummaryStep({ attrs }: DbSummaryStepProps) {
       await saveItem({ ...data, id: data.id || id || Date.now().toString() });
       set(contextKey, null); // Clear context
       const navPath = attrs?.navPath || `${workspace}/list/view`;
-      navigate(`/${config}/${navPath}`);
+      go(`/:config/${navPath}`); // ✅ UŻYWAMY go() zamiast navigate()
     } catch (err: any) {
       alert(`Save failed: ${err.message}`);
     } finally {
@@ -62,14 +62,14 @@ export default function DbSummaryStep({ attrs }: DbSummaryStepProps) {
 
   const handleCancel = () => {
     const cancelPath = attrs?.cancelNavPath || `${workspace}/list/view`;
-    navigate(`/${config}/${cancelPath}`);
+    go(`/:config/${cancelPath}`); // ✅ UŻYWAMY go() zamiast navigate()
   };
 
   const handleAdditionalAction = (action: any) => {
     if (action.type === "regenerate") {
       set(contextKey, null);
     }
-    navigate(`/${config}/${action.navPath}`);
+    go(`/:config/${action.navPath}`); // ✅ UŻYWAMY go() zamiast navigate()
   };
 
   // ✅ CONDITIONAL RENDERING AFTER ALL HOOKS
@@ -83,13 +83,13 @@ export default function DbSummaryStep({ attrs }: DbSummaryStepProps) {
         <div className="text-xs text-zinc-500 mb-4">No data found in context: {contextKey}</div>
         <div className="space-x-3">
           <button
-            onClick={() => navigate(`/${config}/${workspace}/llm-create/new`)}
+            onClick={() => go(`/:config/${workspace}/llm-create/new`)} // ✅ UŻYWAMY go()
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
           >
             🤖 Generate New Data
           </button>
           <button
-            onClick={() => navigate(`/${config}/${workspace}/create/new`)}
+            onClick={() => go(`/:config/${workspace}/create/new`)} // ✅ UŻYWAMY go()
             className="bg-zinc-600 text-white px-4 py-2 rounded hover:bg-zinc-700"
           >
             ✏️ Create Manually

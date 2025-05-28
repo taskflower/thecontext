@@ -1,7 +1,7 @@
 // src/themes/default/steps/FormStep.tsx
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { useWorkspaceSchema, useCollections, useEngineStore } from "@/core";
+import { useParams } from "react-router-dom";
+import { useWorkspaceSchema, useCollections, useEngineStore, useAppNavigation } from "@/core";
 import { FieldWidget } from "../widgets/form/FieldWidget";
 import { LoadingSpinner, ErrorMessage } from "../commons/StepWrapper";
 
@@ -23,8 +23,8 @@ interface FormStepProps {
 
 export default function FormStep({ attrs }: FormStepProps) {
   // ✅ ALL HOOKS AT TOP LEVEL
-  const navigate = useNavigate();
   const params = useParams<{ id: string; config: string; workspace: string }>();
+  const { go } = useAppNavigation(); // ✅ UŻYWAMY useAppNavigation
   const editId = params.id;
 
   const { schema, loading, error } = useWorkspaceSchema(attrs?.schemaPath || "");
@@ -67,12 +67,16 @@ export default function FormStep({ attrs }: FormStepProps) {
         await saveItem(payload);
       }
       
-      navigate(`/${params.config}/${attrs.onSubmit.navPath}`);
+      go(`/:config/${attrs.onSubmit.navPath}`); // ✅ UŻYWAMY go() zamiast navigate()
     } catch (err: any) {
       alert(`Save failed: ${err.message}`);
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleCancel = () => {
+    go(`/:config/${attrs.onSubmit.navPath}`); // ✅ UŻYWAMY go() zamiast navigate()
   };
 
   // ✅ CONDITIONAL RENDERING AFTER ALL HOOKS
@@ -116,7 +120,7 @@ export default function FormStep({ attrs }: FormStepProps) {
             </button>
             <button
               type="button"
-              onClick={() => navigate(`/${params.config}/${attrs.onSubmit.navPath}`)}
+              onClick={handleCancel}
               className="px-4 py-2.5 text-sm font-medium text-zinc-700 border border-zinc-300/80 rounded-md hover:bg-zinc-50"
             >
               Cancel
