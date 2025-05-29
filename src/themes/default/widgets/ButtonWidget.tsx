@@ -1,11 +1,46 @@
 // src/themes/default/widgets/ButtonWidget.tsx
 import { useAppNavigation } from "@/core/hooks/useAppNavigation";
+import { useParams } from "react-router-dom";
 
+type ButtonWidgetProps = { 
+  title: string; 
+  attrs: { 
+    navPath?: string; 
+    variant?: string 
+  } 
+};
 
-type ButtonWidgetProps = { title: string; attrs: { navPath?: string; variant?: string } };
 export default function ButtonWidget({ title, attrs }: ButtonWidgetProps) {
   const { go } = useAppNavigation([]);
-  const handle = () => attrs.navPath && go(`/:config/:workspace/${attrs.navPath}`);
+  const params = useParams();
+  
+  const handle = () => {
+    if (!attrs.navPath) return;
+    
+    const config = params.config || "exampleTicketApp";
+    
+    // Sprawdź czy navPath zaczyna się od nazwy workspace'a
+    const navPath = attrs.navPath;
+    const pathParts = navPath.split('/');
+    const possibleWorkspace = pathParts[0];
+    
+    // Lista znanych workspace'ów
+    const knownWorkspaces = ['main', 'tickets', 'users'];
+    
+    let fullPath;
+    if (knownWorkspaces.includes(possibleWorkspace)) {
+      // NavPath zawiera workspace - użyj go bezpośrednio
+      fullPath = `/${config}/${navPath}`;
+    } else {
+      // NavPath nie zawiera workspace - użyj aktualnego
+      const workspace = params.workspace || "tickets";
+      fullPath = `/${config}/${workspace}/${navPath}`;
+    }
+    
+    console.log(`[ButtonWidget] Navigating from navPath: ${navPath} to: ${fullPath}`);
+    go(fullPath);
+  };
+
   return (
     <button
       onClick={handle}
