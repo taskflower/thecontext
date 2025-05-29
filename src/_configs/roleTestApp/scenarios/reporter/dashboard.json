@@ -1,0 +1,39 @@
+{
+  "slug": "dashboard",
+  "nodes": [
+    {
+      "slug": "view",
+      "label": "Reporter Dashboard",
+      "order": 1,
+      "tplFile": "DbSummaryStep",
+      "attrs": {
+        "title": "📝 Reporter Dashboard",
+        "description": "Welcome to the reporter workspace",
+        "schemaPath": "ticket",
+        "contextKey": "currentUser",
+        "readOnly": true,
+        "showGeneratedBadge": false,
+        "additionalActions": [
+          {
+            "type": "custom",
+            "label": "➕ Create Ticket",
+            "navPath": "reporter/create/form",
+            "variant": "primary"
+          },
+          {
+            "type": "custom",
+            "label": "📋 My Tickets",
+            "navPath": "reporter/list/view",
+            "variant": "secondary"
+          },
+          {
+            "type": "logout",
+            "label": "🚪 Logout",
+            "navPath": "main/dashboard/view",
+            "variant": "outline"
+          }
+        ]
+      }
+    }
+  ]
+}

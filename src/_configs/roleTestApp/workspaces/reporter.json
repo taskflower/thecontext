@@ -1,0 +1,87 @@
+{
+    "slug": "reporter",
+    "name": "Reporter Dashboard",
+    "templateSettings": {
+      "layoutFile": "Simple",
+      "widgets": [
+        {
+          "tplFile": "CurrentUserWidget",
+          "title": "Logged User",
+          "attrs": {
+            "variant": "compact"
+          }
+        },
+        {
+          "tplFile": "InfoWidget",
+          "title": "📝 Reporter Dashboard",
+          "attrs": {
+            "content": "Create and track your tickets.",
+            "variant": "info"
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "➕ New Ticket",
+          "attrs": {
+            "navPath": "create/form",
+            "variant": "primary"
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "📋 My Tickets",
+          "attrs": {
+            "navPath": "list/view",
+            "variant": "secondary"
+          }
+        }
+      ]
+    },
+    "contextSchema": {
+      "ticket": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "label": "Title",
+            "fieldType": "text",
+            "required": true
+          },
+          "description": {
+            "type": "string",
+            "label": "Description",
+            "fieldType": "textarea",
+            "required": true
+          },
+          "priority": {
+            "type": "string",
+            "label": "Priority",
+            "fieldType": "select",
+            "enum": ["low", "medium", "high"],
+            "enumLabels": {
+              "low": "Low",
+              "medium": "Medium",
+              "high": "High"
+            },
+            "default": "medium",
+            "required": true
+          },
+          "status": {
+            "type": "string",
+            "label": "Status",
+            "fieldType": "select",
+            "enum": ["new"],
+            "default": "new",
+            "required": true
+          },
+          "reporterId": {
+            "type": "string",
+            "label": "Reporter ID",
+            "fieldType": "text",
+            "required": false
+          }
+        }
+      }
+    }
+  }
+  

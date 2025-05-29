@@ -1,0 +1,34 @@
+{
+    "slug": "login",
+    "nodes": [
+      {
+        "slug": "form",
+        "label": "Login Form",
+        "order": 1,
+        "tplFile": "FormStep",
+        "attrs": {
+          "title": "👤 Login to System",
+          "description": "Select your user account",
+          "schemaPath": "loginData",
+          "onSubmit": {
+            "saveToContext": true,
+            "contextKey": "loginData",
+            "navPath": "main/login/process"
+          }
+        }
+      },
+      {
+        "slug": "process",
+        "label": "Process Login",
+        "order": 2,
+        "tplFile": "UserLoginProcessStep",
+        "attrs": {
+          "title": "Logging in...",
+          "loginDataPath": "loginData",
+          "currentUserPath": "currentUser",
+          "successNavPath": "{{currentUser.role}}/dashboard/view",
+          "errorNavPath": "main/login/form"
+        }
+      }
+    ]
+  }

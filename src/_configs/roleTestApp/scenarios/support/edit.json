@@ -1,0 +1,22 @@
+{
+    "slug": "edit",
+    "nodes": [
+      {
+        "slug": "form",
+        "label": "Handle Ticket",
+        "order": 1,
+        "tplFile": "FormStep",
+        "attrs": {
+          "title": "🎧 Handle Ticket",
+          "schemaPath": "ticket",
+          "loadFromParams": true,
+          "onSubmit": {
+            "collection": "tickets",
+            "navPath": "support/list/view",
+            "action": "update"
+          }
+        }
+      }
+    ]
+  }
+  

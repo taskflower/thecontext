@@ -1,0 +1,39 @@
+{
+  "slug": "dashboard",
+  "nodes": [
+    {
+      "slug": "view",
+      "label": "Admin Dashboard",
+      "order": 1,
+      "tplFile": "DbSummaryStep",
+      "attrs": {
+        "title": "⚙️ Admin Dashboard",
+        "description": "Welcome to the admin workspace",
+        "schemaPath": "user",
+        "contextKey": "currentUser",
+        "readOnly": true,
+        "showGeneratedBadge": false,
+        "additionalActions": [
+          {
+            "type": "custom",
+            "label": "👥 Manage Users",
+            "navPath": "admin/list/view",
+            "variant": "primary"
+          },
+          {
+            "type": "custom",
+            "label": "➕ Add User",
+            "navPath": "admin/create/form",
+            "variant": "secondary"
+          },
+          {
+            "type": "logout",
+            "label": "🚪 Logout",
+            "navPath": "main/dashboard/view",
+            "variant": "outline"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Minimal 3-Role App",
+  "tplDir": "default",
+  "defaultWorkspace": "main",
+  "defaultScenario": "dashboard",
+  "database": {
+    "provider": "indexedDB",
+    "collections": {
+      "users": "users",
+      "tickets": "tickets"
+    }
+  }
+}

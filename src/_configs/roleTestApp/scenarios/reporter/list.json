@@ -1,0 +1,41 @@
+{
+    "slug": "list",
+    "nodes": [
+      {
+        "slug": "view",
+        "label": "My Tickets",
+        "order": 1,
+        "tplFile": "ListTableStep",
+        "attrs": {
+          "schemaPath": "ticket",
+          "collection": "tickets",
+          "columns": [
+            {
+              "key": "title",
+              "label": "Title",
+              "type": "text"
+            },
+            {
+              "key": "priority",
+              "label": "Priority",
+              "type": "badge"
+            },
+            {
+              "key": "status",
+              "label": "Status",
+              "type": "badge"
+            }
+          ],
+          "emptyState": {
+            "icon": "📋",
+            "title": "No Tickets",
+            "description": "You haven't created any tickets yet.",
+            "actionButton": {
+              "title": "Create First Ticket",
+              "navPath": "reporter/create/form"
+            }
+          }
+        }
+      }
+    ]
+  }

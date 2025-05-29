@@ -1,0 +1,87 @@
+{
+  "name": "Main Dashboard",
+  "templateSettings": {
+    "layoutFile": "Simple",
+    "widgets": [
+      {
+        "tplFile": "CurrentUserWidget",
+        "title": "User Panel",
+        "attrs": {
+          "variant": "detailed"
+        }
+      },
+      {
+        "tplFile": "InfoWidget",
+        "title": "🚀 3-Role System Demo",
+        "attrs": {
+          "content": "Simple app with 3 roles: Reporter (creates tickets), Support (handles tickets), Admin (manages users).",
+          "variant": "info"
+        }
+      },
+      {
+        "tplFile": "ButtonWidget",
+        "title": "👤 Login",
+        "attrs": {
+          "navPath": "main/login/form",
+          "variant": "primary"
+        }
+      },
+      {
+        "tplFile": "ButtonWidget",
+        "title": "📝 Register",
+        "attrs": {
+          "navPath": "main/register/form",
+          "variant": "secondary"
+        }
+      }
+    ]
+  },
+  "contextSchema": {
+    "loginData": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "label": "Select User",
+          "fieldType": "userSelect",
+          "required": true
+        }
+      }
+    },
+    "registerData": {
+      "type": "object",
+      "properties": {
+        "firstName": {
+          "type": "string",
+          "label": "First Name",
+          "fieldType": "text",
+          "required": true
+        },
+        "lastName": {
+          "type": "string",
+          "label": "Last Name",
+          "fieldType": "text",
+          "required": true
+        },
+        "email": {
+          "type": "string",
+          "label": "Email",
+          "fieldType": "email",
+          "required": true
+        },
+        "role": {
+          "type": "string",
+          "label": "Role",
+          "fieldType": "select",
+          "enum": ["reporter", "support"],
+          "enumLabels": {
+            "reporter": "Reporter",
+            "support": "Support"
+          },
+          "required": true,
+          "default": "reporter"
+        }
+      }
+    }
+  }
+}

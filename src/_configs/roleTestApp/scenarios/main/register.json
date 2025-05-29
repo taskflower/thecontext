@@ -1,0 +1,63 @@
+{
+    "slug": "register",
+    "nodes": [
+      {
+        "slug": "form",
+        "label": "Registration Form",
+        "order": 1,
+        "tplFile": "FormStep",
+        "attrs": {
+          "title": "📝 Register New Account",
+          "description": "Create your account to get started",
+          "schemaPath": "registerData",
+          "onSubmit": {
+            "saveToContext": true,
+            "contextKey": "registerData",
+            "navPath": "main/register/process"
+          }
+        }
+      },
+      {
+        "slug": "process",
+        "label": "Process Registration",
+        "order": 2,
+        "tplFile": "UserRegisterProcessStep",
+        "attrs": {
+          "title": "Creating your account...",
+          "description": "Please wait while we set up your account",
+          "registerDataPath": "registerData",
+          "currentUserPath": "currentUser",
+          "successNavPath": "{{currentUser.role}}/dashboard/view",
+          "errorNavPath": "main/register/form"
+        }
+      },
+      {
+        "slug": "success",
+        "label": "Registration Success",
+        "order": 3,
+        "tplFile": "DbSummaryStep",
+        "attrs": {
+          "title": "✅ Account Created Successfully!",
+          "description": "Your account has been created. You can now access your workspace.",
+          "schemaPath": "registerData",
+          "contextKey": "currentUser",
+          "readOnly": true,
+          "showGeneratedBadge": false,
+          "additionalActions": [
+            {
+              "type": "custom",
+              "label": "🚀 Go to My Workspace",
+              "navPath": "{{currentUser.role}}/dashboard/view",
+              "variant": "primary"
+            },
+            {
+              "type": "custom",
+              "label": "👤 Login as Different User",
+              "navPath": "main/login/form",
+              "variant": "outline"
+            }
+          ]
+        }
+      }
+    ]
+  }

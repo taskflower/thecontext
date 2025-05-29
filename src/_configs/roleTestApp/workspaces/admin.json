@@ -1,0 +1,83 @@
+{
+  "slug": "admin",
+  "name": "Admin Dashboard",
+  "templateSettings": {
+    "layoutFile": "Simple",
+    "widgets": [
+      {
+        "tplFile": "CurrentUserWidget",
+        "title": "Logged User",
+        "attrs": {
+          "variant": "compact"
+        }
+      },
+      {
+        "tplFile": "InfoWidget",
+        "title": "⚙️ Admin Dashboard",
+        "attrs": {
+          "content": "Manage users and system settings.",
+          "variant": "info"
+        }
+      },
+      {
+        "tplFile": "ButtonWidget",
+        "title": "👥 Manage Users",
+        "attrs": {
+          "navPath": "list/view",
+          "variant": "primary"
+        }
+      },
+      {
+        "tplFile": "ButtonWidget",
+        "title": "➕ Add User",
+        "attrs": {
+          "navPath": "create/form",
+          "variant": "secondary"
+        }
+      }
+    ]
+  },
+  "contextSchema": {
+    "user": {
+      "type": "object",
+      "properties": {
+        "firstName": {
+          "type": "string",
+          "label": "First Name",
+          "fieldType": "text",
+          "required": true
+        },
+        "lastName": {
+          "type": "string",
+          "label": "Last Name",
+          "fieldType": "text",
+          "required": true
+        },
+        "email": {
+          "type": "string",
+          "label": "Email",
+          "fieldType": "email",
+          "required": true
+        },
+        "role": {
+          "type": "string",
+          "label": "Role",
+          "fieldType": "select",
+          "enum": ["reporter", "support", "admin"],
+          "enumLabels": {
+            "reporter": "Reporter",
+            "support": "Support",
+            "admin": "Admin"
+          },
+          "required": true
+        },
+        "isActive": {
+          "type": "boolean",
+          "label": "Active",
+          "fieldType": "checkbox",
+          "default": true
+        }
+      }
+    }
+  }
+}

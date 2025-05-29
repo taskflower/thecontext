@@ -1,0 +1,33 @@
+{
+    "slug": "dashboard",
+    "nodes": [
+      {
+        "slug": "view",
+        "label": "Support Dashboard",
+        "order": 1,
+        "tplFile": "DbSummaryStep",
+        "attrs": {
+          "title": "🎧 Support Dashboard",
+          "description": "Welcome to the support workspace",
+          "schemaPath": "ticket",
+          "contextKey": "currentUser",
+          "readOnly": true,
+          "showGeneratedBadge": false,
+          "additionalActions": [
+            {
+              "type": "custom",
+              "label": "📋 All Tickets",
+              "navPath": "support/list/view",
+              "variant": "primary"
+            },
+            {
+              "type": "logout",
+              "label": "🚪 Logout",
+              "navPath": "main/dashboard/view",
+              "variant": "outline"
+            }
+          ]
+        }
+      }
+    ]
+  }

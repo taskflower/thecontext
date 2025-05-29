@@ -1,0 +1,21 @@
+{
+  "slug": "edit",
+  "nodes": [
+    {
+      "slug": "form",
+      "label": "Edit User",
+      "order": 1,
+      "tplFile": "FormStep",
+      "attrs": {
+        "title": "✏️ Edit User",
+        "schemaPath": "user",
+        "loadFromParams": true,
+        "onSubmit": {
+          "collection": "users",
+          "navPath": "admin/list/view",
+          "action": "update"
+        }
+      }
+    }
+  ]
+}

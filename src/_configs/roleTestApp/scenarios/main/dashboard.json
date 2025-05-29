@@ -1,0 +1,33 @@
+{
+  "slug": "dashboard",
+  "nodes": [
+    {
+      "slug": "view",
+      "label": "Main Dashboard",
+      "order": 1,
+      "tplFile": "DbSummaryStep",
+      "attrs": {
+        "title": "🚀 Welcome to 3-Role System",
+        "description": "Please login to access your workspace",
+        "schemaPath": "loginData",
+        "contextKey": "currentUser",
+        "readOnly": true,
+        "showGeneratedBadge": false,
+        "additionalActions": [
+          {
+            "type": "custom",
+            "label": "👤 Login",
+            "navPath": "main/login/form",
+            "variant": "primary"
+          },
+          {
+            "type": "custom",
+            "label": "📝 Register",
+            "navPath": "main/register/form",
+            "variant": "secondary"
+          }
+        ]
+      }
+    }
+  ]
+}

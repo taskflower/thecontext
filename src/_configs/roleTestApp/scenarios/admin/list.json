@@ -1,0 +1,64 @@
+{
+  "slug": "list",
+  "nodes": [
+    {
+      "slug": "view",
+      "label": "User Management",
+      "order": 1,
+      "tplFile": "ListTableStep",
+      "attrs": {
+        "schemaPath": "user",
+        "collection": "users",
+        "columns": [
+          {
+            "key": "firstName",
+            "label": "First Name",
+            "type": "text"
+          },
+          {
+            "key": "lastName",
+            "label": "Last Name",
+            "type": "text"
+          },
+          {
+            "key": "email",
+            "label": "Email",
+            "type": "text"
+          },
+          {
+            "key": "role",
+            "label": "Role",
+            "type": "badge"
+          },
+          {
+            "key": "isActive",
+            "label": "Status",
+            "type": "badge"
+          }
+        ],
+        "actions": [
+          {
+            "type": "edit",
+            "label": "Edit",
+            "navPath": "admin/edit/id"
+          },
+          {
+            "type": "delete",
+            "label": "Delete",
+            "variant": "danger",
+            "confirm": "Are you sure you want to delete this user?"
+          }
+        ],
+        "emptyState": {
+          "icon": "👥",
+          "title": "No Users",
+          "description": "No users in the system yet.",
+          "actionButton": {
+            "title": "Add First User",
+            "navPath": "admin/create/form"
+          }
+        }
+      }
+    }
+  ]
+}

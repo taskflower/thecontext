@@ -1,0 +1,81 @@
+{
+  "slug": "support",
+  "name": "Support Dashboard",
+  "templateSettings": {
+    "layoutFile": "Simple",
+    "widgets": [
+      {
+        "tplFile": "CurrentUserWidget",
+        "title": "Logged User",
+        "attrs": {
+          "variant": "compact"
+        }
+      },
+      {
+        "tplFile": "InfoWidget",
+        "title": "🎧 Support Dashboard",
+        "attrs": {
+          "content": "Handle and resolve tickets.",
+          "variant": "info"
+        }
+      },
+      {
+        "tplFile": "ButtonWidget",
+        "title": "📋 All Tickets",
+        "attrs": {
+          "navPath": "list/view",
+          "variant": "primary"
+        }
+      }
+    ]
+  },
+  "contextSchema": {
+    "ticket": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "label": "Title",
+          "fieldType": "text",
+          "required": true
+        },
+        "description": {
+          "type": "string",
+          "label": "Description",
+          "fieldType": "textarea",
+          "required": true
+        },
+        "priority": {
+          "type": "string",
+          "label": "Priority",
+          "fieldType": "select",
+          "enum": ["low", "medium", "high"],
+          "enumLabels": {
+            "low": "Low",
+            "medium": "Medium",
+            "high": "High"
+          },
+          "required": true
+        },
+        "status": {
+          "type": "string",
+          "label": "Status",
+          "fieldType": "select",
+          "enum": ["new", "in_progress", "resolved"],
+          "enumLabels": {
+            "new": "New",
+            "in_progress": "In Progress",
+            "resolved": "Resolved"
+          },
+          "required": true
+        },
+        "assigneeId": {
+          "type": "string",
+          "label": "Assigned To",
+          "fieldType": "userSelect",
+          "required": false
+        }
+      }
+    }
+  }
+}

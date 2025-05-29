@@ -1,0 +1,21 @@
+{
+  "slug": "create",
+  "nodes": [
+    {
+      "slug": "form",
+      "label": "New Ticket",
+      "order": 1,
+      "tplFile": "FormStep",
+      "attrs": {
+        "title": "📝 Create New Ticket",
+        "schemaPath": "ticket",
+        "autoPopulateFromCurrentUser": true,
+        "excludeFields": ["status"],
+        "onSubmit": {
+          "collection": "tickets",
+          "navPath": "reporter/dashboard/view"
+        }
+      }
+    }
+  ]
+}
