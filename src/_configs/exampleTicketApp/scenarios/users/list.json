@@ -15,7 +15,7 @@
           "description": "Nie masz jeszcze żadnych użytkowników. Dodaj pierwszego użytkownika.",
           "actionButton": {
             "title": "Dodaj użytkownika",
-            "navPath": "users/create/new"
+            "navURL": "users/create/new"
           }
         },
         "headerWidgets": [
@@ -34,7 +34,7 @@
             "title": "➕ Dodaj użytkownika",
             "attrs": {
               "variant": "primary",
-              "navPath": "users/create/new"
+              "navURL": "users/create/new"
             }
           },
           {
@@ -104,7 +104,7 @@
           {
             "type": "edit",
             "label": "Edytuj",
-            "navPath": "users/edit/id"
+            "navURL": "users/edit/id"
           },
           {
             "type": "delete",

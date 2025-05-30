@@ -10,7 +10,7 @@
           "loadFromContext": "currentUser",
           "onSubmit": {
             "collection": "users",
-            "navPath":     "profile/view",
+            "navURL":     "profile/view",
             "action":      "update"
           }
         }

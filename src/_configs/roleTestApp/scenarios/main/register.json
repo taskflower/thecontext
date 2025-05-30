@@ -13,7 +13,7 @@
           "onSubmit": {
             "saveToContext": true,
             "contextKey": "registerData",
-            "navPath": "main/register/process"
+            "navURL": "main/register/process"
           }
         }
       },
@@ -27,8 +27,8 @@
           "description": "Please wait while we set up your account",
           "registerDataPath": "registerData",
           "currentUserPath": "currentUser",
-          "successNavPath": "{{currentUser.role}}/dashboard/view",
-          "errorNavPath": "main/register/form"
+          "successNavURL": "{{currentUser.role}}/dashboard/view",
+          "errorNavURL": "main/register/form"
         }
       },
       {
@@ -47,13 +47,13 @@
             {
               "type": "custom",
               "label": "🚀 Go to My Workspace",
-              "navPath": "{{currentUser.role}}/dashboard/view",
+              "navURL": "{{currentUser.role}}/dashboard/view",
               "variant": "primary"
             },
             {
               "type": "custom",
               "label": "👤 Login as Different User",
-              "navPath": "main/login/form",
+              "navURL": "main/login/form",
               "variant": "outline"
             }
           ]

@@ -32,7 +32,7 @@
             "description": "You haven't created any tickets yet.",
             "actionButton": {
               "title": "Create First Ticket",
-              "navPath": "reporter/create/form"
+              "navURL": "reporter/create/form"
             }
           }
         }

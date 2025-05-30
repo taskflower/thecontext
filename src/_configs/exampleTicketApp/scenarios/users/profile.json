@@ -14,19 +14,19 @@
           "collection": "users",
           "readOnly": true,
           "showGeneratedBadge": false,
-          "navPath": "users/list/view",
-          "cancelNavPath": "users/list/view", 
+          "navURL": "users/list/view",
+          "cancelnavURL": "users/list/view", 
           "additionalActions": [
             {
               "type": "edit",
               "label": "✏️ Edytuj profil",
-              "navPath": "users/profile/edit",
+              "navURL": "users/profile/edit",
               "variant": "primary"
             },
             {
               "type": "logout",
               "label": "🚪 Wyloguj się", 
-              "navPath": "users/login/form",
+              "navURL": "users/login/form",
               "variant": "outline"
             }
           ]
@@ -45,7 +45,7 @@
           "excludeFields": ["isActive"],
           "onSubmit": {
             "collection": "users",
-            "navPath": "users/profile/summary"
+            "navURL": "users/profile/summary"
           }
         }
       },
@@ -62,8 +62,8 @@
           "collection": "users",
           "readOnly": true,
           "showGeneratedBadge": false,
-          "navPath": "users/profile/view",
-          "cancelNavPath": "users/profile/view"
+          "navURL": "users/profile/view",
+          "cancelnavURL": "users/profile/view"
         }
       }
     ]

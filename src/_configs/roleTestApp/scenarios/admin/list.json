@@ -40,7 +40,7 @@
           {
             "type": "edit",
             "label": "Edit",
-            "navPath": "admin/edit/form"
+            "navURL": "/admin/edit/form"
           },
           {
             "type": "delete",
@@ -55,7 +55,7 @@
           "description": "No users in the system yet.",
           "actionButton": {
             "title": "Add First User",
-            "navPath": "admin/create/form"
+            "navURL": "/admin/create/form"
           }
         }
       }

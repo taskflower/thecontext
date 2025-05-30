@@ -12,7 +12,7 @@ export interface Column {
 interface Action {
   type: "edit" | "delete" | "custom";
   label?: string;
-  navPath?: string;
+  navURL?: string;
   confirm?: string;
   variant?: "default" | "danger";
 }
@@ -23,7 +23,7 @@ interface EmptyState {
   description?: string;
   actionButton?: {
     title: string;
-    navPath: string;
+    navURL: string;
   };
 }
 
@@ -166,7 +166,7 @@ export default function DataTable({
         </p>
         {emptyState?.actionButton && (
           <button
-            onClick={() => go(emptyState.actionButton.navPath)}
+            onClick={() => go(emptyState.actionButton.navURL)}
             className="bg-zinc-900 text-white px-5 py-2.5 text-sm font-medium rounded-md hover:bg-zinc-800 transition-colors"
           >
             {emptyState.actionButton.title}
@@ -228,11 +228,11 @@ export default function DataTable({
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-3">
                       {actions.map((action, index) => {
-                        if (action.type === "edit" && action.navPath) {
+                        if (action.type === "edit" && action.navURL) {
                           return (
                             <button
                               key={index}
-                              onClick={() => go(`${action.navPath}/${record.id}`)}
+                              onClick={() => go(`${action.navURL}/${record.id}`)}
                               className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors"
                             >
                               {action.label || "Edytuj"}
@@ -254,11 +254,11 @@ export default function DataTable({
                             </button>
                           );
                         }
-                        if (action.type === "custom" && action.navPath) {
+                        if (action.type === "custom" && action.navURL) {
                           return (
                             <button
                               key={index}
-                              onClick={() => go(`${action.navPath}/${record.id}`)}
+                              onClick={() => go(`${action.navURL}/${record.id}`)}
                               className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors"
                             >
                               {action.label || "Akcja"}

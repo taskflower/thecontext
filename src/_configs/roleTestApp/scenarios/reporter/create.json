@@ -13,7 +13,7 @@
         "excludeFields": ["status"],
         "onSubmit": {
           "collection": "tickets",
-          "navPath": "reporter/dashboard/view"
+          "navURL": "reporter/dashboard/view"
         }
       }
     }

@@ -30,7 +30,7 @@
             {
               "type": "edit",
               "label": "Handle",
-              "navPath": "support/edit/id"
+              "navURL": "support/edit/id"
             }
           ],
           "emptyState": {

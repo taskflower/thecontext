@@ -13,7 +13,7 @@
           "onSubmit": {
             "saveToContext": true,
             "contextKey": "loginData",
-            "navPath": "users/login/step/process"
+            "navURL": "users/login/step/process"
           }
         }
       },
@@ -27,8 +27,8 @@
           "description": "Sprawdzamy Twoje dane i przygotowujemy sesję",
           "loginDataPath": "loginData",
           "currentUserPath": "currentUser",
-          "successNavPath": "users/profile/view",
-          "errorNavPath": "users/login/form"
+          "successNavURL": "users/profile/view",
+          "errorNavURL": "users/login/form"
         }
       }
     ]

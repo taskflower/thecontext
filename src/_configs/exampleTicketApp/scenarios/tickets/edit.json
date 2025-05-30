@@ -12,7 +12,7 @@
           "loadFromParams": true,
           "onSubmit": {
             "collection": "tickets",
-            "navPath": "tickets/list/view",
+            "navURL": "tickets/list/view",
             "action": "update"
           }
         }

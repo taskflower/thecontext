@@ -17,19 +17,19 @@
           {
             "type": "custom",
             "label": "➕ Create Ticket",
-            "navPath": "reporter/create/form",
+            "navURL": "reporter/create/form",
             "variant": "primary"
           },
           {
             "type": "custom",
             "label": "📋 My Tickets",
-            "navPath": "reporter/list/view",
+            "navURL": "reporter/list/view",
             "variant": "secondary"
           },
           {
             "type": "logout",
             "label": "🚪 Logout",
-            "navPath": "main/dashboard/view",
+            "navURL": "main/dashboard/view",
             "variant": "outline"
           }
         ]

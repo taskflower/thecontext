@@ -11,7 +11,7 @@
           "schemaPath": "user",
           "onSubmit": {
             "collection": "users",
-            "navPath": "admin/list/view",
+            "navURL": "/admin/list/view",
             "action": "create"
           }
         }

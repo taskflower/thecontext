@@ -6,9 +6,9 @@ interface CurrentUserWidgetProps {
   attrs?: {
     currentUserPath?: string;
     showActions?: boolean;
-    editNavPath?: string;
-    logoutNavPath?: string;
-    loginNavPath?: string; // NOWE: ścieżka do logowania
+    editnavURL?: string;
+    logoutnavURL?: string;
+    loginnavURL?: string; // NOWE: ścieżka do logowania
     variant?: "compact" | "detailed";
     colSpan?: string | number;
   };
@@ -24,9 +24,9 @@ export default function CurrentUserWidget({
   const {
     currentUserPath = "currentUser",
     showActions = true,
-    editNavPath = "profile/edit/form", // fallback domyślny
-    logoutNavPath = "main/dashboard/view", // fallback domyślny
-    loginNavPath = "main/login/form", // NOWE: ścieżka do logowania z fallback
+    editnavURL = "profile/edit/form", // fallback domyślny
+    logoutnavURL = "main/dashboard/view", // fallback domyślny
+    loginnavURL = "main/login/form", // NOWE: ścieżka do logowania z fallback
     variant = "detailed"
   } = attrs;
 
@@ -34,15 +34,15 @@ export default function CurrentUserWidget({
 
   const handleLogout = () => {
     set(currentUserPath, null);
-    go(`/:config/${logoutNavPath}`);
+    go(`/:config/${logoutnavURL}`);
   };
 
   const handleEdit = () => {
-    go(`/:config/${editNavPath}`);
+    go(`/:config/${editnavURL}`);
   };
 
   const handleLogin = () => {
-    go(`/:config/${loginNavPath}`); // UŻYWA loginNavPath z attrs
+    go(`/:config/${loginnavURL}`); // UŻYWA loginnavURL z attrs
   };
 
   if (!currentUser) {

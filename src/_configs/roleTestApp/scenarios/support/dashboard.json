@@ -17,13 +17,13 @@
             {
               "type": "custom",
               "label": "📋 All Tickets",
-              "navPath": "support/list/view",
+              "navURL": "support/list/view",
               "variant": "primary"
             },
             {
               "type": "logout",
               "label": "🚪 Logout",
-              "navPath": "main/dashboard/view",
+              "navURL": "main/dashboard/view",
               "variant": "outline"
             }
           ]

@@ -5,7 +5,7 @@ export const WIDGET_SCHEMAS = {
       attrs: {
         type: 'object',
         properties: {
-          navPath: { type: 'string', label: 'Navigation Path', required: true },
+          navURL: { type: 'string', label: 'Navigation Path', required: true },
           variant: { 
             type: 'string', 
             label: 'Variant',

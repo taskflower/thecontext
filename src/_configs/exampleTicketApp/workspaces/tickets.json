@@ -9,9 +9,9 @@
         "title": "Logged User",
         "attrs": {
           "variant": "compact",
-          "loginNavPath": "main/login/form",
-          "logoutNavPath": "main/dashboard/view", 
-          "editNavPath": "profile/edit/form"
+          "loginnavURL": "main/login/form",
+          "logoutnavURL": "main/dashboard/view", 
+          "editnavURL": "profile/edit/form"
         }
       },
       {
@@ -27,7 +27,7 @@
         "tplFile": "ButtonWidget",
         "title": "📝 Create New Ticket", 
         "attrs": {
-          "navPath": "create/new",
+          "navURL": "create/new",
           "variant": "primary",
           "colSpan": 1
         }
@@ -36,7 +36,7 @@
         "tplFile": "ButtonWidget",
         "title": "📋 View All Tickets", 
         "attrs": {
-          "navPath": "list/view",
+          "navURL": "list/view",
           "variant": "secondary",
           "colSpan": 1
         }
@@ -45,7 +45,7 @@
         "tplFile": "ButtonWidget",
         "title": "🤖 Wygeneruj z AI",
         "attrs": {
-          "navPath": "llm-create/new",
+          "navURL": "llm-create/new",
           "variant": "secondary",
           "colSpan": 1
         }

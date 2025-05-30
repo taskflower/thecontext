@@ -12,7 +12,7 @@ interface FormStepProps {
     description?: string;
     onSubmit: {
       collection?: string;
-      navPath: string;
+      navURL: string;
       saveToContext?: boolean;
       contextKey?: string;
     };
@@ -125,7 +125,7 @@ export default function FormStep({ attrs }: FormStepProps) {
         await saveItem(payload);
       }
       
-      go(`/:config/${attrs.onSubmit.navPath}`);
+      go(`/:config/${attrs.onSubmit.navURL}`);
     } catch (err: any) {
       alert(`Save failed: ${err.message}`);
     } finally {
@@ -134,7 +134,7 @@ export default function FormStep({ attrs }: FormStepProps) {
   };
 
   const handleCancel = () => {
-    go(`/:config/${attrs.onSubmit.navPath}`);
+    go(`/:config/${attrs.onSubmit.navURL}`);
   };
 
   // ✅ CONDITIONAL RENDERING AFTER ALL HOOKS

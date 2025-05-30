@@ -64,7 +64,7 @@ export interface ScenarioNode {
     excludeFields?: string[];
     onSubmit?: {
       collection: string;
-      navPath: string;
+      navURL: string;
       action?: "create" | "update";
     };
     // LLM specific
@@ -72,15 +72,15 @@ export interface ScenarioNode {
     placeholder?: string;
     contextInstructions?: string;
     examplePrompts?: string[];
-    navPath?: string;
-    cancelNavPath?: string;
+    navURL?: string;
+    cancelnavURL?: string;
     systemMessage?: string;
     // List specific
     emptyState?: {
       icon?: string;
       title?: string;
       description?: string;
-      actionButton?: { title: string; navPath: string };
+      actionButton?: { title: string; navURL: string };
     };
     columns?: Array<{
       key: string;
@@ -92,14 +92,14 @@ export interface ScenarioNode {
     actions?: Array<{
       type: "edit" | "delete" | "custom";
       label?: string;
-      navPath?: string;
+      navURL?: string;
       confirm?: string;
       variant?: "default" | "danger";
     }>;
     widgets?: Array<{
       tplFile: string;
       title: string;
-      attrs: { navPath: string; variant?: "primary" | "secondary" };
+      attrs: { navURL: string; variant?: "primary" | "secondary" };
     }>;
     pagination?: { pageSize?: number; showTotal?: boolean };
     search?: { enabled?: boolean; placeholder?: string; fields?: string[] };

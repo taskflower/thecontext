@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 type ButtonWidgetProps = { 
   title: string; 
   attrs: { 
-    navPath?: string; 
+    navURL?: string; 
     variant?: string 
   } 
 };
@@ -15,13 +15,13 @@ export default function ButtonWidget({ title, attrs }: ButtonWidgetProps) {
   const params = useParams();
   
   const handle = () => {
-    if (!attrs.navPath) return;
+    if (!attrs.navURL) return;
     
     const config = params.config || "exampleTicketApp";
     
-    // Sprawdź czy navPath zaczyna się od nazwy workspace'a
-    const navPath = attrs.navPath;
-    const pathParts = navPath.split('/');
+    // Sprawdź czy navURL zaczyna się od nazwy workspace'a
+    const navURL = attrs.navURL;
+    const pathParts = navURL.split('/');
     const possibleWorkspace = pathParts[0];
     
     // Lista znanych workspace'ów
@@ -29,15 +29,15 @@ export default function ButtonWidget({ title, attrs }: ButtonWidgetProps) {
     
     let fullPath;
     if (knownWorkspaces.includes(possibleWorkspace)) {
-      // NavPath zawiera workspace - użyj go bezpośrednio
-      fullPath = `/${config}/${navPath}`;
+      // navURL zawiera workspace - użyj go bezpośrednio
+      fullPath = `/${config}/${navURL}`;
     } else {
-      // NavPath nie zawiera workspace - użyj aktualnego
+      // navURL nie zawiera workspace - użyj aktualnego
       const workspace = params.workspace || "tickets";
-      fullPath = `/${config}/${workspace}/${navPath}`;
+      fullPath = `/${config}/${workspace}/${navURL}`;
     }
     
-    console.log(`[ButtonWidget] Navigating from navPath: ${navPath} to: ${fullPath}`);
+    console.log(`[ButtonWidget] Navigating from navURL: ${navURL} to: ${fullPath}`);
     go(fullPath);
   };
 

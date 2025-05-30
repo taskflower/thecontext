@@ -11,7 +11,7 @@
           "contextKey": "currentUser",
           "readOnly": true,
           "additionalActions": [
-            { "type": "edit", "label": "Edit Profile", "navPath": "profile/edit" }
+            { "type": "edit", "label": "Edit Profile", "navURL": "profile/edit" }
           ]
         }
       }

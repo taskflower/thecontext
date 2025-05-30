@@ -9,9 +9,9 @@
         "title": "Logged User",
         "attrs": {
           "variant": "compact",
-          "loginNavPath": "main/login/form",
-          "logoutNavPath": "main/dashboard/view", 
-          "editNavPath": "profile/edit/form"
+          "loginnavURL": "main/login/form",
+          "logoutnavURL": "main/dashboard/view", 
+          "editnavURL": "profile/edit/form"
         }
       },
       {
@@ -36,7 +36,7 @@
         "tplFile": "ButtonWidget",
         "title": "👤 Logowanie",
         "attrs": {
-          "navPath": "users/login/form",
+          "navURL": "users/login/form",
           "variant": "primary",
           "colSpan": 1
         }
@@ -45,7 +45,7 @@
         "tplFile": "ButtonWidget",
         "title": "📝 Nowe zgłoszenie",
         "attrs": {
-          "navPath": "tickets/create/form",
+          "navURL": "tickets/create/form",
           "variant": "primary",
           "colSpan": 1
         }

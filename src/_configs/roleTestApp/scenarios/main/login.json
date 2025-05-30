@@ -13,7 +13,7 @@
           "onSubmit": {
             "saveToContext": true,
             "contextKey": "loginData",
-            "navPath": "main/login/process"
+            "navURL": "main/login/process"
           }
         }
       },
@@ -26,8 +26,8 @@
           "title": "Logging in...",
           "loginDataPath": "loginData",
           "currentUserPath": "currentUser",
-          "successNavPath": "{{currentUser.role}}/dashboard/view",
-          "errorNavPath": "main/login/form"
+          "successNavURL": "{{currentUser.role}}/dashboard/view",
+          "errorNavURL": "main/login/form"
         }
       }
     ]

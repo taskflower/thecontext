@@ -10,9 +10,9 @@
         "attrs": {
           "colSpan": 3,
           "variant": "compact",
-          "loginNavPath": "main/login/form",
-          "logoutNavPath": "main/dashboard/view", 
-          "editNavPath": "profile/edit/form"
+          "loginnavURL": "/main/login/form",
+          "logoutnavURL": "/main/dashboard/view", 
+          "editnavURL": "/profile/edit/form"
         }
       },
       {
@@ -29,7 +29,7 @@
         "title": "👤 Login",
         "attrs": {
           "colSpan": 2,
-          "navPath": "main/login/form",
+          "navURL": "/main/login/form",
           "variant": "primary"
         }
       },
@@ -39,7 +39,7 @@
         "attrs": {
           "colSpan": 2,
           "colStart": 3,
-          "navPath": "main/register/form",
+          "navURL": "/main/register/form",
           "variant": "secondary"
         }
       }

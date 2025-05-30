@@ -12,9 +12,9 @@ interface LLMGenerationStepProps {
     placeholder?: string;
     examplePrompts?: string[];
     systemMessage?: string;
-    navPath?: string;
+    navURL?: string;
     nextStep?: string;
-    cancelNavPath?: string;
+    cancelnavURL?: string;
     contextKey?: string;
   };
 }
@@ -91,9 +91,9 @@ export default function LLMGenerationStep({ attrs }: LLMGenerationStepProps) {
     if (attrs?.nextStep) {
       nextPath = `/:config/${workspace}/${attrs.nextStep}`;
       console.log(`LLM: Using nextStep: ${attrs.nextStep} → ${nextPath}`);
-    } else if (attrs?.navPath) {
-      nextPath = `/:config/${attrs.navPath}`;
-      console.log(`LLM: Using navPath: ${attrs.navPath} → ${nextPath}`);
+    } else if (attrs?.navURL) {
+      nextPath = `/:config/${attrs.navURL}`;
+      console.log(`LLM: Using navURL: ${attrs.navURL} → ${nextPath}`);
     } else {
       nextPath = `/:config/${workspace}/list`;
       console.log(`LLM: Using fallback → ${nextPath}`);
@@ -103,7 +103,7 @@ export default function LLMGenerationStep({ attrs }: LLMGenerationStepProps) {
   };
 
   const handleCancel = () => {
-    const cancelPath = attrs?.cancelNavPath || `${workspace}/list`;
+    const cancelPath = attrs?.cancelnavURL || `${workspace}/list`;
     go(`/:config/${cancelPath}`); // ✅ UŻYWAMY go() zamiast navigate()
   };
 

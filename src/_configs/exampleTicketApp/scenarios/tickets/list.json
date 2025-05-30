@@ -15,7 +15,7 @@
           "description": "Nie masz jeszcze żadnych zgłoszeń. Stwórz pierwsze zgłoszenie, aby rozpocząć.",
           "actionButton": {
             "title": "Stwórz zgłoszenie",
-            "navPath": "tickets/create/new"
+            "navURL": "tickets/create/new"
           }
         },
         "headerWidgets": [
@@ -33,7 +33,7 @@
             "title": "➕ Dodaj nowe zgłoszenie",
             "attrs": {
               "variant": "primary",
-              "navPath": "tickets/create/new"
+              "navURL": "tickets/create/new"
             }
           },
           {
@@ -41,7 +41,7 @@
             "title": "🤖 Wygeneruj z AI",
             "attrs": {
               "variant": "secondary",
-              "navPath": "tickets/llm-create/new"
+              "navURL": "tickets/llm-create/new"
             }
           },
           {
@@ -113,7 +113,7 @@
           {
             "type": "edit",
             "label": "Edytuj",
-            "navPath": "tickets/edit/id"
+            "navURL": "tickets/edit/id"
           },
           {
             "type": "delete",
@@ -124,7 +124,7 @@
           {
             "type": "custom",
             "label": "Szczegóły",
-            "navPath": "tickets/view/details"
+            "navURL": "tickets/view/details"
           }
         ]
       }

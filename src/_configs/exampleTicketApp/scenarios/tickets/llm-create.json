@@ -20,8 +20,8 @@
           "Prośba o instalację oprogramowania",
           "Błąd w kalkulacji raportów sprzedażowych"
         ],
-        "cancelNavPath": "tickets/list/view",
-        "navPath": "tickets/llm-create/db-summary",
+        "cancelnavURL": "tickets/list/view",
+        "navURL": "tickets/llm-create/db-summary",
         "saveToContext": true,
         "contextKey": "generatedTicket"
       }
@@ -37,21 +37,21 @@
         "schemaPath": "ticket",
         "collection": "tickets",
         "contextKey": "generatedTicket",
-        "navPath": "tickets/llm-create/list",
-        "cancelNavPath": "tickets/llm-create/list",
+        "navURL": "tickets/llm-create/list",
+        "cancelnavURL": "tickets/llm-create/list",
         "allowEdit": true,
         "showGeneratedBadge": true,
         "additionalActions": [
           {
             "type": "regenerate",
             "label": "🔄 Wygeneruj ponownie",
-            "navPath": "tickets/llm-create/llm-generation",
+            "navURL": "tickets/llm-create/llm-generation",
             "variant": "secondary"
           },
           {
             "type": "custom",
             "label": "✏️ Edytuj ręcznie",
-            "navPath": "tickets/create/form",
+            "navURL": "tickets/create/form",
             "variant": "outline"
           }
         ]

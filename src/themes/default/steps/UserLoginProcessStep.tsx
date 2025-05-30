@@ -7,8 +7,8 @@ interface UserLoginProcessStepProps {
   attrs: {
     loginDataPath?: string; // ścieżka do danych logowania w kontekście
     currentUserPath?: string; // gdzie zapisać dane zalogowanego użytkownika
-    successNavPath?: string; // gdzie przekierować po sukcesie
-    errorNavPath?: string; // gdzie przekierować przy błędzie
+    successNavURL?: string; // gdzie przekierować po sukcesie
+    errorNavURL?: string; // gdzie przekierować przy błędzie
     title?: string;
     description?: string;
   };
@@ -24,8 +24,8 @@ export default function UserLoginProcessStep({ attrs }: UserLoginProcessStepProp
 
   const loginDataPath = attrs.loginDataPath || "loginData";
   const currentUserPath = attrs.currentUserPath || "currentUser";
-  const successNavPath = attrs.successNavPath || "users/profile/view";
-  const errorNavPath = attrs.errorNavPath || "users/login/form";
+  const successNavURL = attrs.successNavURL || "users/profile/view";
+  const errorNavURL = attrs.errorNavURL || "users/login/form";
 
   useEffect(() => {
     if (!loadingUsers && users.length > 0) {
@@ -73,7 +73,7 @@ export default function UserLoginProcessStep({ attrs }: UserLoginProcessStepProp
       
       // Przekieruj po krótkim opóźnieniu
       setTimeout(() => {
-        go(`/:config/${successNavPath}`);
+        go(`/:config/${successNavURL}`);
       }, 1500);
 
     } catch (err: any) {
@@ -81,7 +81,7 @@ export default function UserLoginProcessStep({ attrs }: UserLoginProcessStepProp
       
       // Przekieruj z powrotem do formularza logowania po opóźnieniu
       setTimeout(() => {
-        go(`/:config/${errorNavPath}`);
+        go(`/:config/${errorNavURL}`);
       }, 3000);
     } finally {
       setProcessing(false);

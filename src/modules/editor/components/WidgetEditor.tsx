@@ -12,7 +12,7 @@ const WIDGET_SCHEMAS = {
     attrs: {
       type: "object",
       properties: {
-        navPath: { type: "string", label: "Navigation Path", required: true },
+        navURL: { type: "string", label: "Navigation Path", required: true },
         variant: {
           type: "string",
           label: "Variant",
@@ -167,7 +167,7 @@ export default function WidgetEditor({ widgets, onChange }: WidgetEditorProps) {
       title: `New ${type}`,
       attrs:
         type === "ButtonWidget"
-          ? { navPath: "", variant: "default", colSpan: "1" }
+          ? { navURL: "", variant: "default", colSpan: "1" }
           : type === "InfoWidget"
           ? { content: "Widget content", variant: "default", colSpan: "1" }
           : { size: "medium", align: "left", colSpan: "1" },

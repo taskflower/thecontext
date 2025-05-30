@@ -7,8 +7,8 @@ interface Props {
   attrs: {
     registerDataPath?: string;
     currentUserPath?: string;
-    successNavPath?: string; // może zawierać {{currentUser.role}}
-    errorNavPath?: string;
+    successNavURL?: string; // może zawierać {{currentUser.role}}
+    errorNavURL?: string;
     title?: string;
     description?: string;
   };
@@ -35,7 +35,7 @@ export default function UserRegisterProcessStep({ attrs }: Props) {
         setState("success");
         
         // Hook useAppNavigation automatycznie przetworzy {{currentUser.role}}
-        const targetPath = attrs.successNavPath || "{{currentUser.role}}/dashboard/view";
+        const targetPath = attrs.successNavURL || "{{currentUser.role}}/dashboard/view";
         
         console.log(`[UserRegisterProcessStep] Using navigation template: ${targetPath}`);
         
@@ -48,7 +48,7 @@ export default function UserRegisterProcessStep({ attrs }: Props) {
         setErr(e.message);
         setState("error");
         
-        const errorPath = attrs.errorNavPath || "main/register/form";
+        const errorPath = attrs.errorNavURL || "main/register/form";
         setTimeout(() => {
           go(`/:config/${errorPath}`);
         }, 3000);

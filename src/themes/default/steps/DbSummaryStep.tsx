@@ -12,15 +12,15 @@ interface DbSummaryStepProps {
     contextKey?: string;
     title?: string;
     description?: string;
-    navPath?: string;
-    cancelNavPath?: string;
+    navURL?: string;
+    cancelnavURL?: string;
     allowEdit?: boolean;
     showGeneratedBadge?: boolean;
     readOnly?: boolean;
     additionalActions?: Array<{
       type: string;
       label: string;
-      navPath: string;
+      navURL: string;
       variant?: "primary" | "secondary" | "outline" | "danger";
     }>;
   };
@@ -51,8 +51,8 @@ export default function DbSummaryStep({ attrs }: DbSummaryStepProps) {
     try {
       await saveItem({ ...data, id: data.id || id || Date.now().toString() });
       set(contextKey, null); // Clear context
-      const navPath = attrs?.navPath || `${workspace}/list/view`;
-      go(`/:config/${navPath}`); // ✅ UŻYWAMY go() zamiast navigate()
+      const navURL = attrs?.navURL || `${workspace}/list/view`;
+      go(`/:config/${navURL}`); // ✅ UŻYWAMY go() zamiast navigate()
     } catch (err: any) {
       alert(`Save failed: ${err.message}`);
     } finally {
@@ -61,7 +61,7 @@ export default function DbSummaryStep({ attrs }: DbSummaryStepProps) {
   };
 
   const handleCancel = () => {
-    const cancelPath = attrs?.cancelNavPath || `${workspace}/list/view`;
+    const cancelPath = attrs?.cancelnavURL || `${workspace}/list/view`;
     go(`/:config/${cancelPath}`); // ✅ UŻYWAMY go() zamiast navigate()
   };
 
@@ -69,7 +69,7 @@ export default function DbSummaryStep({ attrs }: DbSummaryStepProps) {
     if (action.type === "regenerate") {
       set(contextKey, null);
     }
-    go(`/:config/${action.navPath}`); // ✅ UŻYWAMY go() zamiast navigate()
+    go(`/:config/${action.navURL}`); // ✅ UŻYWAMY go() zamiast navigate()
   };
 
   // ✅ CONDITIONAL RENDERING AFTER ALL HOOKS

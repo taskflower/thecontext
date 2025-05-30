@@ -17,19 +17,19 @@
           {
             "type": "custom",
             "label": "👥 Manage Users",
-            "navPath": "admin/list/view",
+            "navURL": "/admin/list/view",
             "variant": "primary"
           },
           {
             "type": "custom",
             "label": "➕ Add User",
-            "navPath": "admin/create/form",
+            "navURL": "/admin/create/form",
             "variant": "secondary"
           },
           {
             "type": "logout",
             "label": "🚪 Logout",
-            "navPath": "main/dashboard/view",
+            "navURL": "/main/dashboard/view",
             "variant": "outline"
           }
         ]
