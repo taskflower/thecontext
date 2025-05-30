@@ -13,6 +13,7 @@
         "tplFile": "CurrentUserWidget",
         "title": "Logged User",
         "attrs": {
+          "colSpan": "full",
           "variant": "compact",
           "loginnavURL": "/main/login/form",
           "logoutnavURL": "/main", 

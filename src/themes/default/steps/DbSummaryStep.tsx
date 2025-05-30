@@ -1,7 +1,12 @@
 // src/themes/default/steps/DbSummaryStep.tsx - GENERYCZNA WERSJA
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useWorkspaceSchema, useCollections, useEngineStore, useAppNavigation } from "@/core";
+import {
+  useWorkspaceSchema,
+  useCollections,
+  useEngineStore,
+  useAppNavigation,
+} from "@/core";
 import { FieldWidget } from "../widgets/form/FieldWidget";
 import { LoadingSpinner, ErrorMessage } from "../commons/StepWrapper";
 
@@ -10,36 +15,36 @@ interface DbSummaryStepProps {
     schemaPath: string;
     title?: string;
     description?: string;
-    
+
     // ✅ UJEDNOLICONA STRUKTURA NAWIGACJI
     onSubmit?: {
-      collection?: string;      // Kolekcja do zapisu
-      navURL?: string;          // Ścieżka po zapisie
-      clearContext?: boolean;   // Czy wyczyścić kontekst po zapisie
+      collection?: string; // Kolekcja do zapisu
+      navURL?: string; // Ścieżka po zapisie
+      clearContext?: boolean; // Czy wyczyścić kontekst po zapisie
     };
-    
+
     onCancel?: {
-      navURL: string;           // Ścieżka anulowania
+      navURL: string; // Ścieżka anulowania
     };
-    
+
     // Konfiguracja danych
-    loadFromContext?: string;   // Klucz kontekstu do załadowania
-    
+    loadFromContext?: string; // Klucz kontekstu do załadowania
+
     // Opcje wyświetlania
-    allowEdit?: boolean;        // Czy można edytować pola
+    allowEdit?: boolean; // Czy można edytować pola
     showGeneratedBadge?: boolean; // Czy pokazać badge "AI Generated"
-    readOnly?: boolean;         // Tryb tylko do odczytu
-    
+    readOnly?: boolean; // Tryb tylko do odczytu
+
     // Dodatkowe akcje
     additionalActions?: Array<{
       type: "regenerate" | "custom" | "edit";
       label: string;
-      navURL?: string;          // Pełna ścieżka nawigacji
-      nextStep?: string;        // Slug kolejnego kroku w flow
+      navURL?: string; // Pełna ścieżka nawigacji
+      nextStep?: string; // Slug kolejnego kroku w flow
       variant?: "primary" | "secondary" | "outline" | "danger";
-      clearContext?: boolean;   // Czy wyczyścić kontekst przed nawigacją
+      clearContext?: boolean; // Czy wyczyścić kontekst przed nawigacją
     }>;
-    
+
     // Fallback akcje gdy brak danych w kontekście
     noDataActions?: Array<{
       label: string;
@@ -53,9 +58,13 @@ interface DbSummaryStepProps {
 export default function DbSummaryStep({ attrs }: DbSummaryStepProps) {
   const { workspace = "", id } = useParams();
   const { go } = useAppNavigation();
-  
-  const { schema, loading, error } = useWorkspaceSchema(attrs?.schemaPath || "");
-  const { saveItem, loading: savingToDb } = useCollections(attrs?.onSubmit?.collection || "");
+
+  const { schema, loading, error } = useWorkspaceSchema(
+    attrs?.schemaPath || ""
+  );
+  const { saveItem, loading: savingToDb } = useCollections(
+    attrs?.onSubmit?.collection || ""
+  );
   const { get, set } = useEngineStore();
   const [data, setData] = useState<Record<string, any>>({});
   const [saving, setSaving] = useState(false);
@@ -77,12 +86,12 @@ export default function DbSummaryStep({ attrs }: DbSummaryStepProps) {
       if (attrs?.onSubmit?.collection) {
         await saveItem({ ...data, id: data.id || id || Date.now().toString() });
       }
-      
+
       // Wyczyść kontekst jeśli skonfigurowane
       if (attrs?.onSubmit?.clearContext !== false) {
         set(contextKey, null);
       }
-      
+
       // Nawiguj do następnej strony
       const navURL = attrs?.onSubmit?.navURL || `${workspace}/list/view`;
       go(navURL);
@@ -103,12 +112,12 @@ export default function DbSummaryStep({ attrs }: DbSummaryStepProps) {
     if (action.clearContext) {
       set(contextKey, null);
     }
-    
+
     // Określ ścieżkę nawigacji
     let navPath;
     if (action.nextStep) {
       // nextStep = kolejny krok w obecnym flow
-      const currentFlow = window.location.pathname.split('/')[3]; // Zakładając /:config/workspace/flow/step
+      const currentFlow = window.location.pathname.split("/")[3]; // Zakładając /:config/workspace/flow/step
       navPath = `${workspace}/${currentFlow}/${action.nextStep}`;
     } else if (action.navURL) {
       // navURL = pełna ścieżka
@@ -116,48 +125,58 @@ export default function DbSummaryStep({ attrs }: DbSummaryStepProps) {
     } else {
       navPath = `${workspace}/list/view`;
     }
-    
+
     go(navPath);
   };
 
   const handleNoDataAction = (action: any) => {
     let navPath;
     if (action.nextStep) {
-      const currentFlow = window.location.pathname.split('/')[3];
+      const currentFlow = window.location.pathname.split("/")[3];
       navPath = `${workspace}/${currentFlow}/${action.nextStep}`;
     } else if (action.navURL) {
       navPath = action.navURL;
     } else {
       navPath = `${workspace}/list/view`;
     }
-    
+
     go(navPath);
   };
 
   if (loading) return <LoadingSpinner text="Loading summary..." />;
-  if (error || !schema) return <ErrorMessage error={error || `Schema not found: ${attrs?.schemaPath}`} />;
+  if (error || !schema)
+    return (
+      <ErrorMessage error={error || `Schema not found: ${attrs?.schemaPath}`} />
+    );
 
   // ✅ GENERYCZNY FALLBACK SCREEN ZAMIAST HARDKODOWANYCH AKCJI
   if (!hasContextData) {
     return (
       <div className="py-24 text-center">
-        <div className="text-yellow-600 text-sm font-medium mb-2">No Data Found</div>
-        <div className="text-xs text-zinc-500 mb-6">No data found in context: {contextKey}</div>
-        
+        <div className="text-yellow-600 text-sm font-medium mb-2">
+          No Data Found
+        </div>
+        <div className="text-xs text-zinc-500 mb-6">
+          No data found in context: {contextKey}
+        </div>
+
         {attrs?.noDataActions && attrs.noDataActions.length > 0 ? (
           <div className="space-x-3">
             {attrs.noDataActions.map((action, i) => {
               const variants = {
                 primary: "bg-blue-600 text-white hover:bg-blue-700",
-                secondary: "bg-zinc-600 text-white hover:bg-zinc-700", 
-                outline: "bg-white text-zinc-700 border border-zinc-300 hover:bg-zinc-50"
+                secondary: "bg-zinc-600 text-white hover:bg-zinc-700",
+                outline:
+                  "bg-white text-zinc-700 border border-zinc-300 hover:bg-zinc-50",
               };
-              
+
               return (
                 <button
                   key={i}
                   onClick={() => handleNoDataAction(action)}
-                  className={`px-4 py-2 rounded transition-colors ${variants[action.variant || "outline"]}`}
+                  className={`px-4 py-2 rounded transition-colors ${
+                    variants[action.variant || "outline"]
+                  }`}
                 >
                   {action.label}
                 </button>
@@ -204,21 +223,26 @@ export default function DbSummaryStep({ attrs }: DbSummaryStepProps) {
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {Object.entries(schema.properties).map(([key, field]: any) => (
-              <div key={key} className={field.fieldType === "textarea" ? "md:col-span-2" : ""}>
+              <div
+                key={key}
+                className={
+                  field.fieldType === "textarea" ? "md:col-span-2" : ""
+                }
+              >
                 {isReadOnly ? (
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-zinc-700">
                       {field.label || key}
                     </label>
                     <div className="p-3 bg-zinc-50 border border-zinc-200/60 rounded-md text-sm min-h-[2.5rem] flex items-center">
-                      {field?.enumLabels?.[data[key]] || data[key] || ''}
+                      {field?.enumLabels?.[data[key]] || data[key] || ""}
                     </div>
                   </div>
                 ) : (
                   <FieldWidget
                     field={{ ...field, key }}
                     value={data[key] ?? ""}
-                    onChange={(k, v) => setData(d => ({ ...d, [k]: v }))}
+                    onChange={(k, v) => setData((d) => ({ ...d, [k]: v }))}
                   />
                 )}
               </div>
@@ -242,16 +266,19 @@ export default function DbSummaryStep({ attrs }: DbSummaryStepProps) {
               {attrs?.additionalActions?.map((action, i) => {
                 const variants = {
                   primary: "bg-blue-600 text-white hover:bg-blue-700",
-                  secondary: "bg-zinc-600 text-white hover:bg-zinc-700", 
-                  outline: "bg-white text-zinc-700 border border-zinc-300 hover:bg-zinc-50",
-                  danger: "bg-red-600 text-white hover:bg-red-700"
+                  secondary: "bg-zinc-600 text-white hover:bg-zinc-700",
+                  outline:
+                    "bg-white text-zinc-700 border border-zinc-300 hover:bg-zinc-50",
+                  danger: "bg-red-600 text-white hover:bg-red-700",
                 };
-                
+
                 return (
                   <button
                     key={i}
                     onClick={() => handleAdditionalAction(action)}
-                    className={`px-4 py-2.5 text-sm font-medium rounded-md transition-colors ${variants[action.variant || "outline"]}`}
+                    className={`px-4 py-2.5 text-sm font-medium rounded-md transition-colors ${
+                      variants[action.variant || "outline"]
+                    }`}
                   >
                     {action.label}
                   </button>
