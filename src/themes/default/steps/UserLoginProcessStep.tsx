@@ -24,8 +24,8 @@ export default function UserLoginProcessStep({ attrs }: UserLoginProcessStepProp
 
   const loginDataPath = attrs.loginDataPath || "loginData";
   const currentUserPath = attrs.currentUserPath || "currentUser";
-  const successNavURL = attrs.successNavURL || "users/profile/view";
-  const errorNavURL = attrs.errorNavURL || "users/login/form";
+  const successNavURL = attrs.successNavURL || "/{{currentUser.role}}/dashboard/view";
+  const errorNavURL = attrs.errorNavURL || "/main/login/form";
 
   useEffect(() => {
     if (!loadingUsers && users.length > 0) {
@@ -70,22 +70,22 @@ export default function UserLoginProcessStep({ attrs }: UserLoginProcessStepProp
       set(loginDataPath, null);
 
       setSuccess(true);
-      
-      // Przekieruj po krótkim opóźnieniu
-      setTimeout(() => {
-        go(`/:config/${successNavURL}`);
-      }, 1500);
 
     } catch (err: any) {
       setError(err.message);
-      
-      // Przekieruj z powrotem do formularza logowania po opóźnieniu
-      setTimeout(() => {
-        go(`/:config/${errorNavURL}`);
-      }, 3000);
     } finally {
       setProcessing(false);
     }
+  };
+
+  const handleSuccessNavigation = () => {
+    console.log(`[UserLoginProcessStep] Navigating to: ${successNavURL}`);
+    go(successNavURL);
+  };
+
+  const handleErrorNavigation = () => {
+    console.log(`[UserLoginProcessStep] Navigating to error page: ${errorNavURL}`);
+    go(errorNavURL);
   };
 
   if (loadingUsers) {
@@ -120,9 +120,16 @@ export default function UserLoginProcessStep({ attrs }: UserLoginProcessStepProp
           <h3 className="text-lg font-medium text-zinc-900 mb-2">
             Logowanie pomyślne!
           </h3>
-          <p className="text-sm text-zinc-600">
-            Przekierowujemy do Twojego profilu...
+          <p className="text-sm text-zinc-600 mb-6">
+            Zostałeś pomyślnie zalogowany do systemu.
           </p>
+          
+          <button
+            onClick={handleSuccessNavigation}
+            className="w-full bg-green-600 text-white text-sm font-medium px-4 py-2.5 rounded-md hover:bg-green-700 transition-colors"
+          >
+            Przejdź do dashboardu
+          </button>
         </div>
       </div>
     );
@@ -140,12 +147,27 @@ export default function UserLoginProcessStep({ attrs }: UserLoginProcessStepProp
           <h3 className="text-lg font-medium text-zinc-900 mb-2">
             Błąd logowania
           </h3>
-          <p className="text-sm text-red-600 mb-4">
+          <p className="text-sm text-red-600 mb-2">
             {error}
           </p>
-          <p className="text-xs text-zinc-500">
-            Przekierowujemy z powrotem do formularza...
+          <p className="text-xs text-zinc-500 mb-6">
+            Sprawdź dane i spróbuj ponownie.
           </p>
+          
+          <div className="flex gap-3">
+            <button
+              onClick={handleErrorNavigation}
+              className="flex-1 bg-zinc-600 text-white text-sm font-medium px-4 py-2.5 rounded-md hover:bg-zinc-700 transition-colors"
+            >
+              Spróbuj ponownie
+            </button>
+            <button
+              onClick={() => go("/main")}
+              className="flex-1 bg-zinc-100 text-zinc-700 text-sm font-medium px-4 py-2.5 rounded-md hover:bg-zinc-200 transition-colors"
+            >
+              Powrót do głównej
+            </button>
+          </div>
         </div>
       </div>
     );
