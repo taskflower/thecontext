@@ -1,0 +1,20 @@
+{
+    "slug": "respond",
+    "nodes": [
+      {
+        "slug": "form",
+        "label": "Respond to Ticket",
+        "tplFile": "FormStep",
+        "attrs": {
+          "schemaPath":   "response",
+          "collection":   "responses",
+          "loadFromParams": true,
+          "onSubmit": {
+            "collection": "responses",
+            "navPath":    "support/list/view",
+            "action":     "create"
+          }
+        }
+      }
+    ]
+  }

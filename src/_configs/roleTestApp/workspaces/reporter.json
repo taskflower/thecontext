@@ -1,6 +1,7 @@
 {
     "slug": "reporter",
     "name": "Reporter Dashboard",
+    "rolesAllowed": ["reporter"],
     "templateSettings": {
       "layoutFile": "Simple",
       "widgets": [

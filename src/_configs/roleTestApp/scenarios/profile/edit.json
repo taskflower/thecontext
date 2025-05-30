@@ -1,0 +1,19 @@
+{
+    "slug": "edit",
+    "nodes": [
+      {
+        "slug": "form",
+        "label": "Edit Profile",
+        "tplFile": "FormStep",
+        "attrs": {
+          "schemaPath": "user",
+          "loadFromContext": "currentUser",
+          "onSubmit": {
+            "collection": "users",
+            "navPath":     "profile/view",
+            "action":      "update"
+          }
+        }
+      }
+    ]
+  }

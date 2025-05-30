@@ -1,48 +1,60 @@
 // src/themes/default/layouts/Simple.tsx
-import UserDropdown from "@/auth/UserDropdown";
 import { Link, useParams } from "react-router-dom";
+import { useEngineStore } from "@/core";
+import UserDropdown from "@/auth/UserDropdown";
+
+// 1) Globujemy *wszystkie* pliki workspace’ów jako JSON
+const workspaceModules = import.meta.glob<{
+  slug: string;
+  name: string;
+  rolesAllowed?: string[];
+}>("/src/_configs/*/workspaces/*.json", { eager: true, as: "json" });
 
 export default function Simple({ children }: any) {
-  const { config } = useParams();
-  const cfg = config || "exampleTicketApp";
+  // 2) Hooki NA GÓRZE
+  const { config } = useParams<{ config?: string }>();
+  const cfg = config || "roleTestApp";
+
+  const { get } = useEngineStore();
+  const currentRole = get("currentUser.role");
+
+  // 3) Filtrowanie: wybierz tylko workspace’y z bieżącego configu
+  const allWorkspaces = Object.entries(workspaceModules)
+    .filter(([file]) => file.includes(`/${cfg}/workspaces/`))
+    .map(([, mod]) => mod);
+
+  // 4) Dodatkowe filtrowanie po rolesAllowed
+  const visible = allWorkspaces.filter(
+    (ws) => !ws.rolesAllowed || ws.rolesAllowed.includes(currentRole)
+  );
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col w-full">
-      <header className="border-b border-zinc-200/80 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-6">
-          <div className="flex justify-between items-center h-14">
-            <div className="flex items-center">
-              <h1 className="text-lg font-medium tracking-tight text-zinc-900">
-                {cfg}
-              </h1>
-            </div>
-            <div className="flex items-center gap-8">
-              <nav className="flex items-center gap-1">
-                {["main", "tickets","users"].map((p) => (
-                  <Link
-                    key={p}
-                    to={`/${cfg}/${p}`}
-                    className="px-3 py-1.5 text-sm font-medium text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100/80 rounded-md transition-colors"
-                  >
-                    {p.charAt(0).toUpperCase() + p.slice(1)}
-                  </Link>
-                ))}
-              </nav>
-              <UserDropdown />
-            </div>
-          </div>
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <header className="sticky top-0 bg-white border-b z-10">
+        <div className="container mx-auto flex items-center justify-between px-6 py-4">
+          <h1 className="text-lg font-semibold">{cfg}</h1>
+          <nav className="flex space-x-2">
+            {visible.map((ws) => (
+              <Link
+                key={ws.slug}
+                to={`/${cfg}/${ws.slug}`}
+                className="px-3 py-1 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition"
+              >
+                {ws.name}
+              </Link>
+            ))}
+          </nav>
+          <UserDropdown />
         </div>
       </header>
-      
-      <main className="flex-1 container mx-auto px-12 py-8">
-        <div className="container mx-auto">{children}</div>
+
+      <main className="flex-1 container mx-auto px-6 py-8">
+        {children}
       </main>
-      
-      <footer className="border-t border-zinc-200/50 bg-white/50 mt-16">
-        <div className="container mx-auto px-6 py-6">
-          <p className="text-center text-xs text-zinc-500 font-medium">
-            © {new Date().getFullYear()} {cfg} — Built with Universal Engine + LLM
-          </p>
+
+      <footer className="bg-white border-t">
+        <div className="container mx-auto px-6 py-4 text-center text-xs text-gray-500">
+          © {new Date().getFullYear()} {cfg}
         </div>
       </footer>
     </div>

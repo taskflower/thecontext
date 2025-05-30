@@ -1,0 +1,19 @@
+{
+    "slug": "view",
+    "nodes": [
+      {
+        "slug": "view",
+        "label": "My Profile",
+        "tplFile": "DbSummaryStep",
+        "attrs": {
+          "schemaPath": "user",
+          "collection": "users",
+          "contextKey": "currentUser",
+          "readOnly": true,
+          "additionalActions": [
+            { "type": "edit", "label": "Edit Profile", "navPath": "profile/edit" }
+          ]
+        }
+      }
+    ]
+  }

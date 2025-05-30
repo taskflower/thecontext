@@ -1,5 +1,6 @@
 {
   "name": "Main Dashboard",
+  "slug": "main",
   "templateSettings": {
     "layoutFile": "Simple",
     "widgets": [

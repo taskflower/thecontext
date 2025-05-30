@@ -1,6 +1,7 @@
 {
   "slug": "support",
   "name": "Support Dashboard",
+  "rolesAllowed": ["support"],
   "templateSettings": {
     "layoutFile": "Simple",
     "widgets": [

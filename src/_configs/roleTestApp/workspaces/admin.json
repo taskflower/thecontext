@@ -1,6 +1,8 @@
 {
-  "slug": "admin",
+ 
   "name": "Admin Dashboard",
+  "slug": "admin",
+  "rolesAllowed": ["admin"],
   "templateSettings": {
     "layoutFile": "Simple",
     "widgets": [

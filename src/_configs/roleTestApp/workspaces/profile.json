@@ -1,0 +1,25 @@
+
+{
+   
+    "name": "My Profile",
+    "slug": "profile",
+    "rolesAllowed": ["admin","reporter","support"],
+    "templateSettings": {
+      "layoutFile": "Simple",
+      "widgets": [
+        { "tplFile": "CurrentUserWidget", "title": "Profile", "attrs": { "variant": "detailed" } }
+      ]
+    },
+    "contextSchema": {
+      "user": {
+        "type": "object",
+        "properties": {
+          "firstName": { "type": "string", "label": "First Name", "fieldType": "text",  "required": true },
+          "lastName":  { "type": "string", "label": "Last Name",  "fieldType": "text",  "required": true },
+          "email":     { "type": "string", "label": "Email",      "fieldType": "email", "required": true },
+          "role":      { "type": "string", "label": "Role",       "fieldType": "text",  "required": true }
+        }
+      }
+    }
+  }
+  
