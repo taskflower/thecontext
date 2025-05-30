@@ -3,8 +3,8 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { configDB } from '@/db';
 import { db } from '@/provideDB/firebase/config';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-
+import { collection, query, where, getDocs, getDoc } from 'firebase/firestore';
+import { useAuthContext } from '@/auth/AuthContext';
 
 const configCache = new Map<string, any>();
 
@@ -14,6 +14,7 @@ const configCache = new Map<string, any>();
  */
 export function useConfig<T = any>(configName: string, path: string): T | undefined {
   const [data, setData] = useState<T>();
+  const { user } = useAuthContext();
   const params = useParams<{ workspace?: string; scenario?: string }>();
 
   // Identyfikator konfiguracji (nazwa bez uid)
@@ -30,9 +31,14 @@ export function useConfig<T = any>(configName: string, path: string): T | undefi
     const load = async () => {
       let localData: any;
       
+      // Debug: pokaż co próbujemy załadować
+      console.log(`useConfig: Loading ${configName} from ${path}`);
+      console.log(`useConfig: Key = ${key}, ConfigId = ${cfgId}`);
+      
       // 1. Lokalny cache w pamięci
       if (configCache.has(key)) {
         const cached = configCache.get(key);
+        console.log(`useConfig: Found in memory cache for ${key}`);
         if (mounted) setData(cached);
         return;
       }
@@ -98,21 +104,46 @@ export function useConfig<T = any>(configName: string, path: string): T | undefi
       try {
         console.log(`Fetching config from: ${path}`);
         const res = await fetch(path);
+        
         if (!res.ok) {
-          console.error(`useConfig fetch failed: ${res.status} ${res.statusText} for ${path}`);
+          console.warn(`useConfig fetch failed: ${res.status} ${res.statusText} for ${path}`);
+          // Jeśli plik nie istnieje, nie traktuj jako błąd - po prostu brak konfiguracji
+          if (res.status === 404) {
+            console.info(`Config file not found: ${path} - this is normal for new configurations`);
+            return;
+          }
           return;
         }
+        
         const contentType = res.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
-          console.error(`useConfig: Expected JSON but got ${contentType} for ${path}`);
-          return;
+          console.warn(`useConfig: Expected JSON but got ${contentType} for ${path}`);
+          // Sprawdź czy to nie jest HTML (błąd 404)
+          const text = await res.text();
+          if (text.includes('<!DOCTYPE') || text.includes('<html')) {
+            console.info(`Received HTML page instead of JSON for ${path} - file probably doesn't exist`);
+            return;
+          }
+          // Spróbuj sparsować jako JSON mimo błędnego content-type
+          try {
+            const cfg = JSON.parse(text) as T;
+            configCache.set(key, cfg);
+            await configDB.records.put({ id: key, data: cfg, updatedAt: new Date() });
+            if (mounted) setData(cfg);
+            return;
+          } catch (parseErr) {
+            console.error(`Failed to parse response as JSON for ${path}:`, parseErr);
+            return;
+          }
         }
+        
         const cfg = (await res.json()) as T;
         configCache.set(key, cfg);
         await configDB.records.put({ id: key, data: cfg, updatedAt: new Date() });
         if (mounted) setData(cfg);
       } catch (err) {
-        console.error('useConfig fetch error', err);
+        console.warn('useConfig fetch error:', err);
+        // Nie loguj jako error - brak pliku konfiguracyjnego to normalna sytuacja
       }
     };
 
