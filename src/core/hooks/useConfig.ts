@@ -3,9 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { configDB } from '@/db';
 import { db } from '@/provideDB/firebase/config';
-import { collection, query, where, getDocs, getDoc } from 'firebase/firestore';
-import { useAuthContext } from '@/auth/AuthContext';
-
+import { collection, query, where, getDocs } from 'firebase/firestore';
 const configCache = new Map<string, any>();
 
 /**
@@ -14,7 +12,6 @@ const configCache = new Map<string, any>();
  */
 export function useConfig<T = any>(configName: string, path: string): T | undefined {
   const [data, setData] = useState<T>();
-  const { user } = useAuthContext();
   const params = useParams<{ workspace?: string; scenario?: string }>();
 
   // Identyfikator konfiguracji (nazwa bez uid)
