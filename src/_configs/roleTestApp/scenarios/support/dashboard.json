@@ -1,33 +1,64 @@
 {
-    "slug": "dashboard",
-    "nodes": [
-      {
-        "slug": "view",
-        "label": "Support Dashboard",
-        "order": 1,
-        "tplFile": "DbSummaryStep",
-        "attrs": {
-          "title": "🎧 Support Dashboard",
-          "description": "Welcome to the support workspace",
-          "schemaPath": "ticket",
-          "contextKey": "currentUser",
-          "readOnly": true,
-          "showGeneratedBadge": false,
-          "additionalActions": [
-            {
-              "type": "custom",
-              "label": "📋 All Tickets",
-              "navURL": "support/list/view",
-              "variant": "primary"
-            },
-            {
-              "type": "logout",
-              "label": "🚪 Logout",
-              "navURL": "main/dashboard/view",
-              "variant": "outline"
+  "slug": "dashboard",
+  "nodes": [
+    {
+      "slug": "view",
+      "label": "Support Dashboard",
+      "order": 1,
+      "tplFile": "ListTableStep",
+      "attrs": {
+        "title": "🎧 Support Dashboard",
+        "description": "Welcome to the support workspace. Handle and resolve tickets.",
+        "schemaPath": "ticket",
+        "collection": "tickets",
+        "headerWidgets": [
+          {
+            "tplFile": "InfoWidget",
+            "title": "🎧 Support Dashboard",
+            "attrs": {
+              "content": "Handle and resolve tickets from all reporters.",
+              "variant": "info"
             }
-          ]
+          },
+          {
+            "tplFile": "ButtonWidget",
+            "title": "📋 All Tickets",
+            "attrs": {
+              "navURL": "/support/list/view",
+              "variant": "primary"
+            }
+          }
+        ],
+        "columns": [
+          {
+            "key": "title",
+            "label": "Title",
+            "type": "text"
+          },
+          {
+            "key": "priority",
+            "label": "Priority",
+            "type": "badge"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "badge"
+          }
+        ],
+        "actions": [
+          {
+            "type": "edit",
+            "label": "Handle",
+            "navURL": "/support/edit"
+          }
+        ],
+        "emptyState": {
+          "icon": "🎧",
+          "title": "No Tickets to Handle",
+          "description": "No tickets in the system yet. Tickets will appear here when reporters create them."
         }
       }
-    ]
-  }
+    }
+  ]
+}

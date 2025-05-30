@@ -14,10 +14,34 @@
         "title": "Logged User",
         "attrs": {
           "colSpan": "full",
-          "variant": "compact",
+          "variant": "detailed",
           "loginnavURL": "/main/login/form",
-          "logoutnavURL": "/main", 
+          "logoutnavURL": "/main",
           "editnavURL": "/profile/edit/form"
+        }
+      },
+      {
+        "tplFile": "InfoWidget",
+        "title": "👤 Profile Management",
+        "attrs": {
+          "content": "Manage your personal information and account settings.",
+          "variant": "info"
+        }
+      },
+      {
+        "tplFile": "ButtonWidget",
+        "title": "📋 View Full Profile",
+        "attrs": {
+          "navURL": "/profile/view/view",
+          "variant": "primary"
+        }
+      },
+      {
+        "tplFile": "ButtonWidget",
+        "title": "✏️ Edit Profile",
+        "attrs": {
+          "navURL": "/profile/edit/form",
+          "variant": "secondary"
         }
       }
     ]

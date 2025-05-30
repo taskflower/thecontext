@@ -1,0 +1,51 @@
+{
+    "slug": "dashboard",
+    "nodes": [
+      {
+        "slug": "view",
+        "label": "My Profile Dashboard",
+        "order": 1,
+        "tplFile": "DbSummaryStep",
+        "attrs": {
+          "title": "👤 My Profile",
+          "description": "View and manage your profile information",
+          "schemaPath": "user",
+          "loadFromContext": "currentUser",
+          "readOnly": true,
+          "showGeneratedBadge": false,
+          "additionalActions": [
+            {
+              "type": "edit",
+              "label": "✏️ Edit Profile",
+              "navURL": "/profile/edit/form",
+              "variant": "primary"
+            },
+            {
+              "type": "custom",
+              "label": "🔒 Change Password",
+              "navURL": "/profile/password/form",
+              "variant": "secondary"
+            },
+            {
+              "type": "custom",
+              "label": "🏠 Back to Dashboard",
+              "navURL": "/{{currentUser.role}}/dashboard/view",
+              "variant": "outline"
+            }
+          ],
+          "noDataActions": [
+            {
+              "label": "🔄 Refresh Profile",
+              "navURL": "/profile/dashboard/view",
+              "variant": "primary"
+            },
+            {
+              "label": "🏠 Go to Main Dashboard", 
+              "navURL": "/main/dashboard/view",
+              "variant": "outline"
+            }
+          ]
+        }
+      }
+    ]
+  }

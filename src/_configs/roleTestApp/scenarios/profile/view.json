@@ -1,19 +1,32 @@
 {
-    "slug": "view",
-    "nodes": [
-      {
-        "slug": "view",
-        "label": "My Profile",
-        "tplFile": "DbSummaryStep",
-        "attrs": {
-          "schemaPath": "user",
-          "collection": "users",
-          "contextKey": "currentUser",
-          "readOnly": true,
-          "additionalActions": [
-            { "type": "edit", "label": "Edit Profile", "navURL": "profile/edit" }
-          ]
-        }
+  "slug": "view",
+  "nodes": [
+    {
+      "slug": "view",
+      "label": "My Profile",
+      "tplFile": "DbSummaryStep",
+      "attrs": {
+        "title": "👤 My Profile",
+        "description": "View your personal information",
+        "schemaPath": "user",
+        "loadFromContext": "currentUser",
+        "readOnly": true,
+        "showGeneratedBadge": false,
+        "additionalActions": [
+          {
+            "type": "edit",
+            "label": "✏️ Edit Profile",
+            "navURL": "/profile/edit/form",
+            "variant": "primary"
+          },
+          {
+            "type": "custom",
+            "label": "🏠 Back to Dashboard",
+            "navURL": "/{{currentUser.role}}/dashboard/view",
+            "variant": "outline"
+          }
+        ]
       }
-    ]
-  }
+    }
+  ]
+}

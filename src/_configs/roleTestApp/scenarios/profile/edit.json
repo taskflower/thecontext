@@ -1,19 +1,24 @@
 {
-    "slug": "edit",
-    "nodes": [
-      {
-        "slug": "form",
-        "label": "Edit Profile",
-        "tplFile": "FormStep",
-        "attrs": {
-          "schemaPath": "user",
-          "loadFromContext": "currentUser",
-          "onSubmit": {
-            "collection": "users",
-            "navURL":     "profile/view",
-            "action":      "update"
-          }
+  "slug": "edit",
+  "nodes": [
+    {
+      "slug": "form",
+      "label": "Edit Profile",
+      "tplFile": "FormStep",
+      "attrs": {
+        "title": "✏️ Edit My Profile",
+        "description": "Update your personal information",
+        "schemaPath": "user",
+        "loadFromContext": "currentUser",
+        "onSubmit": {
+          "collection": "users",
+          "navURL": "/profile/view/view",
+          "action": "update"
+        },
+        "onCancel": {
+          "navURL": "/profile/view/view"
         }
       }
-    ]
-  }
+    }
+  ]
+}

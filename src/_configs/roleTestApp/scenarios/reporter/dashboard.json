@@ -5,34 +5,64 @@
       "slug": "view",
       "label": "Reporter Dashboard",
       "order": 1,
-      "tplFile": "DbSummaryStep",
+      "tplFile": "ListTableStep",
       "attrs": {
         "title": "📝 Reporter Dashboard",
-        "description": "Welcome to the reporter workspace",
+        "description": "Welcome to the reporter workspace. Create and manage your tickets.",
         "schemaPath": "ticket",
-        "contextKey": "currentUser",
-        "readOnly": true,
-        "showGeneratedBadge": false,
-        "additionalActions": [
+        "collection": "tickets",
+        "headerWidgets": [
           {
-            "type": "custom",
-            "label": "➕ Create Ticket",
-            "navURL": "reporter/create/form",
-            "variant": "primary"
+            "tplFile": "InfoWidget",
+            "title": "📝 Reporter Dashboard",
+            "attrs": {
+              "content": "Create and track your tickets.",
+              "variant": "info"
+            }
           },
           {
-            "type": "custom",
-            "label": "📋 My Tickets",
-            "navURL": "reporter/list/view",
-            "variant": "secondary"
+            "tplFile": "ButtonWidget",
+            "title": "➕ New Ticket",
+            "attrs": {
+              "navURL": "/reporter/create/form",
+              "variant": "primary"
+            }
           },
           {
-            "type": "logout",
-            "label": "🚪 Logout",
-            "navURL": "main/dashboard/view",
-            "variant": "outline"
+            "tplFile": "ButtonWidget",
+            "title": "📋 My Tickets",
+            "attrs": {
+              "navURL": "/reporter/list/view",
+              "variant": "secondary"
+            }
           }
-        ]
+        ],
+        "columns": [
+          {
+            "key": "title",
+            "label": "Title",
+            "type": "text"
+          },
+          {
+            "key": "priority",
+            "label": "Priority",
+            "type": "badge"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "badge"
+          }
+        ],
+        "emptyState": {
+          "icon": "📋",
+          "title": "No Tickets Yet",
+          "description": "You haven't created any tickets yet. Start by creating your first ticket.",
+          "actionButton": {
+            "title": "Create First Ticket",
+            "navURL": "/reporter/create/form"
+          }
+        }
       }
     }
   ]
