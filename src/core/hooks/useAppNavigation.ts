@@ -39,38 +39,17 @@ export function useAppNavigation() {
     });
   };
 
-  /**
-   * Buduje ścieżkę na podstawie szablonu
-   * Obsługuje formaty:
-   * - "workspace/scenario/node" -> "/config/workspace/scenario/node"
-   * - "/config/workspace/scenario/node" -> "/config/workspace/scenario/node"
-   * - "workspace" -> "/config/workspace"
-   */
-  function buildPath(template: string): string {
-    // Przetwórz kontekst {{...}}
+  function processLink(template: string): string {
     let path = processContextPlaceholders(template);
     
-    // Zastąp standardowe placeholdery
-    path = path
-      .replace(/:config/g, config)
-      .replace(/:workspace/g, workspace)
-      .replace(/:scenario/g, scenario)
-      .replace(/:node/g, node)
-      .replace(/:id/g, id);
-
-    // Jeśli ścieżka nie zaczyna się od /, dodaj config na początku
+    // Dodaj config jeśli go nie ma
     if (!path.startsWith('/')) {
       path = `/${config}/${path}`;
+    } else if (!path.startsWith(`/${config}`)) {
+      path = `/${config}${path}`;
     }
-
-    // Cleanup - usuń podwójne slashe
-    path = path.replace(/\/+/g, "/");
     
-    // Usuń trailing slash (oprócz root)
-    if (path.length > 1 && path.endsWith('/')) {
-      path = path.slice(0, -1);
-    }
-
+    path = path.replace(/\/+/g, "/");
     return path;
   }
 
@@ -86,12 +65,12 @@ export function useAppNavigation() {
     /** Aktualny id (dla edycji) */
     id,
     
-    /** Buduje ścieżkę bez nawigacji */
-    to: (template: string) => buildPath(template),
+    /** Przetwarza link bez budowania ścieżek */
+    to: (template: string) => processLink(template),
     
-    /** Nawiguje do wygenerowanej ścieżki */
+    /** Nawiguje do przetworzonego linka */
     go: (template: string) => {
-      const fullPath = buildPath(template);
+      const fullPath = processLink(template);
       console.log(`[Navigation] ${template} → ${fullPath}`);
       navigate(fullPath);
     },

@@ -1,6 +1,5 @@
 // src/themes/default/widgets/ButtonWidget.tsx
 import { useAppNavigation } from "@/core/hooks/useAppNavigation";
-import { useParams } from "react-router-dom";
 
 type ButtonWidgetProps = { 
   title: string; 
@@ -11,42 +10,36 @@ type ButtonWidgetProps = {
 };
 
 export default function ButtonWidget({ title, attrs }: ButtonWidgetProps) {
-  const { go } = useAppNavigation([]);
-  const params = useParams();
+  const { go } = useAppNavigation();
   
-  const handle = () => {
-    if (!attrs.navURL) return;
+  // Debug logs
+  console.log(`[ButtonWidget] Received props:`, { title, attrs });
+  
+  const handleClick = () => {
+    console.log(`[ButtonWidget] Click detected`);
+    console.log(`[ButtonWidget] attrs.navURL:`, attrs.navURL);
     
-    const config = params.config || "exampleTicketApp";
-    
-    // Sprawdź czy navURL zaczyna się od nazwy workspace'a
-    const navURL = attrs.navURL;
-    const pathParts = navURL.split('/');
-    const possibleWorkspace = pathParts[0];
-    
-    // Lista znanych workspace'ów
-    const knownWorkspaces = ['main', 'tickets', 'users'];
-    
-    let fullPath;
-    if (knownWorkspaces.includes(possibleWorkspace)) {
-      // navURL zawiera workspace - użyj go bezpośrednio
-      fullPath = `/${config}/${navURL}`;
-    } else {
-      // navURL nie zawiera workspace - użyj aktualnego
-      const workspace = params.workspace || "tickets";
-      fullPath = `/${config}/${workspace}/${navURL}`;
+    if (!attrs.navURL) {
+      console.log(`[ButtonWidget] No navURL provided!`);
+      return;
     }
     
-    console.log(`[ButtonWidget] Navigating from navURL: ${navURL} to: ${fullPath}`);
-    go(fullPath);
+    console.log(`[ButtonWidget] About to navigate to: ${attrs.navURL}`);
+    go(attrs.navURL);
   };
 
   return (
     <button
-      onClick={handle}
+      onClick={handleClick}
       className={`w-full px-4 py-2 text-sm font-medium rounded-md transition-colors ${
         attrs.variant === "primary"
           ? "bg-zinc-900 text-white hover:bg-zinc-800"
+          : attrs.variant === "secondary"
+          ? "bg-zinc-600 text-white hover:bg-zinc-700"
+          : attrs.variant === "outline"
+          ? "border border-zinc-300 text-zinc-700 hover:bg-zinc-50"
+          : attrs.variant === "danger"
+          ? "bg-red-600 text-white hover:bg-red-700"
           : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
       }`}
     >
