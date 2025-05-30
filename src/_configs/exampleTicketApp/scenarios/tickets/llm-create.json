@@ -20,10 +20,14 @@
           "Prośba o instalację oprogramowania",
           "Błąd w kalkulacji raportów sprzedażowych"
         ],
-        "cancelnavURL": "/tickets/list/view",
-        "navURL": "/tickets/llm-create/db-summary",
-        "saveToContext": true,
-        "contextKey": "generatedTicket"
+        "onSubmit": {
+          "nextStep": "db-summary",
+          "saveToContext": true,
+          "contextKey": "generatedTicket"
+        },
+        "onCancel": {
+          "navURL": "tickets/list/view"
+        }
       }
     },
     {
@@ -35,23 +39,41 @@
         "title": "📋 Przejrzyj wygenerowane zgłoszenie",
         "description": "Sprawdź dane wygenerowane przez AI i zapisz zgłoszenie do bazy danych",
         "schemaPath": "ticket",
-        "collection": "tickets",
-        "contextKey": "generatedTicket",
-        "navURL": "/tickets/list/view",
-        "cancelnavURL": "/tickets/list/view",
+        "loadFromContext": "generatedTicket",
         "allowEdit": true,
         "showGeneratedBadge": true,
+        "onSubmit": {
+          "collection": "tickets",
+          "navURL": "tickets/list/view",
+          "clearContext": true
+        },
+        "onCancel": {
+          "navURL": "tickets/list/view"
+        },
         "additionalActions": [
           {
             "type": "regenerate",
             "label": "🔄 Wygeneruj ponownie",
-            "navURL": "/tickets/llm-create/llm-generation",
-            "variant": "secondary"
+            "nextStep": "llm-generation",
+            "variant": "secondary",
+            "clearContext": true
           },
           {
             "type": "custom",
             "label": "✏️ Edytuj ręcznie",
-            "navURL": "/tickets/create/form",
+            "navURL": "tickets/create/form",
+            "variant": "outline"
+          }
+        ],
+        "noDataActions": [
+          {
+            "label": "🤖 Generuj z AI",
+            "nextStep": "llm-generation",
+            "variant": "primary"
+          },
+          {
+            "label": "✏️ Utwórz ręcznie",
+            "navURL": "tickets/create/form",
             "variant": "outline"
           }
         ]

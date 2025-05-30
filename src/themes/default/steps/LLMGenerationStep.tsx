@@ -1,4 +1,4 @@
-// src/themes/default/steps/LLMGenerationStep.tsx
+// src/themes/default/steps/LLMGenerationStep.tsx - POPRAWIONA WERSJA
 import { useState, useMemo } from "react";
 import { z } from "zod";
 import { useParams } from "react-router-dom";
@@ -12,28 +12,35 @@ interface LLMGenerationStepProps {
     placeholder?: string;
     examplePrompts?: string[];
     systemMessage?: string;
-    navURL?: string;
-    nextStep?: string;
-    cancelnavURL?: string;
-    contextKey?: string;
+    contextInstructions?: string;
+    
+    // ✅ UJEDNOLICONA STRUKTURA NAWIGACJI
+    onSubmit?: {
+      nextStep?: string;        // Slug kolejnego kroku
+      navURL?: string;          // Pełna ścieżka
+      saveToContext?: boolean;
+      contextKey?: string;
+    };
+    onCancel?: {
+      navURL: string;
+    };
   };
 }
 
 export default function LLMGenerationStep({ attrs }: LLMGenerationStepProps) {
-  // ✅ ALL HOOKS AT TOP LEVEL
   const { workspace = "" } = useParams();
-  const { go } = useAppNavigation(); // ✅ UŻYWAMY useAppNavigation
+  const { go } = useAppNavigation();
   const { schema, loading, error } = useWorkspaceSchema(attrs?.schemaPath || "");
   const { set } = useEngineStore();
   const [prompt, setPrompt] = useState("");
 
-  const contextKey = attrs?.contextKey || attrs.schemaPath;
+  // ✅ UŻYWAMY UJEDNOLICONEJ KONFIGURACJI
+  const contextKey = attrs?.onSubmit?.contextKey || attrs.schemaPath;
 
   // Build Zod and JSON Schema from existing schema
   const { zodSchema, jsonSchema } = useMemo(() => {
     if (!schema?.properties) return { zodSchema: undefined, jsonSchema: null };
 
-    // Convert schema to Zod - much simpler!
     const zFields: Record<string, any> = {};
     Object.entries(schema.properties).forEach(([key, field]: any) => {
       let zf;
@@ -43,13 +50,10 @@ export default function LLMGenerationStep({ attrs }: LLMGenerationStepProps) {
         default: zf = field.enum ? z.enum(field.enum) : z.string();
       }
       
-      // Make optional if not required
       if (!field.required) zf = zf.optional();
-      
       zFields[key] = zf.describe(field.label || key);
     });
 
-    // JSON Schema is just our existing schema with some tweaks
     const jsonSchema = {
       type: "object",
       properties: Object.fromEntries(
@@ -79,35 +83,40 @@ export default function LLMGenerationStep({ attrs }: LLMGenerationStepProps) {
     systemMessage: attrs?.systemMessage,
   });
 
+  // ✅ POPRAWIONA LOGIKA NAWIGACJI
   const handleContinue = () => {
     if (!result) return;
     
-    // Save generated data to context
-    set(contextKey, result);
-    console.log(`LLM: Saved to context [${contextKey}]:`, result);
+    // Zapisz do kontekstu jeśli skonfigurowane
+    if (attrs?.onSubmit?.saveToContext) {
+      set(contextKey, result);
+      console.log(`LLM: Saved to context [${contextKey}]:`, result);
+    }
     
-    // Determine next path with debugging
+    // Określ następną ścieżkę
     let nextPath;
-    if (attrs?.nextStep) {
-      nextPath = `/:config/${workspace}/${attrs.nextStep}`;
-      console.log(`LLM: Using nextStep: ${attrs.nextStep} → ${nextPath}`);
-    } else if (attrs?.navURL) {
-      nextPath = `/:config/${attrs.navURL}`;
-      console.log(`LLM: Using navURL: ${attrs.navURL} → ${nextPath}`);
+    if (attrs?.onSubmit?.nextStep) {
+      // nextStep = kolejny krok w tym samym flow
+      nextPath = `${workspace}/llm-create/${attrs.onSubmit.nextStep}`;
+      console.log(`LLM: Using nextStep: ${attrs.onSubmit.nextStep} → ${nextPath}`);
+    } else if (attrs?.onSubmit?.navURL) {
+      // navURL = pełna ścieżka nawigacji
+      nextPath = attrs.onSubmit.navURL;
+      console.log(`LLM: Using navURL: ${attrs.onSubmit.navURL} → ${nextPath}`);
     } else {
-      nextPath = `/:config/${workspace}/list`;
+      // Fallback
+      nextPath = `${workspace}/list/view`;
       console.log(`LLM: Using fallback → ${nextPath}`);
     }
     
-    go(nextPath); // ✅ UŻYWAMY go() zamiast navigate()
+    go(nextPath);
   };
 
   const handleCancel = () => {
-    const cancelPath = attrs?.cancelnavURL || `${workspace}/list`;
-    go(`/:config/${cancelPath}`); // ✅ UŻYWAMY go() zamiast navigate()
+    const cancelPath = attrs?.onCancel?.navURL || `${workspace}/list/view`;
+    go(cancelPath);
   };
 
-  // ✅ CONDITIONAL RENDERING AFTER ALL HOOKS
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
@@ -136,6 +145,9 @@ export default function LLMGenerationStep({ attrs }: LLMGenerationStepProps) {
         <div className="mb-6">
           <h2 className="text-2xl font-bold">{attrs?.title || "🤖 AI Generation"}</h2>
           {attrs?.description && <p className="text-gray-600 mt-2">{attrs.description}</p>}
+          {attrs?.contextInstructions && (
+            <p className="text-sm text-gray-500 mt-1 italic">{attrs.contextInstructions}</p>
+          )}
         </div>
       )}
 
@@ -143,7 +155,7 @@ export default function LLMGenerationStep({ attrs }: LLMGenerationStepProps) {
         {/* Example prompts */}
         {attrs?.examplePrompts && attrs.examplePrompts.length > 0 && (
           <div className="bg-zinc-50 p-4 rounded-lg">
-            <h4 className="text-sm font-medium text-zinc-700 mb-3">Examples:</h4>
+            <h4 className="text-sm font-medium text-zinc-700 mb-3">Przykłady:</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {attrs.examplePrompts.map((example, i) => (
                 <button
@@ -162,7 +174,7 @@ export default function LLMGenerationStep({ attrs }: LLMGenerationStepProps) {
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder={attrs?.placeholder || "Describe your request..."}
+          placeholder={attrs?.placeholder || "Opisz swoje żądanie..."}
           className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           disabled={isLoading}
         />
@@ -177,42 +189,43 @@ export default function LLMGenerationStep({ attrs }: LLMGenerationStepProps) {
             {isLoading ? (
               <>
                 <span className="inline-flex animate-spin h-4 w-4 border-b-2 border-white rounded-full" />
-                Generating...
+                Generowanie...
               </>
             ) : (
-              "🎯 Generate"
+              "🎯 Generuj"
             )}
           </button>
           <button 
             onClick={handleCancel} 
             className="px-6 py-3 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
           >
-            Cancel
+            Anuluj
           </button>
         </div>
 
         {/* Error display */}
         {llmError && (
           <div className="p-4 bg-red-50 border border-red-200 rounded">
-            <div className="text-red-600 text-sm font-medium">Error: {llmError}</div>
+            <div className="text-red-600 text-sm font-medium">Błąd: {llmError}</div>
           </div>
         )}
         
         {/* Success + Continue */}
         {result && (
           <div className="p-4 bg-green-50 border border-green-200 rounded">
+            <div className="text-green-700 text-sm font-medium mb-3">✅ Wygenerowano pomyślnie!</div>
             <div className="flex gap-3">
               <button 
                 onClick={handleContinue} 
                 className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 flex items-center gap-2"
               >
-                ✅ Continue
+                ✅ Kontynuuj
               </button>
               <button 
                 onClick={() => start()} 
                 className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
               >
-                🔄 Regenerate
+                🔄 Wygeneruj ponownie
               </button>
             </div>
           </div>
