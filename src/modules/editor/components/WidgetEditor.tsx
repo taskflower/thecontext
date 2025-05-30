@@ -1,8 +1,9 @@
 // src/modules/editor/components/WidgetEditor.tsx - Improved UX version
 import { useState } from "react";
-import { useLlmEngine } from "@/core/engine";
+
 import { z } from "zod";
 import WidgetCard from "./WidgetCard";
+import { useLlmEngine } from "@/core";
 
 // Widget schemas dla różnych typów widgetów
 const WIDGET_SCHEMAS = {
@@ -381,7 +382,7 @@ export default function WidgetEditor({ widgets, onChange }: WidgetEditorProps) {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
-                {result.widgets.map((widget, index) => (
+                {result.widgets.map((widget:any, index:any) => (
                   <div
                     key={index}
                     className="border border-zinc-200 rounded-md p-3 bg-zinc-50"

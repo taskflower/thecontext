@@ -46,7 +46,7 @@ export function useAppNavigation(slugs: string[] = []) {
    */
   const processContextPlaceholders = (template: string): string => {
     // Znajdź wszystkie {{...}} w szablonie
-    return template.replace(/\{\{([^}]+)\}\}/g, (match, path) => {
+    return template.replace(/\{\{([^}]+)\}\}/g, (path) => {
       // Podziel ścieżkę na segmenty (np. "profile.role" → ["profile", "role"])
       const pathSegments = path.trim().split('.');
       

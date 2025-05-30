@@ -1,7 +1,8 @@
 // src/modules/editor/components/EditorSidebar.tsx
+import { useConfig } from "@/core";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useConfig } from "@/core/engine";
+
 
 interface AppConfig {
   name: string;

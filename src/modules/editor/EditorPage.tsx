@@ -10,7 +10,7 @@ export default function EditorPage() {
     config: string;
     workspace: string;
     scenario?: string;
-    type: string;
+    type: any;
   }>();
 
   const cfgName = config || 'exampleTicketApp';
