@@ -1,70 +1,70 @@
 {
-    "slug": "profile",
-    "nodes": [
-      {
-        "slug": "view",
-        "label": "Profil użytkownika",
-        "order": 1, 
-        "tplFile": "DbSummaryStep",
-        "attrs": {
-          "title": "👤 Twój profil",
-          "description": "Przeglądaj i zarządzaj swoimi danymi osobowymi",
-          "schemaPath": "user",
-          "contextKey": "currentUser",
-          "collection": "users",
-          "readOnly": true,
-          "showGeneratedBadge": false,
-          "navURL": "/users/list/view",
-          "cancelnavURL": "/users/list/view", 
-          "additionalActions": [
-            {
-              "type": "edit",
-              "label": "✏️ Edytuj profil",
-              "navURL": "/users/profile/edit",
-              "variant": "primary"
-            },
-            {
-              "type": "logout",
-              "label": "🚪 Wyloguj się", 
-              "navURL": "users/login/form",
-              "variant": "outline"
-            }
-          ]
-        }
-      },
-      {
-        "slug": "edit",
-        "label": "Edycja profilu",
-        "order": 2,
-        "tplFile": "FormStep", 
-        "attrs": {
-          "title": "✏️ Edytuj swój profil",
-          "description": "Zaktualizuj swoje dane osobowe",
-          "schemaPath": "user",
-          "loadFromContext": "currentUser",
-          "excludeFields": ["isActive"],
-          "onSubmit": {
-            "collection": "users",
-            "navURL": "users/profile/summary"
+  "slug": "profile",
+  "nodes": [
+    {
+      "slug": "view",
+      "label": "Profil użytkownika",
+      "order": 1, 
+      "tplFile": "DbSummaryStep",
+      "attrs": {
+        "title": "👤 Twój profil",
+        "description": "Przeglądaj i zarządzaj swoimi danymi osobowymi",
+        "schemaPath": "user",
+        "contextKey": "currentUser",
+        "collection": "users",
+        "readOnly": true,
+        "showGeneratedBadge": false,
+        "navURL": "/users/list/view",
+        "cancelnavURL": "/users/list/view", 
+        "additionalActions": [
+          {
+            "type": "edit",
+            "label": "✏️ Edytuj profil",
+            "navURL": "/users/profile/edit",
+            "variant": "primary"
+          },
+          {
+            "type": "logout",
+            "label": "🚪 Wyloguj się", 
+            "navURL": "/users/login/form",
+            "variant": "outline"
           }
-        }
-      },
-      {
-        "slug": "summary",
-        "label": "Podsumowanie zmian",
-        "order": 3,
-        "tplFile": "DbSummaryStep",
-        "attrs": {
-          "title": "✅ Profil zaktualizowany",
-          "description": "Twoje zmiany zostały zapisane pomyślnie",
-          "schemaPath": "user", 
-          "contextKey": "currentUser",
+        ]
+      }
+    },
+    {
+      "slug": "edit",
+      "label": "Edycja profilu",
+      "order": 2,
+      "tplFile": "FormStep", 
+      "attrs": {
+        "title": "✏️ Edytuj swój profil",
+        "description": "Zaktualizuj swoje dane osobowe",
+        "schemaPath": "user",
+        "loadFromContext": "currentUser",
+        "excludeFields": ["isActive"],
+        "onSubmit": {
           "collection": "users",
-          "readOnly": true,
-          "showGeneratedBadge": false,
-          "navURL": "/users/profile/view",
-          "cancelnavURL": "/users/profile/view"
+          "navURL": "/users/profile/summary"
         }
       }
-    ]
-  } 
+    },
+    {
+      "slug": "summary",
+      "label": "Podsumowanie zmian",
+      "order": 3,
+      "tplFile": "DbSummaryStep",
+      "attrs": {
+        "title": "✅ Profil zaktualizowany",
+        "description": "Twoje zmiany zostały zapisane pomyślnie",
+        "schemaPath": "user", 
+        "contextKey": "currentUser",
+        "collection": "users",
+        "readOnly": true,
+        "showGeneratedBadge": false,
+        "navURL": "/users/profile/view",
+        "cancelnavURL": "/users/profile/view"
+      }
+    }
+  ]
+}

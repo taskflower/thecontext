@@ -37,8 +37,8 @@
         "schemaPath": "ticket",
         "collection": "tickets",
         "contextKey": "generatedTicket",
-        "navURL": "/tickets/llm-create/list",
-        "cancelnavURL": "/tickets/llm-create/list",
+        "navURL": "/tickets/list/view",
+        "cancelnavURL": "/tickets/list/view",
         "allowEdit": true,
         "showGeneratedBadge": true,
         "additionalActions": [
@@ -51,7 +51,7 @@
           {
             "type": "custom",
             "label": "✏️ Edytuj ręcznie",
-            "navURL": "tickets/create/form",
+            "navURL": "/tickets/create/form",
             "variant": "outline"
           }
         ]

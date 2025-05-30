@@ -1,35 +1,35 @@
 {
-    "slug": "login",
-    "nodes": [
-      {
-        "slug": "form",
-        "label": "Wybór użytkownika",
-        "order": 1,
-        "tplFile": "FormStep",
-        "attrs": {
-          "title": "👤 Logowanie do systemu",
-          "description": "Wybierz swoje konto użytkownika z listy",
-          "schemaPath": "userLogin",
-          "onSubmit": {
-            "saveToContext": true,
-            "contextKey": "loginData",
-            "navURL": "users/login/step/process"
-          }
-        }
-      },
-      {
-        "slug": "process",
-        "label": "Proces logowania", 
-        "order": 2,
-        "tplFile": "UserLoginProcessStep",
-        "attrs": {
-          "title": "Logowanie w toku...",
-          "description": "Sprawdzamy Twoje dane i przygotowujemy sesję",
-          "loginDataPath": "loginData",
-          "currentUserPath": "currentUser",
-          "successNavURL": "users/profile/view",
-          "errorNavURL": "users/login/form"
+  "slug": "login",
+  "nodes": [
+    {
+      "slug": "form",
+      "label": "Wybór użytkownika",
+      "order": 1,
+      "tplFile": "FormStep",
+      "attrs": {
+        "title": "👤 Logowanie do systemu",
+        "description": "Wybierz swoje konto użytkownika z listy",
+        "schemaPath": "userLogin",
+        "onSubmit": {
+          "saveToContext": true,
+          "contextKey": "loginData",
+          "navURL": "/users/login/process"
         }
       }
-    ]
-  }
+    },
+    {
+      "slug": "process",
+      "label": "Proces logowania", 
+      "order": 2,
+      "tplFile": "UserLoginProcessStep",
+      "attrs": {
+        "title": "Logowanie w toku...",
+        "description": "Sprawdzamy Twoje dane i przygotowujemy sesję",
+        "loginDataPath": "loginData",
+        "currentUserPath": "currentUser",
+        "successNavURL": "/users/profile/view",
+        "errorNavURL": "/users/login/form"
+      }
+    }
+  ]
+}

@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import UserDropdown from "@/auth/UserDropdown";
 import WorkspaceNavigation from "../commons/WorkspaceNavigation";
 
-
 export default function Simple({ children }: any) {
   const { config } = useParams<{ config?: string }>();
   const cfg = config || "exampleTicketApp";

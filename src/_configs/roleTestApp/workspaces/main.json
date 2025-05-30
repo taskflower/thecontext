@@ -4,17 +4,7 @@
   "templateSettings": {
     "layoutFile": "Simple",
     "widgets": [
-      {
-        "tplFile": "CurrentUserWidget",
-        "title": "Logged User",
-        "attrs": {
-          "colSpan": 3,
-          "variant": "compact",
-          "loginnavURL": "/main/login/form",
-          "logoutnavURL": "/main", 
-          "editnavURL": "/profile/edit/form"
-        }
-      },
+      
       {
         "tplFile": "InfoWidget",
         "title": "🚀 3-Role System Demo",
@@ -25,22 +15,14 @@
         }
       },
       {
-        "tplFile": "ButtonWidget",
-        "title": "👤 Login",
+        "tplFile": "CurrentUserWidget",
+        "title": "Logged User",
         "attrs": {
-          "colSpan": 2,
-          "navURL": "/main/login/form",
-          "variant": "primary"
-        }
-      },
-      {
-        "tplFile": "ButtonWidget",
-        "title": "📝 Register",
-        "attrs": {
-          "colSpan": 2,
-          "colStart": 3,
-          "navURL": "/main/register/form",
-          "variant": "secondary"
+          "colSpan": "full",
+          "variant": "compact",
+          "loginnavURL": "/main/login/form",
+          "logoutnavURL": "/main", 
+          "registernavURL": "/main/register/form"
         }
       }
     ]

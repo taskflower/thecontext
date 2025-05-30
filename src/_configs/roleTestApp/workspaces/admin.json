@@ -28,7 +28,7 @@
         "tplFile": "ButtonWidget",
         "title": "👥 Manage Users",
         "attrs": {
-          "navURL": "/list/view",
+          "navURL": "/admin/list/view",
           "variant": "primary"
         }
       },
@@ -36,7 +36,7 @@
         "tplFile": "ButtonWidget",
         "title": "➕ Add User",
         "attrs": {
-          "navURL": "/create/form",
+          "navURL": "/admin/create/form",
           "variant": "secondary"
         }
       }

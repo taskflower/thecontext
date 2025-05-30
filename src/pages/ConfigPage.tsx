@@ -53,7 +53,7 @@ export default function ConfigPage() {
   );
 
   // Loading states
-  if (!app || layoutLoading) return <div>Loading...</div>;
+  if (!app || layoutLoading) return <></>;
   if (!workspaceConfig) return <Error>Workspace not found: {workspace}</Error>;
   if (!Layout) return <Error>Layout not found: {layoutFile}</Error>;
 
@@ -62,11 +62,11 @@ export default function ConfigPage() {
     if (!scenarioConfig) {
       return (
         <Layout>
-          <div>Loading scenario...</div>
+          <></>
         </Layout>
       );
     }
-    
+
     if (!scenarioConfig.nodes?.length) {
       return (
         <Layout>
@@ -76,8 +76,9 @@ export default function ConfigPage() {
     }
 
     // Znajdź node po slug lub użyj pierwszego
-    const selectedNode = node 
-      ? scenarioConfig.nodes.find(n => n.slug === node) || scenarioConfig.nodes[0]
+    const selectedNode = node
+      ? scenarioConfig.nodes.find((n) => n.slug === node) ||
+        scenarioConfig.nodes[0]
       : scenarioConfig.nodes[0];
 
     return (
@@ -116,8 +117,8 @@ function StepRenderer({
   attrs: any;
 }) {
   const { Component, loading, error } = useComponent(theme, "steps", filename);
-  
-  if (loading) return <div>Loading step...</div>;
+
+  if (loading) return <></>;
   if (error || !Component) return <Error>Step not found: {filename}</Error>;
 
   try {
@@ -134,9 +135,10 @@ function WidgetRenderer({ theme, widget }: { theme: string; widget: any }) {
     "widgets",
     widget?.tplFile || ""
   );
-  
-  if (loading) return <div>Loading widget...</div>;
-  if (error || !Component) return <Error>Widget not found: {widget?.tplFile}</Error>;
+
+  if (loading) return <></>;
+  if (error || !Component)
+    return <Error>Widget not found: {widget?.tplFile}</Error>;
 
   // Grid styling
   const colSpanMap: Record<string | number, string> = {
@@ -151,7 +153,7 @@ function WidgetRenderer({ theme, widget }: { theme: string; widget: any }) {
 
   const colStartMap: Record<string | number, string> = {
     1: "col-start-1",
-    2: "col-start-2", 
+    2: "col-start-2",
     3: "col-start-3",
     4: "col-start-4",
     5: "col-start-5",
@@ -164,7 +166,7 @@ function WidgetRenderer({ theme, widget }: { theme: string; widget: any }) {
   const colStart = widget?.attrs?.colStart;
 
   const spanClass = colSpanMap[colSpan] || "col-span-1";
-  const startClass = colStart ? (colStartMap[colStart] || "") : "";
+  const startClass = colStart ? colStartMap[colStart] || "" : "";
   const combinedClasses = [spanClass, startClass].filter(Boolean).join(" ");
 
   try {

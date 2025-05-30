@@ -11,7 +11,7 @@
           "attrs": {
             "variant": "compact",
             "loginnavURL": "/main/login/form",
-            "logoutnavURL": "/main/dashboard/view", 
+            "logoutnavURL": "/main", 
             "editnavURL": "/profile/edit/form"
           }
         },
@@ -27,7 +27,7 @@
           "tplFile": "ButtonWidget",
           "title": "➕ New Ticket",
           "attrs": {
-            "navURL": "create/form",
+            "navURL": "/reporter/create/form",
             "variant": "primary"
           }
         },
@@ -35,7 +35,7 @@
           "tplFile": "ButtonWidget",
           "title": "📋 My Tickets",
           "attrs": {
-            "navURL": "list/view",
+            "navURL": "/reporter/list/view",
             "variant": "secondary"
           }
         }

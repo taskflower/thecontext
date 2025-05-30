@@ -9,6 +9,7 @@ interface CurrentUserWidgetProps {
     editnavURL?: string;
     logoutnavURL?: string;
     loginnavURL?: string;
+    registernavURL?: string;
     variant?: "compact" | "detailed";
     colSpan?: string | number;
   };
@@ -27,6 +28,7 @@ export default function CurrentUserWidget({
     editnavURL = "/profile/edit/form", // fallback domyślny
     logoutnavURL = "/main", // POPRAWIONE: usuń dashboard/view
     loginnavURL = "/main/login/form",
+    registernavURL = "/main/register/form",
     variant = "detailed"
   } = attrs;
 
@@ -45,6 +47,10 @@ export default function CurrentUserWidget({
     go(loginnavURL); // POPRAWIONE: usuń /:config/
   };
 
+  const handleRegister = () => {
+    go(registernavURL); // NOWA FUNKCJA: obsługa rejestracji
+  };
+
   if (!currentUser) {
     return (
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
@@ -54,14 +60,22 @@ export default function CurrentUserWidget({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
-          <div>
+          <div className="flex-1">
             <p className="text-sm font-medium text-yellow-800">Nie jesteś zalogowany</p>
-            <button
-              onClick={handleLogin}
-              className="text-xs text-yellow-600 hover:text-yellow-800 underline mt-1"
-            >
-              Zaloguj się
-            </button>
+            <div className="flex gap-4 mt-2">
+              <button
+                onClick={handleLogin}
+                className="text-xs text-yellow-600 hover:text-yellow-800 underline"
+              >
+                Zaloguj się
+              </button>
+              <button
+                onClick={handleRegister}
+                className="text-xs text-blue-600 hover:text-blue-800 underline"
+              >
+                Zarejestruj się
+              </button>
+            </div>
           </div>
         </div>
       </div>

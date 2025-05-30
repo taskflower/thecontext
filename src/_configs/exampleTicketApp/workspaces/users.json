@@ -9,9 +9,9 @@
         "title": "Logged User",
         "attrs": {
           "variant": "compact",
-          "loginnavURL": "main/login/form",
-          "logoutnavURL": "main/dashboard/view", 
-          "editnavURL": "profile/edit/form"
+          "loginnavURL": "/main/login/form",
+          "logoutnavURL": "/main", 
+          "editnavURL": "/profile/edit/form"
         }
       },
       {
@@ -27,7 +27,7 @@
         "tplFile": "ButtonWidget",
         "title": "👤 Zaloguj się",
         "attrs": {
-          "navURL": "login/form",
+          "navURL": "/users/login/form",
           "variant": "primary",
           "colSpan": 1
         }
@@ -36,7 +36,7 @@
         "tplFile": "ButtonWidget",
         "title": "➕ Add New User",
         "attrs": {
-          "navURL": "create/new",
+          "navURL": "/users/create/form",
           "variant": "secondary",
           "colSpan": 1
         }
@@ -45,7 +45,7 @@
         "tplFile": "ButtonWidget",
         "title": "👥 View All Users",
         "attrs": {
-          "navURL": "list/view",
+          "navURL": "/users/list/view",
           "variant": "secondary",
           "colSpan": 1
         }

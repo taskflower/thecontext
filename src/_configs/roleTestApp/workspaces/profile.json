@@ -15,7 +15,7 @@
         "attrs": {
           "variant": "compact",
           "loginnavURL": "/main/login/form",
-          "logoutnavURL": "/main/dashboard/view", 
+          "logoutnavURL": "/main", 
           "editnavURL": "/profile/edit/form"
         }
       }

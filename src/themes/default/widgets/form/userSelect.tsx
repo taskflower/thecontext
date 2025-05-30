@@ -92,16 +92,9 @@ export default function UserSelectFieldWidget({ title, attrs }: UserSelectFieldW
         <p className="text-xs text-zinc-500">{field.description}</p>
       )}
       
-      {/* Link do zarządzania użytkownikami */}
-      <div className="text-xs">
-        <a 
-          href="/#/exampleTicketApp/users/list" 
-          target="_blank"
-          className="text-blue-600 hover:text-blue-800 underline"
-        >
-          → Zarządzaj użytkownikami
-        </a>
-      </div>
+      {field.error && (
+        <p className="text-xs text-red-500">{field.error}</p>
+      )}
     </div>
   );
 }

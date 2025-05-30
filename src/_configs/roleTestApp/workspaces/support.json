@@ -11,7 +11,7 @@
         "attrs": {
           "variant": "compact",
           "loginnavURL": "/main/login/form",
-          "logoutnavURL": "/main/dashboard/view", 
+          "logoutnavURL": "/main", 
           "editnavURL": "/profile/edit/form"
         }
       },
@@ -27,7 +27,7 @@
         "tplFile": "ButtonWidget",
         "title": "📋 All Tickets",
         "attrs": {
-          "navURL": "/list/view",
+          "navURL": "/support/list/view",
           "variant": "primary"
         }
       }
