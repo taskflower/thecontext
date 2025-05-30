@@ -6,11 +6,12 @@
     "widgets": [
       {
         "tplFile": "CurrentUserWidget",
-        "title": "Zalogowany użytkownik",
+        "title": "Logged User",
         "attrs": {
           "variant": "compact",
-          "showActions": true,
-          "colSpan": "full"
+          "loginNavPath": "main/login/form",
+          "logoutNavPath": "main/dashboard/view", 
+          "editNavPath": "profile/edit/form"
         }
       },
       {

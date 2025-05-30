@@ -8,6 +8,7 @@ interface CurrentUserWidgetProps {
     showActions?: boolean;
     editNavPath?: string;
     logoutNavPath?: string;
+    loginNavPath?: string; // NOWE: ścieżka do logowania
     variant?: "compact" | "detailed";
     colSpan?: string | number;
   };
@@ -23,8 +24,9 @@ export default function CurrentUserWidget({
   const {
     currentUserPath = "currentUser",
     showActions = true,
-    editNavPath = "users/profile/edit",
-    logoutNavPath = "users/login/form",
+    editNavPath = "profile/edit/form", // fallback domyślny
+    logoutNavPath = "main/dashboard/view", // fallback domyślny
+    loginNavPath = "main/login/form", // NOWE: ścieżka do logowania z fallback
     variant = "detailed"
   } = attrs;
 
@@ -39,6 +41,10 @@ export default function CurrentUserWidget({
     go(`/:config/${editNavPath}`);
   };
 
+  const handleLogin = () => {
+    go(`/:config/${loginNavPath}`); // UŻYWA loginNavPath z attrs
+  };
+
   if (!currentUser) {
     return (
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
@@ -51,7 +57,7 @@ export default function CurrentUserWidget({
           <div>
             <p className="text-sm font-medium text-yellow-800">Nie jesteś zalogowany</p>
             <button
-              onClick={() => go(`/:config/${logoutNavPath}`)}
+              onClick={handleLogin} // ZMIENIONE: używamy funkcji zamiast go()
               className="text-xs text-yellow-600 hover:text-yellow-800 underline mt-1"
             >
               Zaloguj się

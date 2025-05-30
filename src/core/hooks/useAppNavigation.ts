@@ -1,4 +1,4 @@
-// 1. ROZSZERZONY useAppNavigation z dynamiczną obsługą {{context.path}}
+// Fixed useAppNavigation with proper context processing
 import { useNavigate, useParams } from "react-router-dom";
 import { useEngineStore } from "./useEngineStore";
 
@@ -11,15 +11,6 @@ type NavParams = {
   id?: string;
 };
 
-/**
- * Hook do budowania i nawigacji po ścieżkach aplikacji z placeholderami:
- * :config, :workspace, :scenario, :action, :step, :id oraz @next, @prev
- * NOWE: {{context.path}} - dynamiczne ścieżki z kontekstu
- * PRZYKŁADY:
- * - "{{profile.role}}" → "admin" → workspace-admin
- * - "{{currentUser.department}}" → "it" → dept-it  
- * - "{{settings.theme}}" → "dark" → theme-dark
- */
 export function useAppNavigation(slugs: string[] = []) {
   const navigate = useNavigate();
   const params = useParams<NavParams>();
@@ -34,34 +25,40 @@ export function useAppNavigation(slugs: string[] = []) {
     id = "",
   } = params;
 
-  // Obliczamy aktualny slug i pozycję w slugs
   const currentSlug = step || action;
   const idx = slugs.findIndex((s) => s === currentSlug);
   const prev = idx > 0 ? slugs[idx - 1] : null;
   const next = idx >= 0 && idx < slugs.length - 1 ? slugs[idx + 1] : null;
 
   /**
-   * UNIWERSALNA FUNKCJA: Przetwarzanie kontekstu w ścieżkach
-   * Obsługuje dowolne ścieżki kontekstu {{context.anyPath.nested}}
+   * POPRAWIONA FUNKCJA: Przetwarzanie kontekstu w ścieżkach
    */
   const processContextPlaceholders = (template: string): string => {
+    console.log(`[Context] Processing template: "${template}"`);
+    
     // Znajdź wszystkie {{...}} w szablonie
-    return template.replace(/\{\{([^}]+)\}\}/g, (path) => {
-      // Podziel ścieżkę na segmenty (np. "profile.role" → ["profile", "role"])
-      const pathSegments = path.trim().split('.');
+    return template.replace(/\{\{([^}]+)\}\}/g, (fullMatch, contextPath) => {
+      console.log(`[Context] Found placeholder: "${fullMatch}" with path: "${contextPath}"`);
+      
+      // Podziel ścieżkę na segmenty (np. "currentUser.role" → ["currentUser", "role"])
+      const pathSegments = contextPath.trim().split('.');
+      console.log(`[Context] Path segments:`, pathSegments);
       
       // Pobierz wartość z kontekstu
       let value = get(pathSegments[0]); // Pobierz główny obiekt
+      console.log(`[Context] Base object "${pathSegments[0]}":`, value);
       
       // Przejdź przez zagnieżdżone właściwości
       for (let i = 1; i < pathSegments.length && value != null; i++) {
+        console.log(`[Context] Accessing property "${pathSegments[i]}" on:`, value);
         value = value[pathSegments[i]];
+        console.log(`[Context] Result:`, value);
       }
       
       // Zwróć wartość lub pusty string jeśli nie znaleziono
       const result = value != null ? String(value) : "";
+      console.log(`[Context] Final resolved value for "${fullMatch}": "${result}"`);
       
-      console.log(`[Context] Resolved {{${path}}} → "${result}"`);
       return result;
     });
   };
@@ -85,11 +82,15 @@ export function useAppNavigation(slugs: string[] = []) {
       .replace(/@next/g, next ?? "")
       .replace(/@prev/g, prev ?? "");
 
+    console.log(`[useAppNavigation] After standard placeholders: "${path}"`);
+
     // KROK 3: Jeśli ścieżka nie zaczyna się od config, dodaj go
     if (config && !path.startsWith(`/${config}`)) {
       const cleanPath = path.startsWith('/') ? path.slice(1) : path;
       path = `/${config}/${cleanPath}`;
     }
+
+    console.log(`[useAppNavigation] After adding config: "${path}"`);
 
     // KROK 4: Usuń duplikaty segmentów workspace
     if (workspace) {

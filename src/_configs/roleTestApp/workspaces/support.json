@@ -9,7 +9,10 @@
         "tplFile": "CurrentUserWidget",
         "title": "Logged User",
         "attrs": {
-          "variant": "compact"
+          "variant": "compact",
+          "loginNavPath": "main/login/form",
+          "logoutNavPath": "main/dashboard/view", 
+          "editNavPath": "profile/edit/form"
         }
       },
       {

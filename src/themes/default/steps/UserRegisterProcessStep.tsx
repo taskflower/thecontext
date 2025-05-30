@@ -7,8 +7,8 @@ interface Props {
   attrs: {
     registerDataPath?: string;
     currentUserPath?: string;
-    successNavPath?: string; // teraz musi być "/:config/{{currentUser.role}}/dashboard/view"
-    errorNavPath?: string;   // np. "/:config/main/register/form"
+    successNavPath?: string; // może zawierać {{currentUser.role}}
+    errorNavPath?: string;
     title?: string;
     description?: string;
   };
@@ -33,12 +33,25 @@ export default function UserRegisterProcessStep({ attrs }: Props) {
         set(attrs.currentUserPath || "currentUser", newUser);
 
         setState("success");
-        // **Proste przekierowanie** — useAppNavigation załatwi resztę
-        go(attrs.successNavPath!);
+        
+        // Hook useAppNavigation automatycznie przetworzy {{currentUser.role}}
+        const targetPath = attrs.successNavPath || "{{currentUser.role}}/dashboard/view";
+        
+        console.log(`[UserRegisterProcessStep] Using navigation template: ${targetPath}`);
+        
+        // Krótkie opóźnienie dla UX
+        setTimeout(() => {
+          go(`/:config/${targetPath}`);
+        }, 1500);
+        
       } catch (e: any) {
         setErr(e.message);
         setState("error");
-        go(attrs.errorNavPath!);
+        
+        const errorPath = attrs.errorNavPath || "main/register/form";
+        setTimeout(() => {
+          go(`/:config/${errorPath}`);
+        }, 3000);
       }
     })();
   }, [go, get, saveItem, set, attrs]);
@@ -46,17 +59,26 @@ export default function UserRegisterProcessStep({ attrs }: Props) {
   if (state === "idle" || saving) {
     return <LoadingSpinner text={attrs.title || "Creating Account..."} />;
   }
+  
   if (state === "success") {
     return (
-      <div className="text-center py-20">
-        <h3 className="text-green-600 text-lg">
-          Rejestracja zakończona sukcesem!
-        </h3>
-        <p className="text-sm text-gray-600 mt-2">
-          Zaraz przeniesiemy Cię do Twojego dashboardu…
-        </p>
+      <div className="max-w-md mx-auto">
+        <div className="bg-white border border-green-200 rounded-lg p-8 text-center">
+          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-zinc-900 mb-2">
+            Rejestracja zakończona sukcesem!
+          </h3>
+          <p className="text-sm text-zinc-600">
+            {attrs.description || "Zaraz przeniesiemy Cię do Twojego dashboardu…"}
+          </p>
+        </div>
       </div>
     );
   }
+  
   return <ErrorMessage error={err} />;
 }
