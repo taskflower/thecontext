@@ -40,7 +40,7 @@
           {
             "type": "edit",
             "label": "Edit",
-            "navPath": "admin/edit/id"
+            "navPath": "admin/edit/form"
           },
           {
             "type": "delete",

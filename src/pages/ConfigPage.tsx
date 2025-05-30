@@ -1,4 +1,4 @@
-// src/pages/ConfigPage.tsx - FIXED ROUTING LOGIC + GRID OFFSET
+// src/pages/ConfigPage.tsx - SIMPLIFIED VERSION with scenario/node structure
 import { useComponent, useConfig } from "@/core";
 import { useParams } from "react-router-dom";
 import { useMemo } from "react";
@@ -13,30 +13,31 @@ function Error({ children }: { children: React.ReactNode }) {
 }
 
 export default function ConfigPage() {
-  const { config, workspace, scenario, action, step, id } = useParams<{
+  const { config, workspace, scenario, node, id } = useParams<{
     config: string;
     workspace: string;
     scenario: string;
-    action: string;
-    step: string;
+    node: string;
     id: string;
   }>();
 
-  const configName = config || "exampleTicketApp";
-  const workspaceName = workspace || "tickets";
-  const base = `/src/_configs/${configName}`;
+  // Wymagaj podstawowych parametrów
+  if (!config) return <Error>Missing config parameter</Error>;
+  if (!workspace) return <Error>Missing workspace parameter</Error>;
 
-  const app = useConfig<AppConfig>(configName, `${base}/app.json`);
+  const base = `/src/_configs/${config}`;
+
+  const app = useConfig<AppConfig>(config, `${base}/app.json`);
   const workspaceConfig = useConfig<WorkspaceConfig>(
-    configName,
-    `${base}/workspaces/${workspaceName}.json`
+    config,
+    `${base}/workspaces/${workspace}.json`
   );
   const scenarioConfig = useConfig<ScenarioConfig>(
-    configName,
-    scenario ? `${base}/scenarios/${workspaceName}/${scenario}.json` : ""
+    config,
+    scenario ? `${base}/scenarios/${workspace}/${scenario}.json` : ""
   );
 
-  // Memoized layout config
+  // Layout config
   const { theme, layoutFile } = useMemo(
     () => ({
       theme: app?.tplDir || "default",
@@ -53,92 +54,46 @@ export default function ConfigPage() {
 
   // Loading states
   if (!app || layoutLoading) return <div>Loading...</div>;
-  if (!workspaceConfig)
-    return <Error>Workspace not found: {workspaceName}</Error>;
+  if (!workspaceConfig) return <Error>Workspace not found: {workspace}</Error>;
   if (!Layout) return <Error>Layout not found: {layoutFile}</Error>;
 
-  // Handle scenario rendering
+  // Scenario mode: /:config/:workspace/:scenario/:node
   if (scenario) {
-    if (!scenarioConfig)
+    if (!scenarioConfig) {
       return (
         <Layout>
           <div>Loading scenario...</div>
         </Layout>
       );
-    if (!scenarioConfig.nodes?.length)
+    }
+    
+    if (!scenarioConfig.nodes?.length) {
       return (
         <Layout>
           <Error>Invalid scenario: {scenario}</Error>
         </Layout>
       );
-
-    // 🔥 FIXED ROUTING LOGIC
-    console.log("=== DEBUGGING STEP SELECTION ===");
-    console.log("URL params:", {
-      config,
-      workspace,
-      scenario,
-      action,
-      step,
-      id,
-    });
-    console.log(
-      "Available nodes:",
-      scenarioConfig.nodes.map((n) => n.slug)
-    );
-    console.log("action param:", action);
-    console.log("step param:", step);
-    console.log("id param:", id);
-
-    // 🔥 FIXED: Proper step detection logic
-    let actualStep;
-
-    if (step) {
-      // Jeśli mamy step param, użyj go
-      actualStep = step;
-      console.log("Using step param:", actualStep);
-    } else if (action && scenarioConfig.nodes.find((n) => n.slug === action)) {
-      // Jeśli action to slug istniejącego node'a, użyj action jako step
-      actualStep = action;
-      console.log("Using action as step:", actualStep);
-    } else if (action === "step" && id) {
-      // Jeśli action="step" i mamy id, użyj id jako step (routing bug fix)
-      actualStep = id;
-      console.log("Routing bug fix - using id as step:", actualStep);
-    } else if (id === "new") {
-      // Jeśli id="new", użyj pierwszego node'a
-      actualStep = scenarioConfig.nodes[0].slug;
-      console.log("New item - using first node:", actualStep);
-    } else if (id) {
-      // Jeśli mamy id ale nie "new", prawdopodobnie edytujemy
-      actualStep = step || "form";
-      console.log("Edit mode - using step or form:", actualStep);
-    } else {
-      // Fallback do pierwszego node'a
-      actualStep = scenarioConfig.nodes[0].slug;
-      console.log("Fallback to first node:", actualStep);
     }
 
-    const node =
-      scenarioConfig.nodes.find((n) => n.slug === actualStep) ||
-      scenarioConfig.nodes[0];
-    console.log("Selected node:", node?.slug, "with tplFile:", node?.tplFile);
-    console.log("=== END DEBUG ===");
+    // Znajdź node po slug lub użyj pierwszego
+    const selectedNode = node 
+      ? scenarioConfig.nodes.find(n => n.slug === node) || scenarioConfig.nodes[0]
+      : scenarioConfig.nodes[0];
 
     return (
       <Layout>
         <StepRenderer
           theme={theme}
-          filename={node.tplFile}
-          attrs={node.attrs}
-          ticketId={action === "step" ? undefined : id}
-          key={`${actualStep}-${id || "new"}`}
+          filename={selectedNode.tplFile}
+          attrs={selectedNode.attrs}
+          recordId={id}
+          key={`${scenario}-${selectedNode.slug}-${id || "new"}`}
         />
       </Layout>
     );
   }
 
-  // Handle workspace grid
+  // Workspace mode: /:config/:workspace (grid z widgets)
   return (
     <Layout>
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
@@ -150,39 +105,40 @@ export default function ConfigPage() {
   );
 }
 
-// Compact components
+// Renderowanie kroku scenariusza
 function StepRenderer({
   theme,
   filename,
   attrs,
-  ticketId,
 }: {
   theme: string;
   filename: string;
   attrs: any;
-  ticketId?: string;
 }) {
   const { Component, loading, error } = useComponent(theme, "steps", filename);
+  
   if (loading) return <div>Loading step...</div>;
   if (error || !Component) return <Error>Step not found: {filename}</Error>;
 
   try {
-    return <Component attrs={attrs || {}} ticketId={ticketId} />;
+    return <Component attrs={attrs || {}} />;
   } catch (err) {
     return <Error>Render failed: {String(err)}</Error>;
   }
 }
 
+// Renderowanie widget'a workspace
 function WidgetRenderer({ theme, widget }: { theme: string; widget: any }) {
   const { Component, loading, error } = useComponent(
     theme,
     "widgets",
     widget?.tplFile || ""
   );
+  
   if (loading) return <div>Loading widget...</div>;
-  if (error || !Component)
-    return <Error>Widget not found: {widget?.tplFile}</Error>;
+  if (error || !Component) return <Error>Widget not found: {widget?.tplFile}</Error>;
 
+  // Grid styling
   const colSpanMap: Record<string | number, string> = {
     full: "col-span-full",
     6: "col-span-full",
@@ -193,7 +149,6 @@ function WidgetRenderer({ theme, widget }: { theme: string; widget: any }) {
     1: "col-span-1",
   };
 
-  // 🔥 NOWE: Mapowanie dla przesunięcia w gridzie (col-start)
   const colStartMap: Record<string | number, string> = {
     1: "col-start-1",
     2: "col-start-2", 
@@ -201,15 +156,13 @@ function WidgetRenderer({ theme, widget }: { theme: string; widget: any }) {
     4: "col-start-4",
     5: "col-start-5",
     6: "col-start-6",
-    7: "col-start-7", // dla większych gridów
+    7: "col-start-7",
     auto: "col-start-auto",
   };
 
-  // Pobierz wartości z attrs
   const colSpan = widget?.attrs?.colSpan || 1;
   const colStart = widget?.attrs?.colStart;
 
-  // Zbuduj klasy CSS
   const spanClass = colSpanMap[colSpan] || "col-span-1";
   const startClass = colStart ? (colStartMap[colStart] || "") : "";
   const combinedClasses = [spanClass, startClass].filter(Boolean).join(" ");

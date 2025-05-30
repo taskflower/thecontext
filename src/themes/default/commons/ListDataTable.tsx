@@ -1,4 +1,4 @@
-// src/themes/default/commons/ListDataTable.tsx
+// src/themes/default/commons/ListDataTable.tsx - Fixed for new URL structure
 import { useAppNavigation } from "@/core/hooks/useAppNavigation";
 
 export interface Column {
@@ -55,7 +55,7 @@ export default function DataTable({
   onSort,
   onDelete,
 }: DataTableProps) {
-  const { go } = useAppNavigation(); // ✅ UŻYWAMY useAppNavigation
+  const { go } = useAppNavigation();
 
   const getFieldDisplayValue = (key: string, value: any) => {
     const field = schema?.properties?.[key];
@@ -166,7 +166,7 @@ export default function DataTable({
         </p>
         {emptyState?.actionButton && (
           <button
-            onClick={() => go(`/:config/${emptyState?.actionButton?.navPath}`)} // ✅ UŻYWAMY go()
+            onClick={() => go(emptyState.actionButton.navPath)}
             className="bg-zinc-900 text-white px-5 py-2.5 text-sm font-medium rounded-md hover:bg-zinc-800 transition-colors"
           >
             {emptyState.actionButton.title}
@@ -228,11 +228,11 @@ export default function DataTable({
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-3">
                       {actions.map((action, index) => {
-                        if (action.type === "edit") {
+                        if (action.type === "edit" && action.navPath) {
                           return (
                             <button
                               key={index}
-                              onClick={() => go(`/:config/${action.navPath}/${record.id}`)} // ✅ UŻYWAMY go()
+                              onClick={() => go(`${action.navPath}/${record.id}`)}
                               className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors"
                             >
                               {action.label || "Edytuj"}
@@ -254,11 +254,11 @@ export default function DataTable({
                             </button>
                           );
                         }
-                        if (action.type === "custom") {
+                        if (action.type === "custom" && action.navPath) {
                           return (
                             <button
                               key={index}
-                              onClick={() => go(`/:config/${action.navPath}/${record.id}`)} // ✅ UŻYWAMY go()
+                              onClick={() => go(`${action.navPath}/${record.id}`)}
                               className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors"
                             >
                               {action.label || "Akcja"}

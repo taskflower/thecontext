@@ -21,7 +21,7 @@
           "Błąd w kalkulacji raportów sprzedażowych"
         ],
         "cancelNavPath": "tickets/list/view",
-        "navPath": "tickets/db-summary/view",
+        "navPath": "tickets/llm-create/db-summary",
         "saveToContext": true,
         "contextKey": "generatedTicket"
       }
@@ -37,8 +37,8 @@
         "schemaPath": "ticket",
         "collection": "tickets",
         "contextKey": "generatedTicket",
-        "navPath": "tickets/list/view",
-        "cancelNavPath": "tickets/list/view",
+        "navPath": "tickets/llm-create/list",
+        "cancelNavPath": "tickets/llm-create/list",
         "allowEdit": true,
         "showGeneratedBadge": true,
         "additionalActions": [

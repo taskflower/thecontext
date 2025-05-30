@@ -1,27 +1,30 @@
-// src/App.tsx - Cleaned version with EdV2 only
-import { BrowserRouter, useRoutes } from "react-router-dom";
+// src/App.tsx - Fixed version with proper redirect logic
+import { BrowserRouter, useRoutes, Navigate } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthContext";
 import ConfigPage from "./pages/ConfigPage";
 import AuthPage from "./pages/AuthPage";
+import RedirectToDefault from "./pages/RedirectToDefault";
 import { useMemo } from "react";
-
 
 function AppRoutes() {
   const routes = useMemo(
     () => [
       { path: "login", element: <AuthPage /> },
 
-      // Regular config routes
+      // Simplified routes - scenario/node structure
       {
-        path: ":config/:workspace/:scenario/:action/:id",
+        path: ":config/:workspace/:scenario/:node/:id",
         element: <ConfigPage />,
       },
       {
-        path: ":config/:workspace/:scenario/:action/:step?",
+        path: ":config/:workspace/:scenario/:node",
         element: <ConfigPage />,
       },
       { path: ":config/:workspace", element: <ConfigPage /> },
-      { path: "/", element: <ConfigPage /> },
+      
+      // 🔥 NOWE: Redirect dla root URL
+      { path: "/", element: <RedirectToDefault /> },
+      
       {
         path: "*",
         element: (
@@ -37,7 +40,6 @@ function AppRoutes() {
   return (
     <>
       {useRoutes(routes)}
-      {/* <EditorControlV2 /> */}
     </>
   );
 }
