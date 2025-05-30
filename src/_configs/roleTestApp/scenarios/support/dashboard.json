@@ -11,53 +11,21 @@
         "description": "Welcome to the support workspace. Handle and resolve tickets.",
         "schemaPath": "ticket",
         "collection": "tickets",
+        "filters": [
+          { "role": "support", "field": "assigneeId" }
+        ],
         "headerWidgets": [
-          {
-            "tplFile": "InfoWidget",
-            "title": "🎧 Support Dashboard",
-            "attrs": {
-              "content": "Handle and resolve tickets from all reporters.",
-              "variant": "info"
-            }
-          },
-          {
-            "tplFile": "ButtonWidget",
-            "title": "📋 All Tickets",
-            "attrs": {
-              "navURL": "/support/list/view",
-              "variant": "primary"
-            }
-          }
+          { "tplFile": "InfoWidget", "title": "🎧 Support Dashboard", "attrs": { "content": "Handle and resolve tickets from all reporters.", "variant": "info" } },
+          { "tplFile": "ButtonWidget", "title": "📋 All Tickets", "attrs": { "navURL": "/support/list/view", "variant": "primary" } }
         ],
         "columns": [
-          {
-            "key": "title",
-            "label": "Title",
-            "type": "text"
-          },
-          {
-            "key": "priority",
-            "label": "Priority",
-            "type": "badge"
-          },
-          {
-            "key": "status",
-            "label": "Status",
-            "type": "badge"
-          }
+          { "key": "title", "label": "Title", "type": "text" },
+          { "key": "priority", "label": "Priority", "type": "badge" },
+          { "key": "status", "label": "Status", "type": "badge" }
         ],
-        "actions": [
-          {
-            "type": "edit",
-            "label": "Handle",
-            "navURL": "/support/edit"
-          }
-        ],
-        "emptyState": {
-          "icon": "🎧",
-          "title": "No Tickets to Handle",
-          "description": "No tickets in the system yet. Tickets will appear here when reporters create them."
-        }
+        "actions": [ { "type": "edit", "label": "Handle", "navURL": "/support/edit" } ],
+        "emptyState": { "icon": "🎧", "title": "No Tickets to Handle", "description": "No tickets assigned to you." },
+        "pagination": { "pageSize": 10, "showTotal": true }
       }
     }
   ]

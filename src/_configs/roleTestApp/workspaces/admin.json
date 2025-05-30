@@ -1,8 +1,9 @@
 {
- 
   "name": "Admin Dashboard",
   "slug": "admin",
-  "rolesAllowed": ["admin"],
+  "rolesAllowed": [
+    "admin"
+  ],
   "templateSettings": {
     "layoutFile": "Simple",
     "widgets": [
@@ -12,7 +13,7 @@
         "attrs": {
           "variant": "compact",
           "loginnavURL": "/main/login/form",
-          "logoutnavURL": "/main", 
+          "logoutnavURL": "/main",
           "editnavURL": "/profile/edit/form"
         }
       },
@@ -68,7 +69,11 @@
           "type": "string",
           "label": "Role",
           "fieldType": "select",
-          "enum": ["reporter", "support", "admin"],
+          "enum": [
+            "reporter",
+            "support",
+            "admin"
+          ],
           "enumLabels": {
             "reporter": "Reporter",
             "support": "Support",

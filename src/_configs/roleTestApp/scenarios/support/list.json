@@ -1,44 +1,39 @@
+
 {
-    "slug": "list",
-    "nodes": [
-      {
-        "slug": "view",
-        "label": "All Tickets",
-        "order": 1,
-        "tplFile": "ListTableStep",
-        "attrs": {
-          "schemaPath": "ticket",
-          "collection": "tickets",
-          "columns": [
-            {
-              "key": "title",
-              "label": "Title",
-              "type": "text"
-            },
-            {
-              "key": "priority",
-              "label": "Priority",
-              "type": "badge"
-            },
-            {
-              "key": "status",
-              "label": "Status",
-              "type": "badge"
-            }
-          ],
-          "actions": [
-            {
-              "type": "edit",
-              "label": "Handle",
-              "navURL": "/support/edit/id"
-            }
-          ],
-          "emptyState": {
-            "icon": "🎧",
-            "title": "No Tickets",
-            "description": "No tickets in the system yet."
+  "slug": "list",
+  "nodes": [
+    {
+      "slug": "view",
+      "label": "All Tickets",
+      "order": 1,
+      "tplFile": "ListTableStep",
+      "attrs": {
+        "schemaPath": "ticket",
+        "collection": "tickets",
+        "filters": [
+          {
+            "role": "support",
+            "field": "assigneeId"
           }
+        ],
+        "columns": [
+          { "key": "title", "label": "Title", "type": "text" },
+          { "key": "priority", "label": "Priority", "type": "badge" },
+          { "key": "status", "label": "Status", "type": "badge" }
+        ],
+        "actions": [
+          {
+            "type": "edit",
+            "label": "Handle",
+            "navURL": "/support/edit"
+          }
+        ],
+        "emptyState": {
+          "icon": "🎧",
+          "title": "No Tickets",
+          "description": "No tickets in the system yet."
         }
       }
-    ]
-  }
+    }
+  ]
+}

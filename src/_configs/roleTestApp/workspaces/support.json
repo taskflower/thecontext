@@ -1,7 +1,9 @@
 {
   "slug": "support",
   "name": "Support Dashboard",
-  "rolesAllowed": ["support"],
+  "rolesAllowed": [
+    "support"
+  ],
   "templateSettings": {
     "layoutFile": "Simple",
     "widgets": [
@@ -11,7 +13,7 @@
         "attrs": {
           "variant": "compact",
           "loginnavURL": "/main/login/form",
-          "logoutnavURL": "/main", 
+          "logoutnavURL": "/main",
           "editnavURL": "/profile/edit/form"
         }
       },
@@ -53,7 +55,11 @@
           "type": "string",
           "label": "Priority",
           "fieldType": "select",
-          "enum": ["low", "medium", "high"],
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
           "enumLabels": {
             "low": "Low",
             "medium": "Medium",
@@ -65,7 +71,11 @@
           "type": "string",
           "label": "Status",
           "fieldType": "select",
-          "enum": ["new", "in_progress", "resolved"],
+          "enum": [
+            "new",
+            "in_progress",
+            "resolved"
+          ],
           "enumLabels": {
             "new": "New",
             "in_progress": "In Progress",
