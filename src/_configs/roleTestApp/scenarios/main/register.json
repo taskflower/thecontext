@@ -13,7 +13,10 @@
           "onSubmit": {
             "saveToContext": true,
             "contextKey": "registerData",
-            "navURL": "main/register/process"
+            "navURL": "/main/register/process"
+          },
+          "onCancel": {
+            "navURL": "/main"
           }
         }
       },

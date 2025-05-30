@@ -1,7 +1,12 @@
-// src/themes/default/steps/FormStep.tsx - ENHANCED VERSION
+// src/themes/default/steps/FormStep.tsx - CLEAN VERSION
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useWorkspaceSchema, useCollections, useEngineStore, useAppNavigation } from "@/core";
+import {
+  useWorkspaceSchema,
+  useCollections,
+  useEngineStore,
+  useAppNavigation,
+} from "@/core";
 import { FieldWidget } from "../widgets/form/FieldWidget";
 import { LoadingSpinner, ErrorMessage } from "../commons/StepWrapper";
 
@@ -15,21 +20,26 @@ interface FormStepProps {
       navURL: string;
       saveToContext?: boolean;
       contextKey?: string;
+      action?: "create" | "update";
+    };
+    onCancel?: {
+      navURL: string;
     };
     loadFromParams?: boolean;
-    loadFromContext?: string; // NOWE: ścieżka kontekstu do załadowania danych
+    loadFromContext?: string;
     excludeFields?: string[];
-    autoPopulateFromCurrentUser?: boolean; // NOWE: auto-wypełnianie z currentUser
+    autoPopulateFromCurrentUser?: boolean;
   };
 }
 
 export default function FormStep({ attrs }: FormStepProps) {
-  // ✅ ALL HOOKS AT TOP LEVEL
   const params = useParams<{ id: string; config: string; workspace: string }>();
   const { go } = useAppNavigation();
   const editId = params.id;
 
-  const { schema, loading, error } = useWorkspaceSchema(attrs?.schemaPath || "");
+  const { schema, loading, error } = useWorkspaceSchema(
+    attrs?.schemaPath || ""
+  );
   const { items, saveItem } = useCollections(attrs.onSubmit?.collection || "");
   const { get, set } = useEngineStore();
   const [data, setData] = useState<Record<string, any>>({});
@@ -40,14 +50,17 @@ export default function FormStep({ attrs }: FormStepProps) {
   // Initialize data when schema loads
   useEffect(() => {
     if (!schema?.properties) return;
-    
+
     const defaults = Object.fromEntries(
-      Object.entries(schema.properties).map(([key, field]: any) => [key, field.default])
+      Object.entries(schema.properties).map(([key, field]: any) => [
+        key,
+        field.default,
+      ])
     );
 
     let initialData = defaults;
 
-    // NOWE: Ładowanie z określonego kontekstu
+    // Ładowanie z określonego kontekstu
     if (attrs.loadFromContext) {
       const contextData = get(attrs.loadFromContext);
       if (contextData) {
@@ -70,19 +83,17 @@ export default function FormStep({ attrs }: FormStepProps) {
       }
     }
 
-    // NOWE: Auto-wypełnianie z currentUser
+    // Auto-wypełnianie z currentUser
     if (attrs.autoPopulateFromCurrentUser) {
       const currentUser = get("currentUser");
       if (currentUser) {
-        // Mapowanie pól currentUser na pola formularza
         const userMapping: Record<string, string> = {
           firstName: "firstName",
-          lastName: "lastName", 
+          lastName: "lastName",
           email: "email",
           phone: "phone",
           role: "role",
           department: "department",
-          // Dodaj więcej mapowań według potrzeb
         };
 
         Object.entries(userMapping).forEach(([userField, formField]) => {
@@ -91,18 +102,19 @@ export default function FormStep({ attrs }: FormStepProps) {
           }
         });
 
-        // Specjalne pole dla ID użytkownika
         if (schema.properties.reporterId || schema.properties.userId) {
-          const userIdField = schema.properties.reporterId ? "reporterId" : "userId";
+          const userIdField = schema.properties.reporterId
+            ? "reporterId"
+            : "userId";
           initialData[userIdField] = currentUser.id;
         }
 
-        // Specjalne pole dla nazwy użytkownika
         if (schema.properties.reporter) {
-          initialData.reporter = `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim();
+          initialData.reporter = `${currentUser.firstName || ""} ${
+            currentUser.lastName || ""
+          }`.trim();
         }
 
-        // Auto-wypełnij email reportera
         if (schema.properties.reporterEmail) {
           initialData.reporterEmail = currentUser.email;
         }
@@ -110,22 +122,31 @@ export default function FormStep({ attrs }: FormStepProps) {
     }
 
     setData(initialData);
-  }, [schema, contextKey, attrs.loadFromParams, attrs.loadFromContext, attrs.autoPopulateFromCurrentUser, editId, items, get]);
+  }, [
+    schema,
+    contextKey,
+    attrs.loadFromParams,
+    attrs.loadFromContext,
+    attrs.autoPopulateFromCurrentUser,
+    editId,
+    items,
+    get,
+  ]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    
+
     try {
       const payload = { ...data, id: editId || Date.now().toString() };
-      
+
       if (attrs.onSubmit.saveToContext) {
         set(contextKey, payload);
       } else {
         await saveItem(payload);
       }
-      
-      go(`/:config/${attrs.onSubmit.navURL}`);
+
+      go(attrs.onSubmit.navURL);
     } catch (err: any) {
       alert(`Save failed: ${err.message}`);
     } finally {
@@ -134,12 +155,15 @@ export default function FormStep({ attrs }: FormStepProps) {
   };
 
   const handleCancel = () => {
-    go(`/:config/${attrs.onSubmit.navURL}`);
+    // ŻADNEGO KOMBINOWANIA - tylko to co jest w konfiguracji
+    go(attrs.onCancel?.navURL || "/main");
   };
 
-  // ✅ CONDITIONAL RENDERING AFTER ALL HOOKS
   if (loading) return <LoadingSpinner text="Loading form..." />;
-  if (error || !schema) return <ErrorMessage error={error || `Schema not found: ${attrs?.schemaPath}`} />;
+  if (error || !schema)
+    return (
+      <ErrorMessage error={error || `Schema not found: ${attrs?.schemaPath}`} />
+    );
 
   return (
     <div className="max-w-xl mx-auto">
@@ -164,24 +188,38 @@ export default function FormStep({ attrs }: FormStepProps) {
                   key={key}
                   field={{ ...field, key }}
                   value={data[key] ?? ""}
-                  onChange={(k, v) => setData(d => ({ ...d, [k]: v }))}
+                  onChange={(k, v) => setData((d) => ({ ...d, [k]: v }))}
                 />
               ))}
           </div>
-          <div className="flex gap-3 mt-8 pt-6 border-t border-zinc-200/60">
+          <div
+            className={`${
+              attrs.onCancel ? "flex gap-3" : "flex justify-end"
+            } mt-8 pt-6 border-t border-zinc-200/60`}
+          >
+            {attrs.onCancel && (
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="px-4 py-2.5 text-sm font-medium text-zinc-700 border border-zinc-300/80 rounded-md hover:bg-zinc-50"
+              >
+                Cancel
+              </button>
+            )}
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 bg-zinc-900 text-white text-sm font-medium px-4 py-2.5 rounded-md hover:bg-zinc-800 disabled:opacity-50"
+              className={`${
+                attrs.onCancel ? "flex-1" : "px-8"
+              } bg-zinc-900 text-white text-sm font-medium px-4 py-2.5 rounded-md hover:bg-zinc-800 disabled:opacity-50`}
             >
-              {saving ? "Saving..." : attrs.onSubmit.saveToContext ? "Continue" : editId ? "Update" : "Save"}
-            </button>
-            <button
-              type="button"
-              onClick={handleCancel}
-              className="px-4 py-2.5 text-sm font-medium text-zinc-700 border border-zinc-300/80 rounded-md hover:bg-zinc-50"
-            >
-              Cancel
+              {saving
+                ? "Saving..."
+                : attrs.onSubmit.saveToContext
+                ? "Continue"
+                : editId
+                ? "Update"
+                : "Save"}
             </button>
           </div>
         </form>

@@ -1,4 +1,4 @@
-// src/themes/default/steps/UserRegisterProcessStep.tsx
+// src/themes/default/steps/UserRegisterProcessStep.tsx - FIXED
 import { useEffect, useState } from "react";
 import { useEngineStore, useCollections, useAppNavigation } from "@/core";
 import { LoadingSpinner, ErrorMessage } from "../commons/StepWrapper";
@@ -15,7 +15,6 @@ interface Props {
 }
 
 export default function UserRegisterProcessStep({ attrs }: Props) {
-  // **HOOKI NA GÓRZE**
   const { get, set } = useEngineStore();
   const { saveItem, loading: saving } = useCollections("users");
   const { go } = useAppNavigation();
@@ -34,23 +33,23 @@ export default function UserRegisterProcessStep({ attrs }: Props) {
 
         setState("success");
         
-        // Hook useAppNavigation automatycznie przetworzy {{currentUser.role}}
-        const targetPath = attrs.successNavURL || "{{currentUser.role}}/dashboard/view";
+        // ✅ POPRAWIONE: używaj prostego formatu
+        const targetPath = attrs.successNavURL || "/{{currentUser.role}}/dashboard/view";
         
         console.log(`[UserRegisterProcessStep] Using navigation template: ${targetPath}`);
         
-        // Krótkie opóźnienie dla UX
         setTimeout(() => {
-          go(`/:config/${targetPath}`);
+          go(targetPath);
         }, 1500);
         
       } catch (e: any) {
         setErr(e.message);
         setState("error");
         
-        const errorPath = attrs.errorNavURL || "main/register/form";
+        // ✅ POPRAWIONE: używaj prostego formatu
+        const errorPath = attrs.errorNavURL || "/main/register/form";
         setTimeout(() => {
-          go(`/:config/${errorPath}`);
+          go(errorPath);
         }, 3000);
       }
     })();

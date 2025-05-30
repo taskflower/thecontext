@@ -14,13 +14,13 @@
           "collection": "users",
           "readOnly": true,
           "showGeneratedBadge": false,
-          "navURL": "users/list/view",
-          "cancelnavURL": "users/list/view", 
+          "navURL": "/users/list/view",
+          "cancelnavURL": "/users/list/view", 
           "additionalActions": [
             {
               "type": "edit",
               "label": "✏️ Edytuj profil",
-              "navURL": "users/profile/edit",
+              "navURL": "/users/profile/edit",
               "variant": "primary"
             },
             {
@@ -62,8 +62,8 @@
           "collection": "users",
           "readOnly": true,
           "showGeneratedBadge": false,
-          "navURL": "users/profile/view",
-          "cancelnavURL": "users/profile/view"
+          "navURL": "/users/profile/view",
+          "cancelnavURL": "/users/profile/view"
         }
       }
     ]

@@ -11,7 +11,7 @@
           "colSpan": 3,
           "variant": "compact",
           "loginnavURL": "/main/login/form",
-          "logoutnavURL": "/main/dashboard/view", 
+          "logoutnavURL": "/main", 
           "editnavURL": "/profile/edit/form"
         }
       },

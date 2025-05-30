@@ -1,4 +1,4 @@
-// src/core/hooks/useAppNavigation.ts - SIMPLIFIED VERSION
+// src/core/hooks/useAppNavigation.ts - SLASH VERSION
 import { useNavigate, useParams } from "react-router-dom";
 import { useEngineStore } from "./useEngineStore";
 
@@ -39,18 +39,19 @@ export function useAppNavigation() {
     });
   };
 
-  function processLink(template: string): string {
-    let path = processContextPlaceholders(template);
+  /**
+   * Buduje pełny URL z config
+   * 
+   * WAŻNE: Komponenty podają URL z / na początku: "/workspace/scenario/node"
+   * Taki zapis od razu informuje że to jest URL!
+   * Config dodawany automatycznie: "/admin/list/view" → "/roleTestApp/admin/list/view"
+   */
+  function buildFullPath(template: string): string {
+    const processedPath = processContextPlaceholders(template);
     
-    // Dodaj config jeśli go nie ma
-    if (!path.startsWith('/')) {
-      path = `/${config}/${path}`;
-    } else if (!path.startsWith(`/${config}`)) {
-      path = `/${config}${path}`;
-    }
-    
-    path = path.replace(/\/+/g, "/");
-    return path;
+    // Usuń / z początku i dodaj config
+    const cleanPath = processedPath.startsWith('/') ? processedPath.slice(1) : processedPath;
+    return `/${config}/${cleanPath}`;
   }
 
   return {
@@ -65,12 +66,12 @@ export function useAppNavigation() {
     /** Aktualny id (dla edycji) */
     id,
     
-    /** Przetwarza link bez budowania ścieżek */
-    to: (template: string) => processLink(template),
+    /** Buduje pełną ścieżkę z config */
+    to: (template: string) => buildFullPath(template),
     
-    /** Nawiguje do przetworzonego linka */
+    /** Nawiguje - template z / na początku, config dodawany automatycznie */
     go: (template: string) => {
-      const fullPath = processLink(template);
+      const fullPath = buildFullPath(template);
       console.log(`[Navigation] ${template} → ${fullPath}`);
       navigate(fullPath);
     },
