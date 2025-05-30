@@ -8,6 +8,7 @@
         "tplFile": "CurrentUserWidget",
         "title": "Logged User",
         "attrs": {
+          "colSpan": 3,
           "variant": "compact",
           "loginNavPath": "main/login/form",
           "logoutNavPath": "main/dashboard/view", 
@@ -19,13 +20,15 @@
         "title": "🚀 3-Role System Demo",
         "attrs": {
           "content": "Simple app with 3 roles: Reporter (creates tickets), Support (handles tickets), Admin (manages users).",
-          "variant": "info"
+          "variant": "info",
+          "colSpan": "full"
         }
       },
       {
         "tplFile": "ButtonWidget",
         "title": "👤 Login",
         "attrs": {
+          "colSpan": 2,
           "navPath": "main/login/form",
           "variant": "primary"
         }
@@ -34,6 +37,8 @@
         "tplFile": "ButtonWidget",
         "title": "📝 Register",
         "attrs": {
+          "colSpan": 2,
+          "colStart": 3,
           "navPath": "main/register/form",
           "variant": "secondary"
         }

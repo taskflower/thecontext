@@ -1,4 +1,4 @@
-// src/pages/ConfigPage.tsx - FIXED ROUTING LOGIC
+// src/pages/ConfigPage.tsx - FIXED ROUTING LOGIC + GRID OFFSET
 import { useComponent, useConfig } from "@/core";
 import { useParams } from "react-router-dom";
 import { useMemo } from "react";
@@ -193,9 +193,30 @@ function WidgetRenderer({ theme, widget }: { theme: string; widget: any }) {
     1: "col-span-1",
   };
 
+  // 🔥 NOWE: Mapowanie dla przesunięcia w gridzie (col-start)
+  const colStartMap: Record<string | number, string> = {
+    1: "col-start-1",
+    2: "col-start-2", 
+    3: "col-start-3",
+    4: "col-start-4",
+    5: "col-start-5",
+    6: "col-start-6",
+    7: "col-start-7", // dla większych gridów
+    auto: "col-start-auto",
+  };
+
+  // Pobierz wartości z attrs
+  const colSpan = widget?.attrs?.colSpan || 1;
+  const colStart = widget?.attrs?.colStart;
+
+  // Zbuduj klasy CSS
+  const spanClass = colSpanMap[colSpan] || "col-span-1";
+  const startClass = colStart ? (colStartMap[colStart] || "") : "";
+  const combinedClasses = [spanClass, startClass].filter(Boolean).join(" ");
+
   try {
     return (
-      <div className={colSpanMap[widget?.attrs?.colSpan || 1] || "col-span-1"}>
+      <div className={combinedClasses}>
         <Component {...(widget || {})} />
       </div>
     );
