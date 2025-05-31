@@ -13,7 +13,8 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { configDB } from "@/db";
+import { configDB } from "@/provideDB";
+
 
 interface ConfigWithOwner {
   id: string;

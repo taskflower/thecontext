@@ -1,8 +1,8 @@
 // src/core/hooks/useConfig.ts - FIXED VERSION to prevent rerenders
 import { useState, useEffect, useRef } from "react";
-import { configDB } from '@/db';
 import { db } from '@/provideDB/firebase/config';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+import { configDB } from "@/provideDB";
 
 // ✅ FIX: Move cache outside component to prevent reinitialization
 const configCache = new Map<string, any>();

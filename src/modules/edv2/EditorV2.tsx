@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useLocation } from "react-router-dom";
-import { configDB } from "@/db";
 import { parsePath } from "./shared/editorUtils";
 import WorkspaceEditor from "./workspace/WorkspaceEditor";
 import ScenarioEditor from "./scenario/ScenarioEditor";
 import { Breadcrumbs } from "./shared/Breadcrumbs";
 import { useConfig } from "@/core";
+import { configDB } from "@/provideDB";
 
 interface EditorV2Props {
   isOpen: boolean;

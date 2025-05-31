@@ -1,9 +1,9 @@
 // src/modules/editor/components/WorkspaceEditor.tsx
 import { useState, useEffect } from 'react';
-import { configDB } from '@/db';
 import WidgetEditor from './WidgetEditor';
 import ContextSchemaEditor from './ContextSchemaEditor';
 import { useConfig } from '@/core';
+import { configDB } from '@/provideDB';
 
 
 interface WorkspaceConfig {

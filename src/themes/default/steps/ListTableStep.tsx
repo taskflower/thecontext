@@ -1,5 +1,5 @@
 // src/themes/default/steps/ListTableStep.tsx - Modern Dropbox Style
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useWorkspaceSchema, useEngineStore, useAppNavigation } from "@/core";
 import { useCollections } from "@/core/hooks/useCollections";
 import ButtonWidget from "../widgets/ButtonWidget";
