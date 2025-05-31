@@ -4,6 +4,15 @@ import { useWorkspaceSchema, useEngineStore, useAppNavigation } from "@/core";
 import { useCollections } from "@/core/hooks/useCollections";
 import ButtonWidget from "../widgets/ButtonWidget";
 
+// Define the filter option type
+interface FilterOption {
+  key: string;
+  label: string;
+  field?: string;
+  value?: string;
+  showAll?: boolean;
+}
+
 interface ListTableStepProps {
   attrs: {
     title?: string;
@@ -37,13 +46,7 @@ interface ListTableStepProps {
     }>;
     roleFilters?: {
       enabled?: boolean;
-      options?: Array<{
-        key: string;
-        label: string;
-        field?: string;
-        value?: string;
-        showAll?: boolean;
-      }>;
+      options?: FilterOption[];
     };
   };
 }
@@ -62,14 +65,14 @@ export default function ListTableStep({ attrs }: ListTableStepProps) {
   } = useWorkspaceSchema(attrs?.schemaPath || "");
 
   // Przygotuj opcje filtrów
-  const filterOptions = useMemo(() => {
+  const filterOptions = useMemo((): FilterOption[] => {
     if (!attrs?.roleFilters?.enabled || !currentUser) {
       return [];
     }
 
     if (!attrs.roleFilters.options) {
       const role = currentUser.role;
-      const defaultFilters = [
+      const defaultFilters: FilterOption[] = [
         { key: "all", label: "All Items", showAll: true },
       ];
 
@@ -229,6 +232,8 @@ export default function ListTableStep({ attrs }: ListTableStepProps) {
     key,
     label: schema.properties[key].label || key,
     type: "text" as const,
+    width: undefined,
+    sortable: undefined,
   }));
 
   return (
@@ -280,7 +285,6 @@ export default function ListTableStep({ attrs }: ListTableStepProps) {
           {/* Filters */}
           {filterOptions.length > 0 && (
             <div className="flex items-center space-x-2">
-              
               {filterOptions.map((filter) => (
                 <button
                   key={filter.key}
@@ -335,7 +339,7 @@ export default function ListTableStep({ attrs }: ListTableStepProps) {
                     <th
                       key={column.key}
                       className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
-                      style={{ width: column.width }}
+                      style={column.width ? { width: column.width } : undefined}
                     >
                       {column.label || column.key}
                     </th>
