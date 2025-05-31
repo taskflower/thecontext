@@ -41,6 +41,7 @@ export interface WorkspaceConfig {
   name: string;
   templateSettings: {
     layoutFile: string;
+    parentClass?: string;  
     widgets: Array<{
       tplFile: string;
       title: string;

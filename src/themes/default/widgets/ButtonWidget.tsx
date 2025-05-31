@@ -1,8 +1,8 @@
 import { useAppNavigation } from "@/core";
 import I from "../I";
 
-type ButtonVariant = 'primary' | 'danger' | 'outline';
-type ButtonSize = 'sm' | 'md' | 'lg';
+type ButtonVariant = "primary" | "danger" | "outline";
+type ButtonSize = "sm" | "md" | "lg";
 
 type ButtonWidgetProps = {
   title: string;
@@ -30,8 +30,8 @@ export default function ButtonWidget({ title, attrs }: ButtonWidgetProps) {
     lg: "px-6 py-3 text-lg",
   };
 
-  const variant = attrs.variant || 'primary';
-  const size = attrs.size || 'md';
+  const variant = attrs.variant || "primary";
+  const size = attrs.size || "md";
 
   return (
     <button
@@ -44,7 +44,7 @@ export default function ButtonWidget({ title, attrs }: ButtonWidgetProps) {
         flex items-center justify-center gap-2
       `}
     >
-      {attrs.icon && <I name={attrs.icon} className="w-5 h-5" />}
+      {attrs.icon && <I name={attrs.icon} className="w-5 h-5 stroke-2" />}
       {title}
     </button>
   );

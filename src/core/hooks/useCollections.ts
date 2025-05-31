@@ -1,4 +1,4 @@
-// src/core/hooks/useCollections.ts - ENHANCED VERSION with full config support
+// src/core/hooks/useCollections.ts - ENHANCED VERSION with relations support
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useConfig } from "./useConfig";
@@ -9,6 +9,7 @@ import Dexie from "dexie";
 const dbs = new Map<string, Dexie>();
 
 interface RelationConfig {
+  type: 'many-to-one' | 'one-to-many';
   foreignKey: string;
   target: string;
 }
@@ -24,7 +25,7 @@ function getDB(collection: string): Dexie {
 
 interface QueryOptions {
   where?: Array<{ field: string; operator: string; value: any }>;
-  populate?: string[];
+  populate?: string[]; // ✅ NEW: Relations to populate
 }
 
 export function useCollections<T = any>(
@@ -85,31 +86,39 @@ export function useCollections<T = any>(
     [collection, appConfig?.database?.permissions]
   );
 
-  // ✅ NEW: Populate relations
+  // ✅ NEW: Populate relations using config
   const populateRelations = useCallback(
     async (records: any[], populateFields: string[]): Promise<any[]> => {
-      if (!populateFields.length || !appConfig?.database?.relations)
+      if (!populateFields.length || !appConfig?.database?.relations) {
         return records;
+      }
 
       const relations = appConfig.database.relations;
+      const populatedRecords = [...records];
 
       for (const relationKey of populateFields) {
-        const relationConfig = relations[`${collection}.${relationKey}`];
+        const fullRelationKey = `${collection}.${relationKey}`;
+        const relationConfig = relations[fullRelationKey] as RelationConfig;
+        
         if (!relationConfig) {
-          console.warn(`Relation not found: ${collection}.${relationKey}`);
+          console.warn(`Relation not found: ${fullRelationKey}`);
           continue;
         }
 
         const { type, target, foreignKey } = relationConfig;
-        const targetCollection =
-          appConfig.database.collections[target] || target;
+        const targetCollection = appConfig.database.collections[target] || target;
         const targetDB = getDB(targetCollection);
 
         if (type === "many-to-one") {
           // Get unique foreign IDs
           const foreignIds = [
-            ...new Set(records.map((r) => r[foreignKey]).filter(Boolean)),
+            ...new Set(
+              populatedRecords
+                .map((r) => r[foreignKey])
+                .filter(Boolean)
+            )
           ];
+
           if (!foreignIds.length) continue;
 
           // Fetch related records
@@ -117,19 +126,19 @@ export function useCollections<T = any>(
           const relatedMap = new Map(relatedRecords.map((r) => [r.id, r]));
 
           // Populate records
-          records.forEach((record) => {
+          populatedRecords.forEach((record) => {
             if (record[foreignKey]) {
-              record[relationKey] = relatedMap.get(record[foreignKey]);
+              record[relationKey] = relatedMap.get(record[foreignKey]) || null;
             }
           });
 
           console.log(
-            `🔗 Populated ${relationKey} for ${records.length} records`
+            `🔗 Populated ${relationKey} for ${populatedRecords.length} records`
           );
         }
 
         if (type === "one-to-many") {
-          const parentIds = records.map((r) => r.id);
+          const parentIds = populatedRecords.map((r) => r.id);
           const relatedRecords = await targetDB.table("items").toArray();
 
           const relatedMap = new Map<string, any[]>();
@@ -141,17 +150,17 @@ export function useCollections<T = any>(
               relatedMap.get(parentId)!.push(record);
             });
 
-          records.forEach((record) => {
+          populatedRecords.forEach((record) => {
             record[relationKey] = relatedMap.get(record.id) || [];
           });
 
           console.log(
-            `🔗 Populated ${relationKey} (one-to-many) for ${records.length} records`
+            `🔗 Populated ${relationKey} (one-to-many) for ${populatedRecords.length} records`
           );
         }
       }
 
-      return records;
+      return populatedRecords;
     },
     [
       collection,
@@ -160,7 +169,7 @@ export function useCollections<T = any>(
     ]
   );
 
-  // ✅ ENHANCED: Load items with full config support
+  // ✅ ENHANCED: Load items with full config support including relations
   const loadItems = useCallback(async () => {
     if (loadingRef.current || !appConfig || !actualCollectionRef.current)
       return;
@@ -211,7 +220,8 @@ export function useCollections<T = any>(
       }
 
       console.log(
-        `📋 Loaded ${allItems.length} items from ${actualCollectionRef.current} (${collection})`
+        `📋 Loaded ${allItems.length} items from ${actualCollectionRef.current} (${collection})`,
+        options.populate?.length ? `with relations: ${options.populate.join(', ')}` : ''
       );
       setItems(allItems);
     } catch (error) {

@@ -1,4 +1,4 @@
-// src/themes/default/steps/ListTableStep.tsx - Modern Dropbox Style
+// src/themes/default/steps/ListTableStep.tsx - Enhanced with Relations Support
 import { useState, useMemo } from "react";
 import { useWorkspaceSchema, useEngineStore, useAppNavigation } from "@/core";
 import { useCollections } from "@/core/hooks/useCollections";
@@ -22,9 +22,10 @@ interface ListTableStepProps {
     columns?: Array<{
       key: string;
       label?: string;
-      type?: "text" | "badge" | "date" | "enum";
+      type?: "text" | "badge" | "date" | "enum" | "relation";
       width?: string;
       sortable?: boolean;
+      relationPath?: string; // ✅ NEW: For nested relation display
     }>;
     actions?: Array<{
       type: "edit" | "delete" | "custom";
@@ -48,6 +49,8 @@ interface ListTableStepProps {
       enabled?: boolean;
       options?: FilterOption[];
     };
+    // ✅ NEW: Relations configuration
+    populate?: string[]; // Relations to populate
   };
 }
 
@@ -102,25 +105,31 @@ export default function ListTableStep({ attrs }: ListTableStepProps) {
   const queryOptions = useMemo(() => {
     const activeFilterConfig = filterOptions.find(f => f.key === activeFilter);
 
-    if (!activeFilterConfig || activeFilterConfig.showAll) {
-      return {};
-    }
+    const baseOptions: any = {};
 
-    let filterValue = activeFilterConfig.value || "";
-    if (filterValue.includes("{{currentUser.id}}")) {
-      filterValue = currentUser?.id || "";
-    }
+    // Add where filters
+    if (activeFilterConfig && !activeFilterConfig.showAll) {
+      let filterValue = activeFilterConfig.value || "";
+      if (filterValue.includes("{{currentUser.id}}")) {
+        filterValue = currentUser?.id || "";
+      }
 
-    return {
-      where: [
+      baseOptions.where = [
         {
           field: activeFilterConfig.field || "id",
           operator: "==" as const,
           value: filterValue,
         },
-      ],
-    };
-  }, [activeFilter, filterOptions, currentUser]);
+      ];
+    }
+
+    // ✅ NEW: Add populate relations
+    if (attrs?.populate?.length) {
+      baseOptions.populate = attrs.populate;
+    }
+
+    return baseOptions;
+  }, [activeFilter, filterOptions, currentUser, attrs?.populate]);
 
   const { items, loading, deleteItem } = useCollections(
     attrs?.collection || "",
@@ -132,11 +141,27 @@ export default function ListTableStep({ attrs }: ListTableStepProps) {
     if (!searchTerm) return items;
     
     return items.filter((item: any) => {
-      return Object.values(item).some((value: any) => 
+      // Search in main fields
+      const searchInMain = Object.values(item).some((value: any) => 
         String(value).toLowerCase().includes(searchTerm.toLowerCase())
       );
+
+      // ✅ NEW: Search in populated relations
+      if (!searchInMain && attrs?.populate?.length) {
+        return attrs.populate.some(relationKey => {
+          const relationData = item[relationKey];
+          if (relationData && typeof relationData === 'object') {
+            return Object.values(relationData).some((value: any) =>
+              String(value).toLowerCase().includes(searchTerm.toLowerCase())
+            );
+          }
+          return false;
+        });
+      }
+
+      return searchInMain;
     });
-  }, [items, searchTerm]);
+  }, [items, searchTerm, attrs?.populate]);
 
   const handleEdit = (item: any) => {
     const editAction = attrs?.actions?.find((a) => a.type === "edit");
@@ -167,18 +192,35 @@ export default function ListTableStep({ attrs }: ListTableStepProps) {
         resolved: "bg-green-100 text-green-800 border-green-200",
         closed: "bg-gray-100 text-gray-800 border-gray-200",
       },
+      isActive: {
+        true: "bg-green-100 text-green-800 border-green-200",
+        false: "bg-red-100 text-red-800 border-red-200",
+      },
+      role: {
+        admin: "bg-purple-100 text-purple-800 border-purple-200",
+        support: "bg-blue-100 text-blue-800 border-blue-200",
+        reporter: "bg-green-100 text-green-800 border-green-200",
+      }
     };
 
     return colors[field]?.[value] || "bg-gray-100 text-gray-800 border-gray-200";
   };
 
+  // ✅ NEW: Helper to get nested value from relations
+  const getNestedValue = (item: any, path: string) => {
+    return path.split('.').reduce((obj, key) => obj?.[key], item);
+  };
+
   const renderCellValue = (item: any, column: any) => {
-    const value = item[column.key];
+    // ✅ NEW: Handle relation paths (e.g., "reporter.firstName")
+    const value = column.relationPath 
+      ? getNestedValue(item, column.relationPath)
+      : item[column.key];
 
     if (column.type === "badge") {
       return (
         <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getBadgeColor(value, column.key)}`}>
-          {schema?.properties?.[column.key]?.enumLabels?.[value] || value}
+          {schema?.properties?.[column.key]?.enumLabels?.[value] || value || "-"}
         </span>
       );
     }
@@ -187,6 +229,15 @@ export default function ListTableStep({ attrs }: ListTableStepProps) {
       return (
         <span className="text-sm text-slate-600">
           {new Date(value).toLocaleDateString()}
+        </span>
+      );
+    }
+
+    // ✅ NEW: Handle relation display
+    if (column.type === "relation" && column.relationPath) {
+      return (
+        <span className="text-sm text-slate-900 font-medium">
+          {value || "-"}
         </span>
       );
     }
@@ -398,6 +449,11 @@ export default function ListTableStep({ attrs }: ListTableStepProps) {
           <p className="text-sm text-slate-600">
             Showing {filteredItems.length} of {items.length} records
             {searchTerm && ` matching "${searchTerm}"`}
+            {attrs?.populate?.length && (
+              <span className="ml-2 text-blue-600">
+                (with {attrs.populate.join(', ')} relations)
+              </span>
+            )}
           </p>
         </div>
       )}
