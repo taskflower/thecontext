@@ -21,7 +21,7 @@ export default function ButtonWidget({ title, attrs }: ButtonWidgetProps) {
   const variants: Record<ButtonVariant, string> = {
     primary: "bg-blue-500 hover:bg-blue-600 text-white",
     danger: "bg-red-500 hover:bg-red-600 text-white",
-    outline: "border-2 border-gray-300 hover:bg-gray-50 text-gray-700",
+    outline: "border border-gray-300 hover:bg-gray-50 text-gray-700",
   };
 
   const sizes: Record<ButtonSize, string> = {

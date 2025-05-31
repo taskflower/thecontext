@@ -20,7 +20,7 @@
         "attrs": {
           "variant": "compact",
           "loginnavURL": "/main/login/form",
-          "logoutnavURL": "/main", 
+          "logoutnavURL": "/main",
           "registernavURL": "/main/register/form",
           "cellClass": "col-span-full md:col-span-1 lg:col-span-2 xl:col-span-6"
         }
@@ -39,7 +39,7 @@
         "title": "Register",
         "attrs": {
           "navURL": "/main/register/form",
-          "variant": "secondary",
+          "variant": "outline",
           "cellClass": "col-span-1 lg:col-span-1 xl:col-span-3"
         }
       }
@@ -82,7 +82,10 @@
           "type": "string",
           "label": "Role",
           "fieldType": "select",
-          "enum": ["reporter", "support"],
+          "enum": [
+            "reporter",
+            "support"
+          ],
           "enumLabels": {
             "reporter": "Reporter",
             "support": "Support"
