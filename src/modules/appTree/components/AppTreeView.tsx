@@ -1,5 +1,5 @@
 // src/modules/appTree/AppTreeView.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAppTreeData } from "../hooks/useAppTreeData";
 import { TreeWorkspace } from "./TreeWorkspace";
@@ -41,7 +41,7 @@ const AppTreeView: React.FC<AppTreeViewProps> = ({ configName, onClose }) => {
   } | null>(null);
 
   const getCurrentView = () => {
-    const pathParts = location.pathname.split('/').filter(Boolean);
+    const pathParts = location.pathname.split("/").filter(Boolean);
     if (pathParts.length < 2 || pathParts[0] !== configName) {
       return { workspace: null, scenario: null, node: null };
     }
@@ -56,21 +56,32 @@ const AppTreeView: React.FC<AppTreeViewProps> = ({ configName, onClose }) => {
   const isViewingWorkspace = (workspaceSlug: string) =>
     currentView.workspace === workspaceSlug && !currentView.scenario;
 
-  const isViewingNode = (workspaceSlug: string, scenarioSlug: string, nodeSlug: string) =>
+  const isViewingNode = (
+    workspaceSlug: string,
+    scenarioSlug: string,
+    nodeSlug: string
+  ) =>
     currentView.workspace === workspaceSlug &&
     currentView.scenario === scenarioSlug &&
     currentView.node === nodeSlug;
 
-  React.useEffect(() => {
+  // AUTO-EXPAND tylko kiedy nie zostało ręcznie ustawione
+  useEffect(() => {
     if (currentView.workspace && workspaces.length > 0) {
-      setExpandedWorkspace(currentView.workspace);
-      if (currentView.scenario) {
-        setExpandedScenario(`${currentView.workspace}:${currentView.scenario}`);
+      if (expandedWorkspace !== currentView.workspace) {
+        setExpandedWorkspace(currentView.workspace);
       }
-    } else if (workspaces.length > 0 && !expandedWorkspace) {
+      if (currentView.scenario) {
+        const key = `${currentView.workspace}:${currentView.scenario}`;
+        if (expandedScenario !== key) {
+          setExpandedScenario(key);
+        }
+      }
+    } else if (!expandedWorkspace && workspaces.length > 0) {
       setExpandedWorkspace(workspaces[0].slug);
     }
-  }, [workspaces, currentView, expandedWorkspace]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspaces, currentView.workspace, currentView.scenario]);
 
   const toggleWorkspace = (workspaceSlug: string) => {
     if (expandedWorkspace === workspaceSlug) {
@@ -98,7 +109,11 @@ const AppTreeView: React.FC<AppTreeViewProps> = ({ configName, onClose }) => {
     navigate(`/${configName}/${workspaceSlug}`);
   };
 
-  const navigateToNode = (workspaceSlug: string, scenarioSlug: string, nodeSlug: string) => {
+  const navigateToNode = (
+    workspaceSlug: string,
+    scenarioSlug: string,
+    nodeSlug: string
+  ) => {
     setExpandedWorkspace(workspaceSlug);
     setExpandedScenario(`${workspaceSlug}:${scenarioSlug}`);
     navigate(`/${configName}/${workspaceSlug}/${scenarioSlug}/${nodeSlug}`);
@@ -140,14 +155,17 @@ const AppTreeView: React.FC<AppTreeViewProps> = ({ configName, onClose }) => {
                 onToggleScenario={toggleScenario}
                 onNavigateWorkspace={navigateToWorkspace}
                 onEditWorkspace={setEditingWorkspace}
-                onEditScenario={(ws, sc) => setEditingScenario({ workspace: ws, scenario: sc })}
+                onEditScenario={(ws, sc) =>
+                  setEditingScenario({ workspace: ws, scenario: sc })
+                }
                 onNavigateNode={navigateToNode}
                 onEditNode={(workspace, scenario, node) =>
                   setEditingNode({ workspace, scenario, node })
                 }
                 isViewingWorkspace={isViewingWorkspace(workspace.slug)}
                 isViewingScenario={(scenarioSlug: string) =>
-                  currentView.scenario === scenarioSlug && currentView.workspace === workspace.slug
+                  currentView.scenario === scenarioSlug &&
+                  currentView.workspace === workspace.slug
                 }
                 isViewingNode={(scenarioSlug: string, nodeSlug: string) =>
                   isViewingNode(workspace.slug, scenarioSlug, nodeSlug)
@@ -166,7 +184,8 @@ const AppTreeView: React.FC<AppTreeViewProps> = ({ configName, onClose }) => {
               </div>
               {extendedAppConfig?.workspaces && (
                 <div className="text-xs mt-2 text-zinc-500">
-                  Oczekiwane workspaces: {extendedAppConfig.workspaces.join(", ")}
+                  Oczekiwane workspaces:{" "}
+                  {extendedAppConfig.workspaces.join(", ")}
                 </div>
               )}
             </div>
@@ -175,7 +194,8 @@ const AppTreeView: React.FC<AppTreeViewProps> = ({ configName, onClose }) => {
 
         <div className="p-4 border-t border-zinc-200 bg-zinc-50 text-center text-xs text-zinc-400">
           Znalazłem {workspaces.length} workspace'y,{" "}
-          {workspaces.reduce((sum, ws) => sum + ws.scenarios.length, 0)} scenariuszy
+          {workspaces.reduce((sum, ws) => sum + ws.scenarios.length, 0)}{" "}
+          scenariuszy
         </div>
       </div>
 
