@@ -6,32 +6,63 @@ interface FormFieldProps {
   type?: 'text' | 'textarea' | 'select' | 'number';
   value: any;
   onChange: (value: any) => void;
-  options?: Array<{value: string, label: string}>;
+  options?: Array<{ value: string; label: string }>;
   placeholder?: string;
   required?: boolean;
   rows?: number;
+  disabled?: boolean;
 }
 
 export const FormField: React.FC<FormFieldProps> = ({
-  label, type = 'text', value, onChange, options, placeholder, required, rows = 2
+  label,
+  type = 'text',
+  value,
+  onChange,
+  options,
+  placeholder,
+  required,
+  rows = 2,
+  disabled = false,
 }) => {
-  const baseClass = "w-full px-2 py-1.5 text-sm border border-zinc-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500";
-  
+  const baseClass =
+    'w-full px-2 py-1.5 text-sm border border-zinc-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500';
+
   return (
     <div>
       <label className="block text-xs font-medium text-zinc-700 mb-1">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       {type === 'textarea' ? (
-        <textarea value={value} onChange={(e) => onChange(e.target.value)} 
-          rows={rows} className={baseClass} placeholder={placeholder} />
+        <textarea
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          rows={rows}
+          className={baseClass + (disabled ? ' bg-zinc-100 cursor-not-allowed' : '')}
+          placeholder={placeholder}
+          disabled={disabled}
+        />
       ) : type === 'select' ? (
-        <select value={value} onChange={(e) => onChange(e.target.value)} className={baseClass}>
-          {options?.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={baseClass + (disabled ? ' bg-zinc-100 cursor-not-allowed' : '')}
+          disabled={disabled}
+        >
+          {options?.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
         </select>
       ) : (
-        <input type={type} value={value} onChange={(e) => onChange(e.target.value)} 
-          className={baseClass} placeholder={placeholder} />
+        <input
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={baseClass + (disabled ? ' bg-zinc-100 cursor-not-allowed' : '')}
+          placeholder={placeholder}
+          disabled={disabled}
+        />
       )}
     </div>
   );

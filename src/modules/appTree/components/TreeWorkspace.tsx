@@ -42,7 +42,7 @@ export const TreeWorkspace: React.FC<TreeWorkspaceProps> = ({
           onClick={() => onNavigateWorkspace(workspace.slug)}
           className="flex-1 flex items-center gap-2 px-2 py-1.5 text-sm text-left hover:bg-zinc-100 rounded-md"
         >
-          {isExpanded ? <FolderOpen size={14} /> : <Folder size={14} />}
+          {isExpanded ? <FolderOpen size={14} className='text-orange-600 bg-yellow-100 rounded'/> : <Folder size={14} />}
           <span className="font-medium truncate">{workspace.name}</span>
           <span className="text-xs text-zinc-400">
             ({workspace.scenarios.length})
