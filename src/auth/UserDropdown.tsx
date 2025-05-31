@@ -105,12 +105,7 @@ const UserDropdown: React.FC = () => {
       {/* App Tree Modal */}
       {showAppTree && (
         <Suspense fallback={
-          <div className="fixed left-6 top-1/2 transform -translate-y-1/2 z-50 w-80 bg-white rounded-lg shadow-xl border border-zinc-200 p-8">
-            <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-2 border-zinc-300 border-t-zinc-900"></div>
-              <span className="ml-3 text-zinc-600">Loading App Tree...</span>
-            </div>
-          </div>
+          <></>
         }>
           <AppTreeCard 
             onClose={handleCloseAppTree}

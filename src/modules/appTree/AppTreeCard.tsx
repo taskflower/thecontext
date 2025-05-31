@@ -17,7 +17,7 @@ const AppTreeCard: React.FC<AppTreeCardProps> = ({ onClose, configName = 'exampl
       />
       
       {/* Card */}
-      <div className="fixed left-6 top-1/2 transform -translate-y-1/2 z-50 w-80 bg-white rounded-lg shadow-xl border border-zinc-200 max-h-[80vh] flex flex-col animate-in slide-in-from-left-2 duration-300">
+      <div className="fixed left-6 top-10 z-50 w-92 bg-white rounded-lg shadow-xl border border-zinc-200 h-[90vh] flex flex-col animate-in slide-in-from-left-2">
         {/* Header */}
         <div className="p-4 border-b border-zinc-200 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-zinc-900 flex items-center gap-2">
