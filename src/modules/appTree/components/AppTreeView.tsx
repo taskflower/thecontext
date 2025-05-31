@@ -1,10 +1,18 @@
-// src/modules/appTree/components/AppTreeView.tsx (Refactored)
+// src/modules/appTree/components/AppTreeView.tsx (Poprawiony)
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAppTreeData } from "../hooks/useAppTreeData";
 import { TreeWorkspace } from "./TreeWorkspace";
 
-import EditScenarioCard from "../../editScenario/EditScenarioCard";
+// Dodajemy rozszerzony interfejs AppConfig
+interface ExtendedAppConfig {
+  name: string;
+  tplDir: string;
+  defaultWorkspace: string;
+  defaultScenario: string;
+  workspaces?: string[];
+}
+
 import EditNodeCard from "../../editNode/EditNodeCard";
 import { NodeInfo, ScenarioInfo, WorkspaceInfo } from "../hooks/useAppTree";
 import EditWorkspaceCard from "@/modules/editWorkspace/EditWorkspaceCard";
@@ -16,6 +24,7 @@ interface AppTreeViewProps {
 
 const AppTreeView: React.FC<AppTreeViewProps> = ({ configName, onClose }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { workspaces, loading, error, appConfig } = useAppTreeData(configName);
   
   const [expandedWorkspace, setExpandedWorkspace] = useState<string | null>(null);
@@ -23,22 +32,60 @@ const AppTreeView: React.FC<AppTreeViewProps> = ({ configName, onClose }) => {
   
   // Edit states
   const [editingWorkspace, setEditingWorkspace] = useState<WorkspaceInfo | null>(null);
-  const [editingScenario, setEditingScenario] = useState<{
-    workspace: WorkspaceInfo;
-    scenario: ScenarioInfo;
-  } | null>(null);
   const [editingNode, setEditingNode] = useState<{
     workspace: WorkspaceInfo;
     scenario: ScenarioInfo;
     node: NodeInfo;
   } | null>(null);
 
-  // Auto-expand first workspace
+  // Parse current location to determine what we're viewing
+  const getCurrentView = () => {
+    const pathParts = location.pathname.split('/').filter(Boolean);
+    // Expected format: /configName/workspace/scenario/node
+    
+    if (pathParts.length < 2 || pathParts[0] !== configName) {
+      return { workspace: null, scenario: null, node: null };
+    }
+
+    const workspace = pathParts[1] || null;
+    const scenario = pathParts[2] || null;
+    const node = pathParts[3] || null;
+
+    return { workspace, scenario, node };
+  };
+
+  const currentView = getCurrentView();
+
+  // Helper functions to determine current view state
+  const isViewingWorkspace = (workspaceSlug: string) => {
+    return currentView.workspace === workspaceSlug && !currentView.scenario;
+  };
+
+  const isViewingScenario = (workspaceSlug: string, scenarioSlug: string) => {
+    return currentView.workspace === workspaceSlug && 
+           currentView.scenario === scenarioSlug && 
+           !currentView.node;
+  };
+
+  const isViewingNode = (workspaceSlug: string, scenarioSlug: string, nodeSlug: string) => {
+    return currentView.workspace === workspaceSlug && 
+           currentView.scenario === scenarioSlug && 
+           currentView.node === nodeSlug;
+  };
+
+  // Auto-expand current workspace and scenario
   React.useEffect(() => {
-    if (workspaces.length > 0 && !expandedWorkspace) {
+    if (currentView.workspace && workspaces.length > 0) {
+      setExpandedWorkspace(currentView.workspace);
+      
+      if (currentView.scenario) {
+        setExpandedScenario(`${currentView.workspace}:${currentView.scenario}`);
+      }
+    } else if (workspaces.length > 0 && !expandedWorkspace) {
+      // Auto-expand first workspace if no current view
       setExpandedWorkspace(workspaces[0].slug);
     }
-  }, [workspaces, expandedWorkspace]);
+  }, [workspaces, currentView, expandedWorkspace]);
 
   const toggleWorkspace = (workspaceSlug: string) => {
     if (expandedWorkspace === workspaceSlug) {
@@ -108,9 +155,12 @@ const AppTreeView: React.FC<AppTreeViewProps> = ({ configName, onClose }) => {
                 onToggleScenario={toggleScenario}
                 onNavigateWorkspace={navigateToWorkspace}
                 onEditWorkspace={setEditingWorkspace}
-                onEditScenario={(workspace, scenario) => setEditingScenario({ workspace, scenario })}
                 onNavigateNode={navigateToNode}
                 onEditNode={(workspace, scenario, node) => setEditingNode({ workspace, scenario, node })}
+                isViewingWorkspace={isViewingWorkspace(workspace.slug)}
+                isViewingNode={(scenarioSlug: string, nodeSlug: string) => 
+                  isViewingNode(workspace.slug, scenarioSlug, nodeSlug)
+                }
               />
             );
           })}
@@ -145,14 +195,6 @@ const AppTreeView: React.FC<AppTreeViewProps> = ({ configName, onClose }) => {
           workspace={editingWorkspace}
           configName={configName}
           onClose={() => setEditingWorkspace(null)}
-        />
-      )}
-      {editingScenario && (
-        <EditScenarioCard
-          workspace={editingScenario.workspace}
-          scenario={editingScenario.scenario}
-          configName={configName}
-          onClose={() => setEditingScenario(null)}
         />
       )}
       {editingNode && (

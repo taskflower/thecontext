@@ -1,0 +1,110 @@
+{
+    "type": "object",
+    "title": "TitleWidget Configuration",
+    "description": "Schema for configuring a title widget component with optional description",
+    "properties": {
+      "tplFile": {
+        "type": "string",
+        "const": "TitleWidget",
+        "description": "Template file identifier for the title widget"
+      },
+      "title": {
+        "type": "string",
+        "description": "Main title text to display",
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "attrs": {
+        "type": "object",
+        "description": "Title widget attributes and styling options",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Optional description text displayed below the title",
+            "maxLength": 500
+          },
+          "size": {
+            "type": "string",
+            "description": "Size variant of the title and description",
+            "enum": ["small", "medium", "large"],
+            "default": "medium",
+            "enumDescriptions": {
+              "small": "Small text (title: text-lg font-medium, description: text-sm)",
+              "medium": "Medium text (title: text-xl font-semibold, description: text-base)",
+              "large": "Large text (title: text-2xl font-bold, description: text-lg)"
+            }
+          },
+          "align": {
+            "type": "string",
+            "description": "Text alignment for title and description",
+            "enum": ["left", "center", "right"],
+            "default": "left",
+            "enumDescriptions": {
+              "left": "Left-aligned text",
+              "center": "Center-aligned text",
+              "right": "Right-aligned text"
+            }
+          },
+          "colSpan": {
+            "type": ["number", "string"],
+            "description": "Grid column span for layout positioning",
+            "oneOf": [
+              {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 12
+              },
+              {
+                "type": "string",
+                "enum": ["full", "auto"]
+              }
+            ],
+            "examples": [1, 2, 3, "full"]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "required": ["tplFile", "title"],
+    "additionalProperties": false,
+    "examples": [
+      {
+        "tplFile": "TitleWidget",
+        "title": "Dashboard Overview",
+        "attrs": {
+          "description": "Welcome to your main dashboard where you can view key metrics and navigate to different sections.",
+          "size": "large",
+          "align": "center",
+          "colSpan": "full"
+        }
+      },
+      {
+        "tplFile": "TitleWidget",
+        "title": "Recent Activity",
+        "attrs": {
+          "size": "medium",
+          "align": "left",
+          "colSpan": 2
+        }
+      },
+      {
+        "tplFile": "TitleWidget",
+        "title": "Quick Stats",
+        "attrs": {
+          "description": "Current system statistics",
+          "size": "small",
+          "align": "center"
+        }
+      },
+      {
+        "tplFile": "TitleWidget",
+        "title": "🎫 Ticket Management",
+        "attrs": {
+          "description": "Manage support tickets, track issues and handle customer requests efficiently.",
+          "size": "medium",
+          "align": "left",
+          "colSpan": "full"
+        }
+      }
+    ]
+  }

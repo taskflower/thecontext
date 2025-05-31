@@ -1,0 +1,115 @@
+{
+    "type": "object",
+    "title": "InfoWidget Configuration",
+    "description": "Schema for configuring an info widget component with colored variants and content display",
+    "properties": {
+      "tplFile": {
+        "type": "string",
+        "const": "InfoWidget",
+        "description": "Template file identifier for the info widget"
+      },
+      "title": {
+        "type": "string",
+        "description": "Main title text to display in the info widget",
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "attrs": {
+        "type": "object",
+        "description": "Info widget attributes and styling options",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "Main content text displayed in the widget body",
+            "default": "Default content",
+            "maxLength": 1000
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description text displayed below the title",
+            "maxLength": 500
+          },
+          "variant": {
+            "type": "string",
+            "description": "Color variant that determines the background and border styling",
+            "enum": ["default", "info", "success", "warning", "error"],
+            "default": "default",
+            "enumDescriptions": {
+              "default": "White background with gray border (neutral styling)",
+              "info": "Light blue background with blue border (informational content)",
+              "success": "Light green background with green border (positive/success messages)",
+              "warning": "Light yellow background with yellow border (warning/caution messages)",
+              "error": "Light red background with red border (error/danger messages)"
+            }
+          },
+          "colSpan": {
+            "type": ["number", "string"],
+            "description": "Grid column span for layout positioning",
+            "oneOf": [
+              {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 12
+              },
+              {
+                "type": "string",
+                "enum": ["full", "auto"]
+              }
+            ],
+            "examples": [1, 2, 3, "full"]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "required": ["tplFile", "title"],
+    "additionalProperties": false,
+    "examples": [
+      {
+        "tplFile": "InfoWidget",
+        "title": "🎫 Ticket Management",
+        "attrs": {
+          "content": "Manage support tickets, track issues and handle customer requests efficiently.",
+          "variant": "info",
+          "colSpan": "full"
+        }
+      },
+      {
+        "tplFile": "InfoWidget",
+        "title": "System Status",
+        "attrs": {
+          "content": "All systems are operational and running smoothly.",
+          "description": "Last updated 5 minutes ago",
+          "variant": "success",
+          "colSpan": 2
+        }
+      },
+      {
+        "tplFile": "InfoWidget",
+        "title": "⚠️ Maintenance Notice",
+        "attrs": {
+          "content": "Scheduled maintenance will occur tonight from 11 PM to 2 AM. Some features may be temporarily unavailable.",
+          "variant": "warning",
+          "colSpan": "full"
+        }
+      },
+      {
+        "tplFile": "InfoWidget",
+        "title": "Connection Error",
+        "attrs": {
+          "content": "Unable to connect to the database. Please contact system administrator if the problem persists.",
+          "description": "Error occurred at 14:32",
+          "variant": "error",
+          "colSpan": 3
+        }
+      },
+      {
+        "tplFile": "InfoWidget",
+        "title": "Welcome",
+        "attrs": {
+          "content": "Welcome to the dashboard. Here you can access all the main features of the application.",
+          "variant": "default"
+        }
+      }
+    ]
+  }

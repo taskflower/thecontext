@@ -1,0 +1,124 @@
+{
+    "type": "object",
+    "title": "ButtonWidget Configuration",
+    "description": "Schema for configuring a button widget component",
+    "properties": {
+      "tplFile": {
+        "type": "string",
+        "const": "ButtonWidget",
+        "description": "Template file identifier for the button widget"
+      },
+      "title": {
+        "type": "string",
+        "description": "Text displayed on the button",
+        "minLength": 1,
+        "maxLength": 100
+      },
+      "attrs": {
+        "type": "object",
+        "description": "Button widget attributes and styling options",
+        "properties": {
+          "navURL": {
+            "type": "string",
+            "description": "URL to navigate to when button is clicked",
+            "pattern": "^/.*",
+            "examples": [
+              "/tickets/create/form",
+              "/tickets/list/view",
+              "/profile/edit"
+            ]
+          },
+          "variant": {
+            "type": "string",
+            "description": "Visual style variant of the button",
+            "enum": ["primary", "secondary", "outline"],
+            "default": "primary",
+            "enumDescriptions": {
+              "primary": "Blue background with white text (main action)",
+              "secondary": "Gray background with white text (secondary action)",
+              "outline": "White background with gray border and text (subtle action)"
+            }
+          },
+          "size": {
+            "type": "string",
+            "description": "Size of the button",
+            "enum": ["sm", "md", "lg"],
+            "default": "md",
+            "enumDescriptions": {
+              "sm": "Small button (px-3 py-1, text-sm)",
+              "md": "Medium button (px-4 py-2, default size)",
+              "lg": "Large button (px-6 py-3, text-lg)"
+            }
+          },
+          "icon": {
+            "type": "string",
+            "description": "Icon name to display alongside button text",
+            "examples": [
+              "plus",
+              "list",
+              "edit",
+              "trash",
+              "download"
+            ]
+          },
+          "fullWidth": {
+            "type": "boolean",
+            "description": "Whether button should take full width of its container",
+            "default": false
+          },
+          "colSpan": {
+            "type": ["number", "string"],
+            "description": "Grid column span for layout positioning",
+            "oneOf": [
+              {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 12
+              },
+              {
+                "type": "string",
+                "enum": ["full", "auto"]
+              }
+            ],
+            "examples": [1, 2, 3, "full"]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "required": ["tplFile", "title", "attrs"],
+    "additionalProperties": false,
+    "examples": [
+      {
+        "tplFile": "ButtonWidget",
+        "title": "📝 Create New Ticket",
+        "attrs": {
+          "navURL": "/tickets/create/form",
+          "variant": "primary",
+          "colSpan": 1
+        }
+      },
+      {
+        "tplFile": "ButtonWidget",
+        "title": "📋 View All Tickets",
+        "attrs": {
+          "navURL": "/tickets/list/view",
+          "variant": "secondary",
+          "size": "md",
+          "icon": "list",
+          "colSpan": 1
+        }
+      },
+      {
+        "tplFile": "ButtonWidget",
+        "title": "Download Report",
+        "attrs": {
+          "navURL": "/reports/download",
+          "variant": "outline", 
+          "size": "lg",
+          "icon": "download",
+          "fullWidth": true
+        }
+      }
+    ]
+  }

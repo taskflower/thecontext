@@ -2,9 +2,10 @@
 import React, { useState, useRef, useEffect, Suspense } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuthContext } from "../auth/AuthContext";
+import { LucideInspect, LucideLogOut } from "lucide-react";
 
 // Direct lazy import of the component
-const AppTreeCard = React.lazy(() => import('../modules/appTree/AppTreeCard'));
+const AppTreeCard = React.lazy(() => import("../modules/appTree/AppTreeCard"));
 
 const UserDropdown: React.FC = () => {
   const navigate = useNavigate();
@@ -59,7 +60,7 @@ const UserDropdown: React.FC = () => {
     <>
       <div className="relative" ref={dropdownRef}>
         <button
-          onClick={() => setIsOpen(o => !o)}
+          onClick={() => setIsOpen((o) => !o)}
           className="flex items-center space-x-2 focus:outline-none"
         >
           <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-700 font-semibold">
@@ -81,20 +82,17 @@ const UserDropdown: React.FC = () => {
                 onClick={handleOpenAppTree}
                 className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-3"
               >
-                <span className="text-lg">🌳</span>
-                <div>
-                  <div className="font-medium text-sm">Application Tree</div>
-                  <div className="text-xs text-gray-500">Browse workspaces & scenarios</div>
-                </div>
+                <LucideInspect className="w-4 h-4" />
+                <div className="font-medium text-sm">Application Inspector</div>
               </button>
-              
-              <div className="border-t border-zinc-100 my-1"></div>
-              
+
+            
+
               <button
                 onClick={handleLogout}
                 className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-3"
               >
-                <span className="text-lg">🚪</span>
+                <LucideLogOut className="w-4 h-4"/>
                 <span className="font-medium text-sm">Wyloguj</span>
               </button>
             </div>
@@ -104,12 +102,10 @@ const UserDropdown: React.FC = () => {
 
       {/* App Tree Modal */}
       {showAppTree && (
-        <Suspense fallback={
-          <></>
-        }>
-          <AppTreeCard 
+        <Suspense fallback={<></>}>
+          <AppTreeCard
             onClose={handleCloseAppTree}
-            configName={config || 'exampleTicketApp'}
+            configName={config || "exampleTicketApp"}
           />
         </Suspense>
       )}

@@ -1,5 +1,6 @@
 // src/modules/appTree/AppTreeCard.tsx - Main card component
 import React from 'react';
+import { X, TreePine } from 'lucide-react';
 import AppTreeView from './components/AppTreeView';
 
 interface AppTreeCardProps {
@@ -19,23 +20,27 @@ const AppTreeCard: React.FC<AppTreeCardProps> = ({ onClose, configName = 'exampl
       {/* Card */}
       <div className="fixed left-6 top-10 z-50 w-92 bg-white rounded-lg shadow-xl border border-zinc-200 h-[90vh] flex flex-col animate-in slide-in-from-left-2">
         {/* Header */}
-        <div className="p-4 border-b border-zinc-200 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-zinc-900 flex items-center gap-2">
-            🌳 Application Tree
-          </h3>
+        <div className="p-3 border-b border-zinc-200 flex items-center justify-between bg-zinc-50">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-sm font-medium text-zinc-900 flex items-center gap-1.5">
+              <TreePine size={14} />
+              Application Tree
+            </h3>
+            <p className="text-xs text-zinc-500 truncate">
+              {configName}
+            </p>
+          </div>
           <button
             onClick={onClose}
-            className="text-zinc-400 hover:text-zinc-600 p-1 rounded-md hover:bg-zinc-100"
+            className="text-zinc-400 hover:text-zinc-600 p-1 rounded hover:bg-zinc-100"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X size={14} />
           </button>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-hidden">
-          <AppTreeView configName={configName}  />
+          <AppTreeView configName={configName} />
         </div>
       </div>
     </>
