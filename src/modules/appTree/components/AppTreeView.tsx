@@ -27,6 +27,9 @@ const AppTreeView: React.FC<AppTreeViewProps> = ({ configName, onClose }) => {
   const location = useLocation();
   const { workspaces, loading, error, appConfig } = useAppTreeData(configName);
   
+  // Bezpieczne rzutowanie typu
+  const extendedAppConfig = appConfig as ExtendedAppConfig;
+  
   const [expandedWorkspace, setExpandedWorkspace] = useState<string | null>(null);
   const [expandedScenario, setExpandedScenario] = useState<string | null>(null);
   
@@ -169,13 +172,13 @@ const AppTreeView: React.FC<AppTreeViewProps> = ({ configName, onClose }) => {
             <div className="text-center py-8 text-zinc-400">
               <div className="text-2xl mb-2">📭</div>
               <div className="text-sm">
-                {!appConfig?.workspaces
+                {!extendedAppConfig?.workspaces
                   ? "Brak zdefiniowanych workspaces w app.json"
                   : "Brak workspaces"}
               </div>
-              {appConfig?.workspaces && (
+              {extendedAppConfig?.workspaces && (
                 <div className="text-xs mt-2 text-zinc-500">
-                  Oczekiwane workspaces: {appConfig.workspaces.join(", ")}
+                  Oczekiwane workspaces: {extendedAppConfig.workspaces.join(", ")}
                 </div>
               )}
             </div>
