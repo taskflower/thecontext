@@ -12,9 +12,11 @@ interface TreeWorkspaceProps {
   onToggleScenario: (workspaceSlug: string, scenarioSlug: string) => void;
   onNavigateWorkspace: (workspaceSlug: string) => void;
   onEditWorkspace: (workspace: WorkspaceInfo) => void;
+  onEditScenario: (workspace: WorkspaceInfo, scenario: ScenarioInfo) => void;
   onNavigateNode: (workspaceSlug: string, scenarioSlug: string, nodeSlug: string) => void;
   onEditNode: (workspace: WorkspaceInfo, scenario: ScenarioInfo, node: NodeInfo) => void;
   isViewingWorkspace: boolean;
+  isViewingScenario: (scenarioSlug: string) => boolean;
   isViewingNode: (scenarioSlug: string, nodeSlug: string) => boolean;
 }
 
@@ -26,19 +28,18 @@ export const TreeWorkspace: React.FC<TreeWorkspaceProps> = ({
   onToggleScenario,
   onNavigateWorkspace,
   onEditWorkspace,
+  onEditScenario,
   onNavigateNode,
   onEditNode,
   isViewingWorkspace,
+  isViewingScenario,
   isViewingNode,
 }) => {
   return (
     <div>
       <div className="flex items-center">
         <button
-          onClick={() => {
-            // nawigacja do workspace
-            onNavigateWorkspace(workspace.slug);
-          }}
+          onClick={() => onNavigateWorkspace(workspace.slug)}
           className="flex-1 flex items-center gap-2 px-2 py-1.5 text-sm text-left hover:bg-zinc-100 rounded-md"
         >
           {isExpanded ? <FolderOpen size={14} /> : <Folder size={14} />}
@@ -79,11 +80,11 @@ export const TreeWorkspace: React.FC<TreeWorkspaceProps> = ({
                 scenario={scenario}
                 workspace={workspace}
                 isExpanded={isScenarioExpanded}
-                onToggle={() => {
-                  onToggleScenario(workspace.slug, scenario.slug);
-                }}
+                onToggle={() => onToggleScenario(workspace.slug, scenario.slug)}
+                onEditScenario={() => onEditScenario(workspace, scenario)}
                 onNavigateNode={onNavigateNode}
                 onEditNode={onEditNode}
+                isViewingScenario={isViewingScenario(scenario.slug)}
                 isViewingNode={(nodeSlug: string) =>
                   isViewingNode(scenario.slug, nodeSlug)
                 }

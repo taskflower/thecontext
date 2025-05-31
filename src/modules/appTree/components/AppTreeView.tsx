@@ -1,10 +1,13 @@
-// src/modules/appTree/components/AppTreeView.tsx (Poprawiony)
+// src/modules/appTree/AppTreeView.tsx
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAppTreeData } from "../hooks/useAppTreeData";
 import { TreeWorkspace } from "./TreeWorkspace";
+import EditScenarioCard from "../../editScenario/EditScenarioCard";
+import EditNodeCard from "../../editNode/EditNodeCard";
+import { NodeInfo, ScenarioInfo, WorkspaceInfo } from "../hooks/useAppTree";
+import EditWorkspaceCard from "@/modules/editWorkspace/EditWorkspaceCard";
 
-// Dodajemy rozszerzony interfejs AppConfig
 interface ExtendedAppConfig {
   name: string;
   tplDir: string;
@@ -12,10 +15,6 @@ interface ExtendedAppConfig {
   defaultScenario: string;
   workspaces?: string[];
 }
-
-import EditNodeCard from "../../editNode/EditNodeCard";
-import { NodeInfo, ScenarioInfo, WorkspaceInfo } from "../hooks/useAppTree";
-import EditWorkspaceCard from "@/modules/editWorkspace/EditWorkspaceCard";
 
 interface AppTreeViewProps {
   configName: string;
@@ -26,66 +25,49 @@ const AppTreeView: React.FC<AppTreeViewProps> = ({ configName, onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { workspaces, loading, error, appConfig } = useAppTreeData(configName);
-  
-  // Bezpieczne rzutowanie typu
   const extendedAppConfig = appConfig as ExtendedAppConfig;
-  
+
   const [expandedWorkspace, setExpandedWorkspace] = useState<string | null>(null);
   const [expandedScenario, setExpandedScenario] = useState<string | null>(null);
-  
-  // Edit states
   const [editingWorkspace, setEditingWorkspace] = useState<WorkspaceInfo | null>(null);
+  const [editingScenario, setEditingScenario] = useState<{
+    workspace: WorkspaceInfo;
+    scenario: ScenarioInfo;
+  } | null>(null);
   const [editingNode, setEditingNode] = useState<{
     workspace: WorkspaceInfo;
     scenario: ScenarioInfo;
     node: NodeInfo;
   } | null>(null);
 
-  // Parse current location to determine what we're viewing
   const getCurrentView = () => {
     const pathParts = location.pathname.split('/').filter(Boolean);
-    // Expected format: /configName/workspace/scenario/node
-    
     if (pathParts.length < 2 || pathParts[0] !== configName) {
       return { workspace: null, scenario: null, node: null };
     }
-
     const workspace = pathParts[1] || null;
     const scenario = pathParts[2] || null;
     const node = pathParts[3] || null;
-
     return { workspace, scenario, node };
   };
 
   const currentView = getCurrentView();
 
-  // Helper functions to determine current view state
-  const isViewingWorkspace = (workspaceSlug: string) => {
-    return currentView.workspace === workspaceSlug && !currentView.scenario;
-  };
+  const isViewingWorkspace = (workspaceSlug: string) =>
+    currentView.workspace === workspaceSlug && !currentView.scenario;
 
-  const isViewingScenario = (workspaceSlug: string, scenarioSlug: string) => {
-    return currentView.workspace === workspaceSlug && 
-           currentView.scenario === scenarioSlug && 
-           !currentView.node;
-  };
+  const isViewingNode = (workspaceSlug: string, scenarioSlug: string, nodeSlug: string) =>
+    currentView.workspace === workspaceSlug &&
+    currentView.scenario === scenarioSlug &&
+    currentView.node === nodeSlug;
 
-  const isViewingNode = (workspaceSlug: string, scenarioSlug: string, nodeSlug: string) => {
-    return currentView.workspace === workspaceSlug && 
-           currentView.scenario === scenarioSlug && 
-           currentView.node === nodeSlug;
-  };
-
-  // Auto-expand current workspace and scenario
   React.useEffect(() => {
     if (currentView.workspace && workspaces.length > 0) {
       setExpandedWorkspace(currentView.workspace);
-      
       if (currentView.scenario) {
         setExpandedScenario(`${currentView.workspace}:${currentView.scenario}`);
       }
     } else if (workspaces.length > 0 && !expandedWorkspace) {
-      // Auto-expand first workspace if no current view
       setExpandedWorkspace(workspaces[0].slug);
     }
   }, [workspaces, currentView, expandedWorkspace]);
@@ -158,10 +140,16 @@ const AppTreeView: React.FC<AppTreeViewProps> = ({ configName, onClose }) => {
                 onToggleScenario={toggleScenario}
                 onNavigateWorkspace={navigateToWorkspace}
                 onEditWorkspace={setEditingWorkspace}
+                onEditScenario={(ws, sc) => setEditingScenario({ workspace: ws, scenario: sc })}
                 onNavigateNode={navigateToNode}
-                onEditNode={(workspace, scenario, node) => setEditingNode({ workspace, scenario, node })}
+                onEditNode={(workspace, scenario, node) =>
+                  setEditingNode({ workspace, scenario, node })
+                }
                 isViewingWorkspace={isViewingWorkspace(workspace.slug)}
-                isViewingNode={(scenarioSlug: string, nodeSlug: string) => 
+                isViewingScenario={(scenarioSlug: string) =>
+                  currentView.scenario === scenarioSlug && currentView.workspace === workspace.slug
+                }
+                isViewingNode={(scenarioSlug: string, nodeSlug: string) =>
                   isViewingNode(workspace.slug, scenarioSlug, nodeSlug)
                 }
               />
@@ -187,17 +175,24 @@ const AppTreeView: React.FC<AppTreeViewProps> = ({ configName, onClose }) => {
 
         <div className="p-4 border-t border-zinc-200 bg-zinc-50 text-center text-xs text-zinc-400">
           Znalazłem {workspaces.length} workspace'y,{" "}
-          {workspaces.reduce((sum, ws) => sum + ws.scenarios.length, 0)}{" "}
-          scenariuszy
+          {workspaces.reduce((sum, ws) => sum + ws.scenarios.length, 0)} scenariuszy
         </div>
       </div>
 
-      {/* Edit Cards */}
       {editingWorkspace && (
         <EditWorkspaceCard
           workspace={editingWorkspace}
           configName={configName}
           onClose={() => setEditingWorkspace(null)}
+        />
+      )}
+      {editingScenario && (
+        <EditScenarioCard
+          workspace={editingScenario.workspace}
+          scenario={editingScenario.scenario}
+          configName={configName}
+          onClose={() => setEditingScenario(null)}
+          onSave={() => setEditingScenario(null)}
         />
       )}
       {editingNode && (
