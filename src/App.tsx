@@ -9,6 +9,7 @@ import { useMemo } from "react";
 function AppRoutes() {
   const routes = useMemo(
     () => [
+      { path: "/", element: <RedirectToDefault /> },
       { path: "login", element: <AuthPage /> },
       {
         path: ":config/:workspace/:scenario/:node/:id",
@@ -19,7 +20,7 @@ function AppRoutes() {
         element: <ConfigPage />,
       },
       { path: ":config/:workspace", element: <ConfigPage /> },
-      { path: "/", element: <RedirectToDefault /> },
+      
       {
         path: "*",
         element: (

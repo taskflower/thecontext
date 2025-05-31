@@ -2,7 +2,7 @@
   "name": "Minimal 3-Role App",
   "tplDir": "default", 
   "defaultWorkspace": "main",
-  "defaultScenario": "dashboard",
+  "defaultScenario": "login",
   "workspaces": ["main","reporter","support","admin","profile"],
   "database": {
     "provider": "indexedDB",

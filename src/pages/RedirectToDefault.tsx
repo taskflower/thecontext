@@ -1,68 +1,42 @@
-// src/pages/RedirectToDefault.tsx - Redirect logic for root URL
+// src/pages/RedirectToDefault.tsx 
+// Redirects root URL to default workspace or scenario/node
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import type { AppConfig } from "@/core/types";
 
-const DEFAULT_CONFIG = "exampleTicketApp";
+const DEFAULT_CONFIG = "roleTestApp";
 
 export default function RedirectToDefault() {
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadDefaultConfig = async () => {
+    const loadDefaultUrl = async () => {
       try {
-        // Próbuj załadować domyślną konfigurację
         const response = await fetch(`/src/_configs/${DEFAULT_CONFIG}/app.json`);
+        const appConfig = await response.json();
         
-        if (!response.ok) {
-          throw new Error(`Failed to load default config: ${response.status}`);
-        }
-        
-        const appConfig: AppConfig = await response.json();
-        
-        // Zbuduj URL na podstawie konfiguracji
-        const config = DEFAULT_CONFIG;
         const workspace = appConfig.defaultWorkspace || "default";
-        const scenario = appConfig.defaultScenario || "default";
-        const action = "view"; // Zahardkodowane jak prosiłeś
         
-        const url = `/${config}/${workspace}/${scenario}/${action}`;
-        console.log(`Redirecting to: ${url}`);
-        
-        setRedirectUrl(url);
+        if (appConfig.defaultScenario) {
+          // Scenario mode: /:config/:workspace/:scenario/:node
+          const [scenario, node] = appConfig.defaultScenario.split('/');
+          const finalNode = node || "view"; // fallback if no node specified
+          setRedirectUrl(`/${DEFAULT_CONFIG}/${workspace}/${scenario}/${finalNode}`);
+        } else {
+          // Workspace mode: /:config/:workspace
+          setRedirectUrl(`/${DEFAULT_CONFIG}/${workspace}`);
+        }
       } catch (err) {
-        console.error("Failed to load default config:", err);
-        setError(err instanceof Error ? err.message : "Unknown error");
-        
-        // Fallback do podstawowego URL
-        setRedirectUrl(`/${DEFAULT_CONFIG}/tickets/default/view`);
-      } finally {
-        setLoading(false);
+        // Fallback to workspace mode
+        setRedirectUrl(`/${DEFAULT_CONFIG}/default`);
       }
     };
 
-    loadDefaultConfig();
+    loadDefaultUrl();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-zinc-600">Loading default configuration...</div>
-      </div>
-    );
+  if (!redirectUrl) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
-  if (error) {
-    console.warn("Redirect error:", error);
-    // Nawet przy błędzie, robimy redirect do fallback URL
-  }
-
-  if (redirectUrl) {
-    return <Navigate to={redirectUrl} replace />;
-  }
-
-  // Ostateczny fallback
-  return <Navigate to={`/${DEFAULT_CONFIG}/tickets/default/view`} replace />;
+  return <Navigate to={redirectUrl} replace />;
 }
