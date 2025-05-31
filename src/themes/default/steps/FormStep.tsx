@@ -1,4 +1,4 @@
-// src/themes/default/steps/FormStep.tsx - CLEAN VERSION
+// src/themes/default/steps/FormStep.tsx - FIXED VERSION
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useWorkspaceSchema, useEngineStore, useAppNavigation } from "@/core";
@@ -6,15 +6,14 @@ import { FieldWidget } from "../widgets/form/FieldWidget";
 import { LoadingSpinner, ErrorMessage } from "../commons/StepWrapper";
 import { useCollections } from "@/core/hooks/useCollections";
 
-
 interface FormStepProps {
   attrs: {
     schemaPath: string;
     title?: string;
     description?: string;
-    onSubmit: {
+    onSubmit?: {
       collection?: string;
-      navURL: string;
+      navURL?: string;
       saveToContext?: boolean;
       contextKey?: string;
       action?: "create" | "update";
@@ -37,12 +36,15 @@ export default function FormStep({ attrs }: FormStepProps) {
   const { schema, loading, error } = useWorkspaceSchema(
     attrs?.schemaPath || ""
   );
-  const { items, saveItem } = useCollections(attrs.onSubmit?.collection || "");
+  
+  // Only initialize collections hook if we have a collection specified
+  const collectionName = attrs?.onSubmit?.collection || "";
+  const { items, saveItem } = useCollections(collectionName);
   const { get, set } = useEngineStore();
   const [data, setData] = useState<Record<string, any>>({});
   const [saving, setSaving] = useState(false);
 
-  const contextKey = attrs.onSubmit?.contextKey || attrs.schemaPath;
+  const contextKey = attrs?.onSubmit?.contextKey || attrs?.schemaPath || "formData";
 
   // Initialize data when schema loads
   useEffect(() => {
@@ -58,7 +60,7 @@ export default function FormStep({ attrs }: FormStepProps) {
     let initialData = defaults;
 
     // Ładowanie z określonego kontekstu
-    if (attrs.loadFromContext) {
+    if (attrs?.loadFromContext) {
       const contextData = get(attrs.loadFromContext);
       if (contextData) {
         initialData = { ...initialData, ...contextData };
@@ -73,7 +75,7 @@ export default function FormStep({ attrs }: FormStepProps) {
     }
 
     // Ładowanie z parametrów (edycja)
-    if (attrs.loadFromParams && editId) {
+    if (attrs?.loadFromParams && editId) {
       const existing = items.find((item: any) => item.id === editId);
       if (existing) {
         initialData = { ...initialData, ...existing };
@@ -81,7 +83,7 @@ export default function FormStep({ attrs }: FormStepProps) {
     }
 
     // Auto-wypełnianie z currentUser
-    if (attrs.autoPopulateFromCurrentUser) {
+    if (attrs?.autoPopulateFromCurrentUser) {
       const currentUser = get("currentUser");
       if (currentUser) {
         const userMapping: Record<string, string> = {
@@ -122,9 +124,9 @@ export default function FormStep({ attrs }: FormStepProps) {
   }, [
     schema,
     contextKey,
-    attrs.loadFromParams,
-    attrs.loadFromContext,
-    attrs.autoPopulateFromCurrentUser,
+    attrs?.loadFromParams,
+    attrs?.loadFromContext,
+    attrs?.autoPopulateFromCurrentUser,
     editId,
     items,
     get,
@@ -137,13 +139,20 @@ export default function FormStep({ attrs }: FormStepProps) {
     try {
       const payload = { ...data, id: editId || Date.now().toString() };
 
-      if (attrs.onSubmit.saveToContext) {
+      // Safe access to onSubmit properties with defaults
+      const saveToContext = attrs?.onSubmit?.saveToContext ?? false;
+      const navURL = attrs?.onSubmit?.navURL || "/main";
+
+      if (saveToContext) {
         set(contextKey, payload);
-      } else {
+      } else if (collectionName) {
         await saveItem(payload);
+      } else {
+        // If no collection specified and not saving to context, just save to context as fallback
+        set(contextKey, payload);
       }
 
-      go(attrs.onSubmit.navURL);
+      go(navURL);
     } catch (err: any) {
       alert(`Save failed: ${err.message}`);
     } finally {
@@ -152,8 +161,8 @@ export default function FormStep({ attrs }: FormStepProps) {
   };
 
   const handleCancel = () => {
-    // ŻADNEGO KOMBINOWANIA - tylko to co jest w konfiguracji
-    go(attrs.onCancel?.navURL || "/main");
+    // Safe access with fallback
+    go(attrs?.onCancel?.navURL || "/main");
   };
 
   if (loading) return <LoadingSpinner text="Loading form..." />;
@@ -164,12 +173,12 @@ export default function FormStep({ attrs }: FormStepProps) {
 
   return (
     <div className="max-w-xl mx-auto">
-      {(attrs.title || attrs.description) && (
+      {(attrs?.title || attrs?.description) && (
         <div className="mb-6">
           <h2 className="text-xl font-semibold text-zinc-900">
             {attrs.title || (editId ? "Edit Record" : "New Record")}
           </h2>
-          {attrs.description && (
+          {attrs?.description && (
             <p className="text-zinc-600 mt-1 text-sm">{attrs.description}</p>
           )}
         </div>
@@ -179,7 +188,7 @@ export default function FormStep({ attrs }: FormStepProps) {
         <form onSubmit={handleSubmit} className="p-6">
           <div className="space-y-5">
             {Object.entries(schema.properties)
-              .filter(([key]) => !attrs.excludeFields?.includes(key))
+              .filter(([key]) => !attrs?.excludeFields?.includes(key))
               .map(([key, field]) => (
                 <FieldWidget
                   key={key}
@@ -191,10 +200,10 @@ export default function FormStep({ attrs }: FormStepProps) {
           </div>
           <div
             className={`${
-              attrs.onCancel ? "flex gap-3" : "flex justify-end"
+              attrs?.onCancel ? "flex gap-3" : "flex justify-end"
             } mt-8 pt-6 border-t border-zinc-200/60`}
           >
-            {attrs.onCancel && (
+            {attrs?.onCancel && (
               <button
                 type="button"
                 onClick={handleCancel}
@@ -207,12 +216,12 @@ export default function FormStep({ attrs }: FormStepProps) {
               type="submit"
               disabled={saving}
               className={`${
-                attrs.onCancel ? "flex-1" : "px-8"
+                attrs?.onCancel ? "flex-1" : "px-8"
               } bg-zinc-900 text-white text-sm font-medium px-4 py-2.5 rounded-md hover:bg-zinc-800 disabled:opacity-50`}
             >
               {saving
                 ? "Saving..."
-                : attrs.onSubmit.saveToContext
+                : attrs?.onSubmit?.saveToContext
                 ? "Continue"
                 : editId
                 ? "Update"
