@@ -1,4 +1,4 @@
-// src/modules/appTree/components/TreeNode.tsx (Poprawiony)
+// src/modules/appTree/components/TreeNode.tsx
 import React from 'react';
 import { Settings, Edit } from 'lucide-react';
 import { NodeInfo, ScenarioInfo, WorkspaceInfo } from '../hooks/useAppTree';
@@ -21,7 +21,7 @@ export const TreeNode: React.FC<TreeNodeProps> = ({
   isViewingNode,
 }) => {
   return (
-    <div className="flex items-center gap-2 px-2 py-1 text-xs group hover:bg-zinc-50 rounded">
+    <div className="flex items-center gap-2 px-2 py-1 text-xs rounded">
       <span className="text-zinc-300">└─</span>
       <Settings size={12} className="text-zinc-400" />
       <button
@@ -38,7 +38,7 @@ export const TreeNode: React.FC<TreeNodeProps> = ({
       {isViewingNode && (
         <button
           onClick={() => onEdit(workspace, scenario, node)}
-          className="px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded opacity-0 group-hover:opacity-100 transition-opacity ml-1 flex items-center gap-1"
+          className="px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded ml-1 flex items-center gap-1"
         >
           <Edit size={8} />
           Edytuj

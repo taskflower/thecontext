@@ -1,4 +1,4 @@
-// src/modules/appTree/components/TreeWorkspace.tsx (Poprawiony)
+// src/modules/appTree/components/TreeWorkspace.tsx
 import React from 'react';
 import { FolderOpen, Folder, Edit } from 'lucide-react';
 import { TreeScenario } from './TreeScenario';
@@ -33,9 +33,12 @@ export const TreeWorkspace: React.FC<TreeWorkspaceProps> = ({
 }) => {
   return (
     <div>
-      <div className="flex items-center group">
+      <div className="flex items-center">
         <button
-          onClick={() => onNavigateWorkspace(workspace.slug)}
+          onClick={() => {
+            // nawigacja do workspace
+            onNavigateWorkspace(workspace.slug);
+          }}
           className="flex-1 flex items-center gap-2 px-2 py-1.5 text-sm text-left hover:bg-zinc-100 rounded-md"
         >
           {isExpanded ? <FolderOpen size={14} /> : <Folder size={14} />}
@@ -49,14 +52,14 @@ export const TreeWorkspace: React.FC<TreeWorkspaceProps> = ({
             e.stopPropagation();
             onToggleWorkspace(workspace.slug);
           }}
-          className="px-1 py-1 text-zinc-400 hover:text-zinc-600 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+          className="px-1 py-1 text-zinc-400 hover:text-zinc-600 rounded"
         >
           {isExpanded ? '−' : '+'}
         </button>
         {isViewingWorkspace && (
           <button
             onClick={() => onEditWorkspace(workspace)}
-            className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded opacity-0 group-hover:opacity-100 transition-opacity ml-1 flex items-center gap-1"
+            className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded ml-1 flex items-center gap-1"
           >
             <Edit size={10} />
             Edytuj
@@ -69,17 +72,21 @@ export const TreeWorkspace: React.FC<TreeWorkspaceProps> = ({
           {workspace.scenarios.map((scenario) => {
             const scenarioKey = `${workspace.slug}:${scenario.slug}`;
             const isScenarioExpanded = expandedScenario === scenarioKey;
-            
+
             return (
               <TreeScenario
                 key={scenario.slug}
                 scenario={scenario}
                 workspace={workspace}
                 isExpanded={isScenarioExpanded}
-                onToggle={onToggleScenario}
+                onToggle={() => {
+                  onToggleScenario(workspace.slug, scenario.slug);
+                }}
                 onNavigateNode={onNavigateNode}
                 onEditNode={onEditNode}
-                isViewingNode={(nodeSlug: string) => isViewingNode(scenario.slug, nodeSlug)}
+                isViewingNode={(nodeSlug: string) =>
+                  isViewingNode(scenario.slug, nodeSlug)
+                }
               />
             );
           })}
