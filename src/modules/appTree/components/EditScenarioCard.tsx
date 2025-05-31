@@ -42,12 +42,9 @@ const EditScenarioCard: React.FC<EditScenarioCardProps> = ({
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black bg-opacity-20 z-50"
-        onClick={onClose}
-      />
+      
       {/* Card */}
-      <div className="fixed left-1/4 top-1/6 z-60 w-4/12 bg-white rounded-lg shadow-xl border border-zinc-200 p-6">
+      <div className="fixed ml-10 left-96 top-10 z-60 w-4/12 bg-white rounded-lg shadow-xl border border-zinc-200 p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Edycja scenariusza</h3>
           <button
@@ -59,9 +56,7 @@ const EditScenarioCard: React.FC<EditScenarioCardProps> = ({
         </div>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-zinc-700">
-              Slug
-            </label>
+            <label className="block text-sm font-medium text-zinc-700">Slug</label>
             <input
               type="text"
               value={scenario.slug}
@@ -70,9 +65,7 @@ const EditScenarioCard: React.FC<EditScenarioCardProps> = ({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-zinc-700">
-              Nazwa
-            </label>
+            <label className="block text-sm font-medium text-zinc-700">Nazwa</label>
             <input
               type="text"
               value={name}

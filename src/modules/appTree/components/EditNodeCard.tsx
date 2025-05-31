@@ -59,12 +59,9 @@ const EditNodeCard: React.FC<EditNodeCardProps> = ({
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black bg-opacity-20 z-50"
-        onClick={onClose}
-      />
+     
       {/* Card */}
-      <div className="fixed left-1/4 top-1/6 z-60 w-4/12 bg-white rounded-lg shadow-xl border border-zinc-200 p-6">
+      <div className="fixed ml-10 left-96 top-10 z-60 w-4/12 bg-white rounded-lg shadow-xl border border-zinc-200 p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Edycja kroku</h3>
           <button
@@ -76,9 +73,7 @@ const EditNodeCard: React.FC<EditNodeCardProps> = ({
         </div>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-zinc-700">
-              Slug
-            </label>
+            <label className="block text-sm font-medium text-zinc-700">Slug</label>
             <input
               type="text"
               value={node.slug}
@@ -87,9 +82,7 @@ const EditNodeCard: React.FC<EditNodeCardProps> = ({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-zinc-700">
-              Label
-            </label>
+            <label className="block text-sm font-medium text-zinc-700">Label</label>
             <input
               type="text"
               value={label}
@@ -98,9 +91,7 @@ const EditNodeCard: React.FC<EditNodeCardProps> = ({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-zinc-700">
-              Kolejność (order)
-            </label>
+            <label className="block text-sm font-medium text-zinc-700">Kolejność (order)</label>
             <input
               type="number"
               value={order}
@@ -109,9 +100,7 @@ const EditNodeCard: React.FC<EditNodeCardProps> = ({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-zinc-700">
-              tplFile
-            </label>
+            <label className="block text-sm font-medium text-zinc-700">tplFile</label>
             <input
               type="text"
               value={tplFile}
