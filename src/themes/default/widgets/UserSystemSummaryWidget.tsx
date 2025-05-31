@@ -1,5 +1,6 @@
 // src/themes/default/widgets/UserSystemSummaryWidget.tsx
-import { useEngineStore, useCollections } from "@/core";
+import { useEngineStore } from "@/core";
+import { useCollections } from "@/core/hooks/useCollections";
 
 interface UserSystemSummaryWidgetProps {
   title?: string;

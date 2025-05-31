@@ -1,14 +1,11 @@
 // src/themes/default/steps/FormStep.tsx - CLEAN VERSION
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import {
-  useWorkspaceSchema,
-  useCollections,
-  useEngineStore,
-  useAppNavigation,
-} from "@/core";
+import { useWorkspaceSchema, useEngineStore, useAppNavigation } from "@/core";
 import { FieldWidget } from "../widgets/form/FieldWidget";
 import { LoadingSpinner, ErrorMessage } from "../commons/StepWrapper";
+import { useCollections } from "@/core/hooks/useCollections";
+
 
 interface FormStepProps {
   attrs: {

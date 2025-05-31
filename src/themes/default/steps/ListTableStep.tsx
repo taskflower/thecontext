@@ -1,6 +1,6 @@
-// src/themes/default/steps/ListTableStep.tsx
-import React, { useState, useEffect, useMemo } from "react";
-import { useWorkspaceSchema, useCollections, useEngineStore } from "@/core";
+// src/themes/default/steps/ListTableStep.tsx - SIMPLIFIED VERSION
+import { useState, useEffect, useMemo } from "react";
+import { useWorkspaceSchema, useEngineStore } from "@/core";
 import DataTable, { Column } from "../commons/ListDataTable";
 import Pagination from "../commons/ListPaination";
 import { LoadingSpinner, ErrorMessage } from "../commons/StepWrapper";
@@ -8,6 +8,7 @@ import { LoadingSpinner, ErrorMessage } from "../commons/StepWrapper";
 import TitleWidget from "../widgets/TitleWidget";
 import ButtonWidget from "../widgets/ButtonWidget";
 import InfoWidget from "../widgets/InfoWidget";
+import { useCollections } from "@/core/hooks/useCollections";
 
 interface Widget {
   tplFile: string;
@@ -26,9 +27,6 @@ interface ListStepProps {
     collection: string;
     title?: string;
     description?: string;
-    /**
-     * Jeśli zdefiniowane, filtruje rekordy według pola dla danej roli
-     */
     filters?: FilterConfig[];
     emptyState?: any;
     columns?: any[];
@@ -53,76 +51,67 @@ const widgetMap = {
 
 export default function ListStep({ attrs }: ListStepProps) {
   // ✅ HOOKI NA GÓRZE
-  const { schema, loading, error } = useWorkspaceSchema(
-    attrs?.schemaPath || ""
-  );
-  const {
-    items: records,
-    loading: loadingRecords,
-    deleteItem,
-  } = useCollections(attrs?.collection || "");
+  const { schema, loading, error } = useWorkspaceSchema(attrs?.schemaPath || "");
+  const { items: records, loading: loadingRecords, deleteItem } = useCollections(attrs?.collection || "");
   const { get } = useEngineStore();
-  const currentUser = get("currentUser");
+  
+  // ✅ FIX: Stable user reference
+  const currentUser = useMemo(() => get("currentUser"), [get("currentUser")?.id, get("currentUser")?.role]);
 
-  // ✅ FILTR PODSTAWOWY wg konfiguracji
+  // ✅ FIX: Simplified base filtering without complex memoization
   const baseRecords = useMemo(() => {
-    if (!attrs.filters || !currentUser) return records;
+    if (!attrs.filters || !currentUser || !records.length) return records;
+    
     const filter = attrs.filters.find(f => f.role === currentUser.role);
-    return filter
-      ? records.filter(r => r[filter.field] === currentUser.id)
-      : records;
-  }, [records, attrs.filters, currentUser]);
+    if (!filter) return records;
+    
+    return records.filter(r => r[filter.field] === currentUser.id);
+  }, [records, attrs.filters, currentUser?.id, currentUser?.role]);
 
-  // STANY UI
+  // STANY UI - SIMPLIFIED
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortField, setSortField] = useState(
-    attrs?.sorting?.defaultField || ""
-  );
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">(
-    attrs?.sorting?.defaultDirection || "asc"
-  );
+  const [sortField, setSortField] = useState(attrs?.sorting?.defaultField || "");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">(attrs?.sorting?.defaultDirection || "asc");
   const [currentPage, setCurrentPage] = useState(1);
+  
   const pageSize = attrs?.pagination?.pageSize || 10;
 
-  // ✅ MEMO: filtracja search + sort na podstawie baseRecords
+  // ✅ FIX: Much simpler filtering without complex dependencies
   const filteredRecords = useMemo(() => {
     if (!baseRecords.length) return [];
 
     let filtered = [...baseRecords];
 
-    if (searchTerm && attrs?.search?.enabled) {
-      const searchFields =
-        attrs.search.fields || Object.keys(schema?.properties || {});
+    // Search filter
+    if (searchTerm && attrs?.search?.enabled && schema?.properties) {
+      const searchFields = attrs.search.fields || Object.keys(schema.properties);
       filtered = filtered.filter(record =>
         searchFields.some(field =>
-          String((record as any)[field] || "")
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase())
+          String(record[field] || "").toLowerCase().includes(searchTerm.toLowerCase())
         )
       );
     }
 
+    // Sort
     if (sortField && attrs?.sorting?.enabled) {
       filtered.sort((a, b) => {
-        const aValue = String((a as any)[sortField] || "");
-        const bValue = String((b as any)[sortField] || "");
+        const aValue = String(a[sortField] || "");
+        const bValue = String(b[sortField] || "");
         const cmp = aValue.localeCompare(bValue);
         return sortDirection === "asc" ? cmp : -cmp;
       });
     }
 
     return filtered;
-  }, [baseRecords, searchTerm, sortField, sortDirection, attrs.search, attrs.sorting, schema?.properties]);
+  }, [baseRecords, searchTerm, sortField, sortDirection, attrs?.search, attrs?.sorting, schema?.properties]);
 
   // PAGINACJA
-  const paginatedRecords = useMemo(
-    () =>
-      filteredRecords.slice(
-        (currentPage - 1) * pageSize,
-        currentPage * pageSize
-      ),
-    [filteredRecords, currentPage, pageSize]
-  );
+  const paginatedRecords = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    const end = start + pageSize;
+    return filteredRecords.slice(start, end);
+  }, [filteredRecords, currentPage, pageSize]);
+  
   const totalPages = Math.ceil(filteredRecords.length / pageSize);
 
   // KOLUNY DO TABELI
@@ -148,15 +137,18 @@ export default function ListStep({ attrs }: ListStepProps) {
     try {
       await deleteItem(recordId);
     } catch (err) {
+      console.error("Delete error:", err);
       alert("Błąd podczas usuwania rekordu");
     }
   };
 
   // RENDER WIDGETÓW HEADER
   const renderWidget = (widget: Widget, index: number) => {
-    const WidgetComponent =
-      widgetMap[widget.tplFile as keyof typeof widgetMap];
-    if (!WidgetComponent) return null;
+    const WidgetComponent = widgetMap[widget.tplFile as keyof typeof widgetMap];
+    if (!WidgetComponent) {
+      console.warn(`Widget not found: ${widget.tplFile}`);
+      return null;
+    }
     return (
       <div key={index} className="widget-container">
         <WidgetComponent title={widget.title} attrs={widget.attrs} />
@@ -166,8 +158,7 @@ export default function ListStep({ attrs }: ListStepProps) {
 
   // ⚠️ Loading / Error
   if (loading) return <LoadingSpinner text="Loading configuration..." />;
-  if (error || !schema)
-    return <ErrorMessage error={error || `Schema not found: ${attrs?.schemaPath}`} />;
+  if (error || !schema) return <ErrorMessage error={error || `Schema not found: ${attrs?.schemaPath}`} />;
 
   return (
     <div className="space-y-6">
@@ -216,7 +207,7 @@ export default function ListStep({ attrs }: ListStepProps) {
         collection={attrs?.collection || ""}
       />
 
-      {attrs?.pagination && (
+      {attrs?.pagination && totalPages > 1 && (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

@@ -14,7 +14,7 @@ interface WorkspaceNavigationProps {
 }
 
 export default function WorkspaceNavigation({ variant = 'simple' }: WorkspaceNavigationProps) {
-  const { config, workspace } = useParams<{ config?: string; workspace?: string }>();
+  const { config } = useParams<{ config?: string; workspace?: string }>();
   const location = useLocation();
   const cfg = config || "exampleTicketApp";
   

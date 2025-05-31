@@ -1,7 +1,8 @@
 // src/themes/default/steps/UserRegisterProcessStep.tsx - IMPROVED VERSION
 import { useEffect, useState } from "react";
-import { useEngineStore, useCollections, useAppNavigation } from "@/core";
-import { LoadingSpinner, ErrorMessage } from "../commons/StepWrapper";
+import { useEngineStore, useAppNavigation } from "@/core";
+import { LoadingSpinner } from "../commons/StepWrapper";
+import { useCollections } from "@/core/hooks/useCollections";
 
 interface Props {
   attrs: {

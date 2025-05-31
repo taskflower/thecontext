@@ -1,5 +1,7 @@
 // src/themes/default/widgets/form/userSelect.tsx
-import { useCollections } from "@/core";
+
+import { useCollections } from "@/core/hooks/useCollections";
+
 
 interface UserSelectFieldWidgetProps {
   title?: string;
