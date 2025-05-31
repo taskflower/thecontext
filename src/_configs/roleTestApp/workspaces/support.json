@@ -1,11 +1,10 @@
 {
   "slug": "support",
   "name": "Support Dashboard",
-  "rolesAllowed": [
-    "support"
-  ],
+  "rolesAllowed": ["support"],
   "templateSettings": {
     "layoutFile": "Simple",
+    "parentClass": "grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
     "widgets": [
       {
         "tplFile": "CurrentUserWidget",
@@ -14,7 +13,8 @@
           "variant": "compact",
           "loginnavURL": "/main/login/form",
           "logoutnavURL": "/main",
-          "editnavURL": "/profile/edit/form"
+          "editnavURL": "/profile/edit/form",
+          "cellClass": "col-span-full md:col-span-1"
         }
       },
       {
@@ -22,7 +22,8 @@
         "title": "🎧 Support Dashboard",
         "attrs": {
           "content": "Handle and resolve tickets.",
-          "variant": "info"
+          "variant": "info",
+          "cellClass": "col-span-full md:col-span-1 lg:col-span-2"
         }
       },
       {
@@ -30,7 +31,8 @@
         "title": "📋 All Tickets",
         "attrs": {
           "navURL": "/support/list/view",
-          "variant": "primary"
+          "variant": "primary",
+          "cellClass": "col-span-full md:col-span-1"
         }
       }
     ]
@@ -55,11 +57,7 @@
           "type": "string",
           "label": "Priority",
           "fieldType": "select",
-          "enum": [
-            "low",
-            "medium",
-            "high"
-          ],
+          "enum": ["low", "medium", "high"],
           "enumLabels": {
             "low": "Low",
             "medium": "Medium",
@@ -71,11 +69,7 @@
           "type": "string",
           "label": "Status",
           "fieldType": "select",
-          "enum": [
-            "new",
-            "in_progress",
-            "resolved"
-          ],
+          "enum": ["new", "in_progress", "resolved"],
           "enumLabels": {
             "new": "New",
             "in_progress": "In Progress",

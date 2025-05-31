@@ -3,26 +3,44 @@
   "slug": "main",
   "templateSettings": {
     "layoutFile": "Simple",
+    "parentClass": "grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-12",
     "widgets": [
-      
       {
         "tplFile": "InfoWidget",
         "title": "🚀 3-Role System Demo",
         "attrs": {
           "content": "Simple app with 3 roles: Reporter (creates tickets), Support (handles tickets), Admin (manages users).",
           "variant": "info",
-          "colSpan": "full"
+          "cellClass": "col-span-full lg:col-span-8 xl:col-span-12"
         }
       },
       {
         "tplFile": "CurrentUserWidget",
         "title": "Logged User",
         "attrs": {
-          "colSpan": "full",
           "variant": "compact",
           "loginnavURL": "/main/login/form",
           "logoutnavURL": "/main", 
-          "registernavURL": "/main/register/form"
+          "registernavURL": "/main/register/form",
+          "cellClass": "col-span-full md:col-span-1 lg:col-span-2 xl:col-span-6"
+        }
+      },
+      {
+        "tplFile": "ButtonWidget",
+        "title": "Login",
+        "attrs": {
+          "navURL": "/main/login/form",
+          "variant": "primary",
+          "cellClass": "col-span-1 lg:col-span-1 xl:col-span-3"
+        }
+      },
+      {
+        "tplFile": "ButtonWidget",
+        "title": "Register",
+        "attrs": {
+          "navURL": "/main/register/form",
+          "variant": "secondary",
+          "cellClass": "col-span-1 lg:col-span-1 xl:col-span-3"
         }
       }
     ]

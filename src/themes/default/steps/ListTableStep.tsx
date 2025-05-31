@@ -280,7 +280,7 @@ export default function ListTableStep({ attrs }: ListTableStepProps) {
           {/* Filters */}
           {filterOptions.length > 0 && (
             <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-slate-700 mr-2">Show:</span>
+              
               {filterOptions.map((filter) => (
                 <button
                   key={filter.key}

@@ -1,11 +1,10 @@
 {
   "name": "Admin Dashboard",
   "slug": "admin",
-  "rolesAllowed": [
-    "admin"
-  ],
+  "rolesAllowed": ["admin"],
   "templateSettings": {
     "layoutFile": "Simple",
+    "parentClass": "grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
     "widgets": [
       {
         "tplFile": "CurrentUserWidget",
@@ -14,7 +13,8 @@
           "variant": "compact",
           "loginnavURL": "/main/login/form",
           "logoutnavURL": "/main",
-          "editnavURL": "/profile/edit/form"
+          "editnavURL": "/profile/edit/form",
+          "cellClass": "col-span-full md:col-span-1"
         }
       },
       {
@@ -22,7 +22,8 @@
         "title": "⚙️ Admin Dashboard",
         "attrs": {
           "content": "Manage users and system settings.",
-          "variant": "info"
+          "variant": "info",
+          "cellClass": "col-span-full md:col-span-1 lg:col-span-2"
         }
       },
       {
@@ -30,7 +31,8 @@
         "title": "👥 Manage Users",
         "attrs": {
           "navURL": "/admin/list/view",
-          "variant": "primary"
+          "variant": "primary",
+          "cellClass": "col-span-1"
         }
       },
       {
@@ -38,7 +40,8 @@
         "title": "➕ Add User",
         "attrs": {
           "navURL": "/admin/create/form",
-          "variant": "secondary"
+          "variant": "secondary",
+          "cellClass": "col-span-1"
         }
       }
     ]
@@ -69,11 +72,7 @@
           "type": "string",
           "label": "Role",
           "fieldType": "select",
-          "enum": [
-            "reporter",
-            "support",
-            "admin"
-          ],
+          "enum": ["reporter", "support", "admin"],
           "enumLabels": {
             "reporter": "Reporter",
             "support": "Support",

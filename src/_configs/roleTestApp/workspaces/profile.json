@@ -1,23 +1,20 @@
 {
   "name": "My Profile",
   "slug": "profile",
-  "rolesAllowed": [
-    "admin",
-    "reporter",
-    "support"
-  ],
+  "rolesAllowed": ["admin", "reporter", "support"],
   "templateSettings": {
     "layoutFile": "Simple",
+    "parentClass": "grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
     "widgets": [
       {
         "tplFile": "CurrentUserWidget",
         "title": "Logged User",
         "attrs": {
-          "colSpan": "full",
           "variant": "detailed",
           "loginnavURL": "/main/login/form",
           "logoutnavURL": "/main",
-          "editnavURL": "/profile/edit/form"
+          "editnavURL": "/profile/edit/form",
+          "cellClass": "col-span-full"
         }
       },
       {
@@ -25,7 +22,8 @@
         "title": "👤 Profile Management",
         "attrs": {
           "content": "Manage your personal information and account settings.",
-          "variant": "info"
+          "variant": "info",
+          "cellClass": "col-span-full md:col-span-1 lg:col-span-2"
         }
       },
       {
@@ -33,7 +31,8 @@
         "title": "📋 View Full Profile",
         "attrs": {
           "navURL": "/profile/view/view",
-          "variant": "primary"
+          "variant": "primary",
+          "cellClass": "col-span-1"
         }
       },
       {
@@ -41,7 +40,8 @@
         "title": "✏️ Edit Profile",
         "attrs": {
           "navURL": "/profile/edit/form",
-          "variant": "secondary"
+          "variant": "secondary",
+          "cellClass": "col-span-1"
         }
       }
     ]

@@ -1,4 +1,4 @@
-// src/pages/ConfigPage.tsx - SIMPLIFIED VERSION with scenario/node structure
+// src/pages/ConfigPage.tsx - VERSION with cellClass and parentClass
 import { useComponent, useConfig } from "@/core";
 import { useParams } from "react-router-dom";
 import { useMemo } from "react";
@@ -93,9 +93,13 @@ export default function ConfigPage() {
   }
 
   // Workspace mode: /:config/:workspace (grid z widgets)
+  // ✅ NEW: Use parentClass from config, with sensible default
+  const parentClass = workspaceConfig.templateSettings?.parentClass || 
+    "grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6";
+
   return (
     <Layout>
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+      <div className={parentClass}>
         {workspaceConfig.templateSettings?.widgets?.map((widget, i) => (
           <WidgetRenderer key={i} theme={theme} widget={widget} />
         ))}
@@ -113,7 +117,6 @@ function StepRenderer({
   theme: string;
   filename: string;
   attrs: any;
-  // ✅ FIX: Remove recordId prop since it's not used
 }) {
   const { Component, loading, error } = useComponent(theme, "steps", filename);
 
@@ -139,38 +142,12 @@ function WidgetRenderer({ theme, widget }: { theme: string; widget: any }) {
   if (error || !Component)
     return <Error>Widget not found: {widget?.tplFile}</Error>;
 
-  // Grid styling
-  const colSpanMap: Record<string | number, string> = {
-    full: "col-span-full",
-    6: "col-span-full",
-    5: "col-span-5",
-    4: "col-span-4",
-    3: "col-span-3",
-    2: "col-span-2",
-    1: "col-span-1",
-  };
-
-  const colStartMap: Record<string | number, string> = {
-    1: "col-start-1",
-    2: "col-start-2",
-    3: "col-start-3",
-    4: "col-start-4",
-    5: "col-start-5",
-    6: "col-start-6",
-    7: "col-start-7",
-    auto: "col-start-auto",
-  };
-
-  const colSpan = widget?.attrs?.colSpan || 1;
-  const colStart = widget?.attrs?.colStart;
-
-  const spanClass = colSpanMap[colSpan] || "col-span-1";
-  const startClass = colStart ? colStartMap[colStart] || "" : "";
-  const combinedClasses = [spanClass, startClass].filter(Boolean).join(" ");
+  // ✅ NEW: Use cellClass from widget attrs, with fallback to col-span-1
+  const cellClass = widget?.attrs?.cellClass || "col-span-1";
 
   try {
     return (
-      <div className={combinedClasses}>
+      <div className={cellClass}>
         <Component {...(widget || {})} />
       </div>
     );
