@@ -1,5 +1,5 @@
 // src/App.tsx - Fixed version with proper redirect logic
-import { BrowserRouter, useRoutes, Navigate } from "react-router-dom";
+import { BrowserRouter, useRoutes } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthContext";
 import ConfigPage from "./pages/ConfigPage";
 import AuthPage from "./pages/AuthPage";
@@ -10,8 +10,6 @@ function AppRoutes() {
   const routes = useMemo(
     () => [
       { path: "login", element: <AuthPage /> },
-
-      // Simplified routes - scenario/node structure
       {
         path: ":config/:workspace/:scenario/:node/:id",
         element: <ConfigPage />,
@@ -21,14 +19,11 @@ function AppRoutes() {
         element: <ConfigPage />,
       },
       { path: ":config/:workspace", element: <ConfigPage /> },
-      
-      // 🔥 NOWE: Redirect dla root URL
       { path: "/", element: <RedirectToDefault /> },
-      
       {
         path: "*",
         element: (
-          <div className="flex items-center justify-center min-h-screen text-zinc-600">
+          <div className="flex items-center justify-center min-h-screen">
             Page not found
           </div>
         ),
@@ -37,11 +32,7 @@ function AppRoutes() {
     []
   );
 
-  return (
-    <>
-      {useRoutes(routes)}
-    </>
-  );
+  return <>{useRoutes(routes)}</>;
 }
 
 export function App() {

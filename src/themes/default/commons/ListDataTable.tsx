@@ -166,7 +166,7 @@ export default function DataTable({
         </p>
         {emptyState?.actionButton && (
           <button
-            onClick={() => go(emptyState.actionButton.navURL)}
+            onClick={() => go(emptyState.actionButton!.navURL)}
             className="bg-zinc-900 text-white px-5 py-2.5 text-sm font-medium rounded-md hover:bg-zinc-800 transition-colors"
           >
             {emptyState.actionButton.title}
@@ -232,7 +232,9 @@ export default function DataTable({
                           return (
                             <button
                               key={index}
-                              onClick={() => go(`${action.navURL}/${record.id}`)}
+                              onClick={() =>
+                                go(`${action.navURL}/${record.id}`)
+                              }
                               className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors"
                             >
                               {action.label || "Edytuj"}
@@ -258,7 +260,9 @@ export default function DataTable({
                           return (
                             <button
                               key={index}
-                              onClick={() => go(`${action.navURL}/${record.id}`)}
+                              onClick={() =>
+                                go(`${action.navURL}/${record.id}`)
+                              }
                               className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors"
                             >
                               {action.label || "Akcja"}

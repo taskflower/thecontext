@@ -8,6 +8,11 @@ import Dexie from "dexie";
 // Simple DB per collection - MOVED OUTSIDE COMPONENT
 const dbs = new Map<string, Dexie>();
 
+interface RelationConfig {
+  foreignKey: string;
+  target: string;
+}
+
 function getDB(collection: string): Dexie {
   if (!dbs.has(collection)) {
     const db = new Dexie(collection);
@@ -253,12 +258,13 @@ export function useCollections<T = any>(
         const relations = appConfig?.database?.relations;
         if (relations) {
           Object.entries(relations).forEach(([relationKey, relationConfig]) => {
+            const relationConfigTyped = relationConfig as RelationConfig;
             if (
               relationKey.startsWith(`${collection}.`) &&
-              relationConfig.foreignKey.includes("Id")
+              relationConfigTyped.foreignKey.includes("Id")
             ) {
-              const fieldName = relationConfig.foreignKey;
-              if (!item[fieldName] && relationConfig.target === "users") {
+              const fieldName = relationConfigTyped.foreignKey;
+              if (!item[fieldName] && relationConfigTyped.target === "users") {
                 item[fieldName] = currentUser.id;
                 console.log(
                   `🔄 Auto-populated ${fieldName} = ${currentUser.id}`

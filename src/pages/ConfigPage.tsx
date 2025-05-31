@@ -13,7 +13,7 @@ function Error({ children }: { children: React.ReactNode }) {
 }
 
 export default function ConfigPage() {
-  const { config, workspace, scenario, node, id } = useParams<{
+  const { config, workspace, scenario, node } = useParams<{
     config: string;
     workspace: string;
     scenario: string;
@@ -87,8 +87,6 @@ export default function ConfigPage() {
           theme={theme}
           filename={selectedNode.tplFile}
           attrs={selectedNode.attrs}
-          recordId={id}
-          key={`${scenario}-${selectedNode.slug}-${id || "new"}`}
         />
       </Layout>
     );
@@ -115,6 +113,7 @@ function StepRenderer({
   theme: string;
   filename: string;
   attrs: any;
+  // ✅ FIX: Remove recordId prop since it's not used
 }) {
   const { Component, loading, error } = useComponent(theme, "steps", filename);
 
