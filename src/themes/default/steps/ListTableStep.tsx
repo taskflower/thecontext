@@ -1,9 +1,8 @@
-// src/themes/default/steps/ListTableStep.tsx - ENHANCED with Filters
+// src/themes/default/steps/ListTableStep.tsx - Modern Dropbox Style
 import { useState, useEffect, useMemo } from "react";
-import { useParams } from "react-router-dom";
 import { useWorkspaceSchema, useEngineStore, useAppNavigation } from "@/core";
 import { useCollections } from "@/core/hooks/useCollections";
-import { LoadingSpinner, ErrorMessage } from "../commons/StepWrapper";
+import ButtonWidget from "../widgets/ButtonWidget";
 
 interface ListTableStepProps {
   attrs: {
@@ -36,70 +35,31 @@ interface ListTableStepProps {
       title: string;
       attrs: Record<string, any>;
     }>;
-    pagination?: { pageSize?: number; showTotal?: boolean };
-    search?: { enabled?: boolean; placeholder?: string; fields?: string[] };
-    sorting?: { enabled?: boolean; defaultField?: string; defaultDirection?: "asc" | "desc" };
-    // NEW: Filter configuration
     roleFilters?: {
       enabled?: boolean;
       options?: Array<{
         key: string;
         label: string;
-        field?: string; // pole do filtrowania, domyślnie z permissions
-        value?: string; // wartość filtra, może zawierać {{currentUser.id}}
-        showAll?: boolean; // czy ten filter pokazuje wszystkie rekordy
+        field?: string;
+        value?: string;
+        showAll?: boolean;
       }>;
     };
   };
-}
-
-// Komponent filtrów
-function TableFilters({ 
-  filters, 
-  activeFilter, 
-  onFilterChange, 
-  currentUser 
-}: {
-  filters: any[];
-  activeFilter: string;
-  onFilterChange: (key: string) => void;
-  currentUser: any;
-}) {
-  return (
-    <div className="mb-4 p-3 bg-gray-50 rounded-lg border">
-      <div className="flex flex-wrap gap-2">
-        <span className="text-sm font-medium text-gray-700 mr-3 py-2">
-          Show:
-        </span>
-        {filters.map((filter) => (
-          <button
-            key={filter.key}
-            onClick={() => onFilterChange(filter.key)}
-            className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-              activeFilter === filter.key
-                ? "bg-blue-600 text-white"
-                : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
-            }`}
-          >
-            {filter.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
 }
 
 export default function ListTableStep({ attrs }: ListTableStepProps) {
   const { go } = useAppNavigation();
   const { get } = useEngineStore();
   const currentUser = get("currentUser");
-  
-  // Stan filtrowania
   const [activeFilter, setActiveFilter] = useState<string>("all");
-  
-  const { schema, loading: schemaLoading, error: schemaError } = useWorkspaceSchema(
-    attrs?.schemaPath || ""
-  );
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const {
+    schema,
+    loading: schemaLoading,
+    error: schemaError,
+  } = useWorkspaceSchema(attrs?.schemaPath || "");
 
   // Przygotuj opcje filtrów
   const filterOptions = useMemo(() => {
@@ -107,27 +67,25 @@ export default function ListTableStep({ attrs }: ListTableStepProps) {
       return [];
     }
 
-    // Domyślne opcje filtrów jeśli nie podano custom
     if (!attrs.roleFilters.options) {
       const role = currentUser.role;
       const defaultFilters = [
-        { key: "all", label: "All Tickets", showAll: true },
+        { key: "all", label: "All Items", showAll: true },
       ];
 
-      // Dodaj filter specyficzny dla roli
       if (role === "reporter") {
         defaultFilters.push({
           key: "mine",
-          label: "My Tickets", 
+          label: "My Items",
           field: "reporterId",
-          value: currentUser.id
+          value: currentUser.id,
         });
       } else if (role === "support") {
         defaultFilters.push({
           key: "assigned",
           label: "Assigned to Me",
-          field: "assigneeId", 
-          value: currentUser.id
+          field: "assigneeId",
+          value: currentUser.id,
         });
       }
 
@@ -137,15 +95,14 @@ export default function ListTableStep({ attrs }: ListTableStepProps) {
     return attrs.roleFilters.options;
   }, [attrs?.roleFilters, currentUser]);
 
-  // Przygotuj opcje query dla useCollections na podstawie aktywnego filtra
+  // Query options for useCollections
   const queryOptions = useMemo(() => {
     const activeFilterConfig = filterOptions.find(f => f.key === activeFilter);
-    
+
     if (!activeFilterConfig || activeFilterConfig.showAll) {
-      return {}; // Brak filtrowania - pokaż wszystkie
+      return {};
     }
 
-    // Zastąp placeholdery w value
     let filterValue = activeFilterConfig.value || "";
     if (filterValue.includes("{{currentUser.id}}")) {
       filterValue = currentUser?.id || "";
@@ -156,9 +113,9 @@ export default function ListTableStep({ attrs }: ListTableStepProps) {
         {
           field: activeFilterConfig.field || "id",
           operator: "==" as const,
-          value: filterValue
-        }
-      ]
+          value: filterValue,
+        },
+      ],
     };
   }, [activeFilter, filterOptions, currentUser]);
 
@@ -167,167 +124,203 @@ export default function ListTableStep({ attrs }: ListTableStepProps) {
     queryOptions
   );
 
-  // Ustaw domyślny filtr przy pierwszym załadowaniu
-  useEffect(() => {
-    if (filterOptions.length > 0 && activeFilter === "all") {
-      // Sprawdź czy jest dostępny filtr "mine" lub "assigned" dla danej roli
-      const roleSpecificFilter = filterOptions.find(f => 
-        f.key === "mine" || f.key === "assigned"
+  // Filter items by search term
+  const filteredItems = useMemo(() => {
+    if (!searchTerm) return items;
+    
+    return items.filter((item: any) => {
+      return Object.values(item).some((value: any) => 
+        String(value).toLowerCase().includes(searchTerm.toLowerCase())
       );
-      if (roleSpecificFilter) {
-        setActiveFilter(roleSpecificFilter.key);
-      }
-    }
-  }, [filterOptions]);
+    });
+  }, [items, searchTerm]);
 
   const handleEdit = (item: any) => {
-    const editAction = attrs?.actions?.find(a => a.type === "edit");
+    const editAction = attrs?.actions?.find((a) => a.type === "edit");
     if (editAction?.navURL) {
       go(`${editAction.navURL}/${item.id}`);
     }
   };
 
   const handleDelete = async (item: any) => {
-    const deleteAction = attrs?.actions?.find(a => a.type === "delete");
+    const deleteAction = attrs?.actions?.find((a) => a.type === "delete");
     if (deleteAction?.confirm) {
       if (!confirm(deleteAction.confirm)) return;
     }
     await deleteItem(item.id);
   };
 
-  const handleCustomAction = (action: any, item: any) => {
-    if (action.navURL) {
-      go(`${action.navURL}/${item.id}`);
-    }
-  };
-
   const getBadgeColor = (value: string, field: string) => {
     const colors: Record<string, Record<string, string>> = {
       priority: {
-        low: "bg-green-100 text-green-800",
-        medium: "bg-yellow-100 text-yellow-800", 
-        high: "bg-red-100 text-red-800"
+        low: "bg-green-100 text-green-800 border-green-200",
+        medium: "bg-yellow-100 text-yellow-800 border-yellow-200",
+        high: "bg-red-100 text-red-800 border-red-200",
+        urgent: "bg-purple-100 text-purple-800 border-purple-200",
       },
       status: {
-        new: "bg-blue-100 text-blue-800",
-        in_progress: "bg-purple-100 text-purple-800",
-        resolved: "bg-green-100 text-green-800"
+        new: "bg-blue-100 text-blue-800 border-blue-200",
+        in_progress: "bg-orange-100 text-orange-800 border-orange-200",
+        resolved: "bg-green-100 text-green-800 border-green-200",
+        closed: "bg-gray-100 text-gray-800 border-gray-200",
       },
-      role: {
-        admin: "bg-red-100 text-red-800",
-        support: "bg-blue-100 text-blue-800", 
-        reporter: "bg-green-100 text-green-800"
-      },
-      isActive: {
-        true: "bg-green-100 text-green-800",
-        false: "bg-gray-100 text-gray-800"
-      }
     };
-    
-    return colors[field]?.[value] || "bg-gray-100 text-gray-800";
+
+    return colors[field]?.[value] || "bg-gray-100 text-gray-800 border-gray-200";
   };
 
   const renderCellValue = (item: any, column: any) => {
     const value = item[column.key];
-    
+
     if (column.type === "badge") {
       return (
-        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getBadgeColor(value, column.key)}`}>
+        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getBadgeColor(value, column.key)}`}>
           {schema?.properties?.[column.key]?.enumLabels?.[value] || value}
         </span>
       );
     }
-    
+
     if (column.type === "date" && value) {
-      return new Date(value).toLocaleDateString();
+      return (
+        <span className="text-sm text-slate-600">
+          {new Date(value).toLocaleDateString()}
+        </span>
+      );
     }
-    
-    return value || "-";
+
+    return (
+      <span className="text-sm text-slate-900 font-medium">
+        {value || "-"}
+      </span>
+    );
   };
 
   if (schemaLoading || loading) {
-    return <LoadingSpinner text="Loading data..." />;
+    return (
+      <div className="flex items-center justify-center py-24">
+        <div className="text-center">
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-50 text-blue-700">
+            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Loading data...
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (schemaError || !schema) {
-    return <ErrorMessage error={schemaError || `Schema not found: ${attrs?.schemaPath}`} />;
+    return (
+      <div className="text-center py-24">
+        <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+          <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-medium text-slate-900 mb-2">Configuration Error</h3>
+        <p className="text-slate-600 text-sm">{schemaError || `Schema not found: ${attrs?.schemaPath}`}</p>
+      </div>
+    );
   }
 
-  const columns = attrs?.columns || Object.keys(schema.properties).map(key => ({
+  const columns = attrs?.columns || Object.keys(schema.properties).map((key) => ({
     key,
     label: schema.properties[key].label || key,
-    type: "text" as const
+    type: "text" as const,
   }));
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto space-y-8">
       {/* Header */}
-      {(attrs?.title || attrs?.description) && (
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold text-zinc-900">
-            {attrs.title || "Data List"}
-          </h2>
-          {attrs?.description && (
-            <p className="text-zinc-600 mt-1 text-sm">{attrs.description}</p>
-          )}
-        </div>
-      )}
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-slate-900 mb-3">
+          {attrs?.title || "Data Overview"}
+        </h1>
+        {attrs?.description && (
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            {attrs.description}
+          </p>
+        )}
+      </div>
 
       {/* Header Widgets */}
-      {attrs?.headerWidgets && (
-        <div className="mb-6 flex flex-wrap gap-4">
+      {attrs?.headerWidgets && attrs.headerWidgets.length > 0 && (
+        <div className="flex flex-wrap gap-4 justify-center">
           {attrs.headerWidgets.map((widget, index) => (
             <div key={index} className="flex-shrink-0">
-              {/* Tu można zaimplementować renderowanie widgetów */}
               {widget.tplFile === "ButtonWidget" && (
-                <button 
-                  onClick={() => go(widget.attrs.navURL)}
-                  className={`px-4 py-2 text-sm font-medium rounded-md ${
-                    widget.attrs.variant === "primary" 
-                      ? "bg-blue-600 text-white hover:bg-blue-700"
-                      : widget.attrs.variant === "secondary"
-                      ? "bg-gray-200 text-gray-900 hover:bg-gray-300"
-                      : "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  {widget.title}
-                </button>
-              )}
-              {widget.tplFile === "InfoWidget" && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <p className="text-sm text-blue-800">{widget.attrs.content}</p>
-                </div>
+                <ButtonWidget title={widget.title} attrs={widget.attrs} />
               )}
             </div>
           ))}
         </div>
       )}
 
-      {/* NEW: Role-based Filters */}
-      {filterOptions.length > 0 && (
-        <TableFilters
-          filters={filterOptions}
-          activeFilter={activeFilter}
-          onFilterChange={setActiveFilter}
-          currentUser={currentUser}
-        />
-      )}
+      {/* Filters and Search */}
+      <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-6">
+        <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+          {/* Search */}
+          <div className="relative flex-1 max-w-md">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg className="h-5 w-5 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <input
+              type="text"
+              placeholder="Search records..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="block w-full pl-10 pr-3 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200"
+            />
+          </div>
+
+          {/* Filters */}
+          {filterOptions.length > 0 && (
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-medium text-slate-700 mr-2">Show:</span>
+              {filterOptions.map((filter) => (
+                <button
+                  key={filter.key}
+                  onClick={() => setActiveFilter(filter.key)}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    activeFilter === filter.key
+                      ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25"
+                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  }`}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Table */}
-      <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden">
-        {items.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-4xl mb-4">{attrs?.emptyState?.icon || "📄"}</div>
-            <h3 className="text-lg font-medium text-zinc-900 mb-2">
-              {attrs?.emptyState?.title || "No Data"}
+      <div className="bg-white rounded-2xl border border-slate-200/60 shadow-xl shadow-slate-200/50 overflow-hidden">
+        {filteredItems.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="mx-auto w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+              <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-medium text-slate-900 mb-2">
+              {searchTerm ? "No matching records" : (attrs?.emptyState?.title || "No records found")}
             </h3>
-            <p className="text-zinc-600 mb-4">
-              {attrs?.emptyState?.description || "No records found."}
+            <p className="text-slate-600 mb-6">
+              {searchTerm 
+                ? `No records match "${searchTerm}". Try adjusting your search.`
+                : (attrs?.emptyState?.description || "Get started by creating your first record.")
+              }
             </p>
-            {attrs?.emptyState?.actionButton && (
+            {attrs?.emptyState?.actionButton && !searchTerm && (
               <button
                 onClick={() => go(attrs.emptyState!.actionButton!.navURL)}
-                className="bg-zinc-900 text-white px-4 py-2 text-sm font-medium rounded-md hover:bg-zinc-800"
+                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:shadow-lg hover:shadow-blue-500/25 hover:-translate-y-0.5 transition-all duration-200"
               >
                 {attrs.emptyState.actionButton.title}
               </button>
@@ -336,47 +329,49 @@ export default function ListTableStep({ attrs }: ListTableStepProps) {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-zinc-50/50 border-b border-zinc-200/60">
+              <thead className="bg-slate-50/50 border-b border-slate-200/60">
                 <tr>
                   {columns.map((column) => (
                     <th
                       key={column.key}
-                      className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider"
+                      className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
                       style={{ width: column.width }}
                     >
                       {column.label || column.key}
                     </th>
                   ))}
                   {attrs?.actions && attrs.actions.length > 0 && (
-                    <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
                       Actions
                     </th>
                   )}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-200/60">
-                {items.map((item, index) => (
-                  <tr key={item.id || index} className="hover:bg-zinc-50/30">
+              <tbody className="divide-y divide-slate-200/60">
+                {filteredItems.map((item, index) => (
+                  <tr
+                    key={item.id || index}
+                    className="hover:bg-slate-50/50 transition-colors duration-150"
+                  >
                     {columns.map((column) => (
-                      <td key={column.key} className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
+                      <td key={column.key} className="px-6 py-4 whitespace-nowrap">
                         {renderCellValue(item, column)}
                       </td>
                     ))}
                     {attrs?.actions && attrs.actions.length > 0 && (
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                        <div className="flex justify-end gap-2">
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <div className="flex justify-end space-x-2">
                           {attrs.actions.map((action, actionIndex) => (
                             <button
                               key={actionIndex}
                               onClick={() => {
                                 if (action.type === "edit") handleEdit(item);
                                 else if (action.type === "delete") handleDelete(item);
-                                else handleCustomAction(action, item);
                               }}
-                              className={`px-3 py-1 text-xs font-medium rounded ${
+                              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
                                 action.variant === "danger"
-                                  ? "bg-red-100 text-red-700 hover:bg-red-200"
-                                  : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
+                                  ? "bg-red-100 text-red-700 hover:bg-red-200 border border-red-200"
+                                  : "bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200"
                               }`}
                             >
                               {action.label || action.type}
@@ -393,10 +388,13 @@ export default function ListTableStep({ attrs }: ListTableStepProps) {
         )}
       </div>
 
-      {/* Pagination info */}
-      {attrs?.pagination?.showTotal && items.length > 0 && (
-        <div className="mt-4 text-sm text-zinc-600">
-          Showing {items.length} records
+      {/* Footer info */}
+      {filteredItems.length > 0 && (
+        <div className="text-center">
+          <p className="text-sm text-slate-600">
+            Showing {filteredItems.length} of {items.length} records
+            {searchTerm && ` matching "${searchTerm}"`}
+          </p>
         </div>
       )}
     </div>

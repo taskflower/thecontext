@@ -1,4 +1,4 @@
-// src/commons/WorkspaceNavigation.tsx
+// src/commons/WorkspaceNavigation.tsx - Modern Dropbox Style
 import { Link, useParams, useLocation } from "react-router-dom";
 import { useEngineStore } from "@/core";
 import { useState, useEffect } from "react";
@@ -7,6 +7,8 @@ interface WorkspaceInfo {
   slug: string;
   name: string;
   rolesAllowed?: string[];
+  icon?: string;
+  color?: string;
 }
 
 interface WorkspaceNavigationProps {
@@ -29,14 +31,12 @@ export default function WorkspaceNavigation({ variant = 'simple' }: WorkspaceNav
     return location.pathname.includes(`/${cfg}/${workspaceSlug}`);
   };
 
-  // Dynamiczne ładowanie wszystkich workspace'ów dla aktualnej konfiguracji
+  // Dynamiczne ładowanie wszystkich workspace'ów
   useEffect(() => {
     const loadWorkspaces = async () => {
       try {
         setLoading(true);
         
-        // Pobierz listę plików workspace'ów dla aktualnej konfiguracji
-        // Używamy Vite's import.meta.glob z lazy loading
         const workspaceFiles = import.meta.glob<WorkspaceInfo>(
           "/src/_configs/*/workspaces/*.json",
           { as: "json" }
@@ -47,11 +47,12 @@ export default function WorkspaceNavigation({ variant = 'simple' }: WorkspaceNav
           .map(async ([path, loader]) => {
             try {
               const workspace = await loader();
-              // Wyciągnij slug z nazwy pliku (np. "tickets.json" -> "tickets")
               const slug = path.split('/').pop()?.replace('.json', '') || '';
               return {
                 ...workspace,
-                slug: workspace.slug || slug
+                slug: workspace.slug || slug,
+                icon: workspace.icon || getDefaultIcon(slug),
+                color: workspace.color || getDefaultColor(slug)
               };
             } catch (error) {
               console.warn(`Failed to load workspace: ${path}`, error);
@@ -62,7 +63,6 @@ export default function WorkspaceNavigation({ variant = 'simple' }: WorkspaceNav
         const loadedWorkspaces = (await Promise.all(workspacePromises))
           .filter((ws): ws is WorkspaceInfo => ws !== null);
         
-        // Filtruj po rolesAllowed
         const visibleWorkspaces = loadedWorkspaces.filter(
           (ws) => !ws.rolesAllowed || ws.rolesAllowed.includes(currentRole)
         );
@@ -79,35 +79,83 @@ export default function WorkspaceNavigation({ variant = 'simple' }: WorkspaceNav
     loadWorkspaces();
   }, [cfg, currentRole]);
 
-  // Style wariantów
-  const getStyles = () => {
-    if (variant === 'universal') {
-      return {
-        container: "flex items-center gap-1",
-        loading: "px-3 py-1.5 text-sm text-zinc-400",
-        empty: "px-3 py-1.5 text-sm text-zinc-400",
-        link: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
-        inactive: "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100/80",
-        active: "text-zinc-900 bg-zinc-200/60 font-semibold"
-      };
-    } else {
-      return {
-        container: "flex space-x-2",
-        loading: "px-3 py-1 text-sm text-gray-400",
-        empty: "px-3 py-1 text-sm text-gray-400",
-        link: "px-3 py-1 text-sm font-medium rounded transition",
-        inactive: "text-gray-600 hover:text-gray-900 hover:bg-gray-100",
-        active: "text-gray-900 bg-gray-200 font-semibold"
-      };
-    }
+  const getDefaultIcon = (slug: string) => {
+    const iconMap: Record<string, string> = {
+      'tickets': '🎫',
+      'users': '👥',
+      'projects': '📁',
+      'dashboard': '📊',
+      'settings': '⚙️',
+      'reports': '📈'
+    };
+    return iconMap[slug] || '📄';
   };
 
-  const styles = getStyles();
+  const getDefaultColor = (slug: string) => {
+    const colorMap: Record<string, string> = {
+      'tickets': 'from-blue-500 to-cyan-500',
+      'users': 'from-green-500 to-emerald-500',
+      'projects': 'from-purple-500 to-violet-500',
+      'dashboard': 'from-orange-500 to-red-500',
+      'settings': 'from-gray-500 to-slate-500',
+      'reports': 'from-pink-500 to-rose-500'
+    };
+    return colorMap[slug] || 'from-indigo-500 to-blue-500';
+  };
 
+  if (variant === 'universal') {
+    return (
+      <nav className="flex items-center space-x-1">
+        {loading ? (
+          <div className="flex space-x-2">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-8 w-20 bg-slate-200 rounded-lg animate-pulse"></div>
+            ))}
+          </div>
+        ) : workspaces.length > 0 ? (
+          workspaces.map((ws) => {
+            const isActive = isWorkspaceActive(ws.slug);
+            return (
+              <Link
+                key={ws.slug}
+                to={`/${cfg}/${ws.slug}`}
+                className={`
+                  group relative flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                  ${isActive 
+                    ? 'bg-white shadow-lg shadow-slate-200/50 text-slate-900 border border-slate-200/60' 
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  }
+                `}
+              >
+                <div className={`
+                  w-6 h-6 rounded-lg bg-gradient-to-r ${ws.color} flex items-center justify-center text-white text-xs
+                  ${isActive ? 'shadow-sm' : 'group-hover:shadow-sm'}
+                  transition-all duration-200
+                `}>
+                  {ws.icon}
+                </div>
+                <span className="whitespace-nowrap">{ws.name}</span>
+                
+                {isActive && (
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/5 to-purple-500/5 pointer-events-none"></div>
+                )}
+              </Link>
+            );
+          })
+        ) : (
+          <div className="text-sm text-slate-500 px-4 py-2">
+            No workspaces available
+          </div>
+        )}
+      </nav>
+    );
+  }
+
+  // Simple variant
   return (
-    <nav className={styles.container}>
+    <nav className="flex items-center space-x-1">
       {loading ? (
-        <div className={styles.loading}>Loading workspaces...</div>
+        <div className="text-sm text-slate-400 px-3 py-2">Loading...</div>
       ) : workspaces.length > 0 ? (
         workspaces.map((ws) => {
           const isActive = isWorkspaceActive(ws.slug);
@@ -115,14 +163,21 @@ export default function WorkspaceNavigation({ variant = 'simple' }: WorkspaceNav
             <Link
               key={ws.slug}
               to={`/${cfg}/${ws.slug}`}
-              className={`${styles.link} ${isActive ? styles.active : styles.inactive}`}
+              className={`
+                flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                ${isActive 
+                  ? 'bg-slate-900 text-white shadow-lg' 
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }
+              `}
             >
-              {ws.name}
+              <span className="text-xs">{ws.icon}</span>
+              <span>{ws.name}</span>
             </Link>
           );
         })
       ) : (
-        <div className={styles.empty}>No workspaces available</div>
+        <div className="text-sm text-slate-400 px-3 py-2">No workspaces</div>
       )}
     </nav>
   );
