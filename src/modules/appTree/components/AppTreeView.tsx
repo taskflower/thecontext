@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConfig } from "@/core";
-import EditWorkspaceCard from "./EditWorkspaceCard";
-import EditScenarioCard from "./EditScenarioCard";
-import EditNodeCard from "./EditNodeCard";
+import EditWorkspaceCard from "../../editWorkspace/EditWorkspaceCard";
+import EditScenarioCard from "../../editScenario/EditScenarioCard";
+import EditNodeCard from "../../editNode/EditNodeCard";
 
 interface AppConfig {
   name: string;
