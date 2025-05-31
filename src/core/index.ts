@@ -1,10 +1,10 @@
-// src/core/engine.ts - Poprawione eksporty
-export { useComponent } from "./hooks/useComponent";
-export { getAvailableThemes } from "./hooks/getAvailableThemes";
-export { useEngineStore } from "./hooks/useEngineStore"; // TYLKO kontekst
-export { useLlmEngine } from "./hooks/useLlmEngine";
-export { useConfig } from "./hooks/useConfig"; // TYLKO konfiguracja
-export { useCollections } from "./hooks/useCollections"; // TYLKO kolekcje
-export { useWorkspaceSchema } from "./hooks/useWorkspaceSchema";
-export { useAppNavigation } from "./hooks/useAppNavigation";
-export type * from "./types";
+// src/core/index.ts
+export * from "./hooks/useAppNavigation";
+export * from "./hooks/useComponent";
+export * from "./hooks/useConfig";
+export * from "./hooks/useEngineStore";
+export * from "./hooks/useLlmEngine";
+export * from "./hooks/useWorkspaceSchema";
+export * from "./hooks/useDatabase";
+export * from "./hooks/getAvailableThemes";
+export * from "./types";

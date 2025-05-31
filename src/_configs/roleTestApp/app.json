@@ -10,6 +10,30 @@
       "users": "users",
       "tickets": "tickets",
       "responses": "responses"
+    },
+    "relations": {
+      "tickets.reporter": {
+        "type": "many-to-one",
+        "target": "users",
+        "foreignKey": "reporterId"
+      },
+      "tickets.assignee": {
+        "type": "many-to-one", 
+        "target": "users",
+        "foreignKey": "assigneeId"
+      }
+    },
+    "permissions": {
+      "tickets": {
+        "reporter": {
+          "filter": { "field": "reporterId", "value": "{{currentUser.id}}" },
+          "canCreate": true
+        },
+        "support": {
+          "filter": { "field": "assigneeId", "value": "{{currentUser.id}}" }
+        },
+        "admin": {}
+      }
     }
   }
 }

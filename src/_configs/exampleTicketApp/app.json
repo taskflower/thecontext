@@ -1,14 +1,37 @@
 {
-  "name": "Test App",
+  "name": "Minimal 3-Role App",
   "tplDir": "default",
-  "defaultWorkspace": "tickets",
-  "defaultScenario": "list",
+  "defaultWorkspace": "main",
+  "defaultScenario": "dashboard",
+  "workspaces": ["main","reporter","support","admin","profile"],
   "database": {
     "provider": "indexedDB",
     "collections": {
       "users": "users",
-      "tickets": "tickets",
-      "profiles": "profiles"
+      "tickets": "tickets", 
+      "responses": "responses"
+    },
+    "relations": {
+      "tickets.reporter": {
+        "type": "many-to-one",
+        "target": "users",
+        "foreignKey": "reporterId"
+      },
+      "tickets.assignee": {
+        "type": "many-to-one", 
+        "target": "users",
+        "foreignKey": "assigneeId"
+      },
+      "tickets.responses": {
+        "type": "one-to-many",
+        "target": "responses", 
+        "foreignKey": "ticketId"
+      },
+      "users.tickets": {
+        "type": "one-to-many",
+        "target": "tickets",
+        "foreignKey": "reporterId"
+      }
     }
   }
 }
