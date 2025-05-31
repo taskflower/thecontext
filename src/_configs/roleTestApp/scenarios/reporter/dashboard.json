@@ -11,24 +11,46 @@
         "description": "Welcome to the reporter workspace. Create and manage your tickets.",
         "schemaPath": "ticket",
         "collection": "tickets",
-        "filters": [
-          { "role": "reporter", "field": "reporterId" }
-        ],
+        "roleFilters": {
+          "enabled": true,
+          "options": [
+            {
+              "key": "mine",
+              "label": "My Tickets",
+              "field": "reporterId", 
+              "value": "{{currentUser.id}}"
+            },
+            {
+              "key": "all",
+              "label": "All Tickets",
+              "showAll": true
+            }
+          ]
+        },
         "headerWidgets": [
           {
             "tplFile": "InfoWidget",
             "title": "📝 Reporter Dashboard",
-            "attrs": { "content": "Create and track your tickets.", "variant": "info" }
+            "attrs": { 
+              "content": "Create and track your tickets.", 
+              "variant": "info" 
+            }
           },
           {
             "tplFile": "ButtonWidget",
             "title": "➕ New Ticket",
-            "attrs": { "navURL": "/reporter/create/form", "variant": "primary" }
+            "attrs": { 
+              "navURL": "/reporter/create/form", 
+              "variant": "primary" 
+            }
           },
           {
             "tplFile": "ButtonWidget",
             "title": "📋 My Tickets",
-            "attrs": { "navURL": "/reporter/list/view", "variant": "secondary" }
+            "attrs": { 
+              "navURL": "/reporter/list/view", 
+              "variant": "secondary" 
+            }
           }
         ],
         "columns": [
@@ -40,7 +62,10 @@
           "icon": "📋",
           "title": "No Tickets Yet",
           "description": "You haven't created any tickets yet. Start by creating your first ticket.",
-          "actionButton": { "title": "Create First Ticket", "navURL": "/reporter/create/form" }
+          "actionButton": { 
+            "title": "Create First Ticket", 
+            "navURL": "/reporter/create/form" 
+          }
         },
         "pagination": { "pageSize": 10, "showTotal": true }
       }

@@ -1,3 +1,4 @@
+
 {
   "slug": "dashboard",
   "nodes": [
@@ -11,22 +12,66 @@
         "description": "Welcome to the support workspace. Handle and resolve tickets.",
         "schemaPath": "ticket",
         "collection": "tickets",
-        "filters": [
-          { "role": "support", "field": "assigneeId" }
-        ],
+        "roleFilters": {
+          "enabled": true,
+          "options": [
+            {
+              "key": "all",
+              "label": "All Tickets",
+              "showAll": true
+            },
+            {
+              "key": "assigned",
+              "label": "Assigned to Me",
+              "field": "assigneeId",
+              "value": "{{currentUser.id}}"
+            },
+            {
+              "key": "unassigned",
+              "label": "Unassigned",
+              "field": "assigneeId",
+              "value": ""
+            }
+          ]
+        },
         "headerWidgets": [
-          { "tplFile": "InfoWidget", "title": "🎧 Support Dashboard", "attrs": { "content": "Handle and resolve tickets from all reporters.", "variant": "info" } },
-          { "tplFile": "ButtonWidget", "title": "📋 All Tickets", "attrs": { "navURL": "/support/list/view", "variant": "primary" } }
+          { 
+            "tplFile": "InfoWidget", 
+            "title": "🎧 Support Dashboard", 
+            "attrs": { 
+              "content": "Handle and resolve tickets from all reporters.", 
+              "variant": "info" 
+            } 
+          },
+          { 
+            "tplFile": "ButtonWidget", 
+            "title": "📋 All Tickets", 
+            "attrs": { 
+              "navURL": "/support/list/view", 
+              "variant": "primary" 
+            } 
+          }
         ],
         "columns": [
           { "key": "title", "label": "Title", "type": "text" },
           { "key": "priority", "label": "Priority", "type": "badge" },
           { "key": "status", "label": "Status", "type": "badge" }
         ],
-        "actions": [ { "type": "edit", "label": "Handle", "navURL": "/support/edit" } ],
-        "emptyState": { "icon": "🎧", "title": "No Tickets to Handle", "description": "No tickets assigned to you." },
+        "actions": [
+          { 
+            "type": "edit", 
+            "label": "Handle", 
+            "navURL": "/support/edit" 
+          }
+        ],
+        "emptyState": { 
+          "icon": "🎧", 
+          "title": "No Tickets to Handle", 
+          "description": "No tickets found for the selected filter." 
+        },
         "pagination": { "pageSize": 10, "showTotal": true }
       }
     }
   ]
 }
+

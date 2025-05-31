@@ -1,4 +1,3 @@
-
 {
   "slug": "list",
   "nodes": [
@@ -8,12 +7,46 @@
       "order": 1,
       "tplFile": "ListTableStep",
       "attrs": {
+        "title": "🎧 All Tickets",
+        "description": "View and manage all tickets in the system",
         "schemaPath": "ticket",
         "collection": "tickets",
-        "filters": [
+        "roleFilters": {
+          "enabled": true,
+          "options": [
+            {
+              "key": "all",
+              "label": "All Tickets",
+              "showAll": true
+            },
+            {
+              "key": "assigned",
+              "label": "Assigned to Me",
+              "field": "assigneeId",
+              "value": "{{currentUser.id}}"
+            },
+            {
+              "key": "unassigned",
+              "label": "Unassigned",
+              "field": "assigneeId",
+              "value": ""
+            },
+            {
+              "key": "new",
+              "label": "New Tickets",
+              "field": "status",
+              "value": "new"
+            }
+          ]
+        },
+        "headerWidgets": [
           {
-            "role": "support",
-            "field": "assigneeId"
+            "tplFile": "ButtonWidget",
+            "title": "🏠 Dashboard",
+            "attrs": { 
+              "navURL": "/support/dashboard/view", 
+              "variant": "outline" 
+            }
           }
         ],
         "columns": [
@@ -31,8 +64,9 @@
         "emptyState": {
           "icon": "🎧",
           "title": "No Tickets",
-          "description": "No tickets in the system yet."
-        }
+          "description": "No tickets found for the selected filter."
+        },
+        "pagination": { "pageSize": 10, "showTotal": true }
       }
     }
   ]

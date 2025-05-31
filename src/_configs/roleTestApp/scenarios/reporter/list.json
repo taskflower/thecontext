@@ -7,16 +7,42 @@
       "order": 1,
       "tplFile": "ListTableStep",
       "attrs": {
+        "title": "📋 My Tickets",
+        "description": "View and manage all your tickets",
         "schemaPath": "ticket",
         "collection": "tickets",
-        "filters": [
-          { "role": "reporter", "field": "reporterId" }
-        ],
+        "roleFilters": {
+          "enabled": true,
+          "options": [
+            {
+              "key": "mine",
+              "label": "My Tickets",
+              "field": "reporterId",
+              "value": "{{currentUser.id}}"
+            },
+            {
+              "key": "all",
+              "label": "All Tickets", 
+              "showAll": true
+            }
+          ]
+        },
         "headerWidgets": [
           {
             "tplFile": "ButtonWidget",
             "title": "🏠 Dashboard",
-            "attrs": { "navURL": "/reporter/dashboard/view", "variant": "outline" }
+            "attrs": { 
+              "navURL": "/reporter/dashboard/view", 
+              "variant": "outline" 
+            }
+          },
+          {
+            "tplFile": "ButtonWidget",
+            "title": "➕ New Ticket",
+            "attrs": { 
+              "navURL": "/reporter/create/form", 
+              "variant": "primary" 
+            }
           }
         ],
         "columns": [
@@ -28,7 +54,10 @@
           "icon": "📋",
           "title": "No Tickets",
           "description": "You haven't created any tickets yet.",
-          "actionButton": { "title": "Create First Ticket", "navURL": "/reporter/create/form" }
+          "actionButton": { 
+            "title": "Create First Ticket", 
+            "navURL": "/reporter/create/form" 
+          }
         },
         "pagination": { "pageSize": 10, "showTotal": true }
       }

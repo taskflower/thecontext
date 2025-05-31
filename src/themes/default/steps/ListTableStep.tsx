@@ -1,221 +1,403 @@
-// src/themes/default/steps/ListTableStep.tsx - SIMPLIFIED VERSION
+// src/themes/default/steps/ListTableStep.tsx - ENHANCED with Filters
 import { useState, useEffect, useMemo } from "react";
-import { useWorkspaceSchema, useEngineStore } from "@/core";
-import DataTable, { Column } from "../commons/ListDataTable";
-import Pagination from "../commons/ListPaination";
-import { LoadingSpinner, ErrorMessage } from "../commons/StepWrapper";
-// Import widgetów
-import TitleWidget from "../widgets/TitleWidget";
-import ButtonWidget from "../widgets/ButtonWidget";
-import InfoWidget from "../widgets/InfoWidget";
+import { useParams } from "react-router-dom";
+import { useWorkspaceSchema, useEngineStore, useAppNavigation } from "@/core";
 import { useCollections } from "@/core/hooks/useCollections";
+import { LoadingSpinner, ErrorMessage } from "../commons/StepWrapper";
 
-interface Widget {
-  tplFile: string;
-  title: string;
-  attrs: any;
-}
-
-interface FilterConfig {
-  role: string;
-  field: string;
-}
-
-interface ListStepProps {
+interface ListTableStepProps {
   attrs: {
-    schemaPath: string;
-    collection: string;
     title?: string;
     description?: string;
-    filters?: FilterConfig[];
-    emptyState?: any;
-    columns?: any[];
-    actions?: any[];
-    headerWidgets?: Widget[];
+    schemaPath: string;
+    collection: string;
+    columns?: Array<{
+      key: string;
+      label?: string;
+      type?: "text" | "badge" | "date" | "enum";
+      width?: string;
+      sortable?: boolean;
+    }>;
+    actions?: Array<{
+      type: "edit" | "delete" | "custom";
+      label?: string;
+      navURL?: string;
+      confirm?: string;
+      variant?: "default" | "danger";
+    }>;
+    emptyState?: {
+      icon?: string;
+      title?: string;
+      description?: string;
+      actionButton?: { title: string; navURL: string };
+    };
+    headerWidgets?: Array<{
+      tplFile: string;
+      title: string;
+      attrs: Record<string, any>;
+    }>;
     pagination?: { pageSize?: number; showTotal?: boolean };
     search?: { enabled?: boolean; placeholder?: string; fields?: string[] };
-    sorting?: {
+    sorting?: { enabled?: boolean; defaultField?: string; defaultDirection?: "asc" | "desc" };
+    // NEW: Filter configuration
+    roleFilters?: {
       enabled?: boolean;
-      defaultField?: string;
-      defaultDirection?: "asc" | "desc";
+      options?: Array<{
+        key: string;
+        label: string;
+        field?: string; // pole do filtrowania, domyślnie z permissions
+        value?: string; // wartość filtra, może zawierać {{currentUser.id}}
+        showAll?: boolean; // czy ten filter pokazuje wszystkie rekordy
+      }>;
     };
   };
 }
 
-// Mapowanie dostępnych widgetów
-const widgetMap = {
-  TitleWidget,
-  ButtonWidget,
-  InfoWidget,
-};
+// Komponent filtrów
+function TableFilters({ 
+  filters, 
+  activeFilter, 
+  onFilterChange, 
+  currentUser 
+}: {
+  filters: any[];
+  activeFilter: string;
+  onFilterChange: (key: string) => void;
+  currentUser: any;
+}) {
+  return (
+    <div className="mb-4 p-3 bg-gray-50 rounded-lg border">
+      <div className="flex flex-wrap gap-2">
+        <span className="text-sm font-medium text-gray-700 mr-3 py-2">
+          Show:
+        </span>
+        {filters.map((filter) => (
+          <button
+            key={filter.key}
+            onClick={() => onFilterChange(filter.key)}
+            className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+              activeFilter === filter.key
+                ? "bg-blue-600 text-white"
+                : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+            }`}
+          >
+            {filter.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-export default function ListStep({ attrs }: ListStepProps) {
-  // ✅ HOOKI NA GÓRZE
-  const { schema, loading, error } = useWorkspaceSchema(attrs?.schemaPath || "");
-  const { items: records, loading: loadingRecords, deleteItem } = useCollections(attrs?.collection || "");
+export default function ListTableStep({ attrs }: ListTableStepProps) {
+  const { go } = useAppNavigation();
   const { get } = useEngineStore();
+  const currentUser = get("currentUser");
   
-  // ✅ FIX: Stable user reference
-  const currentUser = useMemo(() => get("currentUser"), [get("currentUser")?.id, get("currentUser")?.role]);
-
-  // ✅ FIX: Simplified base filtering without complex memoization
-  const baseRecords = useMemo(() => {
-    if (!attrs.filters || !currentUser || !records.length) return records;
-    
-    const filter = attrs.filters.find(f => f.role === currentUser.role);
-    if (!filter) return records;
-    
-    return records.filter(r => r[filter.field] === currentUser.id);
-  }, [records, attrs.filters, currentUser?.id, currentUser?.role]);
-
-  // STANY UI - SIMPLIFIED
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortField, setSortField] = useState(attrs?.sorting?.defaultField || "");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">(attrs?.sorting?.defaultDirection || "asc");
-  const [currentPage, setCurrentPage] = useState(1);
+  // Stan filtrowania
+  const [activeFilter, setActiveFilter] = useState<string>("all");
   
-  const pageSize = attrs?.pagination?.pageSize || 10;
+  const { schema, loading: schemaLoading, error: schemaError } = useWorkspaceSchema(
+    attrs?.schemaPath || ""
+  );
 
-  // ✅ FIX: Much simpler filtering without complex dependencies
-  const filteredRecords = useMemo(() => {
-    if (!baseRecords.length) return [];
+  // Przygotuj opcje filtrów
+  const filterOptions = useMemo(() => {
+    if (!attrs?.roleFilters?.enabled || !currentUser) {
+      return [];
+    }
 
-    let filtered = [...baseRecords];
+    // Domyślne opcje filtrów jeśli nie podano custom
+    if (!attrs.roleFilters.options) {
+      const role = currentUser.role;
+      const defaultFilters = [
+        { key: "all", label: "All Tickets", showAll: true },
+      ];
 
-    // Search filter
-    if (searchTerm && attrs?.search?.enabled && schema?.properties) {
-      const searchFields = attrs.search.fields || Object.keys(schema.properties);
-      filtered = filtered.filter(record =>
-        searchFields.some(field =>
-          String(record[field] || "").toLowerCase().includes(searchTerm.toLowerCase())
-        )
+      // Dodaj filter specyficzny dla roli
+      if (role === "reporter") {
+        defaultFilters.push({
+          key: "mine",
+          label: "My Tickets", 
+          field: "reporterId",
+          value: currentUser.id
+        });
+      } else if (role === "support") {
+        defaultFilters.push({
+          key: "assigned",
+          label: "Assigned to Me",
+          field: "assigneeId", 
+          value: currentUser.id
+        });
+      }
+
+      return defaultFilters;
+    }
+
+    return attrs.roleFilters.options;
+  }, [attrs?.roleFilters, currentUser]);
+
+  // Przygotuj opcje query dla useCollections na podstawie aktywnego filtra
+  const queryOptions = useMemo(() => {
+    const activeFilterConfig = filterOptions.find(f => f.key === activeFilter);
+    
+    if (!activeFilterConfig || activeFilterConfig.showAll) {
+      return {}; // Brak filtrowania - pokaż wszystkie
+    }
+
+    // Zastąp placeholdery w value
+    let filterValue = activeFilterConfig.value || "";
+    if (filterValue.includes("{{currentUser.id}}")) {
+      filterValue = currentUser?.id || "";
+    }
+
+    return {
+      where: [
+        {
+          field: activeFilterConfig.field || "id",
+          operator: "==" as const,
+          value: filterValue
+        }
+      ]
+    };
+  }, [activeFilter, filterOptions, currentUser]);
+
+  const { items, loading, deleteItem } = useCollections(
+    attrs?.collection || "",
+    queryOptions
+  );
+
+  // Ustaw domyślny filtr przy pierwszym załadowaniu
+  useEffect(() => {
+    if (filterOptions.length > 0 && activeFilter === "all") {
+      // Sprawdź czy jest dostępny filtr "mine" lub "assigned" dla danej roli
+      const roleSpecificFilter = filterOptions.find(f => 
+        f.key === "mine" || f.key === "assigned"
+      );
+      if (roleSpecificFilter) {
+        setActiveFilter(roleSpecificFilter.key);
+      }
+    }
+  }, [filterOptions]);
+
+  const handleEdit = (item: any) => {
+    const editAction = attrs?.actions?.find(a => a.type === "edit");
+    if (editAction?.navURL) {
+      go(`${editAction.navURL}/${item.id}`);
+    }
+  };
+
+  const handleDelete = async (item: any) => {
+    const deleteAction = attrs?.actions?.find(a => a.type === "delete");
+    if (deleteAction?.confirm) {
+      if (!confirm(deleteAction.confirm)) return;
+    }
+    await deleteItem(item.id);
+  };
+
+  const handleCustomAction = (action: any, item: any) => {
+    if (action.navURL) {
+      go(`${action.navURL}/${item.id}`);
+    }
+  };
+
+  const getBadgeColor = (value: string, field: string) => {
+    const colors: Record<string, Record<string, string>> = {
+      priority: {
+        low: "bg-green-100 text-green-800",
+        medium: "bg-yellow-100 text-yellow-800", 
+        high: "bg-red-100 text-red-800"
+      },
+      status: {
+        new: "bg-blue-100 text-blue-800",
+        in_progress: "bg-purple-100 text-purple-800",
+        resolved: "bg-green-100 text-green-800"
+      },
+      role: {
+        admin: "bg-red-100 text-red-800",
+        support: "bg-blue-100 text-blue-800", 
+        reporter: "bg-green-100 text-green-800"
+      },
+      isActive: {
+        true: "bg-green-100 text-green-800",
+        false: "bg-gray-100 text-gray-800"
+      }
+    };
+    
+    return colors[field]?.[value] || "bg-gray-100 text-gray-800";
+  };
+
+  const renderCellValue = (item: any, column: any) => {
+    const value = item[column.key];
+    
+    if (column.type === "badge") {
+      return (
+        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getBadgeColor(value, column.key)}`}>
+          {schema?.properties?.[column.key]?.enumLabels?.[value] || value}
+        </span>
       );
     }
-
-    // Sort
-    if (sortField && attrs?.sorting?.enabled) {
-      filtered.sort((a, b) => {
-        const aValue = String(a[sortField] || "");
-        const bValue = String(b[sortField] || "");
-        const cmp = aValue.localeCompare(bValue);
-        return sortDirection === "asc" ? cmp : -cmp;
-      });
+    
+    if (column.type === "date" && value) {
+      return new Date(value).toLocaleDateString();
     }
-
-    return filtered;
-  }, [baseRecords, searchTerm, sortField, sortDirection, attrs?.search, attrs?.sorting, schema?.properties]);
-
-  // PAGINACJA
-  const paginatedRecords = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    const end = start + pageSize;
-    return filteredRecords.slice(start, end);
-  }, [filteredRecords, currentPage, pageSize]);
-  
-  const totalPages = Math.ceil(filteredRecords.length / pageSize);
-
-  // KOLUNY DO TABELI
-  const columns = useMemo(() => {
-    if (!schema?.properties) return [];
-    return (
-      attrs.columns ||
-      Object.entries(schema.properties).map(([key, field]: any) => ({
-        key,
-        label: field.label || key,
-        type: field.enum ? "badge" : field.format === "date" ? "date" : "text",
-      }))
-    );
-  }, [attrs.columns, schema?.properties]);
-
-  // RESET strony po zmianie search/sort
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, sortField, sortDirection]);
-
-  // DELETE handler
-  const handleDelete = async (recordId: string) => {
-    try {
-      await deleteItem(recordId);
-    } catch (err) {
-      console.error("Delete error:", err);
-      alert("Błąd podczas usuwania rekordu");
-    }
+    
+    return value || "-";
   };
 
-  // RENDER WIDGETÓW HEADER
-  const renderWidget = (widget: Widget, index: number) => {
-    const WidgetComponent = widgetMap[widget.tplFile as keyof typeof widgetMap];
-    if (!WidgetComponent) {
-      console.warn(`Widget not found: ${widget.tplFile}`);
-      return null;
-    }
-    return (
-      <div key={index} className="widget-container">
-        <WidgetComponent title={widget.title} attrs={widget.attrs} />
-      </div>
-    );
-  };
+  if (schemaLoading || loading) {
+    return <LoadingSpinner text="Loading data..." />;
+  }
 
-  // ⚠️ Loading / Error
-  if (loading) return <LoadingSpinner text="Loading configuration..." />;
-  if (error || !schema) return <ErrorMessage error={error || `Schema not found: ${attrs?.schemaPath}`} />;
+  if (schemaError || !schema) {
+    return <ErrorMessage error={schemaError || `Schema not found: ${attrs?.schemaPath}`} />;
+  }
+
+  const columns = attrs?.columns || Object.keys(schema.properties).map(key => ({
+    key,
+    label: schema.properties[key].label || key,
+    type: "text" as const
+  }));
 
   return (
-    <div className="space-y-6">
-      {/* Header Widgets */}
-      {attrs.headerWidgets && attrs.headerWidgets.length > 0 && (
-        <div className="header-widgets-container">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-            {attrs.headerWidgets.map((w, i) => renderWidget(w, i))}
-          </div>
-        </div>
-      )}
-
-      {/* Search Bar */}
-      {attrs?.search?.enabled && (
-        <div className="flex justify-between items-center">
-          <input
-            type="text"
-            placeholder={attrs.search.placeholder || "Szukaj..."}
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="px-4 py-2 border border-zinc-300 rounded-md max-w-sm"
-          />
-          {attrs?.pagination?.showTotal && (
-            <div className="text-sm text-zinc-600">
-              Znaleziono: {filteredRecords.length}
-            </div>
+    <div className="max-w-7xl mx-auto">
+      {/* Header */}
+      {(attrs?.title || attrs?.description) && (
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-zinc-900">
+            {attrs.title || "Data List"}
+          </h2>
+          {attrs?.description && (
+            <p className="text-zinc-600 mt-1 text-sm">{attrs.description}</p>
           )}
         </div>
       )}
 
-      <DataTable
-        records={paginatedRecords}
-        columns={columns as Column[]}
-        actions={attrs?.actions}
-        schema={schema}
-        loading={loadingRecords}
-        emptyState={attrs?.emptyState}
-        sortField={sortField}
-        sortDirection={sortDirection}
-        sortingEnabled={attrs?.sorting?.enabled}
-        onSort={(field, dir) => {
-          setSortField(field);
-          setSortDirection(dir);
-        }}
-        onDelete={handleDelete}
-        collection={attrs?.collection || ""}
-      />
+      {/* Header Widgets */}
+      {attrs?.headerWidgets && (
+        <div className="mb-6 flex flex-wrap gap-4">
+          {attrs.headerWidgets.map((widget, index) => (
+            <div key={index} className="flex-shrink-0">
+              {/* Tu można zaimplementować renderowanie widgetów */}
+              {widget.tplFile === "ButtonWidget" && (
+                <button 
+                  onClick={() => go(widget.attrs.navURL)}
+                  className={`px-4 py-2 text-sm font-medium rounded-md ${
+                    widget.attrs.variant === "primary" 
+                      ? "bg-blue-600 text-white hover:bg-blue-700"
+                      : widget.attrs.variant === "secondary"
+                      ? "bg-gray-200 text-gray-900 hover:bg-gray-300"
+                      : "border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  {widget.title}
+                </button>
+              )}
+              {widget.tplFile === "InfoWidget" && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <p className="text-sm text-blue-800">{widget.attrs.content}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
 
-      {attrs?.pagination && totalPages > 1 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalRecords={filteredRecords.length}
-          pageSize={pageSize}
-          onPageChange={setCurrentPage}
-          showTotal={attrs.pagination.showTotal}
+      {/* NEW: Role-based Filters */}
+      {filterOptions.length > 0 && (
+        <TableFilters
+          filters={filterOptions}
+          activeFilter={activeFilter}
+          onFilterChange={setActiveFilter}
+          currentUser={currentUser}
         />
+      )}
+
+      {/* Table */}
+      <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden">
+        {items.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-4xl mb-4">{attrs?.emptyState?.icon || "📄"}</div>
+            <h3 className="text-lg font-medium text-zinc-900 mb-2">
+              {attrs?.emptyState?.title || "No Data"}
+            </h3>
+            <p className="text-zinc-600 mb-4">
+              {attrs?.emptyState?.description || "No records found."}
+            </p>
+            {attrs?.emptyState?.actionButton && (
+              <button
+                onClick={() => go(attrs.emptyState!.actionButton!.navURL)}
+                className="bg-zinc-900 text-white px-4 py-2 text-sm font-medium rounded-md hover:bg-zinc-800"
+              >
+                {attrs.emptyState.actionButton.title}
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-zinc-50/50 border-b border-zinc-200/60">
+                <tr>
+                  {columns.map((column) => (
+                    <th
+                      key={column.key}
+                      className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider"
+                      style={{ width: column.width }}
+                    >
+                      {column.label || column.key}
+                    </th>
+                  ))}
+                  {attrs?.actions && attrs.actions.length > 0 && (
+                    <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  )}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-200/60">
+                {items.map((item, index) => (
+                  <tr key={item.id || index} className="hover:bg-zinc-50/30">
+                    {columns.map((column) => (
+                      <td key={column.key} className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
+                        {renderCellValue(item, column)}
+                      </td>
+                    ))}
+                    {attrs?.actions && attrs.actions.length > 0 && (
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                        <div className="flex justify-end gap-2">
+                          {attrs.actions.map((action, actionIndex) => (
+                            <button
+                              key={actionIndex}
+                              onClick={() => {
+                                if (action.type === "edit") handleEdit(item);
+                                else if (action.type === "delete") handleDelete(item);
+                                else handleCustomAction(action, item);
+                              }}
+                              className={`px-3 py-1 text-xs font-medium rounded ${
+                                action.variant === "danger"
+                                  ? "bg-red-100 text-red-700 hover:bg-red-200"
+                                  : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
+                              }`}
+                            >
+                              {action.label || action.type}
+                            </button>
+                          ))}
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Pagination info */}
+      {attrs?.pagination?.showTotal && items.length > 0 && (
+        <div className="mt-4 text-sm text-zinc-600">
+          Showing {items.length} records
+        </div>
       )}
     </div>
   );

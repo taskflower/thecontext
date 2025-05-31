@@ -1,6 +1,6 @@
 {
   "name": "Minimal 3-Role App",
-  "tplDir": "default",
+  "tplDir": "default", 
   "defaultWorkspace": "main",
   "defaultScenario": "dashboard",
   "workspaces": ["main","reporter","support","admin","profile"],
@@ -8,7 +8,7 @@
     "provider": "indexedDB",
     "collections": {
       "users": "users",
-      "tickets": "tickets",
+      "tickets": "tickets", 
       "responses": "responses"
     },
     "relations": {
@@ -18,21 +18,45 @@
         "foreignKey": "reporterId"
       },
       "tickets.assignee": {
-        "type": "many-to-one", 
-        "target": "users",
+        "type": "many-to-one",
+        "target": "users", 
         "foreignKey": "assigneeId"
       }
     },
     "permissions": {
       "tickets": {
         "reporter": {
-          "filter": { "field": "reporterId", "value": "{{currentUser.id}}" },
-          "canCreate": true
+          "canCreate": true,
+          "canUpdate": false,
+          "canDelete": false
         },
         "support": {
-          "filter": { "field": "assigneeId", "value": "{{currentUser.id}}" }
+          "canCreate": false,
+          "canUpdate": true,
+          "canDelete": false
         },
-        "admin": {}
+        "admin": {
+          "canCreate": true,
+          "canUpdate": true,
+          "canDelete": true
+        }
+      },
+      "users": {
+        "admin": {
+          "canCreate": true,
+          "canUpdate": true,
+          "canDelete": true
+        },
+        "reporter": {
+          "canCreate": false,
+          "canUpdate": false,
+          "canDelete": false
+        },
+        "support": {
+          "canCreate": false,
+          "canUpdate": false,
+          "canDelete": false
+        }
       }
     }
   }
