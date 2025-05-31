@@ -178,7 +178,7 @@ export default function CurrentUserWidget({
                   title="Sign Out" 
                   attrs={{
                     navURL: logoutnavURL,
-                    variant: "danger",
+                    variant: "outline",
                     size: "md",
                     fullWidth: true
                   }}

@@ -270,7 +270,7 @@ export default function FormStep({ attrs }: FormStepProps) {
           <div className="space-y-6">
             {Object.entries(schema.properties)
               .filter(([key]) => !attrs?.excludeFields?.includes(key))
-              .map(([key, field], index) => (
+              .map(([key, field]) => (
                 <div key={key} className="group">
                   <FieldWidget
                     field={{

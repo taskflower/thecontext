@@ -1,7 +1,7 @@
 import { useAppNavigation } from "@/core";
 import I from "../I";
 
-type ButtonVariant = "primary" | "danger" | "outline";
+type ButtonVariant = "primary" | "secondary" | "outline";
 type ButtonSize = "sm" | "md" | "lg";
 
 type ButtonWidgetProps = {
@@ -20,7 +20,7 @@ export default function ButtonWidget({ title, attrs }: ButtonWidgetProps) {
 
   const variants: Record<ButtonVariant, string> = {
     primary: "bg-blue-500 hover:bg-blue-600 text-white",
-    danger: "bg-red-500 hover:bg-red-600 text-white",
+    secondary: "bg-gray-500 hover:bg-gray-600 text-white",
     outline: "border border-gray-300 hover:bg-gray-50 text-gray-700",
   };
 
