@@ -29,11 +29,11 @@ export default function ButtonWidget({ title, attrs }: ButtonWidgetProps) {
     const base = "inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
     
     const variants = {
-      primary: "text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:shadow-lg hover:shadow-blue-500/25 hover:-translate-y-0.5 focus:ring-blue-500",
-      secondary: "text-white bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 hover:shadow-lg hover:shadow-slate-500/25 hover:-translate-y-0.5 focus:ring-slate-500",
-      outline: "text-slate-700 bg-white border-2 border-slate-300 hover:border-slate-400 hover:bg-slate-50 hover:shadow-md focus:ring-slate-500",
-      danger: "text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 hover:shadow-lg hover:shadow-red-500/25 hover:-translate-y-0.5 focus:ring-red-500",
-      success: "text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 hover:shadow-lg hover:shadow-green-500/25 hover:-translate-y-0.5 focus:ring-green-500"
+      primary: "text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 hover:shadow-md hover:shadow-blue-500/20 focus:ring-blue-400",
+      secondary: "text-white bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 hover:shadow-md hover:shadow-slate-500/20 focus:ring-slate-400",
+      outline: "text-slate-600 bg-white border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm focus:ring-slate-400",
+      danger: "text-white bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 hover:shadow-md hover:shadow-red-500/20 focus:ring-red-400",
+      success: "text-white bg-gradient-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 hover:shadow-md hover:shadow-green-500/20 focus:ring-green-400"
     };
     
     return `${base} ${variants[attrs.variant || "primary"]}`;
@@ -105,7 +105,7 @@ export default function ButtonWidget({ title, attrs }: ButtonWidgetProps) {
       `}
     >
       {attrs.icon && (
-        <span className="mr-2 group-hover:scale-110 transition-transform duration-200">
+        <span className="mr-2">
           {getIconElement()}
         </span>
       )}
@@ -113,7 +113,7 @@ export default function ButtonWidget({ title, attrs }: ButtonWidgetProps) {
       <span className="font-semibold">{title}</span>
       
       {/* Subtle shine effect on hover */}
-      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 group-hover:animate-pulse transition-opacity duration-300 pointer-events-none"></div>
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none"></div>
     </button>
   );
 }

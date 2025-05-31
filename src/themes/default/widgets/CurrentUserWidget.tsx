@@ -1,5 +1,6 @@
 // src/themes/default/widgets/CurrentUserWidget.tsx - Modern Dropbox Style
 import { useEngineStore, useAppNavigation } from "@/core";
+import ButtonWidget from "./ButtonWidget";
 
 interface CurrentUserWidgetProps {
   title?: string;
@@ -43,14 +44,6 @@ export default function CurrentUserWidget({
     go(editnavURL);
   };
 
-  const handleLogin = () => {
-    go(loginnavURL);
-  };
-
-  const handleRegister = () => {
-    go(registernavURL);
-  };
-
   const getUserInitials = () => {
     if (!currentUser) return "?";
     const first = currentUser.firstName?.[0] || "";
@@ -82,18 +75,28 @@ export default function CurrentUserWidget({
           </p>
           
           <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={handleLogin}
-              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-medium rounded-xl hover:from-blue-700 hover:to-purple-700 hover:shadow-lg hover:shadow-blue-500/25 hover:-translate-y-0.5 transition-all duration-200"
-            >
-              Sign In
-            </button>
-            <button
-              onClick={handleRegister}
-              className="flex-1 px-4 py-2.5 bg-white text-slate-700 text-sm font-medium border-2 border-slate-200 rounded-xl hover:border-slate-300 hover:bg-slate-50 transition-all duration-200"
-            >
-              Register
-            </button>
+            <div className="flex-1">
+              <ButtonWidget 
+                title="Sign In" 
+                attrs={{
+                  navURL: loginnavURL,
+                  variant: "primary",
+                  size: "md",
+                  fullWidth: true
+                }}
+              />
+            </div>
+            <div className="flex-1">
+              <ButtonWidget 
+                title="Register" 
+                attrs={{
+                  navURL: registernavURL,
+                  variant: "outline",
+                  size: "md",
+                  fullWidth: true
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -158,18 +161,29 @@ export default function CurrentUserWidget({
           {/* Actions */}
           {showActions && (
             <div className="flex gap-3">
-              <button
-                onClick={handleEdit}
-                className="flex-1 px-4 py-2.5 bg-slate-100 text-slate-700 text-sm font-medium rounded-xl hover:bg-slate-200 transition-all duration-200"
-              >
-                Edit Profile
-              </button>
-              <button
-                onClick={handleLogout}
-                className="flex-1 px-4 py-2.5 bg-red-100 text-red-700 text-sm font-medium rounded-xl hover:bg-red-200 transition-all duration-200"
-              >
-                Sign Out
-              </button>
+              <div className="flex-1">
+                <ButtonWidget 
+                  title="Edit Profile" 
+                  attrs={{
+                    navURL: editnavURL,
+                    variant: "secondary",
+                    size: "md",
+                    icon: "edit",
+                    fullWidth: true
+                  }}
+                />
+              </div>
+              <div className="flex-1">
+                <ButtonWidget 
+                  title="Sign Out" 
+                  attrs={{
+                    navURL: logoutnavURL,
+                    variant: "danger",
+                    size: "md",
+                    fullWidth: true
+                  }}
+                />
+              </div>
             </div>
           )}
         </div>
