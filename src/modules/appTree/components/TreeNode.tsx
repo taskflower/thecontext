@@ -21,12 +21,12 @@ export const TreeNode: React.FC<TreeNodeProps> = ({
   isViewingNode,
 }) => {
   return (
-    <div className="flex items-center gap-2 px-2 py-1 text-xs rounded">
+    <div className="flex items-center gap-2 px-2 py-1 text-xs rounded -mr-2">
       <span className="text-zinc-300">└─</span>
       <Settings size={12} className="text-zinc-400" />
       <button
         onClick={() => onNavigate(workspace.slug, scenario.slug, node.slug)}
-        className="flex-1 min-w-0 text-left"
+        className="flex-1 min-w-0 text-left hover:bg-zinc-100 px-2 py-1 rounded"
       >
         <div className="text-zinc-600 truncate">
           {node.label || node.slug}

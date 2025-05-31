@@ -55,7 +55,7 @@ export const TreeWorkspace: React.FC<TreeWorkspaceProps> = ({
           }}
           className="px-1 py-1 text-zinc-400 hover:text-zinc-600 rounded"
         >
-          {isExpanded ? '−' : '+'}
+       
         </button>
         {isViewingWorkspace && (
           <button
