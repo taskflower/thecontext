@@ -35,7 +35,7 @@ const AppTreeCard: React.FC<AppTreeCardProps> = ({ onClose, configName = 'exampl
 
         {/* Content */}
         <div className="flex-1 overflow-hidden">
-          <AppTreeView configName={configName} onNavigate={onClose} />
+          <AppTreeView configName={configName}  />
         </div>
       </div>
     </>
