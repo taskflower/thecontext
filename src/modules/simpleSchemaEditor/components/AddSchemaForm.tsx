@@ -38,6 +38,8 @@ export const AddSchemaForm: React.FC<AddSchemaFormProps> = ({ onAdd, onCancel })
   ];
 
   const createSchemaFromTemplate = (templateId: string) => {
+    console.log('Creating schema from template:', templateId);
+    
     if (!schemaName.trim()) return;
     onAdd(schemaName.trim());
   };

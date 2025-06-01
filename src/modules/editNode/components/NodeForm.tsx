@@ -8,6 +8,16 @@ interface NodeFormProps {
   onFieldChange: (key: string, value: any) => void;
 }
 
+const TEMPLATE_OPTIONS = [
+  "FormStep",
+  "ListTableStep", 
+  "DbSummaryStep",
+  "LLMGenerationStep",
+  "UserLoginProcessStep",
+  "InfoStep",
+  "ConfirmationStep"
+];
+
 const nodeFormSchema = {
   path: {
     type: "string",
@@ -44,15 +54,7 @@ const nodeFormSchema = {
     label: "Template File",
     fieldType: "select",
     required: true,
-    enum: [
-      "FormStep",
-      "ListTableStep", 
-      "DbSummaryStep",
-      "LLMGenerationStep",
-      "UserLoginProcessStep",
-      "InfoStep",
-      "ConfirmationStep"
-    ],
+    enum: TEMPLATE_OPTIONS,
     enumLabels: {
       "FormStep": "FormStep - Formularz",
       "ListTableStep": "ListTableStep - Lista/Tabela", 
@@ -64,7 +66,7 @@ const nodeFormSchema = {
     },
     description: "Komponent template używany do renderowania tego kroku"
   }
-} as const;
+};
 
 export const NodeForm: React.FC<NodeFormProps> = ({
   formData,
