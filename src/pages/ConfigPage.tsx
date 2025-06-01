@@ -21,6 +21,8 @@ export default function ConfigPage() {
     id: string;
   }>();
 
+  console.log('🎯 ConfigPage params:', { config, workspace, scenario, node });
+
   // Wymagaj podstawowych parametrów
   if (!config) return <Error>Missing config parameter</Error>;
   if (!workspace) return <Error>Missing workspace parameter</Error>;
@@ -37,6 +39,12 @@ export default function ConfigPage() {
     scenario ? `${base}/scenarios/${workspace}/${scenario}.json` : ""
   );
 
+  console.log('📊 Configs loaded:', { 
+    app: !!app, 
+    workspaceConfig: !!workspaceConfig,
+    layoutFile: workspaceConfig?.templateSettings?.layoutFile 
+  });
+
   // Layout config
   const { theme, layoutFile } = useMemo(
     () => ({
@@ -51,6 +59,8 @@ export default function ConfigPage() {
     "layouts",
     layoutFile
   );
+
+  console.log('🎨 Layout:', { Layout: !!Layout, loading: layoutLoading, theme, layoutFile });
 
   // Loading states
   if (!app || layoutLoading) return <></>;
