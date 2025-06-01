@@ -1,9 +1,16 @@
 // src/modules/configsManager/ConfigsManagerCard.tsx
 import React, { useEffect, useState } from "react";
-import { X, Cloud, HardDrive, RefreshCw, Upload, Download, Trash2 } from "lucide-react";
+import {
+  X,
+  Cloud,
+  HardDrive,
+  RefreshCw,
+  Upload,
+  Download,
+  Trash2,
+} from "lucide-react";
 import { BaseModal } from "../shared/components/BaseModal";
 import { useConfigManager } from "./useConfigManager";
-
 
 interface ConfigsManagerCardProps {
   onClose: () => void;
@@ -17,7 +24,7 @@ const ConfigsManagerCard: React.FC<ConfigsManagerCardProps> = ({ onClose }) => {
     downloadConfig,
     uploadConfig,
     deleteConfig,
-    clearLocalConfig
+    clearLocalConfig,
   } = useConfigManager();
 
   const [selectedConfig, setSelectedConfig] = useState<string | null>(null);
@@ -28,41 +35,49 @@ const ConfigsManagerCard: React.FC<ConfigsManagerCardProps> = ({ onClose }) => {
 
   const getSourceIcon = (source: string) => {
     switch (source) {
-      case 'firebase': return <Cloud size={16} className="text-green-600" />;
-      case 'local': return <HardDrive size={16} className="text-blue-600" />;
-      case 'both': return <div className="flex gap-1">
-        <HardDrive size={12} className="text-blue-600" />
-        <Cloud size={12} className="text-green-600" />
-      </div>;
-      default: return <HardDrive size={16} className="text-gray-400" />;
+      case "firebase":
+        return <Cloud size={16} className="text-green-600" />;
+      case "local":
+        return <HardDrive size={16} className="text-blue-600" />;
+      case "both":
+        return (
+          <div className="flex gap-1">
+            <HardDrive size={12} className="text-blue-600" />
+            <Cloud size={12} className="text-green-600" />
+          </div>
+        );
+      default:
+        return <HardDrive size={16} className="text-gray-400" />;
     }
   };
 
   const getSourceBadge = (source: string) => {
     const styles = {
-      local: 'bg-blue-50 text-blue-700 border-blue-200',
-      firebase: 'bg-green-50 text-green-700 border-green-200',
-      both: 'bg-purple-50 text-purple-700 border-purple-200'
+      local: "bg-blue-50 text-blue-700 border-blue-200",
+      firebase: "bg-green-50 text-green-700 border-green-200",
+      both: "bg-purple-50 text-purple-700 border-purple-200",
     };
-    return `px-2 py-1 text-xs rounded border ${styles[source as keyof typeof styles] || styles.local}`;
+    return `px-2 py-1 text-xs rounded border ${
+      styles[source as keyof typeof styles] || styles.local
+    }`;
   };
 
   const handleAction = async (action: string, configName: string) => {
     setSelectedConfig(configName);
     try {
       switch (action) {
-        case 'upload':
+        case "upload":
           await uploadConfig(configName);
           break;
-        case 'download':
+        case "download":
           await downloadConfig(configName);
           break;
-        case 'delete':
+        case "delete":
           if (confirm(`Delete "${configName}" from Firebase?`)) {
             await deleteConfig(configName);
           }
           break;
-        case 'clearLocal':
+        case "clearLocal":
           if (confirm(`Clear local cache for "${configName}"?`)) {
             await clearLocalConfig(configName);
           }
@@ -91,14 +106,18 @@ const ConfigsManagerCard: React.FC<ConfigsManagerCardProps> = ({ onClose }) => {
         {/* Header */}
         <div className="flex justify-between items-center mb-4 pb-3 border-b">
           <div className="text-sm text-zinc-600">
-            Manage configuration synchronization between local cache and Firebase
+            Manage configuration synchronization between local cache and
+            Firebase
           </div>
           <button
             onClick={loadConfigList}
             disabled={loading && !selectedConfig}
             className="flex items-center gap-2 px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded disabled:opacity-50"
           >
-            <RefreshCw size={12} className={loading && !selectedConfig ? 'animate-spin' : ''} />
+            <RefreshCw
+              size={12}
+              className={loading && !selectedConfig ? "animate-spin" : ""}
+            />
             Refresh
           </button>
         </div>
@@ -108,7 +127,9 @@ const ConfigsManagerCard: React.FC<ConfigsManagerCardProps> = ({ onClose }) => {
           {loading && configs.length === 0 ? (
             <div className="flex items-center justify-center py-8">
               <RefreshCw size={16} className="animate-spin mr-2" />
-              <span className="text-sm text-gray-500">Loading configurations...</span>
+              <span className="text-sm text-gray-500">
+                Loading configurations...
+              </span>
             </div>
           ) : configs.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
@@ -144,50 +165,52 @@ const ConfigsManagerCard: React.FC<ConfigsManagerCardProps> = ({ onClose }) => {
                   {/* Actions */}
                   <div className="flex gap-2 flex-wrap">
                     {/* Upload to Firebase */}
-                    {config.source !== 'firebase' && (
+                    {config.source !== "firebase" && (
                       <button
-                        onClick={() => handleAction('upload', config.name)}
+                        onClick={() => handleAction("upload", config.name)}
                         disabled={isActionLoading(config.name)}
                         className="flex items-center gap-1 px-2 py-1 text-xs bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 disabled:opacity-50"
                       >
                         <Upload size={12} />
-                        {isActionLoading(config.name) ? 'Uploading...' : 'Upload'}
+                        {isActionLoading(config.name) ? "U..." : "Up"}
                       </button>
                     )}
 
                     {/* Download from Firebase */}
-                    {config.source !== 'local' && (
+                    {config.source !== "local" && (
                       <button
-                        onClick={() => handleAction('download', config.name)}
+                        onClick={() => handleAction("download", config.name)}
                         disabled={isActionLoading(config.name)}
                         className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 rounded border border-blue-200 disabled:opacity-50"
                       >
                         <Download size={12} />
-                        {isActionLoading(config.name) ? 'Downloading...' : 'Download'}
+                        {isActionLoading(config.name)
+                          ? "D......"
+                          : "Down"}
                       </button>
                     )}
 
                     {/* Clear Local */}
-                    {config.source !== 'firebase' && (
+                    {config.source !== "firebase" && (
                       <button
-                        onClick={() => handleAction('clearLocal', config.name)}
+                        onClick={() => handleAction("clearLocal", config.name)}
                         disabled={isActionLoading(config.name)}
                         className="flex items-center gap-1 px-2 py-1 text-xs bg-orange-50 hover:bg-orange-100 text-orange-700 rounded border border-orange-200 disabled:opacity-50"
                       >
                         <HardDrive size={12} />
-                        Clear Local
+                        Clear
                       </button>
                     )}
 
                     {/* Delete from Firebase */}
-                    {config.source !== 'local' && (
+                    {config.source !== "local" && (
                       <button
-                        onClick={() => handleAction('delete', config.name)}
+                        onClick={() => handleAction("delete", config.name)}
                         disabled={isActionLoading(config.name)}
                         className="flex items-center gap-1 px-2 py-1 text-xs bg-red-50 hover:bg-red-100 text-red-700 rounded border border-red-200 disabled:opacity-50"
                       >
                         <Trash2 size={12} />
-                        Delete Firebase
+                        DB
                       </button>
                     )}
                   </div>
@@ -213,7 +236,7 @@ const ConfigsManagerCard: React.FC<ConfigsManagerCardProps> = ({ onClose }) => {
               Auto-sync enabled
             </div>
           </div>
-          
+
           {/* Action Legend */}
           <div className="border-t pt-2 space-y-1">
             <div className="font-medium text-gray-700 mb-1">Actions:</div>

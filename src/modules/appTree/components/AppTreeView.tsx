@@ -22,7 +22,7 @@ interface AppTreeViewProps {
   onClose?: () => void;
 }
 
-const AppTreeView: React.FC<AppTreeViewProps> = ({ configName, onClose }) => {
+const AppTreeView: React.FC<AppTreeViewProps> = ({ configName}) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { workspaces, loading, error, appConfig } = useAppTreeData(configName);

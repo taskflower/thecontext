@@ -25,7 +25,7 @@ const EditScenarioCard: React.FC<EditScenarioCardProps> = ({
 }) => {
   const [scenarioData, setScenarioData] = useState<any>(null);
   const [name, setName] = useState<string>(scenario.name);
-  const [slug, setSlug] = useState<string>(scenario.slug);
+  const [slug] = useState<string>(scenario.slug);
   const [nodeCount, setNodeCount] = useState<number>(scenario.nodes?.length || 0);
 
   const { loading, saving, error, setError, handleAsync } = useModalState();

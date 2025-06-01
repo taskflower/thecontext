@@ -1,5 +1,5 @@
 // src/core/config/firebaseConfigSync.ts - ENHANCED with versioning
-import { collection, doc, getDoc, setDoc, getDocs, query, where } from 'firebase/firestore';
+import { collection, doc, getDoc, setDoc, getDocs } from 'firebase/firestore';
 import { db } from '@/provideDB/firebase/config';
 import { configDB } from '@/provideDB';
 

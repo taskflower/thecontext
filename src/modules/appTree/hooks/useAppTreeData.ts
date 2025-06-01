@@ -4,12 +4,17 @@ import { AppConfig, useConfig } from "@/core";
 import { CacheManager } from '../services/cacheManager';
 import { WorkspaceInfo } from './useAppTree';
 
+// Extended interface to include optional workspaces property
+interface ExtendedAppConfig extends AppConfig {
+  workspaces?: string[];
+}
+
 export const useAppTreeData = (configName: string) => {
   const [workspaces, setWorkspaces] = useState<WorkspaceInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const appConfig = useConfig<AppConfig>(
+  const appConfig = useConfig<ExtendedAppConfig>(
     configName,
     `/src/_configs/${configName}/app.json`
   );

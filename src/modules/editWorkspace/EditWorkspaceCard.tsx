@@ -22,7 +22,7 @@ const EditWorkspaceCard: React.FC<EditWorkspaceCardProps> = ({
 }) => {
   const [workspaceData, setWorkspaceData] = useState<any>(null);
   const [showSchemaEditor, setShowSchemaEditor] = useState(false);
-  const { loading, saving, error, setError, handleAsync } = useModalState();
+  const { loading, saving, error,  handleAsync } = useModalState();
 
   // Form states
   const [name, setName] = useState(workspace.name);

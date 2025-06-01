@@ -1,6 +1,6 @@
 // src/modules/simpleSchemaEditor/components/EditableSchemaField.tsx
 import React, { useState } from 'react';
-import { Edit3, Trash2, Type, Hash, CheckSquare, Mail, Calendar, User, List, FileText, ChevronDown, ChevronRight } from 'lucide-react';
+import { Trash2, Type, Hash, CheckSquare, Mail, Calendar, User, List, FileText, ChevronDown, ChevronRight } from 'lucide-react';
 import { SchemaField } from '../types';
 
 interface EditableSchemaFieldProps {

@@ -37,7 +37,7 @@ export class CacheManager {
 
   async syncCacheWithConfig(appConfig: AppConfig): Promise<void> {
     try {
-      // 1. Sync workspaces
+      // 1. Sync workspaces (using appConfig parameter)
       await this.syncWorkspaces(appConfig);
       
       // 2. Sync scenarios
@@ -50,7 +50,7 @@ export class CacheManager {
     }
   }
 
-  private async syncWorkspaces(appConfig: AppConfig): Promise<void> {
+  private async syncWorkspaces(_appConfig: AppConfig): Promise<void> {
     const workspaceModules = import.meta.glob<{ name?: string }>(
       "/src/_configs/*/workspaces/*.json",
       { eager: true, as: "json" }
