@@ -1,4 +1,4 @@
-// src/modules/appTree/AppTreeView.tsx
+// src/modules/appTree/components/AppTreeView.tsx
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAppTreeData } from "../hooks/useAppTreeData";
@@ -7,6 +7,7 @@ import EditScenarioCard from "../../editScenario/EditScenarioCard";
 import EditNodeCard from "../../editNode/EditNodeCard";
 import { NodeInfo, ScenarioInfo, WorkspaceInfo } from "../hooks/useAppTree";
 import EditWorkspaceCard from "@/modules/editWorkspace/EditWorkspaceCard";
+import ConfigsManagerCard from "@/modules/configsManager/ConfigsManagerCard"; // import nowego modułu
 
 interface ExtendedAppConfig {
   name: string;
@@ -39,6 +40,9 @@ const AppTreeView: React.FC<AppTreeViewProps> = ({ configName, onClose }) => {
     scenario: ScenarioInfo;
     node: NodeInfo;
   } | null>(null);
+
+  // nowy stan sterujący oknem ConfigsManager
+  const [showConfigsManager, setShowConfigsManager] = useState(false);
 
   const getCurrentView = () => {
     const pathParts = location.pathname.split("/").filter(Boolean);
@@ -192,10 +196,19 @@ const AppTreeView: React.FC<AppTreeViewProps> = ({ configName, onClose }) => {
           )}
         </div>
 
-        <div className="p-4 border-t border-zinc-200 bg-zinc-50 text-center text-xs text-zinc-400">
-          Znalazłem {workspaces.length} workspace'y,{" "}
-          {workspaces.reduce((sum, ws) => sum + ws.scenarios.length, 0)}{" "}
-          scenariuszy
+        <div className="p-4 border-t border-zinc-200 bg-zinc-50 text-center text-xs text-zinc-400 flex flex-col items-center gap-2">
+          <div>
+            Znalazłem {workspaces.length} workspace'y,{" "}
+            {workspaces.reduce((sum, ws) => sum + ws.scenarios.length, 0)}{" "}
+            scenariuszy
+          </div>
+          {/* Nowy przycisk ConfigsManager */}
+          <button
+            onClick={() => setShowConfigsManager(true)}
+            className="w-full mt-2 px-3 py-1 text-xs border border-blue-400 text-blue-600 rounded hover:bg-blue-200"
+          >
+            EXPORT 
+          </button>
         </div>
       </div>
 
@@ -223,6 +236,11 @@ const AppTreeView: React.FC<AppTreeViewProps> = ({ configName, onClose }) => {
           configName={configName}
           onClose={() => setEditingNode(null)}
         />
+      )}
+
+      {/* Warunkowe wyświetlenie okienka ConfigsManager */}
+      {showConfigsManager && (
+        <ConfigsManagerCard onClose={() => setShowConfigsManager(false)} />
       )}
     </>
   );
