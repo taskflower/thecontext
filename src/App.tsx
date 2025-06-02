@@ -20,7 +20,6 @@ function AppRoutes() {
         element: <ConfigPage />,
       },
       { path: ":config/:workspace", element: <ConfigPage /> },
-      
       {
         path: "*",
         element: (
@@ -32,7 +31,6 @@ function AppRoutes() {
     ],
     []
   );
-
   return <>{useRoutes(routes)}</>;
 }
 
