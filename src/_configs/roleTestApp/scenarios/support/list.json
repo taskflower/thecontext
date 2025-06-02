@@ -44,7 +44,7 @@
             "tplFile": "ButtonWidget",
             "title": "🏠 Dashboard",
             "attrs": { 
-              "navURL": "/support/dashboard/view", 
+              "navigationPath": "/support/dashboard/view", 
               "variant": "outline" 
             }
           }
@@ -58,7 +58,7 @@
           {
             "type": "edit",
             "label": "Handle",
-            "navURL": "/support/edit"
+            "navigationPath": "/support/edit"
           }
         ],
         "emptyState": {

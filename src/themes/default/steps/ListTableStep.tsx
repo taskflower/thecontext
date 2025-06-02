@@ -30,7 +30,7 @@ interface ListTableStepProps {
     actions?: Array<{
       type: "edit" | "delete" | "custom";
       label?: string;
-      navURL?: string;
+      navigationPath?: string;
       confirm?: string;
       variant?: "default" | "danger";
     }>;
@@ -38,7 +38,7 @@ interface ListTableStepProps {
       icon?: string;
       title?: string;
       description?: string;
-      actionButton?: { title: string; navURL: string };
+      actionButton?: { title: string; navigationPath: string };
     };
     headerWidgets?: Array<{
       tplFile: string;
@@ -165,8 +165,8 @@ export default function ListTableStep({ attrs }: ListTableStepProps) {
 
   const handleEdit = (item: any) => {
     const editAction = attrs?.actions?.find((a) => a.type === "edit");
-    if (editAction?.navURL) {
-      go(`${editAction.navURL}/${item.id}`);
+    if (editAction?.navigationPath) {
+      go(`${editAction.navigationPath}/${item.id}`);
     }
   };
 
@@ -374,7 +374,7 @@ export default function ListTableStep({ attrs }: ListTableStepProps) {
             </p>
             {attrs?.emptyState?.actionButton && !searchTerm && (
               <button
-                onClick={() => go(attrs.emptyState!.actionButton!.navURL)}
+                onClick={() => go(attrs.emptyState!.actionButton!.navigationPath)}
                 className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:shadow-lg hover:shadow-blue-500/25 hover:-translate-y-0.5 transition-all duration-200"
               >
                 {attrs.emptyState.actionButton.title}

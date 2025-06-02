@@ -17,31 +17,31 @@
             {
               "type": "edit",
               "label": "✏️ Edit Profile",
-              "navURL": "/profile/edit/form",
+              "navigationPath": "/profile/edit/form",
               "variant": "primary"
             },
             {
               "type": "custom",
               "label": "🔒 Change Password",
-              "navURL": "/profile/password/form",
+              "navigationPath": "/profile/password/form",
               "variant": "secondary"
             },
             {
               "type": "custom",
               "label": "🏠 Back to Dashboard",
-              "navURL": "/{{currentUser.role}}/dashboard/view",
+              "navigationPath": "/{{currentUser.role}}/dashboard/view",
               "variant": "outline"
             }
           ],
           "noDataActions": [
             {
               "label": "🔄 Refresh Profile",
-              "navURL": "/profile/dashboard/view",
+              "navigationPath": "/profile/dashboard/view",
               "variant": "primary"
             },
             {
               "label": "🏠 Go to Main Dashboard", 
-              "navURL": "/main/dashboard/view",
+              "navigationPath": "/main/dashboard/view",
               "variant": "outline"
             }
           ]

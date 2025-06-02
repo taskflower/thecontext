@@ -11,9 +11,9 @@
         "title": "Logged User",
         "attrs": {
           "variant": "compact",
-          "loginnavURL": "/main/login/form",
-          "logoutnavURL": "/main",
-          "editnavURL": "/profile/edit/form",
+          "loginnavigationPath": "/main/login/form",
+          "logoutnavigationPath": "/main",
+          "editnavigationPath": "/profile/edit/form",
           "cellClass": "col-span-full md:col-span-1"
         }
       },
@@ -30,7 +30,7 @@
         "tplFile": "ButtonWidget",
         "title": "📋 All Tickets",
         "attrs": {
-          "navURL": "/support/list/view",
+          "navigationPath": "/support/list/view",
           "variant": "primary",
           "cellClass": "col-span-full md:col-span-1"
         }

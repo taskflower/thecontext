@@ -40,7 +40,7 @@
             "tplFile": "ButtonWidget",
             "title": "➕ New Ticket",
             "attrs": { 
-              "navURL": "/reporter/create/form", 
+              "navigationPath": "/reporter/create/form", 
               "variant": "primary" 
             }
           },
@@ -48,7 +48,7 @@
             "tplFile": "ButtonWidget",
             "title": "📋 My Tickets",
             "attrs": { 
-              "navURL": "/reporter/list/view", 
+              "navigationPath": "/reporter/list/view", 
               "variant": "secondary" 
             }
           }
@@ -64,7 +64,7 @@
           "description": "You haven't created any tickets yet. Start by creating your first ticket.",
           "actionButton": { 
             "title": "Create First Ticket", 
-            "navURL": "/reporter/create/form" 
+            "navigationPath": "/reporter/create/form" 
           }
         },
         "pagination": { "pageSize": 10, "showTotal": true }

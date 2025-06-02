@@ -26,7 +26,7 @@
           "contextKey": "generatedTicket"
         },
         "onCancel": {
-          "navURL": "tickets/list/view"
+          "navigationPath": "tickets/list/view"
         }
       }
     },
@@ -44,11 +44,11 @@
         "showGeneratedBadge": true,
         "onSubmit": {
           "collection": "tickets",
-          "navURL": "tickets/list/view",
+          "navigationPath": "tickets/list/view",
           "clearContext": true
         },
         "onCancel": {
-          "navURL": "tickets/list/view"
+          "navigationPath": "tickets/list/view"
         },
         "additionalActions": [
           {
@@ -61,7 +61,7 @@
           {
             "type": "custom",
             "label": "✏️ Edytuj ręcznie",
-            "navURL": "tickets/create/form",
+            "navigationPath": "tickets/create/form",
             "variant": "outline"
           }
         ],
@@ -73,7 +73,7 @@
           },
           {
             "label": "✏️ Utwórz ręcznie",
-            "navURL": "tickets/create/form",
+            "navigationPath": "tickets/create/form",
             "variant": "outline"
           }
         ]

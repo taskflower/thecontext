@@ -19,9 +19,9 @@
         "title": "Logged User",
         "attrs": {
           "variant": "compact",
-          "loginnavURL": "/main/login/form",
-          "logoutnavURL": "/main",
-          "registernavURL": "/main/register/form",
+          "loginnavigationPath": "/main/login/form",
+          "logoutnavigationPath": "/main",
+          "registernavigationPath": "/main/register/form",
           "cellClass": "col-span-full md:col-span-1 lg:col-span-2 xl:col-span-6"
         }
       },
@@ -29,7 +29,7 @@
         "tplFile": "ButtonWidget",
         "title": "Login",
         "attrs": {
-          "navURL": "/main/login/form",
+          "navigationPath": "/main/login/form",
           "variant": "primary",
           "cellClass": "col-span-1 lg:col-span-1 xl:col-span-3"
         }
@@ -38,7 +38,7 @@
         "tplFile": "ButtonWidget",
         "title": "Register",
         "attrs": {
-          "navURL": "/main/register/form",
+          "navigationPath": "/main/register/form",
           "variant": "outline",
           "cellClass": "col-span-1 lg:col-span-1 xl:col-span-3"
         }

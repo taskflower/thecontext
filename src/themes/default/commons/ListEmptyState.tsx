@@ -7,7 +7,7 @@ interface ListEmptyStateProps {
   description?: string;
   actionButton?: {
     title: string;
-    navURL: string;
+    navigationPath: string;
     variant?: "primary" | "secondary" | "outline";
   };
   className?: string;
@@ -29,7 +29,7 @@ export default function ListEmptyState({
       <p className="text-zinc-600 mb-4">{description}</p>
       {actionButton && (
         <button
-          onClick={() => go(actionButton.navURL)}
+          onClick={() => go(actionButton.navigationPath)}
           className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
             actionButton.variant === "primary" || !actionButton.variant
               ? "bg-zinc-900 text-white hover:bg-zinc-800"

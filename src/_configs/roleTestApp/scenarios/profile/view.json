@@ -16,13 +16,13 @@
           {
             "type": "edit",
             "label": "✏️ Edit Profile",
-            "navURL": "/profile/edit/form",
+            "navigationPath": "/profile/edit/form",
             "variant": "primary"
           },
           {
             "type": "custom",
             "label": "🏠 Back to Dashboard",
-            "navURL": "/{{currentUser.role}}/dashboard/view",
+            "navigationPath": "/{{currentUser.role}}/dashboard/view",
             "variant": "outline"
           }
         ]

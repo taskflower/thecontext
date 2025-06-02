@@ -32,7 +32,7 @@
             "tplFile": "ButtonWidget",
             "title": "🏠 Dashboard",
             "attrs": { 
-              "navURL": "/reporter/dashboard/view", 
+              "navigationPath": "/reporter/dashboard/view", 
               "variant": "outline" 
             }
           },
@@ -40,7 +40,7 @@
             "tplFile": "ButtonWidget",
             "title": "➕ New Ticket",
             "attrs": { 
-              "navURL": "/reporter/create/form", 
+              "navigationPath": "/reporter/create/form", 
               "variant": "primary" 
             }
           }
@@ -56,7 +56,7 @@
           "description": "You haven't created any tickets yet.",
           "actionButton": { 
             "title": "Create First Ticket", 
-            "navURL": "/reporter/create/form" 
+            "navigationPath": "/reporter/create/form" 
           }
         },
         "pagination": { "pageSize": 10, "showTotal": true }

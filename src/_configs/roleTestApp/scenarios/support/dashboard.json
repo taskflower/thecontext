@@ -52,7 +52,7 @@
            
             "attrs": { 
               "icon": "clipboard-list",
-              "navURL": "/support/list/view", 
+              "navigationPath": "/support/list/view", 
               "variant": "primary" 
             } 
           }
@@ -91,7 +91,7 @@
             "type": "edit", 
             "label": "Handle", 
             "icon": "settings",
-            "navURL": "/support/edit" 
+            "navigationPath": "/support/edit" 
           }
         ],
         "emptyState": { 

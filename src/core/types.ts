@@ -65,7 +65,7 @@
       excludeFields?: string[];
       onSubmit?: {
         collection: string;
-        navURL: string;
+        navigationPath: string;
         action?: "create" | "update";
       };
       // LLM specific
@@ -73,15 +73,15 @@
       placeholder?: string;
       contextInstructions?: string;
       examplePrompts?: string[];
-      navURL?: string;
-      cancelnavURL?: string;
+      navigationPath?: string;
+      cancelnavigationPath?: string;
       systemMessage?: string;
       // List specific
       emptyState?: {
         icon?: string;
         title?: string;
         description?: string;
-        actionButton?: { title: string; navURL: string };
+        actionButton?: { title: string; navigationPath: string };
       };
       columns?: Array<{
         key: string;
@@ -93,14 +93,14 @@
       actions?: Array<{
         type: "edit" | "delete" | "custom";
         label?: string;
-        navURL?: string;
+        navigationPath?: string;
         confirm?: string;
         variant?: "default" | "danger";
       }>;
       widgets?: Array<{
         tplFile: string;
         title: string;
-        attrs: { navURL: string; variant?: "primary" | "secondary" };
+        attrs: { navigationPath: string; variant?: "primary" | "secondary" };
       }>;
       pagination?: { pageSize?: number; showTotal?: boolean };
       search?: { enabled?: boolean; placeholder?: string; fields?: string[] };

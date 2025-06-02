@@ -7,10 +7,10 @@ interface CurrentUserWidgetProps {
   attrs?: {
     currentUserPath?: string;
     showActions?: boolean;
-    editnavURL?: string;
-    logoutnavURL?: string;
-    loginnavURL?: string;
-    registernavURL?: string;
+    editnavigationPath?: string;
+    logoutnavigationPath?: string;
+    loginnavigationPath?: string;
+    registernavigationPath?: string;
     variant?: "compact" | "detailed" | "card";
     colSpan?: string | number;
   };
@@ -26,10 +26,10 @@ export default function CurrentUserWidget({
   const {
     currentUserPath = "currentUser",
     showActions = true,
-    editnavURL = "/profile/edit/form",
-    logoutnavURL = "/main",
-    loginnavURL = "/main/login/form",
-    registernavURL = "/main/register/form",
+    editnavigationPath = "/profile/edit/form",
+    logoutnavigationPath = "/main",
+    loginnavigationPath = "/main/login/form",
+    registernavigationPath = "/main/register/form",
     variant = "detailed"
   } = attrs;
 
@@ -37,11 +37,11 @@ export default function CurrentUserWidget({
 
   const handleLogout = () => {
     set(currentUserPath, null);
-    go(logoutnavURL);
+    go(logoutnavigationPath);
   };
 
   const handleEdit = () => {
-    go(editnavURL);
+    go(editnavigationPath);
   };
 
   const getUserInitials = () => {
@@ -79,7 +79,7 @@ export default function CurrentUserWidget({
               <ButtonWidget 
                 title="Sign In" 
                 attrs={{
-                  navURL: loginnavURL,
+                  navigationPath: loginnavigationPath,
                   variant: "primary",
                   size: "md",
                   fullWidth: true
@@ -90,7 +90,7 @@ export default function CurrentUserWidget({
               <ButtonWidget 
                 title="Register" 
                 attrs={{
-                  navURL: registernavURL,
+                  navigationPath: registernavigationPath,
                   variant: "outline",
                   size: "md",
                   fullWidth: true
@@ -165,7 +165,7 @@ export default function CurrentUserWidget({
                 <ButtonWidget 
                   title="Edit Profile" 
                   attrs={{
-                    navURL: editnavURL,
+                    navigationPath: editnavigationPath,
                     variant: "secondary",
                     size: "md",
                     icon: "edit",
@@ -177,7 +177,7 @@ export default function CurrentUserWidget({
                 <ButtonWidget 
                   title="Sign Out" 
                   attrs={{
-                    navURL: logoutnavURL,
+                    navigationPath: logoutnavigationPath,
                     variant: "outline",
                     size: "md",
                     fullWidth: true

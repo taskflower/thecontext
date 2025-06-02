@@ -8,8 +8,8 @@ interface UserLoginProcessStepProps {
   attrs: {
     loginDataPath?: string; // ścieżka do danych logowania w kontekście
     currentUserPath?: string; // gdzie zapisać dane zalogowanego użytkownika
-    successNavURL?: string; // gdzie przekierować po sukcesie
-    errorNavURL?: string; // gdzie przekierować przy błędzie
+    successnavigationPath?: string; // gdzie przekierować po sukcesie
+    errornavigationPath?: string; // gdzie przekierować przy błędzie
     title?: string;
     description?: string;
   };
@@ -25,8 +25,8 @@ export default function UserLoginProcessStep({ attrs }: UserLoginProcessStepProp
 
   const loginDataPath = attrs.loginDataPath || "loginData";
   const currentUserPath = attrs.currentUserPath || "currentUser";
-  const successNavURL = attrs.successNavURL || "/{{currentUser.role}}/dashboard/view";
-  const errorNavURL = attrs.errorNavURL || "/main/login/form";
+  const successnavigationPath = attrs.successnavigationPath || "/{{currentUser.role}}/dashboard/view";
+  const errornavigationPath = attrs.errornavigationPath || "/main/login/form";
 
   useEffect(() => {
     if (!loadingUsers && users.length > 0) {
@@ -80,13 +80,13 @@ export default function UserLoginProcessStep({ attrs }: UserLoginProcessStepProp
   };
 
   const handleSuccessNavigation = () => {
-    console.log(`[UserLoginProcessStep] Navigating to: ${successNavURL}`);
-    go(successNavURL);
+    console.log(`[UserLoginProcessStep] Navigating to: ${successnavigationPath}`);
+    go(successnavigationPath);
   };
 
   const handleErrorNavigation = () => {
-    console.log(`[UserLoginProcessStep] Navigating to error page: ${errorNavURL}`);
-    go(errorNavURL);
+    console.log(`[UserLoginProcessStep] Navigating to error page: ${errornavigationPath}`);
+    go(errornavigationPath);
   };
 
   if (loadingUsers) {

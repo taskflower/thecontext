@@ -7,7 +7,7 @@ type ButtonSize = "sm" | "md" | "lg";
 type ButtonWidgetProps = {
   title: string;
   attrs: {
-    navURL?: string;
+    navigationPath?: string;
     variant?: ButtonVariant;
     size?: ButtonSize;
     icon?: string;
@@ -35,7 +35,7 @@ export default function ButtonWidget({ title, attrs }: ButtonWidgetProps) {
 
   return (
     <button
-      onClick={() => attrs.navURL && go(attrs.navURL)}
+      onClick={() => attrs.navigationPath && go(attrs.navigationPath)}
       className={`
         rounded-md font-medium transition-all focus:outline-none focus:ring-2
         ${variants[variant]}

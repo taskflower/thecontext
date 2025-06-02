@@ -12,7 +12,7 @@
         "loadFromParams": true,
         "onSubmit": {
           "collection": "users",
-          "navURL": "/admin/list/view",
+          "navigationPath": "/admin/list/view",
           "action": "update"
         }
       }

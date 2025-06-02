@@ -37,9 +37,9 @@ export function WidgetEditor({ widgets, onChange }: WidgetEditorProps) {
       />
       {widget.tplFile === 'ButtonWidget' && (
         <input
-          value={widget.attrs?.navURL || ''}
+          value={widget.attrs?.navigationPath || ''}
           onChange={(e) => updateWidget(index, { 
-            attrs: { ...widget.attrs, navURL: e.target.value }
+            attrs: { ...widget.attrs, navigationPath: e.target.value }
           })}
           className="w-full text-sm border rounded px-2 py-1"
           placeholder="Navigation path"

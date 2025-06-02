@@ -12,13 +12,13 @@ interface FormStepProps {
     description?: string;
     onSubmit?: {
       collection?: string;
-      navURL?: string;
+      navigationPath?: string;
       saveToContext?: boolean;
       contextKey?: string;
       action?: "create" | "update";
     };
     onCancel?: {
-      navURL: string;
+      navigationPath: string;
     };
     loadFromParams?: boolean;
     loadFromContext?: string;
@@ -153,7 +153,7 @@ export default function FormStep({ attrs }: FormStepProps) {
       const payload = { ...data, id: editId || Date.now().toString() };
 
       const saveToContext = attrs?.onSubmit?.saveToContext ?? false;
-      const navURL = attrs?.onSubmit?.navURL || "/main";
+      const navigationPath = attrs?.onSubmit?.navigationPath || "/main";
 
       if (saveToContext) {
         set(contextKey, payload);
@@ -172,7 +172,7 @@ export default function FormStep({ attrs }: FormStepProps) {
         setTimeout(() => button.classList.remove("animate-pulse"), 500);
       }
 
-      setTimeout(() => go(navURL), 600);
+      setTimeout(() => go(navigationPath), 600);
     } catch (err: any) {
       alert(`Save failed: ${err.message}`);
     } finally {
@@ -181,7 +181,7 @@ export default function FormStep({ attrs }: FormStepProps) {
   };
 
   const handleCancel = () => {
-    go(attrs?.onCancel?.navURL || "/main");
+    go(attrs?.onCancel?.navigationPath || "/main");
   };
 
   if (loading) {

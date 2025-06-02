@@ -24,7 +24,7 @@ export const parsePath = (pathname: string) => {
   
   export const createDefaultWidget = (type: string) => {
     const attrs = type === 'ButtonWidget' 
-      ? { navURL: '', variant: 'default', colSpan: '2' }
+      ? { navigationPath: '', variant: 'default', colSpan: '2' }
       : type === 'InfoWidget'
       ? { content: 'Content here', variant: 'default', colSpan: '3' }
       : { size: 'medium', colSpan: 'full' };

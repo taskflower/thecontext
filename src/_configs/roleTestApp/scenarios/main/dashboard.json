@@ -17,13 +17,13 @@
           {
             "type": "custom",
             "label": "👤 Login",
-            "navURL": "/main/login/form",
+            "navigationPath": "/main/login/form",
             "variant": "primary"
           },
           {
             "type": "custom",
             "label": "📝 Register",
-            "navURL": "/main/register/form",
+            "navigationPath": "/main/register/form",
             "variant": "secondary"
           }
         ]

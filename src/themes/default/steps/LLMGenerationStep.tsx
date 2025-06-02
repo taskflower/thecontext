@@ -17,12 +17,12 @@ interface LLMGenerationStepProps {
     // ✅ UJEDNOLICONA STRUKTURA NAWIGACJI
     onSubmit?: {
       nextStep?: string;        // Slug kolejnego kroku
-      navURL?: string;          // Pełna ścieżka
+      navigationPath?: string;          // Pełna ścieżka
       saveToContext?: boolean;
       contextKey?: string;
     };
     onCancel?: {
-      navURL: string;
+      navigationPath: string;
     };
   };
 }
@@ -99,10 +99,10 @@ export default function LLMGenerationStep({ attrs }: LLMGenerationStepProps) {
       // nextStep = kolejny krok w tym samym flow
       nextPath = `${workspace}/llm-create/${attrs.onSubmit.nextStep}`;
       console.log(`LLM: Using nextStep: ${attrs.onSubmit.nextStep} → ${nextPath}`);
-    } else if (attrs?.onSubmit?.navURL) {
-      // navURL = pełna ścieżka nawigacji
-      nextPath = attrs.onSubmit.navURL;
-      console.log(`LLM: Using navURL: ${attrs.onSubmit.navURL} → ${nextPath}`);
+    } else if (attrs?.onSubmit?.navigationPath) {
+      // navigationPath = pełna ścieżka nawigacji
+      nextPath = attrs.onSubmit.navigationPath;
+      console.log(`LLM: Using navigationPath: ${attrs.onSubmit.navigationPath} → ${nextPath}`);
     } else {
       // Fallback
       nextPath = `${workspace}/list/view`;
@@ -113,7 +113,7 @@ export default function LLMGenerationStep({ attrs }: LLMGenerationStepProps) {
   };
 
   const handleCancel = () => {
-    const cancelPath = attrs?.onCancel?.navURL || `${workspace}/list/view`;
+    const cancelPath = attrs?.onCancel?.navigationPath || `${workspace}/list/view`;
     go(cancelPath);
   };
 

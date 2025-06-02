@@ -12,11 +12,11 @@
         "loadFromContext": "currentUser",
         "onSubmit": {
           "collection": "users",
-          "navURL": "/profile/view/view",
+          "navigationPath": "/profile/view/view",
           "action": "update"
         },
         "onCancel": {
-          "navURL": "/profile/view/view"
+          "navigationPath": "/profile/view/view"
         }
       }
     }

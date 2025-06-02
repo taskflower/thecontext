@@ -11,9 +11,9 @@
         "title": "Logged User",
         "attrs": {
           "variant": "detailed",
-          "loginnavURL": "/main/login/form",
-          "logoutnavURL": "/main",
-          "editnavURL": "/profile/edit/form",
+          "loginnavigationPath": "/main/login/form",
+          "logoutnavigationPath": "/main",
+          "editnavigationPath": "/profile/edit/form",
           "cellClass": "col-span-full"
         }
       },
@@ -30,7 +30,7 @@
         "tplFile": "ButtonWidget",
         "title": "📋 View Full Profile",
         "attrs": {
-          "navURL": "/profile/view/view",
+          "navigationPath": "/profile/view/view",
           "variant": "primary",
           "cellClass": "col-span-1"
         }
@@ -39,7 +39,7 @@
         "tplFile": "ButtonWidget",
         "title": "✏️ Edit Profile",
         "attrs": {
-          "navURL": "/profile/edit/form",
+          "navigationPath": "/profile/edit/form",
           "variant": "secondary",
           "cellClass": "col-span-1"
         }

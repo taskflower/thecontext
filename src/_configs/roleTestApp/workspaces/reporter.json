@@ -11,9 +11,9 @@
         "title": "Logged User",
         "attrs": {
           "variant": "compact",
-          "loginnavURL": "/main/login/form",
-          "logoutnavURL": "/main",
-          "editnavURL": "/profile/edit/form",
+          "loginnavigationPath": "/main/login/form",
+          "logoutnavigationPath": "/main",
+          "editnavigationPath": "/profile/edit/form",
           "cellClass": "col-span-full md:col-span-1"
         }
       },
@@ -30,7 +30,7 @@
         "tplFile": "ButtonWidget",
         "title": "➕ New Ticket",
         "attrs": {
-          "navURL": "/reporter/create/form",
+          "navigationPath": "/reporter/create/form",
           "variant": "primary",
           "cellClass": "col-span-1"
         }
@@ -39,7 +39,7 @@
         "tplFile": "ButtonWidget",
         "title": "📋 My Tickets",
         "attrs": {
-          "navURL": "/reporter/list/view",
+          "navigationPath": "/reporter/list/view",
           "variant": "secondary",
           "cellClass": "col-span-1"
         }

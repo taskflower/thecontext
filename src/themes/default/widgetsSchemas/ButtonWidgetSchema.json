@@ -18,7 +18,7 @@
         "type": "object",
         "description": "Button widget attributes and styling options",
         "properties": {
-          "navURL": {
+          "navigationPath": {
             "type": "string",
             "description": "URL to navigate to when button is clicked",
             "pattern": "^/.*",
@@ -93,7 +93,7 @@
         "tplFile": "ButtonWidget",
         "title": "📝 Create New Ticket",
         "attrs": {
-          "navURL": "/tickets/create/form",
+          "navigationPath": "/tickets/create/form",
           "variant": "primary",
           "colSpan": 1
         }
@@ -102,7 +102,7 @@
         "tplFile": "ButtonWidget",
         "title": "📋 View All Tickets",
         "attrs": {
-          "navURL": "/tickets/list/view",
+          "navigationPath": "/tickets/list/view",
           "variant": "secondary",
           "size": "md",
           "icon": "list",
@@ -113,7 +113,7 @@
         "tplFile": "ButtonWidget",
         "title": "Download Report",
         "attrs": {
-          "navURL": "/reports/download",
+          "navigationPath": "/reports/download",
           "variant": "outline", 
           "size": "lg",
           "icon": "download",

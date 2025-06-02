@@ -11,7 +11,7 @@
           "loadFromParams": true,
           "onSubmit": {
             "collection": "responses",
-            "navURL":    "support/list/view",
+            "navigationPath":    "support/list/view",
             "action":     "create"
           }
         }

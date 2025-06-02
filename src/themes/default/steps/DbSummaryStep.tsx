@@ -19,12 +19,12 @@ interface DbSummaryStepProps {
     // ✅ UJEDNOLICONA STRUKTURA NAWIGACJI
     onSubmit?: {
       collection?: string; // Kolekcja do zapisu
-      navURL?: string; // Ścieżka po zapisie
+      navigationPath?: string; // Ścieżka po zapisie
       clearContext?: boolean; // Czy wyczyścić kontekst po zapisie
     };
 
     onCancel?: {
-      navURL: string; // Ścieżka anulowania
+      navigationPath: string; // Ścieżka anulowania
     };
 
     // Konfiguracja danych
@@ -39,7 +39,7 @@ interface DbSummaryStepProps {
     additionalActions?: Array<{
       type: "regenerate" | "custom" | "edit";
       label: string;
-      navURL?: string; // Pełna ścieżka nawigacji
+      navigationPath?: string; // Pełna ścieżka nawigacji
       nextStep?: string; // Slug kolejnego kroku w flow
       variant?: "primary" | "secondary" | "outline" | "danger";
       clearContext?: boolean; // Czy wyczyścić kontekst przed nawigacją
@@ -48,7 +48,7 @@ interface DbSummaryStepProps {
     // Fallback akcje gdy brak danych w kontekście
     noDataActions?: Array<{
       label: string;
-      navURL?: string;
+      navigationPath?: string;
       nextStep?: string;
       variant?: "primary" | "secondary" | "outline";
     }>;
@@ -93,8 +93,8 @@ export default function DbSummaryStep({ attrs }: DbSummaryStepProps) {
       }
 
       // Nawiguj do następnej strony
-      const navURL = attrs?.onSubmit?.navURL || `${workspace}/list/view`;
-      go(navURL);
+      const navigationPath = attrs?.onSubmit?.navigationPath || `${workspace}/list/view`;
+      go(navigationPath);
     } catch (err: any) {
       alert(`Save failed: ${err.message}`);
     } finally {
@@ -103,7 +103,7 @@ export default function DbSummaryStep({ attrs }: DbSummaryStepProps) {
   };
 
   const handleCancel = () => {
-    const cancelPath = attrs?.onCancel?.navURL || `${workspace}/list/view`;
+    const cancelPath = attrs?.onCancel?.navigationPath || `${workspace}/list/view`;
     go(cancelPath);
   };
 
@@ -119,9 +119,9 @@ export default function DbSummaryStep({ attrs }: DbSummaryStepProps) {
       // nextStep = kolejny krok w obecnym flow
       const currentFlow = window.location.pathname.split("/")[3]; // Zakładając /:config/workspace/flow/step
       navPath = `${workspace}/${currentFlow}/${action.nextStep}`;
-    } else if (action.navURL) {
-      // navURL = pełna ścieżka
-      navPath = action.navURL;
+    } else if (action.navigationPath) {
+      // navigationPath = pełna ścieżka
+      navPath = action.navigationPath;
     } else {
       navPath = `${workspace}/list/view`;
     }
@@ -134,8 +134,8 @@ export default function DbSummaryStep({ attrs }: DbSummaryStepProps) {
     if (action.nextStep) {
       const currentFlow = window.location.pathname.split("/")[3];
       navPath = `${workspace}/${currentFlow}/${action.nextStep}`;
-    } else if (action.navURL) {
-      navPath = action.navURL;
+    } else if (action.navigationPath) {
+      navPath = action.navigationPath;
     } else {
       navPath = `${workspace}/list/view`;
     }

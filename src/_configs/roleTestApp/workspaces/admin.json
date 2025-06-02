@@ -11,9 +11,9 @@
         "title": "Logged User",
         "attrs": {
           "variant": "compact",
-          "loginnavURL": "/main/login/form",
-          "logoutnavURL": "/main",
-          "editnavURL": "/profile/edit/form",
+          "loginnavigationPath": "/main/login/form",
+          "logoutnavigationPath": "/main",
+          "editnavigationPath": "/profile/edit/form",
           "cellClass": "col-span-full md:col-span-1"
         }
       },
@@ -30,7 +30,7 @@
         "tplFile": "ButtonWidget",
         "title": "👥 Manage Users",
         "attrs": {
-          "navURL": "/admin/list/view",
+          "navigationPath": "/admin/list/view",
           "variant": "primary",
           "cellClass": "col-span-1"
         }
@@ -39,7 +39,7 @@
         "tplFile": "ButtonWidget",
         "title": "➕ Add User",
         "attrs": {
-          "navURL": "/admin/create/form",
+          "navigationPath": "/admin/create/form",
           "variant": "secondary",
           "cellClass": "col-span-1"
         }

@@ -8,8 +8,8 @@ interface Props {
   attrs: {
     registerDataPath?: string;
     currentUserPath?: string;
-    successNavURL?: string; // może zawierać {{currentUser.role}}
-    errorNavURL?: string;
+    successnavigationPath?: string; // może zawierać {{currentUser.role}}
+    errornavigationPath?: string;
     title?: string;
     description?: string;
   };
@@ -42,13 +42,13 @@ export default function UserRegisterProcessStep({ attrs }: Props) {
   }, [get, saveItem, set, attrs]);
 
   const handleSuccessNavigation = () => {
-    const targetPath = attrs.successNavURL || "/{{currentUser.role}}/dashboard/view";
+    const targetPath = attrs.successnavigationPath || "/{{currentUser.role}}/dashboard/view";
     console.log(`[UserRegisterProcessStep] Navigating to: ${targetPath}`);
     go(targetPath);
   };
 
   const handleErrorNavigation = () => {
-    const errorPath = attrs.errorNavURL || "/main/register/form";
+    const errorPath = attrs.errornavigationPath || "/main/register/form";
     console.log(`[UserRegisterProcessStep] Navigating to error page: ${errorPath}`);
     go(errorPath);
   };
