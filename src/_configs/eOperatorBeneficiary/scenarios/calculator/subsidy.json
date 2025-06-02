@@ -1,0 +1,56 @@
+{
+    "slug": "subsidy",
+    "nodes": [
+      {
+        "slug": "form",
+        "label": "Kalkulator dotacji",
+        "order": 1,
+        "tplFile": "FormStep",
+        "attrs": {
+          "title": "🧮 Kalkulator dotacji e-Operator",
+          "description": "Sprawdź na jaką dotację możesz liczyć w programie e-Operator. Wprowadź dane swojego gospodarstwa domowego, a kalkulator obliczy wysokość dostępnej dotacji.",
+          "schemaPath": "subsidyCalculation",
+          "onSubmit": {
+            "action": "calculateSubsidy",
+            "saveToContext": true,
+            "contextKey": "calculationResult",
+            "navUrlPath": "/calculator/subsidy/result"
+          }
+        }
+      },
+      {
+        "slug": "result",
+        "label": "Wynik kalkulacji",
+        "order": 2,
+        "tplFile": "DbSummaryStep",
+        "attrs": {
+          "title": "💰 Wynik kalkulacji dotacji",
+          "description": "Oto wynik kalkulacji dotacji dla Twojego gospodarstwa domowego",
+          "schemaPath": "subsidyCalculation",
+          "loadFromContext": "calculationResult",
+          "readOnly": true,
+          "showGeneratedBadge": false,
+          "additionalActions": [
+            {
+              "type": "custom",
+              "label": "📞 Skontaktuj się z operatorem",
+              "navigationPath": "/contact/operator/form",
+              "variant": "primary"
+            },
+            {
+              "type": "custom",
+              "label": "🔨 Znajdź wykonawcę",
+              "navigationPath": "/requests/contractor/form",
+              "variant": "secondary"
+            },
+            {
+              "type": "custom",
+              "label": "🔄 Nowa kalkulacja",
+              "navigationPath": "/calculator/subsidy/form",
+              "variant": "outline"
+            }
+          ]
+        }
+      }
+    ]
+  }

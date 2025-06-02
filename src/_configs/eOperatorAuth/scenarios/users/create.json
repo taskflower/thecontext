@@ -1,0 +1,21 @@
+{
+    "slug": "create",
+    "nodes": [
+      {
+        "slug": "form",
+        "label": "Nowy użytkownik",
+        "order": 1,
+        "tplFile": "FormStep",
+        "attrs": {
+          "title": "➕ Dodaj nowego użytkownika",
+          "description": "Utwórz nowe konto użytkownika w systemie e-Operator. Przypisz odpowiednią rolę i uprawnienia.",
+          "schemaPath": "user",
+          "onSubmit": {
+            "collection": "users",
+            "navigationPath": "/users/list/view",
+            "action": "create"
+          }
+        }
+      }
+    ]
+  }

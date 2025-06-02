@@ -1,0 +1,45 @@
+{
+    "name": "e-Operator Marketplace",
+    "tplDir": "default",
+    "defaultWorkspace": "main",
+    "defaultScenario": "marketplace/browse",
+    "workspaces": [
+      "main",
+      "contractors",
+      "auditors",
+      "search"
+    ],
+    "database": {
+      "provider": "indexedDB",
+      "collections": {
+        "contractor_requests": "contractor_requests",
+        "auditor_requests": "auditor_requests",
+        "contractor_offers": "contractor_offers",
+        "auditor_offers": "auditor_offers",
+        "contractor_profiles": "contractor_profiles",
+        "auditor_profiles": "auditor_profiles"
+      },
+      "relations": {
+        "contractor_offers.request": {
+          "type": "many-to-one",
+          "target": "contractor_requests",
+          "foreignKey": "requestId"
+        },
+        "auditor_offers.request": {
+          "type": "many-to-one",
+          "target": "auditor_requests",
+          "foreignKey": "requestId"
+        },
+        "contractor_offers.contractor": {
+          "type": "many-to-one",
+          "target": "contractor_profiles",
+          "foreignKey": "contractorId"
+        },
+        "auditor_offers.auditor": {
+          "type": "many-to-one",
+          "target": "auditor_profiles",
+          "foreignKey": "auditorId"
+        }
+      }
+    }
+  }

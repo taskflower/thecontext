@@ -1,0 +1,141 @@
+{
+    "slug": "rejected",
+    "nodes": [
+      {
+        "slug": "view",
+        "label": "Odrzucone zapytania",
+        "order": 1,
+        "tplFile": "ListTableStep",
+        "attrs": {
+          "schemaPath": "request",
+          "collection": "requests",
+          "filter": {"status": "rejected"},
+          "emptyState": {
+            "icon": "❌",
+            "title": "Brak odrzuconych zapytań",
+            "description": "Nie ma zapytań, które zostały odrzucone podczas weryfikacji.",
+            "actionButton": {
+              "title": "Sprawdź oczekujące",
+              "navigationPath": "/verification/requests/pending"
+            }
+          },
+          "headerWidgets": [
+            {
+              "tplFile": "TitleWidget",
+              "title": "❌ Odrzucone zapytania",
+              "attrs": {
+                "description": "Lista zapytań odrzuconych podczas procesu weryfikacji",
+                "size": "large",
+                "align": "left",
+                "colSpan": 4
+              }
+            },
+            {
+              "tplFile": "ButtonWidget",
+              "title": "⏳ Oczekujące",
+              "attrs": {
+                "variant": "primary",
+                "navigationPath": "/verification/requests/pending"
+              }
+            },
+            {
+              "tplFile": "ButtonWidget",
+              "title": "✅ Zatwierdzone",
+              "attrs": {
+                "variant": "secondary",
+                "navigationPath": "/verification/requests/approved"
+              }
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "ℹ️ Informacje",
+              "attrs": {
+                "content": "Odrzucone zapytania nie są publikowane na giełdzie. Beneficjenci otrzymują informację o powodach odrzucenia.",
+                "variant": "error",
+                "colSpan": "full"
+              }
+            }
+          ],
+          "search": {
+            "enabled": true,
+            "placeholder": "Szukaj w odrzuconych zapytaniach...",
+            "fields": ["workScope", "city", "verificationNotes"]
+          },
+          "sorting": {
+            "enabled": true,
+            "defaultField": "verificationDate",
+            "defaultDirection": "desc"
+          },
+          "pagination": {
+            "pageSize": 20,
+            "showTotal": true
+          },
+          "columns": [
+            {
+              "key": "type",
+              "label": "Typ",
+              "type": "badge",
+              "sortable": true
+            },
+            {
+              "key": "workScope",
+              "label": "Zakres prac",
+              "type": "text",
+              "sortable": false,
+              "truncate": true
+            },
+            {
+              "key": "city",
+              "label": "Miejscowość",
+              "type": "text",
+              "sortable": true
+            },
+            {
+              "key": "verificationNotes",
+              "label": "Powód odrzucenia",
+              "type": "text",
+              "sortable": false,
+              "truncate": true
+            },
+            {
+              "key": "verificationDate",
+              "label": "Data odrzucenia",
+              "type": "date",
+              "sortable": true
+            },
+            {
+              "key": "submissionDate",
+              "label": "Data złożenia",
+              "type": "date",
+              "sortable": true
+            }
+          ],
+          "actions": [
+            {
+              "type": "custom",
+              "label": "Zobacz szczegóły",
+              "navigationPath": "/verification/requests/view/details"
+            },
+            {
+              "type": "custom",
+              "label": "Historia weryfikacji",
+              "navigationPath": "/verification/requests/view/history"
+            },
+            {
+              "type": "custom",
+              "label": "🔄 Przywróć do weryfikacji",
+              "navigationPath": "/verification/requests/restore/form",
+              "variant": "warning",
+              "confirm": "Czy na pewno chcesz przywrócić to zapytanie do weryfikacji?"
+            },
+            {
+              "type": "delete",
+              "label": "Usuń na stałe",
+              "variant": "danger",
+              "confirm": "Czy na pewno chcesz na stałe usunąć to zapytanie? Ta operacja jest nieodwracalna."
+            }
+          ]
+        }
+      }
+    ]
+  }

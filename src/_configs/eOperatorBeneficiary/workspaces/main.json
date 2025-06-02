@@ -1,0 +1,83 @@
+{
+    "name": "Panel Beneficjenta e-Operator",
+    "tplDir": "default",
+    "templateSettings": {
+      "layoutFile": "UniversalLayout",
+      "widgets": [
+        {
+          "tplFile": "CurrentUserWidget",
+          "title": "Moje konto",
+          "attrs": {
+            "variant": "expanded",
+            "loginNavigationPath": "/auth/login/form",
+            "logoutNavigationPath": "/main", 
+            "editNavigationPath": "/profile/edit/form"
+          }
+        },
+        {
+          "tplFile": "InfoWidget",
+          "title": "🏠 Panel Beneficjenta e-Operator",
+          "attrs": {
+            "content": "Sprawdź swoją dotację, znajdź wykonawców i audytorów, zarządzaj swoimi zleceniami. Wszystko czego potrzebujesz do termomodernizacji w jednym miejscu.",
+            "variant": "info",
+            "colSpan": "full"
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "🧮 Kalkulator dotacji",
+          "attrs": {
+            "navigationPath": "/calculator/subsidy/form",
+            "variant": "primary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "📞 Kontakt z operatorem",
+          "attrs": {
+            "navigationPath": "/contact/operator/form",
+            "variant": "primary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "🔨 Znajdź wykonawcę",
+          "attrs": {
+            "navigationPath": "/requests/contractor/form",
+            "variant": "secondary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "📋 Znajdź audytora",
+          "attrs": {
+            "navigationPath": "/requests/auditor/form",
+            "variant": "secondary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "📝 Moje zlecenia",
+          "attrs": {
+            "navigationPath": "/myorders/list/view",
+            "variant": "outline",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "MyOrdersSummaryWidget",
+          "title": "Moje aktywne zlecenia",
+          "attrs": {
+            "showPendingRequests": true,
+            "showActiveOffers": true,
+            "showRecentActivity": true,
+            "colSpan": 1
+          }
+        }
+      ]
+    }
+  }

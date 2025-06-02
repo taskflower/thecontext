@@ -1,0 +1,146 @@
+{
+    "slug": "approved",
+    "nodes": [
+      {
+        "slug": "view",
+        "label": "Zatwierdzone zapytania",
+        "order": 1,
+        "tplFile": "ListTableStep",
+        "attrs": {
+          "schemaPath": "request",
+          "collection": "requests",
+          "filter": {"status": "approved"},
+          "emptyState": {
+            "icon": "✅",
+            "title": "Brak zatwierdzonych zapytań",
+            "description": "Nie ma jeszcze zatwierdzonych zapytań do przeglądania.",
+            "actionButton": {
+              "title": "Sprawdź oczekujące",
+              "navigationPath": "/verification/requests/pending"
+            }
+          },
+          "headerWidgets": [
+            {
+              "tplFile": "TitleWidget",
+              "title": "✅ Zatwierdzone zapytania",
+              "attrs": {
+                "description": "Lista zweryfikowanych i zatwierdzonych zapytań beneficjentów",
+                "size": "large",
+                "align": "left",
+                "colSpan": 4
+              }
+            },
+            {
+              "tplFile": "ButtonWidget",
+              "title": "⏳ Oczekujące",
+              "attrs": {
+                "variant": "primary",
+                "navigationPath": "/verification/requests/pending"
+              }
+            },
+            {
+              "tplFile": "ButtonWidget",
+              "title": "❌ Odrzucone",
+              "attrs": {
+                "variant": "secondary",
+                "navigationPath": "/verification/requests/rejected"
+              }
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "ℹ️ Informacje",
+              "attrs": {
+                "content": "Zatwierdzone zapytania zostały zweryfikowane i opublikowane na giełdzie dla wykonawców/audytorów.",
+                "variant": "success",
+                "colSpan": "full"
+              }
+            }
+          ],
+          "search": {
+            "enabled": true,
+            "placeholder": "Szukaj w zatwierdzonych zapytaniach...",
+            "fields": ["workScope", "city", "postalCode", "beneficiaryId"]
+          },
+          "sorting": {
+            "enabled": true,
+            "defaultField": "verificationDate",
+            "defaultDirection": "desc"
+          },
+          "pagination": {
+            "pageSize": 20,
+            "showTotal": true
+          },
+          "columns": [
+            {
+              "key": "type",
+              "label": "Typ",
+              "type": "badge",
+              "sortable": true
+            },
+            {
+              "key": "workScope",
+              "label": "Zakres prac",
+              "type": "text",
+              "sortable": false,
+              "truncate": true
+            },
+            {
+              "key": "city",
+              "label": "Miejscowość",
+              "type": "text",
+              "sortable": true
+            },
+            {
+              "key": "postalCode",
+              "label": "Kod pocztowy",
+              "type": "text",
+              "sortable": true
+            },
+            {
+              "key": "status",
+              "label": "Status",
+              "type": "badge",
+              "sortable": true
+            },
+            {
+              "key": "verificationDate",
+              "label": "Data weryfikacji",
+              "type": "date",
+              "sortable": true
+            },
+            {
+              "key": "submissionDate",
+              "label": "Data złożenia",
+              "type": "date",
+              "sortable": true
+            }
+          ],
+          "actions": [
+            {
+              "type": "custom",
+              "label": "Zobacz szczegóły",
+              "navigationPath": "/verification/requests/view/details"
+            },
+            {
+              "type": "custom",
+              "label": "Historia weryfikacji",
+              "navigationPath": "/verification/requests/view/history"
+            },
+            {
+              "type": "custom",
+              "label": "📊 Zobacz oferty",
+              "navigationPath": "/verification/requests/view/offers",
+              "condition": "status === 'published'"
+            },
+            {
+              "type": "custom",
+              "label": "🔄 Cofnij zatwierdzenie",
+              "navigationPath": "/verification/requests/revert/form",
+              "variant": "warning",
+              "confirm": "Czy na pewno chcesz cofnąć zatwierdzenie tego zapytania?"
+            }
+          ]
+        }
+      }
+    ]
+  }

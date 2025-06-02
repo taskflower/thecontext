@@ -1,0 +1,38 @@
+{
+    "name": "e-Operator Auth",
+    "tplDir": "default",
+    "defaultWorkspace": "main",
+    "defaultScenario": "auth/login",
+    "workspaces": [
+      "main",
+      "auth",
+      "users",
+      "profile"
+    ],
+    "database": {
+      "provider": "indexedDB",
+      "collections": {
+        "users": "users",
+        "roles": "roles",
+        "sessions": "sessions",
+        "operators": "operators"
+      },
+      "relations": {
+        "users.operator": {
+          "type": "many-to-one",
+          "target": "operators",
+          "foreignKey": "operatorId"
+        },
+        "users.role": {
+          "type": "many-to-one",
+          "target": "roles",
+          "foreignKey": "roleId"
+        },
+        "sessions.user": {
+          "type": "many-to-one",
+          "target": "users",
+          "foreignKey": "userId"
+        }
+      }
+    }
+  }

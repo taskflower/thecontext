@@ -1,0 +1,136 @@
+{
+  "slug": "pending",
+  "nodes": [
+    {
+      "slug": "view",
+      "label": "Oczekujące zapytania",
+      "order": 1,
+      "tplFile": "ListTableStep",
+      "attrs": {
+        "schemaPath": "request",
+        "collection": "requests",
+        "filter": {"status": "pending"},
+        "emptyState": {
+          "icon": "⏳",
+          "title": "Brak oczekujących zapytań",
+          "description": "Obecnie nie ma zapytań oczekujących na weryfikację.",
+          "actionButton": {
+            "title": "Odśwież",
+            "navigationPath": "/verification/requests/pending"
+          }
+        },
+        "headerWidgets": [
+          {
+            "tplFile": "TitleWidget",
+            "title": "⏳ Oczekujące zapytania",
+            "attrs": {
+              "description": "Zapytania beneficjentów oczekujące na weryfikację i moderację",
+              "size": "large",
+              "align": "left",
+              "colSpan": 3
+            }
+          },
+          {
+            "tplFile": "ButtonWidget",
+            "title": "✅ Zatwierdzone",
+            "attrs": {
+              "variant": "secondary",
+              "navigationPath": "/verification/requests/approved"
+            }
+          },
+          {
+            "tplFile": "ButtonWidget",
+            "title": "❌ Odrzucone",
+            "attrs": {
+              "variant": "secondary",
+              "navigationPath": "/verification/requests/rejected"
+            }
+          },
+          {
+            "tplFile": "InfoWidget",
+            "title": "⚠️ Uwaga",
+            "attrs": {
+              "content": "Przed zatwierdzeniem usuń wszystkie dane wrażliwe (pełny adres, szczegóły kontaktowe). Zostaw tylko kod pocztowy i ogólny opis prac.",
+              "variant": "warning",
+              "colSpan": "full"
+            }
+          }
+        ],
+        "search": {
+          "enabled": true,
+          "placeholder": "Szukaj w oczekujących zapytaniach...",
+          "fields": ["workScope", "city", "address", "phone"]
+        },
+        "sorting": {
+          "enabled": true,
+          "defaultField": "submissionDate",
+          "defaultDirection": "asc"
+        },
+        "pagination": {
+          "pageSize": 15,
+          "showTotal": true
+        },
+        "columns": [
+          {
+            "key": "type",
+            "label": "Typ",
+            "type": "badge",
+            "sortable": true
+          },
+          {
+            "key": "workScope",
+            "label": "Zakres prac",
+            "type": "text",
+            "sortable": false,
+            "truncate": true
+          },
+          {
+            "key": "city",
+            "label": "Miejscowość",
+            "type": "text",
+            "sortable": true
+          },
+          {
+            "key": "address",
+            "label": "Adres (do usunięcia)",
+            "type": "text",
+            "sortable": false,
+            "highlight": "warning"
+          },
+          {
+            "key": "phone",
+            "label": "Telefon (do ukrycia)",
+            "type": "text",
+            "sortable": false,
+            "highlight": "warning"
+          },
+          {
+            "key": "submissionDate",
+            "label": "Data złożenia",
+            "type": "date",
+            "sortable": true
+          }
+        ],
+        "actions": [
+          {
+            "type": "custom",
+            "label": "🔍 Zweryfikuj",
+            "navigationPath": "/verification/requests/verify/form",
+            "variant": "primary"
+          },
+          {
+            "type": "custom",
+            "label": "Zobacz szczegóły",
+            "navigationPath": "/verification/requests/view/details"
+          },
+          {
+            "type": "custom",
+            "label": "❌ Odrzuć",
+            "navigationPath": "/verification/requests/reject/form",
+            "variant": "danger"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+    "slug": "edit",
+    "nodes": [
+      {
+        "slug": "form",
+        "label": "Edycja profilu",
+        "order": 1,
+        "tplFile": "FormStep",
+        "attrs": {
+          "title": "✏️ Edytuj swój profil",
+          "description": "Zaktualizuj swoje dane osobowe i informacje kontaktowe",
+          "schemaPath": "userProfile",
+          "loadFromContext": "currentUser",
+          "excludeFields": ["role", "isActive", "isVerified"],
+          "onSubmit": {
+            "collection": "users",
+            "navigationPath": "/profile/view/summary"
+          }
+        }
+      }
+    ]
+  }

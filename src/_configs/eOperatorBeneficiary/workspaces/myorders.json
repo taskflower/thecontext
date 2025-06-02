@@ -1,0 +1,169 @@
+{
+    "slug": "myorders",
+    "name": "My Orders",
+    "templateSettings": {
+      "layoutFile": "Simple",
+      "widgets": [
+        {
+          "tplFile": "CurrentUserWidget",
+          "title": "Moje konto",
+          "attrs": {
+            "variant": "compact",
+            "loginNavigationPath": "/auth/login/form",
+            "logoutNavigationPath": "/main", 
+            "editNavigationPath": "/profile/edit/form"
+          }
+        },
+        {
+          "tplFile": "InfoWidget",
+          "title": "📝 Moje zlecenia",
+          "attrs": {
+            "content": "Zarządzaj swoimi zleceniami, przeglądaj oferty wykonawców i audytorów, zostaw opinie po zakończeniu współpracy.",
+            "variant": "info",
+            "colSpan": "full"
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "🔨 Nowe zlecenie wykonawcy",
+          "attrs": {
+            "navigationPath": "/requests/contractor/form",
+            "variant": "primary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "📋 Nowe zlecenie audytora",
+          "attrs": {
+            "navigationPath": "/requests/auditor/form",
+            "variant": "primary",
+            "colSpan": 1
+          }
+        }
+      ]
+    },
+    "contextSchema": {
+      "myOrder": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "label": "ID zlecenia",
+            "fieldType": "text",
+            "required": false,
+            "aiHint": "Order identifier"
+          },
+          "type": {
+            "type": "string",
+            "label": "Typ zlecenia",
+            "fieldType": "select",
+            "enum": ["contractor", "auditor"],
+            "enumLabels": {
+              "contractor": "Wykonawca",
+              "auditor": "Audytor"
+            },
+            "required": true,
+            "aiHint": "Type of service order"
+          },
+          "status": {
+            "type": "string",
+            "label": "Status",
+            "fieldType": "select",
+            "enum": ["pending", "verified", "published", "in_progress", "completed", "cancelled"],
+            "enumLabels": {
+              "pending": "Oczekuje weryfikacji",
+              "verified": "Zweryfikowane",
+              "published": "Opublikowane",
+              "in_progress": "W trakcie realizacji",
+              "completed": "Zakończone",
+              "cancelled": "Anulowane"
+            },
+            "required": true,
+            "aiHint": "Order status"
+          },
+          "workScope": {
+            "type": "string",
+            "label": "Zakres prac",
+            "fieldType": "textarea",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Description of work scope"
+          },
+          "postalCode": {
+            "type": "string",
+            "label": "Kod pocztowy",
+            "fieldType": "text",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Postal code"
+          },
+          "submissionDate": {
+            "type": "string",
+            "label": "Data złożenia",
+            "fieldType": "date",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "When order was submitted"
+          },
+          "offersCount": {
+            "type": "number",
+            "label": "Liczba ofert",
+            "fieldType": "number",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Number of received offers"
+          }
+        }
+      },
+      "review": {
+        "type": "object",
+        "properties": {
+          "rating": {
+            "type": "number",
+            "label": "Ocena (1-5)",
+            "fieldType": "number",
+            "minimum": 1,
+            "maximum": 5,
+            "required": true,
+            "aiHint": "Rating from 1 to 5 stars"
+          },
+          "comment": {
+            "type": "string",
+            "label": "Komentarz",
+            "fieldType": "textarea",
+            "required": true,
+            "aiHint": "Review comment"
+          },
+          "recommendedWork": {
+            "type": "array",
+            "label": "Polecane rodzaje prac",
+            "fieldType": "multiselect",
+            "items": {
+              "type": "string",
+              "enum": ["heat_pump", "pellet_boiler", "wood_gasification", "windows", "doors", "wall_insulation", "attic_insulation", "audit"]
+            },
+            "enumLabels": {
+              "heat_pump": "Pompy ciepła",
+              "pellet_boiler": "Piece na pellet",
+              "wood_gasification": "Piece zgazowujące",
+              "windows": "Okna",
+              "doors": "Drzwi",
+              "wall_insulation": "Docieplenie ścian",
+              "attic_insulation": "Docieplenie poddasza",
+              "audit": "Audyty energetyczne"
+            },
+            "required": false,
+            "aiHint": "Types of work this contractor/auditor is recommended for"
+          },
+          "wouldRecommend": {
+            "type": "boolean",
+            "label": "Czy polecasz tego specjalistę?",
+            "fieldType": "checkbox",
+            "required": true,
+            "aiHint": "Whether you would recommend this specialist"
+          }
+        }
+      }
+    }
+  }

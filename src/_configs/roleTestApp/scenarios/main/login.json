@@ -29,8 +29,8 @@
           "title": "Logging in...",
           "loginDataPath": "loginData",
           "currentUserPath": "currentUser",
-          "successnavigationPath": "{{currentUser.role}}/dashboard/view",
-          "errornavigationPath": "main/login/form"
+          "successNavigationPath": "{{currentUser.role}}/dashboard/view",
+          "errorNavigationPath": "main/login/form"
         }
       }
     ]

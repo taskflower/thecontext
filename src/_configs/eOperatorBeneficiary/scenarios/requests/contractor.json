@@ -1,0 +1,55 @@
+{
+    "slug": "contractor",
+    "nodes": [
+      {
+        "slug": "form",
+        "label": "Znajdź wykonawcę",
+        "order": 1,
+        "tplFile": "FormStep",
+        "attrs": {
+          "title": "🔨 Złóż zapytanie o wykonawcę",
+          "description": "Wypełnij formularz z opisem prac, które chcesz zlecić. Zweryfikowani wykonawcy z Twojego regionu otrzymają Twoje zapytanie i będą mogli złożyć oferty.",
+          "schemaPath": "contractorRequest",
+          "autoPopulateFromCurrentUser": true,
+          "onSubmit": {
+            "collection": "contractor_requests",
+            "navUrlPath": "/requests/contractor/submitted"
+          }
+        }
+      },
+      {
+        "slug": "submitted",
+        "label": "Zapytanie wysłane",
+        "order": 2,
+        "tplFile": "DbSummaryStep",
+        "attrs": {
+          "title": "📋 Zapytanie zostało złożone",
+          "description": "Twoje zapytanie zostało przesłane do weryfikacji. Po zatwierdzeniu przez operatora zostanie opublikowane dla wykonawców.",
+          "schemaPath": "contractorRequest",
+          "loadFromContext": "contractorRequest",
+          "readOnly": true,
+          "showGeneratedBadge": false,
+          "additionalActions": [
+            {
+              "type": "custom",
+              "label": "📝 Moje zlecenia",
+              "navigationPath": "/myorders/list/view",
+              "variant": "primary"
+            },
+            {
+              "type": "custom",
+              "label": "📋 Znajdź audytora",
+              "navigationPath": "/requests/auditor/form",
+              "variant": "secondary"
+            },
+            {
+              "type": "custom",
+              "label": "🏠 Menu główne",
+              "navigationPath": "/main",
+              "variant": "outline"
+            }
+          ]
+        }
+      }
+    ]
+  }

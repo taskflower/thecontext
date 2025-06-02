@@ -11,9 +11,9 @@
         "title": "Logged User",
         "attrs": {
           "variant": "compact",
-          "loginnavigationPath": "/main/login/form",
-          "logoutnavigationPath": "/main",
-          "editnavigationPath": "/profile/edit/form",
+          "loginNavigationPath": "/main/login/form",
+          "logoutNavigationPath": "/main",
+          "editNavigationPath": "/profile/edit/form",
           "cellClass": "col-span-full md:col-span-1"
         }
       },

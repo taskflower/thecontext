@@ -1,0 +1,133 @@
+{
+    "slug": "contact",
+    "name": "Operator Contact",
+    "templateSettings": {
+      "layoutFile": "Simple",
+      "widgets": [
+        {
+          "tplFile": "CurrentUserWidget",
+          "title": "Moje konto",
+          "attrs": {
+            "variant": "compact",
+            "loginNavigationPath": "/auth/login/form",
+            "logoutNavigationPath": "/main", 
+            "editNavigationPath": "/profile/edit/form"
+          }
+        },
+        {
+          "tplFile": "InfoWidget",
+          "title": "📞 Kontakt z operatorem",
+          "attrs": {
+            "content": "Skontaktuj się z operatorem programu e-Operator, aby uzyskać pomoc i informacje o dostępnych dotacjach.",
+            "variant": "info",
+            "colSpan": "full"
+          }
+        }
+      ]
+    },
+    "contextSchema": {
+      "operatorContact": {
+        "type": "object",
+        "properties": {
+          "postalCode": {
+            "type": "string",
+            "label": "Kod pocztowy",
+            "fieldType": "text",
+            "pattern": "^[0-9]{2}-[0-9]{3}$",
+            "required": true,
+            "aiHint": "Postal code in format XX-XXX"
+          },
+          "city": {
+            "type": "string",
+            "label": "Miejscowość",
+            "fieldType": "text",
+            "required": true,
+            "aiHint": "City name"
+          },
+          "phone": {
+            "type": "string",
+            "label": "Numer telefonu",
+            "fieldType": "text",
+            "required": true,
+            "aiHint": "Contact phone number"
+          },
+          "message": {
+            "type": "string",
+            "label": "Wiadomość (opcjonalna)",
+            "fieldType": "textarea",
+            "required": false,
+            "aiHint": "Optional message to operator"
+          },
+          "preferredContactTime": {
+            "type": "string",
+            "label": "Preferowany czas kontaktu",
+            "fieldType": "select",
+            "enum": ["morning", "afternoon", "evening", "anytime"],
+            "enumLabels": {
+              "morning": "Rano (8:00-12:00)",
+              "afternoon": "Popołudnie (12:00-16:00)",
+              "evening": "Wieczór (16:00-20:00)",
+              "anytime": "Dowolny czas"
+            },
+            "required": false,
+            "aiHint": "Preferred contact time"
+          },
+          "contactPurpose": {
+            "type": "string",
+            "label": "Cel kontaktu",
+            "fieldType": "select",
+            "enum": ["info_request", "application_help", "technical_support", "complaint", "other"],
+            "enumLabels": {
+              "info_request": "Prośba o informacje",
+              "application_help": "Pomoc z wnioskiem",
+              "technical_support": "Wsparcie techniczne",
+              "complaint": "Reklamacja/skarga",
+              "other": "Inne"
+            },
+            "required": true,
+            "aiHint": "Purpose of contact"
+          },
+          "status": {
+            "type": "string",
+            "label": "Status",
+            "fieldType": "select",
+            "enum": ["pending", "in_progress", "completed", "cancelled"],
+            "enumLabels": {
+              "pending": "Oczekuje na kontakt",
+              "in_progress": "W trakcie realizacji",
+              "completed": "Zakończone",
+              "cancelled": "Anulowane"
+            },
+            "default": "pending",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Contact request status"
+          },
+          "submissionDate": {
+            "type": "string",
+            "label": "Data zgłoszenia",
+            "fieldType": "datetime",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "When the contact request was submitted"
+          },
+          "responseDate": {
+            "type": "string",
+            "label": "Data odpowiedzi",
+            "fieldType": "datetime",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "When operator responded"
+          },
+          "assignedOperator": {
+            "type": "string",
+            "label": "Przypisany operator",
+            "fieldType": "text",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Operator assigned to handle this request"
+          }
+        }
+      }
+    }
+  }

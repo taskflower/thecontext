@@ -1,0 +1,230 @@
+{
+    "slug": "contractors",
+    "name": "Contractors Marketplace",
+    "templateSettings": {
+      "layoutFile": "Simple",
+      "widgets": [
+        {
+          "tplFile": "CurrentUserWidget",
+          "title": "Panel użytkownika",
+          "attrs": {
+            "variant": "compact",
+            "loginNavigationPath": "/auth/login/form",
+            "logoutNavigationPath": "/main", 
+            "editNavigationPath": "/profile/edit/form"
+          }
+        },
+        {
+          "tplFile": "InfoWidget",
+          "title": "🔨 Giełda wykonawców",
+          "attrs": {
+            "content": "Przeglądaj aktywne zlecenia na prace termomodernizacyjne. Sprawdź portfolio wykonawców i ich oferty.",
+            "variant": "info",
+            "colSpan": "full"
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "🆕 Najnowsze zlecenia",
+          "attrs": {
+            "navigationPath": "/contractors/browse/new",
+            "variant": "primary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "🔥 Wszystkie aktywne",
+          "attrs": {
+            "navigationPath": "/contractors/browse/active",
+            "variant": "secondary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "👥 Portfolio wykonawców",
+          "attrs": {
+            "navigationPath": "/contractors/profiles/list",
+            "variant": "outline",
+            "colSpan": 1
+          }
+        }
+      ]
+    },
+    "contextSchema": {
+      "contractorMarketplaceRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "label": "ID zlecenia",
+            "fieldType": "text",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Request identifier"
+          },
+          "workScope": {
+            "type": "string",
+            "label": "Zakres prac",
+            "fieldType": "textarea",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Work scope description"
+          },
+          "postalCode": {
+            "type": "string",
+            "label": "Kod pocztowy",
+            "fieldType": "text",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Location postal code"
+          },
+          "city": {
+            "type": "string",
+            "label": "Miejscowość",
+            "fieldType": "text",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "City name"
+          },
+          "heatSource": {
+            "type": "array",
+            "label": "Źródło ciepła",
+            "fieldType": "multiselect",
+            "readOnly": true,
+            "items": {
+              "type": "string",
+              "enum": ["heat_pump", "pellet_boiler", "wood_gasification"]
+            },
+            "enumLabels": {
+              "heat_pump": "Pompa ciepła",
+              "pellet_boiler": "Piec na pellet",
+              "wood_gasification": "Piec zgazowujący drewno"
+            },
+            "required": false,
+            "aiHint": "Required heat sources"
+          },
+          "thermomodernization": {
+            "type": "object",
+            "label": "Termomodernizacja",
+            "fieldType": "group",
+            "readOnly": true,
+            "properties": {
+              "windows": {
+                "type": "number",
+                "label": "Okna (ilość)",
+                "fieldType": "number",
+                "readOnly": true
+              },
+              "doors": {
+                "type": "number",
+                "label": "Drzwi (ilość)",
+                "fieldType": "number",
+                "readOnly": true
+              },
+              "wallInsulation": {
+                "type": "number",
+                "label": "Docieplenie ścian (m²)",
+                "fieldType": "number",
+                "readOnly": true
+              },
+              "atticInsulation": {
+                "type": "number",
+                "label": "Docieplenie poddasza (m²)",
+                "fieldType": "number",
+                "readOnly": true
+              }
+            },
+            "required": false,
+            "aiHint": "Thermomodernization details"
+          },
+          "publishedDate": {
+            "type": "string",
+            "label": "Data publikacji",
+            "fieldType": "date",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Publication date"
+          },
+          "offersCount": {
+            "type": "number",
+            "label": "Liczba ofert",
+            "fieldType": "number",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Number of offers"
+          },
+          "averageOfferPrice": {
+            "type": "number",
+            "label": "Średnia cena ofert (PLN)",
+            "fieldType": "number",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Average offer price"
+          }
+        }
+      },
+      "contractorProfile": {
+        "type": "object",
+        "properties": {
+          "companyName": {
+            "type": "string",
+            "label": "Nazwa firmy",
+            "fieldType": "text",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Company name"
+          },
+          "description": {
+            "type": "string",
+            "label": "Opis działalności",
+            "fieldType": "textarea",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Company description"
+          },
+          "services": {
+            "type": "array",
+            "label": "Oferowane usługi",
+            "fieldType": "multiselect",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Offered services"
+          },
+          "experience": {
+            "type": "number",
+            "label": "Lata doświadczenia",
+            "fieldType": "number",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Years of experience"
+          },
+          "serviceArea": {
+            "type": "string",
+            "label": "Obszar działania",
+            "fieldType": "text",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Service area"
+          },
+          "rating": {
+            "type": "number",
+            "label": "Ocena",
+            "fieldType": "number",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Average rating"
+          },
+          "completedProjects": {
+            "type": "number",
+            "label": "Zrealizowane projekty",
+            "fieldType": "number",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Number of completed projects"
+          }
+        }
+      }
+    }
+  }

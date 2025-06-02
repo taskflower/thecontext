@@ -1,0 +1,66 @@
+{
+    "name": "e-Operator Marketplace",
+    "tplDir": "default",
+    "templateSettings": {
+      "layoutFile": "UniversalLayout",
+      "widgets": [
+        {
+          "tplFile": "CurrentUserWidget",
+          "title": "Panel użytkownika",
+          "attrs": {
+            "variant": "compact",
+            "loginNavigationPath": "/auth/login/form",
+            "logoutNavigationPath": "/main", 
+            "editNavigationPath": "/profile/edit/form"
+          }
+        },
+        {
+          "tplFile": "InfoWidget",
+          "title": "🛒 e-Operator Marketplace",
+          "attrs": {
+            "content": "Centralna platforma łącząca beneficjentów z wykonawcami i audytorami. Przeglądaj aktywne zlecenia, oferty i portfolio specjalistów.",
+            "variant": "info",
+            "colSpan": "full"
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "🔨 Giełda wykonawców",
+          "attrs": {
+            "navigationPath": "/contractors/browse/active",
+            "variant": "primary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "📋 Giełda audytorów",
+          "attrs": {
+            "navigationPath": "/auditors/browse/active",
+            "variant": "primary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "🔍 Wyszukaj specjalistów",
+          "attrs": {
+            "navigationPath": "/search/specialists/form",
+            "variant": "secondary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "MarketplaceStatsWidget",
+          "title": "Statystyki marketplace",
+          "attrs": {
+            "showActiveRequests": true,
+            "showActiveOffers": true,
+            "showSpecialistsCount": true,
+            "showRecentActivity": true,
+            "colSpan": 2
+          }
+        }
+      ]
+    }
+  }

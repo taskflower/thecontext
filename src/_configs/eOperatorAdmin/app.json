@@ -1,0 +1,51 @@
+{
+    "name": "e-Operator Admin Panel",
+    "tplDir": "default",
+    "defaultWorkspace": "main",
+    "defaultScenario": "auth/login",
+    "workspaces": [
+      "main",
+      "verification",
+      "moderation",
+      "reports",
+      "settings"
+    ],
+    "database": {
+      "provider": "indexedDB",
+      "collections": {
+        "requests": "requests",
+        "offers": "offers",
+        "users": "users",
+        "operators": "operators",
+        "verification_logs": "verification_logs",
+        "moderation_logs": "moderation_logs"
+      },
+      "relations": {
+        "requests.beneficiary": {
+          "type": "many-to-one",
+          "target": "users",
+          "foreignKey": "beneficiaryId"
+        },
+        "offers.contractor": {
+          "type": "many-to-one",
+          "target": "users",
+          "foreignKey": "contractorId"
+        },
+        "offers.request": {
+          "type": "many-to-one",
+          "target": "requests",
+          "foreignKey": "requestId"
+        },
+        "verification_logs.operator": {
+          "type": "many-to-one",
+          "target": "operators",
+          "foreignKey": "operatorId"
+        },
+        "verification_logs.request": {
+          "type": "many-to-one",
+          "target": "requests",
+          "foreignKey": "requestId"
+        }
+      }
+    }
+  }

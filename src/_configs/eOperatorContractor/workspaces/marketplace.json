@@ -1,0 +1,226 @@
+{
+    "slug": "marketplace",
+    "name": "Marketplace",
+    "templateSettings": {
+      "layoutFile": "Simple",
+      "widgets": [
+        {
+          "tplFile": "CurrentUserWidget",
+          "title": "Moje konto",
+          "attrs": {
+            "variant": "compact",
+            "loginNavigationPath": "/auth/login/form",
+            "logoutNavigationPath": "/main", 
+            "editNavigationPath": "/profile/edit/form"
+          }
+        },
+        {
+          "tplFile": "InfoWidget",
+          "title": "🛒 Giełda zleceń wykonawców",
+          "attrs": {
+            "content": "Przeglądaj aktywne zlecenia od beneficjentów programu e-Operator. Składaj oferty na projekty w swojej okolicy i specjalizacji.",
+            "variant": "info",
+            "colSpan": "full"
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "🆕 Nowe zlecenia",
+          "attrs": {
+            "navigationPath": "/marketplace/browse/new",
+            "variant": "primary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "🔥 Wszystkie aktywne",
+          "attrs": {
+            "navigationPath": "/marketplace/browse/active",
+            "variant": "secondary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "📍 W mojej okolicy",
+          "attrs": {
+            "navigationPath": "/marketplace/browse/nearby",
+            "variant": "secondary",
+            "colSpan": 1
+          }
+        }
+      ]
+    },
+    "contextSchema": {
+      "marketplaceRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "label": "ID zlecenia",
+            "fieldType": "text",
+            "required": false,
+            "aiHint": "Request identifier"
+          },
+          "workScope": {
+            "type": "string",
+            "label": "Zakres prac",
+            "fieldType": "textarea",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Description of work scope"
+          },
+          "postalCode": {
+            "type": "string",
+            "label": "Kod pocztowy",
+            "fieldType": "text",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Postal code"
+          },
+          "city": {
+            "type": "string",
+            "label": "Miejscowość",
+            "fieldType": "text",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "City name"
+          },
+          "heatSource": {
+            "type": "array",
+            "label": "Źródło ciepła",
+            "fieldType": "multiselect",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Required heat sources"
+          },
+          "thermomodernization": {
+            "type": "object",
+            "label": "Termomodernizacja",
+            "fieldType": "group",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Thermomodernization requirements"
+          },
+          "budget": {
+            "type": "number",
+            "label": "Przewidywany budżet (PLN)",
+            "fieldType": "number",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Expected budget"
+          },
+          "preferredStartDate": {
+            "type": "string",
+            "label": "Preferowany termin rozpoczęcia",
+            "fieldType": "date",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Preferred start date"
+          },
+          "publishedDate": {
+            "type": "string",
+            "label": "Data publikacji",
+            "fieldType": "date",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "When request was published"
+          },
+          "offersCount": {
+            "type": "number",
+            "label": "Liczba ofert",
+            "fieldType": "number",
+            "readOnly": true,
+            "required": false,
+            "aiHint": "Number of offers submitted"
+          }
+        }
+      },
+      "contractorOffer": {
+        "type": "object",
+        "properties": {
+          "priceOffer": {
+            "type": "number",
+            "label": "Oferowana cena (PLN)",
+            "fieldType": "number",
+            "minimum": 0,
+            "required": true,
+            "aiHint": "Offered price for the project"
+          },
+          "estimatedDuration": {
+            "type": "number",
+            "label": "Szacowany czas realizacji (dni)",
+            "fieldType": "number",
+            "minimum": 1,
+            "required": true,
+            "aiHint": "Estimated project duration in days"
+          },
+          "offerDescription": {
+            "type": "string",
+            "label": "Opis oferty",
+            "fieldType": "textarea",
+            "required": true,
+            "aiHint": "Detailed description of what you offer"
+          },
+          "includedServices": {
+            "type": "array",
+            "label": "Zakres usług",
+            "fieldType": "multiselect",
+            "items": {
+              "type": "string",
+              "enum": ["design", "materials", "installation", "warranty", "maintenance", "permits", "cleanup"]
+            },
+            "enumLabels": {
+              "design": "Projekt/dokumentacja",
+              "materials": "Materiały",
+              "installation": "Montaż",
+              "warranty": "Gwarancja",
+              "maintenance": "Serwis",
+              "permits": "Załatwienie pozwoleń",
+              "cleanup": "Sprzątanie po pracach"
+            },
+            "required": true,
+            "aiHint": "Services included in the offer"
+          },
+          "warrantyPeriod": {
+            "type": "number",
+            "label": "Okres gwarancji (miesięcy)",
+            "fieldType": "number",
+            "minimum": 0,
+            "maximum": 120,
+            "required": false,
+            "aiHint": "Warranty period in months"
+          },
+          "paymentTerms": {
+            "type": "string",
+            "label": "Warunki płatności",
+            "fieldType": "select",
+            "enum": ["upfront", "50_50", "progressive", "completion"],
+            "enumLabels": {
+              "upfront": "Płatność z góry",
+              "50_50": "50% z góry, 50% po zakończeniu",
+              "progressive": "Płatności etapowe",
+              "completion": "Płatność po zakończeniu"
+            },
+            "required": true,
+            "aiHint": "Payment terms"
+          },
+          "additionalNotes": {
+            "type": "string",
+            "label": "Dodatkowe uwagi",
+            "fieldType": "textarea",
+            "required": false,
+            "aiHint": "Any additional notes or conditions"
+          },
+          "contactInfo": {
+            "type": "string",
+            "label": "Informacje kontaktowe",
+            "fieldType": "textarea",
+            "required": true,
+            "aiHint": "How client can contact you"
+          }
+        }
+      }
+    }
+  }

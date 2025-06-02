@@ -1,0 +1,233 @@
+{
+    "slug": "portfolio",
+    "name": "Portfolio Management",
+    "templateSettings": {
+      "layoutFile": "Simple",
+      "widgets": [
+        {
+          "tplFile": "CurrentUserWidget",
+          "title": "Moje konto",
+          "attrs": {
+            "variant": "compact",
+            "loginNavigationPath": "/auth/login/form",
+            "logoutNavigationPath": "/main", 
+            "editNavigationPath": "/profile/edit/form"
+          }
+        },
+        {
+          "tplFile": "InfoWidget",
+          "title": "🏗️ Zarządzanie portfolio",
+          "attrs": {
+            "content": "Twórz i zarządzaj swoim portfolio wykonawcy. Dodaj opis firmy, zdjęcia realizacji i informacje o oferowanych usługach.",
+            "variant": "info",
+            "colSpan": "full"
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "➕ Dodaj realizację",
+          "attrs": {
+            "navigationPath": "/portfolio/add/form",
+            "variant": "primary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "✏️ Edytuj profil",
+          "attrs": {
+            "navigationPath": "/portfolio/profile/edit",
+            "variant": "secondary",
+            "colSpan": 1
+          }
+        }
+      ]
+    },
+    "contextSchema": {
+      "contractorProfile": {
+        "type": "object",
+        "properties": {
+          "companyName": {
+            "type": "string",
+            "label": "Nazwa firmy",
+            "fieldType": "text",
+            "required": true,
+            "aiHint": "Official company name"
+          },
+          "nip": {
+            "type": "string",
+            "label": "NIP",
+            "fieldType": "text",
+            "pattern": "^[0-9]{10}$",
+            "required": true,
+            "aiHint": "Tax identification number"
+          },
+          "companyAddress": {
+            "type": "string",
+            "label": "Adres firmy",
+            "fieldType": "text",
+            "required": true,
+            "aiHint": "Company address"
+          },
+          "description": {
+            "type": "string",
+            "label": "Opis działalności",
+            "fieldType": "textarea",
+            "required": true,
+            "aiHint": "Description of company activities and expertise"
+          },
+          "services": {
+            "type": "array",
+            "label": "Oferowane usługi",
+            "fieldType": "multiselect",
+            "items": {
+              "type": "string",
+              "enum": ["heat_pump", "pellet_boiler", "wood_gasification", "windows", "doors", "wall_insulation", "attic_insulation", "solar_panels", "ventilation"]
+            },
+            "enumLabels": {
+              "heat_pump": "Pompy ciepła",
+              "pellet_boiler": "Piece na pellet",
+              "wood_gasification": "Piece zgazowujące drewno",
+              "windows": "Okna i stolarka",
+              "doors": "Drzwi",
+              "wall_insulation": "Docieplenie ścian",
+              "attic_insulation": "Docieplenie poddaszy",
+              "solar_panels": "Panele fotowoltaiczne",
+              "ventilation": "Wentylacja"
+            },
+            "required": true,
+            "aiHint": "Services offered by the contractor"
+          },
+          "experience": {
+            "type": "number",
+            "label": "Lata doświadczenia",
+            "fieldType": "number",
+            "minimum": 0,
+            "maximum": 50,
+            "required": true,
+            "aiHint": "Years of experience in the field"
+          },
+          "certifications": {
+            "type": "string",
+            "label": "Certyfikaty i uprawnienia",
+            "fieldType": "textarea",
+            "required": false,
+            "aiHint": "Professional certifications and qualifications"
+          },
+          "serviceArea": {
+            "type": "array",
+            "label": "Obszar działania (kody pocztowe)",
+            "fieldType": "text",
+            "required": true,
+            "aiHint": "Service area postal codes (comma separated)"
+          },
+          "website": {
+            "type": "string",
+            "label": "Strona internetowa",
+            "fieldType": "url",
+            "required": false,
+            "aiHint": "Company website URL"
+          },
+          "contactPhone": {
+            "type": "string",
+            "label": "Telefon kontaktowy",
+            "fieldType": "text",
+            "required": true,
+            "aiHint": "Contact phone number"
+          },
+          "contactEmail": {
+            "type": "string",
+            "label": "Email kontaktowy",
+            "fieldType": "email",
+            "required": true,
+            "aiHint": "Contact email address"
+          }
+        }
+      },
+      "portfolioItem": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "label": "Tytuł realizacji",
+            "fieldType": "text",
+            "required": true,
+            "aiHint": "Title of the project"
+          },
+          "description": {
+            "type": "string",
+            "label": "Opis realizacji",
+            "fieldType": "textarea",
+            "required": true,
+            "aiHint": "Detailed description of the project"
+          },
+          "serviceType": {
+            "type": "array",
+            "label": "Rodzaj usług",
+            "fieldType": "multiselect",
+            "items": {
+              "type": "string",
+              "enum": ["heat_pump", "pellet_boiler", "wood_gasification", "windows", "doors", "wall_insulation", "attic_insulation", "solar_panels", "ventilation"]
+            },
+            "enumLabels": {
+              "heat_pump": "Pompy ciepła",
+              "pellet_boiler": "Piece na pellet",
+              "wood_gasification": "Piece zgazowujące drewno",
+              "windows": "Okna i stolarka",
+              "doors": "Drzwi",
+              "wall_insulation": "Docieplenie ścian",
+              "attic_insulation": "Docieplenie poddaszy",
+              "solar_panels": "Panele fotowoltaiczne",
+              "ventilation": "Wentylacja"
+            },
+            "required": true,
+            "aiHint": "Types of services provided in this project"
+          },
+          "location": {
+            "type": "string",
+            "label": "Lokalizacja (ogólna)",
+            "fieldType": "text",
+            "required": true,
+            "aiHint": "General location (city/region, no specific address)"
+          },
+          "completionDate": {
+            "type": "string",
+            "label": "Data zakończenia",
+            "fieldType": "date",
+            "required": true,
+            "aiHint": "Project completion date"
+          },
+          "projectValue": {
+            "type": "number",
+            "label": "Wartość projektu (PLN)",
+            "fieldType": "number",
+            "minimum": 0,
+            "required": false,
+            "aiHint": "Project value in PLN"
+          },
+          "duration": {
+            "type": "number",
+            "label": "Czas realizacji (dni)",
+            "fieldType": "number",
+            "minimum": 1,
+            "required": false,
+            "aiHint": "Project duration in days"
+          },
+          "images": {
+            "type": "array",
+            "label": "Zdjęcia przed/po",
+            "fieldType": "imageUpload",
+            "required": false,
+            "aiHint": "Before/after project images"
+          },
+          "clientReview": {
+            "type": "string",
+            "label": "Opinia klienta",
+            "fieldType": "textarea",
+            "required": false,
+            "aiHint": "Client testimonial for this project"
+          }
+        }
+      }
+    }
+  }

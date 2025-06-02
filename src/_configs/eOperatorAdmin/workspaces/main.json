@@ -1,0 +1,66 @@
+{
+    "name": "Panel Operatora e-Operator",
+    "tplDir": "default",
+    "templateSettings": {
+      "layoutFile": "UniversalLayout",
+      "widgets": [
+        {
+          "tplFile": "CurrentUserWidget",
+          "title": "Panel operatora",
+          "attrs": {
+            "variant": "expanded",
+            "loginNavigationPath": "/auth/login/form",
+            "logoutNavigationPath": "/main", 
+            "editNavigationPath": "/profile/edit/form"
+          }
+        },
+        {
+          "tplFile": "InfoWidget",
+          "title": "🛡️ Panel Operatora e-Operator",
+          "attrs": {
+            "content": "Zarządzaj weryfikacją zapytań, moderacją ofert i nadzorem nad systemem e-Operator. Kontroluj jakość i bezpieczeństwo platform beneficjentów, wykonawców i audytorów.",
+            "variant": "info",
+            "colSpan": "full"
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "🔍 Weryfikacja zapytań",
+          "attrs": {
+            "navigationPath": "/verification/requests/pending",
+            "variant": "primary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "⚖️ Moderacja ofert",
+          "attrs": {
+            "navigationPath": "/moderation/offers/pending",
+            "variant": "primary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "📊 Raporty",
+          "attrs": {
+            "navigationPath": "/reports/dashboard/view",
+            "variant": "secondary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "SystemStatsWidget",
+          "title": "Statystyki systemu",
+          "attrs": {
+            "showPendingRequests": true,
+            "showPendingOffers": true,
+            "showActiveUsers": true,
+            "showRecentActivity": true,
+            "colSpan": 2
+          }
+        }
+      ]
+    }
+  }

@@ -1,0 +1,51 @@
+{
+    "name": "e-Operator Beneficjent",
+    "tplDir": "default",
+    "defaultWorkspace": "main",
+    "defaultScenario": "calculator/subsidy",
+    "workspaces": [
+      "main",
+      "calculator",
+      "contact",
+      "requests",
+      "myorders"
+    ],
+    "database": {
+      "provider": "indexedDB",
+      "collections": {
+        "subsidy_calculations": "subsidy_calculations",
+        "contact_requests": "contact_requests",
+        "contractor_requests": "contractor_requests",
+        "auditor_requests": "auditor_requests",
+        "offers": "offers",
+        "reviews": "reviews"
+      },
+      "relations": {
+        "contractor_requests.beneficiary": {
+          "type": "many-to-one",
+          "target": "users",
+          "foreignKey": "beneficiaryId"
+        },
+        "auditor_requests.beneficiary": {
+          "type": "many-to-one",
+          "target": "users",
+          "foreignKey": "beneficiaryId"
+        },
+        "offers.request": {
+          "type": "many-to-one",
+          "target": "contractor_requests",
+          "foreignKey": "requestId"
+        },
+        "reviews.beneficiary": {
+          "type": "many-to-one",
+          "target": "users",
+          "foreignKey": "beneficiaryId"
+        },
+        "reviews.contractor": {
+          "type": "many-to-one",
+          "target": "users",
+          "foreignKey": "contractorId"
+        }
+      }
+    }
+  }

@@ -1,0 +1,251 @@
+{
+    "slug": "requests",
+    "name": "Service Requests",
+    "templateSettings": {
+      "layoutFile": "Simple",
+      "widgets": [
+        {
+          "tplFile": "CurrentUserWidget",
+          "title": "Moje konto",
+          "attrs": {
+            "variant": "compact",
+            "loginNavigationPath": "/auth/login/form",
+            "logoutNavigationPath": "/main", 
+            "editNavigationPath": "/profile/edit/form"
+          }
+        },
+        {
+          "tplFile": "InfoWidget",
+          "title": "🔍 Zapytania o usługi",
+          "attrs": {
+            "content": "Złóż zapytanie o wykonawcę lub audytora. Otrzymaj oferty od zweryfikowanych specjalistów.",
+            "variant": "info",
+            "colSpan": "full"
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "🔨 Wykonawca",
+          "attrs": {
+            "navigationPath": "/requests/contractor/form",
+            "variant": "primary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "📋 Audytor",
+          "attrs": {
+            "navigationPath": "/requests/auditor/form",
+            "variant": "primary",
+            "colSpan": 1
+          }
+        }
+      ]
+    },
+    "contextSchema": {
+      "contractorRequest": {
+        "type": "object",
+        "properties": {
+          "postalCode": {
+            "type": "string",
+            "label": "Kod pocztowy",
+            "fieldType": "text",
+            "pattern": "^[0-9]{2}-[0-9]{3}$",
+            "required": true,
+            "aiHint": "Postal code in format XX-XXX"
+          },
+          "city": {
+            "type": "string",
+            "label": "Miejscowość",
+            "fieldType": "text",
+            "required": true,
+            "aiHint": "City name"
+          },
+          "address": {
+            "type": "string",
+            "label": "Ulica i numer domu",
+            "fieldType": "text",
+            "required": true,
+            "aiHint": "Full street address"
+          },
+          "phone": {
+            "type": "string",
+            "label": "Numer telefonu",
+            "fieldType": "text",
+            "required": true,
+            "aiHint": "Contact phone number"
+          },
+          "heatSource": {
+            "type": "array",
+            "label": "Źródło ciepła",
+            "fieldType": "multiselect",
+            "items": {
+              "type": "string",
+              "enum": ["heat_pump", "pellet_boiler", "wood_gasification"]
+            },
+            "enumLabels": {
+              "heat_pump": "Pompa ciepła",
+              "pellet_boiler": "Piec na pellet",
+              "wood_gasification": "Piec zgazowujący drewno"
+            },
+            "required": false,
+            "aiHint": "Selected heat sources"
+          },
+          "windows": {
+            "type": "number",
+            "label": "Okna (ilość)",
+            "fieldType": "number",
+            "minimum": 0,
+            "required": false,
+            "aiHint": "Number of windows to replace"
+          },
+          "doors": {
+            "type": "number",
+            "label": "Drzwi (ilość)",
+            "fieldType": "number",
+            "minimum": 0,
+            "required": false,
+            "aiHint": "Number of doors to replace"
+          },
+          "wallInsulation": {
+            "type": "number",
+            "label": "Docieplenie ścian (m²)",
+            "fieldType": "number",
+            "minimum": 0,
+            "required": false,
+            "aiHint": "Wall insulation area in square meters"
+          },
+          "atticInsulation": {
+            "type": "number",
+            "label": "Docieplenie poddasza (m²)",
+            "fieldType": "number",
+            "minimum": 0,
+            "required": false,
+            "aiHint": "Attic insulation area in square meters"
+          },
+          "auditDocument": {
+            "type": "string",
+            "label": "Audyt efektywności energetycznej",
+            "fieldType": "textarea",
+            "required": false,
+            "aiHint": "Energy efficiency audit document content (without personal data)"
+          },
+          "additionalNotes": {
+            "type": "string",
+            "label": "Dodatkowe uwagi",
+            "fieldType": "textarea",
+            "required": false,
+            "aiHint": "Additional notes or requirements"
+          },
+          "preferredStartDate": {
+            "type": "string",
+            "label": "Preferowany termin rozpoczęcia",
+            "fieldType": "date",
+            "required": false,
+            "aiHint": "Preferred start date for work"
+          },
+          "budget": {
+            "type": "number",
+            "label": "Przewidywany budżet (PLN)",
+            "fieldType": "number",
+            "minimum": 0,
+            "required": false,
+            "aiHint": "Expected budget for the work"
+          }
+        }
+      },
+      "auditorRequest": {
+        "type": "object",
+        "properties": {
+          "postalCode": {
+            "type": "string",
+            "label": "Kod pocztowy",
+            "fieldType": "text",
+            "pattern": "^[0-9]{2}-[0-9]{3}$",
+            "required": true,
+            "aiHint": "Postal code in format XX-XXX"
+          },
+          "city": {
+            "type": "string",
+            "label": "Miejscowość",
+            "fieldType": "text",
+            "required": true,
+            "aiHint": "City name"
+          },
+          "address": {
+            "type": "string",
+            "label": "Ulica i numer domu",
+            "fieldType": "text",
+            "required": true,
+            "aiHint": "Full street address"
+          },
+          "phone": {
+            "type": "string",
+            "label": "Numer telefonu",
+            "fieldType": "text",
+            "required": true,
+            "aiHint": "Contact phone number"
+          },
+          "propertyType": {
+            "type": "string",
+            "label": "Typ nieruchomości",
+            "fieldType": "select",
+            "enum": ["house", "apartment", "commercial"],
+            "enumLabels": {
+              "house": "Dom jednorodzinny",
+              "apartment": "Mieszkanie",
+              "commercial": "Lokal użytkowy"
+            },
+            "required": true,
+            "aiHint": "Type of property to audit"
+          },
+          "propertyArea": {
+            "type": "number",
+            "label": "Powierzchnia nieruchomości (m²)",
+            "fieldType": "number",
+            "minimum": 1,
+            "required": true,
+            "aiHint": "Property area in square meters"
+          },
+          "buildingYear": {
+            "type": "number",
+            "label": "Rok budowy",
+            "fieldType": "number",
+            "minimum": 1800,
+            "maximum": 2025,
+            "required": false,
+            "aiHint": "Year when building was constructed"
+          },
+          "currentHeatingSystem": {
+            "type": "string",
+            "label": "Obecny system grzewczy",
+            "fieldType": "text",
+            "required": false,
+            "aiHint": "Description of current heating system"
+          },
+          "auditPurpose": {
+            "type": "string",
+            "label": "Cel audytu",
+            "fieldType": "select",
+            "enum": ["subsidy_application", "renovation_planning", "energy_optimization", "other"],
+            "enumLabels": {
+              "subsidy_application": "Wniosek o dotację",
+              "renovation_planning": "Planowanie remontu",
+              "energy_optimization": "Optymalizacja energetyczna",
+              "other": "Inne"
+            },
+            "required": true,
+            "aiHint": "Purpose of the energy audit"
+          },
+          "preferredAuditDate": {
+            "type": "string",
+            "label": "Preferowany termin audytu",
+            "fieldType": "date",
+            "required": false,
+            "aiHint": "Preferred date for audit"
+          }
+        }
+      }
+    }
+  }

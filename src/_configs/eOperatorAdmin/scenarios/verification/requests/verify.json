@@ -1,0 +1,57 @@
+{
+    "slug": "verify",
+    "nodes": [
+      {
+        "slug": "form",
+        "label": "Weryfikacja zapytania",
+        "order": 1,
+        "tplFile": "FormStep",
+        "attrs": {
+          "title": "🔍 Weryfikacja zapytania beneficjenta",
+          "description": "Przejrzyj zapytanie i usuń dane wrażliwe przed publikacją. Zachowaj tylko kod pocztowy i ogólny opis prac.",
+          "schemaPath": "request",
+          "loadFromParams": true,
+          "highlightFields": ["address", "phone"],
+          "onSubmit": {
+            "action": "verifyRequest",
+            "collection": "requests",
+            "navUrlPath": "/verification/requests/verify/summary"
+          }
+        }
+      },
+      {
+        "slug": "summary",
+        "label": "Podsumowanie weryfikacji",
+        "order": 2,
+        "tplFile": "DbSummaryStep",
+        "attrs": {
+          "title": "✅ Zapytanie zostało zweryfikowane",
+          "description": "Zapytanie zostało pomyślnie zweryfikowane i jest gotowe do publikacji na giełdzie.",
+          "schemaPath": "request",
+          "loadFromContext": "verifiedRequest",
+          "readOnly": true,
+          "showGeneratedBadge": false,
+          "additionalActions": [
+            {
+              "type": "custom",
+              "label": "📋 Wróć do listy oczekujących",
+              "navigationPath": "/verification/requests/pending",
+              "variant": "primary"
+            },
+            {
+              "type": "custom",
+              "label": "✅ Zobacz zatwierdzone",
+              "navigationPath": "/verification/requests/approved",
+              "variant": "secondary"
+            },
+            {
+              "type": "custom",
+              "label": "🛒 Zobacz na giełdzie",
+              "navigationPath": "/marketplace/contractors/browse/active",
+              "variant": "outline"
+            }
+          ]
+        }
+      }
+    ]
+  }

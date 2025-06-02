@@ -1,0 +1,135 @@
+{
+    "slug": "list",
+    "nodes": [
+      {
+        "slug": "view",
+        "label": "Lista użytkowników",
+        "order": 1,
+        "tplFile": "ListTableStep",
+        "attrs": {
+          "schemaPath": "user",
+          "collection": "users",
+          "emptyState": {
+            "icon": "👥",
+            "title": "Brak użytkowników",
+            "description": "System nie zawiera jeszcze żadnych użytkowników. Dodaj pierwszego użytkownika.",
+            "actionButton": {
+              "title": "Dodaj użytkownika",
+              "navigationPath": "/users/create/form"
+            }
+          },
+          "headerWidgets": [
+            {
+              "tplFile": "TitleWidget",
+              "title": "👥 Lista użytkowników e-Operator",
+              "attrs": {
+                "description": "Zarządzaj wszystkimi kontami użytkowników systemu e-Operator",
+                "size": "large",
+                "align": "left",
+                "colSpan": 4
+              }
+            },
+            {
+              "tplFile": "ButtonWidget",
+              "title": "➕ Dodaj użytkownika",
+              "attrs": {
+                "variant": "primary",
+                "navigationPath": "/users/create/form"
+              }
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "📊 Statystyki użytkowników",
+              "attrs": {
+                "content": "Zarządzaj rolami, uprawnieniami i statusem aktywności użytkowników.",
+                "variant": "info",
+                "colSpan": "full"
+              }
+            }
+          ],
+          "search": {
+            "enabled": true,
+            "placeholder": "Szukaj użytkowników...",
+            "fields": ["firstName", "lastName", "email", "phone", "city"]
+          },
+          "sorting": {
+            "enabled": true,
+            "defaultField": "lastName",
+            "defaultDirection": "asc"
+          },
+          "pagination": {
+            "pageSize": 20,
+            "showTotal": true
+          },
+          "columns": [
+            {
+              "key": "firstName",
+              "label": "Imię",
+              "type": "text",
+              "sortable": true
+            },
+            {
+              "key": "lastName",
+              "label": "Nazwisko",
+              "type": "text",
+              "sortable": true
+            },
+            {
+              "key": "email",
+              "label": "Email",
+              "type": "text",
+              "sortable": true
+            },
+            {
+              "key": "role",
+              "label": "Rola",
+              "type": "badge",
+              "sortable": true
+            },
+            {
+              "key": "city",
+              "label": "Miejscowość",
+              "type": "text",
+              "sortable": true
+            },
+            {
+              "key": "isActive",
+              "label": "Aktywny",
+              "type": "badge",
+              "sortable": true
+            },
+            {
+              "key": "isVerified",
+              "label": "Zweryfikowany",
+              "type": "badge",
+              "sortable": true
+            },
+            {
+              "key": "registrationDate",
+              "label": "Data rejestracji",
+              "type": "date",
+              "sortable": true
+            }
+          ],
+          "actions": [
+            {
+              "type": "edit",
+              "label": "Edytuj",
+              "navigationPath": "/users/edit/form"
+            },
+            {
+              "type": "custom",
+              "label": "Szczegóły",
+              "navigationPath": "/users/view/details"
+            },
+            {
+              "type": "delete",
+              "label": "Usuń",
+              "variant": "danger",
+              "confirm": "Czy na pewno chcesz usunąć tego użytkownika? Ta operacja jest nieodwracalna."
+            }
+          ]
+        }
+      }
+    ]
+  }

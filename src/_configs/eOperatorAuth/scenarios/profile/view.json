@@ -1,0 +1,40 @@
+{
+    "slug": "view",
+    "nodes": [
+      {
+        "slug": "summary",
+        "label": "Mój profil",
+        "order": 1,
+        "tplFile": "DbSummaryStep",
+        "attrs": {
+          "title": "👤 Mój profil",
+          "description": "Przegląd Twoich danych osobowych i ustawień konta",
+          "schemaPath": "userProfile",
+          "contextKey": "currentUser",
+          "collection": "users",
+          "readOnly": true,
+          "showGeneratedBadge": false,
+          "additionalActions": [
+            {
+              "type": "edit",
+              "label": "✏️ Edytuj profil",
+              "navigationPath": "/profile/edit/form",
+              "variant": "primary"
+            },
+            {
+              "type": "custom",
+              "label": "🔒 Zmień hasło",
+              "navigationPath": "/profile/change-password/form",
+              "variant": "secondary"
+            },
+            {
+              "type": "logout",
+              "label": "🚪 Wyloguj się",
+              "navigationPath": "/auth/login/form",
+              "variant": "outline"
+            }
+          ]
+        }
+      }
+    ]
+  }

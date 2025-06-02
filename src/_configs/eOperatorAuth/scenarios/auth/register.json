@@ -1,0 +1,48 @@
+{
+    "slug": "register",
+    "nodes": [
+      {
+        "slug": "form",
+        "label": "Rejestracja",
+        "order": 1,
+        "tplFile": "FormStep",
+        "attrs": {
+          "title": "📝 Rejestracja w e-Operator",
+          "description": "Utwórz nowe konto w systemie e-Operator. Wybierz swoją rolę i wypełnij dane kontaktowe.",
+          "schemaPath": "userRegister",
+          "onSubmit": {
+            "collection": "users",
+            "navUrlPath": "/auth/register/success"
+          }
+        }
+      },
+      {
+        "slug": "success",
+        "label": "Rejestracja zakończona",
+        "order": 2,
+        "tplFile": "DbSummaryStep",
+        "attrs": {
+          "title": "✅ Konto zostało utworzone",
+          "description": "Twoje konto zostało pomyślnie utworzone. Możesz teraz się zalogować.",
+          "schemaPath": "userRegister",
+          "loadFromContext": "userRegister",
+          "readOnly": true,
+          "showGeneratedBadge": false,
+          "additionalActions": [
+            {
+              "type": "custom",
+              "label": "🔐 Zaloguj się",
+              "navigationPath": "/auth/login/form",
+              "variant": "primary"
+            },
+            {
+              "type": "custom",
+              "label": "🏠 Strona główna",
+              "navigationPath": "/main",
+              "variant": "secondary"
+            }
+          ]
+        }
+      }
+    ]
+  }

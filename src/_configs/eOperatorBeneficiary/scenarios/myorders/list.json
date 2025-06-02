@@ -1,0 +1,130 @@
+{
+    "slug": "list",
+    "nodes": [
+      {
+        "slug": "view",
+        "label": "Moje zlecenia",
+        "order": 1,
+        "tplFile": "ListTableStep",
+        "attrs": {
+          "schemaPath": "myOrder",
+          "collection": "contractor_requests",
+          "filterByCurrentUser": true,
+          "emptyState": {
+            "icon": "📝",
+            "title": "Brak zleceń",
+            "description": "Nie masz jeszcze żadnych zleceń. Rozpocznij od złożenia zapytania o wykonawcę lub audytora.",
+            "actionButton": {
+              "title": "Znajdź wykonawcę",
+              "navigationPath": "/requests/contractor/form"
+            }
+          },
+          "headerWidgets": [
+            {
+              "tplFile": "TitleWidget",
+              "title": "📝 Moje zlecenia",
+              "attrs": {
+                "description": "Zarządzaj swoimi zleceniami, przeglądaj oferty i zostaw opinie",
+                "size": "large",
+                "align": "left",
+                "colSpan": 4
+              }
+            },
+            {
+              "tplFile": "ButtonWidget",
+              "title": "🔨 Nowy wykonawca",
+              "attrs": {
+                "variant": "primary",
+                "navigationPath": "/requests/contractor/form"
+              }
+            },
+            {
+              "tplFile": "ButtonWidget",
+              "title": "📋 Nowy audytor",
+              "attrs": {
+                "variant": "secondary",
+                "navigationPath": "/requests/auditor/form"
+              }
+            }
+          ],
+          "search": {
+            "enabled": true,
+            "placeholder": "Szukaj w moich zleceniach...",
+            "fields": ["workScope", "postalCode"]
+          },
+          "sorting": {
+            "enabled": true,
+            "defaultField": "submissionDate",
+            "defaultDirection": "desc"
+          },
+          "pagination": {
+            "pageSize": 10,
+            "showTotal": true
+          },
+          "columns": [
+            {
+              "key": "type",
+              "label": "Typ",
+              "type": "badge",
+              "sortable": true
+            },
+            {
+              "key": "workScope",
+              "label": "Zakres prac",
+              "type": "text",
+              "sortable": false,
+              "truncate": true
+            },
+            {
+              "key": "status",
+              "label": "Status",
+              "type": "badge",
+              "sortable": true
+            },
+            {
+              "key": "postalCode",
+              "label": "Lokalizacja",
+              "type": "text",
+              "sortable": true
+            },
+            {
+              "key": "offersCount",
+              "label": "Oferty",
+              "type": "number",
+              "sortable": true
+            },
+            {
+              "key": "submissionDate",
+              "label": "Data złożenia",
+              "type": "date",
+              "sortable": true
+            }
+          ],
+          "actions": [
+            {
+              "type": "custom",
+              "label": "Zobacz szczegóły",
+              "navigationPath": "/myorders/view/details"
+            },
+            {
+              "type": "custom",
+              "label": "Oferty",
+              "navigationPath": "/myorders/offers/list",
+              "condition": "status === 'published'"
+            },
+            {
+              "type": "edit",
+              "label": "Edytuj",
+              "condition": "status === 'pending'"
+            },
+            {
+              "type": "delete",
+              "label": "Anuluj",
+              "variant": "danger",
+              "confirm": "Czy na pewno chcesz anulować to zlecenie?"
+            }
+          ]
+        }
+      }
+    ]
+  }

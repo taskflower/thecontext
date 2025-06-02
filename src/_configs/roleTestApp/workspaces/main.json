@@ -19,8 +19,8 @@
         "title": "Logged User",
         "attrs": {
           "variant": "compact",
-          "loginnavigationPath": "/main/login/form",
-          "logoutnavigationPath": "/main",
+          "loginNavigationPath": "/main/login/form",
+          "logoutNavigationPath": "/main",
           "registernavigationPath": "/main/register/form",
           "cellClass": "col-span-full md:col-span-1 lg:col-span-2 xl:col-span-6"
         }

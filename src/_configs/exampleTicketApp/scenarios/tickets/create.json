@@ -14,7 +14,7 @@
         "excludeFields": ["status"],
         "onSubmit": {
           "collection": "tickets",
-          "navigationPath": "tickets/list/view"
+          "navUrlPath": "tickets/list/view"
         }
       }
     }

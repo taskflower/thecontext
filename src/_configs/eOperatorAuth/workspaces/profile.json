@@ -1,0 +1,115 @@
+{
+    "slug": "profile",
+    "name": "User Profile",
+    "templateSettings": {
+      "layoutFile": "Simple",
+      "widgets": [
+        {
+          "tplFile": "CurrentUserWidget",
+          "title": "Panel użytkownika",
+          "attrs": {
+            "variant": "expanded",
+            "loginNavigationPath": "/auth/login/form",
+            "logoutNavigationPath": "/main", 
+            "editNavigationPath": "/profile/edit/form"
+          }
+        },
+        {
+          "tplFile": "InfoWidget",
+          "title": "👤 Profil użytkownika",
+          "attrs": {
+            "content": "Zarządzaj swoimi danymi osobowymi i ustawieniami konta w systemie e-Operator.",
+            "variant": "info",
+            "colSpan": "full"
+          }
+        }
+      ]
+    },
+    "contextSchema": {
+      "currentUser": {
+        "type": "object",
+        "properties": {}
+      },
+      "userProfile": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "label": "Email",
+            "fieldType": "email",
+            "required": true,
+            "aiHint": "User email address"
+          },
+          "firstName": {
+            "type": "string",
+            "label": "Imię",
+            "fieldType": "text",
+            "required": true,
+            "aiHint": "First name"
+          },
+          "lastName": {
+            "type": "string",
+            "label": "Nazwisko",
+            "fieldType": "text",
+            "required": true,
+            "aiHint": "Last name"
+          },
+          "phone": {
+            "type": "string",
+            "label": "Telefon",
+            "fieldType": "text",
+            "required": true,
+            "aiHint": "Contact phone number"
+          },
+          "postalCode": {
+            "type": "string",
+            "label": "Kod pocztowy",
+            "fieldType": "text",
+            "pattern": "^[0-9]{2}-[0-9]{3}$",
+            "required": true,
+            "aiHint": "Postal code in format XX-XXX"
+          },
+          "city": {
+            "type": "string",
+            "label": "Miejscowość",
+            "fieldType": "text",
+            "required": true,
+            "aiHint": "City name"
+          },
+          "address": {
+            "type": "string",
+            "label": "Ulica i numer domu",
+            "fieldType": "text",
+            "required": false,
+            "aiHint": "Street address"
+          }
+        }
+      },
+      "passwordChange": {
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "label": "Obecne hasło",
+            "fieldType": "password",
+            "required": true,
+            "aiHint": "Current password for verification"
+          },
+          "newPassword": {
+            "type": "string",
+            "label": "Nowe hasło",
+            "fieldType": "password",
+            "required": true,
+            "aiHint": "New password"
+          },
+          "confirmPassword": {
+            "type": "string",
+            "label": "Potwierdź nowe hasło",
+            "fieldType": "password",
+            "required": true,
+            "aiHint": "Confirm new password"
+          }
+        }
+      }
+    }
+  }

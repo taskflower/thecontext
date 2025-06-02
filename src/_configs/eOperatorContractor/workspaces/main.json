@@ -1,0 +1,66 @@
+{
+    "name": "Panel Wykonawcy e-Operator",
+    "tplDir": "default",
+    "templateSettings": {
+      "layoutFile": "UniversalLayout",
+      "widgets": [
+        {
+          "tplFile": "CurrentUserWidget",
+          "title": "Moje konto",
+          "attrs": {
+            "variant": "expanded",
+            "loginNavigationPath": "/auth/login/form",
+            "logoutNavigationPath": "/main", 
+            "editNavigationPath": "/profile/edit/form"
+          }
+        },
+        {
+          "tplFile": "InfoWidget",
+          "title": "🔨 Panel Wykonawcy e-Operator",
+          "attrs": {
+            "content": "Znajdź zlecenia w swojej okolicy, zarządzaj portfolio swoich realizacji i składaj oferty dla beneficjentów programu e-Operator.",
+            "variant": "info",
+            "colSpan": "full"
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "🛒 Giełda zleceń",
+          "attrs": {
+            "navigationPath": "/marketplace/browse/active",
+            "variant": "primary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "📋 Moje oferty",
+          "attrs": {
+            "navigationPath": "/offers/list/view",
+            "variant": "primary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "🏗️ Portfolio",
+          "attrs": {
+            "navigationPath": "/portfolio/manage/view",
+            "variant": "secondary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "ContractorStatsWidget",
+          "title": "Moje statystyki",
+          "attrs": {
+            "showActiveOffers": true,
+            "showWonProjects": true,
+            "showRating": true,
+            "showEarnings": true,
+            "colSpan": 2
+          }
+        }
+      ]
+    }
+  }

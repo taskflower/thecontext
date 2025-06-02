@@ -1,0 +1,35 @@
+{
+    "slug": "login",
+    "nodes": [
+      {
+        "slug": "form",
+        "label": "Logowanie",
+        "order": 1,
+        "tplFile": "FormStep",
+        "attrs": {
+          "title": "🔐 Logowanie do e-Operator",
+          "description": "Wprowadź swoje dane logowania i wybierz rolę, aby uzyskać dostęp do odpowiedniego panelu.",
+          "schemaPath": "userLogin",
+          "onSubmit": {
+            "saveToContext": true,
+            "contextKey": "loginData",
+            "navUrlPath": "/auth/login/process"
+          }
+        }
+      },
+      {
+        "slug": "process",
+        "label": "Proces logowania", 
+        "order": 2,
+        "tplFile": "UserLoginProcessStep",
+        "attrs": {
+          "title": "Logowanie w toku...",
+          "description": "Sprawdzamy Twoje dane i przygotowujemy sesję",
+          "loginDataPath": "loginData",
+          "currentUserPath": "currentUser",
+          "successNavUrlPath": "/profile/view/summary",
+          "errorNavUrlPath": "/auth/login/form"
+        }
+      }
+    ]
+  }

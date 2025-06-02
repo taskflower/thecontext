@@ -1,0 +1,49 @@
+{
+    "slug": "operator",
+    "nodes": [
+      {
+        "slug": "form",
+        "label": "Kontakt z operatorem",
+        "order": 1,
+        "tplFile": "FormStep",
+        "attrs": {
+          "title": "📞 Kontakt z operatorem programu",
+          "description": "Skontaktuj się z operatorem programu e-Operator. Operator skontaktuje się z Tobą w wybranym terminie i udzieli wszystkich niezbędnych informacji.",
+          "schemaPath": "operatorContact",
+          "autoPopulateFromCurrentUser": true,
+          "onSubmit": {
+            "collection": "contact_requests",
+            "navUrlPath": "/contact/operator/confirmation"
+          }
+        }
+      },
+      {
+        "slug": "confirmation",
+        "label": "Potwierdzenie kontaktu",
+        "order": 2,
+        "tplFile": "DbSummaryStep",
+        "attrs": {
+          "title": "✅ Zapytanie zostało wysłane",
+          "description": "Twoje zapytanie zostało przekazane do operatora. Skontaktujemy się z Tobą w ciągu 24 godzin.",
+          "schemaPath": "operatorContact",
+          "loadFromContext": "operatorContact",
+          "readOnly": true,
+          "showGeneratedBadge": false,
+          "additionalActions": [
+            {
+              "type": "custom",
+              "label": "🏠 Powrót do menu głównego",
+              "navigationPath": "/main",
+              "variant": "primary"
+            },
+            {
+              "type": "custom",
+              "label": "🧮 Kalkulator dotacji",
+              "navigationPath": "/calculator/subsidy/form",
+              "variant": "secondary"
+            }
+          ]
+        }
+      }
+    ]
+  }

@@ -1,0 +1,214 @@
+{
+    "slug": "browse",
+    "nodes": [
+      {
+        "slug": "active",
+        "label": "Aktywne zlecenia",
+        "order": 1,
+        "tplFile": "ListTableStep",
+        "attrs": {
+          "schemaPath": "contractorMarketplaceRequest",
+          "collection": "contractor_requests",
+          "filter": {"status": "published"},
+          "emptyState": {
+            "icon": "🔨",
+            "title": "Brak aktywnych zleceń",
+            "description": "Obecnie nie ma aktywnych zleceń dla wykonawców. Sprawdź ponownie później.",
+            "actionButton": {
+              "title": "Odśwież",
+              "navigationPath": "/contractors/browse/active"
+            }
+          },
+          "headerWidgets": [
+            {
+              "tplFile": "TitleWidget",
+              "title": "🔨 Giełda zleceń wykonawców",
+              "attrs": {
+                "description": "Przeglądaj aktywne zlecenia od beneficjentów programu e-Operator",
+                "size": "large",
+                "align": "left",
+                "colSpan": 4
+              }
+            },
+            {
+              "tplFile": "ButtonWidget",
+              "title": "🆕 Najnowsze",
+              "attrs": {
+                "variant": "primary",
+                "navigationPath": "/contractors/browse/new"
+              }
+            },
+            {
+              "tplFile": "ButtonWidget",
+              "title": "👥 Portfolio wykonawców",
+              "attrs": {
+                "variant": "secondary",
+                "navigationPath": "/contractors/profiles/list"
+              }
+            },
+            {
+              "tplFile": "InfoWidget",
+              "title": "ℹ️ Informacje",
+              "attrs": {
+                "content": "Wszystkie zlecenia są zweryfikowane przez operatora. Dane kontaktowe beneficjentów dostępne po złożeniu oferty.",
+                "variant": "info",
+                "colSpan": "full"
+              }
+            }
+          ],
+          "search": {
+            "enabled": true,
+            "placeholder": "Szukaj zleceń...",
+            "fields": ["workScope", "city", "postalCode"]
+          },
+          "sorting": {
+            "enabled": true,
+            "defaultField": "publishedDate",
+            "defaultDirection": "desc"
+          },
+          "pagination": {
+            "pageSize": 15,
+            "showTotal": true
+          },
+          "columns": [
+            {
+              "key": "workScope",
+              "label": "Zakres prac",
+              "type": "text",
+              "sortable": false,
+              "truncate": true
+            },
+            {
+              "key": "city",
+              "label": "Miejscowość",
+              "type": "text",
+              "sortable": true
+            },
+            {
+              "key": "postalCode",
+              "label": "Kod pocztowy",
+              "type": "text",
+              "sortable": true
+            },
+            {
+              "key": "heatSource",
+              "label": "Źródło ciepła",
+              "type": "badges",
+              "sortable": false
+            },
+            {
+              "key": "publishedDate",
+              "label": "Data publikacji",
+              "type": "date",
+              "sortable": true
+            },
+            {
+              "key": "offersCount",
+              "label": "Oferty",
+              "type": "number",
+              "sortable": true
+            },
+            {
+              "key": "averageOfferPrice",
+              "label": "Śr. cena",
+              "type": "currency",
+              "sortable": true
+            }
+          ],
+          "actions": [
+            {
+              "type": "custom",
+              "label": "Zobacz szczegóły",
+              "navigationPath": "/contractors/request/details"
+            },
+            {
+              "type": "custom",
+              "label": "Zobacz oferty",
+              "navigationPath": "/contractors/request/offers"
+            },
+            {
+              "type": "custom",
+              "label": "💰 Złóż ofertę",
+              "navigationPath": "/contractors/offer/create",
+              "variant": "primary"
+            }
+          ]
+        }
+      },
+      {
+        "slug": "new",
+        "label": "Najnowsze zlecenia",
+        "order": 2,
+        "tplFile": "ListTableStep",
+        "attrs": {
+          "schemaPath": "contractorMarketplaceRequest",
+          "collection": "contractor_requests",
+          "filter": {"status": "published"},
+          "sort": {"publishedDate": "desc"},
+          "limit": 20,
+          "emptyState": {
+            "icon": "🆕",
+            "title": "Brak nowych zleceń",
+            "description": "Nie ma nowych zleceń w ciągu ostatnich 24 godzin."
+          },
+          "headerWidgets": [
+            {
+              "tplFile": "TitleWidget",
+              "title": "🆕 Najnowsze zlecenia",
+              "attrs": {
+                "description": "Zlecenia opublikowane w ciągu ostatnich 24 godzin",
+                "size": "large",
+                "align": "left"
+              }
+            }
+          ],
+          "search": {
+            "enabled": true,
+            "placeholder": "Szukaj w najnowszych zleceniach...",
+            "fields": ["workScope", "city"]
+          },
+          "columns": [
+            {
+              "key": "workScope",
+              "label": "Zakres prac",
+              "type": "text",
+              "truncate": true
+            },
+            {
+              "key": "city",
+              "label": "Miejscowość",
+              "type": "text"
+            },
+            {
+              "key": "heatSource",
+              "label": "Źródło ciepła",
+              "type": "badges"
+            },
+            {
+              "key": "publishedDate",
+              "label": "Opublikowano",
+              "type": "datetime"
+            },
+            {
+              "key": "offersCount",
+              "label": "Oferty",
+              "type": "number"
+            }
+          ],
+          "actions": [
+            {
+              "type": "custom",
+              "label": "Szczegóły",
+              "navigationPath": "/contractors/request/details"
+            },
+            {
+              "type": "custom",
+              "label": "💰 Złóż ofertę",
+              "navigationPath": "/contractors/offer/create",
+              "variant": "primary"
+            }
+          ]
+        }
+      }
+    ]
+  }

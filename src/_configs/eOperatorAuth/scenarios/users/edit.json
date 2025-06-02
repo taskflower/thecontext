@@ -1,0 +1,22 @@
+{
+    "slug": "edit",
+    "nodes": [
+      {
+        "slug": "form",
+        "label": "Edytuj użytkownika",
+        "order": 1,
+        "tplFile": "FormStep",
+        "attrs": {
+          "title": "✏️ Edytuj użytkownika",
+          "description": "Modyfikuj dane użytkownika, jego rolę i uprawnienia w systemie.",
+          "schemaPath": "user",
+          "loadFromParams": true,
+          "onSubmit": {
+            "collection": "users",
+            "navigationPath": "/users/list/view",
+            "action": "update"
+          }
+        }
+      }
+    ]
+  }

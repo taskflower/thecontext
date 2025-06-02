@@ -30,8 +30,8 @@
         "description": "Please wait while we set up your account",
         "registerDataPath": "registerData",
         "currentUserPath": "currentUser",
-        "successnavigationPath": "{{currentUser.role}}/dashboard/view",
-        "errornavigationPath": "main/register/form"
+        "successNavigationPath": "{{currentUser.role}}/dashboard/view",
+        "errorNavigationPath": "main/register/form"
       }
     },
     {

@@ -1,0 +1,65 @@
+{
+    "name": "e-Operator Authentication Hub",
+    "tplDir": "default",
+    "templateSettings": {
+      "layoutFile": "UniversalLayout",
+      "widgets": [
+        {
+          "tplFile": "CurrentUserWidget",
+          "title": "Panel użytkownika",
+          "attrs": {
+            "variant": "expanded",
+            "loginNavigationPath": "/auth/login/form",
+            "logoutNavigationPath": "/main", 
+            "editNavigationPath": "/profile/edit/form"
+          }
+        },
+        {
+          "tplFile": "InfoWidget",
+          "title": "🔐 System Autentykacji e-Operator",
+          "attrs": {
+            "content": "Zarządzaj kontami użytkowników, rolami i uprawnieniami w systemie e-Operator. Bezpieczna autentykacja dla wszystkich ról: beneficjentów, wykonawców, audytorów i operatorów.",
+            "variant": "info",
+            "colSpan": "full"
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "👤 Logowanie",
+          "attrs": {
+            "navigationPath": "/auth/login/form",
+            "variant": "primary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "📝 Rejestracja",
+          "attrs": {
+            "navigationPath": "/auth/register/form",
+            "variant": "secondary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "ButtonWidget",
+          "title": "👥 Zarządzanie użytkownikami",
+          "attrs": {
+            "navigationPath": "/users/list/view",
+            "variant": "secondary",
+            "colSpan": 1
+          }
+        },
+        {
+          "tplFile": "UserSystemSummaryWidget",
+          "title": "Statystyki użytkowników",
+          "attrs": {
+            "showStats": true,
+            "showRecentActivity": true,
+            "showRoleBreakdown": true,
+            "colSpan": 2
+          }
+        }
+      ]
+    }
+  }

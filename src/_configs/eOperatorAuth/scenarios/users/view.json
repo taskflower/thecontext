@@ -1,0 +1,40 @@
+{
+    "slug": "view",
+    "nodes": [
+      {
+        "slug": "details",
+        "label": "Szczegóły użytkownika",
+        "order": 1,
+        "tplFile": "DbSummaryStep",
+        "attrs": {
+          "title": "👤 Szczegóły użytkownika",
+          "description": "Pełne informacje o użytkowniku i jego aktywności w systemie",
+          "schemaPath": "user",
+          "loadFromParams": true,
+          "collection": "users",
+          "readOnly": true,
+          "showGeneratedBadge": false,
+          "additionalActions": [
+            {
+              "type": "edit",
+              "label": "✏️ Edytuj użytkownika",
+              "navigationPath": "/users/edit/form",
+              "variant": "primary"
+            },
+            {
+              "type": "custom",
+              "label": "🔄 Reset hasła",
+              "navigationPath": "/users/reset-password/form",
+              "variant": "secondary"
+            },
+            {
+              "type": "custom",
+              "label": "📋 Powrót do listy",
+              "navigationPath": "/users/list/view",
+              "variant": "outline"
+            }
+          ]
+        }
+      }
+    ]
+  }

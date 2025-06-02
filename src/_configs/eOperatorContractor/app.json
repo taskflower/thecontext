@@ -1,0 +1,50 @@
+{
+    "name": "e-Operator Wykonawca",
+    "tplDir": "default",
+    "defaultWorkspace": "main",
+    "defaultScenario": "marketplace/browse",
+    "workspaces": [
+      "main",
+      "portfolio",
+      "marketplace",
+      "offers",
+      "profile"
+    ],
+    "database": {
+      "provider": "indexedDB",
+      "collections": {
+        "contractor_profiles": "contractor_profiles",
+        "contractor_offers": "contractor_offers",
+        "contractor_requests": "contractor_requests",
+        "portfolio_items": "portfolio_items",
+        "contractor_reviews": "contractor_reviews"
+      },
+      "relations": {
+        "contractor_profiles.contractor": {
+          "type": "one-to-one",
+          "target": "users",
+          "foreignKey": "contractorId"
+        },
+        "contractor_offers.contractor": {
+          "type": "many-to-one",
+          "target": "users",
+          "foreignKey": "contractorId"
+        },
+        "contractor_offers.request": {
+          "type": "many-to-one",
+          "target": "contractor_requests",
+          "foreignKey": "requestId"
+        },
+        "portfolio_items.contractor": {
+          "type": "many-to-one",
+          "target": "users",
+          "foreignKey": "contractorId"
+        },
+        "contractor_reviews.contractor": {
+          "type": "many-to-one",
+          "target": "users",
+          "foreignKey": "contractorId"
+        }
+      }
+    }
+  }
