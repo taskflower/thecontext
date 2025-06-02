@@ -14,7 +14,7 @@ export default function Simple({ children }: any) {
           <h1 className="text-lg font-semibold">{cfg}</h1>
           
           <div className="flex items-center gap-8">
-            <WorkspaceNavigation variant="simple" />
+            <WorkspaceNavigation  />
             <UserDropdown />
           </div>
         </div>

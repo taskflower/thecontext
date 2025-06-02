@@ -1,4 +1,4 @@
-// src/commons/WorkspaceNavigation.tsx - Modern Dropbox Style
+// src/commons/WorkspaceNavigation.tsx - Jeden wariant
 import { Link, useParams, useLocation } from "react-router-dom";
 import { useEngineStore } from "@/core";
 import { useState, useEffect } from "react";
@@ -11,13 +11,7 @@ interface WorkspaceInfo {
   color?: string;
 }
 
-interface WorkspaceNavigationProps {
-  variant?: "simple" | "universal";
-}
-
-export default function WorkspaceNavigation({
-  variant = "simple",
-}: WorkspaceNavigationProps) {
+export default function WorkspaceNavigation() {
   const { config } = useParams<{ config?: string; workspace?: string }>();
   const location = useLocation();
   const cfg = config || "exampleTicketApp";
@@ -85,63 +79,6 @@ export default function WorkspaceNavigation({
     loadWorkspaces();
   }, [cfg, currentRole]);
 
-  if (variant === "universal") {
-    return (
-      <nav className="flex items-center space-x-1">
-        {loading ? (
-          <div className="flex space-x-2">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-8 w-20 bg-slate-200 rounded-lg animate-pulse"
-              ></div>
-            ))}
-          </div>
-        ) : workspaces.length > 0 ? (
-          workspaces.map((ws) => {
-            const isActive = isWorkspaceActive(ws.slug);
-            return (
-              <Link
-                key={ws.slug}
-                to={`/${cfg}/${ws.slug}`}
-                className={`
-                  group relative flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200
-                  ${
-                    isActive
-                      ? "bg-white shadow-lg shadow-slate-200/50 text-slate-900 border border-slate-200/60"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
-                  }
-                `}
-              >
-                <div
-                  className={`
-                  w-6 h-6 rounded-lg bg-gradient-to-r ${
-                    ws.color
-                  } flex items-center justify-center text-white text-xs
-                  ${isActive ? "shadow-sm" : "group-hover:shadow-sm"}
-                  transition-all duration-200
-                `}
-                >
-                  {ws.icon}
-                </div>
-                <span className="whitespace-nowrap">{ws.name}</span>
-
-                {isActive && (
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/5 to-purple-500/5 pointer-events-none"></div>
-                )}
-              </Link>
-            );
-          })
-        ) : (
-          <div className="text-sm text-slate-500 px-4 py-2">
-            No workspaces available
-          </div>
-        )}
-      </nav>
-    );
-  }
-
-  // Simple variant
   return (
     <nav className="flex items-center space-x-1">
       {loading ? (
